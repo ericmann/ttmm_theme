@@ -64,7 +64,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P6-06 Push and manual check (Phase 6)
 - [x] P7-01 Cache headers and Batcache
 - [x] P7-02 Purge and Cloudflare adapter
-- [ ] P7-03 Newsletter handler, custom-url provider, settings
+- [x] P7-03 Newsletter handler, custom-url provider, settings
 - [ ] P7-04 Jetpack unconnected-render check (assumption) and seed provider
 - [ ] P7-05 Cache tuning: verse_boundary_hour, max_age_cap, min_age
 - [ ] P7-06 Newsletter tuning: token_ttl, rate limits
@@ -383,3 +383,7 @@ Added Cache\Headers (send_headers for anonymous front-end GETs: public max-age c
 ### P7-02 — 6c14011
 Added Cache\Purge (transition_post_status, publish<->other only, fires ttm_purge_urls with front page/post/every section archive+feed/its series archive+hub when in a series/writing page when relevant/main feed/ttm/v1 series+lead) and Cache\Cloudflare (listens to ttm_purge_urls always, checks available() at call time not registration time since Plugin::boot() only runs once; wp_safe_remote_post Bearer auth, chunked by cache.cloudflare.batch, dedup, WP_DEBUG-guarded error_log on failure). Added cache.cloudflare.batch (30) to Config::defaults()/ConfigTest.
 7 acceptance tests added. Full verify green: composer lint 0 errors, 104/104 unit, npm lint/build green, forbidden-patterns clean, 272 integration tests OK (1 pre-existing skip).
+
+### P7-03 — f18da2d
+Added Newsletter\Handler (admin_post(_nopriv)_ttm_subscribe: rate limit -> honeypot -> HMAC token current/previous window -> email validity, all failures return the same success redirect; forward via injectable set_forwarder() static for unit testability) and Newsletter\Provider\CustomUrl (Provider interface render() emits the token/honeypot form, no wp_create_nonce; subscribe() forwards via wp_safe_remote_post only when endpoint is https + wp_http_validate_url-valid). Registered custom-url in Providers::default_registry(). Added Newsletter\Settings tab (provider/endpoint/fallback email/list id; API key always masked as ••••). Added newsletter.api_key to Config::defaults(). Also fixed 3 pre-existing lint issues from P7-01/P7-02 surfaced by this run's full phpcs pass (Headers.php docblock alignment, undocumented high-timeout warnings on the two wp_safe_remote_post calls).
+10 acceptance tests added. Full verify green: composer lint 0 errors, 109/109 unit, npm lint/build green, forbidden-patterns clean, 277 integration tests OK (1 pre-existing skip).
