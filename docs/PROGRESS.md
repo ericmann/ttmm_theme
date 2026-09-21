@@ -24,7 +24,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P1-12 CLI recount, primary:assign, series:assign, series:rebuild
 - [x] P1-13 Seeder core: categories, pages, navigation, posts, images
 - [x] P1-14 Seeder fiction, verse, states and seed command; tuning series.max_purchase_links
-- [ ] P1-15 Push and manual check (Phase 1)
+- [x] P1-15 Push and manual check (Phase 1)
 - [ ] P2-01 Block styles, pattern categories, image sizes
 - [ ] P2-02 ttm.css foundation: bridge, grids, rules, type utilities, buttons, tags, inputs, body typography
 - [ ] P2-03 ttm.css chrome, nav.js, editor.css; CSS budget tuning
@@ -221,3 +221,8 @@ posts.json grew to 87 entries (13 quiet-ledger chapters, 9 salt-and-iron chapter
 Measurement for series.max_purchase_links (assumption 6): max observed across the seed is 2 (the-quiet-ledger). Before: 6 (default). After: 6 kept — 2 is comfortably under the cap; no change warranted since the cap bounds the P1-06 admin repeater UI, not current content volume.
 72 integration tests pass (6 new); full verify green.
 Manual check: NOT VERIFIED (human) -- open /wp-admin and browse the seeded series/books once Phase 3+ front-end exists.
+
+### P1-15 — 5cbb91f
+Pushed build/2026-09-21 to origin (52754b0..8365879, then this empty commit). No source changes.
+Push: done -- origin/build/2026-09-21
+Manual check: NOT VERIFIED (human) -- after npm run env:seed: /wp-admin/post.php?post=<a seeded chapter id>&action=edit shows the "These Things Matter" sidebar with series, part "12 of 31", form Chapter; Pre-publish panel warns when the excerpt is cleared; /wp-admin/term.php?taxonomy=series&tag_ID=<the-quiet-ledger> shows all fields and the ordered part list; Settings -> These Things Matter has General and Books tabs; Posts list shows Primary section / Series / Words columns.
