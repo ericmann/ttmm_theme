@@ -9,8 +9,11 @@
 // (33121 with .ttm-hp added and nothing removed -> 32610 after cleanup;
 // CLAUDE.md's constraint line was stale at 25600 since P5-04/P6-05 and is
 // corrected to match here).
+// R1-12: raised to 33200 for 01 §4.13's missing .ttm-syndication rule
+// (32610 -> 33070, including the stylelint-disable comment its descending-
+// specificity warning needed); CLAUDE.md's constraint line updated to match.
 import { statSync, existsSync } from 'node:fs';
-const cssBudgetBytes = 32700;
+const cssBudgetBytes = 33200;
 const file = 'themes/ttm-theme/assets/css/ttm.css';
 if ( ! existsSync( file ) ) {
 	console.error( `${ file } missing` );

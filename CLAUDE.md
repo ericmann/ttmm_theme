@@ -61,7 +61,7 @@ Tests: `tests/unit` (Brain\Monkey), `tests/integration` (WP test suite in wp-env
 - Every block-binding source has a unit test for its normal and empty value.
 - `tests/unit` never loads WordPress; anything needing `WP_Query`, templates or REST is in `tests/integration`.
 - Rendered markup is deterministic: no random ids, no timestamps except through `Clock`.
-- `themes/ttm-theme/assets/css/ttm.css` ≤ `cssBudgetBytes` (32700, `scripts/check-budget.mjs`) — plain CSS, custom properties from `theme.json` presets, no framework, no hex literals.
+- `themes/ttm-theme/assets/css/ttm.css` ≤ `cssBudgetBytes` (33200, `scripts/check-budget.mjs`) — plain CSS, custom properties from `theme.json` presets, no framework, no hex literals.
 - `package.json` `dependencies` stays `{}`; everything is a devDependency; `composer.lock`/`package-lock.json` committed; `npm audit --audit-level=high` and `composer audit` pass.
 - `uninstall.php` deletes `ttm_` options/transients only, and only when `TTM_REMOVE_DATA === true`.
 - No `prefers-color-scheme`, dark palette or theme toggle; every colour is a `theme.json` preset.

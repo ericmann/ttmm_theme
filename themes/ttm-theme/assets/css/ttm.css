@@ -1185,6 +1185,22 @@ blockquote.is-style-pull cite,
 	color: var(--wp--preset--color--neutral-700);
 }
 
+.ttm-syndication {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	border-top: var(--ttm-rule-1);
+	padding-top: 14px;
+	margin-top: 28px;
+	font-size: var(--wp--preset--font-size--ui);
+	color: var(--wp--preset--color--neutral-700);
+}
+
+/* stylelint-disable-next-line no-descending-specificity -- unrelated component (syndication link vs. .entry-content a:hover) */
+.ttm-syndication a {
+	color: var(--wp--preset--color--accent-700);
+}
+
 .ttm-journal-head:has(.ttm-syndication) .ttm-journal-head__count {
 	display: none;
 }

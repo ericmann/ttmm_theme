@@ -60,24 +60,32 @@ if ( 1 === count( $ttm_links ) ) {
 }
 
 $ttm_words = (int) get_post_meta( $ttm_post_id, 'ttm_word_count', true );
-?>
-<p <?php echo Helpers::wrapper( 'syndication' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() output is already escaped. ?>>
-	<?php
-	printf(
+
+// wp_kses (not just trusting Html::link()'s own escaping) so a hostile *translation* of
+// "Syndicated to %s" -- e.g. via a gettext filter -- can't inject anything beyond a plain
+// link (rule 14: every echo escaped, translator text included).
+$ttm_sentence = wp_kses(
+	sprintf(
 		/* translators: %s: linked network names, e.g. "X and Mastodon". */
-		__( 'Syndicated to %s', 'ttm-core' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- interpolates only Html::link()'d fragments and trusted translator text.
-		$ttm_joined // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Html::link() output is already escaped.
-	);
-	?>
-	<span class="ttm-syndication__words">
-		<?php
-		echo esc_html(
-			sprintf(
-				/* translators: %d: word count. */
-				_n( '%d word', '%d words', $ttm_words, 'ttm-core' ),
-				$ttm_words
-			)
-		);
-		?>
-	</span>
-</p>
+		__( 'Syndicated to %s', 'ttm-core' ),
+		$ttm_joined
+	),
+	[ 'a' => [ 'href' => [] ] ]
+);
+?>
+<div <?php echo Helpers::wrapper( 'syndication' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() output is already escaped. ?>>
+	<p>
+		<?php echo $ttm_sentence; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_kses()'d above. ?>
+		<span class="ttm-syndication__words">
+			<?php
+			echo esc_html(
+				sprintf(
+					/* translators: %d: word count. */
+					_n( '%d word', '%d words', $ttm_words, 'ttm-core' ),
+					$ttm_words
+				)
+			);
+			?>
+		</span>
+	</p>
+</div>

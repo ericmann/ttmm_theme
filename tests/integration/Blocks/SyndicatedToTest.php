@@ -92,6 +92,55 @@ class SyndicatedToTest extends TTM_IntegrationTestCase {
 		$this->assertSame( '', trim( $html ) );
 	}
 
+	public function test_wrapper_is_div_with_data_ttm_block(): void {
+		$journal = $this->category_id( 'journal', 'Journal' );
+		$post    = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $journal ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $journal );
+		update_post_meta( $post, 'ttm_syndication', [ 'x' => 'https://x.com/example/1' ] );
+
+		$html = $this->render( $post );
+
+		$this->assertMatchesRegularExpression( '/^<div[^>]*class="[^"]*\bttm-syndication\b[^"]*"[^>]*data-ttm-block="syndication"/', trim( $html ) );
+		$this->assertStringContainsString( '<p>', $html );
+	}
+
+	public function test_sentence_is_kses_filtered(): void {
+		$journal = $this->category_id( 'journal', 'Journal' );
+		$post    = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $journal ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $journal );
+		update_post_meta( $post, 'ttm_syndication', [ 'x' => 'https://x.com/example/1' ] );
+
+		add_filter(
+			'gettext',
+			static function ( string $translation, string $text, string $domain ) {
+				if ( 'ttm-core' === $domain && 'Syndicated to %s' === $text ) {
+					return $translation . '<script>alert(1)</script>';
+				}
+				return $translation;
+			},
+			10,
+			3
+		);
+
+		$html = $this->render( $post );
+
+		remove_all_filters( 'gettext' );
+
+		// wp_kses() strips the disallowed <script> tag itself (no code can execute); it may
+		// still leave the tag's inner text as harmless plain text, so only the tag is asserted.
+		$this->assertStringNotContainsString( '<script', $html );
+	}
+
 	public function test_bluesky_only(): void {
 		$journal = $this->category_id( 'journal', 'Journal' );
 		$post    = self::factory()->post->create(
