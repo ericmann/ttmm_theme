@@ -58,6 +58,8 @@ class Plugin {
 			Blocks\Registrar::class,
 			Cache\Headers::class,
 			Cache\Batcache::class,
+			Cache\Purge::class,
+			Cache\Cloudflare::class,
 		];
 	}
 

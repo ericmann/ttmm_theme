@@ -68,6 +68,7 @@ class ConfigTest extends TestCase {
 			'cache.feed_seconds',
 			'cache.cloudflare.zone_id',
 			'cache.cloudflare.api_token',
+			'cache.cloudflare.batch',
 			'newsletter.provider',
 			'newsletter.endpoint',
 			'newsletter.list_id',

@@ -103,6 +103,7 @@ class Config {
 			'cache.feed_seconds'           => 3600,
 			'cache.cloudflare.zone_id'     => defined( 'TTM_CLOUDFLARE_ZONE_ID' ) ? TTM_CLOUDFLARE_ZONE_ID : '',
 			'cache.cloudflare.api_token'   => defined( 'TTM_CLOUDFLARE_API_TOKEN' ) ? TTM_CLOUDFLARE_API_TOKEN : '',
+			'cache.cloudflare.batch'       => 30,
 
 			'newsletter.provider'          => 'jetpack',
 			'newsletter.endpoint'          => '',
