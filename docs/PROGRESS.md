@@ -12,7 +12,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P0-07 Seed rewrite — sections, journal and pages
 - [x] P0-08 Seed rewrite — series and fiction
 - [x] P0-09 Phase 0 push — baseline screenshots
-- [ ] P1-01 Full-width rules and unconstrained grids (rules 35/36)
+- [x] P1-01 Full-width rules and unconstrained grids (rules 35/36)
 - [ ] P1-02 Front masthead per §6.1.1 (pattern, CSS, nav hub class)
 - [ ] P1-03 Front-page current section and nav label fill (`Nav\CurrentSection`)
 - [ ] P1-04 Verse copyright placement and `ttm/verse-copyright` binding
@@ -112,3 +112,14 @@ Reseeded cleanly (`wp-env stop && start`, `wp ttm seed --reset`): 91 posts, 6 se
 Full verify green: composer lint (0 errors), composer test:unit (134/134), npm run lint, npm run test:unit (5 suites), npm run build, forbidden-patterns.sh clean, npm run test:integration (382/382), npm run test:e2e (78 skipped/fixme, 48 phase-1 passed).
 Manual check: NOT VERIFIED (human) — owner should open docs/feedback/phase-2/*.png and compare against design_*.png per phase-2/README.md's pairing table.
 Push: origin/refine/2026-09-21 (branch existed already from foundry_run_start; this is the first push of Phase 0's content).
+
+### P1-01 — b6bd6c7
+12 is-style-grid-* groups (section-row-1/2, single/single-journal/category/page/page-series/page-writing/archive templates, archive-header, front-page's lead-row) switched constrained->default. Front-page chrome groups switched to default too: ttm-lead-row__lead, ttm-rail, ttm-journal-rail (+its ttm-cell-heading is-rail), ttm-series-strip (+its ttm-cell-heading), ttm-poster, ttm-masthead-front + its __meta/__title inner groups, plus ttm-cell-heading in category.html/page-series.html/page-writing.html (only files this task's list names — journal-stream.php/more-in-section.php/section-cell-large.php also have ttm-cell-heading but are out of this task's file list).
+ttm.css: rule 35 CSS needs !important on all 4 properties to beat WP core's inline `.wp-block-separator:not(.is-style-wide):not(.is-style-dots){width:100px}` and the constrained-layout centering rule's `margin:auto !important` — confirmed empirically via live render (was 100px, now 1184px@1280 / 350px@390). Added a `@media(max-width:720px){body{--wp--style--root--padding-left/right: var(--wp--custom--gutter--phone)}}` rule since rule-2-phone's 350px needs the already-defined-but-previously-unused gutter.phone token actually wired to root-padding-aware alignment. Added `display:flex;flex-direction:column` to .ttm-rail (the only one of the changed groups that had no equivalent CSS already covering its previous layout-attribute-driven flex).
+Tests: FrontPageTest::test_grid_groups_are_not_constrained (new); un-fixme'd rule-2 + rule-2-phone in fidelity.spec.mjs.
+Verified: npm run lint clean, composer lint 0 errors, npm run test:integration 383/383, npm run test:e2e 76 skipped/50 passed (both rule-2 rows green), composer test:unit, npm run build, forbidden-patterns, grep is-style-grid+constrained=0. ttm-theme confirmed active; wp-env stopped after.
+
+FLIGHT CONTROLLER NOTE (relayed, recorded for future tasks, not actioned here — see commit body):
+1. .ttm-skip visible instead of screen-reader-only-until-focus -> Phase 1 masthead task (add fidelity row skip-hidden).
+2. Writing cell "Also running" lists the featured serial's own ch.12 as a story -> Phase 3 Writing cell task (check ttm_form derivation + block exclusion logic).
+3. technology-post-2 seeded as Hardening part 2 but mock's part 2 is "Salts, keys and the rotation you skipped" -> next task touching docs/fixtures/seed, or the Phase 2 push task.
