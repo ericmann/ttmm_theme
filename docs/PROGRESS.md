@@ -22,7 +22,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P1-10 Books repeater
 - [x] P1-11 REST series endpoints and lead stub
 - [x] P1-12 CLI recount, primary:assign, series:assign, series:rebuild
-- [ ] P1-13 Seeder core: categories, pages, navigation, posts, images
+- [x] P1-13 Seeder core: categories, pages, navigation, posts, images
 - [ ] P1-14 Seeder fiction, verse, states and seed command; tuning series.max_purchase_links
 - [ ] P1-15 Push and manual check (Phase 1)
 - [ ] P2-01 Block styles, pattern categories, image sizes
@@ -206,3 +206,9 @@ Cli\Loader::register() (called directly by Plugin::boot(), not hooked) is a no-o
 Added Config key cli.batch=200 (ConfigTest updated). Plugin::modules() appends Cli\Loader.
 60 integration tests pass (8 new); full verify green.
 Manual check: none (wp-env CLI run confirmed in this task).
+
+### P1-13 — 7715a45
+Cli\Seeder is a plain utility class (no register(), not in Plugin::modules()), used directly by tests via TTM_IntegrationTestCase::seed() and later by the P1-14 seed CLI command. fixtures_dir() prefers WP_CONTENT_DIR/ttm-fixtures/seed (wp-env mapping) else dirname(TTM_CORE_DIR,3)/docs/fixtures/seed. seed_categories() two-pass (top-level then children) so `parent` slug refs resolve; creates the 7 sections + politics (child of opinion). seed_pages() creates series/writing/newsletter/about with _wp_page_template meta (page-series.html/page-writing.html/page.html). seed_navigation() creates a "Sections" wp_navigation post with nav-order category links + Series link — uses get_posts(title=>) for idempotency check since get_page_by_title() is deprecated since WP 6.2. seed_posts() reads posts.json, sets post_date via Clock::now()->modify("-N days"), categories, tags, featured image (via image()), ttm_featured_in_section/ttm_syndication/ttm_location meta. image($label,$size_key) generates a solid-colour GD PNG at the images.sizes dimensions, wp_upload_bits+wp_insert_attachment+wp_generate_attachment_metadata, sets alt text; returns 0 if GD missing. reset() deletes every post/term carrying _ttm_seed meta (bounded $wpdb queries by meta_key, not full-table scans).
+docs/fixtures/seed/posts.json (62 entries) generated to satisfy every stated per-section/flag minimum from the task text (verified via a one-off Python count check before committing): technology 19 (incl. deep-dive), business 11, faith 6, journal 11, writing 6, security 7, opinion 5 (2 also politics); 5 two-category posts; 4 most_read (2 technology); 3 posts without excerpt; one >=3000-word post; one classic-HTML post (plain <p> + <sup class="modern-footnotes-footnote">, no block markup) — content is placeholder lorem-style text, not hand-authored prose, since acceptance tests check structure/counts only.
+66 integration tests pass (6 new); full verify green.
+Manual check: none
