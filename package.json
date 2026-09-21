@@ -4,7 +4,9 @@
   "private": true,
   "description": "These Things Matter — block theme (ttm-theme) and companion plugin (ttm-core) for eric.mann.blog",
   "license": "GPL-2.0-or-later",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "build": "wp-scripts build --webpack-src-dir=plugins/ttm-core/src --output-path=plugins/ttm-core/build",
     "start": "wp-scripts start --webpack-src-dir=plugins/ttm-core/src --output-path=plugins/ttm-core/build",
@@ -30,5 +32,12 @@
     "@wordpress/e2e-test-utils-playwright": "*",
     "@axe-core/playwright": "*"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "overrides": {
+    "linkify-it": "^5.0.2",
+    "serialize-javascript": "^7.0.5",
+    "markdownlint-cli": "^0.49.1",
+    "qs": "^6.16.0",
+    "uuid": "^11.1.1"
+  }
 }
