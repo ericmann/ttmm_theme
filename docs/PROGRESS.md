@@ -59,7 +59,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P6-01 series-progress and series-stats blocks
 - [x] P6-02 series-featured block; tuning series.hub_featured_parts
 - [x] P6-03 serial-hero block
-- [ ] P6-04 story-tiles and book-grid blocks
+- [x] P6-04 story-tiles and book-grid blocks
 - [ ] P6-05 Hub and Writing templates and CSS
 - [ ] P6-06 Push and manual check (Phase 6)
 - [ ] P7-01 Cache headers and Batcache
@@ -362,3 +362,7 @@ Measurement: series.hub_featured_parts kept at 12 (unchanged) - no real 1280px p
 ### P6-03 — 38f7cc7
 Added ttm/serial-hero: cover figure (F21 is-nocover when no ttm_cover_id), kicker/title(h1 on page-writing/h2 elsewhere)/synopsis (term description), buttons (primary Read chapter 1, secondary Latest: chapter N + ghost Follow by email when in-progress; single purchase-link button when complete/F3 fallback), stat row (published/total chapters, cadence+next-date or "Complete", ~avg min/chapter). Added Serials::purchase_links()/cover_id() thin term-meta readers. Resolution: seriesId attr -> Serials::active() -> F3 fallback to most recently completed (by last_update, matching active()'s existing approach) -> ''.
 5 acceptance tests added. Full verify green: composer lint 0 errors, 97/97 unit, npm lint/build green, forbidden-patterns clean, 246 integration tests OK (2 pre-existing skips).
+
+### P6-04 — aea8de3
+Added ttm/story-tiles (typographic tiles from Serials::stories(); F19 cover tiles render only the image with title moved to aria-label; limit/columns attrs) and ttm/book-grid (from Fiction\Books::all(); cover figure omitted when no cover_id; caption "Form · Year · formats"; purchase links as .btn-ghost rel=noopener target=_blank). Both '' when empty (F20). Also fixed pre-existing ScopeIndent phpcs errors in P6-03's serial-hero/render.php caught by this run's full lint pass.
+7 acceptance tests added. Full verify green: composer lint 0 errors, 97/97 unit, npm lint/build green, forbidden-patterns clean, 253 integration tests OK (2 pre-existing skips).
