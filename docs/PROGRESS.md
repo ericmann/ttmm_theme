@@ -31,7 +31,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P2-04 Block variations and starter content
 - [x] P2-05 Template parts and chrome patterns
 - [x] P2-06 page, 404, index and search-shell templates; current section and body classes
-- [ ] P2-07 Push and manual check (Phase 2)
+- [x] P2-07 Push and manual check (Phase 2)
 - [ ] P3-01 Block registrar, shared helpers, webpack entries, verse-of-the-day block
 - [ ] P3-02 Verse fetcher
 - [ ] P3-03 Verse cron, admin tab and CLI
@@ -268,3 +268,8 @@ Templates\Hierarchy::body_classes() (this task only — single_template/category
 Plugin::modules() appends Nav\CurrentSection, Templates\Hierarchy.
 87 integration tests pass (7 new); full verify green.
 Manual check: NOT VERIFIED (human) -- visit a post, its category archive, a 404, and search results; confirm current-section highlighting and the new template shells render.
+
+### P2-07 — c882c2c
+Pushed build/2026-09-21 to origin. No source changes.
+Push: done -- origin/build/2026-09-21
+Manual check: NOT VERIFIED (human) -- http://localhost:8888/about/ at 1280: inner masthead (22px title, nav, "Newsletter"), H1 56px, body 18/1.65 in the 8-col column, footer links; at 390: title 18px, "Menu" opens a full-screen ground overlay with 24px items and 1px rules, closes with x; no Google Fonts requests.
