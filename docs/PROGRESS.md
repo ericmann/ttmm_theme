@@ -14,7 +14,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P0-09 Phase 0 push — baseline screenshots
 - [x] P1-01 Full-width rules and unconstrained grids (rules 35/36)
 - [x] P1-02 Front masthead per §6.1.1 (pattern, CSS, nav hub class)
-- [ ] P1-03 Front-page current section and nav label fill (`Nav\CurrentSection`)
+- [x] P1-03 Front-page current section and nav label fill (`Nav\CurrentSection`)
 - [ ] P1-04 Verse copyright placement and `ttm/verse-copyright` binding
 - [ ] P1-05 Footer per §6.1.8
 - [ ] P1-06 Newsletter form contract — shared markup, provider chain, custom-url dev-accept, seed
@@ -131,3 +131,11 @@ scripts/css-coverage-allow.txt: removed masthead-front, nav, nav__hub, nav-serie
 Tests: ChromePartsTest 2 new tests. Un-fixme'd mast-meta/title/byline/byline-phone/nav/nav-gap/hub in fidelity.spec.mjs; fixed mast-hub's own margin-left assertion (was `toBe('auto')`, impossible since getComputedStyle never returns the literal keyword for resolved margins — SPEC's own "(x >= 1000)" annotation means a bounding-box position check, so switched to that). Added a non-SPEC skip-hidden row per the flight-controller note.
 FLIGHT CONTROLLER FOLLOW-UP: item 1 (.ttm-skip visible) fixed here — see commit body for the .ttm-skip CSS and the coexistence with WP core's own auto-injected #wp-skip-link (confirmed via curl; not a conflict, ChromePartsTest needs the theme's own). Items 2 (Writing cell "Also running") and 3 (Hardening part 2 seed mismatch) still open, owned by later tasks.
 Verified: npm run lint clean, composer lint 0 errors, npm run test:integration 385/385, npm run test:e2e 58 passed/69 skipped (0 failed), composer test:unit, npm run build, forbidden-patterns all green. ttm-theme confirmed active; wp-env stopped after.
+
+### P1-03 — 3b870a1
+Nav\CurrentSection: is_current_section() gains a front-page branch (is_front_page() && nav.front_current==='lead' → compare link path against get_category_link(PrimaryCategory::id(Lead::id()))); add_class() now adds "current-section current-menu-item" together; new fill_label() replaces a section link's anchor text with the category term's own name when the URL path matches /category/<slug>/ and slug is in sections.order (uses preg_replace_callback to avoid backreference-escaping issues with esc_html() output).
+ttm.css: single `.ttm-nav .current-menu-item > a { color: accent-700 !important }` rule (folded the front-specific override into the shared .ttm-nav one since they'd be identical after the a11y fix, and .ttm-masthead-front__nav already carries .ttm-nav) — !important needed to beat core's `.wp-block-navigation-item__content.wp-block-navigation-item__content{color:inherit}` repeated-class trick (same issue P1-02 found for .ttm-nav__hub).
+Tests: CurrentSectionTest 4 new tests (Config::reset() needed after add_filter('ttm_config',...) for the "none" case since Config memoizes per-process; label-fill test uses a literal /category/technology/ URL since this PHPUnit harness's plain-permalink default makes get_category_link() return ?cat= links even after set_permalink_structure(), a test-environment quirk not a real-code bug).
+FIXED A BUG in my own P0-04 fidelity test: mast-current expected color('accent') but that fails WCAG AA contrast at 14px (axe caught it: 3.75:1 on the live front page) — Decision "Colour vs a11y" (already referenced in P0-04's own docblock but not applied) means accent-700; corrected the assertion and the CSS together.
+plugins/ttm-core/README.md: added a paragraph on nav.front_current under Configuration.
+Verified: composer lint 0 errors, npm run lint clean, npm run test:integration 389/389, npm run test:e2e 59 passed/68 skipped (0 failed, including axe on the front page), composer test:unit, npm run build, forbidden-patterns all green. ttm-theme confirmed active; wp-env stopped after.
