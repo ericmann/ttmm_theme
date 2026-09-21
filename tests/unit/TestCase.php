@@ -38,6 +38,9 @@ abstract class TestCase extends PHPUnitTestCase {
 		Functions\when( 'esc_url' )->returnArg( 1 );
 		Functions\when( 'esc_url_raw' )->returnArg( 1 );
 		Functions\when( 'wp_kses' )->returnArg( 1 );
+		Functions\when( 'wp_strip_all_tags' )->alias(
+			static fn ( string $value ): string => trim( strip_tags( $value ) )
+		);
 		Functions\when( 'sanitize_text_field' )->alias(
 			static fn ( string $value ): string => trim( strip_tags( $value ) )
 		);
