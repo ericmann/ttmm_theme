@@ -55,7 +55,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P5-02 archive-by-year and tag-filter blocks
 - [x] P5-03 category-stats and most-read blocks
 - [x] P5-04 Archive and search patterns, templates and CSS
-- [ ] P5-05 Push and manual check (Phase 5)
+- [x] P5-05 Push and manual check (Phase 5)
 - [ ] P6-01 series-progress and series-stats blocks
 - [ ] P6-02 series-featured block; tuning series.hub_featured_parts
 - [ ] P6-03 serial-hero block
@@ -345,3 +345,7 @@ Assembled category.html, category-journal.html, archive.html and rewrote search.
 Measurement: ttm.css 25451 -> 27358 bytes; bumped scripts/check-budget.mjs cssBudgetBytes 25600 -> 28000 with a documenting comment.
 ArchiveTemplatesTest (6 acceptance tests) added; full verify green (composer lint 0 errors, 97/97 unit, npm lint/build green, forbidden-patterns clean, 228 integration tests OK with the 2 pre-existing skips).
 Manual check: NOT VERIFIED (human) - see commit body for the /category/security/, /category/journal/, /tag/, /?s= checks.
+
+### P5-05 — baac50a
+Pushed build/2026-09-21 through P5-04 (bb2dbc3) to origin.
+Manual check: NOT VERIFIED (human) — /category/security/ vs badge 1e: 80px H1, stats right, filter row with 5 tags, rows grouped by year with 32px year labels, aside Series in Security + Most read; click a filter tag → ?tag= narrows and the tag turns accent; /category/journal/ is the stream; /tag/<seeded tag>/ and /?s=cache render the 1e layout without a filter row.
