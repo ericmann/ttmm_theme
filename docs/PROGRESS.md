@@ -56,7 +56,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P5-03 category-stats and most-read blocks
 - [x] P5-04 Archive and search patterns, templates and CSS
 - [x] P5-05 Push and manual check (Phase 5)
-- [ ] P6-01 series-progress and series-stats blocks
+- [x] P6-01 series-progress and series-stats blocks
 - [ ] P6-02 series-featured block; tuning series.hub_featured_parts
 - [ ] P6-03 serial-hero block
 - [ ] P6-04 story-tiles and book-grid blocks
@@ -349,3 +349,7 @@ Manual check: NOT VERIFIED (human) - see commit body for the /category/security/
 ### P5-05 — baac50a
 Pushed build/2026-09-21 through P5-04 (bb2dbc3) to origin.
 Manual check: NOT VERIFIED (human) — /category/security/ vs badge 1e: 80px H1, stats right, filter row with 5 tags, rows grouped by year with 32px year labels, aside Series in Security + Most read; click a filter tag → ?tag= narrows and the tag turns accent; /category/journal/ is the stream; /tag/<seeded tag>/ and /?s=cache render the 1e layout without a filter row.
+
+### P6-01 — c290a07
+Added ttm/series-progress (segmented bar + meta line, resolves seriesId attr -> queried series term -> post's series via context, F23 open-ended equal-done-segments + trailing neutral segment reusing series-bar's approach minus "current"; "finished {date}" when ttm_status=complete, else "next part {date}" from ttm_next_date when set) and ttm/series-stats (hub header "N series · M in progress" + "Spanning {categories}" in nav order, reading SeriesIndex::all() directly with an inline nav-order sort mirroring SeriesIndex's private categories_for()).
+5 SeriesProgressTest + 2 SeriesStatsTest acceptance tests. Full verify green: composer lint 0 errors, 97/97 unit, npm lint/build green, forbidden-patterns clean, 235 integration tests OK (2 pre-existing skips).
