@@ -12,6 +12,7 @@ namespace TTM\Core\Bindings;
 use TTM\Core\Blocks\Helpers;
 use TTM\Core\Config;
 use TTM\Core\Meta\PrimaryCategory;
+use TTM\Core\Query\Archive;
 use TTM\Core\Query\SeriesIndex;
 use TTM\Core\Support\Clock;
 use WP_Block;
@@ -140,6 +141,14 @@ class Sources {
 				'label'              => __( 'TTM: Series part', 'ttm-core' ),
 				'get_value_callback' => [ self::class, 'series_part' ],
 				'uses_context'       => [ 'postId', 'postType' ],
+			]
+		);
+
+		register_block_bindings_source(
+			'ttm/pagination-label',
+			[
+				'label'              => __( 'TTM: Pagination label', 'ttm-core' ),
+				'get_value_callback' => [ self::class, 'pagination_label' ],
 			]
 		);
 	}
@@ -413,6 +422,20 @@ class Sources {
 		}
 
 		return self::finalize( Values::series_part( $position ), $block_instance, $attribute_name );
+	}
+
+	/**
+	 * `ttm/pagination-label`: "Older (2014–2022) →" / "← Newer (2023–2026)".
+	 *
+	 * @param array{dir?: string} $source_args    `{dir: older|newer}`.
+	 * @param WP_Block            $block_instance Consuming block.
+	 * @param string              $attribute_name Consuming attribute.
+	 * @return string
+	 */
+	public static function pagination_label( array $source_args, $block_instance, string $attribute_name ): string {
+		$dir = 'newer' === ( $source_args['dir'] ?? 'older' ) ? 'newer' : 'older';
+
+		return self::finalize( Archive::resolve_label( $dir ), $block_instance, $attribute_name );
 	}
 
 	/**

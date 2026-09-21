@@ -72,3 +72,35 @@ add_action(
 	},
 	1
 );
+
+/**
+ * `<link rel=alternate>` feeds for each section, in nav order (SPEC §6.5 `ttm_section_feeds`).
+ * Reads categories only via `get_category_by_slug` (rule 1: the theme owns no data).
+ */
+function print_section_feeds(): void {
+	$order = class_exists( '\TTM\Core\Config' )
+		? (array) \TTM\Core\Config::get( 'sections.order', [] )
+		: [ 'technology', 'business', 'faith', 'journal', 'writing', 'security', 'opinion' ];
+
+	$links = [];
+	foreach ( $order as $slug ) {
+		$term = get_category_by_slug( $slug );
+		if ( ! $term ) {
+			continue;
+		}
+		$links[ $slug ] = get_category_feed_link( $term->term_id );
+	}
+
+	/** This filter is documented in plugins/ttm-core/README.md (SPEC §6.5). */
+	$links = apply_filters( 'ttm_section_feeds', $links );
+
+	foreach ( $links as $slug => $url ) {
+		$term = get_category_by_slug( $slug );
+		printf(
+			'<link rel="alternate" type="application/rss+xml" title="%s RSS" href="%s">' . "\n",
+			esc_attr( $term ? $term->name : $slug ),
+			esc_url( $url )
+		);
+	}
+}
+add_action( 'wp_head', __NAMESPACE__ . '\\print_section_feeds' );

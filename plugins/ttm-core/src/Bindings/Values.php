@@ -276,4 +276,31 @@ class Values {
 		/* translators: 1: part number, 2: total parts. */
 		return sprintf( __( 'Part %1$d of %2$d', 'ttm-core' ), $part, (int) $total );
 	}
+
+	/**
+	 * "Older (2014–2022) →" / "← Newer (2023–2026)"; same year collapses to one; `''` without
+	 * a target page (no years).
+	 *
+	 * @param string   $dir       `older` or `newer`.
+	 * @param int|null $from_year Earliest year on the target page.
+	 * @param int|null $to_year   Latest year on the target page.
+	 * @return string
+	 */
+	public static function pagination_label( string $dir, ?int $from_year, ?int $to_year ): string {
+		if ( null === $from_year || null === $to_year ) {
+			return '';
+		}
+
+		$lo    = min( $from_year, $to_year );
+		$hi    = max( $from_year, $to_year );
+		$range = $lo === $hi ? (string) $lo : $lo . '–' . $hi;
+
+		if ( 'newer' === $dir ) {
+			/* translators: %s: year or year range. */
+			return sprintf( __( '← Newer (%s)', 'ttm-core' ), $range );
+		}
+
+		/* translators: %s: year or year range. */
+		return sprintf( __( 'Older (%s) →', 'ttm-core' ), $range );
+	}
 }

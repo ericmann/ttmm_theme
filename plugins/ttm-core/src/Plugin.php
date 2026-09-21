@@ -40,6 +40,7 @@ class Plugin {
 			Query\Lead::class,
 			Query\Cells::class,
 			Query\JournalExcerpt::class,
+			Query\Archive::class,
 			Bindings\Sources::class,
 			Editor\Sidebar::class,
 			Editor\Columns::class,
