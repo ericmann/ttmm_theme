@@ -35,6 +35,7 @@ class Plugin {
 			Meta\Form::class,
 			Meta\WordCount::class,
 			Query\SeriesIndex::class,
+			Query\Stats::class,
 		];
 	}
 
