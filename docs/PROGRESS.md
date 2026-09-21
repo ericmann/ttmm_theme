@@ -7,7 +7,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P0-02 Config keys for phase 2 and the fallback-literal test
 - [x] P0-03 Boundaries table, CSS budget and SETUP note
 - [x] P0-04 Fidelity and editors Playwright skeletons (all rows fixme)
-- [ ] P0-05 Screenshot script and phase-2 feedback folder
+- [x] P0-05 Screenshot script and phase-2 feedback folder
 - [ ] P0-06 Seeder prose library and tagline
 - [ ] P0-07 Seed rewrite — sections, journal and pages
 - [ ] P0-08 Seed rewrite — series and fiction
@@ -75,3 +75,9 @@ playwright.config.mjs: new `fidelity` project (testDir:'.', testMatch on the two
 INTERPRETATION (important for future tasks): files are named fidelity.spec.mjs/editors.spec.mjs, not .spec.js as SPEC/PLAN literally say — Playwright's transform runs .js test files as CommonJS here, which can't require() the real-ESM lib/*.mjs helpers (confirmed failure under the actual `npm run test:e2e`); every existing tests/e2e/specs/*.mjs file already uses .mjs for this exact reason. Updated CLAUDE.md's two references and docs/SETUP.md to match; SPEC.md/PLAN.md still say .spec.js (not edited, not mine to touch) — later tasks whose "Files touched" says "tests/e2e/fidelity.spec.js" mean this file. Also avoided import.meta.url (same CJS-transform incompatibility) in favor of process.cwd()-relative paths.
 Test count: 78 total (76 fidelity + 2 editors), not the task text's "84 fidelity ... 2 editors" — SPEC §6.2 has 77 data rows, one duplicate (lead-row) merges, a11y/network double via "both" viewport; recounted from the live table, transcribed faithfully rather than padded.
 Verified: npm run lint clean; npm run test:e2e green (78 skipped, 48 phase-1 passed); ttm-theme confirmed still active theme after the run; wp-env stopped.
+
+### P0-05 — d435339
+scripts/screenshots.mjs exports ZONES (7 entries) and unionClip(a,b) (pure), and runs the capture only when invoked as CLI (process.argv[1] check — NOT import.meta.url, which broke Jest's dynamic import() of this module in the test; @playwright/test is imported lazily inside run() for the same reason).
+Zones: front-1280/390 (fullPage), masthead/.ttm-masthead-front, lead-row/.ttm-lead-row, series-strip/.ttm-series-strip (single-element .screenshot()); section-rows (first/last .ttm-section-row via .first()/.last(), not :first-of-type/:last-of-type — that CSS pseudo matched 0 elements against the real DOM) and poster-footer (.ttm-poster to .ttm-footer) use unionClip + a viewport resize to the clip's bottom edge first (page.screenshot clip is viewport-relative, not page-relative).
+Verified against real wp-env (seeded): `npm run screenshots` wrote all 7 PNGs to docs/feedback/phase-2/; deleted them afterward (out of scope to commit here — P0-09 does, and they're not needed to keep the tree clean). Confirmed ttm-theme stayed the active theme; wp-env stopped after.
+Tests: scripts/test/screenshots.test.js (2 tests, both green). npm run lint, npm run test:unit (5 suites incl. this one), composer lint/test:unit, npm run build, forbidden-patterns all green (foundry_verify).
