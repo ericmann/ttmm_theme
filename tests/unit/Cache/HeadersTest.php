@@ -81,6 +81,39 @@ class HeadersTest extends TestCase {
 		$this->assertSame( 1000, Headers::max_age( $this->now( '2026-09-20 00:05:00' ) ) );
 	}
 
+	public function test_head_request_gets_public_max_age(): void {
+		$this->stub_config();
+
+		$value = Headers::for_request(
+			[
+				'admin'     => false,
+				'rest'      => false,
+				'feed'      => false,
+				'logged_in' => false,
+				'method'    => 'HEAD',
+			]
+		);
+
+		$this->assertNotNull( $value );
+		$this->assertStringStartsWith( 'public, max-age=', $value );
+	}
+
+	public function test_post_request_gets_no_header(): void {
+		$this->stub_config();
+
+		$value = Headers::for_request(
+			[
+				'admin'     => false,
+				'rest'      => false,
+				'feed'      => false,
+				'logged_in' => false,
+				'method'    => 'POST',
+			]
+		);
+
+		$this->assertNull( $value );
+	}
+
 	public function test_ttm_cache_max_age_filter_overrides(): void {
 		Functions\when( 'apply_filters' )->alias(
 			static function ( string $tag, $value ) {

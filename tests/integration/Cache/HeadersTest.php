@@ -67,6 +67,22 @@ class HeadersTest extends TTM_IntegrationTestCase {
 		$this->assertSame( 'no-store', $value );
 	}
 
+	public function test_head_request_gets_same_max_age_as_get(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+
+		$value = Headers::for_request(
+			[
+				'admin'     => false,
+				'rest'      => false,
+				'feed'      => false,
+				'logged_in' => false,
+				'method'    => 'HEAD',
+			]
+		);
+
+		$this->assertSame( 'public, max-age=43200, s-maxage=43200', $value );
+	}
+
 	public function test_post_request_gets_nothing(): void {
 		$value = Headers::for_request(
 			[

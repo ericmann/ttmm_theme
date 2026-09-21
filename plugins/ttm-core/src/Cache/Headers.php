@@ -94,7 +94,7 @@ class Headers {
 			return 'no-store';
 		}
 
-		if ( 'GET' !== strtoupper( (string) ( $flags['method'] ?? 'GET' ) ) ) {
+		if ( ! in_array( strtoupper( (string) ( $flags['method'] ?? 'GET' ) ), [ 'GET', 'HEAD' ], true ) ) {
 			return null;
 		}
 
