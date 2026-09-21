@@ -10,13 +10,15 @@ declare( strict_types=1 );
 namespace TTM\Core\Query;
 
 use TTM\Core\Bindings\Values;
+use TTM\Core\Blocks\Helpers;
 use TTM\Core\Config;
 use WP_Query;
 use WP_Term;
 
 /**
  * `pre_get_posts` on the main front-end query only; also relabels the core query-pagination
- * next/previous blocks when their query inherits the main query (Decisions).
+ * next/previous blocks when their query inherits the main query (Decisions), and groups
+ * `ttm/archive-by-year`'s inner post-template rows into year sections (F15).
  */
 class Archive {
 
@@ -27,6 +29,75 @@ class Archive {
 		add_action( 'pre_get_posts', [ self::class, 'shape' ] );
 		add_filter( 'render_block_core/query-pagination-next', [ self::class, 'label_next' ], 10, 3 );
 		add_filter( 'render_block_core/query-pagination-previous', [ self::class, 'label_previous' ], 10, 3 );
+		add_filter( 'render_block_data', [ self::class, 'track_archive_scope' ] );
+		add_filter( 'render_block_core/post-template', [ self::class, 'group_by_year' ], 10, 1 );
+	}
+
+	/**
+	 * `render_block_data`: enter `ttm/archive-by-year` scope before its inner blocks render.
+	 *
+	 * @param array<string, mixed> $parsed_block Parsed block.
+	 * @return array<string, mixed>
+	 */
+	public static function track_archive_scope( array $parsed_block ): array {
+		if ( 'ttm/archive-by-year' === ( $parsed_block['blockName'] ?? '' ) ) {
+			++Helpers::$archive_scope;
+		}
+
+		return $parsed_block;
+	}
+
+	/**
+	 * `render_block_core/post-template`: inside `ttm/archive-by-year` only, split the rendered
+	 * `<li>` rows into year sections (F15: a single-post year is still its own group).
+	 *
+	 * @param string $content Rendered `<ul>…</ul>` post-template HTML.
+	 * @return string
+	 */
+	public static function group_by_year( string $content ): string {
+		if ( Helpers::$archive_scope <= 0 ) {
+			return $content;
+		}
+
+		$chunks = preg_split( '/(?=<li\b)/', $content );
+		if ( ! is_array( $chunks ) || count( $chunks ) < 2 ) {
+			return $content;
+		}
+
+		array_shift( $chunks ); 
+		// The opening `<ul …>`; each year gets its own `<ul>` instead.
+
+		$last            = count( $chunks ) - 1;
+		$chunks[ $last ] = (string) preg_replace( '/<\/ul>\s*$/', '', $chunks[ $last ] );
+
+		$order  = [];
+		$groups = [];
+
+		foreach ( $chunks as $li ) {
+			if ( ! preg_match( '/\bpost-(\d+)\b/', $li, $matches ) ) {
+				continue;
+			}
+
+			$year = (int) get_post_time( 'Y', false, (int) $matches[1] );
+
+			if ( ! isset( $groups[ $year ] ) ) {
+				$groups[ $year ] = [];
+				$order[]         = $year;
+			}
+
+			$groups[ $year ][] = $li;
+		}
+
+		$html = '';
+		foreach ( $order as $year ) {
+			$html .= sprintf(
+				'<div class="ttm-archive-year"><h2 class="ttm-archive-year__label tnum">%1$d</h2><ul class="wp-block-post-template ttm-archive-year__rows">%2$s</ul></div>',
+				$year,
+				implode( '', $groups[ $year ] )
+			);
+		}
+
+		return $html;
 	}
 
 	/**

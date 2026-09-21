@@ -22,6 +22,17 @@ use TTM\Core\Support\Text;
 class Helpers {
 
 	/**
+	 * Nesting depth inside `ttm/archive-by-year` (P5-02): incremented by
+	 * `Query\Archive::track_archive_scope()` on `render_block_data` when that block is
+	 * encountered (before its inner `core/query`/`core/post-template` render), decremented by
+	 * the block's own `render.php` after its content is built. `render_block_core/post-template`
+	 * only regroups rows into year sections while this is > 0.
+	 *
+	 * @var int
+	 */
+	public static int $archive_scope = 0;
+
+	/**
 	 * Block wrapper attributes: `ttm-<name>` + any extra classes, `data-ttm-block="<name>"`.
 	 *
 	 * @param string               $name    Block name without the `ttm/` prefix.
