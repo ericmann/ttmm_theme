@@ -11,7 +11,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P0-06 Seeder prose library and tagline
 - [x] P0-07 Seed rewrite — sections, journal and pages
 - [x] P0-08 Seed rewrite — series and fiction
-- [ ] P0-09 Phase 0 push — baseline screenshots
+- [x] P0-09 Phase 0 push — baseline screenshots
 - [ ] P1-01 Full-width rules and unconstrained grids (rules 35/36)
 - [ ] P1-02 Front masthead per §6.1.1 (pattern, CSS, nav hub class)
 - [ ] P1-03 Front-page current section and nav label fill (`Nav\CurrentSection`)
@@ -105,3 +105,10 @@ reading-cves and salt-and-iron series removed. books.json's salt-and-iron row re
 Stories renamed: story-the-last-cron-job (50 paragraphs, 40 days — day offset given by task), story-a-field-guide-to-empty-offices (30 paragraphs, 90 days — offset not specified, chosen), story-uptime (15 paragraphs, featured_image:true, 150 days — offset not specified, chosen).
 Tests: SeedStatesTest (four->six rows), SeederTest 2 new tests (published/total via SeriesIndex::by_slug, ttm_cadence meta; ch12's ttm_part_title === "Reconciliation").
 Verified: composer lint 0 errors, npm run test:integration 382/382 green (real wp-env), `wp ttm seed --reset` exit 0 (91 posts, 6 series, 2 books), grep -ci lorem = 0 across all seed fixtures, composer test:unit/npm lint/build/forbidden-patterns all green. ttm-theme confirmed active; wp-env stopped after.
+
+### P0-09 — 147933f
+Reseeded cleanly (`wp-env stop && start`, `wp ttm seed --reset`): 91 posts, 6 series, 2 books, exit 0. `grep -ri lorem docs/fixtures/seed/` returns 0 hits.
+`npm run screenshots` wrote all 7 PNGs; visually confirmed front-1280.png shows the mock's exact copy: "Stop trusting the database: signing your options table", "Why I moved my build pipeline off GitHub Actions — and what it cost", "Charge for the outcome, bill for the hour", "The Quiet Ledger — Ch. 12: Reconciliation". Committed (7 PNGs) and pushed: branch refine/2026-09-21, PR link printed by git push.
+Full verify green: composer lint (0 errors), composer test:unit (134/134), npm run lint, npm run test:unit (5 suites), npm run build, forbidden-patterns.sh clean, npm run test:integration (382/382), npm run test:e2e (78 skipped/fixme, 48 phase-1 passed).
+Manual check: NOT VERIFIED (human) — owner should open docs/feedback/phase-2/*.png and compare against design_*.png per phase-2/README.md's pairing table.
+Push: origin/refine/2026-09-21 (branch existed already from foundry_run_start; this is the first push of Phase 0's content).
