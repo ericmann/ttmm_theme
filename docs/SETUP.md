@@ -71,6 +71,8 @@ Fix formatting automatically with `composer lint:fix` (phpcbf) and `npx wp-scrip
 
 Run a single file: `npx wp-env run tests-cli --env-cwd=wp-content/ttm-tests php ../ttm-vendor/bin/phpunit -c integration/phpunit.xml.dist --filter BootTest`.
 
+`.wp-env.json` also maps `./docs/fixtures` to `wp-content/ttm-fixtures`, so integration tests can read fixed sample payloads (a Verse API response, a classic-editor HTML sample) with plain `file_exists()`/`file_get_contents()` calls against `WP_CONTENT_DIR . '/ttm-fixtures/...'` instead of embedding them inline. If a mapping does not appear after editing `.wp-env.json`, run `npx wp-env destroy && npx wp-env start` to force a rebuild.
+
 ## Repository layout
 
 See `docs/SPEC.md §4.1`. In short: `plugins/ttm-core` (data, blocks, CLI), `themes/ttm-theme` (presentation), `tests/{unit,integration,e2e}`, `scripts/` (checks), `docs/` (design handoff + this documentation), `.github/workflows/ci.yml`.
