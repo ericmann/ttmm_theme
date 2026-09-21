@@ -37,6 +37,7 @@ class Plugin {
 			Meta\WordCount::class,
 			Query\SeriesIndex::class,
 			Query\Stats::class,
+			Editor\Sidebar::class,
 		];
 	}
 

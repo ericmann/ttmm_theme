@@ -26,13 +26,25 @@
     "env:cli": "wp-env run cli wp",
     "env:logs": "wp-env logs"
   },
-  "devDependencies": {
-    "@wordpress/env": "*",
-    "@wordpress/scripts": "*",
-    "@wordpress/e2e-test-utils-playwright": "*",
-    "@axe-core/playwright": "*"
-  },
   "dependencies": {},
+  "devDependencies": {
+    "@axe-core/playwright": "*",
+    "@wordpress/block-editor": "^17.1.0",
+    "@wordpress/blocks": "^16.0.0",
+    "@wordpress/components": "^40.1.0",
+    "@wordpress/compose": "^8.8.0",
+    "@wordpress/core-data": "^8.0.0",
+    "@wordpress/data": "^10.55.0",
+    "@wordpress/e2e-test-utils-playwright": "*",
+    "@wordpress/editor": "^15.0.0",
+    "@wordpress/element": "^8.7.0",
+    "@wordpress/env": "*",
+    "@wordpress/hooks": "^4.55.0",
+    "@wordpress/i18n": "^6.28.0",
+    "@wordpress/plugins": "^7.55.0",
+    "@wordpress/scripts": "*",
+    "@wordpress/server-side-render": "^6.31.0"
+  },
   "overrides": {
     "linkify-it": "^5.0.2",
     "serialize-javascript": "^7.0.5",
