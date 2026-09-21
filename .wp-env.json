@@ -33,6 +33,6 @@
     }
   },
   "lifecycleScripts": {
-    "afterStart": "npx wp-env run cli wp theme activate ttm-theme && npx wp-env run cli wp rewrite structure '/%postname%/' --hard && npx wp-env run cli wp option update timezone_string America/Los_Angeles && npx wp-env run cli wp option update blogname 'These Things Matter' && npx wp-env run cli wp option update blogdescription 'Technology, business, faith, and the occasional story.' && npx wp-env run cli wp option update default_comment_status closed"
+    "afterStart": "npx wp-env run cli wp theme activate ttm-theme && npx wp-env run cli wp rewrite structure '/%postname%/' --hard && npx wp-env run cli wp option update timezone_string America/Los_Angeles && npx wp-env run cli wp option update blogname 'These Things Matter' && npx wp-env run cli wp option update blogdescription 'Technology, business, faith and the occasional story. One writer, several desks.' && npx wp-env run cli wp option update default_comment_status closed"
   }
 }

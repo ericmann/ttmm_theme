@@ -73,6 +73,35 @@ class Seeder {
 	}
 
 	/**
+	 * `$count` `core/paragraph` blocks drawn deterministically from `prose.json`, cycling by
+	 * `$row_index` so the same row always gets the same paragraphs (SPEC §6.5).
+	 *
+	 * @param int $row_index Stable index of the row this prose is for (its position in the
+	 *                        source fixture, not a database id).
+	 * @param int $count     Number of paragraphs to draw; 0 or a missing/empty fixture returns ''.
+	 * @return string
+	 */
+	private function prose( int $row_index, int $count ): string {
+		if ( $count <= 0 ) {
+			return '';
+		}
+
+		$paragraphs = $this->load( 'prose.json' );
+		$total      = count( $paragraphs );
+		if ( 0 === $total ) {
+			return '';
+		}
+
+		$blocks = '';
+		for ( $offset = 0; $offset < $count; $offset++ ) {
+			$paragraph = (string) $paragraphs[ ( $row_index + $offset ) % $total ];
+			$blocks   .= "\n\n<!-- wp:paragraph -->\n<p>" . esc_html( $paragraph ) . "</p>\n<!-- /wp:paragraph -->\n";
+		}
+
+		return $blocks;
+	}
+
+	/**
 	 * Run the full seed for a given state.
 	 *
 	 * "quiet": every post's days_ago + `seed.quiet_offset_days` (nothing recent; statuses stay
@@ -94,6 +123,10 @@ class Seeder {
 		$books      = 'empty' === $state ? [] : $this->seed_books();
 		$this->seed_verse();
 		$this->seed_jetpack();
+
+		// SPEC §6.5: the mock's tagline. A translatable literal here is fine -- seed content
+		// only, never read at request time.
+		update_option( 'blogdescription', __( 'Technology, business, faith and the occasional story. One writer, several desks.', 'ttm-core' ) );
 
 		return [
 			'categories' => count( $categories ),
@@ -274,7 +307,7 @@ class Seeder {
 		$ids      = [];
 		$excluded = 'empty' === $this->state ? $this->empty_state_excluded_slugs() : [];
 
-		foreach ( $rows as $row ) {
+		foreach ( $rows as $index => $row ) {
 			if ( 'empty' === $this->state ) {
 				$in_excluded_categories = array_intersect( $row['categories'], [ 'security', 'opinion' ] );
 				$is_chapter_or_story    = in_array( $row['slug'], $excluded, true ) || str_starts_with( $row['slug'], 'story-' );
@@ -307,7 +340,7 @@ class Seeder {
 					'post_status'   => $is_future ? 'future' : 'publish',
 					'post_name'     => $row['slug'],
 					'post_title'    => $row['title'],
-					'post_content'  => $row['content'],
+					'post_content'  => ( $row['content'] ?? '' ) . $this->prose( $index, (int) ( $row['paragraphs'] ?? 0 ) ),
 					'post_excerpt'  => $row['excerpt'] ?? '',
 					'post_date'     => $date,
 					'post_date_gmt' => get_gmt_from_date( $date ),
