@@ -1,1 +1,7 @@
 /* These Things Matter — component classes from docs/01-design-language.md §4. Budget: 25 KB (scripts/check-budget.mjs). */
+
+/* 0 base */
+:root {
+	--ttm-rule-1: var(--wp--custom--rule--thin);
+	--ttm-rule-2: var(--wp--custom--rule--thick);
+}
