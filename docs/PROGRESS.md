@@ -9,7 +9,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P0-04 Fidelity and editors Playwright skeletons (all rows fixme)
 - [x] P0-05 Screenshot script and phase-2 feedback folder
 - [x] P0-06 Seeder prose library and tagline
-- [ ] P0-07 Seed rewrite — sections, journal and pages
+- [x] P0-07 Seed rewrite — sections, journal and pages
 - [ ] P0-08 Seed rewrite — series and fiction
 - [ ] P0-09 Phase 0 push — baseline screenshots
 - [ ] P1-01 Full-width rules and unconstrained grids (rules 35/36)
@@ -89,3 +89,12 @@ Seeder::run() calls update_option('blogdescription', ...) with the exact SPEC §
 scripts/forbidden-patterns.sh: allowed_core_options gained blogdescription. .wp-env.json: afterStart's blogdescription literal updated to match the SPEC tagline exactly (was a slightly different phase-1 string).
 Tests: tests/integration/Cli/SeederTest.php — 3 new tests (prose() called via ReflectionMethod since it's private; no existing precedent for testing a private Seeder method, reflection seemed least invasive).
 Verified: composer lint (0 errors), forbidden-patterns.sh clean, grep -ci lorem = 0, npm run test:integration 377/377 green (real wp-env run, ~2min), composer test:unit, npm run lint/test:unit/build all green. ttm-theme confirmed still active; wp-env stopped after.
+
+### P0-07 — c4b73cf
+docs/fixtures/seed/posts.json: 66 posts total (40 rewritten non-fiction + 26 kept fiction rows). Non-fiction rows now use `paragraphs: N` (drawing from prose.json, P0-06) instead of lorem `content`; excerpts are the mock's deks (or original short deks where the mock gave none: php-85, block-editor, one-page-operating-agreement, etc).
+Lead: signing-your-options-table (technology, days_ago:1, 52 paragraphs, featured_image, excerpt verbatim from mock). technology-post-2 slug/days_ago(4)/featured_image kept exactly (tests/e2e/lib/urls.mjs's article screen still points at it correctly, no edit needed).
+Technology: 7 posts (lead + technology-post-2 + php-85-readonly-classes + block-editor-document-model + 3 techCompact fillers at 18/23/30 days — see Interpretation on why not 17/23/30). Business: 5 (charge-for-outcome.. through what-a-cto-actually-does-all-day, days 5/17/24/37/45). Security: 4 (password-manager-weakest-link.. through disclosure-timelines, days 10/21/32/141). Faith: 2 named (bug-reports day6, sabbath day19) + ordinary-time-week-1..9 (6 paragraphs each, week9=27 days per mock, week1=83, 7-day spacing) = 11 faith posts. Opinion: 3 (open-source.., city-council.., local-news.., days 9/29/417). Journal: 8 posts (journal-post-1..8), paragraphs:3, excerpts trimmed/extended to 38-48 words each (verified via node word-count script); journal-post-4 carries location:"Portland" + syndication. Writing (non-fiction): 2 (finishing-a-draft.., outlining-for-people..).
+Fiction rows (quiet-ledger-ch-*, salt-iron-ch-*, story-*): kept out of scope structurally (titles/slugs/days_ago/series untouched, P0-08's job) but their lorem `content` was swapped for an equal-count `paragraphs: N` — required because the task's own lorem check/test scans the whole file regardless of scope.
+pages.json: About + Newsletter rewritten, two original paragraphs each; Series/Writing pages untouched.
+Tests: SeederTest — 3 new (lead resolution + thumbnail via Query\Lead::id() at set_now 2026-09-20 12:00; journal excerpt word-count range 38-48; whole-file lorem check). Existing test_seed_is_idempotent already covers count>=60.
+Verified: python3 json.load valid, grep -ri lorem = 0 hits (both files), composer lint 0 errors, npm run test:integration 380/380 green (real wp-env), composer test:unit, npm run lint/build, forbidden-patterns all green. ttm-theme confirmed active; wp-env stopped after.
