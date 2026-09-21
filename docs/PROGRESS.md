@@ -1,6 +1,6 @@
 # These Things Matter — phase 2 (front-page fidelity) build progress
-Branch: (set by implement)
-Started: (set by implement)
+Branch: refine/2026-09-21
+Started: 2026-09-21T19:10:39.166Z
 
 ## Tasks
 - [ ] P0-01 CSS coverage lint script and allow-list
