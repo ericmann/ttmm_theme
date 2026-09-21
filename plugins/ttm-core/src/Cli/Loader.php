@@ -52,6 +52,19 @@ class Loader {
 				self::output_audit( ( new AuditCommand() )->run( $args, $assoc ), $assoc );
 			}
 		);
+		\WP_CLI::add_command( 'ttm migrate:politics', self::wrap( new MigrateCommand() ) );
+		\WP_CLI::add_command(
+			'ttm migrate:redirects',
+			static function ( array $args, array $assoc ): void {
+				self::output_lines( ( new MigrateCommand() )->redirects( $args, $assoc ) );
+			}
+		);
+		\WP_CLI::add_command(
+			'ttm migrate:close-comments',
+			static function ( array $args, array $assoc ): void {
+				self::output( ( new MigrateCommand() )->close_comments( $args, $assoc ) );
+			}
+		);
 	}
 
 	/**
@@ -97,6 +110,22 @@ class Loader {
 
 			\WP_CLI\Utils\format_items( 'table', $rows, $fields );
 		}//end if
+
+		if ( ! $result['ok'] ) {
+			\WP_CLI::halt( 1 );
+		}
+	}
+
+	/**
+	 * Print only a result's messages (no rows table), for commands whose messages are already
+	 * the literal output the operator wants (e.g. `migrate:redirects`' nginx/JSON lines).
+	 *
+	 * @param array{ok: bool, rows: array<int, array<string, mixed>>, messages: string[]} $result Command result.
+	 */
+	private static function output_lines( array $result ): void {
+		foreach ( $result['messages'] as $message ) {
+			\WP_CLI::log( $message );
+		}
 
 		if ( ! $result['ok'] ) {
 			\WP_CLI::halt( 1 );

@@ -36,10 +36,11 @@ PYEOF
 
 # Rule 5: options/meta/transients keyed under plugins/ttm-core/src must use the ttm_ prefix.
 # Reads of pre-existing WordPress-core option names are allow-listed (we don't own the name,
-# we're just consuming WordPress's own convention): default_comment_status, timezone_string,
-# blogname (as scoped in the task text), plus sticky_posts (found live in Query/Lead.php,
-# reading WP's native "Stick this post" feature).
-allowed_core_options="default_comment_status|timezone_string|blogname|sticky_posts"
+# we're just consuming WordPress's own convention): default_comment_status,
+# default_ping_status (both named explicitly in the migrate:close-comments task text),
+# timezone_string, blogname (as scoped in the task text), plus sticky_posts (found live in
+# Query/Lead.php, reading WP's native "Stick this post" feature).
+allowed_core_options="default_comment_status|default_ping_status|timezone_string|blogname|sticky_posts"
 out=$(grep -rnE "\b(add_option|update_option|get_option|set_transient|get_transient|register_post_meta|register_term_meta)\(\s*'[a-zA-Z_]+'" plugins/ttm-core/src --include='*.php' 2>/dev/null | grep -vE "\(\s*'(ttm_[a-zA-Z_]*|${allowed_core_options})'" || true)
 [ -n "$out" ] && { echo "$out"; hit "non-ttm_ option/meta/transient name (SPEC rule 5)"; }
 
