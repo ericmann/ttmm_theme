@@ -69,7 +69,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P7-05 Cache tuning: verse_boundary_hour, max_age_cap, min_age
 - [x] P7-06 Newsletter tuning: token_ttl, rate limits
 - [x] P7-07 Static audit: extend forbidden-patterns, run, fix
-- [ ] P7-08 Separability tests (theme without plugin, plugin with default theme)
+- [x] P7-08 Separability tests (theme without plugin, plugin with default theme)
 - [ ] P7-09 Push and manual check (Phase 7)
 - [ ] P8-01 Spike: classic-to-block conversion script (jsdom + rawHandler)
 - [ ] P8-02 CLI convert:export, convert:import, convert:revert
@@ -404,3 +404,8 @@ Measurement: worst-case token age (page generated 1s before a token_ttl boundary
 ### P7-07 — 07496f1
 Extended forbidden-patterns.sh for rules 1,3,5,7,8,12,15,16,17,24,32. Fixed real violation: VerseCommand::inspect() duplicated wp_safe_remote_get instead of going through Fetcher — extracted Fetcher::request() as the single call site, used by both fetch() and inspect(). Documented two legitimate variable-include cases (PSR-4 autoloader, build-asset require) with a marker comment rather than rewriting them. Rule 3 needed a small inline python3 context-check (2-line lookback) since grep alone can't express it. Rule 5's allow-list extended globally to cover sticky_posts (found live in Query/Lead.php reading WP's native sticky-post feature). Rule 16's file allow-list corrected to Newsletter/Provider/CustomUrl.php (the actual call site) rather than Handler.php per the task text. Rule 24 run as warning-only per its own scope; recorded the list (three REST 404 status codes, two justified timeout=>10 literals, one real future-Config-key candidate: writing-cell/render.php's posts_per_page=>3, left unfixed per "no behavioural changes" scope).
 `bash scripts/forbidden-patterns.sh` exits 0. Full verify green: composer lint 0 errors, 115/115 unit, npm lint/build green, 277 integration tests OK (1 pre-existing skip).
+
+### P7-08 — 44fb7e2
+Added ThemeAloneTest (unregisters every ttm/* block+binding source, renders all 13 templates, asserts no notices via failOnWarning and no data-ttm-block leakage) and PluginAloneTest (switches to twentytwentyfive, renders all 19 ttm/* blocks with a minimal per-test fixture, asserts semantic non-empty output + no disallowed inline styles).
+Found and fixed 3 real bugs: (1) patterns/section-cell.php's missing pattern header (by design, manually registered) tripped WP's own pattern-directory scanner _doing_it_wrong() on every template render — moved to inc/pattern-templates/ outside the scanned dir, updated both call sites. (2) Seeder::seed_posts() never re-ran Form::on_save() after categories attach (same two-step insert shape P3-11 fixed for PrimaryCategory), so every seeded post's ttm_form stayed "article" — silently broke ttm/story-tiles. (3) Fixing that surfaced that the "empty" seed state's generic "writing-post-*" essays now correctly auto-classify as Stories per 03 §4 once Form derives correctly, breaking its "zero fiction" promise — excluded all Writing-category posts from the "empty" state.
+Full verify green: composer lint 0 errors, 115/115 unit, npm lint/build green, forbidden-patterns clean, 311 integration tests OK (1 pre-existing skip).
