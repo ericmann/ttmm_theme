@@ -91,7 +91,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] R1-10 REST /series ?form=fiction filter per 05 §3
 - [x] R1-11 Nav current-section on series pages
 - [x] R1-12 ttm/syndicated-to wrapper and escaping
-- [ ] R1-13 Test gaps: binding empty values, separability non-empty blocks, permanent skip
+- [x] R1-13 Test gaps: binding empty values, separability non-empty blocks, permanent skip
 - [ ] R1-14 i18n: masthead labels from term names, Books row label, book-grid form caption, feed title
 - [ ] R1-15 Docs alignment: CLAUDE.md rule 16 file and module map, DEPLOYMENT real-IP, convert-classic report field
 
@@ -811,3 +811,28 @@ itself is asserted absent).
 
 Verified via foundry_verify: composer lint/test:unit, npm lint/test:unit/build,
 forbidden-patterns.sh, npm run test:integration (366, +2, all green).
+
+### R1-13 — e5a6f21
+ValuesTest.php: added test_kicker_empty_without_section (Values::kicker([]) === ''),
+test_meta_line_empty_without_parts (Values::meta_line([],[]) === ''), and
+test_short_and_relative_date_empty_without_date -- interpreted as documented in the commit:
+short_date()/relative_date() are total pure formatters with no "empty date" input possible at
+this layer (the real empty case is Bindings\Sources returning '' before calling them, which
+needs WordPress and can't be unit-tested per rule 28); the test asserts both never produce
+blank output even when $d === $now (the most degenerate boundary).
+
+PluginAloneTest.php: seed_minimal()'s $part_1 (already in Security) gained tags_input and
+ttm_featured_in_section='1', giving ttm/most-read and ttm/tag-filter real data on
+/category/security/; their dataProvider rows flipped false -> true. No other block_cases rows
+touched.
+
+ChromePartsTest.php: removed test_rail_renders_without_plugin_blocks_registered (permanently
+skipped -- its class_exists() guard is always true in this suite, since ttm-core is always
+active). tests/integration/Separability/ThemeAloneTest.php already covers the real intent more
+robustly (it actually unregisters every ttm/* block/binding and asserts front-page.html, which
+references the rail part, carries no data-ttm-block afterward) -- this was reviewer T4's own
+suggested fix.
+
+Verified via foundry_verify: composer lint/test:unit (126, +3), npm lint/test:unit/build,
+forbidden-patterns.sh, npm run test:integration -- "OK (365 tests, ...)", 0 skipped (down from
+1), all green.
