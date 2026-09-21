@@ -73,6 +73,10 @@ Run a single file: `npx wp-env run tests-cli --env-cwd=wp-content/ttm-tests php 
 
 `.wp-env.json` also maps `./docs/fixtures` to `wp-content/ttm-fixtures`, so integration tests can read fixed sample payloads (a Verse API response, a classic-editor HTML sample) with plain `file_exists()`/`file_get_contents()` calls against `WP_CONTENT_DIR . '/ttm-fixtures/...'` instead of embedding them inline. If a mapping does not appear after editing `.wp-env.json`, run `npx wp-env destroy && npx wp-env start` to force a rebuild.
 
+## Seed states
+
+`npm run env:seed` runs `wp ttm seed` (state `normal` by default), which fully populates the seven sections, four pages, navigation, ~90 posts, the four seed series (two nonfiction, two fiction, one with a cover), two books and the current verse from `docs/fixtures/verse-sample.json`. `npx wp-env run cli wp ttm seed --state=quiet` shifts every post 120 days into the past (no cell has anything within 90 days, journal nothing within 30) without changing any series status. `npx wp-env run cli wp ttm seed --state=empty` seeds everything except Security/Opinion posts, series (and their chapters), stories and books, and deletes the verse options — useful for exercising every documented fallback (`06-fallbacks.md`). Add `--reset` to any of these to delete every previously seeded object (identified by `_ttm_seed` post/term meta) first; seeding itself is idempotent by slug, so re-running `wp ttm seed` without `--reset` never duplicates content. Seeding refuses to run when `wp_get_environment_type()` returns `production`.
+
 ## Repository layout
 
 See `docs/SPEC.md §4.1`. In short: `plugins/ttm-core` (data, blocks, CLI), `themes/ttm-theme` (presentation), `tests/{unit,integration,e2e}`, `scripts/` (checks), `docs/` (design handoff + this documentation), `.github/workflows/ci.yml`.

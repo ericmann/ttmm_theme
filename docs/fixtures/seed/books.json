@@ -1,0 +1,22 @@
+[
+	{
+		"title": "The Quiet Ledger",
+		"form": "novel",
+		"year": 2026,
+		"formats": [ "ebook", "paperback" ],
+		"links": [
+			{ "label": "Amazon", "url": "https://amazon.com/the-quiet-ledger" }
+		],
+		"series_slug": "the-quiet-ledger"
+	},
+	{
+		"title": "Salt and Iron",
+		"form": "novella",
+		"year": 2025,
+		"formats": [ "ebook" ],
+		"links": [
+			{ "label": "Amazon", "url": "https://amazon.com/salt-and-iron" }
+		],
+		"series_slug": "salt-and-iron"
+	}
+]

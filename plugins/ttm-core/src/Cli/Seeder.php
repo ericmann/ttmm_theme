@@ -20,17 +20,40 @@ class Seeder {
 	private const SEED_META = '_ttm_seed';
 
 	/**
+	 * Days added to every post's `days_ago` for the "quiet" state.
+	 *
+	 * @var int
+	 */
+	private int $days_offset = 0;
+
+	/**
+	 * Current seed state.
+	 *
+	 * @var string
+	 */
+	private string $state = 'normal';
+
+	/**
 	 * The fixtures directory: the wp-env mapping if present, else the repo path directly.
 	 *
 	 * @return string
 	 */
 	public static function fixtures_dir(): string {
-		$mapped = defined( 'WP_CONTENT_DIR' ) ? WP_CONTENT_DIR . '/ttm-fixtures/seed' : '';
+		return self::fixtures_root_dir() . '/seed';
+	}
+
+	/**
+	 * The `docs/fixtures` root: the wp-env mapping if present, else the repo path directly.
+	 *
+	 * @return string
+	 */
+	private static function fixtures_root_dir(): string {
+		$mapped = defined( 'WP_CONTENT_DIR' ) ? WP_CONTENT_DIR . '/ttm-fixtures' : '';
 		if ( $mapped && is_dir( $mapped ) ) {
 			return $mapped;
 		}
 
-		return dirname( TTM_CORE_DIR, 3 ) . '/docs/fixtures/seed';
+		return dirname( TTM_CORE_DIR, 3 ) . '/docs/fixtures';
 	}
 
 	/**
@@ -49,25 +72,52 @@ class Seeder {
 	}
 
 	/**
-	 * Run the full seed for a given state. Only "normal" varies fixture selection today.
+	 * Run the full seed for a given state.
 	 *
-	 * @param string $state Seed state (e.g. "normal", "quiet", "empty").
-	 * @return array{categories:int, pages:int, posts:int, navigation:int}
+	 * "quiet": every post's days_ago + 120 (nothing recent; statuses stay as fixtured).
+	 * "empty": normal minus Security/Opinion posts, series + chapters, stories, books,
+	 * and the verse options are deleted rather than seeded.
+	 *
+	 * @param string $state Seed state: "normal", "quiet", or "empty".
+	 * @return array{categories:int, pages:int, posts:int, navigation:int, series:int, books:int}
 	 */
 	public function run( string $state ): array {
-		unset( $state );
+		$this->state       = $state;
+		$this->days_offset = 'quiet' === $state ? 120 : 0;
 
 		$categories = $this->seed_categories();
 		$pages      = $this->seed_pages();
 		$navigation = $this->seed_navigation();
 		$posts      = $this->seed_posts();
+		$series     = 'empty' === $state ? [] : $this->seed_series();
+		$books      = 'empty' === $state ? [] : $this->seed_books();
+		$this->seed_verse();
 
 		return [
 			'categories' => count( $categories ),
 			'pages'      => count( $pages ),
 			'posts'      => count( $posts ),
 			'navigation' => $navigation ? 1 : 0,
+			'series'     => count( $series ),
+			'books'      => count( $books ),
 		];
+	}
+
+	/**
+	 * Slugs excluded from posts.json when seeding the "empty" state: every chapter
+	 * (from series.json parts) and every standalone story (slug prefix "story-").
+	 *
+	 * @return string[]
+	 */
+	private function empty_state_excluded_slugs(): array {
+		$excluded = [];
+		foreach ( $this->load( 'series.json' ) as $series ) {
+			foreach ( $series['parts'] as $part ) {
+				$excluded[] = $part['post_slug'];
+			}
+		}
+
+		return $excluded;
 	}
 
 	/**
@@ -218,22 +268,33 @@ class Seeder {
 	 * @return int[] Post ids.
 	 */
 	public function seed_posts(): array {
-		$rows = $this->load( 'posts.json' );
-		$ids  = [];
+		$rows     = $this->load( 'posts.json' );
+		$ids      = [];
+		$excluded = 'empty' === $this->state ? $this->empty_state_excluded_slugs() : [];
 
 		foreach ( $rows as $row ) {
+			if ( 'empty' === $this->state ) {
+				$in_excluded_categories = array_intersect( $row['categories'], [ 'security', 'opinion' ] );
+				$is_chapter_or_story    = in_array( $row['slug'], $excluded, true ) || str_starts_with( $row['slug'], 'story-' );
+				if ( $in_excluded_categories || $is_chapter_or_story ) {
+					continue;
+				}
+			}
+
 			$existing = get_page_by_path( $row['slug'], OBJECT, 'post' );
 			if ( $existing ) {
 				$ids[] = $existing->ID;
 				continue;
 			}
 
-			$date = Clock::now()->modify( '-' . (int) $row['days_ago'] . ' days' )->format( 'Y-m-d H:i:s' );
+			$is_future = ! empty( $row['future'] );
+			$days_ago  = $is_future ? (int) $row['days_ago'] : (int) $row['days_ago'] + $this->days_offset;
+			$date      = Clock::now()->modify( ( $days_ago >= 0 ? '-' : '+' ) . abs( $days_ago ) . ' days' )->format( 'Y-m-d H:i:s' );
 
 			$post_id = wp_insert_post(
 				[
 					'post_type'     => 'post',
-					'post_status'   => 'publish',
+					'post_status'   => $is_future ? 'future' : 'publish',
 					'post_name'     => $row['slug'],
 					'post_title'    => $row['title'],
 					'post_content'  => $row['content'],
@@ -246,6 +307,10 @@ class Seeder {
 
 			if ( ! $post_id || is_wp_error( $post_id ) ) {
 				continue;
+			}
+
+			if ( isset( $row['part_title'] ) ) {
+				update_post_meta( $post_id, 'ttm_part_title', $row['part_title'] );
 			}
 
 			$category_ids = [];
@@ -281,6 +346,147 @@ class Seeder {
 		}//end foreach
 
 		return $ids;
+	}
+
+	/**
+	 * Create the series terms and attach their parts. Idempotent by slug.
+	 *
+	 * @return int[] Term ids.
+	 */
+	public function seed_series(): array {
+		$rows = $this->load( 'series.json' );
+		$ids  = [];
+
+		foreach ( $rows as $row ) {
+			$term = get_term_by( 'slug', $row['slug'], 'series' );
+			if ( ! $term ) {
+				$created = wp_insert_term( $row['name'], 'series', [ 'slug' => $row['slug'] ] );
+				$term    = get_term( (int) $created['term_id'], 'series' );
+				update_term_meta( $term->term_id, self::SEED_META, 1 );
+			}
+			$term_id = (int) $term->term_id;
+
+			update_term_meta( $term_id, 'ttm_status', $row['status'] );
+			update_term_meta( $term_id, 'ttm_form', $row['form'] );
+			update_term_meta( $term_id, 'ttm_total_parts', (int) $row['total_parts'] );
+			update_term_meta( $term_id, 'ttm_genre', $row['genre'] ?? '' );
+			update_term_meta( $term_id, 'ttm_cadence', $row['cadence'] ?? '' );
+
+			if ( ! empty( $row['next_date_days_ahead'] ) ) {
+				$next = Clock::now()->modify( '+' . (int) $row['next_date_days_ahead'] . ' days' )->format( 'Y-m-d' );
+				update_term_meta( $term_id, 'ttm_next_date', $next );
+			}
+
+			if ( ! empty( $row['cover'] ) ) {
+				$cover_id = $this->image( $row['name'] . ' cover', 'ttm-cover' );
+				if ( $cover_id ) {
+					update_term_meta( $term_id, 'ttm_cover_id', $cover_id );
+				}
+			}
+
+			if ( ! empty( $row['purchase_links'] ) ) {
+				update_term_meta( $term_id, 'ttm_purchase_links', $row['purchase_links'] );
+			}
+
+			foreach ( $row['parts'] as $part ) {
+				$post = get_page_by_path( $part['post_slug'], OBJECT, 'post' );
+				if ( ! $post ) {
+					continue;
+				}
+				wp_set_object_terms( $post->ID, [ $term_id ], 'series' );
+				update_post_meta( $post->ID, 'ttm_series_part', (int) $part['part'] );
+			}
+
+			$ids[] = $term_id;
+		}//end foreach
+
+		\TTM\Core\Query\SeriesIndex::rebuild();
+
+		return $ids;
+	}
+
+	/**
+	 * Create the seeded books option. Idempotent (replaces the whole option each run).
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function seed_books(): array {
+		$rows  = $this->load( 'books.json' );
+		$books = [];
+
+		foreach ( $rows as $row ) {
+			$series_id = 0;
+			if ( ! empty( $row['series_slug'] ) ) {
+				$term = get_term_by( 'slug', $row['series_slug'], 'series' );
+				if ( $term && ! is_wp_error( $term ) ) {
+					$series_id = (int) $term->term_id;
+				}
+			}
+
+			$books[] = [
+				'title'     => $row['title'],
+				'form'      => $row['form'],
+				'year'      => (int) $row['year'],
+				'cover_id'  => 0,
+				'formats'   => $row['formats'] ?? [],
+				'links'     => $row['links'] ?? [],
+				'series_id' => $series_id,
+			];
+		}
+
+		update_option( 'ttm_books', \TTM\Core\Fiction\Books::sanitize( $books ) );
+
+		return $books;
+	}
+
+	/**
+	 * Seed `ttm_verse`/`ttm_verse_history` from docs/fixtures/verse-sample.json, or delete
+	 * them for the "empty" state.
+	 */
+	public function seed_verse(): void {
+		if ( 'empty' === $this->state ) {
+			delete_option( 'ttm_verse' );
+			delete_option( 'ttm_verse_history' );
+			return;
+		}
+
+		$path = self::fixtures_root_dir() . '/verse-sample.json';
+		if ( ! file_exists( $path ) ) {
+			return;
+		}
+
+		$payload = json_decode( (string) file_get_contents( $path ), true );
+		$items   = $payload['data'] ?? [];
+		if ( empty( $items ) ) {
+			return;
+		}
+
+		update_option( 'ttm_verse', self::map_verse_item( $items[0] ) );
+		update_option( 'ttm_verse_history', array_map( [ self::class, 'map_verse_item' ], array_slice( $items, 0, 6 ) ) );
+	}
+
+	/**
+	 * Map one raw verse API item to the ttm_verse shape (SPEC Appendix A). P3-02's
+	 * Verse\Fetcher::parse() replaces this mapping; the seeder calls this single method
+	 * so that swap is one line.
+	 *
+	 * @param array<string, mixed> $item Raw API item.
+	 * @return array<string, mixed>
+	 */
+	public static function map_verse_item( array $item ): array {
+		$published    = Clock::at( $item['published_at'] );
+		$item_pattern = (string) Config::get( 'verse.item_url_pattern', 'https://dailymedtoday.com/meditation/%s' );
+
+		return [
+			'date'       => $published ? $published->format( 'Y-m-d' ) : '',
+			'text'       => $item['scripture_text'],
+			'reference'  => $item['scripture_reference'],
+			'title'      => $item['title'],
+			'url'        => sprintf( $item_pattern, $item['id'] ),
+			'source_id'  => $item['id'],
+			'copyright'  => $item['copyright_notice'],
+			'fetched_at' => Clock::now()->format( 'Y-m-d H:i:s' ),
+		];
 	}
 
 	/**
@@ -353,5 +559,10 @@ class Seeder {
 				wp_delete_term( (int) $term_id, $term->taxonomy );
 			}
 		}
+
+		delete_option( 'ttm_books' );
+		delete_option( 'ttm_verse' );
+		delete_option( 'ttm_verse_history' );
+		\TTM\Core\Query\SeriesIndex::rebuild();
 	}
 }
