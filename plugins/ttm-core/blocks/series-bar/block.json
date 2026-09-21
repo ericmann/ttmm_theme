@@ -1,0 +1,25 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "ttm/series-bar",
+	"title": "Series Bar",
+	"category": "ttm",
+	"description": "Series progress bar under the inner masthead (01 §4.18, F11, F23).",
+	"textdomain": "ttm-core",
+	"usesContext": [ "postId" ],
+	"attributes": {
+		"previewState": {
+			"type": "string",
+			"default": "normal"
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": false,
+		"color": false,
+		"typography": false,
+		"spacing": false
+	},
+	"render": "file:./render.php",
+	"editorScript": "file:./index.js"
+}
