@@ -93,6 +93,7 @@ class Seeder {
 		$series     = 'empty' === $state ? [] : $this->seed_series();
 		$books      = 'empty' === $state ? [] : $this->seed_books();
 		$this->seed_verse();
+		$this->seed_jetpack();
 
 		return [
 			'categories' => count( $categories ),
@@ -472,6 +473,61 @@ class Seeder {
 
 		update_option( 'ttm_verse', self::seed_verse_item( $items[0] ) );
 		update_option( 'ttm_verse_history', array_map( [ self::class, 'seed_verse_item' ], array_slice( $items, 0, 6 ) ) );
+	}
+
+	/**
+	 * ⚠️ ASSUMPTION verification (SPEC §8 Phase 7): install/activate Jetpack (best-effort, WP-CLI
+	 * only, network failures tolerated) and check whether `jetpack/subscriptions` actually
+	 * registers without a WordPress.com connection. It does not (the block's registration is
+	 * gated behind the `subscriptions` module, which itself refuses to activate unconnected —
+	 * confirmed live: `wp jetpack module activate subscriptions` returns "Newsletter could not
+	 * be activated" and the block stays unregistered), so the seed falls back the
+	 * `newsletter.provider` setting to `mailto` whenever the block isn't registered.
+	 */
+	private function seed_jetpack(): void {
+		if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
+			return;
+		}
+
+		try {
+			\WP_CLI::runcommand(
+				'plugin install jetpack --activate',
+				[
+					'launch'     => false,
+					'exit_error' => false,
+				]
+			);
+		} catch ( \Throwable $e ) {
+			// Network failures tolerated (e.g. no internet in this environment).
+			unset( $e );
+		}
+
+		$connected = class_exists( '\WP_Block_Type_Registry' )
+			&& \WP_Block_Type_Registry::get_instance()->is_registered( 'jetpack/subscriptions' );
+
+		$settings = get_option( 'ttm_settings', [] );
+		if ( ! is_array( $settings ) ) {
+			$settings = [];
+		}
+
+		if ( ! isset( $settings['newsletter'] ) || ! is_array( $settings['newsletter'] ) ) {
+			$settings['newsletter'] = [];
+		}
+
+		if ( $connected ) {
+			// Default (jetpack) applies.
+			unset( $settings['newsletter']['provider'] );
+		} else {
+			$settings['newsletter']['provider']       = 'mailto';
+			$settings['newsletter']['fallback_email'] = 'hello@example.com';
+		}
+
+		if ( empty( $settings['newsletter'] ) ) {
+			unset( $settings['newsletter'] );
+		}
+
+		update_option( 'ttm_settings', $settings );
+		Config::reset();
 	}
 
 	/**
