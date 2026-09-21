@@ -96,7 +96,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] R1-15 Docs alignment: CLAUDE.md rule 16 file and module map, DEPLOYMENT real-IP, convert-classic report field
 - [x] R2-01 F9 stale-year: plugin-side dek suppression, cached staleness, cells.stale_count key, rule-24 allow-list removed
 - [x] R2-02 Test gaps: source-level empty values for ttm/short-date and ttm/relative-date; BoundariesTest sees inline fully-qualified references
-- [ ] R2-03 Docs and duplication cleanup after round 1: CLAUDE.md module map, stale comments, HANDOFF correction, one pagination-label implementation
+- [x] R2-03 Docs and duplication cleanup after round 1: CLAUDE.md module map, stale comments, HANDOFF correction, one pagination-label implementation
 
 ## Log
 (one entry per task, appended by implement)
@@ -949,3 +949,31 @@ inline `\TTM\Core\Blocks\Helpers::wrapper()` written into Query/Lead.php trips i
 No production code touched (task was test-only, out of scope for behaviour changes).
 Verify set green (composer lint/test:unit, npm lint/test:unit/build, forbidden-patterns,
 npm test:integration: 371 tests).
+
+### R2-03 — 21df0e8
+Query\Archive now exposes only year_range($dir): ?array{from:int,to:int} (pure lookup, no
+formatting). The render_block_core/query-pagination-next/-previous filters, label_next/
+label_previous/relabel_pagination, and the new resolve_pagination_label($dir) (calls
+Archive::year_range() then Values::pagination_label()) all live in Bindings\Sources -- Bindings/
+may import Query/ per SPEC §4.2. Sources::pagination_label() (the ttm/pagination-label binding)
+now calls the same resolve_pagination_label() helper instead of duplicating formatting, closing
+a pre-existing bug where Archive::format_label() silently duplicated Values::pagination_label()'s
+two translator strings. ArchiveTest's pagination test now calls
+Sources::resolve_pagination_label('older') (import changed from Query\Archive to
+Bindings\Sources).
+New BoundariesTest::test_pagination_label_strings_have_one_source asserts each of 'Older (%s) →'
+and '← Newer (%s)' occurs exactly once under plugins/ttm-core/src (had to reword my own docblock
+comments that would otherwise have matched the needle literally and inflated the count to 3).
+New ScaffoldTest::test_claude_md_module_map_names_every_src_class walks every src/<Dir>/<Class>.php
+and checks the class name appears on CLAUDE.md's module-map line for that directory; special-cases
+Cli/'s pre-existing "*Command" wildcard shorthand for the four *Command subclasses. Manually
+verified it fails exactly as the task describes when SeriesPosition/SeriesPartList are stripped
+from CLAUDE.md, then restored.
+CLAUDE.md: added SeriesPosition (Meta/), SeriesPartList (Editor/), and a note that Cells owns F9
+end-to-end and Blocks/Helpers is a registered Plugin module owning the archive-scope hooks.
+docs/HANDOFF.md Round 1 R1-02 bullet corrected to point at R2-01 as the task that closed the
+rule-24 allow-list (no longer claims no task was queued for it).
+archive-by-year/render.php docblock fixed: grouping happens in Blocks\Helpers::group_by_year(),
+not Query\Archive::group_by_year() (that method never existed there).
+Verify set green: composer lint/test:unit, npm lint/test:unit/build, forbidden-patterns,
+npm test:integration (371 tests).
