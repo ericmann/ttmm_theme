@@ -39,6 +39,8 @@ class Plugin {
 			Query\Stats::class,
 			Editor\Sidebar::class,
 			Editor\Columns::class,
+			Admin\Page::class,
+			Admin\General::class,
 		];
 	}
 
