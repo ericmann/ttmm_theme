@@ -52,9 +52,16 @@ test.describe( 'rule', () => {
 } );
 
 test.describe( 'masthead', () => {
-	test.fixme( 'mast-meta: .ttm-masthead-front__meta @1280', async ( {
-		page,
-	} ) => {
+	// Flight controller review of P0-09's screenshot: `.ttm-skip` rendered visibly instead of
+	// screen-reader-only-until-focus. Not a §6.2 row from the planner; added here once fixed.
+	test( 'skip-hidden: .ttm-skip @1280', async ( { page } ) => {
+		await gotoFront( page, 1280 );
+		const skip = page.locator( '.ttm-skip' );
+		const box = await skip.boundingBox();
+		expect( box.height ).toBeLessThanOrEqual( 1 );
+	} );
+
+	test( 'mast-meta: .ttm-masthead-front__meta @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const meta = page.locator( '.ttm-masthead-front__meta' );
 		expect( await computed( meta, 'font-size' ) ).toBe( px( 12 ) );
@@ -63,7 +70,7 @@ test.describe( 'masthead', () => {
 		);
 	} );
 
-	test.fixme( 'mast-title: .ttm-masthead-front .wp-block-site-title @1280', async ( {
+	test( 'mast-title: .ttm-masthead-front .wp-block-site-title @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -73,7 +80,7 @@ test.describe( 'masthead', () => {
 		expect( await computed( title, 'font-size' ) ).toBe( px( 76 ) );
 	} );
 
-	test.fixme( 'mast-byline: .ttm-masthead-front__byline @1280', async ( {
+	test( 'mast-byline: .ttm-masthead-front__byline @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -81,7 +88,7 @@ test.describe( 'masthead', () => {
 		expect( await computed( byline, 'margin-top' ) ).toBe( px( 12 ) );
 	} );
 
-	test.fixme( 'mast-byline-phone: .ttm-masthead-front__byline @390', async ( {
+	test( 'mast-byline-phone: .ttm-masthead-front__byline @390', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 390 );
@@ -89,7 +96,7 @@ test.describe( 'masthead', () => {
 		expect( await computed( byline, 'font-size' ) ).toBe( px( 12 ) );
 	} );
 
-	test.fixme( 'mast-nav: .ttm-masthead-front__nav a (first) @1280', async ( {
+	test( 'mast-nav: .ttm-masthead-front__nav a (first) @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -98,7 +105,7 @@ test.describe( 'masthead', () => {
 		expect( await computed( link, 'font-weight' ) ).toBe( '600' );
 	} );
 
-	test.fixme( 'mast-nav-gap: .ttm-masthead-front__nav ul @1280', async ( {
+	test( 'mast-nav-gap: .ttm-masthead-front__nav ul @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -116,7 +123,7 @@ test.describe( 'masthead', () => {
 		expect( await computed( current, 'color' ) ).toBe( color( 'accent' ) );
 	} );
 
-	test.fixme( 'mast-hub: .ttm-masthead-front__nav .ttm-nav__hub > a @1280', async ( {
+	test( 'mast-hub: .ttm-masthead-front__nav .ttm-nav__hub > a @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -125,7 +132,11 @@ test.describe( 'masthead', () => {
 		);
 		expect( await computed( hub, 'font-weight' ) ).toBe( '400' );
 		expect( await computed( hub, 'color' ) ).toBe( color( 'neutral-700' ) );
-		expect( await computed( hub, 'margin-left' ) ).toBe( 'auto' );
+		// SPEC §6.2's expected value is "auto (x >= 1000)" -- `margin-left: auto` pushes the
+		// element right, and getComputedStyle() always resolves `auto` margins to a used pixel
+		// value rather than returning the literal keyword, so the row is checked by position.
+		const box = await hub.boundingBox();
+		expect( box.x ).toBeGreaterThanOrEqual( 1000 );
 	} );
 } );
 

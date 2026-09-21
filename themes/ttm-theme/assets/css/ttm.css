@@ -17,6 +17,31 @@
 	}
 }
 
+/* 0.1 skip link */
+.ttm-skip {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+.ttm-skip:focus {
+	position: fixed;
+	top: var(--wp--preset--spacing--30);
+	left: var(--wp--preset--spacing--30);
+	width: auto;
+	height: auto;
+	overflow: visible;
+	clip-path: none;
+	z-index: 100;
+	padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--40);
+	background: var(--wp--preset--color--bg);
+	color: var(--wp--preset--color--text);
+	outline: 2px solid var(--wp--preset--color--accent);
+}
+
 /* 2.6 rules */
 .is-style-rule-1,
 .is-style-rule-2 {
@@ -557,30 +582,42 @@ blockquote.is-style-pull cite,
 }
 
 /* 4.1 masthead front */
+.ttm-masthead-front {
+	padding-top: var(--wp--preset--spacing--40);
+}
+
+/* Shared by both mastheads' core/navigation block (front + inner). */
+.ttm-nav {
+	box-sizing: border-box;
+}
+
 .ttm-masthead-front__meta {
 	display: flex;
 	justify-content: space-between;
+	align-items: center;
 	font-size: var(--wp--preset--font-size--caption);
 	color: var(--wp--preset--color--neutral-700);
-	padding: var(--wp--preset--spacing--30) 0;
+	font-feature-settings: "tnum" 1;
+	padding: 14px 0;
 	border-bottom: var(--ttm-rule-1);
 }
 
-.ttm-masthead-front__meta nav {
-	display: flex;
-	gap: var(--wp--preset--spacing--40);
+/* stylelint-disable-next-line no-descending-specificity -- unrelated component (masthead meta links vs. .entry-content a:hover) */
+.ttm-masthead-front__links a {
+	margin-left: var(--wp--preset--spacing--40);
 }
 
 .ttm-masthead-front__title {
 	display: grid;
 	grid-template-columns: 1fr auto;
 	align-items: end;
+	gap: var(--wp--preset--spacing--60);
 	padding: var(--wp--preset--spacing--50) 0 var(--wp--preset--spacing--40);
 }
 
 .ttm-masthead-front__byline {
-	font-size: var(--wp--preset--font-size--caption);
-	margin-top: -12px;
+	font-size: var(--wp--preset--font-size--dek);
+	margin-top: var(--wp--preset--spacing--30);
 }
 
 .ttm-masthead-front__byline span {
@@ -608,17 +645,44 @@ blockquote.is-style-pull cite,
 	padding: var(--wp--preset--spacing--30) 0;
 }
 
+.ttm-masthead-front__nav ul {
+	display: flex;
+	align-items: center;
+	gap: 28px;
+}
+
 .ttm-masthead-front__nav .current-menu-item > a {
 	color: var(--wp--preset--color--accent);
 }
 
-.ttm-masthead-front__nav .ttm-nav-series {
+.ttm-masthead-front__nav .ttm-nav__hub {
+	margin-left: auto;
+}
+
+.ttm-masthead-front__nav .ttm-nav__hub > a {
 	margin-left: auto;
 	font-weight: 400;
-	color: var(--wp--preset--color--neutral-700);
+
+	/* `!important` needed: `.wp-block-navigation-item__content.wp-block-navigation-item__content`
+	 * (core's own repeated-class specificity trick) sets `color: inherit` at the same
+	 * class-count as this rule and wins the type-selector tiebreak in some browsers' actual
+	 * cascade resolution despite this selector's extra `a` type selector. */
+	color: var(--wp--preset--color--neutral-700) !important;
 }
 
 @media (max-width: 720px) {
+
+	.ttm-masthead-front__byline {
+		font-size: var(--wp--preset--font-size--caption);
+	}
+
+	.ttm-masthead-front__meta {
+		font-size: var(--wp--preset--font-size--micro);
+	}
+
+	.ttm-masthead-front__links a:not(:first-child) {
+		display: none;
+	}
 
 	.ttm-masthead-front__nav {
 		overflow-x: auto;

@@ -49,11 +49,13 @@ $ttm_nav_links .= sprintf(
 		<p class="is-style-meta"></p>
 		<!-- /wp:paragraph -->
 
-		<!-- wp:navigation {"overlayMenu":"never","layout":{"type":"flex"}} -->
-		<!-- wp:navigation-link {"label":"<?php echo esc_attr__( 'Newsletter', 'ttm-theme' ); ?>","url":"<?php echo esc_url( home_url( '/newsletter/' ) ); ?>","kind":"custom"} /-->
-		<!-- wp:navigation-link {"label":"<?php echo esc_attr__( 'RSS', 'ttm-theme' ); ?>","url":"<?php echo esc_url( get_feed_link() ); ?>","kind":"custom"} /-->
-		<!-- wp:navigation-link {"label":"<?php echo esc_attr__( 'About', 'ttm-theme' ); ?>","url":"<?php echo esc_url( home_url( '/about/' ) ); ?>","kind":"custom"} /-->
-		<!-- /wp:navigation -->
+		<!-- wp:paragraph {"className":"ttm-masthead-front__links"} -->
+		<p class="ttm-masthead-front__links">
+			<a href="<?php echo esc_url( home_url( '/newsletter/' ) ); ?>"><?php esc_html_e( 'Newsletter', 'ttm-theme' ); ?></a>
+			<a href="<?php echo esc_url( get_feed_link() ); ?>"><?php esc_html_e( 'RSS', 'ttm-theme' ); ?></a>
+			<a href="<?php echo esc_url( home_url( '/about/' ) ); ?>"><?php esc_html_e( 'About', 'ttm-theme' ); ?></a>
+		</p>
+		<!-- /wp:paragraph -->
 	</div>
 	<!-- /wp:group -->
 
