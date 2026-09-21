@@ -30,6 +30,7 @@ class Plugin {
 		return [
 			Compat\Theme::class,
 			Taxonomy\Series::class,
+			Meta\PostMeta::class,
 		];
 	}
 
