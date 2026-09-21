@@ -48,7 +48,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P4-02 series-toc block
 - [x] P4-03 series-prev-next and syndicated-to blocks
 - [x] P4-04 Bindings reading-time, word-count, journal-subline, series-name, series-part
-- [ ] P4-05 Template routing, article and journal patterns and templates
+- [x] P4-05 Template routing, article and journal patterns and templates
 - [ ] P4-06 Article and journal CSS including classic content
 - [ ] P4-07 Push and manual check (Phase 4)
 - [ ] P5-01 Archive query, pagination labels, section feeds, journal-in-main-feed
@@ -321,3 +321,6 @@ Added ttm/series-prev-next: mode=series links adjacent published parts ("← Par
 
 ### P4-04 — 1bf03b7
 Added Values::reading_time/word_count/journal_subline/series_name/series_part (pure) and registered the matching Sources: ttm/reading-time, ttm/word-count, ttm/journal-subline, ttm/series-name, ttm/series-part (11 sources total). reading_time suppresses output entirely for a Journal-primary post (03 §10) via an explicit $is_journal bool computed by Sources::is_journal_post(). series_name/series_part reuse Blocks\Helpers::series_position(), with Sources overriding 'total' to null when ttm_total_parts is open-ended before calling Values (same pattern as P3-05/06/07/08, since SeriesIndex's own total substitutes the published count). Full integration suite: 191 tests, 1 pre-existing skip, 0 failures.
+
+### P4-05 — f92e8bb
+Added Templates\Hierarchy::single_hierarchy() (prepends single-journal when the post's primary category is Journal) and category_hierarchy() (prepends page-writing for the Writing category), using WP's generic single_template_hierarchy/category_template_hierarchy filters — no existence check needed, a missing template file falls through on WP's own machinery (rule 3). Extended Query\Cells with ttmSameSection (meta_query on the current post's primary category, posts_per_page from article.more_in_section) and ttmExcludeCurrent (post__not_in current post); journal-stream reuses the journal ttmSection branch but overrides posts_per_page from journal.stream_count specifically when ttmExcludeCurrent is set (the signal distinguishing it from the front page's journal-rail). F17 is-empty marking now also fires for ttmSameSection queries so more-in-section gets F13. Added article-header/more-in-section/journal-stream patterns and single.html/single-journal.html templates. Found and fixed a test-helper ordering bug: go_to() resets $wp_query and the $pages/$page/$multipage globals setup_postdata() sets, so it must run before setup_postdata(), not after, or core/post-content fatals. Full integration suite: 201 tests, 2 skips (1 pre-existing, 1 expected pending page-writing.html/P6-05), 0 failures.
