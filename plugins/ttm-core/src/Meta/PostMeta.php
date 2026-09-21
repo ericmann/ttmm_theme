@@ -159,6 +159,35 @@ class PostMeta {
 				'show_in_rest'      => true,
 			]
 		);
+
+		// P8-02 classic-to-block conversion: the pre-conversion post_content (verbatim, for
+		// convert:revert) and the conversion timestamp. Deliberately not exposed over REST -
+		// this is an internal migration artefact, not editorial content.
+		register_post_meta(
+			'post',
+			'ttm_classic_backup',
+			[
+				'type'              => 'string',
+				'single'            => true,
+				'default'           => '',
+				'sanitize_callback' => 'wp_kses_post',
+				'auth_callback'     => $auth,
+				'show_in_rest'      => false,
+			]
+		);
+
+		register_post_meta(
+			'post',
+			'ttm_converted_at',
+			[
+				'type'              => 'string',
+				'single'            => true,
+				'default'           => '',
+				'sanitize_callback' => 'sanitize_text_field',
+				'auth_callback'     => $auth,
+				'show_in_rest'      => false,
+			]
+		);
 	}
 
 	/**

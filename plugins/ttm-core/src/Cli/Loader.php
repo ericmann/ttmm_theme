@@ -33,6 +33,19 @@ class Loader {
 				self::output( ( new SeriesCommand() )->rebuild() );
 			}
 		);
+		\WP_CLI::add_command( 'ttm convert:export', self::wrap( new ConvertCommand() ) );
+		\WP_CLI::add_command(
+			'ttm convert:import',
+			static function ( array $args, array $assoc ): void {
+				self::output( ( new ConvertCommand() )->import( $args, $assoc ) );
+			}
+		);
+		\WP_CLI::add_command(
+			'ttm convert:revert',
+			static function ( array $args, array $assoc ): void {
+				self::output( ( new ConvertCommand() )->revert( $args, $assoc ) );
+			}
+		);
 	}
 
 	/**
@@ -58,7 +71,25 @@ class Loader {
 		}
 
 		if ( ! empty( $result['rows'] ) ) {
-			\WP_CLI\Utils\format_items( 'table', $result['rows'], array_keys( $result['rows'][0] ) );
+			// Rows don't always share the same keys (e.g. convert:import's per-post block-type
+			// columns vary by post) - format_items() requires one fixed field list, so use the
+			// union of every row's keys and backfill the rest, rather than just the first row's.
+			$fields = [];
+			foreach ( $result['rows'] as $row ) {
+				$fields = array_unique( array_merge( $fields, array_keys( $row ) ) );
+			}
+
+			$rows = array_map(
+				static function ( array $row ) use ( $fields ): array {
+					foreach ( $fields as $field ) {
+						$row[ $field ] = $row[ $field ] ?? '';
+					}
+					return $row;
+				},
+				$result['rows']
+			);
+
+			\WP_CLI\Utils\format_items( 'table', $rows, $fields );
 		}
 
 		if ( ! $result['ok'] ) {
