@@ -79,7 +79,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P8-06 Plugin README, MIGRATION and SETUP cross-check
 - [x] P8-07 Playwright + axe e2e suite and CI
 - [x] P8-08 Push, final manual checks and HANDOFF (Phase 8)
-- [ ] R1-01 Fix upward module imports (Query→Bindings/Blocks, Bindings→Blocks, Taxonomy→Query) and add a boundary test
+- [x] R1-01 Fix upward module imports (Query→Bindings/Blocks, Bindings→Blocks, Taxonomy→Query) and add a boundary test
 - [ ] R1-02 Rule 24: config keys for every hard-coded tunable in src/ and fail the forbidden-patterns rule-24 check
 - [ ] R1-03 SeriesIndex last_update from the newest published part; hook-driven rebuild tests; series:assign derives ttm_form
 - [ ] R1-04 Verse module: F6 uses the stored last-good verse, Sept month format, site-timezone date, DST-safe cron
@@ -537,3 +537,30 @@ Manual check: NOT VERIFIED (human) — CI green on the branch including the
 e2e job (Playwright report artifact); run docs/MIGRATION.md §1-§2 against a
 real archive or WXR export in wp-env per the sequence above; open the front
 page, /category/technology/ and a journal post after each step.
+
+### R1-01 — dcc90ef
+Fixed 3 upward imports found by reviewer: Query\Archive -> Bindings\Values/Blocks\Helpers,
+Bindings\Sources -> Blocks\Helpers, Taxonomy\SeriesAdmin -> Query\SeriesIndex.
+
+New: Meta\SeriesPosition::for_post() reads the ttm_series_index option directly (Meta/ may not
+import Query/); Blocks\Helpers::series_position() now delegates to it. Bindings\Sources inlines
+short_date/reading_time composition (Support\Clock+Dates/Text+Config) instead of calling
+Blocks\Helpers. Editor\SeriesPartList (new) owns the read-only part list + Parts column via its
+own series_edit_form_fields/column hooks, registered independently in Plugin.php (Taxonomy/ may
+not import Editor/).
+
+Interpretation deviations from the suggested design (recorded in commit body, both driven by
+existing out-of-scope tests that call these APIs directly and stay unchanged):
+- archive_scope counter + render_block_data/post-template hooks moved into Blocks\Helpers
+  (self-contained, no query dep) instead of Query\Archive, because
+  tests/integration/Blocks/ArchiveByYearTest.php asserts Helpers::$archive_scope as a public
+  property. Helpers is now a Plugin module (registered in Plugin::modules()).
+- Archive::resolve_label()/label_next/label_previous stay on Query\Archive (duplicates the tiny
+  pagination-label string format inline) instead of moving to Bindings\Sources, because
+  tests/integration/Query/ArchiveTest.php calls Archive::resolve_label() directly.
+
+New tests/unit/BoundariesTest.php encodes the §4.2 row order (Admin/ excluded: not in the SPEC
+table, pre-existing gap, left alone per SI-2 precedent) and fails on any upward `use TTM\Core\...`.
+
+Verified: composer lint, composer test:unit (116 tests), npm run lint/test:unit/build,
+forbidden-patterns.sh, npm run test:integration (338 tests, all green) via foundry_verify.
