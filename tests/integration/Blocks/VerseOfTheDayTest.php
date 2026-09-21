@@ -12,6 +12,7 @@ class VerseOfTheDayTest extends TTM_IntegrationTestCase {
 	public function tear_down(): void {
 		delete_option( 'ttm_verse' );
 		delete_option( 'ttm_verse_history' );
+		\TTM\Core\Config::reset();
 		parent::tear_down();
 	}
 
@@ -128,6 +129,15 @@ class VerseOfTheDayTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_copyright_is_rendered_as_plain_text(): void {
+		add_filter(
+			'ttm_config',
+			static function ( array $config ): array {
+				$config['verse.copyright_placement'] = 'box';
+				return $config;
+			}
+		);
+		\TTM\Core\Config::reset();
+
 		update_option(
 			'ttm_verse',
 			[
@@ -142,6 +152,24 @@ class VerseOfTheDayTest extends TTM_IntegrationTestCase {
 		$html = $this->render();
 
 		$this->assertStringContainsString( 'Copyright &lt;b&gt;bold&lt;/b&gt; notice.', $html );
+	}
+
+	public function test_copyright_is_absent_from_the_box_by_default(): void {
+		update_option(
+			'ttm_verse',
+			[
+				'date'      => \TTM\Core\Support\Clock::today(),
+				'text'      => 'Text.',
+				'reference' => 'Ref.',
+				'copyright' => 'Copyright notice.',
+				'url'       => '',
+			]
+		);
+
+		$html = $this->render();
+
+		$this->assertStringNotContainsString( 'ttm-verse__copyright', $html );
+		$this->assertStringNotContainsString( 'Copyright notice.', $html );
 	}
 
 	public function test_preview_state_empty_renders_nothing_in_editor_context(): void {

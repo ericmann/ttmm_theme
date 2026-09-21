@@ -267,9 +267,7 @@ test.describe( 'verse', () => {
 		);
 	} );
 
-	test.fixme( 'verse-nocopy: .ttm-verse__copyright @1280', async ( {
-		page,
-	} ) => {
+	test( 'verse-nocopy: .ttm-verse__copyright @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		expect( await page.locator( '.ttm-verse__copyright' ).count() ).toBe(
 			0

@@ -15,7 +15,11 @@ for how it was built; this file documents the plugin as it actually ships.
   `ttm_cover_id`); the `ttm_series_index`, `ttm_verse*`, `ttm_books`, `ttm_settings`, and
   `ttm_redirects` options.
 - **Blocks:** every `ttm/*` block under `blocks/` (server-rendered, no front-end JS beyond the
-  editor bundle) and their block-binding sources.
+  editor bundle) and their block-binding sources: `ttm/kicker`, `ttm/meta-line`,
+  `ttm/short-date`, `ttm/relative-date`, `ttm/category-count`, `ttm/today`, `ttm/reading-time`,
+  `ttm/word-count`, `ttm/journal-subline`, `ttm/series-name`, `ttm/series-part`,
+  `ttm/pagination-label`, and `ttm/verse-copyright` (the footer's NIV notice, plain text, empty
+  unless `verse.copyright_placement === 'footer'` and a verse is stored).
 - **Cache:** `Cache/Headers.php` (computed `Cache-Control`), `Cache/Batcache.php`,
   `Cache/Purge.php`/`Cache/Cloudflare.php` (the `ttm_purge_urls` action and its Cloudflare
   adapter).
