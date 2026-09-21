@@ -1,0 +1,34 @@
+# 06 · Content fallbacks
+
+Governing rule: **a block never renders empty and never renders placeholder copy. It steps down one rung — same rules, same type, less inside — and the grid closes around it.** Only two blocks may disappear entirely on the front page (verse with no cached value; series strip with zero series), plus per-block omissions on inner pages noted below. Screen `3c` in the prototype renders F1, F2, F4, F6, F7, F8, F9, F11, F5 at component scale.
+
+| # | Block · location | Trigger | Fallback | Owner |
+|---|---|---|---|---|
+| F1 | Writing cell · front | No serial with `ttm_status=in-progress` | Featured half collapses. Cell shows kicker “From the shelf” + list of finished serials/stories (title 15/800, meta “Novel · 31 chapters”), up to 4. No button. Section link “All serials →” stays. Footnote line 12px: “Short fiction and the full index live on the Writing page.” | plugin `ttm/writing-cell` |
+| F2 | Writing cell · front | No serial terms and no `ttm_form=story` posts exist | Render as an ordinary section cell: 1 featured + 2 headlines from category Writing (writing-about-writing posts). Fiction chrome not output. | plugin |
+| F3 | Writing hero · Writing page | No serial in progress | Feature the most recently completed serial. Kicker “Writing · Complete · N chapters”. Buttons: primary “Read chapter 1”, secondary purchase link if any, no “Follow”. Stat row: chapters, “Complete”, minutes. | plugin `ttm/serial-hero` |
+| F4 | Series strip · front | No series in progress | Heading text → “Series”; list the 3 most recently completed with neutral-900 squares and meta “complete · 4 parts”. Remove the strip **only** if zero series terms exist. | plugin `ttm/series-list` + theme heading hook |
+| F5 | Series hub featured slot | No series in progress | Feature the most recently completed series: kicker “Complete · {categories}”, progress bar fully neutral-900, meta “4 of 4 published · finished Aug 19”, single button “Start at part 1”. | plugin `ttm/series-featured` |
+| F6 | Verse of the day · rail | Fetch failed / no entry for today | Show the last good verse with **its** date: “Meditation for Sept 18 from dailymedtoday.com”. Never blank, never a spinner, never “unavailable”. If no cached value has ever existed → block renders nothing; Journal moves up in the rail. | plugin `ttm/verse-of-the-day` |
+| F7 | Journal rail · front | < 3 entries in the last 30 days | Render what exists (1–2). If none in 30 days, render the single latest entry with a full date (“Aug 3, 2026”). The rail never says “no entries”. | theme query (3 posts, no date filter — dates handle themselves) + `ttm/relative-date` |
+| F8 | Lead story · front | Lead has no featured image | No placeholder box. Headline steps up 44 → 56px (max 18ch), dek 17 → 19px. Row height follows the rail. | plugin `ttm/lead-story` (class `is-textonly`) |
+| F9 | Section cell · front | < 3 posts in 90 days (Opinion, Security often) | Show what exists — one headline is fine. If < 1 post in a year, drop the dek and show the 2 most recent regardless of age with full dates (“Jul 30, 2025”). Cells are **never removed**; the grid is fixed. | theme query (no date filter) + `ttm/short-date` adds year when ≠ current |
+| F10 | Section cell · front | Featured post has no excerpt | Omit the dek; headline sits directly on the meta line. Never auto-generate from the body for cells (the plugin *does* derive excerpts for Journal only). | core `post-excerpt` renders empty; CSS removes gap |
+| F11 | Article | Post has no `series` term | Omit series bar, “In this series” aside and part prev/next. Aside leads with “More in {Category}”. Prev/next becomes chronological within the primary category: “← Previously in Technology” / “Next →”. | plugin blocks return empty; `ttm/series-prev-next mode=auto` |
+| F12 | Article | No featured image | No hero figure. Byline row runs straight into body with a 28px gap. | core |
+| F13 | Article aside · More in section | Primary category has < 3 other posts | Show what exists; if 0, omit the section (wrapper Group hidden via `:has()` or plugin sets `is-empty`). | theme |
+| F14 | Journal post | No syndication URLs | Syndication line omitted; word count moves to the note column (col 3) as “248 words”. | plugin `ttm/syndicated-to` |
+| F15 | Archive | Year group with 1 post | Render normally — year label + one row. Never merge years. | plugin `ttm/archive-by-year` |
+| F16 | Archive | Category has no tags | Filter row omitted; keep the 2px rule above the list. | plugin `ttm/tag-filter` |
+| F17 | Front page | A section has zero posts ever (new category) | Cell not rendered; the row re-flows (remaining cells widen; Technology/Writing keep span 2). Section stays in nav. This is the one exception to “grid is fixed”: an empty category is a configuration state, not a content state. | theme CSS `grid-auto-flow` + plugin `is-empty` class on the Query |
+| F18 | Nav “Series” item | Zero `series` terms | Item hidden. | plugin `Nav/CurrentSection.php` |
+| F19 | Story tile · Writing | Story has a featured image (cover) | Image fills the same 4:3 box; title/meta omitted inside the tile (they appear in the accessible name). Covers stay **colour** — only photographs go grayscale. | plugin `ttm/story-tiles` |
+| F20 | Writing page · Short fiction / In print | Zero stories / zero books | Section (heading + block) omitted; the right column’s remaining section fills. Both empty → body grid becomes single column (7fr → 1fr). | theme `:has()` + plugin empty output |
+| F21 | Writing hero | Serial has no cover | Hero grid → single column; title may widen to 20ch; no shadow anywhere. | plugin class `is-nocover` |
+| F22 | Lead story | Newest Technology post ≥ 30 days old | Lead = newest post site-wide excluding Journal; kicker shows its real section. | plugin `Query/Lead.php` |
+| F23 | Series bar / TOC | Series is open-ended (`ttm_total_parts` empty) | Bar text “Part 3”; progress shows published parts as equal dark segments plus one neutral-300 segment; TOC lists published parts only. | plugin |
+| F24 | Series TOC | A part is scheduled (future) | Row shown unlinked in neutral-700 with `title="Scheduled Sept 26"`; hub list shows the date in the right column. | plugin |
+| F25 | Any list with a “N →” count link | Count is 0 | Link text becomes “All →”. | `ttm/category-count` binding |
+| F26 | Newsletter poster/box | No provider configured | Poster still renders (it is design, not function) with the form pointing at the settings-defined fallback (mailto) — or, if the owner disables it, the poster shows the statement only, no form. | plugin `ttm/newsletter-form` |
+
+Implementation note: fallbacks are **server-side branches** in `render.php` files and Query filters, not editor-visible block variations. The Site Editor previews should exercise them with a “Preview state” dropdown in the `ttm/*` block sidebar (normal / empty / thin) so the owner can see each state without changing content.

@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/modernist-de9cc87f-4460-409f-98c7-09e0b5cce4fb/styles.css">
+<script src="_ds/modernist-de9cc87f-4460-409f-98c7-09e0b5cce4fb/_ds_bundle.js"></script>
+<script src="./image-slot.js"></script>
+<style>
+body{margin:0;background:#e6e4e3;font-family:var(--font-body);color:var(--color-text);text-wrap:pretty}
+a{color:var(--color-text);text-decoration:none}a:hover{color:var(--color-accent)}
+.dv-turn{padding:40px 44px 32px;border-bottom:2px solid var(--color-divider);scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#201e1d;color:#fff}
+.dv-tname{font:600 13px/1.2 var(--font-body);color:#201e1d}
+.dv-opts{display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.1);color:#201e1d;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 12px/1.3 var(--font-body);color:rgba(0,0,0,.6)}
+.dv-card{max-width:100%;background:var(--color-bg);border:1px solid rgba(0,0,0,.12);box-shadow:var(--shadow-md);overflow:hidden}
+.dv-opt:target .dv-oid{background:var(--color-accent);color:#fff}
+.dv-next{margin:22px 0 0;font:12px/1.5 var(--font-body);color:rgba(0,0,0,.55)}
+.pg a:hover{color:var(--color-accent)}
+.pg .hl:hover{color:var(--color-accent)}
+</style>
+</helmet>
+
+<section class="dv-turn" id="t3">
+<div class="dv-thd"><a class="dv-tid" href="#t3">3</a><span class="dv-tname">Phone-width pass on the front page and article, plus the “missing content” states — how each block degrades when a section has nothing new</span></div>
+<div style="max-width:760px;font-size:13px;line-height:1.55;color:rgba(0,0,0,.7);margin:-8px 0 24px">
+<p style="margin:0 0 8px"><strong>Phone (390px).</strong> One column. The rail folds in <em>after</em> the lead and before the section rows; vertical cell rules disappear, 2px zone rules stay; nav scrolls horizontally; nothing gets smaller than 12px.</p>
+<p style="margin:0"><strong>Missing content (<a class="dv-oid" href="#3c">3c</a>).</strong> Rule: a block never renders empty and never renders placeholder copy. It <em>steps down</em> a rung — the same rules and type, less inside — and the grid closes around it. Each state below is a real render of the fallback, side-by-side with what triggers it.</p>
+</div>
+<div class="dv-opts">
+
+<!-- ═══════ 3a PHONE FRONT ═══════ -->
+<div class="dv-opt" id="3a"><div class="dv-olabel"><a class="dv-oid" href="#3a">3a</a>Front page · 390px</div>
+<div class="dv-card pg" style="width:390px" data-screen-label="Front page — phone">
+<div style="padding:0 20px">
+  <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--color-neutral-700);padding:10px 0;border-bottom:1px solid var(--color-divider);font-feature-settings:'tnum' 1"><span>Sun, Sept 20, 2026</span><a href="#">Newsletter</a></div>
+  <div style="padding:18px 0 14px">
+    <h1 style="margin:0 0 0 -0.058em;font-size:44px;line-height:.95;letter-spacing:-0.03em">These Things Matter</h1>
+    <p style="margin:8px 0 0;font-size:13px;color:var(--color-neutral-800)"><span style="color:var(--color-neutral-600)">by</span> <a href="#" style="font-weight:600">Eric Mann</a></p>
+  </div>
+  <div style="height:2px;background:var(--color-divider)"></div>
+  <nav style="display:flex;gap:20px;padding:10px 0;font-size:13px;font-weight:600;overflow-x:auto;white-space:nowrap;scrollbar-width:none">
+    <a href="#" style="color:var(--color-accent)">Technology</a><a href="#">Business</a><a href="#">Faith</a><a href="#">Journal</a><a href="#">Writing</a><a href="#">Security</a><a href="#">Opinion</a><a href="#" style="font-weight:400;color:var(--color-neutral-700)">Series</a>
+  </nav>
+  <div style="height:2px;background:var(--color-divider)"></div>
+
+  <article style="padding:18px 0 20px">
+    <div class="grayscale" style="width:100%;aspect-ratio:4/3;background:var(--color-surface)"><image-slot id="lead-3a" shape="rect" placeholder="Lead photo"></image-slot></div>
+    <p style="margin:14px 0 8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Technology · Hardening WordPress, 3 of 6</p>
+    <h2 class="hl" style="margin:0 0 10px -0.02em;font-size:30px;line-height:1.05;letter-spacing:-0.02em">Stop trusting the database: signing your options table</h2>
+    <p style="margin:0 0 10px;font-size:15px;line-height:1.5;color:var(--color-neutral-800)">A compromised admin account can rewrite wp_options without touching a single file. How to detect it — and why scanners never will.</p>
+    <p style="margin:0;font-size:12px;color:var(--color-neutral-700)">Sept 19 · 14 min read</p>
+  </article>
+
+  <div style="height:2px;background:var(--color-divider)"></div>
+  <sc-if value="{{ showVerse }}" hint-placeholder-val="{{ true }}">
+  <section style="background:var(--color-surface);padding:16px 18px;margin:18px 0 0">
+    <p style="margin:0 0 8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Verse of the day</p>
+    <p style="margin:0 0 8px;font-size:18px;line-height:1.35;font-weight:600">“Be still, and know that I am God.”</p>
+    <p style="margin:0 0 10px;font-size:13px;color:var(--color-neutral-800)">Psalm 46:10</p>
+    <p style="margin:0;font-size:12px;color:var(--color-neutral-700)">from <a href="https://dailymedtoday.com" style="color:var(--color-accent-700);text-decoration:underline;text-underline-offset:3px">dailymedtoday.com</a></p>
+  </section>
+  </sc-if>
+  <section style="padding:18px 0 4px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:8px;border-bottom:2px solid var(--color-divider)"><h6 style="margin:0;font-size:12px">Journal</h6><a href="#" style="font-size:12px;color:var(--color-neutral-700)">All 87</a></div>
+    <sc-for list="{{ journalPhone }}" as="j" hint-placeholder-count="2">
+      <article style="padding:14px 0;border-bottom:1px solid var(--color-divider)">
+        <p style="margin:0 0 5px;font-size:11px;color:var(--color-neutral-700)">{{ j.when }}</p>
+        <h4 class="hl" style="margin:0 0 5px;font-size:16px;line-height:1.25">{{ j.title }}</h4>
+        <p style="margin:0;font-size:14px;line-height:1.5;color:var(--color-neutral-800)">{{ j.excerpt }}</p>
+        <a href="#" style="display:inline-block;margin-top:8px;font-size:12px;font-weight:600;color:var(--color-accent-700)">Continue →</a>
+      </article>
+    </sc-for>
+  </section>
+
+  <sc-for list="{{ phoneCells }}" as="c" hint-placeholder-count="6">
+    <section style="padding:18px 0 20px;border-top:2px solid var(--color-divider);margin-top:18px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px"><h6 style="margin:0;font-size:12px">{{ c.name }}</h6><a href="#" style="font-size:11px;color:var(--color-neutral-600)">{{ c.count }} →</a></div>
+      <article style="margin-bottom:12px"><h3 class="hl" style="margin:0 0 6px;font-size:21px;line-height:1.15">{{ c.lead }}</h3><p style="margin:0;font-size:12px;color:var(--color-neutral-700)">{{ c.leadDate }}</p></article>
+      <sc-for list="{{ c.more }}" as="m" hint-placeholder-count="2">
+        <article style="border-top:1px solid var(--color-divider);padding:10px 0 2px"><h4 class="hl" style="margin:0 0 3px;font-size:15px;line-height:1.3;font-weight:600">{{ m.title }}</h4><p style="margin:0;font-size:12px;color:var(--color-neutral-700)">{{ m.date }}</p></article>
+      </sc-for>
+    </section>
+  </sc-for>
+
+  <section style="padding:18px 0 20px;border-top:2px solid var(--color-divider);margin-top:18px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px"><h6 style="margin:0;font-size:12px">Writing</h6><a href="#" style="font-size:11px;color:var(--color-neutral-600)">All serials →</a></div>
+    <p style="margin:0 0 6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Serial · monthly</p>
+    <h3 class="hl" style="margin:0 0 8px;font-size:22px;line-height:1.1">The Quiet Ledger — Ch. 12: Reconciliation</h3>
+    <p style="margin:0 0 12px;font-size:14px;line-height:1.5;color:var(--color-neutral-800)">Marta finds the second set of books. The first set, it turns out, was the lie.</p>
+    <a href="#" class="btn btn-primary btn-block">Read chapter 12</a>
+  </section>
+  <section style="padding:18px 0 22px;border-top:2px solid var(--color-divider);margin-top:18px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><h6 style="margin:0;font-size:12px">Series in progress</h6><a href="#" style="font-size:11px;color:var(--color-neutral-600)">All →</a></div>
+    <sc-for list="{{ series }}" as="s" hint-placeholder-count="3">
+      <a href="#" style="display:grid;grid-template-columns:10px 1fr;gap:12px;padding:10px 0;border-bottom:1px solid var(--color-divider)"><span style="width:10px;height:10px;background:var(--color-accent);margin-top:5px"></span><span><span style="display:block;font-weight:800;font-size:15px;line-height:1.3">{{ s.title }}</span><span style="display:block;font-size:12px;color:var(--color-neutral-700);margin-top:2px">{{ s.meta }}</span></span></a>
+    </sc-for>
+  </section>
+</div>
+<footer style="background:var(--color-accent);color:var(--color-bg);padding:24px 20px">
+  <h3 style="margin:0 0 14px -0.058em;font-size:28px;line-height:1.05;letter-spacing:-0.02em;color:var(--color-bg)">Everything above, once a week, in your inbox.</h3>
+  <div style="display:flex;flex-direction:column;gap:8px"><input class="input" placeholder="you@example.com" style="background:var(--color-bg);border-color:var(--color-bg)"><button class="btn btn-ghost btn-block" style="color:var(--color-bg);border:1px solid var(--color-bg)">Subscribe</button></div>
+</footer>
+<div style="padding:14px 20px;font-size:11px;line-height:1.6;color:var(--color-neutral-700)">These Things Matter · © 2026 Eric Mann<br>Technology · Business · Faith · Journal · Writing · Security · Opinion · Series</div>
+</div></div>
+
+<!-- ═══════ 3b PHONE ARTICLE ═══════ -->
+<div class="dv-opt" id="3b"><div class="dv-olabel"><a class="dv-oid" href="#3b">3b</a>Article · 390px — series bar collapses, aside moves below</div>
+<div class="dv-card pg" style="width:390px" data-screen-label="Article — phone">
+<div style="padding:0 20px">
+  <div style="display:flex;justify-content:space-between;align-items:baseline;padding:12px 0 10px;border-bottom:2px solid var(--color-divider)"><a href="#" style="font-weight:800;font-size:18px;letter-spacing:-0.02em">These Things Matter</a><a href="#" style="font-size:11px;color:var(--color-neutral-700)">Menu</a></div>
+  <div style="display:grid;grid-template-columns:10px 1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--color-divider);font-size:12px">
+    <span style="width:10px;height:10px;background:var(--color-accent)"></span>
+    <span><a href="#" style="font-weight:600">Hardening WordPress</a> · <span style="font-feature-settings:'tnum' 1">3 of 6</span></span>
+    <div style="display:flex;gap:3px"><span style="width:12px;height:4px;background:var(--color-neutral-900)"></span><span style="width:12px;height:4px;background:var(--color-neutral-900)"></span><span style="width:12px;height:4px;background:var(--color-accent)"></span><span style="width:12px;height:4px;background:var(--color-neutral-300)"></span><span style="width:12px;height:4px;background:var(--color-neutral-300)"></span><span style="width:12px;height:4px;background:var(--color-neutral-300)"></span></div>
+  </div>
+  <article style="padding:24px 0 0">
+    <p style="margin:0 0 10px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Technology · Security</p>
+    <h1 style="margin:0 0 14px -0.03em;font-size:34px;line-height:1.02;letter-spacing:-0.025em">Stop trusting the database: signing your options table</h1>
+    <p style="margin:0 0 16px;font-size:17px;line-height:1.4;color:var(--color-neutral-800)">A compromised admin account can rewrite wp_options without touching a single file. Here is how to detect it.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:6px 14px;padding:12px 0;border-top:2px solid var(--color-divider);border-bottom:1px solid var(--color-divider);font-size:12px;color:var(--color-neutral-700)"><span>By <a href="#" style="font-weight:600;color:var(--color-text)">Eric Mann</a></span><span>Sept 19, 2026</span><span>14 min</span></div>
+    <div style="width:calc(100% + 40px);margin:20px -20px 0;aspect-ratio:4/3;background:var(--color-surface)"><image-slot id="hero-3b" shape="rect" placeholder="Hero — full bleed, full color"></image-slot></div>
+    <div style="font-size:17px;line-height:1.6;padding-top:20px">
+      <p style="margin:0 0 18px">Every WordPress hardening guide begins the same way: lock down file permissions, disable the theme editor, verify core checksums. Good advice. All of it protects the filesystem — and none of it protects the thing that actually runs your site.</p>
+      <h2 style="margin:28px 0 10px;font-size:24px;line-height:1.1;letter-spacing:-0.02em">What a signature buys you</h2>
+      <p style="margin:0 0 18px">Not prevention. A signature makes the write <em>visible</em>.</p>
+      <pre style="margin:0 -20px 18px;padding:14px 20px;background:var(--color-neutral-900);color:var(--color-neutral-100);font:12px/1.55 ui-monospace,Menlo,monospace;overflow:auto;border-left:4px solid var(--color-accent)">$sig = hash_hmac( 'sha256', $blob, KEY );
+if ( ! hash_equals( $stored, $sig ) ) {
+    do_action( 'options_tampered' );
+}</pre>
+      <blockquote style="margin:24px 0;padding:0;font-size:22px;line-height:1.25;font-weight:800;letter-spacing:-0.015em;text-indent:-0.496em">“A file-integrity scanner watches the doors. The options table is a window that was never on the blueprint.”</blockquote>
+    </div>
+    <div style="border-top:2px solid var(--color-divider);margin-top:24px">
+      <a href="#" style="display:block;padding:14px 0;border-bottom:1px solid var(--color-divider)"><span style="display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:6px">← Part 2</span><span style="display:block;font-weight:800;font-size:16px;line-height:1.25">Salts, keys and the rotation you skipped</span></a>
+      <a href="#" style="display:block;padding:14px 0"><span style="display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:6px">Part 4 →</span><span style="display:block;font-weight:800;font-size:16px;line-height:1.25">Keys in the environment, rotated live</span></a>
+    </div>
+  </article>
+  <section style="padding:18px 0 20px;border-top:2px solid var(--color-divider)">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:8px;border-bottom:2px solid var(--color-divider)"><h6 style="margin:0;font-size:12px">In this series</h6><a href="#" style="font-size:11px;color:var(--color-accent-700)">Hub →</a></div>
+    <sc-for list="{{ parts }}" as="p" hint-placeholder-count="6">
+      <a href="#" style="display:grid;grid-template-columns:28px 1fr;gap:10px;padding:9px 0;border-bottom:1px solid var(--color-divider);font-size:14px;line-height:1.35"><span style="font-weight:800;font-feature-settings:'tnum' 1;color:var(--color-neutral-600)">{{ p.n }}</span><span style="font-weight:{{ p.weight }};color:{{ p.color }}">{{ p.title }}</span></a>
+    </sc-for>
+  </section>
+  <section style="background:var(--color-surface);padding:16px 18px;margin-bottom:24px">
+    <p style="margin:0 0 6px;font-weight:800;font-size:15px">Get the next part</p>
+    <p style="margin:0 0 10px;font-size:13px;color:var(--color-neutral-800)">Series land in the newsletter the week they publish.</p>
+    <div style="display:flex;flex-direction:column;gap:6px"><input class="input" placeholder="you@example.com"><button class="btn btn-primary btn-block">Subscribe</button></div>
+  </section>
+</div>
+<div style="border-top:2px solid var(--color-divider);padding:14px 20px;font-size:11px;line-height:1.6;color:var(--color-neutral-700)">These Things Matter · © 2026 Eric Mann</div>
+</div></div>
+
+<!-- ═══════ 3c MISSING-CONTENT STATES ═══════ -->
+<div class="dv-opt" id="3c"><div class="dv-olabel"><a class="dv-oid" href="#3c">3c</a>Missing-content states — each block's step-down when there's nothing new</div>
+<div class="dv-card pg" style="width:1280px;padding:36px 48px 44px" data-screen-label="Empty states">
+  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:36px 40px">
+
+    <sc-for list="{{ fallbacks }}" as="f" hint-placeholder-count="9">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="border-top:2px solid var(--color-divider);padding-top:10px">
+        <p style="margin:0 0 4px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">{{ f.block }}</p>
+        <p style="margin:0;font-size:13px;line-height:1.45"><strong>When:</strong> {{ f.when }}</p>
+        <p style="margin:4px 0 0;font-size:13px;line-height:1.45;color:var(--color-neutral-800)"><strong style="color:var(--color-text)">Rule:</strong> {{ f.rule }}</p>
+      </div>
+      <div style="background:var(--color-bg);border:1px dashed var(--color-neutral-400);padding:16px 18px;min-height:150px">{{ f.render }}</div>
+    </div>
+    </sc-for>
+
+  </div>
+</div></div>
+
+</div>
+<p class="dv-next">Handoff README updated with §9 responsive rules (now drawn) and a new §10 “Content fallbacks” table matching <a class="dv-oid" href="#3c">3c</a>.</p>
+</section>
+
+<section class="dv-turn" id="t2">
+<div class="dv-thd"><a class="dv-tid" href="#t2">2</a><span class="dv-tname">Polish round on <a class="dv-oid" href="#1a">1a</a>, <a class="dv-oid" href="#1c">1c</a>, <a class="dv-oid" href="#1d">1d</a>, <a class="dv-oid" href="#1g">1g</a> — masthead is now “These Things Matter” with Eric Mann as byline; <a class="dv-oid" href="#1e">1e</a> and <a class="dv-oid" href="#1f">1f</a> carry forward unchanged</span></div>
+<div style="max-width:760px;font-size:13px;line-height:1.55;color:rgba(0,0,0,.7);margin:-8px 0 24px">
+<p style="margin:0"><strong>Changed.</strong> Title/byline masthead on every page · journal rail shows longer excerpts with a “Continue” link, no social chrome (syndication note stays on the post itself) · article gets a full-color hero; only the front page prints grayscale · Writing loses the cover requirement — stories get a typographic tile, books keep covers — and gains an “All serials” index; cadence is monthly · newsletter copy: “the week they publish.”</p>
+</div>
+<div class="dv-opts">
+
+<!-- ═══════ 2a FRONT PAGE ═══════ -->
+<div class="dv-opt" id="2a"><div class="dv-olabel"><a class="dv-oid" href="#2a">2a</a>Front page — “These Things Matter”, longer journal excerpts</div>
+<div class="dv-card pg" style="width:1280px" data-screen-label="Front page v2">
+<div style="padding:0 48px">
+  <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--color-neutral-700);padding:14px 0;border-bottom:1px solid var(--color-divider);font-feature-settings:'tnum' 1">
+    <span>Sunday, September 20, 2026</span>
+    <div style="display:flex;gap:18px"><a href="#">Newsletter</a><a href="#">RSS</a><a href="#">About</a></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr auto;align-items:end;gap:32px;padding:28px 0 20px">
+    <div>
+      <h1 style="margin:0 0 0 -0.058em;font-size:76px;line-height:.95;letter-spacing:-0.03em">These Things Matter</h1>
+      <p style="margin:12px 0 0;font-size:15px;color:var(--color-neutral-800)"><span style="color:var(--color-neutral-600)">by</span> <a href="#" style="font-weight:600">Eric Mann</a></p>
+    </div>
+    <p style="margin:0;max-width:32ch;font-size:15px;line-height:1.5;color:var(--color-neutral-800)">Technology, business, faith and the occasional story. One writer, several desks.</p>
+  </div>
+  <div style="height:2px;background:var(--color-divider)"></div>
+  <nav style="display:flex;gap:28px;padding:12px 0;font-size:14px;font-weight:600">
+    <a href="#" style="color:var(--color-accent)">Technology</a><a href="#">Business</a><a href="#">Faith</a><a href="#">Journal</a><a href="#">Writing</a><a href="#">Security</a><a href="#">Opinion</a>
+    <a href="#" style="margin-left:auto;font-weight:400;color:var(--color-neutral-700)">Series</a>
+  </nav>
+  <div style="height:2px;background:var(--color-divider)"></div>
+
+  <div style="display:grid;grid-template-columns:minmax(0,8fr) minmax(0,4fr);gap:0 40px;padding:28px 0 32px">
+    <article>
+      <div class="grayscale" style="width:100%;aspect-ratio:16/9;background:var(--color-surface)"><image-slot id="lead-2a" shape="rect" placeholder="Lead photograph — prints in black and white on the front page"></image-slot></div>
+      <p style="margin:20px 0 10px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Technology · Series: Hardening WordPress, part 3 of 6</p>
+      <h2 class="hl" style="margin:0 0 12px -0.02em;font-size:44px;line-height:1.05;letter-spacing:-0.02em;max-width:22ch">Stop trusting the database: signing your options table</h2>
+      <p style="margin:0 0 12px;font-size:17px;line-height:1.5;color:var(--color-neutral-800);max-width:60ch">A compromised admin account can rewrite <code style="font-size:15px;background:var(--color-surface);padding:1px 5px">wp_options</code> without touching a single file. Here is how to detect it — and why file-integrity scanners never will.</p>
+      <p style="margin:0;font-size:12px;color:var(--color-neutral-700);font-feature-settings:'tnum' 1">Sept 19 · 14 min read · <a href="#" style="color:var(--color-accent-700)">Part 2: Salts, keys and the rotation you skipped</a></p>
+    </article>
+    <aside style="display:flex;flex-direction:column;gap:24px">
+      <sc-if value="{{ showVerse }}" hint-placeholder-val="{{ true }}">
+      <section style="background:var(--color-surface);padding:18px 20px">
+        <p style="margin:0 0 12px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Verse of the day</p>
+        <p style="margin:0 0 10px;font-size:19px;line-height:1.35;font-weight:600;letter-spacing:-0.01em">“Be still, and know that I am God.”</p>
+        <p style="margin:0 0 14px;font-size:13px;color:var(--color-neutral-800)">Psalm 46:10</p>
+        <p style="margin:0;font-size:12px;color:var(--color-neutral-700)">Meditation for Sept 20 from <a href="https://dailymedtoday.com" style="color:var(--color-accent-700);text-decoration:underline;text-underline-offset:3px">dailymedtoday.com</a></p>
+      </section>
+      </sc-if>
+      <section>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:8px;border-bottom:2px solid var(--color-divider)">
+          <h6 style="margin:0;font-size:12px">Journal</h6><a href="#" style="font-size:12px;color:var(--color-neutral-700)">All 87 entries</a>
+        </div>
+        <sc-for list="{{ journalLong }}" as="j" hint-placeholder-count="3">
+          <article style="padding:16px 0;border-bottom:1px solid var(--color-divider)">
+            <p style="margin:0 0 6px;font-size:11px;color:var(--color-neutral-700);font-feature-settings:'tnum' 1">{{ j.when }}</p>
+            <h4 class="hl" style="margin:0 0 6px;font-size:16px;line-height:1.25">{{ j.title }}</h4>
+            <p style="margin:0;font-size:14px;line-height:1.5;color:var(--color-neutral-800)">{{ j.excerpt }}</p>
+            <a href="#" style="display:inline-block;margin-top:8px;font-size:12px;font-weight:600;color:var(--color-accent-700)">Continue →</a>
+          </article>
+        </sc-for>
+      </section>
+    </aside>
+  </div>
+
+  <div style="height:2px;background:var(--color-divider)"></div>
+  <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 32px;padding:0 0 8px">
+    <section style="grid-column:span 2;padding:20px 32px 24px 0;border-right:1px solid var(--color-divider)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px"><h6 style="margin:0;font-size:12px">Technology</h6><a href="#" style="font-size:11px;color:var(--color-neutral-600);font-feature-settings:'tnum' 1">431 articles →</a></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px 28px">
+        <article style="grid-column:span 2;display:grid;grid-template-columns:200px 1fr;gap:20px;align-items:start">
+          <div class="grayscale" style="aspect-ratio:3/2;background:var(--color-surface)"><image-slot id="tech-2a" shape="rect" placeholder="Photo"></image-slot></div>
+          <div><h3 class="hl" style="margin:0 0 8px;font-size:24px;line-height:1.15">Why I moved my build pipeline off GitHub Actions — and what it cost</h3><p style="margin:0;font-size:14px;line-height:1.45;color:var(--color-neutral-800)">Forty minutes of CI a day is two working weeks a year. The math finally caught up with me.</p><p style="margin:8px 0 0;font-size:12px;color:var(--color-neutral-700)">Sept 16 · 9 min</p></div>
+        </article>
+        <article style="border-top:1px solid var(--color-divider);padding-top:14px"><h4 class="hl" style="margin:0 0 6px;font-size:17px;line-height:1.25">PHP 8.5 readonly classes are the feature nobody asked for and everybody needed</h4><p style="margin:0;font-size:12px;color:var(--color-neutral-700)">Sept 12</p></article>
+        <article style="border-top:1px solid var(--color-divider);padding-top:14px"><h4 class="hl" style="margin:0 0 6px;font-size:17px;line-height:1.25">The block editor is a document model. Treat it like one.</h4><p style="margin:0;font-size:12px;color:var(--color-neutral-700)">Sept 8</p></article>
+      </div>
+    </section>
+    <section style="padding:20px 32px 24px 0;border-right:1px solid var(--color-divider)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px"><h6 style="margin:0;font-size:12px">Business</h6><a href="#" style="font-size:11px;color:var(--color-neutral-600)">231 →</a></div>
+      <article style="margin-bottom:16px"><h3 class="hl" style="margin:0 0 8px;font-size:21px;line-height:1.15">Charge for the outcome, bill for the hour</h3><p style="margin:0;font-size:13px;line-height:1.45;color:var(--color-neutral-800)">A consulting pricing model that survives contact with procurement.</p><p style="margin:6px 0 0;font-size:12px;color:var(--color-neutral-700)">Sept 15</p></article>
+      <article style="border-top:1px solid var(--color-divider);padding-top:12px;margin-bottom:12px"><h4 class="hl" style="margin:0 0 4px;font-size:15px;line-height:1.3">The one-page operating agreement</h4><p style="margin:0;font-size:12px;color:var(--color-neutral-700)">Sept 3</p></article>
+      <article style="border-top:1px solid var(--color-divider);padding-top:12px"><h4 class="hl" style="margin:0 0 4px;font-size:15px;line-height:1.3">Fire the client who pays late twice</h4><p style="margin:0;font-size:12px;color:var(--color-neutral-700)">Aug 27</p></article>
+    </section>
+    <section style="padding:20px 0 24px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px"><h6 style="margin:0;font-size:12px">Security</h6><a href="#" style="font-size:11px;color:var(--color-neutral-600)">36 →</a></div>
+      <article style="margin-bottom:16px"><h3 class="hl" style="margin:0 0 8px;font-size:21px;line-height:1.15">Your password manager's weakest link is the browser extension</h3><p style="margin:0;font-size:13px;line-height:1.45;color:var(--color-neutral-800)">Threat-modeling the thing we all installed without thinking.</p><p style="margin:6px 0 0;font-size:12px;color:var(--color-neutral-700)">Sept 10</p></article>
+      <article style="border-top:1px solid var(--color-divider);padding-top:12px;margin-bottom:12px"><h4 class="hl" style="margin:0 0 4px;font-size:15px;line-height:1.3">Nonces are not CSRF tokens</h4><p style="margin:0;font-size:12px;color:var(--color-neutral-700)">Aug 30</p></article>
+      <article style="border-top:1px solid var(--color-divider);padding-top:12px"><h4 class="hl" style="margin:0 0 4px;font-size:15px;line-height:1.3">Reading a CVE like an engineer</h4><p style="margin:0;font-size:12px;color:var(--color-neutral-700)">Aug 19</p></article>
+    </section>
+  </div>
+
+  <div style="height:2px;background:var(--color-divider)"></div>
+  <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 32px">
+    <section style="padding:20px 32px 24px 0;border-right:1px solid var(--color-divider)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px"><h6 style="margin:0;font-size:12px">Faith</h6><a href="#" style="font-size:11px;color:var(--color-neutral-600)">100 →</a></div>
+      <article style="margin-bottom:16px"><h3 class="hl" style="margin:0 0 8px;font-size:21px;line-height:1.15">On praying for the people who file the bug reports</h3><p style="margin:0;font-size:13px;line-height:1.45;color:var(--color-neutral-800)">Patience as an engineering discipline.</p><p style="margin:6px 0 0;font-size:12px;color:var(--color-neutral-700)">Sept 14</p></article>
+      <article style="border-top:1px solid var(--color-divider);padding-top:12px"><h4 class="hl" style="margin:0 0 4px;font-size:15px;line-height:1.3">Sabbath for people who ship on Fridays</h4><p style="margin:0;font-size:12px;color:var(--color-neutral-700)">Sept 1</p></article>
+    </section>
+    <section style="padding:20px 32px 24px 0;border-right:1px solid var(--color-divider)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px"><h6 style="margin:0;font-size:12px">Opinion</h6><a href="#" style="font-size:11px;color:var(--color-neutral-600)">24 →</a></div>
+      <article style="margin-bottom:16px"><h3 class="hl" style="margin:0 0 8px;font-size:21px;line-height:1.15">Open source is not a business model. It is a distribution channel.</h3><p style="margin:6px 0 0;font-size:12px;color:var(--color-neutral-700)">Sept 11</p></article>
+      <article style="border-top:1px solid var(--color-divider);padding-top:12px"><h4 class="hl" style="margin:0 0 4px;font-size:15px;line-height:1.3">The city council meeting nobody attends</h4><p style="margin:0;font-size:12px;color:var(--color-neutral-700)">Aug 22 · Politics</p></article>
+    </section>
+    <section style="grid-column:span 2;padding:20px 0 24px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px"><h6 style="margin:0;font-size:12px">Writing</h6><a href="#" style="font-size:11px;color:var(--color-neutral-600)">All serials & stories →</a></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 28px">
+        <article>
+          <p style="margin:0 0 8px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Serial · new chapter monthly</p>
+          <h3 class="hl" style="margin:0 0 8px;font-size:26px;line-height:1.1">The Quiet Ledger — Ch. 12: Reconciliation</h3>
+          <p style="margin:0 0 12px;font-size:14px;line-height:1.5;color:var(--color-neutral-800);max-width:40ch">Marta finds the second set of books. The first set, it turns out, was the lie.</p>
+          <div style="display:flex;gap:10px"><a href="#" class="btn btn-primary">Read chapter 12</a><a href="#" class="btn btn-secondary">From chapter 1</a></div>
+        </article>
+        <div style="border-left:1px solid var(--color-divider);padding-left:28px">
+          <p style="margin:0 0 6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-neutral-700)">Also running</p>
+          <a href="#" style="display:block;padding:8px 0;border-bottom:1px solid var(--color-divider)"><span style="display:block;font-weight:800;font-size:15px;line-height:1.3">Failover</span><span style="display:block;font-size:12px;color:var(--color-neutral-700)">Novella · complete · 9 chapters</span></a>
+          <a href="#" style="display:block;padding:8px 0;border-bottom:1px solid var(--color-divider)"><span style="display:block;font-weight:800;font-size:15px;line-height:1.3">Salt Water Wires</span><span style="display:block;font-size:12px;color:var(--color-neutral-700)">Novel · complete · 24 chapters</span></a>
+          <a href="#" style="display:block;padding:8px 0"><span style="display:block;font-weight:800;font-size:15px;line-height:1.3">The Last Cron Job</span><span style="display:block;font-size:12px;color:var(--color-neutral-700)">Short story · 3,100 words</span></a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div style="height:2px;background:var(--color-divider)"></div>
+  <section style="padding:20px 0 28px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px"><h6 style="margin:0;font-size:12px">Series in progress</h6><a href="#" style="font-size:12px;color:var(--color-neutral-700)">All series</a></div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px">
+      <sc-for list="{{ series }}" as="s" hint-placeholder-count="3">
+        <a href="#" style="display:grid;grid-template-columns:10px 1fr;gap:12px;align-items:start;padding-top:12px;border-top:1px solid var(--color-divider)">
+          <span style="width:10px;height:10px;background:var(--color-accent);margin-top:5px"></span>
+          <span><span style="display:block;font-weight:800;font-size:16px;line-height:1.25">{{ s.title }}</span><span style="display:block;font-size:12px;color:var(--color-neutral-700);margin-top:4px;font-feature-settings:'tnum' 1">{{ s.meta }}</span></span>
+        </a>
+      </sc-for>
+    </div>
+  </section>
+</div>
+<footer style="background:var(--color-accent);color:var(--color-bg);padding:36px 48px 32px">
+  <div style="display:grid;grid-template-columns:1fr auto;gap:32px;align-items:end">
+    <h3 style="margin:0 0 0 -0.058em;font-size:40px;line-height:1.05;letter-spacing:-0.02em;color:var(--color-bg);max-width:20ch">Everything above, once a week, in your inbox.</h3>
+    <div style="display:flex;gap:8px;align-items:center"><input class="input" placeholder="you@example.com" style="width:260px;background:var(--color-bg);border-color:var(--color-bg)"><button class="btn btn-ghost" style="color:var(--color-bg);border:1px solid var(--color-bg)">Subscribe</button></div>
+  </div>
+</footer>
+<div style="display:flex;justify-content:space-between;padding:16px 48px;font-size:12px;color:var(--color-neutral-700)"><span>These Things Matter · © 2026 Eric Mann · Built on WordPress</span><span>Technology · Business · Faith · Journal · Writing · Security · Opinion · Series · RSS</span></div>
+</div></div>
+
+<!-- ═══════ 2b ARTICLE ═══════ -->
+<div class="dv-opt" id="2b"><div class="dv-olabel"><a class="dv-oid" href="#2b">2b</a>Article — full-color hero, title/byline masthead, newsletter copy fixed</div>
+<div class="dv-card pg" style="width:1280px" data-screen-label="Article v2">
+<div style="padding:0 48px">
+  <div style="display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:32px;padding:14px 0 12px;border-bottom:2px solid var(--color-divider)">
+    <a href="#" style="display:flex;align-items:baseline;gap:10px"><span style="font-weight:800;font-size:22px;letter-spacing:-0.02em">These Things Matter</span><span style="font-size:12px;color:var(--color-neutral-700)">by Eric Mann</span></a>
+    <nav style="display:flex;gap:22px;font-size:13px;font-weight:600"><a href="#" style="color:var(--color-accent)">Technology</a><a href="#">Business</a><a href="#">Faith</a><a href="#">Journal</a><a href="#">Writing</a><a href="#">Security</a><a href="#">Opinion</a><a href="#" style="font-weight:400;color:var(--color-neutral-700)">Series</a></nav>
+    <a href="#" style="font-size:12px;color:var(--color-neutral-700)">Newsletter</a>
+  </div>
+  <div style="display:grid;grid-template-columns:10px 1fr auto;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--color-divider);font-size:13px">
+    <span style="width:10px;height:10px;background:var(--color-accent)"></span>
+    <span><span style="color:var(--color-neutral-700)">Series</span> · <a href="#" style="font-weight:600">Hardening WordPress</a> · <span style="font-feature-settings:'tnum' 1">Part 3 of 6</span></span>
+    <div style="display:flex;gap:4px;align-items:center">
+      <span style="width:22px;height:4px;background:var(--color-neutral-900)"></span><span style="width:22px;height:4px;background:var(--color-neutral-900)"></span><span style="width:22px;height:4px;background:var(--color-accent)"></span><span style="width:22px;height:4px;background:var(--color-neutral-300)"></span><span style="width:22px;height:4px;background:var(--color-neutral-300)"></span><span style="width:22px;height:4px;background:var(--color-neutral-300)"></span>
+      <a href="#" style="margin-left:14px;font-size:12px;color:var(--color-accent-700)">View series</a>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:minmax(0,8fr) minmax(0,4fr);gap:0 64px;padding:40px 0 48px">
+    <article>
+      <p style="margin:0 0 14px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Technology · Security</p>
+      <h1 style="margin:0 0 18px -0.03em;font-size:56px;line-height:1.02;letter-spacing:-0.025em;max-width:18ch">Stop trusting the database: signing your options table</h1>
+      <p style="margin:0 0 22px;font-size:21px;line-height:1.4;color:var(--color-neutral-800);max-width:32em">A compromised admin account can rewrite <code style="font-size:18px;background:var(--color-surface);padding:1px 6px">wp_options</code> without touching a single file. Here is how to detect it — and why your file-integrity scanner never will.</p>
+      <div style="display:flex;gap:18px;align-items:center;padding:14px 0;border-top:2px solid var(--color-divider);border-bottom:1px solid var(--color-divider);font-size:13px;color:var(--color-neutral-700);font-feature-settings:'tnum' 1">
+        <span>By <a href="#" style="font-weight:600;color:var(--color-text)">Eric Mann</a></span><span>September 19, 2026</span><span>14 min read</span>
+        <div style="margin-left:auto;display:flex;gap:6px"><span class="tag tag-neutral">wordpress</span><span class="tag tag-neutral">php</span><span class="tag tag-neutral">integrity</span></div>
+      </div>
+      <figure style="margin:28px 0 0">
+        <div style="width:100%;aspect-ratio:16/9;background:var(--color-surface)"><image-slot id="hero-2b" shape="rect" placeholder="Article hero — full color on the article page"></image-slot></div>
+        <figcaption style="font-size:12px;color:var(--color-neutral-700);margin-top:8px">Caption in the theme's meta type. Photographs are grayscale only on the front page and archives.</figcaption>
+      </figure>
+
+      <div style="font-size:18px;line-height:1.65;max-width:38em;padding-top:28px">
+        <p style="margin:0 0 22px">Every WordPress hardening guide begins the same way: lock down file permissions, disable the theme editor, verify core checksums. Good advice. All of it protects the filesystem — and none of it protects the thing that actually runs your site.</p>
+        <p style="margin:0 0 22px">The options table is executable configuration. <code style="font-size:16px;background:var(--color-surface);padding:1px 6px">active_plugins</code>, <code style="font-size:16px;background:var(--color-surface);padding:1px 6px">siteurl</code>, cron schedules, rewrite rules — a hostile write to any one of these changes what your site does on the next request, and every scanner you own will report green.</p>
+        <h2 style="margin:40px 0 14px;font-size:30px;line-height:1.1;letter-spacing:-0.02em">What a signature buys you</h2>
+        <p style="margin:0 0 22px">Not prevention. A signature does not stop the write; it makes the write <em>visible</em>. On every load, WordPress recomputes an HMAC over the sensitive keys and compares it to the stored one. Mismatch means someone changed the configuration through a path you did not sign.</p>
+        <pre style="margin:0 0 22px;padding:18px 20px;background:var(--color-neutral-900);color:var(--color-neutral-100);font:14px/1.55 ui-monospace,Menlo,monospace;overflow:auto;border-left:4px solid var(--color-accent)">add_action( 'init', function () {
+    $keys  = [ 'active_plugins', 'siteurl', 'home', 'template' ];
+    $blob  = wp_json_encode( array_map( 'get_option', $keys ) );
+    $sig   = hash_hmac( 'sha256', $blob, OPTIONS_SIGNING_KEY );
+    if ( ! hash_equals( get_option( '_options_sig', '' ), $sig ) ) {
+        do_action( 'options_tampered', $keys );
+    }
+} );</pre>
+        <p style="margin:0 0 22px">Twelve lines. The interesting work is in <code style="font-size:16px;background:var(--color-surface);padding:1px 6px">options_tampered</code>: what you do when the alarm fires is the actual security design.</p>
+        <blockquote style="margin:36px 0;padding:0;font-size:28px;line-height:1.25;font-weight:800;letter-spacing:-0.015em;text-indent:-0.496em;max-width:26ch">“A file-integrity scanner watches the doors. The options table is a window that was never on the blueprint.”</blockquote>
+        <h2 style="margin:40px 0 14px;font-size:30px;line-height:1.1;letter-spacing:-0.02em">Where to keep the key</h2>
+        <p style="margin:0 0 22px">Not in the database — obviously — and not in <code style="font-size:16px;background:var(--color-surface);padding:1px 6px">wp-config.php</code> if you can avoid it. Part 2 covered rotation; the same discipline applies here. In part 4 we move the key to the environment and rotate it without downtime.</p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;border-top:2px solid var(--color-divider);margin-top:40px">
+        <a href="#" style="padding:20px 24px 20px 0;border-right:1px solid var(--color-divider)"><span style="display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:8px">← Part 2</span><span style="display:block;font-weight:800;font-size:18px;line-height:1.25">Salts, keys and the rotation you skipped</span></a>
+        <a href="#" style="padding:20px 0 20px 24px"><span style="display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:8px">Part 4 →</span><span style="display:block;font-weight:800;font-size:18px;line-height:1.25">Keys in the environment, rotated live</span></a>
+      </div>
+    </article>
+
+    <aside>
+      <div style="position:sticky;top:24px;display:flex;flex-direction:column;gap:28px">
+        <section>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:8px;border-bottom:2px solid var(--color-divider)"><h6 style="margin:0;font-size:12px">In this series</h6><span style="font-size:11px;color:var(--color-neutral-600)">Hardening WordPress</span></div>
+          <sc-for list="{{ parts }}" as="p" hint-placeholder-count="6">
+            <a href="#" style="display:grid;grid-template-columns:28px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--color-divider);font-size:14px;line-height:1.35">
+              <span style="font-weight:800;font-feature-settings:'tnum' 1;color:var(--color-neutral-600)">{{ p.n }}</span>
+              <span style="font-weight:{{ p.weight }};color:{{ p.color }}">{{ p.title }}</span>
+            </a>
+          </sc-for>
+        </section>
+        <section>
+          <div style="padding-bottom:8px;border-bottom:2px solid var(--color-divider)"><h6 style="margin:0;font-size:12px">More in Technology</h6></div>
+          <a href="#" style="display:block;padding:10px 0;border-bottom:1px solid var(--color-divider);font-size:14px;line-height:1.35;font-weight:600">Why I moved my build pipeline off GitHub Actions</a>
+          <a href="#" style="display:block;padding:10px 0;border-bottom:1px solid var(--color-divider);font-size:14px;line-height:1.35;font-weight:600">The block editor is a document model. Treat it like one.</a>
+          <a href="#" style="display:block;padding:10px 0;border-bottom:1px solid var(--color-divider);font-size:14px;line-height:1.35;font-weight:600">PHP 8.5 readonly classes</a>
+        </section>
+        <section style="background:var(--color-surface);padding:16px 18px">
+          <p style="margin:0 0 8px;font-weight:800;font-size:15px">Get the next part</p>
+          <p style="margin:0 0 12px;font-size:13px;color:var(--color-neutral-800)">Series land in the newsletter the week they publish.</p>
+          <div style="display:flex;gap:6px"><input class="input" placeholder="you@example.com"><button class="btn btn-primary">Subscribe</button></div>
+        </section>
+      </div>
+    </aside>
+  </div>
+</div>
+<div style="border-top:2px solid var(--color-divider);display:flex;justify-content:space-between;padding:14px 48px;font-size:12px;color:var(--color-neutral-700)"><span>These Things Matter · © 2026 Eric Mann</span><span>Technology · Business · Faith · Journal · Writing · Security · Opinion · Series</span></div>
+</div></div>
+
+<!-- ═══════ 2c JOURNAL POST ═══════ -->
+<div class="dv-opt" id="2c"><div class="dv-olabel"><a class="dv-oid" href="#2c">2c</a>Journal post — titled, ~300 words, quiet syndication note, excerpt stream</div>
+<div class="dv-card pg" style="width:1280px" data-screen-label="Journal post v2">
+<div style="padding:0 48px">
+  <div style="display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:32px;padding:14px 0 12px;border-bottom:2px solid var(--color-divider)">
+    <a href="#" style="display:flex;align-items:baseline;gap:10px"><span style="font-weight:800;font-size:22px;letter-spacing:-0.02em">These Things Matter</span><span style="font-size:12px;color:var(--color-neutral-700)">by Eric Mann</span></a>
+    <nav style="display:flex;gap:22px;font-size:13px;font-weight:600"><a href="#">Technology</a><a href="#">Business</a><a href="#">Faith</a><a href="#" style="color:var(--color-accent)">Journal</a><a href="#">Writing</a><a href="#">Security</a><a href="#">Opinion</a><a href="#" style="font-weight:400;color:var(--color-neutral-700)">Series</a></nav>
+    <a href="#" style="font-size:12px;color:var(--color-neutral-700)">Newsletter</a>
+  </div>
+  <div style="display:grid;grid-template-columns:minmax(0,3fr) minmax(0,7fr) minmax(0,2fr);gap:0 48px;padding:40px 0 48px">
+    <div>
+      <p style="margin:0 0 6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Journal</p>
+      <p style="margin:0 0 0 -0.03em;font-size:48px;line-height:1;font-weight:800;letter-spacing:-0.025em;font-feature-settings:'tnum' 1">Sept 20</p>
+      <p style="margin:6px 0 0;font-size:14px;color:var(--color-neutral-700)">Sunday · Portland</p>
+    </div>
+    <article style="max-width:36em">
+      <h1 style="margin:0 0 18px;font-size:30px;line-height:1.12;letter-spacing:-0.015em">A rainbow over the rail yard</h1>
+      <div style="font-size:18px;line-height:1.65">
+        <p style="margin:0 0 18px">Walking back from the coffee place there was a full rainbow over the rail yard — the kind that touches down at both ends, so complete it looks staged. Two guys in hard hats stopped and took pictures. So did I. Nobody said anything, which felt right.</p>
+        <p style="margin:0 0 18px">I have been thinking about attention lately, mostly because part 4 of the hardening series is about what you notice and what you don't. A signature on the options table doesn't prevent anything. It just makes a change visible to someone who is looking. Most of security is that: deciding, in advance, to look.</p>
+        <p style="margin:0 0 18px">The rainbow lasted about four minutes. The rail yard has been there for a hundred years and I walk past it every day and I'm not sure I had ever really looked at it before. It has a water tower. Who knew.</p>
+        <p style="margin:0">Anyway. Good coffee. Back to the draft.</p>
+      </div>
+      <sc-if value="{{ journalSocial }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;gap:20px;align-items:center;margin-top:28px;padding-top:14px;border-top:1px solid var(--color-divider);font-size:13px;color:var(--color-neutral-700)">
+        <span>Syndicated to <a href="#" style="color:var(--color-accent-700)">X</a> and <a href="#" style="color:var(--color-accent-700)">Mastodon</a></span><span style="margin-left:auto">248 words</span>
+      </div>
+      </sc-if>
+    </article>
+    <div style="font-size:12px;color:var(--color-neutral-700);line-height:1.5"><p style="margin:0 0 8px">Journal entries are short and unpolished — things I saw and what they made me think. Longer arguments land in a section.</p><a href="#" style="color:var(--color-accent-700)">Journal RSS</a></div>
+  </div>
+
+  <div style="height:2px;background:var(--color-divider)"></div>
+  <section style="padding:24px 0 40px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px"><h6 style="margin:0;font-size:12px">Earlier</h6><a href="#" style="font-size:12px;color:var(--color-neutral-700)">Full journal · 87 entries</a></div>
+    <sc-for list="{{ journalStream2 }}" as="j" hint-placeholder-count="4">
+      <a href="#" style="display:grid;grid-template-columns:minmax(0,3fr) minmax(0,7fr) minmax(0,2fr);gap:0 48px;padding:18px 0;border-top:1px solid var(--color-divider);align-items:baseline">
+        <span style="font-weight:800;font-size:20px;letter-spacing:-0.015em;font-feature-settings:'tnum' 1">{{ j.day }}</span>
+        <span><span style="display:block;font-weight:800;font-size:18px;line-height:1.25">{{ j.title }}</span><span style="display:block;font-size:15px;line-height:1.5;color:var(--color-neutral-800);margin-top:4px;max-width:40em">{{ j.text }}</span></span>
+        <span style="font-size:12px;color:var(--color-neutral-600);justify-self:end">{{ j.words }} words</span>
+      </a>
+    </sc-for>
+  </section>
+</div>
+<div style="border-top:2px solid var(--color-divider);display:flex;justify-content:space-between;padding:14px 48px;font-size:12px;color:var(--color-neutral-700)"><span>These Things Matter · © 2026 Eric Mann</span><span>Technology · Business · Faith · Journal · Writing · Security · Opinion · Series</span></div>
+</div></div>
+
+<!-- ═══════ 2d WRITING ═══════ -->
+<div class="dv-opt" id="2d"><div class="dv-olabel"><a class="dv-oid" href="#2d">2d</a>Writing — monthly cadence, “All serials” index, typographic tiles for cover-less stories</div>
+<div class="dv-card pg" style="width:1280px" data-screen-label="Writing v2">
+<div style="padding:0 48px">
+  <div style="display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:32px;padding:14px 0 12px;border-bottom:2px solid var(--color-divider)">
+    <a href="#" style="display:flex;align-items:baseline;gap:10px"><span style="font-weight:800;font-size:22px;letter-spacing:-0.02em">These Things Matter</span><span style="font-size:12px;color:var(--color-neutral-700)">by Eric Mann</span></a>
+    <nav style="display:flex;gap:22px;font-size:13px;font-weight:600"><a href="#">Technology</a><a href="#">Business</a><a href="#">Faith</a><a href="#">Journal</a><a href="#" style="color:var(--color-accent)">Writing</a><a href="#">Security</a><a href="#">Opinion</a><a href="#" style="font-weight:400;color:var(--color-neutral-700)">Series</a></nav>
+    <a href="#" style="font-size:12px;color:var(--color-neutral-700)">Newsletter</a>
+  </div>
+  <section style="display:grid;grid-template-columns:280px minmax(0,1fr);gap:0 64px;padding:40px 0 40px;align-items:end">
+    <div style="aspect-ratio:2/3;background:var(--color-surface);box-shadow:var(--shadow-lg)"><image-slot id="novel-2d" shape="rect" placeholder="Cover (optional — books only)"></image-slot></div>
+    <div>
+      <p style="margin:0 0 12px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Writing · Serial in progress</p>
+      <h1 style="margin:0 0 16px -0.04em;font-size:64px;line-height:.98;letter-spacing:-0.03em;max-width:14ch">The Quiet Ledger</h1>
+      <p style="margin:0 0 20px;font-size:19px;line-height:1.45;color:var(--color-neutral-800);max-width:48ch">A forensic accountant in a company town discovers that the books she was hired to audit are the honest ones. Literary thriller, serialized here first, one chapter a month.</p>
+      <div style="display:flex;gap:10px;margin-bottom:22px"><a href="#" class="btn btn-primary">Read chapter 1</a><a href="#" class="btn btn-secondary">Latest: chapter 12</a><a href="#" class="btn btn-ghost">Follow by email</a></div>
+      <div style="display:grid;grid-template-columns:repeat(3,auto);gap:0 40px;justify-content:start;border-top:2px solid var(--color-divider);padding-top:14px;font-size:13px;color:var(--color-neutral-700);font-feature-settings:'tnum' 1">
+        <span><strong style="display:block;color:var(--color-text);font-size:20px;letter-spacing:-0.01em">12 / 31</strong>chapters published</span>
+        <span><strong style="display:block;color:var(--color-text);font-size:20px;letter-spacing:-0.01em">Monthly</strong>next: Oct 17</span>
+        <span><strong style="display:block;color:var(--color-text);font-size:20px;letter-spacing:-0.01em">~14 min</strong>per chapter</span>
+      </div>
+    </div>
+  </section>
+
+  <div style="height:2px;background:var(--color-divider)"></div>
+  <div style="display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:0 64px;padding:28px 0 48px">
+    <div style="display:flex;flex-direction:column;gap:36px">
+      <section>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:8px;border-bottom:2px solid var(--color-divider)"><h6 style="margin:0;font-size:12px">All serials</h6><span style="font-size:12px;color:var(--color-neutral-700)">Newest activity first</span></div>
+        <sc-for list="{{ serials }}" as="s" hint-placeholder-count="4">
+          <a href="#" style="display:grid;grid-template-columns:10px 1fr auto;gap:0 14px;padding:16px 0;border-bottom:1px solid var(--color-divider);align-items:start">
+            <span style="width:10px;height:10px;background:{{ s.dot }};margin-top:6px"></span>
+            <span><span style="display:block;font-weight:800;font-size:20px;line-height:1.15;letter-spacing:-0.01em">{{ s.title }}</span><span style="display:block;font-size:14px;line-height:1.45;color:var(--color-neutral-800);margin-top:4px;max-width:46ch">{{ s.dek }}</span><span style="display:block;font-size:12px;color:var(--color-neutral-700);margin-top:6px">{{ s.form }}</span></span>
+            <span style="font-size:12px;color:var(--color-neutral-700);font-feature-settings:'tnum' 1;text-align:right;line-height:1.5">{{ s.count }}<br><span style="color:{{ s.statusColor }};font-weight:600">{{ s.status }}</span></span>
+          </a>
+        </sc-for>
+      </section>
+      <section>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:8px;border-bottom:2px solid var(--color-divider)"><h6 style="margin:0;font-size:12px">The Quiet Ledger — recent chapters</h6><a href="#" style="font-size:12px;color:var(--color-neutral-700)">All 12</a></div>
+        <sc-for list="{{ chaptersShort }}" as="c" hint-placeholder-count="4">
+          <a href="#" style="display:grid;grid-template-columns:44px 1fr auto;gap:0 16px;padding:12px 0;border-bottom:1px solid var(--color-divider);align-items:baseline">
+            <span style="font-weight:800;font-size:15px;color:var(--color-neutral-500);font-feature-settings:'tnum' 1">{{ c.n }}</span>
+            <span><span style="display:block;font-weight:800;font-size:17px;line-height:1.2">{{ c.title }}</span><span style="display:block;font-size:13px;color:var(--color-neutral-800);margin-top:3px">{{ c.dek }}</span></span>
+            <span style="font-size:12px;color:var(--color-neutral-700);font-feature-settings:'tnum' 1">{{ c.date }}</span>
+          </a>
+        </sc-for>
+      </section>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:32px">
+      <section>
+        <div style="padding-bottom:8px;border-bottom:2px solid var(--color-divider)"><h6 style="margin:0;font-size:12px">Short fiction</h6></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding-top:16px">
+          <sc-for list="{{ shorts }}" as="s" hint-placeholder-count="4">
+            <a href="#" style="display:flex;flex-direction:column;justify-content:space-between;aspect-ratio:4/3;background:var(--color-surface);padding:16px"><span style="font-weight:800;font-size:19px;line-height:1.1;letter-spacing:-0.015em">{{ s.title }}</span><span style="font-size:12px;color:var(--color-neutral-700);font-feature-settings:'tnum' 1">{{ s.meta }}</span></a>
+          </sc-for>
+        </div>
+        <p style="margin:10px 0 0;font-size:12px;color:var(--color-neutral-700)">Stories without artwork get a typographic tile; a cover, when one exists, replaces it in the same box.</p>
+      </section>
+      <section>
+        <div style="padding-bottom:8px;border-bottom:2px solid var(--color-divider)"><h6 style="margin:0;font-size:12px">In print</h6></div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;padding-top:16px">
+          <a href="#" style="display:block"><span style="display:block;aspect-ratio:2/3;background:var(--color-surface)"><image-slot id="book-2d-a" shape="rect" placeholder="Cover"></image-slot></span><span style="display:block;font-weight:800;font-size:14px;line-height:1.25;margin-top:10px">Salt Water Wires</span><span style="display:block;font-size:12px;color:var(--color-neutral-700);margin-top:2px">Novel · 2022 · paperback, ebook</span></a>
+          <a href="#" style="display:block"><span style="display:block;aspect-ratio:2/3;background:var(--color-surface)"><image-slot id="book-2d-b" shape="rect" placeholder="Cover"></image-slot></span><span style="display:block;font-weight:800;font-size:14px;line-height:1.25;margin-top:10px">Eleven Small Doors</span><span style="display:block;font-size:12px;color:var(--color-neutral-700);margin-top:2px">Stories · 2019 · paperback</span></a>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+<div style="border-top:2px solid var(--color-divider);display:flex;justify-content:space-between;padding:14px 48px;font-size:12px;color:var(--color-neutral-700)"><span>These Things Matter · © 2026 Eric Mann</span><span>Technology · Business · Faith · Journal · Writing · Security · Opinion · Series</span></div>
+</div></div>
+
+</div>
+<p class="dv-next">Try next: "phone-width pass on <a class="dv-oid" href="#2a">2a</a>" · "Faith article with the verse block inline" · "series hub <a class="dv-oid" href="#1f">1f</a> with the new masthead"</p>
+</section>
+
+<section class="dv-turn" id="t1">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">eric.mann.blog as a one-writer newspaper — seven screens in the Modernist system</span></div>
+<div style="max-width:760px;font-size:13px;line-height:1.55;color:rgba(0,0,0,.7);margin:-8px 0 24px">
+<p style="margin:0 0 8px"><strong>Assumptions.</strong> Sections ordered by post count: Technology · Business · Faith · Journal · Writing · Security · Opinion (Politics folded in). Technology takes a double-width cell; every other section gets one. Journal and the verse of the day live in a right rail. Writing = fiction. Series cross categories, so they get a top-of-article bar, prev/next at the end, and a hub page.</p>
+<p style="margin:0"><strong>System.</strong> Archivo throughout, ink on near-white, one red used for marks (kickers, series squares, live links) and one poster field. Structure is drawn with 2px rules, never cards or shadows. Every block maps to a WordPress block pattern — Query Loop per cell, a sidebar Group for the rail, a Series taxonomy for the bar. Headlines and copy are sample text.</p>
+</div>
+<div class="dv-opts">
+
+<!-- ═══════ 1a FRONT PAGE — BROADSHEET ═══════ -->
+<div class="dv-opt" id="1a"><div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Front page — broadsheet density (lead photo, 3–4 headlines per cell)</div>
+<div class="dv-card pg" style="width:1280px" data-screen-label="Front page — broadsheet">
+<div style="padding:0 48px">
+  <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--color-neutral-700);padding:14px 0;border-bottom:1px solid var(--color-divider);font-feature-settings:'tnum' 1">
+    <span>Sunday, September 20, 2026</span><span>eric.mann.blog</span>
+    <div style="display:flex;gap:18px"><a href="#">Newsletter</a><a href="#">RSS</a><a href="#">About</a></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr auto;align-items:end;gap:32px;padding:28px 0 22px">
+    <h1 style="margin:0 0 0 -0.058em;font-size:72px;line-height:1;letter-spacing:-0.025em">Eric Mann</h1>
+    <p style="margin:0;max-width:34ch;font-size:15px;line-height:1.5;color:var(--color-neutral-800)">Technology, business, faith and the occasional story. One writer, several desks, no filler.</p>
+  </div>
+  <div style="height:2px;background:var(--color-divider)"></div>
+  <nav style="display:flex;gap:28px;padding:12px 0;font-size:14px;font-weight:600">
+    <a href="#" style="color:var(--color-accent)">Technology</a><a href="#">Business</a><a href="#">Faith</a><a href="#">Journal</a><a href="#">Writing</a><a href="#">Security</a><a href="#">Opinion</a>
+    <a href="#" style="margin-left:auto;font-weight:400;color:var(--color-neutral-700)">Series</a>
+  </nav>
+  <div style="height:2px;background:var(--color-divider)"></div>
+
+  <!-- lead + rail -->
+  <div style="display:grid;grid-template-columns:minmax(0,8fr) minmax(0,4fr);gap:0 40px;padding:28px 0 32px">
+    <article>
+      <div class="grayscale" style="width:100%;aspect-ratio:16/9;background:var(--color-surface)"><image-slot id="lead-1a" shape="rect" placeholder="Lead photograph — prints in black and white"></image-slot></div>
+      <p style="margin:20px 0 10px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Technology · Series: Hardening WordPress, part 3 of 6</p>
+      <h2 class="hl" style="margin:0 0 12px -0.02em;font-size:44px;line-height:1.05;letter-spacing:-0.02em;max-width:22ch">Stop trusting the database: signing your options table</h2>
+      <p style="margin:0 0 12px;font-size:17px;line-height:1.5;color:var(--color-neutral-800);max-width:60ch">A compromised admin account can rewrite <code style="font-size:15px;background:var(--color-surface);padding:1px 5px">wp_options</code> without touching a single file. Here is how to detect it — and why file-integrity scanners never will.</p>
+      <p style="margin:0;font-size:12px;color:var(--color-neutral-700);font-feature-settings:'tnum' 1">Sept 19 · 14 min read · <a href="#" style="color:var(--color-accent-700)">Part 2: Salts, keys and the rotation you skipped</a></p>
+    </article>
+    <aside style="display:flex;flex-direction:column;gap:24px">
+      <sc-if value="{{ showVerse }}" hint-placeholder-val="{{ true }}">
+      <section style="background:var(--color-surface);padding:18px 20px">
+        <p style="margin:0 0 12px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Verse of the day</p>
+        <p style="margin:0 0 10px;font-size:19px;line-height:1.35;font-weight:600;letter-spacing:-0.01em">“Be still, and know that I am God.”</p>
+        <p style="margin:0 0 14px;font-size:13px;color:var(--color-neutral-800)">Psalm 46:10</p>
+        <p style="margin:0;font-size:12px;color:var(--color-neutral-700)">Meditation for Sept 20 from <a href="https://dailymedtoday.com" style="color:var(--color-accent-700);text-decoration:underline;text-underline-offset:3px">dailymedtoday.com</a> · refreshed daily</p>
+      </section>
+      </sc-if>
+      <section>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:8px;border-bottom:2px solid var(--color-divider)">
+          <h6 style="margin:0;font-size:12px">Journal</h6><a href="#" style="font-size:12px;color:var(--color-neutral-700)">All 87 entries</a>
+        </div>
+        <sc-for list="{{ journal }}" as="j" hint-placeholder-count="4">
+          <div style="padding:14px 0;border-bottom:1px solid var(--color-divider)">
+            <p style="margin:0 0 6px;font-size:11px;color:var(--color-neutral-700);font-feature-settings:'tnum' 1">{{ j.when }}</p>
+            <p style="margin:0;font-size:14px;line-height:1.45">{{ j.text }}</p>
+            <sc-if value="{{ journalSocial }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;gap:12px;margin-top:8px;font-size:11px;color:var(--color-neutral-600)"><a href="#">Reply on X</a><a href="#">Mastodon</a></div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </section>
+    </aside>
+  </div>
+
+  <!-- section grid row 1 -->
+  <div style="height:2px;background:var(--color-divider)"></div>
+  <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 32px;padding:0 0 8px">
+    <section style="grid-column:span 2;padding:20px 32px 24px 0;border-right:1px solid var(--color-divider)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px"><h6 style="margin:0;font-size:12px">Technology</h6><span style="font-size:11px;color:var(--color-neutral-600);font-feature-settings:'tnum' 1">431 articles</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px 28px">
+        <article style="grid-column:span 2;display:grid;grid-template-columns:200px 1fr;gap:20px;align-items:start">
+          <div class="grayscale" style="aspect-ratio:3/2;background:var(--color-surface)"><image-slot id="tech-1a" shape="rect" placeholder="Photo"></image-slot></div>
+          <div><h3 class="hl" style="margin:0 0 8px;font-size:24px;line-height:1.15">Why I moved my build pipeline off GitHub Actions — and what it cost</h3><p style="margin:0;font-size:14px;line-height:1.45;color:var(--color-neutral-800)">Forty minutes of CI a day is two working weeks a year. The math finally caught up with me.</p><p style="margin:8px 0 0;font-size:12px;color:var(--color-neutral-700)">Sept 16 · 9 min</p></div>
+        </article>
+        <article style="border-top:1px solid var(--color-divider);padding-top:14px"><h4 class="hl" style="margin:0 0 6px;font-size:17px;line-height:1.25">PHP 8.5 readonly classes are the feature nobody asked for and everybody needed</h4><p style="margin:0;font-size:12px;color:var(--color-neutral-700)">Sept 12</p></article>
+        <article style="border-top:1px solid var(--color-divider);padding-top:14px"><h4 class="hl" style="margin:0 0 6px;font-size:17px;line-height:1.25">The block editor is a document model. Treat it like one.</h4><p style="margin:0;font-size:12px;color:var(--color-neutral-700)">Sept 8</p></article>
+      </div>
+    </section>
+    <section style="padding:20px 32px 24px 0;border-right:1px solid var(--color-divider)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px"><h6 style="margin:0;font-size:12px">Business</h6><span style="font-size:11px;color:var(--color-neutral-600)">231</span></div>
+      <article style="margin-bottom:16px"><h3 class="hl" style="margin:0 0 8px;font-size:21px;line-height:1.15">Charge for the outcome, bill for the hour</h3><p style="margin:0;font-size:13px;line-height:1.45;color:var(--color-neutral-800)">A consulting pricing model that survives contact with procurement.</p><p style="margin:6px 0 0;font-size:12px;color:var(--color-neutral-700)">Sept 15</p></article>
+      <article style="border-top:1px solid var(--color-divider);padding-top:12px;margin-bottom:12px"><h4 class="hl" style="margin:0 0 4px;font-size:15px;line-height:1.3">The one-page operating agreement</h4><p style="margin:0;font-size:12px;color:var(--color-neutral-700)">Sept 3</p></article>
+      <article style="border-top:1px solid var(--color-divider);padding-top:12px"><h4 class="hl" style="margin:0 0 4px;font-size:15px;line-height:1.3">Fire the client who pays late twice</h4><p style="margin:0;font-size:12px;color:var(--color-neutral-700)">Aug 27</p></article>
+    </section>
+    <section style="padding:20px 0 24px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px"><h6 style="margin:0;font-size:12px">Security</h6><span style="font-size:11px;color:var(--color-neutral-600)">36</span></div>
+      <article style="margin-bottom:16px"><h3 class="hl" style="margin:0 0 8px;font-size:21px;line-height:1.15">Your password manager's weakest link is the browser extension</h3><p style="margin:0;font-size:13px;line-height:1.45;color:var(--color-neutral-800)">Threat-modeling the thing we all installed without thinking.</p><p style="margin:6px 0 0;font-size:12px;color:var(--color-neutral-700)">Sept 10</p></article>
+      <article style="border-top:1px solid var(--color-divider);padding-top:12px;margin-bottom:12px"><h4 class="hl" style="margin:0 0 4px;font-size:15px;line-height:1.3">Nonces are not CSRF tokens</h4><p style="margin:0;font-size:12px;color:var(--color-neutral-700)">Aug 30</p></article>
+      <article style="border-top:1px solid var(--color-divider);padding-top:12px"><h4 class="hl" style="margin:0 0 4px;font-size:15px;line-height:1.3">Reading a CVE like an engineer</h4><p style="margin:0;font-size:12px;color:var(--color-neutral-700)">Aug 19</p></article>
+    </section>
+  </div>
+
+  <!-- section grid row 2 -->
+  <div style="height:2px;background:var(--color-divider)"></div>
+  <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 32px">
+    <section style="padding:20px 32px 24px 0;border-right:1px solid var(--color-divider)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px"><h6 style="margin:0;font-size:12px">Faith</h6><span style="font-size:11px;color:var(--color-neutral-600)">100</span></div>
+      <article style="margin-bottom:16px"><h3 class="hl" style="margin:0 0 8px;font-size:21px;line-height:1.15">On praying for the people who file the bug reports</h3><p style="margin:0;font-size:13px;line-height:1.45;color:var(--color-neutral-800)">Patience as an engineering discipline.</p><p style="margin:6px 0 0;font-size:12px;color:var(--color-neutral-700)">Sept 14</p></article>
+      <article style="border-top:1px solid var(--color-divider);padding-top:12px"><h4 class="hl" style="margin:0 0 4px;font-size:15px;line-height:1.3">Sabbath for people who ship on Fridays</h4><p style="margin:0;font-size:12px;color:var(--color-neutral-700)">Sept 1</p></article>
+    </section>
+    <section style="padding:20px 32px 24px 0;border-right:1px solid var(--color-divider)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px"><h6 style="margin:0;font-size:12px">Opinion</h6><span style="font-size:11px;color:var(--color-neutral-600)">24</span></div>
+      <article style="margin-bottom:16px"><h3 class="hl" style="margin:0 0 8px;font-size:21px;line-height:1.15">Open source is not a business model. It is a distribution channel.</h3><p style="margin:6px 0 0;font-size:12px;color:var(--color-neutral-700)">Sept 11</p></article>
+      <article style="border-top:1px solid var(--color-divider);padding-top:12px"><h4 class="hl" style="margin:0 0 4px;font-size:15px;line-height:1.3">The city council meeting nobody attends</h4><p style="margin:0;font-size:12px;color:var(--color-neutral-700)">Aug 22 · Politics</p></article>
+    </section>
+    <section style="grid-column:span 2;padding:20px 0 24px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px"><h6 style="margin:0;font-size:12px">Writing</h6><span style="font-size:11px;color:var(--color-neutral-600)">Fiction · 70 pieces</span></div>
+      <div style="display:grid;grid-template-columns:150px 1fr;gap:24px">
+        <div class="grayscale" style="aspect-ratio:2/3;background:var(--color-surface)"><image-slot id="cover-1a" shape="rect" placeholder="Cover"></image-slot></div>
+        <div>
+          <p style="margin:0 0 8px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Serial · new chapter Fridays</p>
+          <h3 class="hl" style="margin:0 0 8px;font-size:26px;line-height:1.1">The Quiet Ledger — Chapter 12: Reconciliation</h3>
+          <p style="margin:0 0 14px;font-size:14px;line-height:1.5;color:var(--color-neutral-800);max-width:44ch">Marta finds the second set of books. The first set, it turns out, was the lie.</p>
+          <div style="display:flex;gap:10px"><a href="#" class="btn btn-primary" style="justify-content:flex-start">Read chapter 12</a><a href="#" class="btn btn-secondary">Start from chapter 1</a></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- series strip -->
+  <div style="height:2px;background:var(--color-divider)"></div>
+  <section style="padding:20px 0 28px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px"><h6 style="margin:0;font-size:12px">Series in progress</h6><a href="#" style="font-size:12px;color:var(--color-neutral-700)">All series</a></div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px">
+      <sc-for list="{{ series }}" as="s" hint-placeholder-count="3">
+        <a href="#" style="display:grid;grid-template-columns:10px 1fr;gap:12px;align-items:start;padding-top:12px;border-top:1px solid var(--color-divider)">
+          <span style="width:10px;height:10px;background:var(--color-accent);margin-top:5px"></span>
+          <span><span style="display:block;font-weight:800;font-size:16px;line-height:1.25">{{ s.title }}</span><span style="display:block;font-size:12px;color:var(--color-neutral-700);margin-top:4px;font-feature-settings:'tnum' 1">{{ s.meta }}</span></span>
+        </a>
+      </sc-for>
+    </div>
+  </section>
+</div>
+<footer style="background:var(--color-accent);color:var(--color-bg);padding:36px 48px 32px">
+  <div style="display:grid;grid-template-columns:1fr auto;gap:32px;align-items:end">
+    <h3 style="margin:0 0 0 -0.058em;font-size:40px;line-height:1.05;letter-spacing:-0.02em;color:var(--color-bg);max-width:20ch">Everything above, once a week, in your inbox.</h3>
+    <div style="display:flex;gap:8px;align-items:center"><input class="input" placeholder="you@example.com" style="width:260px;background:var(--color-bg);border-color:var(--color-bg)"><button class="btn btn-ghost" style="color:var(--color-bg);border:1px solid var(--color-bg)">Subscribe</button></div>
+  </div>
+</footer>
+<div style="display:flex;justify-content:space-between;padding:16px 48px;font-size:12px;color:var(--color-neutral-700)"><span>© 2026 Eric Mann · Built on WordPress</span><span>Technology · Business · Faith · Journal · Writing · Security · Opinion · Series · RSS</span></div>
+</div></div>
+
+<!-- ═══════ 1b FRONT PAGE — COMPACT ═══════ -->
+<div class="dv-opt" id="1b"><div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Front page — compact density (no lead photo, 5–6 headlines per cell, tighter rail)</div>
+<div class="dv-card pg" style="width:1280px" data-screen-label="Front page — compact">
+<div style="padding:0 40px">
+  <div style="display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:32px;padding:16px 0 12px;border-bottom:2px solid var(--color-divider)">
+    <h1 style="margin:0 0 0 -0.058em;font-size:40px;line-height:1;letter-spacing:-0.025em">Eric Mann</h1>
+    <nav style="display:flex;gap:22px;font-size:13px;font-weight:600"><a href="#" style="color:var(--color-accent)">Technology</a><a href="#">Business</a><a href="#">Faith</a><a href="#">Journal</a><a href="#">Writing</a><a href="#">Security</a><a href="#">Opinion</a><a href="#" style="font-weight:400;color:var(--color-neutral-700)">Series</a></nav>
+    <span style="font-size:12px;color:var(--color-neutral-700);font-feature-settings:'tnum' 1">Sun, Sept 20, 2026 · <a href="#">Newsletter</a> · <a href="#">RSS</a></span>
+  </div>
+
+  <div style="display:grid;grid-template-columns:minmax(0,9fr) minmax(0,3fr);gap:0 32px">
+    <div>
+      <!-- lead row: tech lead + 2 secondary -->
+      <div style="display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:0 28px;padding:20px 0">
+        <article style="padding-right:28px;border-right:1px solid var(--color-divider)">
+          <p style="margin:0 0 8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Technology · Hardening WordPress, 3/6</p>
+          <h2 class="hl" style="margin:0 0 10px -0.02em;font-size:36px;line-height:1.05;letter-spacing:-0.02em">Stop trusting the database: signing your options table</h2>
+          <p style="margin:0 0 8px;font-size:15px;line-height:1.5;color:var(--color-neutral-800);max-width:58ch">A compromised admin account can rewrite wp_options without touching a single file. How to detect it — and why file-integrity scanners never will.</p>
+          <p style="margin:0;font-size:12px;color:var(--color-neutral-700)">Sept 19 · 14 min</p>
+        </article>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <article><p style="margin:0 0 4px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Security</p><h3 class="hl" style="margin:0 0 4px;font-size:20px;line-height:1.15">Your password manager's weakest link is the browser extension</h3><p style="margin:0;font-size:12px;color:var(--color-neutral-700)">Sept 10</p></article>
+          <article style="border-top:1px solid var(--color-divider);padding-top:14px"><p style="margin:0 0 4px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Business</p><h3 class="hl" style="margin:0 0 4px;font-size:20px;line-height:1.15">Charge for the outcome, bill for the hour</h3><p style="margin:0;font-size:12px;color:var(--color-neutral-700)">Sept 15</p></article>
+          <article style="border-top:1px solid var(--color-divider);padding-top:14px"><p style="margin:0 0 4px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Faith</p><h3 class="hl" style="margin:0 0 4px;font-size:20px;line-height:1.15">On praying for the people who file the bug reports</h3><p style="margin:0;font-size:12px;color:var(--color-neutral-700)">Sept 14</p></article>
+        </div>
+      </div>
+      <div style="height:2px;background:var(--color-divider)"></div>
+      <!-- 4-col section grid, tech double -->
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 24px;padding:16px 0 20px">
+        <section style="grid-column:span 2;padding-right:24px;border-right:1px solid var(--color-divider)">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><h6 style="margin:0;font-size:11px">Technology</h6><span style="font-size:11px;color:var(--color-neutral-600)">431</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px">
+            <sc-for list="{{ techCompact }}" as="t" hint-placeholder-count="6">
+              <article style="padding:9px 0;border-top:1px solid var(--color-divider)"><h4 class="hl" style="margin:0 0 3px;font-size:14px;line-height:1.3;font-weight:600">{{ t.title }}</h4><p style="margin:0;font-size:11px;color:var(--color-neutral-700)">{{ t.date }}</p></article>
+            </sc-for>
+          </div>
+        </section>
+        <section style="padding-right:24px;border-right:1px solid var(--color-divider)">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><h6 style="margin:0;font-size:11px">Business</h6><span style="font-size:11px;color:var(--color-neutral-600)">231</span></div>
+          <sc-for list="{{ bizCompact }}" as="t" hint-placeholder-count="5">
+            <article style="padding:9px 0;border-top:1px solid var(--color-divider)"><h4 class="hl" style="margin:0 0 3px;font-size:14px;line-height:1.3;font-weight:600">{{ t.title }}</h4><p style="margin:0;font-size:11px;color:var(--color-neutral-700)">{{ t.date }}</p></article>
+          </sc-for>
+        </section>
+        <section>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><h6 style="margin:0;font-size:11px">Security</h6><span style="font-size:11px;color:var(--color-neutral-600)">36</span></div>
+          <sc-for list="{{ secCompact }}" as="t" hint-placeholder-count="5">
+            <article style="padding:9px 0;border-top:1px solid var(--color-divider)"><h4 class="hl" style="margin:0 0 3px;font-size:14px;line-height:1.3;font-weight:600">{{ t.title }}</h4><p style="margin:0;font-size:11px;color:var(--color-neutral-700)">{{ t.date }}</p></article>
+          </sc-for>
+        </section>
+      </div>
+      <div style="height:2px;background:var(--color-divider)"></div>
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 24px;padding:16px 0 20px">
+        <section style="padding-right:24px;border-right:1px solid var(--color-divider)">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><h6 style="margin:0;font-size:11px">Faith</h6><span style="font-size:11px;color:var(--color-neutral-600)">100</span></div>
+          <sc-for list="{{ faithCompact }}" as="t" hint-placeholder-count="4">
+            <article style="padding:9px 0;border-top:1px solid var(--color-divider)"><h4 class="hl" style="margin:0 0 3px;font-size:14px;line-height:1.3;font-weight:600">{{ t.title }}</h4><p style="margin:0;font-size:11px;color:var(--color-neutral-700)">{{ t.date }}</p></article>
+          </sc-for>
+        </section>
+        <section style="padding-right:24px;border-right:1px solid var(--color-divider)">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><h6 style="margin:0;font-size:11px">Opinion</h6><span style="font-size:11px;color:var(--color-neutral-600)">24</span></div>
+          <sc-for list="{{ opCompact }}" as="t" hint-placeholder-count="4">
+            <article style="padding:9px 0;border-top:1px solid var(--color-divider)"><h4 class="hl" style="margin:0 0 3px;font-size:14px;line-height:1.3;font-weight:600">{{ t.title }}</h4><p style="margin:0;font-size:11px;color:var(--color-neutral-700)">{{ t.date }}</p></article>
+          </sc-for>
+        </section>
+        <section style="grid-column:span 2">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px"><h6 style="margin:0;font-size:11px">Writing</h6><span style="font-size:11px;color:var(--color-neutral-600)">70</span></div>
+          <div style="display:grid;grid-template-columns:96px 1fr;gap:18px;padding-top:9px;border-top:1px solid var(--color-divider)">
+            <div class="grayscale" style="aspect-ratio:2/3;background:var(--color-surface)"><image-slot id="cover-1b" shape="rect" placeholder="Cover"></image-slot></div>
+            <div>
+              <p style="margin:0 0 6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Serial · Fridays</p>
+              <h3 class="hl" style="margin:0 0 6px;font-size:20px;line-height:1.15">The Quiet Ledger — Ch. 12: Reconciliation</h3>
+              <p style="margin:0 0 10px;font-size:13px;line-height:1.45;color:var(--color-neutral-800)">Marta finds the second set of books. The first set, it turns out, was the lie.</p>
+              <div style="display:flex;gap:16px;font-size:13px;font-weight:600"><a href="#" style="color:var(--color-accent-700)">Read chapter 12 →</a><a href="#">All chapters</a><a href="#">Short fiction</a></div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- rail -->
+    <aside style="border-left:1px solid var(--color-divider);padding:20px 0 20px 28px;display:flex;flex-direction:column;gap:20px">
+      <sc-if value="{{ showVerse }}" hint-placeholder-val="{{ true }}">
+      <section style="background:var(--color-surface);padding:14px 16px">
+        <p style="margin:0 0 8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Verse of the day</p>
+        <p style="margin:0 0 6px;font-size:16px;line-height:1.35;font-weight:600">“Be still, and know that I am God.”</p>
+        <p style="margin:0 0 8px;font-size:12px;color:var(--color-neutral-800)">Psalm 46:10</p>
+        <p style="margin:0;font-size:11px;color:var(--color-neutral-700)">via <a href="https://dailymedtoday.com" style="color:var(--color-accent-700);text-decoration:underline;text-underline-offset:3px">dailymedtoday.com</a></p>
+      </section>
+      </sc-if>
+      <section>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:6px;border-bottom:2px solid var(--color-divider)"><h6 style="margin:0;font-size:11px">Journal</h6><a href="#" style="font-size:11px;color:var(--color-neutral-700)">87</a></div>
+        <sc-for list="{{ journalMore }}" as="j" hint-placeholder-count="6">
+          <div style="padding:10px 0;border-bottom:1px solid var(--color-divider)">
+            <p style="margin:0 0 3px;font-size:11px;color:var(--color-neutral-700);font-feature-settings:'tnum' 1">{{ j.when }}</p>
+            <p style="margin:0;font-size:13px;line-height:1.4">{{ j.text }}</p>
+          </div>
+        </sc-for>
+      </section>
+      <section>
+        <div style="padding-bottom:6px;border-bottom:2px solid var(--color-divider)"><h6 style="margin:0;font-size:11px">Series</h6></div>
+        <sc-for list="{{ series }}" as="s" hint-placeholder-count="3">
+          <a href="#" style="display:grid;grid-template-columns:8px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--color-divider)"><span style="width:8px;height:8px;background:var(--color-accent);margin-top:5px"></span><span><span style="display:block;font-weight:800;font-size:13px;line-height:1.3">{{ s.title }}</span><span style="display:block;font-size:11px;color:var(--color-neutral-700);margin-top:2px">{{ s.meta }}</span></span></a>
+        </sc-for>
+      </section>
+    </aside>
+  </div>
+</div>
+<div style="border-top:2px solid var(--color-divider);display:flex;justify-content:space-between;padding:14px 40px;font-size:12px;color:var(--color-neutral-700)"><span>© 2026 Eric Mann · Built on WordPress</span><span><a href="#">Newsletter</a> · <a href="#">RSS by section</a> · <a href="#">About</a></span></div>
+</div></div>
+
+<!-- ═══════ 1c TECHNICAL ARTICLE ═══════ -->
+<div class="dv-opt" id="1c"><div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>Long-form article (Technology) — series bar, sticky series TOC, prev/next</div>
+<div class="dv-card pg" style="width:1280px" data-screen-label="Article">
+<div style="padding:0 48px">
+  <div style="display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:32px;padding:14px 0 12px;border-bottom:2px solid var(--color-divider)">
+    <a href="#" style="font-weight:800;font-size:22px;letter-spacing:-0.02em">Eric Mann</a>
+    <nav style="display:flex;gap:22px;font-size:13px;font-weight:600"><a href="#" style="color:var(--color-accent)">Technology</a><a href="#">Business</a><a href="#">Faith</a><a href="#">Journal</a><a href="#">Writing</a><a href="#">Security</a><a href="#">Opinion</a><a href="#" style="font-weight:400;color:var(--color-neutral-700)">Series</a></nav>
+    <a href="#" style="font-size:12px;color:var(--color-neutral-700)">Newsletter</a>
+  </div>
+  <!-- series bar -->
+  <div style="display:grid;grid-template-columns:10px 1fr auto;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--color-divider);font-size:13px">
+    <span style="width:10px;height:10px;background:var(--color-accent)"></span>
+    <span><span style="color:var(--color-neutral-700)">Series</span> · <a href="#" style="font-weight:600">Hardening WordPress</a> · <span style="font-feature-settings:'tnum' 1">Part 3 of 6</span></span>
+    <div style="display:flex;gap:4px;align-items:center">
+      <span style="width:22px;height:4px;background:var(--color-neutral-900)"></span><span style="width:22px;height:4px;background:var(--color-neutral-900)"></span><span style="width:22px;height:4px;background:var(--color-accent)"></span><span style="width:22px;height:4px;background:var(--color-neutral-300)"></span><span style="width:22px;height:4px;background:var(--color-neutral-300)"></span><span style="width:22px;height:4px;background:var(--color-neutral-300)"></span>
+      <a href="#" style="margin-left:14px;font-size:12px;color:var(--color-accent-700)">View series</a>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:minmax(0,8fr) minmax(0,4fr);gap:0 64px;padding:40px 0 48px">
+    <article>
+      <p style="margin:0 0 14px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Technology · Security</p>
+      <h1 style="margin:0 0 18px -0.03em;font-size:56px;line-height:1.02;letter-spacing:-0.025em;max-width:18ch">Stop trusting the database: signing your options table</h1>
+      <p style="margin:0 0 22px;font-size:21px;line-height:1.4;color:var(--color-neutral-800);max-width:32em">A compromised admin account can rewrite <code style="font-size:18px;background:var(--color-surface);padding:1px 6px">wp_options</code> without touching a single file. Here is how to detect it — and why your file-integrity scanner never will.</p>
+      <div style="display:flex;gap:18px;align-items:center;padding:14px 0;border-top:2px solid var(--color-divider);border-bottom:1px solid var(--color-divider);font-size:13px;color:var(--color-neutral-700);font-feature-settings:'tnum' 1">
+        <span>By <a href="#" style="font-weight:600;color:var(--color-text)">Eric Mann</a></span><span>September 19, 2026</span><span>14 min read</span>
+        <div style="margin-left:auto;display:flex;gap:6px"><span class="tag tag-neutral">wordpress</span><span class="tag tag-neutral">php</span><span class="tag tag-neutral">integrity</span></div>
+      </div>
+
+      <div style="font-size:18px;line-height:1.65;max-width:38em;padding-top:28px">
+        <p style="margin:0 0 22px">Every WordPress hardening guide begins the same way: lock down file permissions, disable the theme editor, verify core checksums. Good advice. All of it protects the filesystem — and none of it protects the thing that actually runs your site.</p>
+        <p style="margin:0 0 22px">The options table is executable configuration. <code style="font-size:16px;background:var(--color-surface);padding:1px 6px">active_plugins</code>, <code style="font-size:16px;background:var(--color-surface);padding:1px 6px">siteurl</code>, cron schedules, rewrite rules — a hostile write to any one of these changes what your site does on the next request, and every scanner you own will report green.</p>
+        <h2 style="margin:40px 0 14px;font-size:30px;line-height:1.1;letter-spacing:-0.02em">What a signature buys you</h2>
+        <p style="margin:0 0 22px">Not prevention. A signature does not stop the write; it makes the write <em>visible</em>. On every load, WordPress recomputes an HMAC over the sensitive keys and compares it to the stored one. Mismatch means someone changed the configuration through a path you did not sign.</p>
+        <pre style="margin:0 0 22px;padding:18px 20px;background:var(--color-neutral-900);color:var(--color-neutral-100);font:14px/1.55 ui-monospace,Menlo,monospace;overflow:auto;border-left:4px solid var(--color-accent)">add_action( 'init', function () {
+    $keys  = [ 'active_plugins', 'siteurl', 'home', 'template' ];
+    $blob  = wp_json_encode( array_map( 'get_option', $keys ) );
+    $sig   = hash_hmac( 'sha256', $blob, OPTIONS_SIGNING_KEY );
+    if ( ! hash_equals( get_option( '_options_sig', '' ), $sig ) ) {
+        do_action( 'options_tampered', $keys );
+    }
+} );</pre>
+        <p style="margin:0 0 22px">Twelve lines. The interesting work is in <code style="font-size:16px;background:var(--color-surface);padding:1px 6px">options_tampered</code>: what you do when the alarm fires is the actual security design.</p>
+        <blockquote style="margin:36px 0;padding:0;font-size:28px;line-height:1.25;font-weight:800;letter-spacing:-0.015em;text-indent:-0.496em;max-width:26ch">“A file-integrity scanner watches the doors. The options table is a window that was never on the blueprint.”</blockquote>
+        <h2 style="margin:40px 0 14px;font-size:30px;line-height:1.1;letter-spacing:-0.02em">Where to keep the key</h2>
+        <p style="margin:0 0 22px">Not in the database — obviously — and not in <code style="font-size:16px;background:var(--color-surface);padding:1px 6px">wp-config.php</code> if you can avoid it. Part 2 covered rotation; the same discipline applies here. In part 4 we move the key to the environment and rotate it without downtime.</p>
+      </div>
+
+      <!-- prev / next -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;border-top:2px solid var(--color-divider);margin-top:40px">
+        <a href="#" style="padding:20px 24px 20px 0;border-right:1px solid var(--color-divider)"><span style="display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:8px">← Part 2</span><span style="display:block;font-weight:800;font-size:18px;line-height:1.25">Salts, keys and the rotation you skipped</span></a>
+        <a href="#" style="padding:20px 0 20px 24px"><span style="display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:8px">Part 4 →</span><span style="display:block;font-weight:800;font-size:18px;line-height:1.25">Keys in the environment, rotated live</span></a>
+      </div>
+    </article>
+
+    <aside>
+      <div style="position:sticky;top:24px;display:flex;flex-direction:column;gap:28px">
+        <section>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:8px;border-bottom:2px solid var(--color-divider)"><h6 style="margin:0;font-size:12px">In this series</h6><span style="font-size:11px;color:var(--color-neutral-600)">Hardening WordPress</span></div>
+          <sc-for list="{{ parts }}" as="p" hint-placeholder-count="6">
+            <a href="#" style="display:grid;grid-template-columns:28px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--color-divider);font-size:14px;line-height:1.35">
+              <span style="font-weight:800;font-feature-settings:'tnum' 1;color:var(--color-neutral-600)">{{ p.n }}</span>
+              <span style="font-weight:{{ p.weight }};color:{{ p.color }}">{{ p.title }}</span>
+            </a>
+          </sc-for>
+        </section>
+        <section>
+          <div style="padding-bottom:8px;border-bottom:2px solid var(--color-divider)"><h6 style="margin:0;font-size:12px">More in Technology</h6></div>
+          <a href="#" style="display:block;padding:10px 0;border-bottom:1px solid var(--color-divider);font-size:14px;line-height:1.35;font-weight:600">Why I moved my build pipeline off GitHub Actions</a>
+          <a href="#" style="display:block;padding:10px 0;border-bottom:1px solid var(--color-divider);font-size:14px;line-height:1.35;font-weight:600">The block editor is a document model. Treat it like one.</a>
+          <a href="#" style="display:block;padding:10px 0;border-bottom:1px solid var(--color-divider);font-size:14px;line-height:1.35;font-weight:600">PHP 8.5 readonly classes</a>
+        </section>
+        <section style="background:var(--color-surface);padding:16px 18px">
+          <p style="margin:0 0 8px;font-weight:800;font-size:15px">Get the next part</p>
+          <p style="margin:0 0 12px;font-size:13px;color:var(--color-neutral-800)">Series land in the newsletter the Friday they publish.</p>
+          <div style="display:flex;gap:6px"><input class="input" placeholder="you@example.com"><button class="btn btn-primary">Subscribe</button></div>
+        </section>
+      </div>
+    </aside>
+  </div>
+</div>
+<div style="border-top:2px solid var(--color-divider);display:flex;justify-content:space-between;padding:14px 48px;font-size:12px;color:var(--color-neutral-700)"><span>© 2026 Eric Mann</span><span>Technology · Business · Faith · Journal · Writing · Security · Opinion · Series</span></div>
+</div></div>
+
+<!-- ═══════ 1d JOURNAL POST ═══════ -->
+<div class="dv-opt" id="1d"><div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a>Journal post — short-form, date-led, syndication links, stream below</div>
+<div class="dv-card pg" style="width:1280px" data-screen-label="Journal post">
+<div style="padding:0 48px">
+  <div style="display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:32px;padding:14px 0 12px;border-bottom:2px solid var(--color-divider)">
+    <a href="#" style="font-weight:800;font-size:22px;letter-spacing:-0.02em">Eric Mann</a>
+    <nav style="display:flex;gap:22px;font-size:13px;font-weight:600"><a href="#">Technology</a><a href="#">Business</a><a href="#">Faith</a><a href="#" style="color:var(--color-accent)">Journal</a><a href="#">Writing</a><a href="#">Security</a><a href="#">Opinion</a><a href="#" style="font-weight:400;color:var(--color-neutral-700)">Series</a></nav>
+    <a href="#" style="font-size:12px;color:var(--color-neutral-700)">Newsletter</a>
+  </div>
+  <div style="display:grid;grid-template-columns:minmax(0,3fr) minmax(0,7fr) minmax(0,2fr);gap:0 48px;padding:40px 0 48px">
+    <div>
+      <p style="margin:0 0 6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Journal</p>
+      <p style="margin:0 0 0 -0.03em;font-size:48px;line-height:1;font-weight:800;letter-spacing:-0.025em;font-feature-settings:'tnum' 1">Sept 20</p>
+      <p style="margin:6px 0 0;font-size:14px;color:var(--color-neutral-700)">Sunday · 7:42 am · Portland</p>
+    </div>
+    <article style="max-width:36em">
+      <h1 style="margin:0 0 18px;font-size:28px;line-height:1.15;letter-spacing:-0.015em">The coffee grinder as a threat model</h1>
+      <div style="font-size:18px;line-height:1.65">
+        <p style="margin:0 0 18px">Ran the burr grinder this morning and thought, as one does, about attack surface. The grinder has one job and one input. It cannot be talked into doing anything else. There is no admin panel.</p>
+        <p style="margin:0 0 18px">Most of the software I inherit is the opposite: a thousand inputs, twelve jobs, and a settings page nobody has fully read. I don't think the answer is fewer features. I think it's knowing which of them are load-bearing.</p>
+        <p style="margin:0">Anyway. Good coffee. Back to part 4.</p>
+      </div>
+      <sc-if value="{{ journalSocial }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;gap:20px;align-items:center;margin-top:28px;padding-top:14px;border-top:1px solid var(--color-divider);font-size:13px;color:var(--color-neutral-700)">
+        <span>Also posted to</span><a href="#" style="font-weight:600;color:var(--color-text)">X</a><a href="#" style="font-weight:600;color:var(--color-text)">Mastodon</a><span style="margin-left:auto">212 words</span>
+      </div>
+      </sc-if>
+    </article>
+    <div style="font-size:12px;color:var(--color-neutral-700);line-height:1.5"><p style="margin:0 0 8px">Journal entries are short, unpolished and mirrored to social. Longer thoughts land in a section.</p><a href="#" style="color:var(--color-accent-700)">Journal RSS</a></div>
+  </div>
+
+  <div style="height:2px;background:var(--color-divider)"></div>
+  <section style="padding:24px 0 40px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px"><h6 style="margin:0;font-size:12px">Earlier this week</h6><a href="#" style="font-size:12px;color:var(--color-neutral-700)">Full journal · 87 entries</a></div>
+    <sc-for list="{{ journalStream }}" as="j" hint-placeholder-count="5">
+      <a href="#" style="display:grid;grid-template-columns:minmax(0,3fr) minmax(0,7fr) minmax(0,2fr);gap:0 48px;padding:18px 0;border-top:1px solid var(--color-divider);align-items:baseline">
+        <span style="font-weight:800;font-size:20px;letter-spacing:-0.015em;font-feature-settings:'tnum' 1">{{ j.day }} <span style="font-weight:400;font-size:13px;color:var(--color-neutral-700);margin-left:8px">{{ j.time }}</span></span>
+        <span style="font-size:16px;line-height:1.5;max-width:40em">{{ j.text }}</span>
+        <span style="font-size:12px;color:var(--color-neutral-600);justify-self:end">{{ j.words }} words</span>
+      </a>
+    </sc-for>
+  </section>
+</div>
+<div style="border-top:2px solid var(--color-divider);display:flex;justify-content:space-between;padding:14px 48px;font-size:12px;color:var(--color-neutral-700)"><span>© 2026 Eric Mann</span><span>Technology · Business · Faith · Journal · Writing · Security · Opinion · Series</span></div>
+</div></div>
+
+<!-- ═══════ 1e SECTION ARCHIVE ═══════ -->
+<div class="dv-opt" id="1e"><div class="dv-olabel"><a class="dv-oid" href="#1e">1e</a>Section archive (Security) — chronological, grouped by year, tag filter, rail of series</div>
+<div class="dv-card pg" style="width:1280px" data-screen-label="Archive — Security">
+<div style="padding:0 48px">
+  <div style="display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:32px;padding:14px 0 12px;border-bottom:2px solid var(--color-divider)">
+    <a href="#" style="font-weight:800;font-size:22px;letter-spacing:-0.02em">Eric Mann</a>
+    <nav style="display:flex;gap:22px;font-size:13px;font-weight:600"><a href="#">Technology</a><a href="#">Business</a><a href="#">Faith</a><a href="#">Journal</a><a href="#">Writing</a><a href="#" style="color:var(--color-accent)">Security</a><a href="#">Opinion</a><a href="#" style="font-weight:400;color:var(--color-neutral-700)">Series</a></nav>
+    <a href="#" style="font-size:12px;color:var(--color-neutral-700)">Newsletter</a>
+  </div>
+  <header style="display:grid;grid-template-columns:minmax(0,8fr) minmax(0,4fr);gap:0 64px;padding:40px 0 28px;align-items:end">
+    <div>
+      <p style="margin:0 0 10px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Section</p>
+      <h1 style="margin:0 0 14px -0.058em;font-size:80px;line-height:.95;letter-spacing:-0.03em">Security</h1>
+      <p style="margin:0;font-size:17px;line-height:1.5;color:var(--color-neutral-800);max-width:52ch">Application security for people who ship. Threat models, disclosures, and the occasional post-mortem — written from the engineer's side of the incident.</p>
+    </div>
+    <div style="font-size:13px;color:var(--color-neutral-700);font-feature-settings:'tnum' 1;line-height:1.6">36 articles · 2014–2026<br>4 series touch this section<br><a href="#" style="color:var(--color-accent-700)">Security RSS</a></div>
+  </header>
+  <div style="display:flex;gap:6px;align-items:center;padding:12px 0;border-top:2px solid var(--color-divider);border-bottom:1px solid var(--color-divider);font-size:12px">
+    <span style="color:var(--color-neutral-700);margin-right:8px">Filter</span>
+    <span class="tag tag-accent">All</span><span class="tag tag-neutral">wordpress</span><span class="tag tag-neutral">threat-modeling</span><span class="tag tag-neutral">cryptography</span><span class="tag tag-neutral">disclosure</span><span class="tag tag-neutral">passwords</span>
+    <span style="margin-left:auto;color:var(--color-neutral-700)">Newest first</span>
+  </div>
+
+  <div style="display:grid;grid-template-columns:minmax(0,8fr) minmax(0,4fr);gap:0 64px;padding:8px 0 48px">
+    <div>
+      <sc-for list="{{ archive }}" as="y" hint-placeholder-count="2">
+        <div style="display:grid;grid-template-columns:120px 1fr;gap:0 24px;padding:24px 0 8px;border-top:2px solid var(--color-divider)">
+          <p style="margin:0;font-size:32px;font-weight:800;letter-spacing:-0.02em;font-feature-settings:'tnum' 1;line-height:1">{{ y.year }}</p>
+          <div>
+            <sc-for list="{{ y.posts }}" as="p" hint-placeholder-count="3">
+              <a href="#" style="display:grid;grid-template-columns:72px 1fr;gap:0 20px;padding:14px 0;border-bottom:1px solid var(--color-divider)">
+                <span style="font-size:12px;color:var(--color-neutral-700);font-feature-settings:'tnum' 1;padding-top:4px">{{ p.date }}</span>
+                <span><span style="display:block;font-weight:800;font-size:20px;line-height:1.2">{{ p.title }}</span><span style="display:block;font-size:14px;line-height:1.45;color:var(--color-neutral-800);margin-top:5px;max-width:56ch">{{ p.dek }}</span><span style="display:block;font-size:12px;color:var(--color-neutral-700);margin-top:6px">{{ p.meta }}</span></span>
+              </a>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+      <div style="display:flex;justify-content:space-between;padding:20px 0;font-size:13px;font-weight:600"><span style="color:var(--color-neutral-500)">← Newer</span><a href="#" style="color:var(--color-accent-700)">Older (2014–2022) →</a></div>
+    </div>
+    <aside style="padding-top:24px;display:flex;flex-direction:column;gap:28px">
+      <section>
+        <div style="padding-bottom:8px;border-bottom:2px solid var(--color-divider)"><h6 style="margin:0;font-size:12px">Series in Security</h6></div>
+        <sc-for list="{{ secSeries }}" as="s" hint-placeholder-count="3">
+          <a href="#" style="display:grid;grid-template-columns:10px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--color-divider)"><span style="width:10px;height:10px;background:var(--color-accent);margin-top:5px"></span><span><span style="display:block;font-weight:800;font-size:15px;line-height:1.25">{{ s.title }}</span><span style="display:block;font-size:12px;color:var(--color-neutral-700);margin-top:3px">{{ s.meta }}</span></span></a>
+        </sc-for>
+      </section>
+      <section>
+        <div style="padding-bottom:8px;border-bottom:2px solid var(--color-divider)"><h6 style="margin:0;font-size:12px">Most read</h6></div>
+        <a href="#" style="display:grid;grid-template-columns:24px 1fr;gap:8px;padding:10px 0;border-bottom:1px solid var(--color-divider);font-size:14px;font-weight:600;line-height:1.35"><span style="color:var(--color-neutral-500);font-weight:800">1</span><span>Nonces are not CSRF tokens</span></a>
+        <a href="#" style="display:grid;grid-template-columns:24px 1fr;gap:8px;padding:10px 0;border-bottom:1px solid var(--color-divider);font-size:14px;font-weight:600;line-height:1.35"><span style="color:var(--color-neutral-500);font-weight:800">2</span><span>Reading a CVE like an engineer</span></a>
+        <a href="#" style="display:grid;grid-template-columns:24px 1fr;gap:8px;padding:10px 0;border-bottom:1px solid var(--color-divider);font-size:14px;font-weight:600;line-height:1.35"><span style="color:var(--color-neutral-500);font-weight:800">3</span><span>Why I still recommend hardware keys to my parents</span></a>
+      </section>
+    </aside>
+  </div>
+</div>
+<div style="border-top:2px solid var(--color-divider);display:flex;justify-content:space-between;padding:14px 48px;font-size:12px;color:var(--color-neutral-700)"><span>© 2026 Eric Mann</span><span>Technology · Business · Faith · Journal · Writing · Security · Opinion · Series</span></div>
+</div></div>
+
+<!-- ═══════ 1f SERIES HUB ═══════ -->
+<div class="dv-opt" id="1f"><div class="dv-olabel"><a class="dv-oid" href="#1f">1f</a>Series hub — cross-category, one featured series plus a two-column index</div>
+<div class="dv-card pg" style="width:1280px" data-screen-label="Series hub">
+<div style="padding:0 48px">
+  <div style="display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:32px;padding:14px 0 12px;border-bottom:2px solid var(--color-divider)">
+    <a href="#" style="font-weight:800;font-size:22px;letter-spacing:-0.02em">Eric Mann</a>
+    <nav style="display:flex;gap:22px;font-size:13px;font-weight:600"><a href="#">Technology</a><a href="#">Business</a><a href="#">Faith</a><a href="#">Journal</a><a href="#">Writing</a><a href="#">Security</a><a href="#">Opinion</a><a href="#" style="color:var(--color-accent)">Series</a></nav>
+    <a href="#" style="font-size:12px;color:var(--color-neutral-700)">Newsletter</a>
+  </div>
+  <header style="padding:40px 0 28px;display:grid;grid-template-columns:minmax(0,8fr) minmax(0,4fr);gap:0 64px;align-items:end">
+    <div><h1 style="margin:0 0 14px -0.058em;font-size:80px;line-height:.95;letter-spacing:-0.03em">Series</h1><p style="margin:0;font-size:17px;line-height:1.5;color:var(--color-neutral-800);max-width:52ch">Longer arguments, split across posts and sometimes across sections. Each series has an order, a status, and a single page that holds it together.</p></div>
+    <div style="font-size:13px;color:var(--color-neutral-700);line-height:1.6;font-feature-settings:'tnum' 1">11 series · 3 in progress<br>Spanning Technology, Security, Faith, Business, Writing</div>
+  </header>
+  <div style="height:2px;background:var(--color-divider)"></div>
+
+  <!-- featured -->
+  <section style="display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:0 64px;padding:28px 0 36px">
+    <div>
+      <p style="margin:0 0 10px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">In progress · Technology · Security</p>
+      <h2 style="margin:0 0 12px;font-size:40px;line-height:1.02;letter-spacing:-0.02em">Hardening WordPress</h2>
+      <p style="margin:0 0 16px;font-size:16px;line-height:1.5;color:var(--color-neutral-800)">Six parts on defending the parts of a WordPress install that scanners ignore: configuration, keys, the database, and the people with logins.</p>
+      <div style="display:flex;gap:4px;margin-bottom:8px"><span style="flex:1;height:6px;background:var(--color-neutral-900)"></span><span style="flex:1;height:6px;background:var(--color-neutral-900)"></span><span style="flex:1;height:6px;background:var(--color-neutral-900)"></span><span style="flex:1;height:6px;background:var(--color-neutral-300)"></span><span style="flex:1;height:6px;background:var(--color-neutral-300)"></span><span style="flex:1;height:6px;background:var(--color-neutral-300)"></span></div>
+      <p style="margin:0 0 18px;font-size:12px;color:var(--color-neutral-700);font-feature-settings:'tnum' 1">3 of 6 published · next part Sept 26</p>
+      <div style="display:flex;gap:10px"><a href="#" class="btn btn-primary">Start at part 1</a><a href="#" class="btn btn-secondary">Follow this series</a></div>
+    </div>
+    <ol style="list-style:none;margin:0;padding:0;border-top:2px solid var(--color-divider)">
+      <sc-for list="{{ parts }}" as="p" hint-placeholder-count="6">
+        <li><a href="#" style="display:grid;grid-template-columns:40px 1fr auto;gap:16px;padding:12px 0;border-bottom:1px solid var(--color-divider);align-items:baseline;font-size:16px;line-height:1.3"><span style="font-weight:800;color:var(--color-neutral-500);font-feature-settings:'tnum' 1">{{ p.n }}</span><span style="font-weight:{{ p.weight }};color:{{ p.color }}">{{ p.title }}</span><span style="font-size:12px;color:var(--color-neutral-700)">{{ p.date }}</span></a></li>
+      </sc-for>
+    </ol>
+  </section>
+
+  <div style="height:2px;background:var(--color-divider)"></div>
+  <section style="padding:24px 0 48px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px"><h6 style="margin:0;font-size:12px">All series</h6><span style="font-size:12px;color:var(--color-neutral-700)">Sorted by last update</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 48px">
+      <sc-for list="{{ allSeries }}" as="s" hint-placeholder-count="6">
+        <a href="#" style="display:grid;grid-template-columns:10px 1fr auto;gap:0 14px;padding:18px 0;border-top:1px solid var(--color-divider);align-items:start">
+          <span style="width:10px;height:10px;background:{{ s.dot }};margin-top:6px"></span>
+          <span><span style="display:block;font-weight:800;font-size:20px;line-height:1.15;letter-spacing:-0.01em">{{ s.title }}</span><span style="display:block;font-size:14px;line-height:1.45;color:var(--color-neutral-800);margin-top:5px;max-width:44ch">{{ s.dek }}</span><span style="display:block;font-size:12px;color:var(--color-neutral-700);margin-top:8px">{{ s.cats }}</span></span>
+          <span style="font-size:12px;color:var(--color-neutral-700);font-feature-settings:'tnum' 1;text-align:right;line-height:1.5">{{ s.count }}<br><span style="color:{{ s.statusColor }};font-weight:600">{{ s.status }}</span></span>
+        </a>
+      </sc-for>
+    </div>
+  </section>
+</div>
+<div style="border-top:2px solid var(--color-divider);display:flex;justify-content:space-between;padding:14px 48px;font-size:12px;color:var(--color-neutral-700)"><span>© 2026 Eric Mann</span><span>Technology · Business · Faith · Journal · Writing · Security · Opinion · Series</span></div>
+</div></div>
+
+<!-- ═══════ 1g WRITING / FICTION ═══════ -->
+<div class="dv-opt" id="1g"><div class="dv-olabel"><a class="dv-oid" href="#1g">1g</a>Writing — fiction showcase: featured novel, covers shelf, serialized chapters, short fiction</div>
+<div class="dv-card pg" style="width:1280px" data-screen-label="Writing">
+<div style="padding:0 48px">
+  <div style="display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:32px;padding:14px 0 12px;border-bottom:2px solid var(--color-divider)">
+    <a href="#" style="font-weight:800;font-size:22px;letter-spacing:-0.02em">Eric Mann</a>
+    <nav style="display:flex;gap:22px;font-size:13px;font-weight:600"><a href="#">Technology</a><a href="#">Business</a><a href="#">Faith</a><a href="#">Journal</a><a href="#" style="color:var(--color-accent)">Writing</a><a href="#">Security</a><a href="#">Opinion</a><a href="#" style="font-weight:400;color:var(--color-neutral-700)">Series</a></nav>
+    <a href="#" style="font-size:12px;color:var(--color-neutral-700)">Newsletter</a>
+  </div>
+  <!-- featured novel -->
+  <section style="display:grid;grid-template-columns:320px minmax(0,1fr);gap:0 64px;padding:40px 0 40px;align-items:end">
+    <div class="grayscale" style="aspect-ratio:2/3;background:var(--color-surface);box-shadow:var(--shadow-lg)"><image-slot id="novel-1g" shape="rect" placeholder="Novel cover — prints grayscale"></image-slot></div>
+    <div>
+      <p style="margin:0 0 12px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Writing · Novel · 2025</p>
+      <h1 style="margin:0 0 16px -0.04em;font-size:64px;line-height:.98;letter-spacing:-0.03em;max-width:14ch">The Quiet Ledger</h1>
+      <p style="margin:0 0 20px;font-size:19px;line-height:1.45;color:var(--color-neutral-800);max-width:48ch">A forensic accountant in a company town discovers that the books she was hired to audit are the honest ones. Literary thriller, 96,000 words. Serialized here first, one chapter a week.</p>
+      <div style="display:flex;gap:10px;margin-bottom:22px"><a href="#" class="btn btn-primary">Read chapter 1</a><a href="#" class="btn btn-secondary">Buy the paperback</a><a href="#" class="btn btn-ghost">Ebook</a></div>
+      <div style="display:grid;grid-template-columns:repeat(3,auto);gap:0 40px;justify-content:start;border-top:2px solid var(--color-divider);padding-top:14px;font-size:13px;color:var(--color-neutral-700);font-feature-settings:'tnum' 1">
+        <span><strong style="display:block;color:var(--color-text);font-size:20px;letter-spacing:-0.01em">12 / 31</strong>chapters published</span>
+        <span><strong style="display:block;color:var(--color-text);font-size:20px;letter-spacing:-0.01em">Fridays</strong>new chapter</span>
+        <span><strong style="display:block;color:var(--color-text);font-size:20px;letter-spacing:-0.01em">~14 min</strong>per chapter</span>
+      </div>
+    </div>
+  </section>
+
+  <div style="height:2px;background:var(--color-divider)"></div>
+  <div style="display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:0 64px;padding:28px 0 48px">
+    <section>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:8px;border-bottom:2px solid var(--color-divider)"><h6 style="margin:0;font-size:12px">The Quiet Ledger — chapters</h6><a href="#" style="font-size:12px;color:var(--color-neutral-700)">Newest first</a></div>
+      <sc-for list="{{ chapters }}" as="c" hint-placeholder-count="6">
+        <a href="#" style="display:grid;grid-template-columns:44px 1fr auto;gap:0 16px;padding:13px 0;border-bottom:1px solid var(--color-divider);align-items:baseline">
+          <span style="font-weight:800;font-size:15px;color:var(--color-neutral-500);font-feature-settings:'tnum' 1">{{ c.n }}</span>
+          <span><span style="display:block;font-weight:800;font-size:18px;line-height:1.2">{{ c.title }}</span><span style="display:block;font-size:13px;color:var(--color-neutral-800);margin-top:3px">{{ c.dek }}</span></span>
+          <span style="font-size:12px;color:var(--color-neutral-700);font-feature-settings:'tnum' 1">{{ c.date }}</span>
+        </a>
+      </sc-for>
+      <a href="#" style="display:block;padding:14px 0;font-size:13px;font-weight:600;color:var(--color-accent-700)">Chapters 1–6 →</a>
+    </section>
+    <div style="display:flex;flex-direction:column;gap:32px">
+      <section>
+        <div style="padding-bottom:8px;border-bottom:2px solid var(--color-divider)"><h6 style="margin:0;font-size:12px">Other books</h6></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding-top:16px">
+          <a href="#" style="display:block"><span class="grayscale" style="display:block;aspect-ratio:2/3;background:var(--color-surface)"><image-slot id="book-a" shape="rect" placeholder="Cover"></image-slot></span><span style="display:block;font-weight:800;font-size:14px;line-height:1.25;margin-top:10px">Salt Water Wires</span><span style="display:block;font-size:12px;color:var(--color-neutral-700);margin-top:2px">Novel · 2022</span></a>
+          <a href="#" style="display:block"><span class="grayscale" style="display:block;aspect-ratio:2/3;background:var(--color-surface)"><image-slot id="book-b" shape="rect" placeholder="Cover"></image-slot></span><span style="display:block;font-weight:800;font-size:14px;line-height:1.25;margin-top:10px">Eleven Small Doors</span><span style="display:block;font-size:12px;color:var(--color-neutral-700);margin-top:2px">Stories · 2019</span></a>
+          <a href="#" style="display:block"><span class="grayscale" style="display:block;aspect-ratio:2/3;background:var(--color-surface)"><image-slot id="book-c" shape="rect" placeholder="Cover"></image-slot></span><span style="display:block;font-weight:800;font-size:14px;line-height:1.25;margin-top:10px">Failover</span><span style="display:block;font-size:12px;color:var(--color-neutral-700);margin-top:2px">Novella · 2017</span></a>
+        </div>
+      </section>
+      <section>
+        <div style="padding-bottom:8px;border-bottom:2px solid var(--color-divider)"><h6 style="margin:0;font-size:12px">Short fiction</h6></div>
+        <sc-for list="{{ shorts }}" as="s" hint-placeholder-count="4">
+          <a href="#" style="display:grid;grid-template-columns:1fr auto;gap:16px;padding:11px 0;border-bottom:1px solid var(--color-divider);align-items:baseline"><span style="font-weight:600;font-size:15px;line-height:1.3">{{ s.title }}</span><span style="font-size:12px;color:var(--color-neutral-700);font-feature-settings:'tnum' 1">{{ s.meta }}</span></a>
+        </sc-for>
+      </section>
+    </div>
+  </div>
+</div>
+<div style="border-top:2px solid var(--color-divider);display:flex;justify-content:space-between;padding:14px 48px;font-size:12px;color:var(--color-neutral-700)"><span>© 2026 Eric Mann</span><span>Technology · Business · Faith · Journal · Writing · Security · Opinion · Series</span></div>
+</div></div>
+
+</div>
+<p class="dv-next">Try next: "merge <a class="dv-oid" href="#1a">1a</a>'s lead photo into <a class="dv-oid" href="#1b">1b</a>'s density" · "show <a class="dv-oid" href="#1a">1a</a> at phone width" · "add a Faith article page with the verse block inline"</p>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showVerse&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Front page&quot;},&quot;journalSocial&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Journal&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const journal = [
+      { when: 'Today · 7:42 am', text: 'The coffee grinder as a threat model. One job, one input, no admin panel.' },
+      { when: 'Yesterday · 9:10 pm', text: 'Part 3 is up. Part 4 is the one I actually wanted to write.' },
+      { when: 'Thu · 12:31 pm', text: 'Forty minutes of CI a day is two working weeks a year. Doing the math out loud tomorrow.' },
+      { when: 'Wed · 6:05 am', text: 'Rain. Psalm 46. A very quiet build server.' },
+    ];
+    const journalMore = journal.concat([
+      { when: 'Tue · 8:20 pm', text: 'Read a CVE write-up that was mostly marketing. Wrote a grumpy draft. Deleted it.' },
+      { when: 'Mon · 7:55 am', text: 'New chapter Friday. Marta finds the second ledger.' },
+    ]);
+    const journalStream = [
+      { day: 'Sept 19', time: '9:10 pm', text: 'Part 3 is up. Part 4 is the one I actually wanted to write — keys in the environment, rotated live, no downtime. It took three weekends to get the demo honest.', words: 61 },
+      { day: 'Sept 18', time: '12:31 pm', text: 'Forty minutes of CI a day is two working weeks a year. Doing the math out loud tomorrow.', words: 22 },
+      { day: 'Sept 17', time: '6:05 am', text: 'Rain. Psalm 46. A very quiet build server.', words: 9 },
+      { day: 'Sept 16', time: '8:20 pm', text: 'Read a CVE write-up that was mostly marketing. Wrote a grumpy draft. Deleted it. This is growth, apparently.', words: 21 },
+      { day: 'Sept 15', time: '7:55 am', text: 'New chapter Friday. Marta finds the second ledger and the reader finds out what the first one was for.', words: 22 },
+    ];
+    const series = [
+      { title: 'Hardening WordPress', meta: 'Technology · Security · 3 of 6' },
+      { title: 'The Consultant’s Ledger', meta: 'Business · 5 of 8' },
+      { title: 'Ordinary Time', meta: 'Faith · 9 of 12 · Sundays' },
+    ];
+    const secSeries = series.slice(0, 1).concat([
+      { title: 'Reading CVEs', meta: 'Security · complete · 4 parts' },
+      { title: 'Passwords for Parents', meta: 'Security · Journal · 3 parts' },
+    ]);
+    const ink = 'var(--color-text)', dim = 'var(--color-neutral-700)';
+    const parts = [
+      { n: '01', title: 'What a scanner sees — and what it can’t', date: 'Aug 22', weight: 400, color: ink },
+      { n: '02', title: 'Salts, keys and the rotation you skipped', date: 'Sept 5', weight: 400, color: ink },
+      { n: '03', title: 'Stop trusting the database: signing your options table', date: 'Sept 19', weight: 800, color: 'var(--color-accent-700)' },
+      { n: '04', title: 'Keys in the environment, rotated live', date: 'Sept 26', weight: 400, color: dim },
+      { n: '05', title: 'The admin with the weak password', date: 'Oct 3', weight: 400, color: dim },
+      { n: '06', title: 'Incident: what to do when the alarm fires', date: 'Oct 10', weight: 400, color: dim },
+    ];
+    const green = 'var(--color-accent-700)', gray = 'var(--color-neutral-500)';
+    const allSeries = [
+      { title: 'Hardening WordPress', dek: 'Defending the parts of an install scanners ignore.', cats: 'Technology · Security', count: '3 of 6', status: 'In progress', statusColor: green, dot: 'var(--color-accent)' },
+      { title: 'The Consultant’s Ledger', dek: 'Pricing, contracts and the client who pays late twice.', cats: 'Business', count: '5 of 8', status: 'In progress', statusColor: green, dot: 'var(--color-accent)' },
+      { title: 'Ordinary Time', dek: 'Sunday essays through the liturgical year.', cats: 'Faith', count: '9 of 12', status: 'In progress', statusColor: green, dot: 'var(--color-accent)' },
+      { title: 'The Quiet Ledger', dek: 'A serialized novel, one chapter a week.', cats: 'Writing', count: '12 of 31', status: 'Serial', statusColor: green, dot: 'var(--color-accent)' },
+      { title: 'Reading CVEs', dek: 'How to read a vulnerability report like the engineer who has to fix it.', cats: 'Security · Technology', count: '4 parts', status: 'Complete', statusColor: gray, dot: 'var(--color-neutral-900)' },
+      { title: 'Block Editor as Document Model', dek: 'What Gutenberg is actually for.', cats: 'Technology', count: '5 parts', status: 'Complete', statusColor: gray, dot: 'var(--color-neutral-900)' },
+      { title: 'Passwords for Parents', dek: 'Security advice that survives Thanksgiving.', cats: 'Security · Journal', count: '3 parts', status: 'Complete', statusColor: gray, dot: 'var(--color-neutral-900)' },
+      { title: 'Sabbath Engineering', dek: 'Rest as a professional discipline.', cats: 'Faith · Business', count: '6 parts', status: 'Complete', statusColor: gray, dot: 'var(--color-neutral-900)' },
+    ];
+    const archive = [
+      { year: '2026', posts: [
+        { date: 'Sept 10', title: 'Your password manager’s weakest link is the browser extension', dek: 'Threat-modeling the thing we all installed without thinking.', meta: '11 min · threat-modeling · passwords' },
+        { date: 'Aug 30', title: 'Nonces are not CSRF tokens', dek: 'They rhyme with the right idea and that is the problem.', meta: '7 min · wordpress' },
+        { date: 'Aug 19', title: 'Reading a CVE like an engineer', dek: 'Severity scores are for procurement. Here is what to read instead.', meta: '9 min · Series: Reading CVEs, 4 of 4' },
+        { date: 'May 2', title: 'Disclosure timelines, from the other side of the inbox', dek: 'Ninety days is a courtesy, not a contract.', meta: '8 min · disclosure' },
+      ] },
+      { year: '2025', posts: [
+        { date: 'Nov 14', title: 'Why I still recommend hardware keys to my parents', dek: 'The security control that survives Thanksgiving.', meta: '6 min · Series: Passwords for Parents, 3 of 3' },
+        { date: 'Jul 3', title: 'Hashing is not encryption. Encoding is not either.', dek: 'A glossary for the meeting you are about to have.', meta: '5 min · cryptography' },
+        { date: 'Feb 20', title: 'Post-mortem: the plugin update that wasn’t', dek: 'A supply-chain scare, in the order it actually happened.', meta: '13 min · wordpress · disclosure' },
+      ] },
+    ];
+    const chapters = [
+      { n: '12', title: 'Reconciliation', dek: 'Marta finds the second set of books.', date: 'Sept 19' },
+      { n: '11', title: 'Accruals', dek: 'What gets counted before it happens.', date: 'Sept 12' },
+      { n: '10', title: 'The Auditor’s Lunch', dek: 'Nobody in Harlan eats alone by accident.', date: 'Sept 5' },
+      { n: '09', title: 'Depreciation', dek: 'The mill, the town, and a number that only goes down.', date: 'Aug 29' },
+      { n: '08', title: 'Material Weakness', dek: 'Marta writes the sentence she cannot unwrite.', date: 'Aug 22' },
+      { n: '07', title: 'Going Concern', dek: 'The founder asks a question he already knows the answer to.', date: 'Aug 15' },
+    ];
+    const shorts = [
+      { title: 'The Last Cron Job', meta: '3,100 words · 2026' },
+      { title: 'A Field Guide to Empty Offices', meta: '1,800 words · 2025' },
+      { title: 'Uptime', meta: '900 words · 2024' },
+      { title: 'What the River Audits', meta: '4,400 words · 2023' },
+    ];
+    const techCompact = [
+      { title: 'Why I moved my build pipeline off GitHub Actions', date: 'Sept 16' }, { title: 'PHP 8.5 readonly classes: nobody asked, everybody needed', date: 'Sept 12' },
+      { title: 'The block editor is a document model. Treat it like one.', date: 'Sept 8' }, { title: 'Composer lockfiles are a security control', date: 'Sept 2' },
+      { title: 'On writing a WordPress theme in 2026', date: 'Aug 28' }, { title: 'Transients, object caches and the lie of “fast enough”', date: 'Aug 21' },
+    ];
+    const bizCompact = [
+      { title: 'Charge for the outcome, bill for the hour', date: 'Sept 15' }, { title: 'The one-page operating agreement', date: 'Sept 3' },
+      { title: 'Fire the client who pays late twice', date: 'Aug 27' }, { title: 'Retainers are a promise about attention', date: 'Aug 14' }, { title: 'What a CTO actually does all day', date: 'Aug 6' },
+    ];
+    const secCompact = [
+      { title: 'Your password manager’s weakest link is the browser extension', date: 'Sept 10' }, { title: 'Nonces are not CSRF tokens', date: 'Aug 30' },
+      { title: 'Reading a CVE like an engineer', date: 'Aug 19' }, { title: 'Disclosure timelines, from the other side of the inbox', date: 'May 2' },
+    ];
+    const faithCompact = [
+      { title: 'On praying for the people who file the bug reports', date: 'Sept 14' }, { title: 'Sabbath for people who ship on Fridays', date: 'Sept 1' }, { title: 'Ordinary Time, week nine', date: 'Aug 24' },
+    ];
+    const opCompact = [
+      { title: 'Open source is not a business model. It is a distribution channel.', date: 'Sept 11' }, { title: 'The city council meeting nobody attends', date: 'Aug 22' }, { title: 'Local news is infrastructure', date: 'Jul 30' },
+    ];
+    const journalLong = [
+      { when: 'Today · Sept 20', title: 'A rainbow over the rail yard', excerpt: 'Walking back from the coffee place there was a full rainbow over the rail yard — the kind that touches down at both ends. Two guys in hard hats stopped and took pictures. So did I.' },
+      { when: 'Thursday · Sept 18', title: 'Two working weeks a year', excerpt: 'Forty minutes of CI a day, every day. I did the math out loud at dinner and nobody was impressed, but I was, and now I have to do something about it.' },
+      { when: 'Wednesday · Sept 17', title: 'Rain, Psalm 46, a quiet build server', excerpt: 'The kind of morning where nothing is broken and you almost distrust it. Read the psalm twice. Left the server alone.' },
+    ];
+    const journalStream2 = [
+      { day: 'Sept 18', title: 'Two working weeks a year', text: 'Forty minutes of CI a day, every day. I did the math out loud at dinner and nobody was impressed, but I was, and now I have to do something about it.', words: 184 },
+      { day: 'Sept 17', title: 'Rain, Psalm 46, a quiet build server', text: 'The kind of morning where nothing is broken and you almost distrust it. Read the psalm twice. Left the server alone.', words: 96 },
+      { day: 'Sept 16', title: 'The CVE that was mostly marketing', text: 'Read a vulnerability write-up that spent more words on the logo than the patch. Wrote a grumpy draft. Deleted it. This is growth, apparently.', words: 142 },
+      { day: 'Sept 15', title: 'Marta finds the second ledger', text: 'Chapter 12 is done. The reader finally learns what the first set of books was for, which means I finally had to decide.', words: 211 },
+    ];
+    const serials = [
+      { title: 'The Quiet Ledger', dek: 'A forensic accountant in a company town discovers the books she was hired to audit are the honest ones.', form: 'Novel · literary thriller · monthly', count: '12 of 31', status: 'In progress', statusColor: 'var(--color-accent-700)', dot: 'var(--color-accent)' },
+      { title: 'Failover', dek: 'Three engineers, one data center, and the night the generators did not start.', form: 'Novella', count: '9 chapters', status: 'Complete', statusColor: 'var(--color-neutral-500)', dot: 'var(--color-neutral-900)' },
+      { title: 'Salt Water Wires', dek: 'A cable-landing station on the Oregon coast, and the family that has kept it running for sixty years.', form: 'Novel · in print', count: '24 chapters', status: 'Complete', statusColor: 'var(--color-neutral-500)', dot: 'var(--color-neutral-900)' },
+      { title: 'The Parish Register', dek: 'Interlinked stories from one small church, told across a century.', form: 'Story cycle', count: '5 of 12', status: 'On hiatus', statusColor: 'var(--color-neutral-600)', dot: 'var(--color-neutral-400)' },
+    ];
+    const chaptersShort = chapters.slice(0, 4);
+    const journalPhone = journalLong.slice(0, 2);
+    const phoneCells = [
+      { name: 'Technology', count: '431', lead: 'Why I moved my build pipeline off GitHub Actions — and what it cost', leadDate: 'Sept 16 · 9 min', more: techCompact.slice(1, 3) },
+      { name: 'Business', count: '231', lead: 'Charge for the outcome, bill for the hour', leadDate: 'Sept 15', more: bizCompact.slice(1, 3) },
+      { name: 'Faith', count: '100', lead: 'On praying for the people who file the bug reports', leadDate: 'Sept 14', more: faithCompact.slice(1, 2) },
+      { name: 'Security', count: '36', lead: 'Your password manager’s weakest link is the browser extension', leadDate: 'Sept 10', more: secCompact.slice(1, 3) },
+      { name: 'Opinion', count: '24', lead: 'Open source is not a business model. It is a distribution channel.', leadDate: 'Sept 11', more: opCompact.slice(1, 2) },
+    ];
+    // Fallback renders: small pieces of real markup showing the degraded block.
+    const h = React.createElement;
+    const S = { h6: { margin: 0, fontSize: 12, fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase' }, meta: { margin: 0, fontSize: 12, color: 'var(--color-neutral-700)' }, kick: { margin: '0 0 6px', fontSize: 11, letterSpacing: '.08em', textTransform: 'uppercase', fontWeight: 600, color: 'var(--color-accent-700)' }, hd: { margin: '0 0 4px', fontSize: 17, fontWeight: 800, lineHeight: 1.25 }, row: { borderTop: '1px solid var(--color-divider)', padding: '10px 0' }, head: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }, sq: (c) => ({ width: 10, height: 10, background: c, marginTop: 5, flex: 'none' }) };
+    const head = (t, r) => h('div', { style: S.head }, h('h6', { style: S.h6 }, t), h('span', { style: { fontSize: 11, color: 'var(--color-neutral-600)' } }, r));
+    const fallbacks = [
+      { block: 'Writing cell · no active serial', when: 'No serial is in progress — the last chapter shipped months ago, or you haven’t started the next story.', rule: 'The featured half collapses. The cell becomes an index of finished work under a “From the shelf” kicker; the button disappears, the section link stays.',
+        render: h('div', null, head('Writing', 'All serials →'), h('p', { style: S.kick }, 'From the shelf'),
+          ['The Quiet Ledger · Novel · 31 chapters', 'Failover · Novella · 9 chapters', 'Salt Water Wires · Novel · in print'].map((t, i) => h('a', { key: i, href: '#', style: { display: 'block', ...S.row, fontWeight: 800, fontSize: 15, lineHeight: 1.3 } }, t.split(' · ')[0], h('span', { style: { fontWeight: 400, fontSize: 12, color: 'var(--color-neutral-700)', marginLeft: 8 } }, t.split(' · ').slice(1).join(' · ')))),
+          h('p', { style: { ...S.meta, marginTop: 8 } }, 'Short fiction and the full index live on the Writing page.')) },
+      { block: 'Writing cell · no fiction at all yet', when: 'Category Writing has posts about writing, but no serial/story objects exist.', rule: 'Behave like any other section cell: 1 featured + 2 headlines from the category. The fiction pattern is not rendered.',
+        render: h('div', null, head('Writing', '70 →'), h('h3', { style: { ...S.hd, fontSize: 21, marginBottom: 6 } }, 'On finishing a draft you no longer believe in'), h('p', { style: S.meta }, 'Sept 6'), h('div', { style: { ...S.row, marginTop: 10 } }, h('p', { style: { ...S.hd, fontSize: 15 } }, 'Outlining for people who hate outlines'), h('p', { style: S.meta }, 'Aug 12'))) },
+      { block: 'Series strip · nothing in progress', when: 'Every series is marked complete.', rule: 'Kicker changes to “Series” and shows the three most recently completed with neutral-900 squares. Strip is removed only if zero series exist.',
+        render: h('div', null, head('Series', 'All →'), ['Reading CVEs · complete · 4 parts', 'Block Editor as Document Model · 5 parts', 'Sabbath Engineering · 6 parts'].map((t, i) => h('a', { key: i, href: '#', style: { display: 'flex', gap: 12, ...S.row } }, h('span', { style: S.sq('var(--color-neutral-900)') }), h('span', null, h('span', { style: { display: 'block', fontWeight: 800, fontSize: 15, lineHeight: 1.3 } }, t.split(' · ')[0]), h('span', { style: { display: 'block', fontSize: 12, color: 'var(--color-neutral-700)' } }, t.split(' · ').slice(1).join(' · ')))))) },
+      { block: 'Verse of the day · API unreachable', when: 'The daily fetch fails, or dailymedtoday returns nothing for today.', rule: 'Show the last good verse with its own date — never blank, never “loading”. If there has never been a good fetch, the box is not rendered and the Journal moves up.',
+        render: h('div', { style: { background: 'var(--color-surface)', padding: '14px 16px' } }, h('p', { style: S.kick }, 'Verse of the day'), h('p', { style: { margin: '0 0 6px', fontSize: 17, lineHeight: 1.35, fontWeight: 600 } }, '“The Lord is my light and my salvation; whom shall I fear?”'), h('p', { style: { margin: '0 0 8px', fontSize: 13, color: 'var(--color-neutral-800)' } }, 'Psalm 27:1'), h('p', { style: S.meta }, 'Meditation for Sept 18 from ', h('a', { href: '#', style: { color: 'var(--color-accent-700)', textDecoration: 'underline', textUnderlineOffset: 3 } }, 'dailymedtoday.com'))) },
+      { block: 'Journal rail · quiet week', when: 'Fewer than 3 entries in the window, or none in 30 days.', rule: 'Render whatever exists (1–2). If none in 30 days, show the single latest entry with its full date — the rail never lists “no entries”.',
+        render: h('div', null, head('Journal', 'All 87'), h('div', { style: S.row }, h('p', { style: { ...S.meta, marginBottom: 5 } }, 'Aug 3, 2026'), h('p', { style: S.hd }, 'A rainbow over the rail yard'), h('p', { style: { margin: 0, fontSize: 14, lineHeight: 1.5, color: 'var(--color-neutral-800)' } }, 'Walking back from the coffee place there was a full rainbow over the rail yard…'), h('a', { href: '#', style: { display: 'inline-block', marginTop: 8, fontSize: 12, fontWeight: 600, color: 'var(--color-accent-700)' } }, 'Continue →'))) },
+      { block: 'Lead story · no featured image', when: 'The newest Technology post has no featured image.', rule: 'No placeholder box. The headline steps up to 56px and the dek to 19px to hold the space; the rail height governs the row.',
+        render: h('div', null, h('p', { style: S.kick }, 'Technology'), h('h2', { style: { margin: '0 0 8px -0.02em', fontSize: 30, lineHeight: 1.05, letterSpacing: '-0.02em', fontWeight: 800 } }, 'Composer lockfiles are a security control'), h('p', { style: { margin: 0, fontSize: 14, lineHeight: 1.5, color: 'var(--color-neutral-800)' } }, 'Pinning is not paranoia. It is the only reproducible build you have.'), h('p', { style: { ...S.meta, marginTop: 8 } }, 'Sept 2 · 6 min')) },
+      { block: 'Section cell · thin category', when: 'Fewer than 3 posts in the last 90 days (Opinion, Security often).', rule: 'Show what exists — 1 headline is fine. Below 1 post in a year, the cell drops its dek and shows the two most recent regardless of age with full dates. Cell is never removed; the grid is fixed.',
+        render: h('div', null, head('Opinion', '24 →'), h('h3', { style: { ...S.hd, fontSize: 21 } }, 'The city council meeting nobody attends'), h('p', { style: S.meta }, 'Aug 22, 2026'), h('div', { style: { ...S.row, marginTop: 10 } }, h('p', { style: { ...S.hd, fontSize: 15 } }, 'Local news is infrastructure'), h('p', { style: S.meta }, 'Jul 30, 2025'))) },
+      { block: 'Article · not in a series', when: 'Post has no series term (most posts).', rule: 'Series bar, “In this series” aside and prev/next are all omitted. Aside shows “More in {Category}” first; prev/next becomes chronological “Previously / Next in Technology”.',
+        render: h('div', null, h('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', borderTop: '2px solid var(--color-divider)' } }, h('a', { href: '#', style: { padding: '12px 14px 12px 0', borderRight: '1px solid var(--color-divider)' } }, h('span', { style: { ...S.meta, display: 'block', fontSize: 11, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 6 } }, '← Previously in Technology'), h('span', { style: { display: 'block', fontWeight: 800, fontSize: 15, lineHeight: 1.25 } }, 'Composer lockfiles are a security control')), h('a', { href: '#', style: { padding: '12px 0 12px 14px' } }, h('span', { style: { ...S.meta, display: 'block', fontSize: 11, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 6 } }, 'Next →'), h('span', { style: { display: 'block', fontWeight: 800, fontSize: 15, lineHeight: 1.25 } }, 'PHP 8.5 readonly classes')))) },
+      { block: 'Series hub · featured slot', when: 'No series in progress.', rule: 'Feature the most recently completed series with “Complete · N parts” and a fully dark progress bar; buttons become “Start at part 1” only.',
+        render: h('div', null, h('p', { style: S.kick }, 'Complete · Security · Technology'), h('h3', { style: { ...S.hd, fontSize: 24, lineHeight: 1.05, letterSpacing: '-0.02em' } }, 'Reading CVEs'), h('div', { style: { display: 'flex', gap: 4, margin: '10px 0 6px' } }, [0, 1, 2, 3].map(i => h('span', { key: i, style: { flex: 1, height: 6, background: 'var(--color-neutral-900)' } }))), h('p', { style: S.meta }, '4 of 4 published · finished Aug 19'), h('a', { href: '#', className: 'btn btn-primary', style: { marginTop: 12 } }, 'Start at part 1')) },
+    ];
+    return {
+      journalLong, journalStream2, serials, chaptersShort, journalPhone, phoneCells, fallbacks,
+      showVerse: this.props.showVerse ?? true,
+      journalSocial: this.props.journalSocial ?? true,
+      journal, journalMore, journalStream, series, secSeries, parts, allSeries, archive, chapters, shorts,
+      techCompact, bizCompact, secCompact, faithCompact, opCompact,
+    };
+  }
+}
+</script>
+</body>
+</html>
