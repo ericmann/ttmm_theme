@@ -70,7 +70,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P7-06 Newsletter tuning: token_ttl, rate limits
 - [x] P7-07 Static audit: extend forbidden-patterns, run, fix
 - [x] P7-08 Separability tests (theme without plugin, plugin with default theme)
-- [ ] P7-09 Push and manual check (Phase 7)
+- [x] P7-09 Push and manual check (Phase 7)
 - [ ] P8-01 Spike: classic-to-block conversion script (jsdom + rawHandler)
 - [ ] P8-02 CLI convert:export, convert:import, convert:revert
 - [ ] P8-03 CLI audit
@@ -409,3 +409,7 @@ Extended forbidden-patterns.sh for rules 1,3,5,7,8,12,15,16,17,24,32. Fixed real
 Added ThemeAloneTest (unregisters every ttm/* block+binding source, renders all 13 templates, asserts no notices via failOnWarning and no data-ttm-block leakage) and PluginAloneTest (switches to twentytwentyfive, renders all 19 ttm/* blocks with a minimal per-test fixture, asserts semantic non-empty output + no disallowed inline styles).
 Found and fixed 3 real bugs: (1) patterns/section-cell.php's missing pattern header (by design, manually registered) tripped WP's own pattern-directory scanner _doing_it_wrong() on every template render — moved to inc/pattern-templates/ outside the scanned dir, updated both call sites. (2) Seeder::seed_posts() never re-ran Form::on_save() after categories attach (same two-step insert shape P3-11 fixed for PrimaryCategory), so every seeded post's ttm_form stayed "article" — silently broke ttm/story-tiles. (3) Fixing that surfaced that the "empty" seed state's generic "writing-post-*" essays now correctly auto-classify as Stories per 03 §4 once Form derives correctly, breaking its "zero fiction" promise — excluded all Writing-category posts from the "empty" state.
 Full verify green: composer lint 0 errors, 115/115 unit, npm lint/build green, forbidden-patterns clean, 311 integration tests OK (1 pre-existing skip).
+
+### P7-09 — 1f516d1
+Pushed build/2026-09-21 through P7-08 (04c3126) to origin.
+Manual check: NOT VERIFIED (human) — curl -I http://localhost:8888/ shows Cache-Control: public, max-age=N ending at the next local midnight or 06:00; wp ttm verse fetch --force logs a purge (debug.log or Cloudflare when constants are set); the front-page poster shows the mailto button (P7-04 recorded outcome B: jetpack/subscriptions never registers unconnected); switch Settings → These Things Matter → Newsletter to mailto and none and confirm F26 (poster stays, statement only for none).
