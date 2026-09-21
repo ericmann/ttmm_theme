@@ -13,6 +13,7 @@ require_once __DIR__ . '/inc/bindings-compat.php';
 require_once __DIR__ . '/inc/block-styles.php';
 require_once __DIR__ . '/inc/patterns.php';
 require_once __DIR__ . '/inc/image-sizes.php';
+require_once __DIR__ . '/inc/starter-content.php';
 
 add_action(
 	'after_setup_theme',
@@ -40,6 +41,20 @@ add_action(
 				'in_footer' => true,
 				'strategy'  => 'defer',
 			] 
+		);
+	}
+);
+
+add_action(
+	'enqueue_block_editor_assets',
+	static function (): void {
+		$js = get_template_directory() . '/assets/js/variations.js';
+		wp_enqueue_script(
+			'ttm-variations',
+			get_template_directory_uri() . '/assets/js/variations.js',
+			[ 'wp-blocks', 'wp-i18n', 'wp-dom-ready' ],
+			(string) filemtime( $js ),
+			true
 		);
 	}
 );

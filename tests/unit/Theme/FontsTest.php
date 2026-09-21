@@ -43,7 +43,13 @@ class FontsTest extends TestCase {
 	public function test_only_nav_js_is_enqueued_on_the_front_end(): void {
 		$src = (string) file_get_contents( TTM_THEME_DIR . 'functions.php' );
 
-		preg_match_all( '/wp_enqueue_script\(\s*[^,]+,\s*[^,]+\/assets\/js\/([a-z0-9_-]+\.js)/', $src, $matches );
+		// Scope to the wp_enqueue_scripts (front-end) callback only; enqueues under other
+		// hooks (e.g. enqueue_block_editor_assets, editor-only) are out of scope for this rule.
+		$this->assertMatchesRegularExpression( "/add_action\\(\\s*'wp_enqueue_scripts'/", $src );
+		preg_match( "/add_action\\(\\s*'wp_enqueue_scripts',(.*?)\\n\\);/s", $src, $block );
+		$this->assertNotEmpty( $block );
+
+		preg_match_all( '/wp_enqueue_script\(\s*[^,]+,\s*[^,]+\/assets\/js\/([a-z0-9_-]+\.js)/', $block[1], $matches );
 
 		$this->assertNotEmpty( $matches[1] );
 		foreach ( $matches[1] as $script ) {
