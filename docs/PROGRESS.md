@@ -8,7 +8,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P0-03 Dates, Text and Html helpers
 - [x] P0-04 Plugin composition root and API-version compat
 - [x] P0-05 Self-hosted Archivo fonts, theme enqueue and base CSS
-- [ ] P0-06 theme.json v3 presets and token check
+- [x] P0-06 theme.json v3 presets and token check
 - [ ] P0-07 Push, CI and manual check (Phase 0)
 - [ ] P1-01 Series taxonomy, term meta, single-series enforcement
 - [ ] P1-02 Post meta registration and sanitizers
@@ -113,3 +113,8 @@ functions.php: wp_enqueue_scripts registers ttm-theme style (ttm.css, filemtime 
 style.css got the 04 §2 resets appended after the header block; ttm.css got a "/* 0 base */" section with --ttm-rule-1/2 bridge vars only; editor.css created with .editor-styles-wrapper{max-width:820px}.
 37/37 unit tests pass (3 new FontsTest); CSS budget 244/25600 bytes; full verify green.
 Manual check: NOT VERIFIED (human) — open the site and confirm fonts render with zero requests to fonts.googleapis.com/fonts.gstatic.com in the Network tab.
+
+### P0-06 — f7e5dc4
+theme.json v3: palette (bg/surface/text/accent/accent-100/600/700/divider/neutral-100..900) from the token sheet, divider hardcoded to rgba(32,30,29,0.4) (token sheet's color-mix() form is mathematically equivalent); color.custom/customGradient/defaultPalette/defaultGradients=false, gradients/duotone=[]; typography.customFontSize/fluid/defaultFontSizes/dropCap=false; 19 fontSizes (micro 11..display-xl 80, all px); 10 spacingSizes (10:4px..100:96px); fontFamilies[0].fontFace has 8 entries (400/600/800 normal + 400 italic × latin/latin-ext) each src file:./assets/fonts/<name>.woff2 with the unicode ranges from P0-05's log; shadow.presets cover; custom.rule/measure/gutter; full styles block (elements link/heading/h1/h2/h6/button/caption, blocks separator/code/quote/pullquote/post-featured-image/image/navigation/search/post-comments-form) copied verbatim from 04 §2.
+scripts/check-theme-json.mjs rewritten: parses docs/_ds/modernist-.../styles.css :root --color-* vars, compares every palette slug case-insensitively against the token (divider special-cased to the rgba literal per task text), asserts the fontSizes/spacingSizes slug->value maps above, the boolean settings, and that every fontFace src starts with file:./assets/fonts/. Exits 1 on any mismatch; exit 0 confirmed.
+41/41 unit tests pass (4 new ThemeJsonTest); full verify + npm run check:theme-json green.
