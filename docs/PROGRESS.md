@@ -42,7 +42,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P3-08 Serials query and writing-cell block
 - [x] P3-09 newsletter-form block with jetpack, mailto and none providers
 - [x] P3-10 Front-page patterns, rail, template and front CSS
-- [ ] P3-11 Front-page fallback state tests (quiet, empty)
+- [x] P3-11 Front-page fallback state tests (quiet, empty)
 - [ ] P3-12 Push and manual check (Phase 3)
 - [ ] P4-01 series-bar block
 - [ ] P4-02 series-toc block
@@ -303,3 +303,6 @@ Added Newsletter\Provider\{Provider interface, Jetpack, Mailto, None} and Newsle
 
 ### P3-10 — 315597e
 Added the seven front patterns (lead-story, journal-rail, section-cell [header-less template], section-cell-large, section-row-1, section-row-2, series-strip), front-page.html (single <main id="main"> landmark wrapping lead-row through the poster; header-front/footer invoked without tagName since those parts already self-wrap — confirmed via a real render that index.html's existing tagName usage double-wraps <header>/<footer>, left alone as out of scope), and inc/patterns.php's register_section_cells() (requires section-cell.php once per business/security/faith/opinion with $ttm_section set, captures output via ob_start, registers ttm/section-cell-{slug}; reads cells.counts through the plugin Config behind a class_exists guard per SPEC §9). Extended Bindings\Values::meta_line()/Sources::meta_line() with an optional politics flag (post carries the Politics child category in any position) always appended last, so section-cell.php's existing date+reading meta-line binding picks up "· Politics" for Opinion posts with no markup change needed. Reused the already-existing ttm-cell-heading __label/__link CSS across every new pattern's heading. Added CSS for 4.7 lead through 4.17 series row plus F17 empty-cell hiding; ttm.css grew 18335 -> 22989 of the 25600-byte budget. Full integration suite: 160 tests, 1 pre-existing skip, 0 failures.
+
+### P3-11 — 87bde2d
+Added tests/integration/Fallbacks/FrontPageStatesTest.php covering F1/F2/F4/F6/F7/F9/F17/F18/F22/F25 against real seeder quiet/empty/normal states. Found and fixed a real Seeder bug: seed_posts() called wp_insert_post() with no post_category, so save_post_post (and Meta\PrimaryCategory::on_save()) fired and resolved "Uncategorized" as the primary category before the real categories were attached via the follow-up wp_set_post_categories() call (which doesn't refire save_post) — every seeded post's ttm_primary_category was stuck at Uncategorized, silently breaking every ttmPrimaryOnly query (section cells, journal rail, kicker/meta-line bindings) for seeded content. Fixed in Seeder.php by deleting the stale meta and re-running PrimaryCategory::on_save() right after wp_set_post_categories(). Full integration suite: 168 tests, 1 pre-existing skip, 0 failures.
