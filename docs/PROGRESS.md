@@ -7,7 +7,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P0-02 Config and Clock
 - [x] P0-03 Dates, Text and Html helpers
 - [x] P0-04 Plugin composition root and API-version compat
-- [ ] P0-05 Self-hosted Archivo fonts, theme enqueue and base CSS
+- [x] P0-05 Self-hosted Archivo fonts, theme enqueue and base CSS
 - [ ] P0-06 theme.json v3 presets and token check
 - [ ] P0-07 Push, CI and manual check (Phase 0)
 - [ ] P1-01 Series taxonomy, term meta, single-series enforcement
@@ -105,3 +105,11 @@ Plugin::modules() returns [Compat\Theme::class]; Plugin::boot() is idempotent vi
 themes/ttm-theme/inc/bindings-compat.php defines TTM_THEME_REQUIRES_API=1 and mirrors the same admin_notices logic: info notice when ttm-core absent, error when TTM_CORE_API !== TTM_THEME_REQUIRES_API; required from functions.php. Never fatals — every TTM_CORE_API/get_current_screen access is guarded.
 uninstall.php: added a bounded $wpdb->prepare() DELETE on options table only, LIKE '_transient_ttm_%' / '_transient_timeout_ttm_%' (esc_like'd), still gated by TTM_REMOVE_DATA === true; terms/meta untouched. PHPCS direct-DB-query warnings are expected/unavoidable for uninstall.php and don't fail lint (warnings, not errors).
 34/34 unit tests pass; BootTest integration tests still green; full verify green.
+
+### P0-05 — 5534ba0
+Fonts downloaded live (network available): Google's css2 API serves Archivo as a variable font, so the same woff2 URL covers weights 400/600/800 per style — saved that one file under archivo-{400,600,800}-{latin,latin-ext}.woff2 and the italic file under archivo-400i-{latin,latin-ext}.woff2 (8 files total, 2 unique binaries duplicated 3x). OFL.txt fetched live (real copyright year is 2020, not the task text's stale "2016" example — used the fetched text).
+Unicode ranges for P0-06/theme.json: latin = U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; latin-ext = U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF.
+functions.php: wp_enqueue_scripts registers ttm-theme style (ttm.css, filemtime version) and ttm-nav script (nav.js, footer+defer, filemtime version) — only script enqueued front-end, verified by FontsTest regex. after_setup_theme adds add_editor_style([ttm.css, editor.css]). wp_head priority 1 preloads archivo-400-latin.woff2 and archivo-800-latin.woff2 only. No wp_resource_hints hook added (nothing to add — absence is the requirement).
+style.css got the 04 §2 resets appended after the header block; ttm.css got a "/* 0 base */" section with --ttm-rule-1/2 bridge vars only; editor.css created with .editor-styles-wrapper{max-width:820px}.
+37/37 unit tests pass (3 new FontsTest); CSS budget 244/25600 bytes; full verify green.
+Manual check: NOT VERIFIED (human) — open the site and confirm fonts render with zero requests to fonts.googleapis.com/fonts.gstatic.com in the Network tab.
