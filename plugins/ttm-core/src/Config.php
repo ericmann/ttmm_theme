@@ -113,6 +113,7 @@ class Config {
 			'newsletter.rate_limit_per_ip' => 5,
 			'newsletter.rate_limit_window' => 600,
 			'newsletter.honeypot_field'    => 'ttm_website',
+			'newsletter.api_key'           => defined( 'TTM_NEWSLETTER_API_KEY' ) ? TTM_NEWSLETTER_API_KEY : '',
 
 			'images.sizes'                 => [
 				'ttm-lead'  => [ 1600, 900, true ],

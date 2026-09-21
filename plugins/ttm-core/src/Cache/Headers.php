@@ -57,9 +57,9 @@ class Headers {
 	/**
 	 * Add `Cache-Control` to `ttm/v1` REST responses.
 	 *
-	 * @param mixed            $result  Response to send, usually a WP_REST_Response.
-	 * @param WP_REST_Server   $server  Server instance (unused).
-	 * @param WP_REST_Request  $request Request being dispatched.
+	 * @param mixed           $result  Response to send, usually a WP_REST_Response.
+	 * @param WP_REST_Server  $server  Server instance (unused).
+	 * @param WP_REST_Request $request Request being dispatched.
 	 * @return mixed
 	 */
 	public static function rest_send( $result, $server, $request ) {

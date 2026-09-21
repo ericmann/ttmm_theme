@@ -77,6 +77,7 @@ class ConfigTest extends TestCase {
 			'newsletter.rate_limit_per_ip',
 			'newsletter.rate_limit_window',
 			'newsletter.honeypot_field',
+			'newsletter.api_key',
 			'images.sizes',
 			'stats.cache_seconds',
 			'stats.tags_cache_seconds',

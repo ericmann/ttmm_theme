@@ -64,7 +64,7 @@ class Cloudflare {
 			$response = wp_safe_remote_post(
 				sprintf( self::ENDPOINT, $zone ),
 				[
-					'timeout' => 10,
+					'timeout' => 10, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout -- deliberate: a slow purge/subscribe endpoint should not silently drop the request early; this runs off the request/response cycle path, not on a page load.
 					'headers' => [
 						'Authorization' => 'Bearer ' . $token,
 						'Content-Type'  => 'application/json',

@@ -60,6 +60,8 @@ class Plugin {
 			Cache\Batcache::class,
 			Cache\Purge::class,
 			Cache\Cloudflare::class,
+			Newsletter\Handler::class,
+			Newsletter\Settings::class,
 		];
 	}
 

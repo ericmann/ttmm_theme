@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace TTM\Core\Newsletter;
 
 use TTM\Core\Config;
+use TTM\Core\Newsletter\Provider\CustomUrl;
 use TTM\Core\Newsletter\Provider\Jetpack;
 use TTM\Core\Newsletter\Provider\Mailto;
 use TTM\Core\Newsletter\Provider\None;
@@ -22,16 +23,16 @@ use TTM\Core\Newsletter\Provider\Provider;
 class Providers {
 
 	/**
-	 * The real provider registry. `custom-url` has no class yet (P7-03): it is simply absent,
-	 * so resolving it always falls through the chain below.
+	 * The real provider registry.
 	 *
 	 * @return array<string, Provider>
 	 */
 	public static function default_registry(): array {
 		return [
-			'jetpack' => new Jetpack(),
-			'mailto'  => new Mailto(),
-			'none'    => new None(),
+			'jetpack'    => new Jetpack(),
+			'custom-url' => new CustomUrl(),
+			'mailto'     => new Mailto(),
+			'none'       => new None(),
 		];
 	}
 
