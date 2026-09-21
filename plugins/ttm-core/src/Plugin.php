@@ -41,6 +41,7 @@ class Plugin {
 			Editor\Columns::class,
 			Admin\Page::class,
 			Admin\General::class,
+			Fiction\Books::class,
 		];
 	}
 

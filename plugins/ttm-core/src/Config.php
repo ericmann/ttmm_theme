@@ -78,6 +78,7 @@ class Config {
 			'writing.chapters_recent'      => 4,
 			'writing.story_tiles'          => 4,
 			'writing.shelf_limit'          => 4,
+			'books.max'                    => 12,
 
 			'archive.per_page'             => 12,
 			'archive.tag_filter_limit'     => 5,
