@@ -8,7 +8,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P0-03 Boundaries table, CSS budget and SETUP note
 - [x] P0-04 Fidelity and editors Playwright skeletons (all rows fixme)
 - [x] P0-05 Screenshot script and phase-2 feedback folder
-- [ ] P0-06 Seeder prose library and tagline
+- [x] P0-06 Seeder prose library and tagline
 - [ ] P0-07 Seed rewrite — sections, journal and pages
 - [ ] P0-08 Seed rewrite — series and fiction
 - [ ] P0-09 Phase 0 push — baseline screenshots
@@ -81,3 +81,11 @@ scripts/screenshots.mjs exports ZONES (7 entries) and unionClip(a,b) (pure), and
 Zones: front-1280/390 (fullPage), masthead/.ttm-masthead-front, lead-row/.ttm-lead-row, series-strip/.ttm-series-strip (single-element .screenshot()); section-rows (first/last .ttm-section-row via .first()/.last(), not :first-of-type/:last-of-type — that CSS pseudo matched 0 elements against the real DOM) and poster-footer (.ttm-poster to .ttm-footer) use unionClip + a viewport resize to the clip's bottom edge first (page.screenshot clip is viewport-relative, not page-relative).
 Verified against real wp-env (seeded): `npm run screenshots` wrote all 7 PNGs to docs/feedback/phase-2/; deleted them afterward (out of scope to commit here — P0-09 does, and they're not needed to keep the tree clean). Confirmed ttm-theme stayed the active theme; wp-env stopped after.
 Tests: scripts/test/screenshots.test.js (2 tests, both green). npm run lint, npm run test:unit (5 suites incl. this one), composer lint/test:unit, npm run build, forbidden-patterns all green (foundry_verify).
+
+### P0-06 — 49cbba0
+docs/fixtures/seed/prose.json: 48 original paragraphs (2-5 sentences, no lorem, written for this repo — technology/business/faith/writing voice matching the mock's byline).
+Seeder::prose(int $row_index, int $count): private, cycles paragraphs by ($row_index + offset) % total, wraps each in a core/paragraph block via esc_html(); 0 count or missing fixture -> ''. seed_posts() loop changed to `foreach ( $rows as $index => $row )`; post_content is now `( $row['content'] ?? '' ) . $this->prose( $index, (int) ( $row['paragraphs'] ?? 0 ) )` — posts.json rows have no `paragraphs` key yet, so output is unchanged (verified: full integration suite green).
+Seeder::run() calls update_option('blogdescription', ...) with the exact SPEC §6.5 tagline after seed_verse()/seed_jetpack().
+scripts/forbidden-patterns.sh: allowed_core_options gained blogdescription. .wp-env.json: afterStart's blogdescription literal updated to match the SPEC tagline exactly (was a slightly different phase-1 string).
+Tests: tests/integration/Cli/SeederTest.php — 3 new tests (prose() called via ReflectionMethod since it's private; no existing precedent for testing a private Seeder method, reflection seemed least invasive).
+Verified: composer lint (0 errors), forbidden-patterns.sh clean, grep -ci lorem = 0, npm run test:integration 377/377 green (real wp-env run, ~2min), composer test:unit, npm run lint/test:unit/build all green. ttm-theme confirmed still active; wp-env stopped after.
