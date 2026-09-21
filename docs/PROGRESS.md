@@ -94,7 +94,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] R1-13 Test gaps: binding empty values, separability non-empty blocks, permanent skip
 - [x] R1-14 i18n: masthead labels from term names, Books row label, book-grid form caption, feed title
 - [x] R1-15 Docs alignment: CLAUDE.md rule 16 file and module map, DEPLOYMENT real-IP, convert-classic report field
-- [ ] R2-01 F9 stale-year: plugin-side dek suppression, cached staleness, cells.stale_count key, rule-24 allow-list removed
+- [x] R2-01 F9 stale-year: plugin-side dek suppression, cached staleness, cells.stale_count key, rule-24 allow-list removed
 - [ ] R2-02 Test gaps: source-level empty values for ttm/short-date and ttm/relative-date; BoundariesTest sees inline fully-qualified references
 - [ ] R2-03 Docs and duplication cleanup after round 1: CLAUDE.md module map, stale comments, HANDOFF correction, one pagination-label implementation
 
@@ -908,3 +908,26 @@ Verified via foundry_verify: composer lint/test:unit (127, +1), npm lint/test:un
 (scripts/test/convert-classic.test.js: 12 passed +1, 2 skipped unchanged), forbidden-patterns.sh.
 Ran npm run test:integration manually (not triggered by this task's file paths): 367 tests, all
 green, unchanged count.
+
+### R2-01 — 7dc3c72
+is_stale_year() now reads Query\Stats::category(term_id)['newest_date'] (new cached field on the
+existing ttm_category_stats_{id} transient, flushed on transition_post_status) via
+get_term_by('slug',...) instead of running its own WP_Query -- zero request-time query when warm.
+Dek suppression: Cells::$stale_scope counter, entered on render_block_data for a stale
+core/query (track_stale_scope, mirrors Blocks\Helpers::track_archive_scope), left in mark_empty()
+(render_block_core/query) after children render; render_block_core/post-excerpt filter
+(suppress_stale_dek) drops content while scope > 0. mark_empty() also adds is-stale class
+(independent of is-empty; both can coexist logically but not in practice here).
+New Config key cells.stale_count (default 2) replaces the hardcoded posts_per_page=2.
+patterns.php no longer calls Query\Cells or varies per_page/show_dek per request;
+section-cell.php always emits wp:post-excerpt unconditionally -- plugin decides at render time.
+forbidden-patterns.sh rule 24: removed the Cells.php/writing-cell.php allow-list entirely (no
+literals remain there to allow). Manually verified: an array-literal 'posts_per_page' => 2
+reintroduced in Cells.php now trips rule 24 and exits 1 (a bare `= 2` assignment, which is what
+was there before, does NOT match the `=>` regex -- the check is specifically for array syntax).
+New BoundariesTest::test_theme_php_references_only_config_from_the_plugin greps all theme PHP
+recursively for TTM\Core\* and allow-lists only Config and Compat\Theme.
+FrontPageStatesTest's do_action('init') re-fire was removed since patterns.php output no longer
+depends on staleness.
+All verify commands green: composer lint/test:unit, npm lint/test:unit/build, forbidden-patterns,
+npm test:integration (370 tests), npm test:e2e (48 tests).
