@@ -1,0 +1,99 @@
+<!-- Rendered post_content of three pre-2016 posts from eric.mann.blog, captured 2026-09-20. Raw post_content needs an authenticated export; rendered HTML is close enough for the conversion spike (wpautop already applied). -->
+
+<!-- post 6917 the-value-of-https-everywhere 2015-08-21T09:49:28 -->
+<article data-post-id="6917" data-slug="the-value-of-https-everywhere">
+<p>When I travel, I use a VPN whenever I connect to any network. Frankly, I don&#8217;t trust people I don&#8217;t know to protect my information or respect my privacy. Ironically, this seems to be a controversial viewpoint these days.</p>
+<p>So let me re-frame the arguments for encrypting everything all the time.</p>
+<h2>Proper Behavior</h2>
+<p>At a very high level, the Internet works with a simple set of <em>verbs</em> for doing things and <em>status codes</em> to indicate the relative success of communications. When you request a web page, for example, you send a GET request (verb) to a web server. If everything&#8217;s OK, the server sends back the page with a 200 status code. If the page has moved, the server sends back a 300 status code and instructions on where to find the new location.</p>
+<p>If a user makes a mistake &#8211; requesting a secure page without security, requesting a page that doesn&#8217;t exist, etc. &#8211; the server responds with a 400 status code to indicate the error (and usually a helpful page explaining what happened and how to fix it). If the <em>server</em> makes a mistake, it sends out a 500 status code and some instructions on how to contact support.</p>
+<p>I&#8217;m skipping over a bunch of details here, but the key point is that the Internet works based on much of the above information. Applications (not just your browser) use the standard verbs to request, create, delete, update, and verify information. They also depend on servers communicating back the right status code so they know how to behave.</p>
+<h2>Poor Behavior</h2>
+<p>When a developer builds an application, they treat these communication standards as a contract. Just like while driving down the street you expect drivers you&#8217;ve never met to obey stop lights and speed zones, developers expect servers they&#8217;ve never met to obey the same contract as the rest of the Internet.</p>
+<p>But sometimes, a provider doesn&#8217;t follow the rules.</p>
+<p>While working with Vagrant today, I ran into an issue. My automation scripts run on boot to make sure my virtual machine is up-to-date and attempts to verify certain application keys with an Ubuntu keyserver before proceeding. My tools <em>expect</em> that these keys are non-existent: they <em>expect</em> the request to result in a 404 Not Found error from the server.</p>
+<p>While flying to Boston, my tools failed.</p>
+<p>As it turns out, the GoGo Inflight Internet tries to be a bit too helpful and <em>breaks the contract</em> my application expected the Internet to follow. My tools expected to see:</p>
+<p><code>HTTP/1.1 404 Not Found<br />
+Date: Fri, 21 Aug 2015 16:14:09 GMT<br />
+Server: Apache/2.2.22 (Ubuntu)<br />
+Vary: Accept-Encoding<br />
+Content-Type: text/html; charset=iso-8859-1<br />
+</code></p>
+<p>Instead, they saw:</p>
+<p><code>HTTP/1.0 302 Moved Temporarily<br />
+Server: squid/3.1.20<br />
+Mime-Version: 1.0<br />
+Date: Fri, 21 Aug 2015 16:13:21 GMT<br />
+Content-Type: text/html<br />
+Content-Length: 0<br />
+Location: http://airborne.gogoinflight.com/abp/squidError.do<br />
+X-Squid-Error: 403 Access Denied<br />
+X-Cache: MISS from 172.19.134.2<br />
+X-Cache-Lookup: MISS from 172.19.134.2:3128<br />
+Via: 1.0 172.19.134.2 (squid/3.1.20)<br />
+Connection: keep-alive<br />
+</code></p>
+<p>GoGo Inflight is using a transparent proxy to <a href="http://ttmm.io/tech/wireless-safety/">intercept</a>, inspect, and process <em>all traffic being sent from the airplane</em>. On the one hand, this means they can return custom error pages like the one above in an attempt to &#8220;help&#8221; customers find the right information.</p>
+<p>On the other hand, it means they make it impossible for developers to know what to expect when our customers are using our tools over their network connection. My tools expect a 404 error. GoGo Inflight thinks it knows better and, rather than returning the 404 as expected, redirects the user to a separate page that, in turn, sends a 200 OK status code.</p>
+<h2>Beyond Contracts</h2>
+<p>This is hugely detrimental to the proper behavior of the Internet, but it also goes much deeper than that. In order to capture 404 errors and return custom error pages, GoGo Inflight needs to <em>inspect every piece of content traversing the network!</em></p>
+<p>Again, I highly advise using a VPN whenever you travel (i.e. are not connected to a trusted network over a hardline). When it comes to airlines, though, that&#8217;s not always an option. I have an AnyConnect VPN, an OpenVPN, and an IP2Sec connection available &#8211; none of them work over GoGo Inflight&#8217;s network. This means the only traffic I can send <em>securely</em> while in the air is over SSL-protected connections.</p>
+<p>I&#8217;m disappointed that the endpoints my tools use are HTTP and not HTTPS, but thanks to endeavors like HTTPS Everywhere, some day soon they might be properly secure. It&#8217;s not a matter of just ensuring that our tools work properly and that the Internet follows the contract we expect it to. Having secure connections <em>everywhere</em> means we can use these tools and the Internet in general safe in the knowledge that no one is eavesdropping on or interfering with our communications.</p>
+<p>Even when intentions are honorable &#8211; I have no doubt GoGo Inflight is trying to be a helpful vendor here &#8211; any sort of interference in network communications is dangerous.</p>
+
+</article>
+
+<!-- post 6914 community-support 2015-07-17T14:00:54 -->
+<article data-post-id="6914" data-slug="community-support">
+<p>Mike<sup id="mfn-content-000000000000054e0000000000000000_6914-1" class="modern-footnotes-footnote " data-mfn="1" data-mfn-post-scope="000000000000054e0000000000000000_6914"><a href="javascript:void(0)"  role="button" aria-pressed="false" aria-describedby="mfn-content-000000000000054e0000000000000000_6914-1">1</a></sup><span role="tooltip" class="modern-footnotes-footnote__note" tabindex="0" data-mfn="1">Obviously not his real name &#8230;</span> was one of the smallest Scouts I&#8217;d ever seen. He was skinny, a little short for his age, and approached every conversation with a demure attitude that betrayed his real thirst for involvement in the group.</p>
+<p>I got to know Mike pretty well after he joined the Scout Troop. He loved playing with Legos. He thought Magic cards were a wasted of time. He was afraid of getting lost in the woods and always carried his grandpa&#8217;s old compass. Mike was a very fun kid; he was complex in his interests and, once he opened up, one of the most endearing people you&#8217;d ever meet.</p>
+<p>As we got closer and closer to summer camp, though, he started to skip Troop meetings. We&#8217;d announce that meal planning would happen the next week and not see him for two. We&#8217;d start planning tent partners, and he&#8217;d sneak out the door with his parents and head home. When we passed around the final sign up sheet for attendees I saw him tear up as he passed the envelope to the next boy.</p>
+<p>That week was the Troop Committee meeting when all of the adult leaders gathered together to plan the next month of activities. The first item on the agenda: &#8220;scholarships&#8221; for Scouts to attend summer camp.</p>
+<blockquote><p>Seriously, it&#8217;s only $200. If someone is asking for a hand-out like that, they really shouldn&#8217;t be going to camp.</p></blockquote>
+<p>The monotonous conversation continued for another fifteen minutes with just about every leader echoing the same sentiment. Boys who couldn&#8217;t otherwise afford to attend camp should work harder to fund raise. We already provided them with candy and popcorn and wreathes to sell. They could collect cans. They could mow lawns. Anyone asking for extra help from the Troop was lazy and didn&#8217;t deserve it.</p>
+<blockquote><p>Mike&#8217;s dad just lost his job, and his mom&#8217;s been unemployed and disabled for the past year. He got his uniform from Goodwill. All of the money he raised from Troop fundraisers went to pay for his annual dues. Without a sponsorship, he won&#8217;t be coming to camp with us.</p></blockquote>
+<p>As everyone had piled on with the talk of lazy Scouts or absentee parents, they overlooked a very important fact: not everyone&#8217;s story is the same.</p>
+<h2>Websites and Blogging</h2>
+<p>I came across a very similar story today on Facebook:</p>
+<blockquote><p>Can someone please explain the thought process behind someone using a crowd funding campaign to pay for them to blog?</p></blockquote>
+<p>The sentiment in response to this question was remarkably similar to that of the Scout leaders in the earlier story:</p>
+<ul>
+<li>Poor work ethic</li>
+<li>&#8220;Get rich quick&#8221; expectations</li>
+<li>Mocking the concept entirely</li>
+</ul>
+<p>All of these responses reflect the same mistake as the earlier story as well: not everyone&#8217;s situation is the same.</p>
+<p>Not everyone has the technical know-how to build a site.<sup id="mfn-content-000000000000054e0000000000000000_6914-2" class="modern-footnotes-footnote " data-mfn="2" data-mfn-post-scope="000000000000054e0000000000000000_6914"><a href="javascript:void(0)"  role="button" aria-pressed="false" aria-describedby="mfn-content-000000000000054e0000000000000000_6914-2">2</a></sup><span role="tooltip" class="modern-footnotes-footnote__note" tabindex="0" data-mfn="2">If the end goal is to monetize the site, utilizing a free hosting platform is likely not an option.</span> Not everyone has the freedom to write what they want when they want, either. A writer friend of mine gave up her dream of writing because she had to work 80+ hours a week just to provide for her kids. Taking time out to build a blog/audience from scratch was not an option.</p>
+<p>Others are in a position where writing will put them (or their families) in professional or personal <em>danger</em>. Moving forward without some sort of backing is inadvisable in many of these circumstances.</p>
+<p>A crowd-funding campaign, however, does two things for the fundraiser:</p>
+<ol>
+<li>It gives them a financial cushion to protect from the potential impact of their endeavor being a failure. Not every blog can grow to provide a reliable income. Many are true labors of love with revenues that barely &#8211; if at all &#8211; cover the cost of the domain.<sup id="mfn-content-000000000000054e0000000000000000_6914-3" class="modern-footnotes-footnote " data-mfn="3" data-mfn-post-scope="000000000000054e0000000000000000_6914"><a href="javascript:void(0)"  role="button" aria-pressed="false" aria-describedby="mfn-content-000000000000054e0000000000000000_6914-3">3</a></sup><span role="tooltip" class="modern-footnotes-footnote__note" tabindex="0" data-mfn="3">I explicitly omit advertising on this site as part of my personal campaign to help clean up the crappy state of the web. I accept donations through <a href="https://gratipay.com/~EricMann/">Gratipay</a> that used to cover $7/week. That covers the domain, my CDN, and part of the services that make this site go. But $364/year comes nowhere <em>close</em> to being a sustainable income.</span></li>
+<li>It helps gauge whether or not a market exists for a particular idea or product, again helping to minimize the risk of the endeavor being a failure.</li>
+</ol>
+<p>Why do people create crowdfunding campaigns for their blogs? For the same reason people ask for money to help create a project, sponsor attendance of a conference, pay off a burdensome debt, cover the costs of a memorial service, or attend Boy Scout summer camp.</p>
+<p>You don&#8217;t have to understand <em>why</em> someone wants your help living their dream. Just recognize that, if you&#8217;re already living yours, you might just have been in a better place to get there; their road might be harder to walk.</p>
+<ul class="modern-footnotes-list "><li id="footnote-000000000000054e0000000000000000_6914-1"><span>1</span><div>Obviously not his real name &#8230; <a href="#mfn-content-000000000000054e0000000000000000_6914-1" class="modern-footnotes-scroll-to-footnote" aria-label="Back to reference 1 in text">↩︎</a></div></li><li id="footnote-000000000000054e0000000000000000_6914-2"><span>2</span><div>If the end goal is to monetize the site, utilizing a free hosting platform is likely not an option. <a href="#mfn-content-000000000000054e0000000000000000_6914-2" class="modern-footnotes-scroll-to-footnote" aria-label="Back to reference 2 in text">↩︎</a></div></li><li id="footnote-000000000000054e0000000000000000_6914-3"><span>3</span><div>I explicitly omit advertising on this site as part of my personal campaign to help clean up the crappy state of the web. I accept donations through <a href="https://gratipay.com/~EricMann/">Gratipay</a> that used to cover $7/week. That covers the domain, my CDN, and part of the services that make this site go. But $364/year comes nowhere <em>close</em> to being a sustainable income. <a href="#mfn-content-000000000000054e0000000000000000_6914-3" class="modern-footnotes-scroll-to-footnote" aria-label="Back to reference 3 in text">↩︎</a></div></li></ul>
+</article>
+
+<!-- post 6854 gardening-and-god 2015-05-03T08:00:28 -->
+<article data-post-id="6854" data-slug="gardening-and-god">
+<p>After an incredible week with my team, I was told I needed to take the weekend and &#8220;not work&#8221; for a change. Honestly, it took me a while to figure out exactly what this meant for my schedule. For the first time in a while, I had a few days with no deadlines and several projects sitting on the back burner just waiting for me to take a look.</p>
+<p>But &#8220;not work&#8221; was the instruction of the day, and I decided to follow it.</p>
+<p>Instead of coding, I got up early on Saturday morning and spent some time in the garden instead. Seeing the marked change in my vegetables from last weekend to this was wonderful. The lettuce is just about ready to become a salad. The carrots are beginning to take off. The radishes &#8211; some were actually ready to eat! The garlic is growing like a weed. The tomatoes, though still small, are finally starting to come into their own.</p>
+<p>And the weeds apparently realized I was out of town and started to multiply, too.</p>
+<p>I spent half my Saturday morning on my hands and knees pulling up tiny weed seedlings to keep them from taking over my garden. I then turned my attention to the stone walkway and started pulling out other seedlings poking through the cracks.</p>
+<p>Then I saw something remarkable. It seems a beautiful and small violet has taken root in between the stones in the center of my walkway. Not only that, it chose this weekend to bloom!</p>
+<p>Unfortunately, it chose to make its home <em>literally</em> in the middle of the path between the back yard and the front. All foot traffic will pass over it. Every time I move the yard debris bin, it will be on that path. If you were going to be a flower and pick where to seed, this would be the worst possible location.</p>
+<p>I tried my hardest to loosen the plant so I could move it, but the attempt completely destroyed what was a beautiful flower. If only it had planted itself somewhere else &#8230;</p>
+<h2>Immobility</h2>
+<p>Whenever I garden, I think back to some of the imagery around gardening in the Bible. One of God&#8217;s first acts after creating the Earth was to plant a garden &#8211; and He created man specifically to help him tend that garden.</p>
+<p>Jesus&#8217; parables often involve gardening. A gardener sows seeds only to have the enemy sow weeds among them in the night. Seeds fall on the path, among thorns, and on good soil. The Lord is a gardener who prunes the branches of a vine in order that they should produce fruit.</p>
+<p>It&#8217;s difficult to be working among creation and not think of the creator.</p>
+<p>It&#8217;s also difficult to miss the lesson behind a beautiful flower growing in the wrong location. The flower was, of course, perfect. It was straight, healthy, had at least three gorgeous blossoms on it, but it was dead center in the middle of a path. The exact <em>wrong</em> place for it to be in this particular garden.</p>
+<p>I did everything I could do to relocate the flower, but its roots were deep and my attempts to move it to where it was <em>supposed</em> to be were painful &#8211; even to the point of death. Had the flower&#8217;s seed just blown a few feet more &#8230; Had the flower&#8217;s roots been shallower and easier to relocate &#8230;</p>
+<p>How often are we like that flower? How often do we settle deep roots in the exact <em>wrong</em> location in God&#8217;s garden? How often are we so resistant to his gentle guidance to the <em>right</em> location that we experience pain and destruction in our lives?</p>
+<p>How often do we stand in the wrong city, the wrong college, the wrong job, the wrong relationships, the wrong habits and argue that God still loves us despite our resistance to go where He wants us to go? We could be the most beautiful flower in the garden, but growing up in the center of the path will lead only to pain as the Gardener, gentle as He is, tries to uproot us and put us where we belong.</p>
+<p>The violet in my garden didn&#8217;t make it. Will we?</p>
+
+</article>

@@ -1,0 +1,30 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "ttm/series-prev-next",
+	"title": "Series Prev / Next",
+	"category": "ttm",
+	"description": "Prev/next navigation: series parts, or chronological within the primary category (01 §4.21, F11).",
+	"textdomain": "ttm-core",
+	"usesContext": [ "postId" ],
+	"attributes": {
+		"mode": {
+			"type": "string",
+			"enum": [ "auto", "series", "chronological" ],
+			"default": "auto"
+		},
+		"previewState": {
+			"type": "string",
+			"default": "normal"
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": false,
+		"color": false,
+		"typography": false,
+		"spacing": false
+	},
+	"render": "file:./render.php",
+	"editorScript": "file:./index.js"
+}

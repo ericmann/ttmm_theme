@@ -1,0 +1,15 @@
+node_modules/
+vendor/
+plugins/ttm-core/build/
+plugins/ttm-core/vendor/
+.wp-env.override.json
+.env
+*.log
+.phpunit.result.cache
+.phpcs.cache
+test-results/
+playwright-report/
+.foundry/implement.lock
+docs/fixtures/live-export*.xml
+docs/fixtures/live/
+FOUNDRY_FEEDBACK.md

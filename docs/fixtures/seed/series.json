@@ -1,0 +1,90 @@
+[
+	{
+		"slug": "hardening-wordpress",
+		"name": "Hardening WordPress",
+		"form": "nonfiction",
+		"status": "in-progress",
+		"total_parts": 6,
+		"genre": "",
+		"cadence": "Weekly",
+		"next_date_days_ahead": 6,
+		"cover": false,
+		"purchase_links": [],
+		"parts": [
+			{ "post_slug": "security-post-1", "part": 1 },
+			{ "post_slug": "technology-post-2", "part": 2 },
+			{ "post_slug": "security-post-2", "part": 3 }
+		]
+	},
+	{
+		"slug": "reading-cves",
+		"name": "Reading CVEs",
+		"form": "nonfiction",
+		"status": "complete",
+		"total_parts": 4,
+		"genre": "",
+		"cadence": "",
+		"next_date_days_ahead": 0,
+		"cover": false,
+		"purchase_links": [],
+		"parts": [
+			{ "post_slug": "security-post-3", "part": 1 },
+			{ "post_slug": "business-post-3", "part": 2 },
+			{ "post_slug": "security-post-4", "part": 3 },
+			{ "post_slug": "business-post-4", "part": 4 }
+		]
+	},
+	{
+		"slug": "the-quiet-ledger",
+		"name": "The Quiet Ledger",
+		"form": "novel",
+		"status": "in-progress",
+		"total_parts": 31,
+		"genre": "literary thriller",
+		"cadence": "Monthly",
+		"next_date_days_ahead": 27,
+		"cover": true,
+		"purchase_links": [
+			{ "label": "Amazon", "url": "https://amazon.com/the-quiet-ledger" },
+			{ "label": "Kobo", "url": "https://kobo.com/the-quiet-ledger" }
+		],
+		"parts": [
+			{ "post_slug": "quiet-ledger-ch-1", "part": 1 },
+			{ "post_slug": "quiet-ledger-ch-2", "part": 2 },
+			{ "post_slug": "quiet-ledger-ch-3", "part": 3 },
+			{ "post_slug": "quiet-ledger-ch-4", "part": 4 },
+			{ "post_slug": "quiet-ledger-ch-5", "part": 5 },
+			{ "post_slug": "quiet-ledger-ch-6", "part": 6 },
+			{ "post_slug": "quiet-ledger-ch-7", "part": 7 },
+			{ "post_slug": "quiet-ledger-ch-8", "part": 8 },
+			{ "post_slug": "quiet-ledger-ch-9", "part": 9 },
+			{ "post_slug": "quiet-ledger-ch-10", "part": 10 },
+			{ "post_slug": "quiet-ledger-ch-11", "part": 11 },
+			{ "post_slug": "quiet-ledger-ch-12", "part": 12 },
+			{ "post_slug": "quiet-ledger-ch-13", "part": 13, "future": true }
+		]
+	},
+	{
+		"slug": "salt-and-iron",
+		"name": "Salt and Iron",
+		"form": "novella",
+		"status": "complete",
+		"total_parts": 9,
+		"genre": "fantasy",
+		"cadence": "",
+		"next_date_days_ahead": 0,
+		"cover": false,
+		"purchase_links": [],
+		"parts": [
+			{ "post_slug": "salt-iron-ch-1", "part": 1 },
+			{ "post_slug": "salt-iron-ch-2", "part": 2 },
+			{ "post_slug": "salt-iron-ch-3", "part": 3 },
+			{ "post_slug": "salt-iron-ch-4", "part": 4 },
+			{ "post_slug": "salt-iron-ch-5", "part": 5 },
+			{ "post_slug": "salt-iron-ch-6", "part": 6 },
+			{ "post_slug": "salt-iron-ch-7", "part": 7 },
+			{ "post_slug": "salt-iron-ch-8", "part": 8 },
+			{ "post_slug": "salt-iron-ch-9", "part": 9 }
+		]
+	}
+]

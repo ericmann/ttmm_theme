@@ -1,0 +1,38 @@
+{
+  "core": "WordPress/WordPress#7.1.1",
+  "phpVersion": "8.3",
+  "port": 8888,
+  "testsPort": 8889,
+  "plugins": [
+    "./plugins/ttm-core"
+  ],
+  "themes": [
+    "./themes/ttm-theme"
+  ],
+  "config": {
+    "WP_DEBUG": true,
+    "WP_DEBUG_LOG": true,
+    "WP_DEBUG_DISPLAY": false,
+    "SCRIPT_DEBUG": true,
+    "WP_ENVIRONMENT_TYPE": "local",
+    "TTM_NEWSLETTER_API_KEY": "",
+    "TTM_CLOUDFLARE_ZONE_ID": "",
+    "TTM_CLOUDFLARE_API_TOKEN": ""
+  },
+  "mappings": {
+    "wp-content/ttm-tests": "./tests",
+    "wp-content/ttm-vendor": "./vendor",
+    "wp-content/ttm-fixtures": "./docs/fixtures"
+  },
+  "env": {
+    "tests": {
+      "config": {
+        "WP_TESTS_DOMAIN": "localhost",
+        "WP_ENVIRONMENT_TYPE": "local"
+      }
+    }
+  },
+  "lifecycleScripts": {
+    "afterStart": "npx wp-env run cli wp theme activate ttm-theme && npx wp-env run cli wp rewrite structure '/%postname%/' --hard && npx wp-env run cli wp option update timezone_string America/Los_Angeles && npx wp-env run cli wp option update blogname 'These Things Matter' && npx wp-env run cli wp option update blogdescription 'Technology, business, faith, and the occasional story.' && npx wp-env run cli wp option update default_comment_status closed"
+  }
+}

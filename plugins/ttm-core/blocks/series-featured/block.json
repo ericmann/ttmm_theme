@@ -1,0 +1,32 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "ttm/series-featured",
+	"title": "Series Featured",
+	"category": "ttm",
+	"description": "Series hub featured slot (01 §4.38), 03 §3 auto-pick, F5, F24.",
+	"textdomain": "ttm-core",
+	"attributes": {
+		"seriesId": {
+			"type": "number",
+			"default": 0
+		},
+		"partsLimit": {
+			"type": "number",
+			"default": 0
+		},
+		"previewState": {
+			"type": "string",
+			"default": "normal"
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": false,
+		"color": false,
+		"typography": false,
+		"spacing": false
+	},
+	"render": "file:./render.php",
+	"editorScript": "file:./index.js"
+}

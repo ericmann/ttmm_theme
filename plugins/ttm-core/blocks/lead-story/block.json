@@ -1,0 +1,29 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "ttm/lead-story",
+	"title": "Lead Story",
+	"category": "ttm",
+	"description": "The front-page lead, selected by Query\\Lead (03 §7, F22).",
+	"textdomain": "ttm-core",
+	"attributes": {
+		"imageRatio": {
+			"type": "string",
+			"enum": [ "16-9", "4-3" ],
+			"default": "16-9"
+		},
+		"previewState": {
+			"type": "string",
+			"default": "normal"
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": false,
+		"color": false,
+		"typography": false,
+		"spacing": false
+	},
+	"render": "file:./render.php",
+	"editorScript": "file:./index.js"
+}

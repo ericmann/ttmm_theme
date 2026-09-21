@@ -1,0 +1,58 @@
+{
+  "name": "these-things-matter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "These Things Matter — block theme (ttm-theme) and companion plugin (ttm-core) for eric.mann.blog",
+  "license": "GPL-2.0-or-later",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "wp-scripts build",
+    "start": "wp-scripts start",
+    "lint": "npm run lint:js && npm run lint:css && npm run check:theme-json && npm run check:block-json && npm run check:budget",
+    "lint:js": "wp-scripts lint-js plugins/ttm-core/src themes/ttm-theme/assets/js scripts tests/e2e --no-error-on-unmatched-pattern",
+    "lint:css": "wp-scripts lint-style 'themes/ttm-theme/assets/css/**/*.css' --allow-empty-input",
+    "check:theme-json": "node scripts/check-theme-json.mjs",
+    "check:block-json": "node scripts/check-block-json.mjs",
+    "check:budget": "node scripts/check-budget.mjs",
+    "test:unit": "wp-scripts test-unit-js --passWithNoTests",
+    "test:integration": "npm run env:start && wp-env run tests-cli --env-cwd=wp-content/ttm-tests php ../ttm-vendor/bin/phpunit -c integration/phpunit.xml.dist",
+    "test:e2e": "playwright install chromium && wp-env start && wp-env run cli wp ttm seed --reset && WP_BASE_URL=http://localhost:8888 wp-scripts test-playwright --config tests/e2e/playwright.config.mjs",
+    "env:start": "wp-env start",
+    "env:stop": "wp-env stop",
+    "env:destroy": "wp-env destroy",
+    "env:seed": "wp-env run cli wp ttm seed",
+    "env:cli": "wp-env run cli wp",
+    "env:logs": "wp-env logs"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@axe-core/playwright": "*",
+    "@playwright/test": "*",
+    "@wordpress/block-editor": "^17.1.0",
+    "@wordpress/block-library": "^11.0.0",
+    "@wordpress/blocks": "^16.0.0",
+    "@wordpress/components": "^40.1.0",
+    "@wordpress/compose": "^8.8.0",
+    "@wordpress/core-data": "^8.0.0",
+    "@wordpress/data": "^10.55.0",
+    "@wordpress/e2e-test-utils-playwright": "*",
+    "@wordpress/editor": "^15.0.0",
+    "@wordpress/element": "^8.7.0",
+    "@wordpress/env": "*",
+    "@wordpress/hooks": "^4.55.0",
+    "@wordpress/i18n": "^6.28.0",
+    "@wordpress/plugins": "^7.55.0",
+    "@wordpress/scripts": "*",
+    "@wordpress/server-side-render": "^6.31.0",
+    "jsdom": "^29.1.1"
+  },
+  "overrides": {
+    "linkify-it": "^5.0.2",
+    "serialize-javascript": "^7.0.5",
+    "markdownlint-cli": "^0.49.1",
+    "qs": "^6.16.0",
+    "uuid": "^11.1.1"
+  }
+}

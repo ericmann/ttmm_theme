@@ -1,0 +1,59 @@
+/*
+Theme Name:        These Things Matter
+Theme URI:         https://github.com/ericmann/ttmm_theme
+Author:            Eric Mann
+Author URI:        https://eric.mann.blog
+Description:       Newspaper-style block theme for eric.mann.blog. Presentation only; data lives in the ttm-core plugin.
+Requires at least: 6.7
+Tested up to:      7.1
+Requires PHP:      8.1
+Version:           0.1.0
+License:           GNU General Public License v2 or later
+License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain:       ttm-theme
+*/
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+img {
+	display: block;
+	max-width: 100%;
+	height: auto;
+}
+
+::selection {
+	background: color-mix(in oklch, var(--wp--preset--color--accent) 30%, transparent);
+}
+
+:focus-visible {
+	outline: 2px solid var(--wp--preset--color--accent);
+	outline-offset: 2px;
+}
+
+p {
+	text-wrap: pretty;
+}
+
+h1,
+h2,
+h3 {
+	text-wrap: balance;
+}
+
+.tnum {
+	font-feature-settings: "tnum";
+}
+
+body {
+	-webkit-font-smoothing: antialiased;
+}
+
+@media (max-width: 720px) {
+	body {
+		--wp--custom--gutter--desktop: var(--wp--custom--gutter--phone);
+	}
+}
