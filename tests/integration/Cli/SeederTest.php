@@ -8,6 +8,7 @@
 declare( strict_types=1 );
 
 use TTM\Core\Cli\Seeder;
+use TTM\Core\Query\Lead;
 
 class SeederTest extends TTM_IntegrationTestCase {
 
@@ -122,6 +123,54 @@ class SeederTest extends TTM_IntegrationTestCase {
 			'Technology, business, faith and the occasional story. One writer, several desks.',
 			get_option( 'blogdescription' )
 		);
+	}
+
+	public function test_seeded_lead_is_signing_your_options_table(): void {
+		$this->set_now();
+
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$lead = get_post( Lead::id() );
+		$this->assertNotNull( $lead );
+		$this->assertSame( 'signing-your-options-table', $lead->post_name );
+		$this->assertTrue( has_post_thumbnail( $lead ) );
+	}
+
+	public function test_seeded_journal_excerpts_are_38_to_48_words(): void {
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$journal = get_term_by( 'slug', 'journal', 'category' );
+		$posts   = get_posts(
+			[
+				'category'       => $journal->term_id,
+				'posts_per_page' => 20,
+				'post_status'    => 'publish',
+			]
+		);
+
+		$this->assertNotEmpty( $posts );
+
+		foreach ( $posts as $post ) {
+			if ( 'classic-post' === $post->post_name ) {
+				continue; // Kept verbatim per the task text; not one of the excerpt rows.
+			}
+
+			$word_count = count( preg_split( '/\s+/', trim( wp_strip_all_tags( get_the_excerpt( $post ) ) ) ) );
+			$this->assertGreaterThanOrEqual( 38, $word_count, "{$post->post_name} excerpt is too short" );
+			$this->assertLessThanOrEqual( 48, $word_count, "{$post->post_name} excerpt is too long" );
+		}
+	}
+
+	public function test_no_seed_row_contains_lorem(): void {
+		$fixtures = [ 'posts.json', 'pages.json' ];
+
+		foreach ( $fixtures as $fixture ) {
+			$path = Seeder::fixtures_dir() . '/' . $fixture;
+			$this->assertFileExists( $path );
+			$this->assertStringNotContainsStringIgnoringCase( 'lorem', (string) file_get_contents( $path ) );
+		}
 	}
 
 	public function test_prose_fixture_has_at_least_forty_paragraphs_without_lorem(): void {

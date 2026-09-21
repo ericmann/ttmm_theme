@@ -15,12 +15,12 @@
 		"slug": "newsletter",
 		"title": "Newsletter",
 		"template": "page",
-		"content": "<!-- wp:paragraph --><p>Subscribe to get new posts by email, roughly weekly.</p><!-- /wp:paragraph -->"
+		"content": "<!-- wp:paragraph --><p>Everything above, once a week, in your inbox: the lead story, a Journal entry or two, and whatever series is currently running.</p><!-- /wp:paragraph --><!-- wp:paragraph --><p>No sponsorships, no tracking pixels, and an unsubscribe link that actually works the first time.</p><!-- /wp:paragraph -->"
 	},
 	{
 		"slug": "about",
 		"title": "About",
 		"template": "page",
-		"content": "<!-- wp:paragraph --><p>Technology, business, faith and the occasional story, from someone who works in all four.</p><!-- /wp:paragraph -->"
+		"content": "<!-- wp:paragraph --><p>This site is technology, business, faith and the occasional story, written by one person who works across all four most weeks and rarely at the same desk twice.</p><!-- /wp:paragraph --><!-- wp:paragraph --><p>The consulting work funds the fiction and the fiction keeps the consulting honest. The Journal is whatever did not fit anywhere else.</p><!-- /wp:paragraph -->"
 	}
 ]
