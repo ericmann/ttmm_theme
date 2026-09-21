@@ -1,139 +1,125 @@
 # Review — These Things Matter build
 Round: 3
 
-Branch `build/2026-09-21` (base `poc` @ `8379c6f`, head `7429291`). 94 tasks (76 build + 15
-round-1 fixes + 3 round-2 fixes), all done, 0 blocked, 0 skipped. This review covers the whole
-branch: the three round-2 fix commits (`7dc3c72`, `e07c215`, `21df0e8`) were read diff-by-diff
-against PLAN `## Review fixes (round 2)` and the SPEC sections each cites; every round-2 finding
-(C1, C2, B1, T1, T2, S2, S3) was re-checked against the code as it now stands; and the CLAUDE.md
-`## Constraints` greps were re-run over the entire tree, not just the round-2 diff.
+Branch `build/2026-09-21` (base `poc` @ `8379c6f`, head `67394eb`). 96 tasks (76 build + 15
+round-1 fixes + 3 round-2 fixes + 2 round-3 fixes), all done, 0 blocked, 0 skipped. This review
+covers the whole branch: the two round-3 fix commits (`b38798d`, `8909f21`) were read diff-by-diff
+against PLAN `## Review fixes (round 3)` and SPEC §3.4 rules 24/27/28; both round-3 findings
+(C1, T1) were re-checked against the code as it now stands; the CLAUDE.md `## Constraints`
+greps were re-run over the entire tree, not just the round-3 diff; and the only round-2 residue
+left open (S1) was re-read.
 
-## Verdict: CHANGES REQUESTED
+## Verdict: APPROVED
 
 What was verified by this reviewer (not taken from the log):
 
-- `foundry_verify` base set green: `composer lint` 0 errors, `composer test:unit` 131/131
-  (950 assertions), `npm run lint` (theme.json, block.json, budget 33070/33200), `npm run
-  test:unit` 12 passed / 2 pre-existing skips, `npm run build`, `bash
-  scripts/forbidden-patterns.sh` clean.
-- `npm run test:integration` 371/371 (1146 assertions, 0 skipped). `npm run test:e2e` 48/48 (reseeded wp-env, 2 viewports, axe clean).
-- Mutation sampling, each caught by the named test: `suppress_stale_dek()` returning content
-  unchanged (CellsTest stale-query test + FrontPageStatesTest F9); `is_stale_year()` issuing a
-  query per call (CellsTest warm-cache test, 423 vs 422 queries); `posts_per_page` back to a
-  literal `2` (CellsTest config-count test); `Sources::short_date()` without its `! $post` guard
-  (FrontSourcesTest empty-value test, TypeError); a duplicated `Older (%s) →` in `Archive.php`
-  (BoundariesTest one-source test); an inline `\TTM\Core\Blocks\Helpers::class` in
-  `Query/Lead.php` (BoundariesTest inline-reference test); `SeriesPosition` removed from
-  CLAUDE.md (ScaffoldTest module-map test); a guarded `\TTM\Core\Query\Cells` call in
-  `themes/ttm-theme/inc/patterns.php` (BoundariesTest theme-references test).
-- One mutation was **not** caught: removing the `$stale_scope` decrement in
-  `Cells::mark_empty()` passes all 28 F9/front-page tests (T1 below).
-- Whole-tree constraint greps: theme owns no data, every `TTM\Core` reference under `themes/`
-  is `Config` and guarded, no inline styles outside the allow-list, no nonces/per-visitor calls
-  in cacheable output, no clock reads outside `Support/Clock.php`, no unbounded queries, no
-  `wp_safe_remote_*` outside the three call sites, no dangerous PHP, front-end JS is `nav.js`
-  only, no `view.js`. One rule-24 literal (C1 below).
-- Every round-2 finding is closed in code: C1 (`cells.stale_count`, allow-list gone), C2
-  (`Stats::category()['newest_date']`, zero queries when warm), B1 (`patterns.php` reads only
-  `Config`; `section-cell.php` always emits `post-excerpt`; dek suppressed plugin-side), T1
-  (source-level empty test), T2 (inline-reference scanner), S2 (one source for the pagination
-  strings, relabel filters in `Bindings\Sources`), S3 (CLAUDE.md map, render.php docblock,
-  HANDOFF R1-02 bullet).
+- `foundry_verify` with the round-3 files, green end to end: `composer lint` 0 errors,
+  `composer test:unit` 131/131 (951 assertions), `npm run lint` (theme.json, block.json, CSS
+  budget 33070/33200 — unchanged, no CSS touched), `npm run test:unit` 12 passed / 2
+  pre-existing skips, `npm run build`, `bash scripts/forbidden-patterns.sh` clean, and
+  `npm run test:integration` 374/374 (1154 assertions, 0 skipped).
+- Mutation sampling on the round-3 work, each applied, run, and restored with `git checkout`:
+  - `story-tiles/render.php` back to `$ttm_columns = 2;` → `forbidden-patterns.sh` exits 1
+    (rule 24) **and** `StoryTilesTest::test_default_columns_come_from_config` fails
+    (`is-cols-2` rendered).
+  - `writing.tile_columns` deleted from `Config::defaults()` →
+    `ConfigTest::test_defaults_contain_every_spec_key` fails.
+  - `self::$stale_scope` decrement removed from `Cells::mark_empty()` →
+    `CellsTest::test_fresh_section_after_stale_section_keeps_its_dek` fails with the fresh
+    Technology row missing `ttm-item__dek` (the exact site-wide leak T1 described; the other
+    13 CellsTest tests still pass, which is why this test was needed).
+  - `Stats::category()` `newest_date` forced to `null` →
+    `StatsTest::test_category_stats_count_and_year_range` fails on its own (`null` vs
+    `'2024-06-01 12:00:00'`), plus four CellsTest F9 tests.
+- Mutation sampling in modules this round did not touch, to keep the whole-branch sample
+  honest: `Dates::short_month` "Sept" → "Sep" (4 unit failures in DatesTest/ValuesTest);
+  `Newsletter\Handler` honeypot check inverted (`HandlerTest::test_honeypot_returns_success_redirect_without_forwarding`);
+  `Cache\Headers` clamp removed (`HeadersTest::test_min_age_floor`, `test_cap_applies_when_config_hour_is_far`).
+- Whole-tree constraint greps (independent of the script): no `prefers-color-scheme`; no
+  `wp_enqueue_style`/`<style` in the plugin; no block `view.js`/`viewScript`; no
+  `fetch(`/`XMLHttpRequest`/`apiFetch`/`admin-ajax`/`wp-json` under the theme's JS;
+  `package.json` `dependencies` is `{}`; no unbounded queries; no data-owning calls under
+  `themes/`; no clock reads outside `Support/Clock.php`; `TTM_CORE_API === 1` defined and
+  checked in `inc/bindings-compat.php`; zero hex literals in `ttm.css`. Every `TTM\Core`
+  reference under `themes/` is guarded (and `BoundariesTest` pins it).
+- `test:e2e` was **not** re-run this round: the only production change is the one-line
+  `Config::get( 'writing.tile_columns', 2 )` substitution, which produces byte-identical
+  markup (`is-cols-2`) on the default config; nothing under `themes/` or `tests/e2e/`
+  changed since the round-2 review ran it 48/48 (confirmed by `git log --stat 5b011aa..HEAD`).
+- Both round-3 findings are closed in code: C1 (`writing.tile_columns` in `Config::defaults()`,
+  read in `render.php`, listed in `ConfigTest`; rule 24's second grep catches plain `= N;`
+  assignments with the same numeric ranges and HTTP-status allow-list, and trips on nothing in
+  the current tree); T1 (the two-section test above; `newest_date` asserted for a populated
+  and an empty category).
 
-Approval is withheld because categories 1 and 3 are not clean across the branch: one bare
-numeric tunable survives in a `render.php` and the rule-24 script cannot see it (C1), and the
-round-2 F9 mechanism ships a scope counter whose exit path has no test and whose failure mode
-is site-wide (T1). Both are small; nothing else on the branch is wrong.
+Categories 1–3 are clean across the entire branch and nothing is blocked, so the branch is
+approved. The items below are low-severity notes for the owner, not defects.
 
 ## Findings (most severe first)
 
 ### 1. Constraints (CLAUDE.md `## Constraints`)
 
-**C1 — Rule 24: a bare tile-column literal in `story-tiles`, and `forbidden-patterns.sh` rule 24
-only sees `=>` array syntax.** `plugins/ttm-core/blocks/story-tiles/render.php:29`
-`$ttm_columns = 2;` is the default column count when the block's `columns` attribute is `0`
-(its `block.json` default), so it is the value every seeded `/writing/` page renders with
-(`is-cols-2`). Every sibling default in the same file and in every other block goes through
-`Config::get()` (`writing.story_tiles`, `writing.plain_count`, `books.*`). `scripts/
-forbidden-patterns.sh:97` matches `=>\s*[2-9]…` only, so a plain assignment is invisible to the
-check that is supposed to enforce rule 24 — the R2-01 commit body records exactly this ("a bare
-`= 2` assignment does not match the rule 24 regex"), which is how the original
-`$query['posts_per_page'] = 2;` sat unflagged through round 1. What breaks: the constraint is
-narrower than CLAUDE.md says, and the next `= N;` tunable lands silently. Fix: a
-`writing.tile_columns` Config key (default `2`, design's "tiles 2-col") read in `render.php` and
-listed in `ConfigTest`; extend rule 24's grep with `=\s*[2-9][0-9]*\s*;` / `=\s*[0-9]{2,}\s*;`
-(same `Config.php` and HTTP-status exclusions). Reviewed and deliberately left as-is: HTTP status
-codes (`Verse/Fetcher.php:192,201` `304`/`200`, the REST `404`s), structural arithmetic
-(`Support/Text.php:72` `intdiv(…, 2)`, `Blocks/Helpers.php:72` `count(...) < 2`,
-`Cli/Seeder.php:57` `dirname(…, 3)`), and the DEV-ONLY seeder's fixture literals
-(`Cli/Seeder.php:487,572,575`). Task P6-04 / R1-02.
+Clean. `forbidden-patterns.sh` is clean and now enforces rule 24 in both `=> N` and `= N;`
+forms; both mutations above confirm it fails when either form returns.
 
-No other constraint hits anywhere in the tree (see the grep list above).
+Two properties of the new rule-24 grep worth knowing, neither a finding:
+
+- It is a superset: `=\s*[2-9][0-9]*\s*;` also matches `>= 2;`, `<= 10;`, `+= 2;`, `=== 2;`.
+  Nothing in the tree hits those today (verified by grep); if one ever does, it is a literal
+  comparison/increment against a tunable, which rule 24 arguably wants flagged anyway.
+- It still does not see literals in function arguments, including the 43
+  `Config::get( 'key', N )` fallback arguments across `src/` and `blocks/`. That is the
+  convention every block and module already uses (the fallback is only reachable when the key
+  is absent from `defaults()`, which `ConfigTest` prevents), and the task explicitly told the
+  implementer not to widen the grep to function arguments. Accepted; see SI-12.
 
 ### 2. Boundaries (SPEC §3.1 rule 1, §4.2)
 
-Clean. `themes/ttm-theme/**/*.php` references only `\TTM\Core\Config` (guarded) and
-`BoundariesTest::test_theme_php_references_only_config_from_the_plugin` now enforces it; the
-`use`-line and inline-reference scans are both green and both killed their sampled mutation; no
-file under `Cache/`, `Verse/`, `Newsletter/` references `Blocks/`. The relabel filters moving
-from `Query\Archive` to `Bindings\Sources` is downward (`Bindings` may import `Query`); see
-SI-11 for the §4.2 wording it leaves behind.
+Clean. Nothing in round 3 touched a module import; `BoundariesTest` (use-line, inline
+fully-qualified, and theme-reference scans) is green; `themes/ttm-theme/**/*.php` references
+only `\TTM\Core\Config`, guarded.
 
 ### 3. Tests
 
-**T1 — Rule 27: the stale-scope exit in `Cells::mark_empty()` has no test, and its failure mode
-is every later section losing its dek.** `plugins/ttm-core/src/Query/Cells.php:212-214`
-decrements `self::$stale_scope` after a stale `core/query` has rendered; `:181-183`
-`suppress_stale_dek()` blanks *every* `core/post-excerpt` while the counter is above zero. With
-the decrement deleted, all 28 tests matching `CellsTest|FrontPageStatesTest|FrontPageTest` still
-pass (verified), because each renders at most one stale section and nothing after it. A
-throwaway test that renders a stale Security query and then a fresh Technology query in the same
-request fails under that mutation: the Technology row comes back with no `ttm-item__dek` at all.
-On the real front page that is every section cell after the first stale one (and any
-`post-excerpt` elsewhere on the page) — exactly the "cached HTML is wrong for everyone" class of
-bug SPEC §3.2 exists to prevent. Fix:
-`CellsTest::test_fresh_section_after_stale_section_keeps_its_dek` — stale section then fresh
-section through `do_blocks()` in one test, assert the stale query has `is-stale` and no
-`ttm-item__dek`, and the fresh query still contains `ttm-item__dek` and its excerpt text. While
-in that file, `Stats::category()['newest_date']` (`Stats.php:94,108`, the field the whole F9
-decision now rests on) has no direct assertion — R2-01 listed `StatsTest.php` in its files but
-did not touch it; add `newest_date` to `StatsTest::test_category_stats_count_and_year_range`
-(equals the newest post's `post_date`, `null` for an empty category). Task R2-01.
-
-Everything else in this category holds: the acceptance tests named by R2-01/R2-02/R2-03 all
-exist, test the mechanic rather than re-deriving it, and each failed under its sampled mutation.
+Clean. Both acceptance tests named by R3-01 exist and fail under their mutation; all three
+named by R3-02 exist and fail under theirs (see the verified list above). The new tests test
+the mechanic (rendered class / rendered dek / cached field), not a re-derivation of it.
+`StoryTilesTest`'s `ttm_config` filter cannot leak into later tests: `TTM_IntegrationTestCase::tear_down()`
+already calls `Config::reset()` (and `StoryTilesTest::tear_down()` does so again).
 
 ### 4. Performance (SPEC §3.2)
 
-Nothing new. `is_stale_year()` is now `get_term_by()` (object-cached) plus one transient read;
-the warm-cache test pins it at zero queries. `Archive::year_range()` keeps the one bounded,
-ids-only re-query per pagination link accepted in round 2. The transient's TTL-driven
-recompute on a front-end request is what SPEC §5.3 itself specifies for `ttm_category_stats_*`.
+Nothing new. One extra `Config::get()` in `story-tiles/render.php` (memoised array read).
 
 ### 5. Spec drift / low
 
-**S1 — Docblock residue.** `plugins/ttm-core/src/Query/Cells.php:26-30` says the counter "lives
-on the filter pair rather than in `Query\Archive`" — `Archive` was never a candidate for
-section-cell state; the sentence was copied from `Blocks\Helpers::$archive_scope`. No task;
-fix it if `Cells.php` is touched again.
+**S1 (carried from round 2, still open, no task) — docblock residue.**
+`plugins/ttm-core/src/Query/Cells.php:26-30` still says the counter "lives on the filter pair
+rather than in `Query\Archive`"; `Archive` was never a candidate. R3-02 was correctly
+test-only and did not touch `Cells.php`. Fix whenever `Cells.php` is next edited.
 
-Not findings: `cssBudgetBytes` is unchanged this round (33070/33200 used, CLAUDE.md agrees);
-`plugins/ttm-core/README.md` §Configuration deliberately lists no per-key table, so
-`cells.stale_count` needs no README entry; `SPEC §5.4` still lists `cells.thin_days` (SI-8,
-owner).
+**S2 (low, docs only) — HANDOFF labels `writing.tile_columns` an `⚠️ ASSUMPTION` key.** It is
+the design's number ("tiles 2-col", 02 §D), not an assumption; the previous review said so
+when queuing C1. Nothing in code carries the marker, so this only affects how the owner reads
+the tuning table in HANDOFF §Round 3. No task.
 
-### 6. Interpretation choices (HANDOFF §Round 2)
+Not findings: `cssBudgetBytes` unchanged (33070/33200, CLAUDE.md agrees); `plugins/ttm-core/README.md`
+§Configuration deliberately has no per-key table, so `writing.tile_columns` needs no README
+entry; SPEC §5.4 does not list the new key (SI-13, owner).
 
-Accepted as the reading most consistent with SPEC: R2-01 resolving the category with
-`get_term_by('slug')` before the transient read (a cached term lookup, not the request-time
-`WP_Query` the task removed); `is-stale` and `is-empty` as independent classes on the same
-wrapper; R2-02's deliberately simple comment stripper in the inline scanner (documented, and it
-kills the sampled mutation); R2-03 keeping `Archive::year_range()`'s bounded re-query exactly as
-`resolve_label()` had it, and ScaffoldTest's line-scoped module-map check with the `*Command`
-shorthand.
+### 6. Interpretation choices (HANDOFF §Round 3)
 
-Not accepted: none — the round-2 choices are all sound. The gap in R2-01 is a missing test (T1),
-not a wrong reading.
+- **R3-01** — mirroring the existing `=>` grep verbatim (same ranges, same HTTP-status
+  allow-list translated to `status = NNN;`) rather than widening to function arguments or
+  comparisons: accepted; it is what the task asked for and what SPEC rule 24's enforcement
+  can do without a tokenizer. The implementer's claim that no reviewed-and-accepted literal
+  trips the new pattern is true (script clean on the tree).
+- **R3-02** — none claimed, none needed: the tests match the task text's fixtures and
+  assertions exactly.
+
+The `Config::all()` memoisation gotcha HANDOFF records (call `Config::reset()` after
+`add_filter('ttm_config')` in tests) is accurate and already the precedent in `LeadTest` and
+`CellsTest`; worth a line in `docs/SETUP.md` some day, not a finding.
 
 ### 7. Blocked and skipped tasks
 
@@ -141,48 +127,40 @@ None. Nothing to unblock.
 
 ### 8. Readability / naming
 
-Good. `Sources::resolve_pagination_label()` reads clearly as "lookup then format"; the R2 tests
-say what they prove in their names (the `…_never_blank_for_a_valid_date` rename was right). S1
-is the only residue.
+Good. `test_fresh_section_after_stale_section_keeps_its_dek` and
+`test_newest_date_is_null_for_an_empty_category` say exactly what they prove; the rule-24
+script comment explains why the second grep exists.
 
-## Round-2 findings, verified closed
+## Round-3 findings, verified closed
 
-C1 `cells.stale_count` read in `Cells` only, `forbidden-patterns.sh` allow-list removed (script
-still clean); C2 `Stats::category()` carries `newest_date`, flushed on `transition_post_status`,
-`is_stale_year()` issues no query when warm (mutation confirmed); B1 `patterns.php` and
-`section-cell.php` no longer vary per request, dek suppressed by `render_block_core/post-excerpt`
-inside a `render_block_data`/`render_block_core/query` scope pair, `is-stale` from `mark_empty()`,
-`FrontPageStatesTest` F9 green without the `init` re-fire, theme-reference guard test added;
-T1 `FrontSourcesTest::test_short_date_and_relative_date_empty_without_post` (no `postId`, and a
-nonexistent id) and the unit test renamed; T2 inline-reference scanner; S2 one source for both
-pagination strings with the relabel filters in `Bindings\Sources`; S3 CLAUDE.md module map,
-`archive-by-year/render.php` docblock, `Cells.php` comments, HANDOFF R1-02 bullet.
+C1 `writing.tile_columns` (`Config.php:81`) read at `story-tiles/render.php:29`, in
+`ConfigTest`'s key list, covered by `StoryTilesTest::test_default_columns_come_from_config`;
+`forbidden-patterns.sh:100-103` second rule-24 grep, exits 1 on the reintroduced literal.
+T1 `CellsTest::test_fresh_section_after_stale_section_keeps_its_dek` fails without the
+`$stale_scope` decrement; `StatsTest` asserts `newest_date` for a populated and an empty
+category and fails without the field.
 
 ## Spec issues
 
-Carried from rounds 1–2 and still open for the owner: **SI-1** (rule 15 "JSON" vs typed
+Carried from rounds 1–3 and still open for the owner: **SI-1** (rule 15 "JSON" vs typed
 `show_in_rest` arrays), **SI-2** (§4.2 "May import" column narrower than the design needs),
 **SI-3** (`sections.technology_slug` missing from §5.4), **SI-4** (`inc/template-hierarchy.php`
 listed in §4.3 / 04 §1 but not built), **SI-5** (rule 12 vs CLI term enumeration), **SI-6**
 (rule 30's 25 KB budget vs 33 KB measured — decide the number once), **SI-7** (§6.10 "GET" should
 read "GET/HEAD"), **SI-8** (`cells.thin_days` needs no code; remove from §5.4 / 06 F9), **SI-9**
-(`Verse` → `Cache` import vs table order), **SI-10** (§5.4 has no F9 count key; code now has
-`cells.stale_count = 2`).
+(`Verse` → `Cache` import vs table order), **SI-10** (§5.4 has no F9 count key; code has
+`cells.stale_count = 2`), **SI-11** (§4.2 `Query/Archive` responsibility column vs where year
+grouping and pagination labels actually live), **SI-12** (rule 24's exception list should name
+HTTP status codes, structural arithmetic and `Config::get()` fallback arguments, which the
+enforcement script necessarily tolerates).
 
 New this round:
 
-- **SI-11** §4.2 lists "pagination labels" under `Query/Archive` and "year grouping" too, but the
-  same table forbids `Query/` importing `Bindings/` or `Blocks/`, so after R1-01/R2-03 the year
-  grouping lives in `Blocks\Helpers` and the labels/relabel filters in `Bindings\Sources` (with
-  `Archive` keeping only the year-range lookup). Recommend rewording the `Query/` and
-  `Bindings/` rows to match, so the responsibility column and the import column agree.
-- **SI-12** Rule 24's exception list ("`0`, `1`, `-1` for `array_search` results, array indices,
-  and CSS values") does not cover HTTP status codes or structural arithmetic (`intdiv(…, 2)`,
-  `count(…) < 2`, `dirname(…, 3)`), which the tree necessarily contains and the script
-  allow-lists. Recommend the rule name those classes explicitly so the enforcement script's
-  allow-list has a spec basis.
+- **SI-13** §5.4 has no `writing.tile_columns` key; code now has `writing.tile_columns = 2`
+  (the design's "tiles 2-col"). Add it next to `writing.story_tiles`, unmarked (it is a design
+  number, not an assumption).
 
-## Manual checks still owed (copied from HANDOFF.md §2, §Round 1, §Round 2)
+## Manual checks still owed (copied from HANDOFF.md §2, §Round 1, §Round 2, §Round 3)
 
 **Phase 0**
 - Open the site and confirm fonts render with zero requests to `fonts.googleapis.com`/`fonts.gstatic.com`.
@@ -250,7 +228,11 @@ New this round:
 **Round 2**
 - R2-01: once a section genuinely goes stale in production (its newest post crosses
   `cells.stale_year_days`), confirm the dek is absent from the rendered HTML (not CSS-hidden), exactly
-  `cells.stale_count` rows show, and — per T1 — that the sections rendered *after* it still show
-  their deks.
+  `cells.stale_count` rows show, and that the sections rendered *after* it still show their deks
+  (now also pinned by `CellsTest`).
 - R2-03: page through a seeded category archive with more than one page and confirm "Older (…) →" /
   "← Newer (…)" render on both the block-bound label and the query-pagination next/previous links.
+
+**Round 3**
+- R3-01: no visual change (same markup, same `is-cols-N` classes); nothing new to eyeball.
+- R3-02: test-only; the F9 stale-year check above is unchanged.
