@@ -1,0 +1,10 @@
+[
+	{ "name": "Technology", "slug": "technology", "description": "Software, infrastructure and the tools that make the internet work. Practical notes from building and running real systems." },
+	{ "name": "Business", "slug": "business", "description": "Running a small technology practice: pricing, clients, and the unglamorous mechanics of getting paid." },
+	{ "name": "Faith", "slug": "faith", "description": "Reflections on belief, doubt, and the practice of a spiritual life alongside an ordinary week." },
+	{ "name": "Journal", "slug": "journal", "description": "Shorter, more personal entries: what happened, what I noticed, what stuck with me." },
+	{ "name": "Writing", "slug": "writing", "description": "On the craft and habit of writing fiction and nonfiction, including notes on works in progress." },
+	{ "name": "Security", "slug": "security", "description": "Application and infrastructure security, told through the incidents and near-misses that teach the real lessons." },
+	{ "name": "Opinion", "slug": "opinion", "description": "Arguments I'm willing to put my name on, about technology, culture, and the occasional bit of politics." },
+	{ "name": "Politics", "slug": "politics", "parent": "opinion", "description": "The subset of opinion writing that touches policy and public life directly." }
+]

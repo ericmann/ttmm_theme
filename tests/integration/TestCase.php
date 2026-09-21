@@ -7,6 +7,7 @@
 
 declare( strict_types=1 );
 
+use TTM\Core\Cli\Seeder;
 use TTM\Core\Config;
 
 abstract class TTM_IntegrationTestCase extends WP_UnitTestCase {
@@ -56,6 +57,19 @@ abstract class TTM_IntegrationTestCase extends WP_UnitTestCase {
 		unset( $context );
 
 		return (string) do_blocks( $markup );
+	}
+
+	/**
+	 * Run the full seed and return the Seeder so tests can inspect/reuse it.
+	 *
+	 * @param string $state Seed state (e.g. "normal").
+	 * @return Seeder
+	 */
+	protected function seed( string $state = 'normal' ): Seeder {
+		$seeder = new Seeder();
+		$seeder->run( $state );
+
+		return $seeder;
 	}
 
 	/**
