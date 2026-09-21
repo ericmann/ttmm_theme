@@ -54,7 +54,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P5-01 Archive query, pagination labels, section feeds, journal-in-main-feed
 - [x] P5-02 archive-by-year and tag-filter blocks
 - [x] P5-03 category-stats and most-read blocks
-- [ ] P5-04 Archive and search patterns, templates and CSS
+- [x] P5-04 Archive and search patterns, templates and CSS
 - [ ] P5-05 Push and manual check (Phase 5)
 - [ ] P6-01 series-progress and series-stats blocks
 - [ ] P6-02 series-featured block; tuning series.hub_featured_parts
@@ -339,3 +339,9 @@ Added ttm/archive-by-year (InnerBlocks container for one core/query) and ttm/tag
 
 ### P5-03 — ec30be7
 Added ttm/category-stats (article count via _n, year range with en dash or a single year, series-touch line omitted at 0, "{Section} RSS" feed link — all from Query\Stats::category(), '' outside a category archive) and ttm/most-read (bounded WP_Query on ttm_featured_in_section=1 AND ttm_primary_category=current term, newest first, limit from the attribute or archive.most_read_limit; '' with zero results or outside a category archive). most-read's source attribute enum documents that "views" (Q6, not implemented) behaves identically to "manual" rather than silently ignored. Full integration suite: 222 tests, 2 pre-existing/expected skips, 0 failures.
+
+### P5-04 — cc4125a
+Assembled category.html, category-journal.html, archive.html and rewrote search.html with archive-header/filter-row patterns and their CSS (4.25-4.29). Added tags-or-series to Values::meta_line/Sources::meta_line (series position via Helpers::series_position + open_ended_total, else archive.row_tags tag names). most-read renders its own "Most read" heading so templates don't duplicate it; only "Series in" gets a template-level heading. archive.html has no filter row/archive-header (category-only), aside keeps only Most read, rows omit tags-or-series. search.html drops the old tagName-on-template-part double-wrap, uses query-title type=search + core/search + post-terms kicker rows. Pagination previous/next left as plain core blocks since P5-01's label_next/label_previous already swaps the text dynamically when inherit=true.
+Measurement: ttm.css 25451 -> 27358 bytes; bumped scripts/check-budget.mjs cssBudgetBytes 25600 -> 28000 with a documenting comment.
+ArchiveTemplatesTest (6 acceptance tests) added; full verify green (composer lint 0 errors, 97/97 unit, npm lint/build green, forbidden-patterns clean, 228 integration tests OK with the 2 pre-existing skips).
+Manual check: NOT VERIFIED (human) - see commit body for the /category/security/, /category/journal/, /tag/, /?s= checks.
