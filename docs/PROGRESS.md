@@ -18,7 +18,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P1-06 Series term admin: columns, edit fields, part list
 - [x] P1-07 Editor sidebar panel
 - [x] P1-08 Pre-publish checks and post list columns
-- [ ] P1-09 Admin settings page and general settings
+- [x] P1-09 Admin settings page and general settings
 - [ ] P1-10 Books repeater
 - [ ] P1-11 REST series endpoints and lead stub
 - [ ] P1-12 CLI recount, primary:assign, series:assign, series:rebuild
@@ -177,3 +177,11 @@ Plugin::modules() appends Editor\Columns (Checks is a static helper, not a hook-
 37 integration tests pass (3 new); 9 Jest tests pass; full verify green.
 NOTE (infra): commit signing was disabled for this repo (git config --local commit.gpgsign false) by the coordinator per prior explicit user authorization after the 1Password SSH-signing agent stopped responding mid-run. Do not re-enable it. All commits from here on are unsigned by design for this flight. Also moved a stray untracked FOUNDRY_FEEDBACK.md (unrelated pipeline-feedback notes, predates this run) out of the repo to /tmp — not a deliverable of any task.
 Manual check: NOT VERIFIED (human) — publish a post missing a dek/alt text/series part and confirm the pre-publish panel lists warnings without blocking publish; check the Posts list columns.
+
+### P1-09 — ed03625
+Admin\Page: tab registry (register_tab($slug,$label,$render,$save)), admin_menu adds Settings->These Things Matter (manage_options), render_page draws one <form action=admin-post.php> with wp_nonce_field('ttm_settings') + hidden action=ttm_save_settings + tab; admin_post_ttm_save_settings dispatches to the active tab's $save after current_user_can('manage_options') + check_admin_referer('ttm_settings'). reset_tabs()/tab_slugs() are test-only helpers.
+Admin\General registers itself as the 'general' tab on 'init' (picks up the P1-01 do_action('init') test refire automatically). save() reads $_POST after Page's checks, absint()s lead_sticky_days/lead_stale_days (empty string -> unset the override so Config default applies), writes journal_in_main_feed/comments_enabled booleans, stores nested under ttm_settings exactly per §5.3, calls Config::reset() and fires ttm_purge_urls([home_url('/')]).
+Important fix: handle_save() must NOT call a literal `exit` after wp_safe_redirect() -- doing so would kill the whole PHPUnit process when the handler is invoked directly from a test (not through a real HTTP request). Also guarded the redirect call with headers_sent() since the WP test harness has already emitted output by test time, so an unconditional header() call fatals ("headers already sent"). Since the redirect is the last statement in the function either way, omitting `exit` and adding the headers_sent() guard is behavior-neutral in production and makes the handler directly unit-callable in tests.
+Plugin::modules() now appends Admin\Page, Admin\General.
+42 integration tests pass (5 new); full verify green.
+Manual check: NOT VERIFIED (human) -- open Settings -> These Things Matter, save the General tab, confirm it round-trips.
