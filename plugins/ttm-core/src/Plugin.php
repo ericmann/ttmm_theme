@@ -47,6 +47,7 @@ class Plugin {
 			Cli\Loader::class,
 			Nav\CurrentSection::class,
 			Templates\Hierarchy::class,
+			Blocks\Registrar::class,
 		];
 	}
 

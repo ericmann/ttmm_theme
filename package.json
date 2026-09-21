@@ -8,8 +8,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "wp-scripts build --webpack-src-dir=plugins/ttm-core/src --output-path=plugins/ttm-core/build",
-    "start": "wp-scripts start --webpack-src-dir=plugins/ttm-core/src --output-path=plugins/ttm-core/build",
+    "build": "wp-scripts build",
+    "start": "wp-scripts start",
     "lint": "npm run lint:js && npm run lint:css && npm run check:theme-json && npm run check:block-json && npm run check:budget",
     "lint:js": "wp-scripts lint-js plugins/ttm-core/src themes/ttm-theme/assets/js scripts tests/e2e --no-error-on-unmatched-pattern",
     "lint:css": "wp-scripts lint-style 'themes/ttm-theme/assets/css/**/*.css' --allow-empty-input",
