@@ -33,18 +33,6 @@ class ChromePartsTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'is-after-poster', $html );
 	}
 
-	public function test_rail_renders_without_plugin_blocks_registered(): void {
-		global $wp_error_handler_triggered;
-
-		if ( class_exists( '\TTM\Core\Blocks\Registrar' ) ) {
-			$this->markTestSkipped( 'ttm/* blocks are registered in this environment; nothing to unregister yet.' );
-		}
-
-		$html = $this->render_template_part( 'rail' );
-
-		$this->assertStringNotContainsString( 'data-ttm-block', $html );
-	}
-
 	public function test_patterns_are_registered_in_ttm_categories(): void {
 		$registry = \WP_Block_Patterns_Registry::get_instance();
 

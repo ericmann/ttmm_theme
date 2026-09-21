@@ -87,8 +87,17 @@ class PluginAloneTest extends TTM_IntegrationTestCase {
 		$series_id = (int) $term['term_id'];
 		update_term_meta( $series_id, 'ttm_total_parts', 2 );
 
-		$part_1 = $this->post_in( $security, [ 'post_title' => 'Part One' ] );
+		$part_1 = $this->post_in(
+			$security,
+			[
+				'post_title' => 'Part One',
+				'tags_input' => [ 'security-basics' ],
+			] 
+		);
 		update_post_meta( $part_1, 'ttm_series_part', 1 );
+		// So ttm/most-read (needs a featured-in-section post) and ttm/tag-filter (needs a
+		// tagged post in the category) both have something real to show on /category/security/.
+		update_post_meta( $part_1, 'ttm_featured_in_section', '1' );
 		wp_set_object_terms( $part_1, [ $series_id ], 'series' );
 
 		$part_2 = $this->post_in( $tech, [ 'post_title' => 'Part Two' ] );
@@ -185,8 +194,8 @@ class PluginAloneTest extends TTM_IntegrationTestCase {
 			'series-prev-next' => [ 'series-prev-next', '<!-- wp:ttm/series-prev-next {"mode":"auto"} /-->', 'series-post', true ],
 			'syndicated-to'    => [ 'syndicated-to', '<!-- wp:ttm/syndicated-to /-->', 'journal-post', true ],
 			'category-stats'   => [ 'category-stats', '<!-- wp:ttm/category-stats /-->', 'security', true ],
-			'most-read'        => [ 'most-read', '<!-- wp:ttm/most-read /-->', 'security', false ],
-			'tag-filter'       => [ 'tag-filter', '<!-- wp:ttm/tag-filter /-->', 'security', false ],
+			'most-read'        => [ 'most-read', '<!-- wp:ttm/most-read /-->', 'security', true ],
+			'tag-filter'       => [ 'tag-filter', '<!-- wp:ttm/tag-filter /-->', 'security', true ],
 			'archive-by-year'  => [ 'archive-by-year', '<!-- wp:ttm/archive-by-year --><!-- wp:query {"query":{"perPage":5,"postType":"post","inherit":false}} --><div class="wp-block-query"><!-- wp:post-template --><!-- wp:post-title /--><!-- /wp:post-template --></div><!-- /wp:query --><!-- /wp:ttm/archive-by-year -->', 'security', true ],
 		];
 	}
