@@ -41,7 +41,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P3-07 series-list block
 - [x] P3-08 Serials query and writing-cell block
 - [x] P3-09 newsletter-form block with jetpack, mailto and none providers
-- [ ] P3-10 Front-page patterns, rail, template and front CSS
+- [x] P3-10 Front-page patterns, rail, template and front CSS
 - [ ] P3-11 Front-page fallback state tests (quiet, empty)
 - [ ] P3-12 Push and manual check (Phase 3)
 - [ ] P4-01 series-bar block
@@ -300,3 +300,6 @@ Added Fiction\Serials (pure static readers, no hooks/registration): active() pic
 
 ### P3-09 — d183c97
 Added Newsletter\Provider\{Provider interface, Jetpack, Mailto, None} and Newsletter\Providers: resolve(configured, registry) is pure over an injected slug=>Provider map (configured provider if available, else mailto if available, else none), unit-testable without WordPress via a StubProvider; default_registry() wires the three real classes (custom-url has no class yet per P7-03 and is simply absent, so it falls through the same chain as any unavailable provider). Jetpack::available() checks WP_Block_Type_Registry for jetpack/subscriptions and render() does_blocks() it; Mailto::available() checks newsletter.fallback_email and renders a plain mailto: link; None is the guaranteed always-available F26 statement. Added ttm/newsletter-form: render.php owns the shared wrapper (data-provider, is-poster/is-box, the always-present "Check your inbox" message shown only via CSS in the subscribed state) and reads isset($_GET['subscribed']) only, never reflecting its value, per rule 7 (no nonces on cacheable output). Full integration suite: 154 tests, 1 pre-existing skip, 0 failures.
+
+### P3-10 — 315597e
+Added the seven front patterns (lead-story, journal-rail, section-cell [header-less template], section-cell-large, section-row-1, section-row-2, series-strip), front-page.html (single <main id="main"> landmark wrapping lead-row through the poster; header-front/footer invoked without tagName since those parts already self-wrap — confirmed via a real render that index.html's existing tagName usage double-wraps <header>/<footer>, left alone as out of scope), and inc/patterns.php's register_section_cells() (requires section-cell.php once per business/security/faith/opinion with $ttm_section set, captures output via ob_start, registers ttm/section-cell-{slug}; reads cells.counts through the plugin Config behind a class_exists guard per SPEC §9). Extended Bindings\Values::meta_line()/Sources::meta_line() with an optional politics flag (post carries the Politics child category in any position) always appended last, so section-cell.php's existing date+reading meta-line binding picks up "· Politics" for Opinion posts with no markup change needed. Reused the already-existing ttm-cell-heading __label/__link CSS across every new pattern's heading. Added CSS for 4.7 lead through 4.17 series row plus F17 empty-cell hiding; ttm.css grew 18335 -> 22989 of the 25600-byte budget. Full integration suite: 160 tests, 1 pre-existing skip, 0 failures.
