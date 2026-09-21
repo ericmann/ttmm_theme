@@ -1,6 +1,6 @@
 <?php
 /**
- * `GET /wp-json/ttm/v1/lead` stub — 404 until Phase 3 implements lead selection.
+ * `GET /wp-json/ttm/v1/lead` (SPEC §6.6).
  *
  * @package TTM\Core\Rest
  */
@@ -9,10 +9,12 @@ declare( strict_types=1 );
 
 namespace TTM\Core\Rest;
 
+use TTM\Core\Query\Lead;
 use WP_Error;
+use WP_REST_Response;
 
 /**
- * Placeholder route; P3-04 replaces get_item() with real lead logic.
+ * Public, GET-only route over the cached lead selection.
  */
 class LeadController {
 
@@ -39,11 +41,17 @@ class LeadController {
 	}
 
 	/**
-	 * `GET /lead`: 404 until Phase 3.
+	 * `GET /lead`: `{id, reason}`; 404 only when `reason === 'none'`.
 	 *
-	 * @return WP_Error
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public static function get_item(): WP_Error {
-		return new WP_Error( 'ttm_lead_not_ready', __( 'Lead selection is not implemented yet.', 'ttm-core' ), [ 'status' => 404 ] );
+	public static function get_item() {
+		$lead = Lead::compute();
+
+		if ( 'none' === $lead['reason'] ) {
+			return new WP_Error( 'ttm_not_found', __( 'No lead post available.', 'ttm-core' ), [ 'status' => 404 ] );
+		}
+
+		return rest_ensure_response( $lead );
 	}
 }
