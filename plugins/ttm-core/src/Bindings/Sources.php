@@ -227,6 +227,10 @@ class Sources {
 			}
 		}
 
+		if ( in_array( 'tags-or-series', $parts, true ) ) {
+			$ctx['tags_or_series'] = self::tags_or_series( $post_id );
+		}
+
 		if ( self::in_politics( $post_id ) ) {
 			$ctx['politics'] = true;
 		}
@@ -537,6 +541,32 @@ class Sources {
 		$raw = (int) get_term_meta( $term->term_id, 'ttm_total_parts', true );
 
 		return $raw > 0 ? $raw : null;
+	}
+
+	/**
+	 * "Series: Reading CVEs, 4 of 4" when the post is in a series, else up to
+	 * `archive.row_tags` tag names joined with ", "; `''` with neither (P5-04 archive row).
+	 *
+	 * @param int $post_id Post id.
+	 * @return string
+	 */
+	private static function tags_or_series( int $post_id ): string {
+		$series = Helpers::series_position( $post_id );
+
+		if ( $series ) {
+			return Values::series_tag_label( $series['name'], $series['part'], self::open_ended_total( $series['slug'] ) );
+		}
+
+		$limit = (int) Config::get( 'archive.row_tags', 2 );
+		$tags  = get_the_tags( $post_id );
+
+		if ( ! is_array( $tags ) || empty( $tags ) ) {
+			return '';
+		}
+
+		$names = wp_list_pluck( array_slice( $tags, 0, $limit ), 'name' );
+
+		return implode( ', ', $names );
 	}
 
 	/**

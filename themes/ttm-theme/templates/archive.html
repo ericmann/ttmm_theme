@@ -1,0 +1,53 @@
+<!-- wp:template-part {"slug":"header-inner"} /-->
+
+<!-- wp:group {"className":"is-style-grid-8-4 ttm-archive-head","layout":{"type":"constrained"}} -->
+<div class="wp-block-group is-style-grid-8-4 ttm-archive-head">
+	<!-- wp:group {"layout":{"type":"constrained"}} -->
+	<div class="wp-block-group">
+		<!-- wp:query-title {"type":"archive","showPrefix":true,"className":"is-style-display-xl"} /-->
+	</div>
+	<!-- /wp:group -->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:group {"className":"is-style-grid-8-4","layout":{"type":"constrained"}} -->
+<div class="wp-block-group is-style-grid-8-4">
+	<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+	<main class="wp-block-group" id="main">
+		<!-- wp:ttm/archive-by-year -->
+		<!-- wp:query {"queryId":0,"query":{"perPage":12,"postType":"post","inherit":true}} -->
+		<div class="wp-block-query">
+			<!-- wp:post-template -->
+				<!-- wp:group {"className":"ttm-archive-row"} -->
+				<div class="wp-block-group ttm-archive-row">
+					<!-- wp:paragraph {"className":"is-style-micro","metadata":{"bindings":{"content":{"source":"ttm/short-date"}}}} -->
+					<p class="is-style-micro"></p>
+					<!-- /wp:paragraph -->
+
+					<!-- wp:post-title {"isLink":true} /-->
+
+					<!-- wp:post-excerpt /-->
+				</div>
+				<!-- /wp:group -->
+			<!-- /wp:post-template -->
+
+			<!-- wp:query-pagination -->
+			<!-- wp:query-pagination-previous /-->
+			<!-- wp:query-pagination-numbers /-->
+			<!-- wp:query-pagination-next /-->
+			<!-- /wp:query-pagination -->
+		</div>
+		<!-- /wp:query -->
+		<!-- /wp:ttm/archive-by-year -->
+	</main>
+	<!-- /wp:group -->
+
+	<!-- wp:group {"tagName":"aside","layout":{"type":"constrained"}} -->
+	<aside class="wp-block-group" aria-label="Section extras">
+		<!-- wp:ttm/most-read /-->
+	</aside>
+	<!-- /wp:group -->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer"} /-->

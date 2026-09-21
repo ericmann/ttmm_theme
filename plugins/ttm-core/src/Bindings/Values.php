@@ -69,8 +69,8 @@ class Values {
 	 * `$ctx['politics']` is set, "Politics" is always appended last (03 §1: an Opinion post
 	 * also filed under the Politics child category), independent of `$parts`.
 	 *
-	 * @param string[]                                                                                                       $parts Requested parts, in order.
-	 * @param array{date?: string, reading?: string, prev_part?: array{part:int, title:string, url:string}, politics?: bool} $ctx Context.
+	 * @param string[]                                                                                                                                $parts Requested parts, in order.
+	 * @param array{date?: string, reading?: string, prev_part?: array{part:int, title:string, url:string}, politics?: bool, tags_or_series?: string} $ctx Context.
 	 * @return string
 	 */
 	public static function meta_line( array $parts, array $ctx ): string {
@@ -98,6 +98,11 @@ class Values {
 							(string) ( $prev['title'] ?? '' )
 						);
 						$pieces[] = Html::link( (string) $prev['url'], $label );
+					}
+					break;
+				case 'tags-or-series':
+					if ( ! empty( $ctx['tags_or_series'] ) ) {
+						$pieces[] = (string) $ctx['tags_or_series'];
 					}
 					break;
 			}//end switch
@@ -302,5 +307,32 @@ class Values {
 
 		/* translators: %s: year or year range. */
 		return sprintf( __( 'Older (%s) →', 'ttm-core' ), $range );
+	}
+
+	/**
+	 * "Series: Reading CVEs, 4 of 4" (archive row meta-line's `tags-or-series` part); the
+	 * open-ended form has no "of M" (P5-04 reuses the P3-05/06/07/08 open-ended convention).
+	 *
+	 * @param string   $name  Series name.
+	 * @param int      $part  Part number.
+	 * @param int|null $total Total parts, or null when open-ended.
+	 * @return string
+	 */
+	public static function series_tag_label( string $name, int $part, ?int $total ): string {
+		$part_label = null !== $total
+			? sprintf(
+				/* translators: 1: part number, 2: total parts. */
+				__( '%1$d of %2$d', 'ttm-core' ),
+				$part,
+				$total
+			)
+			: sprintf(
+				/* translators: %d: part number. */
+				__( 'part %d', 'ttm-core' ),
+				$part
+			);
+
+		/* translators: 1: series name, 2: "N of M" or "part N". */
+		return sprintf( __( 'Series: %1$s, %2$s', 'ttm-core' ), $name, $part_label );
 	}
 }

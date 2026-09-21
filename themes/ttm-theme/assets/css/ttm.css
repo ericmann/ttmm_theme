@@ -1234,3 +1234,99 @@ ul.modern-footnotes-list,
 		height: 4px;
 	}
 }
+
+/* 4.25 archive head */
+.ttm-archive-head {
+	padding: 40px 0 28px;
+	align-items: end;
+}
+
+/* 4.26 filter row */
+.ttm-filter-row-wrap {
+	border-top: var(--ttm-rule-2);
+	padding: var(--wp--preset--spacing--30) 0;
+}
+
+.ttm-filter-row__label {
+	font-weight: 800;
+	margin-right: var(--wp--preset--spacing--20);
+}
+
+.ttm-filter-row__sort {
+	float: right;
+	color: var(--wp--preset--color--neutral-700);
+	font-size: var(--wp--preset--font-size--caption);
+}
+
+/* 4.27 year group */
+.ttm-archive-year {
+	margin-bottom: var(--wp--preset--spacing--50);
+}
+
+.ttm-archive-year__label {
+	font-size: 28px;
+	font-weight: 800;
+	border-bottom: var(--ttm-rule-2);
+	padding-bottom: 8px;
+	margin-bottom: var(--wp--preset--spacing--20);
+}
+
+.ttm-archive-row {
+	border-top: var(--ttm-rule-1);
+	padding: var(--wp--preset--spacing--30) 0;
+}
+
+/* 4.28 pagination */
+.wp-block-query-pagination {
+	justify-content: space-between;
+	border-top: var(--ttm-rule-2);
+	padding-top: var(--wp--preset--spacing--30);
+	margin-top: var(--wp--preset--spacing--40);
+}
+
+/* 4.29 numbered rows */
+.ttm-most-read__list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.ttm-most-read__item {
+	display: grid;
+	grid-template-columns: 24px 1fr;
+	gap: var(--wp--preset--spacing--20);
+	padding: var(--wp--preset--spacing--20) 0;
+	border-top: var(--ttm-rule-1);
+}
+
+.ttm-most-read__num {
+	color: var(--wp--preset--color--neutral-600);
+	font-weight: 800;
+}
+
+.ttm-search .wp-block-search__input,
+.ttm-search .wp-block-search__button {
+	border: var(--ttm-rule-1);
+	font-size: var(--wp--preset--font-size--body-s);
+	border-radius: 0;
+}
+
+.ttm-search .wp-block-search__button {
+	background: transparent;
+	color: var(--wp--preset--color--text);
+	padding: 8px 14px;
+	font-weight: 800;
+	cursor: pointer;
+}
+
+@media (max-width: 720px) {
+
+	.ttm-filter-row-wrap {
+		overflow-x: auto;
+		white-space: nowrap;
+	}
+
+	.ttm-archive-year__label {
+		border-bottom: var(--ttm-rule-2);
+	}
+}
