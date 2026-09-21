@@ -100,6 +100,7 @@ class Config {
 			'cache.verse_boundary_hour'    => 6,
 			'cache.max_age_cap_seconds'    => 86400,
 			'cache.min_age_seconds'        => 60,
+			'cache.feed_seconds'           => 3600,
 			'cache.cloudflare.zone_id'     => defined( 'TTM_CLOUDFLARE_ZONE_ID' ) ? TTM_CLOUDFLARE_ZONE_ID : '',
 			'cache.cloudflare.api_token'   => defined( 'TTM_CLOUDFLARE_API_TOKEN' ) ? TTM_CLOUDFLARE_API_TOKEN : '',
 

@@ -65,6 +65,7 @@ class ConfigTest extends TestCase {
 			'cache.verse_boundary_hour',
 			'cache.max_age_cap_seconds',
 			'cache.min_age_seconds',
+			'cache.feed_seconds',
 			'cache.cloudflare.zone_id',
 			'cache.cloudflare.api_token',
 			'newsletter.provider',

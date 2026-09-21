@@ -56,6 +56,8 @@ class Plugin {
 			Nav\CurrentSection::class,
 			Templates\Hierarchy::class,
 			Blocks\Registrar::class,
+			Cache\Headers::class,
+			Cache\Batcache::class,
 		];
 	}
 
