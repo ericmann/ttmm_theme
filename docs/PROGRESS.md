@@ -60,7 +60,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P6-02 series-featured block; tuning series.hub_featured_parts
 - [x] P6-03 serial-hero block
 - [x] P6-04 story-tiles and book-grid blocks
-- [ ] P6-05 Hub and Writing templates and CSS
+- [x] P6-05 Hub and Writing templates and CSS
 - [ ] P6-06 Push and manual check (Phase 6)
 - [ ] P7-01 Cache headers and Batcache
 - [ ] P7-02 Purge and Cloudflare adapter
@@ -366,3 +366,8 @@ Added ttm/serial-hero: cover figure (F21 is-nocover when no ttm_cover_id), kicke
 ### P6-04 — aea8de3
 Added ttm/story-tiles (typographic tiles from Serials::stories(); F19 cover tiles render only the image with title moved to aria-label; limit/columns attrs) and ttm/book-grid (from Fiction\Books::all(); cover figure omitted when no cover_id; caption "Form · Year · formats"; purchase links as .btn-ghost rel=noopener target=_blank). Both '' when empty (F20). Also fixed pre-existing ScopeIndent phpcs errors in P6-03's serial-hero/render.php caught by this run's full lint pass.
 7 acceptance tests added. Full verify green: composer lint 0 errors, 97/97 unit, npm lint/build green, forbidden-patterns clean, 253 integration tests OK (2 pre-existing skips).
+
+### P6-05 — d16453d
+Added page-series.html (hub head + series-stats, series-featured, "All series" grid, newsletter-box), taxonomy-series.html (full-width series-featured with partsLimit:0 = no cap via $block->parsed_block['attrs'] to distinguish explicit-0 from defaulted-0, "Other series" via series-list excludeCurrent), page-writing.html (serial-hero, series-list form=fiction, series-toc variant=chapters reusing its own heading attr for "Recent chapters", story-tiles/book-grid in an aside with F20 :has() empty-state CSS). Added excludeCurrent bool to ttm/series-list. series-featured now also resolves the queried series term (before ttm_featured/auto-pick) so taxonomy-series.html shows the viewed series. newsletter-box pattern's Group got anchor:"newsletter". One of the 2 pre-existing skips (HierarchyTest's page-writing.html check) now resolves to a real pass.
+Measurement: ttm.css 27358 -> 32025 bytes; bumped scripts/check-budget.mjs cssBudgetBytes 28000 -> 33000 with a documenting comment.
+6 acceptance tests added. Full verify green: composer lint 0 errors, 97/97 unit, npm lint/build green, forbidden-patterns clean, 259 integration tests OK (1 pre-existing skip).
