@@ -51,7 +51,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P4-05 Template routing, article and journal patterns and templates
 - [x] P4-06 Article and journal CSS including classic content
 - [x] P4-07 Push and manual check (Phase 4)
-- [ ] P5-01 Archive query, pagination labels, section feeds, journal-in-main-feed
+- [x] P5-01 Archive query, pagination labels, section feeds, journal-in-main-feed
 - [ ] P5-02 archive-by-year and tag-filter blocks
 - [ ] P5-03 category-stats and most-read blocks
 - [ ] P5-04 Archive and search patterns, templates and CSS
@@ -330,3 +330,6 @@ Added article/journal CSS: byline, prev/next (grid, labels, titles), more-in-sec
 
 ### P4-07 — 1f15414
 Pushed Phase 4 (build/2026-09-21, d8b9bee..ed80813) to origin. Manual check: NOT VERIFIED (human) -- a seeded "hardening-wordpress" part vs badge 2b at 1280: series bar with segments, H1 56px max 18ch, colour hero, sticky aside at >= 1024 with In this series / More in Technology / newsletter box; at 390 (3b) compact bar, full-bleed hero, stacked prev/next; a non-series Technology post shows "← Previously in Technology"; a seeded journal post vs 2c: big date "Sept 18", "Thursday · Portland", syndication line, Earlier stream.
+
+### P5-01 — b6341fa
+Added Query\Archive: pre_get_posts on the main front-end query only (archive.per_page for category archives, journal.archive_per_page for Journal, ?tag= narrowing via sanitize_title, search/tag/date archives use archive.per_page, main feed excludes Journal via category__not_in when journal_in_main_feed is false); also filters render_block_core/query-pagination-next/-previous to swap the anchor text for the year-range label, only when the pagination's own query inherits the main query. Added Values::pagination_label (older/newer, same-year collapse, empty with no years) and the ttm/pagination-label binding source (no uses_context, reads global $wp_query, delegates to Archive::resolve_label() so the binding and the pagination-block relabeling share one implementation). Added functions.php's print_section_feeds() (wp_head, nav-order category feed links through the ttm_section_feeds filter, get_category_by_slug only per rule 1). Found two WP test-harness quirks while writing ArchiveTest: go_to() clears $_GET and only repopulates it from the target URL's own query string (so simulating ?tag= requires add_query_arg() on the URL, not setting $_GET beforehand); and go_to(home_url('/feed/')) doesn't produce a real is_feed() query in this environment, requiring the plain '/?feed=rss2' form instead. Full integration suite: 208 tests, 2 pre-existing/expected skips, 0 failures.
