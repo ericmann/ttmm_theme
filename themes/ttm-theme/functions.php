@@ -10,6 +10,9 @@ declare( strict_types=1 );
 namespace TTM\Theme;
 
 require_once __DIR__ . '/inc/bindings-compat.php';
+require_once __DIR__ . '/inc/block-styles.php';
+require_once __DIR__ . '/inc/patterns.php';
+require_once __DIR__ . '/inc/image-sizes.php';
 
 add_action(
 	'after_setup_theme',
