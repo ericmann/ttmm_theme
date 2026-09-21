@@ -30,6 +30,7 @@
   "devDependencies": {
     "@axe-core/playwright": "*",
     "@wordpress/block-editor": "^17.1.0",
+    "@wordpress/block-library": "^11.0.0",
     "@wordpress/blocks": "^16.0.0",
     "@wordpress/components": "^40.1.0",
     "@wordpress/compose": "^8.8.0",
@@ -43,7 +44,8 @@
     "@wordpress/i18n": "^6.28.0",
     "@wordpress/plugins": "^7.55.0",
     "@wordpress/scripts": "*",
-    "@wordpress/server-side-render": "^6.31.0"
+    "@wordpress/server-side-render": "^6.31.0",
+    "jsdom": "^29.1.1"
   },
   "overrides": {
     "linkify-it": "^5.0.2",
