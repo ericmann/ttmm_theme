@@ -1141,29 +1141,53 @@ blockquote.is-style-pull cite,
 /* 4.9 verse */
 .ttm-verse {
 	background: var(--wp--preset--color--surface);
-	padding: var(--wp--preset--spacing--40) var(--wp--preset--spacing--50);
+	padding: 18px 20px;
+}
+
+.ttm-verse .is-style-kicker {
+	font-size: var(--wp--preset--font-size--micro);
+	margin: 0 0 var(--wp--preset--spacing--30);
 }
 
 .ttm-verse__text {
-	font-size: var(--wp--preset--font-size--dek);
-	line-height: 1.5;
+	margin: 0 0 10px;
+	font-size: var(--wp--preset--font-size--synopsis);
+	font-weight: 600;
+	line-height: 1.35;
+	letter-spacing: -0.01em;
+	color: var(--wp--preset--color--text);
 }
 
 .ttm-verse__reference {
-	font-weight: 600;
-	margin-top: var(--wp--preset--spacing--10);
+	margin: 0 0 14px;
+	font-size: var(--wp--preset--font-size--ui);
+	font-weight: 400;
+	color: var(--wp--preset--color--neutral-800);
 }
 
 .ttm-verse__attribution,
 .ttm-verse__copyright {
-	font-size: var(--wp--preset--font-size--micro);
+	font-size: var(--wp--preset--font-size--caption);
 	color: var(--wp--preset--color--neutral-700);
 }
 
 /* P8-07: underline for WCAG 1.4.1 -- color alone no longer distinguishes the link (axe). */
 /* stylelint-disable-next-line no-descending-specificity -- unrelated component (verse attribution vs. .entry-content a:hover) */
 .ttm-verse__attribution a {
+	color: var(--wp--preset--color--accent-700);
 	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+@media (max-width: 720px) {
+
+	.ttm-verse {
+		padding: 16px 18px;
+	}
+
+	.ttm-verse__text {
+		font-size: var(--wp--preset--font-size--body);
+	}
 }
 
 /* 4.10 journal excerpt */

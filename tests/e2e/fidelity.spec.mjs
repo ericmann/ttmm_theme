@@ -212,7 +212,7 @@ test.describe( 'lead', () => {
 } );
 
 test.describe( 'verse', () => {
-	test.fixme( 'verse-box: .ttm-verse @1280', async ( { page } ) => {
+	test( 'verse-box: .ttm-verse @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const box = page.locator( '.ttm-verse' );
 		expect( await computed( box, 'background-color' ) ).toBe(
@@ -221,7 +221,7 @@ test.describe( 'verse', () => {
 		expect( await computed( box, 'padding' ) ).toBe( '18px 20px' );
 	} );
 
-	test.fixme( 'verse-kicker: .ttm-verse .is-style-kicker @1280', async ( {
+	test( 'verse-kicker: .ttm-verse .is-style-kicker @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -235,16 +235,14 @@ test.describe( 'verse', () => {
 		);
 	} );
 
-	test.fixme( 'verse-text: .ttm-verse__text @1280', async ( { page } ) => {
+	test( 'verse-text: .ttm-verse__text @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const text = page.locator( '.ttm-verse__text' );
 		expect( await computed( text, 'font-size' ) ).toBe( px( 19 ) );
 		expect( await computed( text, 'font-weight' ) ).toBe( '600' );
 	} );
 
-	test.fixme( 'verse-ref: .ttm-verse__reference @1280', async ( {
-		page,
-	} ) => {
+	test( 'verse-ref: .ttm-verse__reference @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const ref = page.locator( '.ttm-verse__reference' );
 		expect( await computed( ref, 'font-size' ) ).toBe( px( 13 ) );
@@ -252,9 +250,7 @@ test.describe( 'verse', () => {
 		expect( await computed( ref, 'font-weight' ) ).toBe( '400' );
 	} );
 
-	test.fixme( 'verse-attr: .ttm-verse__attribution a @1280', async ( {
-		page,
-	} ) => {
+	test( 'verse-attr: .ttm-verse__attribution a @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const attr = page.locator( '.ttm-verse__attribution a' );
 		expect( await computed( attr, 'color' ) ).toBe( color( 'accent-700' ) );
