@@ -10,7 +10,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P0-05 Screenshot script and phase-2 feedback folder
 - [x] P0-06 Seeder prose library and tagline
 - [x] P0-07 Seed rewrite — sections, journal and pages
-- [ ] P0-08 Seed rewrite — series and fiction
+- [x] P0-08 Seed rewrite — series and fiction
 - [ ] P0-09 Phase 0 push — baseline screenshots
 - [ ] P1-01 Full-width rules and unconstrained grids (rules 35/36)
 - [ ] P1-02 Front masthead per §6.1.1 (pattern, CSS, nav hub class)
@@ -98,3 +98,10 @@ Fiction rows (quiet-ledger-ch-*, salt-iron-ch-*, story-*): kept out of scope str
 pages.json: About + Newsletter rewritten, two original paragraphs each; Series/Writing pages untouched.
 Tests: SeederTest — 3 new (lead resolution + thumbnail via Query\Lead::id() at set_now 2026-09-20 12:00; journal excerpt word-count range 38-48; whole-file lorem check). Existing test_seed_is_idempotent already covers count>=60.
 Verified: python3 json.load valid, grep -ri lorem = 0 hits (both files), composer lint 0 errors, npm run test:integration 380/380 green (real wp-env), composer test:unit, npm run lint/build, forbidden-patterns all green. ttm-theme confirmed active; wp-env stopped after.
+
+### P0-08 — daa06aa
+series.json: 6 series. hardening-wordpress (in-progress, total 6, parts: hardening-part-1[new post]/technology-post-2/signing-your-options-table). the-consultants-ledger (in-progress, total 8, parts 1-5 = the 5 P0-07 Business posts oldest->newest, part5=charge-for-outcome-bill-for-hour). ordinary-time (in-progress, total 12, cadence "Sundays", parts 1-9 = ordinary-time-week-1..9). the-quiet-ledger (unchanged slug/total 31/cover/purchase_links; 12 published chapters re-spaced 30 days apart ending 1 day ago — ch1=331..ch12=1; ch7-12 use the mock's own part_titles/deks (Going Concern..Reconciliation); ch13 unchanged future:true). failover (renamed from "Salt and Iron"; salt-iron-ch-* posts renamed to failover-ch-1..9, same 5-paragraph count). salt-water-wires (brand-new 24-chapter complete novel, salt-water-wires-ch-1..24, 3 paragraphs each, cover:true — old salt-and-iron only had 9 chapters so this is genuinely new content, not a rename).
+reading-cves and salt-and-iron series removed. books.json's salt-and-iron row retitled "Salt Water Wires" / series_slug + links updated.
+Stories renamed: story-the-last-cron-job (50 paragraphs, 40 days — day offset given by task), story-a-field-guide-to-empty-offices (30 paragraphs, 90 days — offset not specified, chosen), story-uptime (15 paragraphs, featured_image:true, 150 days — offset not specified, chosen).
+Tests: SeedStatesTest (four->six rows), SeederTest 2 new tests (published/total via SeriesIndex::by_slug, ttm_cadence meta; ch12's ttm_part_title === "Reconciliation").
+Verified: composer lint 0 errors, npm run test:integration 382/382 green (real wp-env), `wp ttm seed --reset` exit 0 (91 posts, 6 series, 2 books), grep -ci lorem = 0 across all seed fixtures, composer test:unit/npm lint/build/forbidden-patterns all green. ttm-theme confirmed active; wp-env stopped after.
