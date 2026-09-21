@@ -55,13 +55,15 @@ If the Compose stack has no `wp` binary in the container, the WXR route still wo
 
 ```bash
 npx wp-env start
-# Database: import, then rewrite URLs (search-replace handles serialized data)
-gunzip -c docs/fixtures/live/eric-mann-blog-*.sql.gz > /tmp/live.sql
-npx wp-env run cli wp db import /var/www/html/wp-content/ttm-tests/../../../tmp/live.sql   # or copy the file into the container first: docker cp /tmp/live.sql $(docker ps -qf name=wordpress):/tmp/
+# Find the wp-env WordPress container (name contains "wordpress-1")
+WP=$(docker ps --format '{{.Names}}' | grep -E 'ttmm[-_]theme.*wordpress-1$' | head -1)
+# Database: copy the dump in, import, rewrite URLs (search-replace handles serialized data)
+gunzip -c docs/fixtures/live/eric-mann-blog-*.sql.gz > /tmp/live.sql && docker cp /tmp/live.sql "$WP":/tmp/live.sql
+npx wp-env run cli wp db import /tmp/live.sql
 npx wp-env run cli wp search-replace 'https://eric.mann.blog' 'http://localhost:8888' --all-tables --precise
 npx wp-env run cli wp cache flush
 # Uploads
-docker cp docs/fixtures/live/uploads-*.tar.gz $(docker ps -qf name=ttmm_theme.*wordpress-1):/tmp/uploads.tar.gz   # container name from `docker ps`
+docker cp docs/fixtures/live/uploads-*.tar.gz "$WP":/tmp/uploads.tar.gz
 npx wp-env run cli sh -c 'tar -C /var/www/html/wp-content -xzf /tmp/uploads.tar.gz && chown -R www-data:www-data /var/www/html/wp-content/uploads'
 # Plugins the archive references but wp-env does not have
 npx wp-env run cli wp plugin install jetpack modern-footnotes --activate
