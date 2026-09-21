@@ -87,7 +87,7 @@ jobs:
         run: npm ci && npm run build && npx playwright install --with-deps chromium
       - if: steps.present.outputs.run == 'true'
         run: npm run env:start && npm run env:seed && npm run test:e2e
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always() && steps.present.outputs.run == 'true'
         with:
           name: playwright-report
