@@ -14,7 +14,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P1-02 Post meta registration and sanitizers
 - [x] P1-03 Primary category, form derivation and word count on save
 - [x] P1-04 Series index
-- [ ] P1-05 Category stats and top tags
+- [x] P1-05 Category stats and top tags
 - [ ] P1-06 Series term admin: columns, edit fields, part list
 - [ ] P1-07 Editor sidebar panel
 - [ ] P1-08 Pre-publish checks and post list columns
@@ -148,3 +148,8 @@ Hooks: save_post_post@40, deleted_post, transition_post_status (only for post_ty
 Readers: all()/get($id)/by_slug($slug)/for_post($post_id)/sorted_by_update($rows).
 Added Config key series.index_batch=500 (ConfigTest updated to expect it).
 25 integration tests pass (7 new); full verify green.
+
+### P1-05 — b77108e
+Query\Stats::category($term_id) returns {count,first_year,last_year,series_count} cached in transient ttm_category_stats_{id} (TTL stats.cache_seconds). count = get_term($id,'category')->count (WP's own publish-only maintained counter — avoids an extra query and the forbidden posts_per_page=>-1 pattern). first_year/last_year from two get_posts(posts_per_page=>1, orderby=date asc/desc) calls, parsed via Clock::at(). series_count = rows in SeriesIndex::all() whose categories array contains the term id. top_tags($term_id) cached in ttm_top_tags_{id} (TTL stats.tags_cache_seconds): one $wpdb->prepare() query joining term_relationships/term_taxonomy/terms via a category-membership subquery, GROUP BY + ORDER BY count DESC LIMIT archive.tag_filter_limit. flush($term_id) deletes both transients; flush_for_post($post_id) flushes every category a post belongs to; hooked to transition_post_status (only when post_type=post and the transition enters or leaves publish).
+Plugin::modules() now appends Query\Stats.
+30 integration tests pass (5 new); full verify green.
