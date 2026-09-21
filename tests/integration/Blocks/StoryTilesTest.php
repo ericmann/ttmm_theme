@@ -92,6 +92,23 @@ class StoryTilesTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'is-cols-3', $html );
 	}
 
+	public function test_default_columns_come_from_config(): void {
+		add_filter(
+			'ttm_config',
+			static function ( array $config ): array {
+				$config['writing.tile_columns'] = 3;
+				return $config;
+			}
+		);
+		Config::reset();
+
+		$this->story( 'A Quiet Field' );
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'is-cols-3', $html );
+	}
+
 	public function test_zero_stories_renders_nothing(): void {
 		$html = $this->render();
 

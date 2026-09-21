@@ -46,6 +46,7 @@ class ConfigTest extends TestCase {
 			'writing.also_running_limit',
 			'writing.chapters_recent',
 			'writing.story_tiles',
+			'writing.tile_columns',
 			'writing.shelf_limit',
 			'writing.plain_count',
 			'books.max',

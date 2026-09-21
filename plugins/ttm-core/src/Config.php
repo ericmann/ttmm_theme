@@ -78,6 +78,7 @@ class Config {
 			'writing.also_running_limit'       => 3,
 			'writing.chapters_recent'          => 4,
 			'writing.story_tiles'              => 4,
+			'writing.tile_columns'             => 2,
 			'writing.shelf_limit'              => 4,
 			'writing.plain_count'              => 3,
 			'books.max'                        => 12,

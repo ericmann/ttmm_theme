@@ -26,7 +26,7 @@ if ( $ttm_limit <= 0 ) {
 
 $ttm_columns = (int) ( $attributes['columns'] ?? 0 );
 if ( $ttm_columns <= 0 ) {
-	$ttm_columns = 2;
+	$ttm_columns = (int) Config::get( 'writing.tile_columns', 2 );
 }
 
 $ttm_story_ids = Serials::stories( $ttm_limit );

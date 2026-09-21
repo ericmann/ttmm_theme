@@ -97,6 +97,11 @@ out=$(g 'echo|printf' plugins/ttm-core/src | grep -E "TTM_(NEWSLETTER_API_KEY|CL
 out=$( { grep -rnE "=>\s*[2-9][0-9]*\b|=>\s*[0-9]{2,}\b" plugins/ttm-core/src --include='*.php' 2>/dev/null | grep -v 'Config.php'; grep -rnE "=>\s*[2-9][0-9]*\b|=>\s*[0-9]{2,}\b" plugins/ttm-core/blocks --include='render.php' 2>/dev/null; } | grep -vE "'status'\s*=>\s*[0-9]{3}\b" || true)
 [ -n "$out" ] && { echo "$out"; hit "hard-coded tunable outside Config.php (SPEC rule 24)"; }
 
+# Rule 24 (cont.): the same class of literal hiding behind a plain assignment (`$x = 2;`)
+# rather than an array-literal `=>`. Same HTTP-status allow-list.
+out=$( { grep -rnE "=\s*[2-9][0-9]*\s*;|=\s*[0-9]{2,}\s*;" plugins/ttm-core/src --include='*.php' 2>/dev/null | grep -v 'Config.php'; grep -rnE "=\s*[2-9][0-9]*\s*;|=\s*[0-9]{2,}\s*;" plugins/ttm-core/blocks --include='render.php' 2>/dev/null; } | grep -vE "status\s*=\s*[0-9]{3}\s*;" || true)
+[ -n "$out" ] && { echo "$out"; hit "hard-coded tunable outside Config.php (SPEC rule 24)"; }
+
 # Rule 32: i18n -- bare strings echoed directly in render.php (excludes internal string
 # comparisons like `echo 'x' === $y ? ... : ...`, which never reach the visitor as text).
 out=$(g "echo '[A-Za-z]|esc_html\( '[A-Za-z]" plugins/ttm-core/blocks --include='render.php' | grep -vE '===|!==' || true)
