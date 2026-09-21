@@ -74,7 +74,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P8-01 Spike: classic-to-block conversion script (jsdom + rawHandler)
 - [x] P8-02 CLI convert:export, convert:import, convert:revert
 - [x] P8-03 CLI audit
-- [ ] P8-04 CLI migrate:politics, migrate:redirects, migrate:close-comments
+- [x] P8-04 CLI migrate:politics, migrate:redirects, migrate:close-comments
 - [ ] P8-05 Spike: Jetpack Social share URLs to ttm_syndication
 - [ ] P8-06 Plugin README, MIGRATION and SETUP cross-check
 - [ ] P8-07 Playwright + axe e2e suite and CI
@@ -449,3 +449,17 @@ foundry_verify fully green (325/325 integration). Manual wp-env check
 the seeded site. Also gitignored the untracked FOUNDRY_FEEDBACK.md operator
 log (left in place, not committed/moved) so it stops blocking the clean-tree
 check.
+
+### P8-04 — ab6ebdb
+Implemented wp ttm migrate:politics (--to=child default per Q3, --to=tag
+alternative), migrate:redirects (nginx/json from a new ttm_redirects option),
+and migrate:close-comments. Idempotent by construction: child mode checks
+whether Politics already parents under Opinion; tag mode's politics_term()
+returns null once the category is deleted. Both politics modes fire
+ttm_purge_urls with front page + old/new category URLs via a new
+Loader::output_lines(). Added default_ping_status to forbidden-patterns.sh's
+core-option allow-list alongside the pre-existing default_comment_status.
+7 new integration tests all passing; foundry_verify fully green (332/332
+integration). Manual wp-env check confirmed correct idempotent no-op against
+the seed (which already applies the Q3 structure), plus spot-checked
+redirects json/nginx output and close-comments dry-run listing.
