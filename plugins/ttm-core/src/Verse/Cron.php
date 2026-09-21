@@ -30,17 +30,28 @@ class Cron {
 	}
 
 	/**
-	 * Schedule the daily fetch event if it isn't already scheduled.
+	 * Schedule the fetch event if it isn't already scheduled.
 	 */
 	public static function schedule(): void {
 		if ( false !== wp_next_scheduled( 'ttm_verse_fetch' ) ) {
 			return;
 		}
 
+		self::schedule_next();
+	}
+
+	/**
+	 * Schedule the next fetch as a single event `verse.fetch_hour`:00 site time from now,
+	 * rather than a WP `wp_schedule_event(..., 'daily', ...)` recurrence: WP's built-in
+	 * recurring schedules just add a fixed `DAY_IN_SECONDS` on every run, which drifts by an
+	 * hour across a DST transition. Recomputing `next_run()` fresh from `Clock::now()` every
+	 * time (in `run_fetch()`, below) keeps the fetch anchored to the local hour instead.
+	 */
+	private static function schedule_next(): void {
 		$hour = (int) Config::get( 'verse.fetch_hour', 5 );
 		$next = self::next_run( Clock::now(), $hour );
 
-		wp_schedule_event( $next->getTimestamp(), 'daily', 'ttm_verse_fetch' );
+		wp_schedule_single_event( $next->getTimestamp(), 'ttm_verse_fetch' );
 	}
 
 	/**
@@ -69,6 +80,8 @@ class Cron {
 		if ( ! $result['ok'] ) {
 			self::maybe_schedule_retry();
 		}
+
+		self::schedule_next();
 	}
 
 	/**

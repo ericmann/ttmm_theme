@@ -65,6 +65,59 @@ class VerseOfTheDayTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'Jan 1', $html );
 	}
 
+	public function test_f6_shows_stored_verse_from_yesterday_not_history_head(): void {
+		$this->set_now( '2026-09-19 12:00:00' );
+
+		update_option(
+			'ttm_verse',
+			[
+				'date'      => '2026-09-18',
+				'text'      => "Yesterday's verse.",
+				'reference' => 'Psalm 1:1',
+				'copyright' => '',
+				'url'       => '',
+			]
+		);
+		update_option(
+			'ttm_verse_history',
+			[
+				[
+					'date'      => '2026-09-17',
+					'text'      => 'An older history-head verse.',
+					'reference' => 'Genesis 1:1',
+					'copyright' => '',
+					'url'       => '',
+				],
+			]
+		);
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'Yesterday’s verse.', $html );
+		$this->assertStringNotContainsString( 'An older history-head verse.', $html );
+		$this->assertStringContainsString( 'Meditation for Sept 18', $html );
+	}
+
+	public function test_attribution_uses_sept_abbreviation(): void {
+		$this->set_now( '2026-09-05 12:00:00' );
+
+		update_option(
+			'ttm_verse',
+			[
+				'date'      => '2026-09-05',
+				'text'      => 'Text.',
+				'reference' => 'Ref.',
+				'copyright' => '',
+				'url'       => '',
+			]
+		);
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'Meditation for Sept 5', $html );
+		$this->assertStringNotContainsString( 'Meditation for Sep ', $html );
+	}
+
 	public function test_renders_nothing_without_any_verse(): void {
 		delete_option( 'ttm_verse' );
 		delete_option( 'ttm_verse_history' );

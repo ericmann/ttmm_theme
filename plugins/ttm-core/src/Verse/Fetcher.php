@@ -106,7 +106,17 @@ class Fetcher {
 	 * @return array<string, mixed>
 	 */
 	public static function parse_item( array $item ): array {
-		$published    = isset( $item['published_at'] ) ? Clock::at( (string) $item['published_at'] ) : null;
+		$published = isset( $item['published_at'] ) ? Clock::at( (string) $item['published_at'] ) : null;
+
+		// Clock::at()'s $tz parameter is silently ignored by PHP whenever the datetime string
+		// itself carries an explicit offset (as `published_at` always does, e.g. "+00:00" or
+		// "-07:00") -- the resulting DateTimeImmutable keeps that offset's timezone, not the
+		// site's. Explicitly convert before taking Y-m-d so an item published just after UTC
+		// midnight still lands on the correct site-local day.
+		if ( $published ) {
+			$published = $published->setTimezone( Clock::timezone() );
+		}
+
 		$item_pattern = (string) Config::get( 'verse.item_url_pattern', 'https://dailymedtoday.com/meditation/%s' );
 
 		return [
