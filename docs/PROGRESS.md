@@ -71,7 +71,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P7-07 Static audit: extend forbidden-patterns, run, fix
 - [x] P7-08 Separability tests (theme without plugin, plugin with default theme)
 - [x] P7-09 Push and manual check (Phase 7)
-- [ ] P8-01 Spike: classic-to-block conversion script (jsdom + rawHandler)
+- [x] P8-01 Spike: classic-to-block conversion script (jsdom + rawHandler)
 - [ ] P8-02 CLI convert:export, convert:import, convert:revert
 - [ ] P8-03 CLI audit
 - [ ] P8-04 CLI migrate:politics, migrate:redirects, migrate:close-comments
@@ -413,3 +413,9 @@ Full verify green: composer lint 0 errors, 115/115 unit, npm lint/build green, f
 ### P7-09 — 1f516d1
 Pushed build/2026-09-21 through P7-08 (04c3126) to origin.
 Manual check: NOT VERIFIED (human) — curl -I http://localhost:8888/ shows Cache-Control: public, max-age=N ending at the next local midnight or 06:00; wp ttm verse fetch --force logs a purge (debug.log or Cloudflare when constants are set); the front-page poster shows the mailto button (P7-04 recorded outcome B: jetpack/subscriptions never registers unconnected); switch Settings → These Things Matter → Newsletter to mailto and none and confirm F26 (poster stays, statement only for none).
+
+### P8-01 — cccc4bd
+Decision: Outcome A - shipped. rawHandler({HTML})+serialize() via require() (CJS build; ESM build fails on unassisted .json imports under Node's stricter ESM loader) converts all 3 fixture posts with zero freeform/html blocks and full text preservation (verified via entity-symmetric normalized-text comparison). Full result table in docs/spikes/P8-01.md.
+Added scripts/lib/footnotes.mjs (transformFootnotes, verified against post 6914's real 3 modern-footnotes pairs including nested-link note content) and scripts/convert-classic.mjs (CLI: node scripts/convert-classic.mjs <in.ndjson> <out.ndjson> [--allow-freeform], exit 1 on text-loss or unexpected freeform blocks). Added @wordpress/block-library + jsdom devDependencies, npm audit 0 vulnerabilities, restored dependencies:{} that npm install dropped.
+Documented (not chased further, per time-box) a Jest-specific module-resolution quirk unrelated to the actual spike question; added jest-unit.config.js to fix Jest's .mjs handling for the pure footnotes tests, which pass; the 2 block-editor tests gracefully it.skip() exactly as the task's acceptance criteria anticipates.
+Full verify green: composer lint 0 errors, 115/115 PHP unit, npm lint clean, 11 passed/2 skipped JS unit, npm build green, forbidden-patterns clean, real CLI run against all 3 fixture posts exits 0.
