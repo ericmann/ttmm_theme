@@ -1,0 +1,39 @@
+<!--
+  Captured verbatim (with literal placeholders) from Jetpack 16.2's
+  wp-content/plugins/jetpack/modules/subscriptions/views.php,
+  Jetpack_Subscriptions_Widget::render_widget_subscription_form(), the self::is_jetpack()
+  branch (lines 518-582) -- the self-hosted, unconnected rendering path. See
+  docs/spikes/P1-jetpack-form.md for the field-by-field comparison against SPEC §6.3
+  (Outcome B: a nonce field is present, contradicting SPEC's "no nonce" claim).
+
+  Placeholders left literal: {current URL} (source), {n} (redirect_fragment / element ids,
+  Jetpack's own "subscribe-blog[-N]" scheme, not a ttm-newsletter-{n} pattern), {blog_id}.
+-->
+<div class="wp-block-jetpack-subscriptions__container">
+	<form action="#" method="post" accept-charset="utf-8" id="subscribe-blog-{n}"
+		data-blog="{blog_id}"
+		data-post_access_level="everybody" >
+
+		<p id="subscribe-email">
+			<label id="jetpack-subscribe-label"
+				class="screen-reader-text"
+				for="subscribe-field-{n}">
+				Email Address:
+			</label>
+			<input type="email" name="email" autocomplete="email" required="required"
+				value=""
+				id="subscribe-field-{n}"
+				placeholder="Enter your email address"
+			/>
+		</p>
+
+		<p id="subscribe-submit">
+			<input type="hidden" name="action" value="subscribe"/>
+			<input type="hidden" name="source" value="{current URL}"/>
+			<input type="hidden" name="sub-type" value="widget"/>
+			<input type="hidden" name="redirect_fragment" value="subscribe-blog-{n}"/>
+			<input type="hidden" name="_wpnonce" value="{nonce}"/>
+			<button type="submit" name="jetpack_subscriptions_widget">Subscribe</button>
+		</p>
+	</form>
+</div>
