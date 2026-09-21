@@ -97,7 +97,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] R2-01 F9 stale-year: plugin-side dek suppression, cached staleness, cells.stale_count key, rule-24 allow-list removed
 - [x] R2-02 Test gaps: source-level empty values for ttm/short-date and ttm/relative-date; BoundariesTest sees inline fully-qualified references
 - [x] R2-03 Docs and duplication cleanup after round 1: CLAUDE.md module map, stale comments, HANDOFF correction, one pagination-label implementation
-- [ ] R3-01 Rule 24: writing.tile_columns Config key for story-tiles; forbidden-patterns.sh rule 24 also matches plain `= N;` assignments
+- [x] R3-01 Rule 24: writing.tile_columns Config key for story-tiles; forbidden-patterns.sh rule 24 also matches plain `= N;` assignments
 - [ ] R3-02 F9 test gaps: stale-scope exit keeps later sections' deks; Stats newest_date asserted directly
 
 ## Log
@@ -979,3 +979,25 @@ archive-by-year/render.php docblock fixed: grouping happens in Blocks\Helpers::g
 not Query\Archive::group_by_year() (that method never existed there).
 Verify set green: composer lint/test:unit, npm lint/test:unit/build, forbidden-patterns,
 npm test:integration (371 tests).
+
+### R3-01 — b38798d
+Added writing.tile_columns Config key (default 2); story-tiles/render.php fallback now
+reads Config::get('writing.tile_columns', 2) instead of bare `= 2;`. forbidden-patterns.sh
+rule 24 gained a second grep for plain `identifier = N;` assignments (same numeric ranges
+and HTTP-status allow-list as the existing `=>` grep), scoped to plugins/ttm-core/src
+(excl. Config.php) and plugins/ttm-core/blocks/*/render.php.
+
+Tests: StoryTilesTest::test_default_columns_come_from_config (new, integration);
+ConfigTest key list gained writing.tile_columns (unit).
+
+Gotcha for later tasks: Config::all() memoises at first call and nothing invalidates it
+automatically — any test that adds an `ttm_config` filter must call Config::reset()
+immediately after add_filter() or the filter is invisible (see LeadTest's
+sections.technology_slug test for the existing precedent). My first draft of this test
+missed that and failed against real is-cols-2 output until I added the reset() call.
+
+Verified: full verify set green including npm run test:integration (372 tests) and
+manual forbidden-patterns.sh round-trip (reintroduced `$ttm_columns = 2;`, confirmed
+exit 1, reverted, confirmed exit 0).
+
+Commit: b38798d
