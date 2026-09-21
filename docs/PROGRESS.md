@@ -17,7 +17,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P1-03 Front-page current section and nav label fill (`Nav\CurrentSection`)
 - [x] P1-04 Verse copyright placement and `ttm/verse-copyright` binding
 - [x] P1-05 Footer per §6.1.8
-- [ ] P1-06 Newsletter form contract — shared markup, provider chain, custom-url dev-accept, seed
+- [x] P1-06 Newsletter form contract — shared markup, provider chain, custom-url dev-accept, seed
 - [ ] P1-07 Spike — Jetpack Subscriptions widget POST contract
 - [ ] P1-08 Jetpack provider on the shared form
 - [ ] P1-09 Editor registration in every context (§6.7)
@@ -152,3 +152,14 @@ Values::footer_line(site_name, year): pure, "{site} · © {year} Eric Mann · Bu
 ttm.css /* 4.34 footer */: padding bumped to spacing--40 (16px, was 12px); added .ttm-footer__copyright:empty{display:none}, .ttm-footer__nav ul flex/gap:0, .ttm-footer__nav a 400/neutral-700 + :hover accent, the wp-block-navigation-item+wp-block-navigation-item::before{content:"·"} separator; minimal .ttm-footer__left/.ttm-footer__meta rules (coverage). Fixed a real pre-existing bug: `.ttm-footer.is-after-poster` never matched anything since wp:template-part's className lands on its own wrapper div, not the part's root element (confirmed via live render) — changed to `.is-after-poster .ttm-footer`.
 Tests: ValuesTest 1 new, FrontSourcesTest 1 new, ChromePartsTest 1 new (needed a real series term since F18 hides Series when the index is empty, or nav count would be 8 not 9).
 Verified: composer test:unit (135/135), composer lint 0 errors, npm run lint clean, npm run test:integration 394/394 (real wp-env), npm run test:e2e 66 passed/61 skipped (0 failed), npm run build, forbidden-patterns all green. ttm-theme confirmed active; wp-env stopped after.
+
+### P1-06 — ebd1fdd
+New Newsletter\Form::render(action, hidden, placement, submit_name=''): the one §6.3 markup shape (label+email input `ttm-nl-email-{n}` via next_id()/reset() static counter, hidden fields, .btn.btn-ghost or .btn.btn-primary for placement=box). The $hidden array's entry matching Config's honeypot field name renders as the special .ttm-hp text input instead of plain hidden.
+CustomUrl: render() now calls Form::render(); available()=endpoint_is_valid()||dev_accept_applies(); new dev_accept_applies() = empty endpoint && newsletter.dev_accept && wp_get_environment_type()!=='production'.
+Handler::handle(): after validation, skips forward()+do_action('ttm_newsletter_subscribed') when CustomUrl::dev_accept_applies() (still returns the same success_url).
+Providers::resolve(configured, registry, dev_accept=false): new dev_accept param inserted between configured and mailto fallback; current() passes CustomUrl::dev_accept_applies().
+newsletter-form/render.php: data-state="subscribed" now also fires on ?subscribe=success (Jetpack's own redirect param), not just ?subscribed=1.
+Seeder: seed_jetpack() replaced with seed_newsletter() — no WP-CLI Jetpack install, just ttm_settings.newsletter = {provider:'custom-url', endpoint:''}.
+ttm.css: .ttm-newsletter-form__form flex/gap:8/align-center (input/.btn classes already self-style, redundant duplicate rules removed); .ttm-newsletter-form__statement 12px; dropped .wp-block-jetpack-subscriptions selectors. NEW: .ttm-poster .btn-ghost override (solid bg/text) — see Interpretation, a real a11y bug this task's own change surfaced.
+Tests: unit ProvidersTest 2 new, HandlerTest 2 new (+ wp_get_environment_type stubbed 'production' in setUp for both HandlerTest and HandlerTuningTest, not in Files touched but required — see commit); integration NewsletterFormTest 3 new (+ f26-none test now explicitly disables dev_accept), SeedStatesTest 1 new, integration/Newsletter/HandlerTest.php extended with shared-markup assertions.
+Verified: composer lint 0 errors, composer test:unit 139/139, npm run lint clean, npm run test:integration 398/398 (real wp-env), curl grep -c ttm-newsletter-form__form = 1, npm run test:e2e 66 passed/61 skipped (0 failed, axe clean after the poster-ghost fix), npm run build, forbidden-patterns all green. ttm-theme confirmed active; wp-env stopped after.
