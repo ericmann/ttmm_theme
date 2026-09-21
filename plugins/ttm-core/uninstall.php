@@ -14,7 +14,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 if ( ! defined( 'TTM_REMOVE_DATA' ) || true !== TTM_REMOVE_DATA ) {
 	return;
 }
-foreach ( array( 'ttm_verse', 'ttm_verse_history', 'ttm_verse_log', 'ttm_books', 'ttm_settings', 'ttm_series_index' ) as $ttm_option ) {
+foreach ( array( 'ttm_verse', 'ttm_verse_history', 'ttm_verse_log', 'ttm_books', 'ttm_settings', 'ttm_series_index', 'ttm_redirects' ) as $ttm_option ) {
 	delete_option( $ttm_option );
 }
 

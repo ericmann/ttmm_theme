@@ -117,5 +117,5 @@ The planner reads `docs/SPEC.md`, writes `docs/PLAN.md`, `docs/PROGRESS.md`, `do
 | Port 8888 in use | Set `"port": 8890` in `.wp-env.override.json`. |
 | `WordPress test suite not found at /wordpress-phpunit` | You ran phpunit on the host. Use `npm run test:integration`. |
 | PHPCS says a prefix is too short | The `ttm` prefix is intentional; the sniff is excluded in `phpcs.xml.dist`. Any other prefix is a real error. |
-| Fonts render as Helvetica | The Archivo woff2 files are not in `themes/ttm-theme/assets/fonts/`; Phase 0 of the build adds them. |
-| Front page shows the default index | The templates land in Phases 2–3; run `npm run env:seed` after they exist. |
+| Fonts render as Helvetica | Confirm the Archivo woff2 files are present in `themes/ttm-theme/assets/fonts/` (shipped since Phase 0) and that the browser cache isn't serving a stale `style.css`. |
+| Front page shows the default index | Run `npm run env:seed` — `front-page.html` and the rest of `themes/ttm-theme/templates/` render only once there is content to query. |
