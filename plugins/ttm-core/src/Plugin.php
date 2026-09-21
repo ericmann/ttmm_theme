@@ -31,6 +31,9 @@ class Plugin {
 			Compat\Theme::class,
 			Taxonomy\Series::class,
 			Meta\PostMeta::class,
+			Meta\PrimaryCategory::class,
+			Meta\Form::class,
+			Meta\WordCount::class,
 		];
 	}
 
