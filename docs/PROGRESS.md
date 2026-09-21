@@ -63,7 +63,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P6-05 Hub and Writing templates and CSS
 - [x] P6-06 Push and manual check (Phase 6)
 - [x] P7-01 Cache headers and Batcache
-- [ ] P7-02 Purge and Cloudflare adapter
+- [x] P7-02 Purge and Cloudflare adapter
 - [ ] P7-03 Newsletter handler, custom-url provider, settings
 - [ ] P7-04 Jetpack unconnected-render check (assumption) and seed provider
 - [ ] P7-05 Cache tuning: verse_boundary_hour, max_age_cap, min_age
@@ -379,3 +379,7 @@ Manual check: NOT VERIFIED (human) — /series/ vs badge 1f: header stats, featu
 ### P7-01 — 73c1961
 Added Cache\Headers (send_headers for anonymous front-end GETs: public max-age clamped between cache.min_age_seconds and cache.max_age_cap_seconds to the earlier of next local midnight / cache.verse_boundary_hour:00, computed via real DateTimeImmutable timestamp diffs so DST transitions are handled automatically; feeds get cache.feed_seconds; admin/logged-in get no-store; non-GET gets nothing) and Cache\Batcache (init: sets $GLOBALS['batcache']['max_age']). rest_post_dispatch hook adds the same header to ttm/v1 REST responses. Headers::send() guards with headers_sent() since PHP-CLI test runs already have output started, which broke many unrelated integration tests until guarded. Added cache.feed_seconds (3600) to Config::defaults()/ConfigTest.
 7 unit + 6 integration acceptance tests added. Full verify green: composer lint 0 errors, 104/104 unit, npm lint/build green, forbidden-patterns clean, 265 integration tests OK (1 pre-existing skip).
+
+### P7-02 — 6c14011
+Added Cache\Purge (transition_post_status, publish<->other only, fires ttm_purge_urls with front page/post/every section archive+feed/its series archive+hub when in a series/writing page when relevant/main feed/ttm/v1 series+lead) and Cache\Cloudflare (listens to ttm_purge_urls always, checks available() at call time not registration time since Plugin::boot() only runs once; wp_safe_remote_post Bearer auth, chunked by cache.cloudflare.batch, dedup, WP_DEBUG-guarded error_log on failure). Added cache.cloudflare.batch (30) to Config::defaults()/ConfigTest.
+7 acceptance tests added. Full verify green: composer lint 0 errors, 104/104 unit, npm lint/build green, forbidden-patterns clean, 272 integration tests OK (1 pre-existing skip).
