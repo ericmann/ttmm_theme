@@ -59,6 +59,7 @@ class General {
 	 * Save handler: reads $_POST (already nonce/capability-checked by Page::handle_save()).
 	 */
 	public static function save(): void {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- nonce + capability already checked by Admin\Page::handle_save() before dispatching here.
 		$settings = get_option( 'ttm_settings', [] );
 		if ( ! is_array( $settings ) ) {
 			$settings = [];
@@ -69,6 +70,7 @@ class General {
 
 		$sticky_raw = isset( $_POST['lead_sticky_days'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_sticky_days'] ) ) : '';
 		$stale_raw  = isset( $_POST['lead_stale_days'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_stale_days'] ) ) : '';
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		if ( ! isset( $settings['lead'] ) || ! is_array( $settings['lead'] ) ) {
 			$settings['lead'] = [];

@@ -42,6 +42,8 @@ class Plugin {
 			Admin\Page::class,
 			Admin\General::class,
 			Fiction\Books::class,
+			Rest\SeriesController::class,
+			Rest\LeadController::class,
 		];
 	}
 

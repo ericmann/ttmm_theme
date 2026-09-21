@@ -73,7 +73,15 @@ class Page {
 			printf(
 				'<a class="nav-tab%s" href="%s">%s</a>',
 				$slug === $current ? ' nav-tab-active' : '',
-				esc_url( add_query_arg( [ 'page' => 'ttm-settings', 'tab' => $slug ], admin_url( 'options-general.php' ) ) ),
+				esc_url(
+					add_query_arg(
+						[
+							'page' => 'ttm-settings',
+							'tab'  => $slug,
+						],
+						admin_url( 'options-general.php' ) 
+					) 
+				),
 				esc_html( $tab['label'] )
 			);
 		}
@@ -114,7 +122,16 @@ class Page {
 		}
 
 		if ( ! headers_sent() ) {
-			wp_safe_redirect( add_query_arg( [ 'page' => 'ttm-settings', 'tab' => $tab, 'updated' => 1 ], admin_url( 'options-general.php' ) ) );
+			$url = add_query_arg(
+				[
+					'page'    => 'ttm-settings',
+					'tab'     => $tab,
+					'updated' => 1,
+				],
+				admin_url( 'options-general.php' )
+			);
+			// phpcs:ignore WordPressVIPMinimum.Security.ExitAfterRedirect.NoExit -- deliberately no exit: this handler must remain directly callable from PHPUnit without terminating the test process; it is the last statement in the function either way.
+			wp_safe_redirect( $url );
 		}
 	}
 
