@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace TTM\Core\Nav;
 
+use TTM\Core\Config;
 use TTM\Core\Meta\PrimaryCategory;
 use TTM\Core\Query\SeriesIndex;
 use WP_Block;
@@ -82,6 +83,22 @@ class CurrentSection {
 			if ( $queried instanceof \WP_Term ) {
 				$category_link = wp_parse_url( get_category_link( $queried ), PHP_URL_PATH );
 				if ( $category_link && trailingslashit( $category_link ) === $path ) {
+					return true;
+				}
+			}
+		}
+
+		// The /series/ hub page itself, and any single series' own taxonomy archive
+		// (/series/{slug}/) -- both are part of the Series section (PLAN P2-06).
+		if ( '/series/' === $path ) {
+			if ( is_tax( 'series' ) ) {
+				return true;
+			}
+
+			if ( is_page() ) {
+				$queried  = get_queried_object();
+				$hub_slug = (string) Config::get( 'sections.nav_hub_slug', 'series' );
+				if ( $queried instanceof \WP_Post && $hub_slug === $queried->post_name ) {
 					return true;
 				}
 			}

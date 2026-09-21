@@ -57,6 +57,28 @@ class CurrentSectionTest extends TTM_IntegrationTestCase {
 		$this->assertSame( '', $html );
 	}
 
+	public function test_series_item_current_on_hub_page_and_series_archive(): void {
+		$term_id = self::factory()->term->create( [ 'taxonomy' => 'series' ] );
+		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		update_post_meta( $post_id, 'ttm_series_part', 1 );
+		wp_set_object_terms( $post_id, [ $term_id ], 'series' );
+		SeriesIndex::rebuild();
+
+		$hub_page_id = self::factory()->post->create(
+			[
+				'post_type' => 'page',
+				'post_name' => 'series',
+			]
+		);
+
+		$this->go_to( get_permalink( $hub_page_id ) );
+		$this->assertStringContainsString( 'current-section', $this->render_nav_link( home_url( '/series/' ) ) );
+
+		$term = get_term( $term_id, 'series' );
+		$this->go_to( (string) get_term_link( $term ) );
+		$this->assertStringContainsString( 'current-section', $this->render_nav_link( home_url( '/series/' ) ) );
+	}
+
 	public function test_body_classes_on_single_series_post(): void {
 		$term_id = self::factory()->term->create( [ 'taxonomy' => 'series' ] );
 		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
