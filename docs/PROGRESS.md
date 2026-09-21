@@ -50,7 +50,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P4-04 Bindings reading-time, word-count, journal-subline, series-name, series-part
 - [x] P4-05 Template routing, article and journal patterns and templates
 - [x] P4-06 Article and journal CSS including classic content
-- [ ] P4-07 Push and manual check (Phase 4)
+- [x] P4-07 Push and manual check (Phase 4)
 - [ ] P5-01 Archive query, pagination labels, section feeds, journal-in-main-feed
 - [ ] P5-02 archive-by-year and tag-filter blocks
 - [ ] P5-03 category-stats and most-read blocks
@@ -327,3 +327,6 @@ Added Templates\Hierarchy::single_hierarchy() (prepends single-journal when the 
 
 ### P4-06 — 09b086c
 Added article/journal CSS: byline, prev/next (grid, labels, titles), more-in-section's F13 is-empty collapse, journal row/date, F14's ttm-journal-head__count hide-when-syndicated rule (renamed the paragraph's class from a provisional ttm-journal-head__words to match), classic-content modern-footnotes selectors (sup link, ::before/::after bracketed note, footnotes list rule, core .wp-block-footnotes), and ≤1024/≤720 responsive rules (single column, full-bleed hero/code, compact series bar). ttm.css grew 22989 -> 25451 of the 25600-byte budget (one new stylelint false-positive suppressed the same way as three earlier ones). Full integration suite: 201 tests, 2 pre-existing/expected skips, 0 failures.
+
+### P4-07 — 1f15414
+Pushed Phase 4 (build/2026-09-21, d8b9bee..ed80813) to origin. Manual check: NOT VERIFIED (human) -- a seeded "hardening-wordpress" part vs badge 2b at 1280: series bar with segments, H1 56px max 18ch, colour hero, sticky aside at >= 1024 with In this series / More in Technology / newsletter box; at 390 (3b) compact bar, full-bleed hero, stacked prev/next; a non-series Technology post shows "← Previously in Technology"; a seeded journal post vs 2c: big date "Sept 18", "Thursday · Portland", syndication line, Earlier stream.
