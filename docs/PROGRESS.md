@@ -4,7 +4,7 @@ Started: 2026-09-21T05:15:08.115Z
 
 ## Tasks
 - [x] P0-01 Branch, harness confirmation, fixtures mapping
-- [ ] P0-02 Config and Clock
+- [x] P0-02 Config and Clock
 - [ ] P0-03 Dates, Text and Html helpers
 - [ ] P0-04 Plugin composition root and API-version compat
 - [ ] P0-05 Self-hosted Archivo fonts, theme enqueue and base CSS
@@ -87,3 +87,8 @@ Started: 2026-09-21T05:15:08.115Z
 Verified full scaffold green: composer lint/test:unit, npm lint/test:unit/build, forbidden-patterns, and npm run test:integration (wp-env start ~42s, phpunit 2/2 pass) all pass on clean checkout. Added "wp-content/ttm-fixtures": "./docs/fixtures" mapping to .wp-env.json (kept ttm-tests/ttm-vendor mappings). Added BootTest::test_fixtures_are_mapped_into_the_container asserting file_exists() for verse-sample.json and classic-sample.html via WP_CONTENT_DIR. Documented the fixtures mapping in docs/SETUP.md under "How the integration harness works", including the wp-env destroy/start rebuild tip.
 Separately fixed docs/foundry.json: branchPrefix "poc/" collided with baseBranch "poc" (git can't hold both a "poc" ref and "poc/*" refs) — changed branchPrefix to "build/" so foundry_run_start could create the run branch at all. This is a pipeline-config fix, not a SPEC/PLAN task deliverable.
 wp-env image pull/start time: ~43s (first start this run; images were already cached locally).
+
+### P0-02 — 5d52053
+Config::defaults() returns all §5.4 keys as flat dotted strings plus journal_in_main_feed/comments_enabled/newsletter.list_id additions. Config::all() overlays get_option('ttm_settings',[]) (flattened one level: key.subkey) onto defaults for exactly 8 allowed keys, then apply_filters('ttm_config'), memoised in static $cache; Config::reset() clears it. Config::get($key,$fallback) — param renamed from $default (PHPCS reserved-keyword warning). Clock is the only DateTime* constructor site in plugins/ttm-core/src (forbidden-patterns.sh enforces via grep -v Support/Clock.php exclusion, confirmed clean). Clock::now()=apply_filters('ttm_now', new DateTimeImmutable('now', wp_timezone())); ::at() catches Exception on invalid strings and returns null.
+tests/unit/TestCase.php now stubs the shared Brain\Monkey WP function set named in the task (__, _x, esc_html__, esc_html, esc_attr, esc_url, esc_url_raw, wp_kses, sanitize_text_field, absint, wp_timezone→America/Los_Angeles, get_option→[], _n) plus a default pass-through apply_filters(tag,value)->value that individual tests override with Functions\when('apply_filters')->alias(...) for the specific tag under test (ttm_config, ttm_now). This pattern (override apply_filters per-test) will be needed by every future unit test that touches a filtered value — later tasks should follow ConfigTest/ClockTest as the model.
+13/13 unit tests pass; full verify set (incl. integration) green.
