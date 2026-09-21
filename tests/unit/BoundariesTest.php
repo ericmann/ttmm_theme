@@ -1,0 +1,151 @@
+<?php
+/**
+ * Enforces the SPEC §4.2 module dependency direction: every `use TTM\Core\…` line in
+ * `plugins/ttm-core/src/<dir>/*.php` must refer to the same directory or an earlier row of
+ * the §4.2 table (the arrow points down the table), with the explicit exception that
+ * `Cache/`, `Verse/` and `Newsletter/` never import `Blocks/` even though some of them are a
+ * later row.
+ *
+ * @package TTM\Tests\Unit
+ */
+
+declare( strict_types=1 );
+
+namespace TTM\Tests\Unit;
+
+use PHPUnit\Framework\TestCase;
+
+class BoundariesTest extends TestCase {
+
+	/**
+	 * SPEC §4.2 table order, top to bottom. A directory may import its own directory or any
+	 * directory earlier in this list. Top-level files (`Config.php`, `Plugin.php`) are grouped
+	 * with `.` (the src root) since they have no directory of their own.
+	 *
+	 * @var string[]
+	 */
+	private const ROW_ORDER = [
+		'.',
+		'Support',
+		'Taxonomy',
+		'Meta',
+		'Query',
+		'Fiction',
+		'Verse',
+		'Bindings',
+		'Blocks',
+		'Editor',
+		'Templates',
+		'Nav',
+		'Newsletter',
+		'Cache',
+		'Rest',
+		'Cli',
+		'Compat',
+	];
+
+	/**
+	 * Directories that never import `Blocks/`, regardless of row order (SPEC §4.2).
+	 *
+	 * @var string[]
+	 */
+	private const NEVER_IMPORTS_BLOCKS = [ 'Cache', 'Verse', 'Newsletter' ];
+
+	public function test_no_directory_imports_a_later_row_of_the_spec_table(): void {
+		$src        = rtrim( TTM_CORE_DIR, '/' ) . '/src';
+		$violations = [];
+
+		foreach ( $this->php_files( $src ) as $file ) {
+			$dir = $this->top_level_dir( $src, $file );
+
+			if ( ! in_array( $dir, self::ROW_ORDER, true ) ) {
+				continue; // Unmapped directory: not part of the §4.2 table.
+			}
+
+			$dir_rank = array_search( $dir, self::ROW_ORDER, true );
+
+			foreach ( $this->use_targets( $file ) as $used_dir ) {
+				if ( in_array( $dir, self::NEVER_IMPORTS_BLOCKS, true ) && 'Blocks' === $used_dir ) {
+					$violations[] = sprintf( '%s (%s/) must never import Blocks/ (used %s)', $file, $dir, $used_dir );
+					continue;
+				}
+
+				if ( ! in_array( $used_dir, self::ROW_ORDER, true ) ) {
+					continue; // Unmapped target directory: not part of the §4.2 table.
+				}
+
+				$used_rank = array_search( $used_dir, self::ROW_ORDER, true );
+
+				if ( $used_rank > $dir_rank ) {
+					$violations[] = sprintf(
+						'%s (%s/, row %d) imports %s/ (row %d) — upward import',
+						$file,
+						$dir,
+						$dir_rank,
+						$used_dir,
+						$used_rank
+					);
+				}
+			}
+		}
+
+		$this->assertSame( [], $violations, "Upward SPEC §4.2 imports found:\n" . implode( "\n", $violations ) );
+	}
+
+	/**
+	 * Every `.php` file directly under $src or one level below it.
+	 *
+	 * @param string $src Absolute path to `plugins/ttm-core/src`.
+	 * @return string[]
+	 */
+	private function php_files( string $src ): array {
+		$top_level = glob( $src . '/*.php' );
+		$files     = false === $top_level ? [] : $top_level;
+
+		$subdirs = glob( $src . '/*', GLOB_ONLYDIR );
+
+		foreach ( false === $subdirs ? [] : $subdirs as $subdir ) {
+			$nested = glob( $subdir . '/*.php' );
+			$files  = array_merge( $files, false === $nested ? [] : $nested );
+		}
+
+		return $files;
+	}
+
+	/**
+	 * The file's directory relative to $src, or '.' for a file directly under $src.
+	 *
+	 * @param string $src  Absolute path to `plugins/ttm-core/src`.
+	 * @param string $file Absolute file path.
+	 * @return string
+	 */
+	private function top_level_dir( string $src, string $file ): string {
+		$relative = ltrim( substr( $file, strlen( $src ) ), '/' );
+		$parts    = explode( '/', $relative );
+
+		return count( $parts ) > 1 ? $parts[0] : '.';
+	}
+
+	/**
+	 * Every distinct `TTM\Core\<Dir>\…` directory referenced by a `use` line in the file
+	 * ('.' for a direct `TTM\Core\ClassName` with no further namespace segment).
+	 *
+	 * @param string $file Absolute file path.
+	 * @return string[]
+	 */
+	private function use_targets( string $file ): array {
+		$contents = (string) file_get_contents( $file );
+		$targets  = [];
+
+		if ( ! preg_match_all( '/^use\s+TTM\\\\Core\\\\([^;]+);/m', $contents, $matches ) ) {
+			return $targets;
+		}
+
+		foreach ( $matches[1] as $used ) {
+			$segments  = explode( '\\', trim( $used ) );
+			$targets[] = count( $segments ) > 1 ? $segments[0] : '.';
+		}
+
+		return array_values( array_unique( $targets ) );
+	}
+}

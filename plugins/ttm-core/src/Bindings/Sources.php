@@ -9,12 +9,14 @@ declare( strict_types=1 );
 
 namespace TTM\Core\Bindings;
 
-use TTM\Core\Blocks\Helpers;
 use TTM\Core\Config;
 use TTM\Core\Meta\PrimaryCategory;
+use TTM\Core\Meta\SeriesPosition;
 use TTM\Core\Query\Archive;
 use TTM\Core\Query\SeriesIndex;
 use TTM\Core\Support\Clock;
+use TTM\Core\Support\Dates;
+use TTM\Core\Support\Text;
 use WP_Block;
 
 /**
@@ -178,7 +180,7 @@ class Sources {
 			'is_politics'  => $has_category && 'politics' === $category->slug,
 		];
 
-		$series = Helpers::series_position( $post_id );
+		$series = SeriesPosition::for_post( $post_id );
 		if ( $series ) {
 			$ctx['series_name'] = $series['name'];
 			$ctx['part']        = $series['part'];
@@ -209,11 +211,11 @@ class Sources {
 
 		if ( in_array( 'date', $parts, true ) ) {
 			$post        = get_post( $post_id );
-			$ctx['date'] = $post ? Helpers::date_short( $post->post_date ) : '';
+			$ctx['date'] = $post ? self::short_date_string( $post->post_date ) : '';
 		}
 
 		if ( in_array( 'reading', $parts, true ) ) {
-			$ctx['reading'] = Helpers::reading_time(
+			$ctx['reading'] = self::reading_time_string(
 				$post_id,
 				/* translators: %d: minutes to read. */
 				__( '%d min read', 'ttm-core' )
@@ -402,7 +404,7 @@ class Sources {
 		unset( $source_args );
 
 		$post_id  = (int) ( $block_instance->context['postId'] ?? 0 );
-		$position = $post_id ? Helpers::series_position( $post_id ) : null;
+		$position = $post_id ? SeriesPosition::for_post( $post_id ) : null;
 
 		return self::finalize( Values::series_name( $position ), $block_instance, $attribute_name );
 	}
@@ -419,7 +421,7 @@ class Sources {
 		unset( $source_args );
 
 		$post_id  = (int) ( $block_instance->context['postId'] ?? 0 );
-		$position = $post_id ? Helpers::series_position( $post_id ) : null;
+		$position = $post_id ? SeriesPosition::for_post( $post_id ) : null;
 
 		if ( null !== $position ) {
 			$position['total'] = self::open_ended_total( $position['slug'] );
@@ -452,6 +454,40 @@ class Sources {
 		$post_id = (int) ( $block_instance->context['postId'] ?? 0 );
 
 		return $post_id ? get_post( $post_id ) : null;
+	}
+
+	/**
+	 * A MySQL datetime formatted with Dates::short() relative to now. Duplicated here (rather
+	 * than reused from `Blocks\Helpers::date_short()`) because `Bindings/` may not import
+	 * `Blocks/` (SPEC §4.2); both compositions of `Support\Clock` + `Support\Dates` stay in
+	 * sync because neither has any other logic.
+	 *
+	 * @param string $mysql_date MySQL datetime string.
+	 * @return string
+	 */
+	private static function short_date_string( string $mysql_date ): string {
+		$date = Clock::at( $mysql_date );
+		if ( ! $date ) {
+			return '';
+		}
+
+		return Dates::short( $date, Clock::now() );
+	}
+
+	/**
+	 * Reading time, formatted with `%d` for the minute count. Duplicated here (rather than
+	 * reused from `Blocks\Helpers::reading_time()`) because `Bindings/` may not import
+	 * `Blocks/` (SPEC §4.2).
+	 *
+	 * @param int    $post_id Post id.
+	 * @param string $format  sprintf() format containing one `%d`.
+	 * @return string
+	 */
+	private static function reading_time_string( int $post_id, string $format ): string {
+		$words   = (int) get_post_meta( $post_id, 'ttm_word_count', true );
+		$minutes = Text::reading_minutes( $words, (int) Config::get( 'reading.words_per_minute', 230 ) );
+
+		return sprintf( $format, $minutes );
 	}
 
 	/**
@@ -551,7 +587,7 @@ class Sources {
 	 * @return string
 	 */
 	private static function tags_or_series( int $post_id ): string {
-		$series = Helpers::series_position( $post_id );
+		$series = SeriesPosition::for_post( $post_id );
 
 		if ( $series ) {
 			return Values::series_tag_label( $series['name'], $series['part'], self::open_ended_total( $series['slug'] ) );

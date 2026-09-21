@@ -10,7 +10,6 @@ declare( strict_types=1 );
 namespace TTM\Core\Taxonomy;
 
 use TTM\Core\Config;
-use TTM\Core\Query\SeriesIndex;
 use WP_Term;
 
 /**
@@ -39,13 +38,14 @@ class SeriesAdmin {
 	}
 
 	/**
-	 * Fields on the "edit series" screen, plus the read-only part list.
+	 * Fields on the "edit series" screen. The read-only part list is a separate
+	 * `series_edit_form_fields` callback in `Editor\SeriesPartList` (SPEC §4.2: `Taxonomy/` may
+	 * not import `Editor/`, so it cannot call that renderer directly).
 	 *
 	 * @param WP_Term $term Series term.
 	 */
 	public static function edit_form_fields( WP_Term $term ): void {
 		self::render_fields( $term->term_id );
-		self::render_part_list( $term->term_id );
 	}
 
 	/**
@@ -171,33 +171,8 @@ class SeriesAdmin {
 	}
 
 	/**
-	 * Read-only ordered part list.
-	 *
-	 * @param int $term_id Series term id.
-	 */
-	private static function render_part_list( int $term_id ): void {
-		$row = SeriesIndex::get( $term_id );
-
-		echo '<tr class="form-field"><th>' . esc_html__( 'Parts', 'ttm-core' ) . '</th><td>';
-		echo '<table class="widefat"><thead><tr><th>#</th><th>' . esc_html__( 'Title', 'ttm-core' ) . '</th><th>' . esc_html__( 'Status', 'ttm-core' ) . '</th><th>' . esc_html__( 'Date', 'ttm-core' ) . '</th><th></th></tr></thead><tbody>';
-
-		foreach ( ( $row['parts'] ?? [] ) as $part ) {
-			printf(
-				'<tr><td>%d</td><td>%s</td><td>%s</td><td>%s</td><td><a href="%s">%s</a></td></tr>',
-				(int) $part['part'],
-				esc_html( $part['title'] ),
-				esc_html( $part['status'] ),
-				esc_html( $part['date'] ),
-				esc_url( (string) get_edit_post_link( $part['post_id'], '' ) ),
-				esc_html__( 'Edit', 'ttm-core' )
-			);
-		}
-
-		echo '</tbody></table></td></tr>';
-	}
-
-	/**
-	 * Add Status/Form/Parts columns to the series term list.
+	 * Add Status/Form columns to the series term list. `Editor\SeriesPartList` adds the Parts
+	 * column separately (SPEC §4.2: `Taxonomy/` may not import `Editor/`/`Query/`).
 	 *
 	 * @param array<string, string> $columns Existing columns.
 	 * @return array<string, string>
@@ -205,7 +180,6 @@ class SeriesAdmin {
 	public static function columns( array $columns ): array {
 		$columns['ttm_status'] = __( 'Status', 'ttm-core' );
 		$columns['ttm_form']   = __( 'Form', 'ttm-core' );
-		$columns['ttm_parts']  = __( 'Parts', 'ttm-core' );
 
 		return $columns;
 	}
@@ -224,12 +198,6 @@ class SeriesAdmin {
 				return esc_html( (string) get_term_meta( $term_id, 'ttm_status', true ) );
 			case 'ttm_form':
 				return esc_html( (string) get_term_meta( $term_id, 'ttm_form', true ) );
-			case 'ttm_parts':
-				$row = SeriesIndex::get( $term_id );
-				if ( ! $row ) {
-					return '';
-				}
-				return esc_html( sprintf( '%d of %d', $row['published'], $row['total'] ) );
 			default:
 				return $content;
 		}

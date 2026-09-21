@@ -11,7 +11,7 @@ namespace TTM\Core\Blocks;
 
 use TTM\Core\Config;
 use TTM\Core\Meta\PrimaryCategory;
-use TTM\Core\Query\SeriesIndex;
+use TTM\Core\Meta\SeriesPosition;
 use TTM\Core\Support\Clock;
 use TTM\Core\Support\Dates;
 use TTM\Core\Support\Text;
@@ -23,14 +23,91 @@ class Helpers {
 
 	/**
 	 * Nesting depth inside `ttm/archive-by-year` (P5-02): incremented by
-	 * `Query\Archive::track_archive_scope()` on `render_block_data` when that block is
-	 * encountered (before its inner `core/query`/`core/post-template` render), decremented by
-	 * the block's own `render.php` after its content is built. `render_block_core/post-template`
-	 * only regroups rows into year sections while this is > 0.
+	 * `track_archive_scope()` on `render_block_data` when that block is encountered (before
+	 * its inner `core/query`/`core/post-template` render), decremented by the block's own
+	 * `render.php` after its content is built. `group_by_year()` (on
+	 * `render_block_core/post-template`) only regroups rows into year sections while this is
+	 * > 0. Lives here (not in `Query\Archive`) because it is purely block-render-scope state
+	 * with no query dependency (SPEC §4.2).
 	 *
 	 * @var int
 	 */
 	public static int $archive_scope = 0;
+
+	/**
+	 * Hook registration.
+	 */
+	public static function register(): void {
+		add_filter( 'render_block_data', [ self::class, 'track_archive_scope' ] );
+		add_filter( 'render_block_core/post-template', [ self::class, 'group_by_year' ], 10, 1 );
+	}
+
+	/**
+	 * `render_block_data`: enter `ttm/archive-by-year` scope before its inner blocks render.
+	 *
+	 * @param array<string, mixed> $parsed_block Parsed block.
+	 * @return array<string, mixed>
+	 */
+	public static function track_archive_scope( array $parsed_block ): array {
+		if ( 'ttm/archive-by-year' === ( $parsed_block['blockName'] ?? '' ) ) {
+			++self::$archive_scope;
+		}
+
+		return $parsed_block;
+	}
+
+	/**
+	 * `render_block_core/post-template`: inside `ttm/archive-by-year` only, split the rendered
+	 * `<li>` rows into year sections (F15: a single-post year is still its own group).
+	 *
+	 * @param string $content Rendered `<ul>…</ul>` post-template HTML.
+	 * @return string
+	 */
+	public static function group_by_year( string $content ): string {
+		if ( self::$archive_scope <= 0 ) {
+			return $content;
+		}
+
+		$chunks = preg_split( '/(?=<li\b)/', $content );
+		if ( ! is_array( $chunks ) || count( $chunks ) < 2 ) {
+			return $content;
+		}
+
+		array_shift( $chunks );
+		// The opening `<ul …>`; each year gets its own `<ul>` instead.
+
+		$last            = count( $chunks ) - 1;
+		$chunks[ $last ] = (string) preg_replace( '/<\/ul>\s*$/', '', $chunks[ $last ] );
+
+		$order  = [];
+		$groups = [];
+
+		foreach ( $chunks as $li ) {
+			if ( ! preg_match( '/\bpost-(\d+)\b/', $li, $matches ) ) {
+				continue;
+			}
+
+			$year = (int) get_post_time( 'Y', false, (int) $matches[1] );
+
+			if ( ! isset( $groups[ $year ] ) ) {
+				$groups[ $year ] = [];
+				$order[]         = $year;
+			}
+
+			$groups[ $year ][] = $li;
+		}
+
+		$html = '';
+		foreach ( $order as $year ) {
+			$html .= sprintf(
+				'<div class="ttm-archive-year"><h2 class="ttm-archive-year__label tnum">%1$d</h2><ul class="wp-block-post-template ttm-archive-year__rows">%2$s</ul></div>',
+				$year,
+				implode( '', $groups[ $year ] )
+			);
+		}
+
+		return $html;
+	}
 
 	/**
 	 * Block wrapper attributes: `ttm-<name>` + any extra classes, `data-ttm-block="<name>"`.
@@ -132,26 +209,7 @@ class Helpers {
 	 * @return array{name:string, slug:string, part:int, total:int, url:string}|null
 	 */
 	public static function series_position( int $post_id ): ?array {
-		$row = SeriesIndex::for_post( $post_id );
-		if ( ! $row ) {
-			return null;
-		}
-
-		$part = 0;
-		foreach ( $row['parts'] as $entry ) {
-			if ( (int) $entry['post_id'] === $post_id ) {
-				$part = (int) $entry['part'];
-				break;
-			}
-		}
-
-		return [
-			'name'  => $row['name'],
-			'slug'  => $row['slug'],
-			'part'  => $part,
-			'total' => (int) $row['total'],
-			'url'   => home_url( '/series/' . $row['slug'] . '/' ),
-		];
+		return SeriesPosition::for_post( $post_id );
 	}
 
 	/**

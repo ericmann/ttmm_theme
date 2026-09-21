@@ -7,6 +7,7 @@
 
 declare( strict_types=1 );
 
+use TTM\Core\Editor\SeriesPartList;
 use TTM\Core\Taxonomy\SeriesAdmin;
 
 class SeriesAdminTest extends TTM_IntegrationTestCase {
@@ -75,23 +76,40 @@ class SeriesAdminTest extends TTM_IntegrationTestCase {
 
 		$term = get_term( $term_id, 'series' );
 
+		// The part list is `Editor\SeriesPartList`'s own `series_edit_form_fields` callback
+		// (SPEC §4.2: `Taxonomy/` may not import `Query/`, so `SeriesAdmin::edit_form_fields()`
+		// no longer renders it directly) — exercise both callbacks as WordPress would fire them.
 		ob_start();
 		SeriesAdmin::edit_form_fields( $term );
+		SeriesPartList::render( $term );
 		$html = ob_get_clean();
 
 		$this->assertStringContainsString( '<td>1</td>', $html );
 	}
 
-	public function test_columns_show_status_and_parts(): void {
+	public function test_columns_show_status_and_form(): void {
 		$columns = SeriesAdmin::columns( [ 'name' => 'Name' ] );
 
 		$this->assertArrayHasKey( 'ttm_status', $columns );
 		$this->assertArrayHasKey( 'ttm_form', $columns );
-		$this->assertArrayHasKey( 'ttm_parts', $columns );
+		$this->assertArrayNotHasKey( 'ttm_parts', $columns );
 
 		$term_id = self::factory()->term->create( [ 'taxonomy' => 'series' ] );
 		update_term_meta( $term_id, 'ttm_status', 'complete' );
 
 		$this->assertSame( 'complete', SeriesAdmin::column_content( '', 'ttm_status', $term_id ) );
+	}
+
+	public function test_series_part_list_adds_parts_column(): void {
+		$columns = SeriesPartList::columns( [ 'name' => 'Name' ] );
+
+		$this->assertArrayHasKey( 'ttm_parts', $columns );
+
+		$term_id = self::factory()->term->create( [ 'taxonomy' => 'series' ] );
+		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		wp_set_object_terms( $post_id, [ $term_id ], 'series' );
+		\TTM\Core\Query\SeriesIndex::rebuild();
+
+		$this->assertSame( '1 of 1', SeriesPartList::column_content( '', 'ttm_parts', $term_id ) );
 	}
 }
