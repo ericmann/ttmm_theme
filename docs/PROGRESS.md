@@ -94,6 +94,9 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] R1-13 Test gaps: binding empty values, separability non-empty blocks, permanent skip
 - [x] R1-14 i18n: masthead labels from term names, Books row label, book-grid form caption, feed title
 - [x] R1-15 Docs alignment: CLAUDE.md rule 16 file and module map, DEPLOYMENT real-IP, convert-classic report field
+- [ ] R2-01 F9 stale-year: plugin-side dek suppression, cached staleness, cells.stale_count key, rule-24 allow-list removed
+- [ ] R2-02 Test gaps: source-level empty values for ttm/short-date and ttm/relative-date; BoundariesTest sees inline fully-qualified references
+- [ ] R2-03 Docs and duplication cleanup after round 1: CLAUDE.md module map, stale comments, HANDOFF correction, one pagination-label implementation
 
 ## Log
 (one entry per task, appended by implement)
