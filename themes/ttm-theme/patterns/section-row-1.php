@@ -11,7 +11,7 @@
 declare( strict_types=1 );
 
 ?>
-<!-- wp:group {"className":"is-style-grid-4 ttm-section-row","layout":{"type":"constrained"}} -->
+<!-- wp:group {"className":"is-style-grid-4 ttm-section-row","layout":{"type":"default"}} -->
 <div class="wp-block-group is-style-grid-4 ttm-section-row">
 	<!-- wp:pattern {"slug":"ttm/section-cell-large"} /-->
 

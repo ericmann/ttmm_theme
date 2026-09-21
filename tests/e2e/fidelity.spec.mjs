@@ -27,7 +27,7 @@ async function gotoFront( page, width ) {
 }
 
 test.describe( 'rule', () => {
-	test.fixme( 'rule-2: main > hr.is-style-rule-2 (first) @1280', async ( {
+	test( 'rule-2: main > hr.is-style-rule-2 (first) @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -42,7 +42,7 @@ test.describe( 'rule', () => {
 		expect( await computed( rule, 'height' ) ).toBe( px( 2 ) );
 	} );
 
-	test.fixme( 'rule-2-phone: main > hr.is-style-rule-2 (first) @390', async ( {
+	test( 'rule-2-phone: main > hr.is-style-rule-2 (first) @390', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 390 );

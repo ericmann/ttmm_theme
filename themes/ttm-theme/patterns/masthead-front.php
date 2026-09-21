@@ -40,10 +40,10 @@ $ttm_nav_links .= sprintf(
 	esc_url( home_url( '/series/' ) )
 );
 ?>
-<!-- wp:group {"className":"ttm-masthead-front","layout":{"type":"constrained"}} -->
+<!-- wp:group {"className":"ttm-masthead-front","layout":{"type":"default"}} -->
 <div class="wp-block-group ttm-masthead-front">
 
-	<!-- wp:group {"className":"ttm-masthead-front__meta","layout":{"type":"flex","justifyContent":"space-between"}} -->
+	<!-- wp:group {"className":"ttm-masthead-front__meta","layout":{"type":"default"}} -->
 	<div class="wp-block-group ttm-masthead-front__meta">
 		<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"ttm/today","args":{"format":"masthead"}}}},"className":"is-style-meta"} -->
 		<p class="is-style-meta"></p>
@@ -57,7 +57,7 @@ $ttm_nav_links .= sprintf(
 	</div>
 	<!-- /wp:group -->
 
-	<!-- wp:group {"className":"ttm-masthead-front__title","layout":{"type":"grid","columns":2}} -->
+	<!-- wp:group {"className":"ttm-masthead-front__title","layout":{"type":"default"}} -->
 	<div class="wp-block-group ttm-masthead-front__title">
 		<!-- wp:group {"layout":{"type":"constrained"}} -->
 		<div class="wp-block-group">

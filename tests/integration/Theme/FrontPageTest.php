@@ -182,4 +182,20 @@ class FrontPageTest extends TTM_IntegrationTestCase {
 		$this->assertSame( 1, substr_count( $html, '<main' ) );
 		$this->assertStringContainsString( 'id="main"', $html );
 	}
+
+	/**
+	 * Rules 35/36: every `is-style-grid-*` group renders `layout:default`, never
+	 * `is-layout-constrained` -- theme CSS (`.is-style-grid-*`) owns the columns, not the
+	 * block's own `layout` support.
+	 */
+	public function test_grid_groups_are_not_constrained(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$this->seed( 'normal' );
+		$this->go_to( '/' );
+
+		$html = $this->render_template( 'front-page' );
+
+		$this->assertDoesNotMatchRegularExpression( '/is-style-grid-[0-9a-z-]+[^"]*is-layout-constrained/', $html );
+		$this->assertDoesNotMatchRegularExpression( '/ttm-section-row[^"]*is-layout-constrained/', $html );
+	}
 }

@@ -6,12 +6,33 @@
 	--ttm-rule-2: var(--wp--custom--rule--thick);
 }
 
+@media (max-width: 720px) {
+
+	/* Root-padding-aware alignment (`.has-global-padding`, core) reads these two custom
+	 * properties off `body`; overriding them switches the global side gutter to the phone
+	 * token below 720px instead of the desktop one theme.json's styles.spacing.padding sets. */
+	body {
+		--wp--style--root--padding-left: var(--wp--custom--gutter--phone);
+		--wp--style--root--padding-right: var(--wp--custom--gutter--phone);
+	}
+}
+
 /* 2.6 rules */
 .is-style-rule-1,
 .is-style-rule-2 {
 	background: var(--wp--preset--color--divider);
 	border: 0;
 	opacity: 1;
+
+	/* Rule 35: full width regardless of the parent's constrained/default layout. `!important`
+	 * is needed to beat two rules WordPress core prints inline: the separator block's own
+	 * `.wp-block-separator:not(.is-style-wide):not(.is-style-dots){width:100px}` (three
+	 * :not() classes outweigh this rule's one) and the constrained-layout centering rule's
+	 * `margin-left/right: auto !important`. */
+	width: 100% !important;
+	max-width: none !important;
+	margin-left: 0 !important;
+	margin-right: 0 !important;
 }
 
 .is-style-rule-1 {
@@ -904,6 +925,8 @@ blockquote.is-style-pull cite,
 
 /* 4.8 rail */
 .ttm-rail {
+	display: flex;
+	flex-direction: column;
 	gap: var(--wp--preset--spacing--60);
 }
 

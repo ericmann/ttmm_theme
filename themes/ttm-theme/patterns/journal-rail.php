@@ -11,9 +11,9 @@
 declare( strict_types=1 );
 
 ?>
-<!-- wp:group {"className":"ttm-journal-rail","layout":{"type":"constrained"}} -->
+<!-- wp:group {"className":"ttm-journal-rail","layout":{"type":"default"}} -->
 <div class="wp-block-group ttm-journal-rail">
-	<!-- wp:group {"className":"ttm-cell-heading is-rail","layout":{"type":"flex","justifyContent":"space-between"}} -->
+	<!-- wp:group {"className":"ttm-cell-heading is-rail","layout":{"type":"default"}} -->
 	<div class="wp-block-group ttm-cell-heading is-rail">
 		<!-- wp:heading {"level":3,"className":"ttm-cell-heading__label"} -->
 		<h3 class="ttm-cell-heading__label"><?php esc_html_e( 'Journal', 'ttm-theme' ); ?></h3>
