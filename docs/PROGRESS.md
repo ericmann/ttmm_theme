@@ -93,7 +93,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] R1-12 ttm/syndicated-to wrapper and escaping
 - [x] R1-13 Test gaps: binding empty values, separability non-empty blocks, permanent skip
 - [x] R1-14 i18n: masthead labels from term names, Books row label, book-grid form caption, feed title
-- [ ] R1-15 Docs alignment: CLAUDE.md rule 16 file and module map, DEPLOYMENT real-IP, convert-classic report field
+- [x] R1-15 Docs alignment: CLAUDE.md rule 16 file and module map, DEPLOYMENT real-IP, convert-classic report field
 
 ## Log
 (one entry per task, appended by implement)
@@ -865,3 +865,43 @@ text='Novel' -> 'Roman'; asserts 'Roman' present and 'Novel' absent.
 Verified via foundry_verify: composer lint/test:unit (126, +1... actually no unit tests added
 here, count matches R1-13's), npm lint/test:unit/build, forbidden-patterns.sh, npm run
 test:integration -- "OK (367 tests, ...)", all green.
+
+### R1-15 — ce7d3e3
+CLAUDE.md: rule 16 line now names Newsletter/Provider/CustomUrl.php (not Handler.php, which only
+decides whether to forward) as the wp_safe_remote_post site, matching
+scripts/forbidden-patterns.sh's own allow-list. Theme module map's inc/{...} list dropped
+template-hierarchy (that file doesn't exist under themes/ttm-theme/inc/; hierarchy routing lives
+in the plugin's Templates\Hierarchy.php).
+
+docs/DEPLOYMENT.md: added a "Real client IP for the newsletter rate limit" note (end of §10) plus
+an Ingress-row pointer to it -- Newsletter\Handler::client_ip() trusts $_SERVER['REMOTE_ADDR']
+directly (never a spoofable header) by design, so behind a Cloudflare Tunnel the ingress/tunnel
+itself must restore the real address from CF-Connecting-IP before PHP sees it, or every visitor
+shares one rate-limit bucket.
+
+scripts/convert-classic.mjs: report.freeform and report.html are now independent counts of
+core/freeform and core/html respectively (previously report.freeform counted BOTH block types
+combined, while report.html held a full duplicate of the serialized markup string, not a count
+at all) -- matches PLAN P8-01's `report: {blockCounts, freeform, html, textEqual}` contract. The
+--allow-freeform exit-1 gate now checks freeform+html > 0. Counting logic extracted to new
+scripts/lib/report.mjs (buildBlockReport()) with zero external imports, mirroring
+lib/footnotes.mjs; also moved convert-classic.mjs's `jsdom` import from a static top-level import
+to a lazy require() inside setUpBlockEditorEnvironment().
+
+Interpretation/deviation: scripts/lib/report.mjs wasn't on this task's file list. Needed because
+Jest's dynamic import() of convert-classic.mjs itself fails under this environment (a distinct,
+additional failure from the pre-existing "spike Outcome B" @wordpress/block-library issue) --
+confirmed empirically: after making jsdom lazy-loaded, the import still failed identically. Only
+by moving the pure counting logic to a lib/*.mjs file with zero imports (like footnotes.mjs,
+which already imports fine in this test file) could the new "runs without block-library"
+acceptance test actually execute rather than being silently skipped. docs/spikes/P8-01.md needed
+no edit -- its description of the conversion goal is unaffected by the report field split.
+
+New tests: ScaffoldTest::test_claude_md_names_custom_url_as_remote_post_site;
+convert-classic.test.js's "reports core/html count separately from freeform" (imports
+buildBlockReport directly, unconditionally -- not gated by the maybeIt/editor check).
+
+Verified via foundry_verify: composer lint/test:unit (127, +1), npm lint/test:unit/build
+(scripts/test/convert-classic.test.js: 12 passed +1, 2 skipped unchanged), forbidden-patterns.sh.
+Ran npm run test:integration manually (not triggered by this task's file paths): 367 tests, all
+green, unchanged count.
