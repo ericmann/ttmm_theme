@@ -8,7 +8,6 @@ on:
 
 permissions:
   contents: read
-  security-events: write
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -122,15 +121,5 @@ jobs:
       - name: Forbidden patterns (SPEC §3)
         run: bash scripts/forbidden-patterns.sh
 
-  codeql:
-    name: CodeQL (JavaScript)
-    runs-on: ubuntu-latest
-    # Code scanning needs GitHub Advanced Security on a private repo; until it is enabled
-    # (or the repo goes public) this job reports but does not gate the build.
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-      - uses: github/codeql-action/init@v3
-        with:
-          languages: javascript
-      - uses: github/codeql-action/analyze@v3
+  # CodeQL (JavaScript) is intentionally absent: code scanning needs GitHub Advanced Security on a
+  # private repo. Re-add `github/codeql-action` init/analyze steps once it is enabled or the repo is public.
