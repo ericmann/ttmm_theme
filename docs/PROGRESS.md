@@ -88,7 +88,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] R1-07 wp ttm audit: fix missing-alt regex and broken-internal-link false positives
 - [x] R1-08 Cache-Control for HEAD requests
 - [x] R1-09 Theme CSS and templates: honeypot rule, nested landmarks, CSS budget reconciled
-- [ ] R1-10 REST /series ?form=fiction filter per 05 §3
+- [x] R1-10 REST /series ?form=fiction filter per 05 §3
 - [ ] R1-11 Nav current-section on series pages
 - [ ] R1-12 ttm/syndicated-to wrapper and escaping
 - [ ] R1-13 Test gaps: binding empty values, separability non-empty blocks, permanent skip
@@ -757,3 +757,19 @@ Verified via foundry_verify: composer lint/test:unit (123, +1), npm lint/test:un
 forbidden-patterns.sh, npm run test:integration (363, +1, all green). Also ran npm run test:e2e
 manually (not part of the standard verify set): 48/48 passed, zero serious/critical axe
 violations on every seeded screen including /writing/ and /category/security/.
+
+### R1-10 — cd49751
+SeriesController.php: the `form` REST arg's enum is now array_merge(Series::FORMS, ['fiction']);
+get_items() filters `'fiction' === $form ? 'nonfiction' !== $row['form'] : $row['form'] === $form`.
+'any' needs no special case -- omitting the form param entirely already means unfiltered, same as
+status.
+
+Test restored to its PLAN name's actual intent: creates a novel row and a nonfiction row, sends
+form=fiction, asserts the novel row's id is present and the nonfiction row's id is absent (rather
+than the previous form=novel/exact-match version that sidestepped the missing enum value).
+
+README.md: documented what ?form= accepts (a term's own form, or 'fiction' for "every non-
+nonfiction row").
+
+Verified via foundry_verify: composer lint/test:unit, npm lint/test:unit/build,
+forbidden-patterns.sh, npm run test:integration (363, all green).
