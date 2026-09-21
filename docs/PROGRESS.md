@@ -26,7 +26,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P1-14 Seeder fiction, verse, states and seed command; tuning series.max_purchase_links
 - [x] P1-15 Push and manual check (Phase 1)
 - [x] P2-01 Block styles, pattern categories, image sizes
-- [ ] P2-02 ttm.css foundation: bridge, grids, rules, type utilities, buttons, tags, inputs, body typography
+- [x] P2-02 ttm.css foundation: bridge, grids, rules, type utilities, buttons, tags, inputs, body typography
 - [ ] P2-03 ttm.css chrome, nav.js, editor.css; CSS budget tuning
 - [ ] P2-04 Block variations and starter content
 - [ ] P2-05 Template parts and chrome patterns
@@ -231,4 +231,11 @@ Manual check: NOT VERIFIED (human) -- after npm run env:seed: /wp-admin/post.php
 block_styles() is a literal array of every {block,name,label} pair from 04 §3 (61 entries; multi-block rows like image/post-featured-image and buttons/button expanded per block; multi-slug cells like grid-8-4/grid-3-7-2/etc expanded per slug) — written as a literal, not generated with a variable label, because __($variable, domain) fails PHPCS's WordPress.WP.I18n.NonSingularStringLiteralText sniff. register_block_styles() hooks init, calls register_block_style() per entry (name/label/is_default only; no inline_style, CSS lives in ttm.css per P2-02/P2-03). primary buttons/button styles get is_default=true.
 patterns.php registers the 5 pattern categories (ttm-front/article/lists/fiction/marketing) on init. image-sizes.php: local literal sizes array (ttm-lead 1600x900, ttm-thumb 800x533, ttm-cover 600x900, ttm-tile 800x600, all hard crop) filtered through apply_filters('ttm_image_sizes', ...) per Decisions — theme never reads plugin Config, keeps its own copy. functions.php requires all three new inc/ files.
 tests/unit/Theme/fixtures/block-styles.php lists every block:name pair for set-equality against block_styles(). 61/61 unit tests pass (3 new); full verify green.
+Manual check: none
+
+### P2-02 — bd3ba5f
+ttm.css grew from 244 to 10858 bytes (budget 25600). Sections in order per the task: 0 base (existing), 2.6 rules (.is-style-rule-1/2), 3 grids (grid-8-4/3-7-2/5-7/7-5/3/2/4, span-2, sticky-aside >=1024, zone/cell/surface-box/tile/poster, 1024/720 collapse media queries), 2.3 type (all is-style-* type slugs from 04§3 with sizes/weights/line-heights/letter-spacing/colors from 01§2.3, tag classes), 4.30 buttons (.btn/.btn-primary/-secondary/-ghost/-block plus the core wp-block-button.is-style-* equivalents, focus/hover/active per 01§4.30 and §5), 4.32 input (.input per the newsletter-box spec text), 4.24 body typography (.entry-content links/lists/headings/code/pre/blockquote incl. is-style-pull hanging-quote/blockquote default/table/footnotes incl. .modern-footnotes-footnote and sup a[data-fn] for classic-editor compatibility).
+All values reference theme.json presets (var(--wp--preset--...)) or the P0-05 --ttm-rule-1/2 bridge vars; zero hex literals. Fixed 4 stylelint no-descending-specificity errors by reordering the :hover secondary-button rule after all button base rules, and the blockquote.is-style-pull cite selector before its wp-block-quote equivalent.
+Interpretation: grid-8-4/5-7/7-5/3-7-2 use one canonical gap per slug (a single is-style-* class can't carry the two different gaps 01§3 assigns the same track ratio across different screens); grid-3/grid-2/grid-4 map to the front series strip / series-hub "all series" / front section-row tracks (the only 3-, 2- and 4-col tracks in 01§3 without their own named slug).
+61/61 unit + 72/72 integration tests still pass (no test changes, CSS-only task); full verify green; stylelint and check:budget both pass.
 Manual check: none
