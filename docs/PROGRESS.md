@@ -44,7 +44,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P3-10 Front-page patterns, rail, template and front CSS
 - [x] P3-11 Front-page fallback state tests (quiet, empty)
 - [x] P3-12 Push and manual check (Phase 3)
-- [ ] P4-01 series-bar block
+- [x] P4-01 series-bar block
 - [ ] P4-02 series-toc block
 - [ ] P4-03 series-prev-next and syndicated-to blocks
 - [ ] P4-04 Bindings reading-time, word-count, journal-subline, series-name, series-part
@@ -309,3 +309,6 @@ Added tests/integration/Fallbacks/FrontPageStatesTest.php covering F1/F2/F4/F6/F
 
 ### P3-12 — b734618
 Pushed Phase 3 (build/2026-09-21, 84fe860..788781e) to origin. Manual check: NOT VERIFIED (human) -- http://localhost:8888/ vs prototype badge 2a at 1280 and 3a at 390: lead 44px with grayscale 16:9 image; rail verse box shows the seeded verse with the underlined dailymedtoday.com link; Technology spans 2 with a 3:2 image; Writing cell shows "The Quiet Ledger — Ch. 12"; series strip 3 rows; red poster; at 390 the nav scrolls horizontally and cells stack as zones.
+
+### P4-01 — 1895d7b
+Added the ttm/series-bar block: usesContext:["postId"] with get_the_ID() fallback; F11 returns '' when SeriesIndex::for_post() finds no series; renders the status square (reusing ttm-series-mark), series name link, "Part N of M" (or F23's "Part N" with no "of M" when ttm_total_parts is 0/empty), and one segment per total part (is-done before current, is-current at current, is-todo after) — or for the open-ended F23 case, one segment per published part (is-done/is-current) plus a single trailing is-todo. Full integration suite: 173 tests, 1 pre-existing skip, 0 failures.
