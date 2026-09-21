@@ -83,7 +83,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] R1-02 Rule 24: config keys for every hard-coded tunable in src/ and fail the forbidden-patterns rule-24 check
 - [x] R1-03 SeriesIndex last_update from the newest published part; hook-driven rebuild tests; series:assign derives ttm_form
 - [x] R1-04 Verse module: F6 uses the stored last-good verse, Sept month format, site-timezone date, DST-safe cron
-- [ ] R1-05 Front-page cells: F9 stale-year branch, journal.rail_count, journal slug constant; writing-cell F1/F2 semantics
+- [x] R1-05 Front-page cells: F9 stale-year branch, journal.rail_count, journal slug constant; writing-cell F1/F2 semantics
 - [ ] R1-06 migrate:politics child mode files Politics posts under Opinion; close-comments purges once
 - [ ] R1-07 wp ttm audit: fix missing-alt regex and broken-internal-link false positives
 - [ ] R1-08 Cache-Control for HEAD requests
@@ -634,3 +634,38 @@ gained the two named acceptance tests.
 
 Verified via foundry_verify: composer lint/test:unit (120, +4), npm lint/test:unit/build,
 forbidden-patterns.sh, npm run test:integration (347, +2, all green).
+
+### R1-05 — 0197b90
+Cells.php: new public Cells::is_stale_year($slug) (a bounded 1-post WP_Query for the
+category's newest post, compared to cells.stale_year_days via Support\Clock+Dates -- no
+per-request cache, since a static memo turned out to break re-registration within the same
+PHP process/test, see below). filter_query_vars() uses it to force posts_per_page=2 for a
+stale section (else falls through to cells.counts as before). The 'journal' === $section
+literal (dedicated posts_per_page override for the rail/stream) now uses $journal_slug, and
+the rail branch (ttmExcludeCurrent=false) now reads journal.rail_count instead of leaving
+posts_per_page at whatever the pattern's baked-in perPage attribute was.
+
+F9 dek suppression is server-side, not CSS: themes/ttm-theme/inc/patterns.php calls
+Cells::is_stale_year() (guarded by class_exists, matching its existing Config::get() call
+style) per section, per request, and section-cell.php's pattern template conditionally omits
+the `core/post-excerpt` block entirely via a new `show_dek` key when stale. Tried a
+mark_empty()+CSS-class approach first; reverted it because CSS-hiding leaves the real excerpt
+text in cached HTML (and it wouldn't have literally satisfied "no ttm-item__dek"), and
+because the ttm.css budrestget had only 10 bytes of headroom.
+
+Caching pitfall recorded for future readers: a `private static array $stale_cache` keyed by
+section broke re-registration when 'init' fires twice in one process (exactly what
+TTM_IntegrationTestCase's set_up() does, and what a real request never does) -- removed.
+
+writing-cell/render.php: F1's shelf list now capped by writing.shelf_limit (was incorrectly
+sharing writing.also_running_limit with the active-mode "Also running" list). F2's plain
+branch gained a ttm_primary_category meta_query, Lead::id() exclusion via post__not_in, and a
+new writing.plain_count Config key (default 3, same as the old hard-coded value); the "All
+serials ->" heading link is now suppressed in plain mode.
+
+Config: removed cells.thin_days (dead -- F9's "show what exists" needs no code, the cell
+query already has no date filter); added writing.plain_count. ConfigTest updated for both.
+
+Verified via foundry_verify: composer lint/test:unit (120), npm lint/test:unit/build,
+forbidden-patterns.sh, npm run test:integration (353, +6, all green). CSS budget unchanged
+(32990/33000).
