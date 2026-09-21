@@ -72,7 +72,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P7-08 Separability tests (theme without plugin, plugin with default theme)
 - [x] P7-09 Push and manual check (Phase 7)
 - [x] P8-01 Spike: classic-to-block conversion script (jsdom + rawHandler)
-- [ ] P8-02 CLI convert:export, convert:import, convert:revert
+- [x] P8-02 CLI convert:export, convert:import, convert:revert
 - [ ] P8-03 CLI audit
 - [ ] P8-04 CLI migrate:politics, migrate:redirects, migrate:close-comments
 - [ ] P8-05 Spike: Jetpack Social share URLs to ttm_syndication
@@ -419,3 +419,17 @@ Decision: Outcome A - shipped. rawHandler({HTML})+serialize() via require() (CJS
 Added scripts/lib/footnotes.mjs (transformFootnotes, verified against post 6914's real 3 modern-footnotes pairs including nested-link note content) and scripts/convert-classic.mjs (CLI: node scripts/convert-classic.mjs <in.ndjson> <out.ndjson> [--allow-freeform], exit 1 on text-loss or unexpected freeform blocks). Added @wordpress/block-library + jsdom devDependencies, npm audit 0 vulnerabilities, restored dependencies:{} that npm install dropped.
 Documented (not chased further, per time-box) a Jest-specific module-resolution quirk unrelated to the actual spike question; added jest-unit.config.js to fix Jest's .mjs handling for the pure footnotes tests, which pass; the 2 block-editor tests gracefully it.skip() exactly as the task's acceptance criteria anticipates.
 Full verify green: composer lint 0 errors, 115/115 PHP unit, npm lint clean, 11 passed/2 skipped JS unit, npm build green, forbidden-patterns clean, real CLI run against all 3 fixture posts exits 0.
+
+### P8-02 — 8cffb68
+Implemented wp ttm convert:export/import/revert (ConvertCommand.php) pairing
+with the P8-01 Node spike. Footnotes written to WP core's native unprefixed
+`footnotes` post meta key. Added ttm_classic_backup/ttm_converted_at post
+meta (show_in_rest=false). import() snapshots a revision, wraps
+wp_update_post() in kses_remove_filters()/kses_init_filters(), only backs up
+content once per post, and rejects freeform blocks unless --allow-freeform.
+7 new integration tests all passing; foundry_verify fully green (318/318
+integration). Manual wp-env end-to-end run (export -> convert-classic.mjs ->
+import --dry-run) found and fixed a real bug: Loader::output() used only the
+first row's keys for WP_CLI\Utils\format_items(), which errored when later
+rows had different columns - fixed by unioning all rows' keys and
+backfilling missing values.
