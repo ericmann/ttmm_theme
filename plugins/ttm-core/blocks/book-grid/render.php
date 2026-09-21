@@ -26,8 +26,17 @@ if ( empty( $ttm_books ) ) {
 <div <?php echo Helpers::wrapper( 'book-grid' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() output is already escaped. ?>>
 	<?php foreach ( $ttm_books as $ttm_book ) : ?>
 		<?php
-		$ttm_form_label = ucfirst( str_replace( '-', ' ', (string) $ttm_book['form'] ) );
-		$ttm_meta_parts = array_filter(
+		// Translatable captions for Fiction\Books::FORMS; an unrecognised value (shouldn't
+		// happen -- Books::sanitize() already constrains it) falls back to a plain transform.
+		$ttm_form_labels = [
+			'novel'       => __( 'Novel', 'ttm-core' ),
+			'novella'     => __( 'Novella', 'ttm-core' ),
+			'story-cycle' => __( 'Story cycle', 'ttm-core' ),
+			'collection'  => __( 'Collection', 'ttm-core' ),
+			'nonfiction'  => __( 'Nonfiction', 'ttm-core' ),
+		];
+		$ttm_form_label  = $ttm_form_labels[ $ttm_book['form'] ] ?? ucfirst( str_replace( '-', ' ', (string) $ttm_book['form'] ) );
+		$ttm_meta_parts  = array_filter(
 			[
 				$ttm_form_label,
 				$ttm_book['year'] > 0 ? (string) $ttm_book['year'] : '',

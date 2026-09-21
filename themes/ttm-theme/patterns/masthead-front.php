@@ -10,19 +10,23 @@
 
 declare( strict_types=1 );
 
+// Fallback labels only: used when a section's category term doesn't exist yet (e.g. before
+// starter content runs). Once the term exists, its own (possibly owner-renamed) name is used
+// instead -- the theme reads the category, never re-derives a name of its own (rule 1).
 $ttm_sections = [
-	'technology' => 'Technology',
-	'business'   => 'Business',
-	'faith'      => 'Faith',
-	'journal'    => 'Journal',
-	'writing'    => 'Writing',
-	'security'   => 'Security',
-	'opinion'    => 'Opinion',
+	'technology' => __( 'Technology', 'ttm-theme' ),
+	'business'   => __( 'Business', 'ttm-theme' ),
+	'faith'      => __( 'Faith', 'ttm-theme' ),
+	'journal'    => __( 'Journal', 'ttm-theme' ),
+	'writing'    => __( 'Writing', 'ttm-theme' ),
+	'security'   => __( 'Security', 'ttm-theme' ),
+	'opinion'    => __( 'Opinion', 'ttm-theme' ),
 ];
 
 $ttm_nav_links = '';
-foreach ( $ttm_sections as $ttm_slug => $ttm_name ) {
+foreach ( $ttm_sections as $ttm_slug => $ttm_fallback_name ) {
 	$ttm_term       = get_category_by_slug( $ttm_slug );
+	$ttm_name       = $ttm_term ? $ttm_term->name : $ttm_fallback_name;
 	$ttm_url        = $ttm_term ? get_category_link( $ttm_term ) : home_url( '/category/' . $ttm_slug . '/' );
 	$ttm_nav_links .= sprintf(
 		'<!-- wp:navigation-link {"label":"%s","url":"%s","kind":"custom"} /-->',

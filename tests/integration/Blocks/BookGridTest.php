@@ -78,6 +78,40 @@ class BookGridTest extends TTM_IntegrationTestCase {
 		$this->assertStringNotContainsString( '<figure', $html );
 	}
 
+	public function test_form_caption_is_translatable(): void {
+		update_option(
+			'ttm_books',
+			[
+				[
+					'title'   => 'Salt and Iron',
+					'form'    => 'novel',
+					'year'    => 2022,
+					'formats' => [],
+					'links'   => [],
+				],
+			]
+		);
+
+		add_filter(
+			'gettext',
+			static function ( string $translation, string $text, string $domain ) {
+				if ( 'ttm-core' === $domain && 'Novel' === $text ) {
+					return 'Roman';
+				}
+				return $translation;
+			},
+			10,
+			3
+		);
+
+		$html = $this->render();
+
+		remove_all_filters( 'gettext' );
+
+		$this->assertStringContainsString( 'Roman', $html );
+		$this->assertStringNotContainsString( 'Novel', $html );
+	}
+
 	public function test_zero_books_renders_nothing(): void {
 		$html = $this->render();
 

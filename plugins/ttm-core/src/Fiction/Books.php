@@ -125,7 +125,13 @@ class Books {
 	private static function render_row( int $index, array $book ): void {
 		$name = "ttm_books[{$index}]";
 
-		echo '<fieldset class="ttm-book-row"><legend>' . esc_html( sprintf( 'Book %d', $index + 1 ) ) . '</legend>';
+		echo '<fieldset class="ttm-book-row"><legend>' . esc_html(
+			sprintf(
+				/* translators: %d: repeater row number (1-based). */
+				__( 'Book %d', 'ttm-core' ),
+				$index + 1
+			)
+		) . '</legend>';
 		printf( '<p><input type="text" placeholder="%s" name="%s[title]" value="%s"></p>', esc_attr__( 'Title', 'ttm-core' ), esc_attr( $name ), esc_attr( $book['title'] ?? '' ) );
 
 		echo '<select name="' . esc_attr( $name ) . '[form]">';

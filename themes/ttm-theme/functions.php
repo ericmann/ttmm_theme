@@ -95,10 +95,15 @@ function print_section_feeds(): void {
 	$links = apply_filters( 'ttm_section_feeds', $links );
 
 	foreach ( $links as $slug => $url ) {
-		$term = get_category_by_slug( $slug );
+		$term  = get_category_by_slug( $slug );
+		$title = sprintf(
+			/* translators: %s: section name, e.g. "Technology". */
+			__( '%s RSS', 'ttm-theme' ),
+			$term ? $term->name : $slug
+		);
 		printf(
-			'<link rel="alternate" type="application/rss+xml" title="%s RSS" href="%s">' . "\n",
-			esc_attr( $term ? $term->name : $slug ),
+			'<link rel="alternate" type="application/rss+xml" title="%s" href="%s">' . "\n",
+			esc_attr( $title ),
 			esc_url( $url )
 		);
 	}

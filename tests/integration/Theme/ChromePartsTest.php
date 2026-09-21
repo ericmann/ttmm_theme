@@ -21,6 +21,26 @@ class ChromePartsTest extends TTM_IntegrationTestCase {
 		}
 	}
 
+	public function test_masthead_nav_uses_category_names(): void {
+		$term    = term_exists( 'technology', 'category' );
+		$term_id = $term ? (int) $term['term_id'] : (int) wp_insert_term( 'Technology', 'category', [ 'slug' => 'technology' ] )['term_id'];
+
+		wp_update_term( $term_id, 'category', [ 'name' => 'Technology Renamed' ] );
+
+		// WordPress caches theme patterns/*.php's scanned output in a transient keyed by file
+		// mtimes, so going through the `ttm/masthead-front` pattern registry (as
+		// parts/header-front.html's own `wp:pattern` reference does) would still see the name
+		// from whenever that cache was last built, not this test's rename. Executing the
+		// pattern file directly proves the same PHP logic without that unrelated cache layer.
+		ob_start();
+		require get_template_directory() . '/patterns/masthead-front.php';
+		$raw = (string) ob_get_clean();
+
+		$html = (string) do_blocks( $raw );
+
+		$this->assertStringContainsString( 'Technology Renamed', $html );
+	}
+
 	public function test_header_inner_renders_menu_toggle_text(): void {
 		$html = $this->render_template_part( 'header-inner' );
 
