@@ -36,6 +36,7 @@ class Sidebar {
 		if ( ! file_exists( $asset_file ) ) {
 			return;
 		}
+		// forbidden-patterns:allow-variable-include -- $asset_file is TTM_CORE_DIR . a fixed literal suffix, never from request input (SPEC rule 15).
 		$asset = require $asset_file;
 
 		wp_enqueue_script(

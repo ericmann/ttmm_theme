@@ -9,7 +9,6 @@ declare( strict_types=1 );
 
 namespace TTM\Core\Cli;
 
-use TTM\Core\Config;
 use TTM\Core\Support\Clock;
 use TTM\Core\Verse\Fetcher;
 
@@ -66,10 +65,7 @@ class VerseCommand extends Command {
 	 * @return array{ok: bool, rows: array<int, array<string, mixed>>, messages: string[]}
 	 */
 	private function inspect( bool $raw ): array {
-		$response = wp_safe_remote_get(
-			Fetcher::endpoint(),
-			[ 'timeout' => (int) Config::get( 'verse.timeout_seconds', 8 ) ]
-		);
+		$response = Fetcher::request();
 
 		if ( is_wp_error( $response ) ) {
 			return [

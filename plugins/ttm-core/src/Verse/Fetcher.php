@@ -15,6 +15,7 @@ use TTM\Core\Support\Clock;
 
 /**
  * The only file allowed to call wp_safe_remote_get for the verse endpoint (SPEC §3.3 rule 16).
+ * `Cli\VerseCommand::inspect()` calls `request()` rather than making its own HTTP call.
  */
 class Fetcher {
 
@@ -120,6 +121,30 @@ class Fetcher {
 	}
 
 	/**
+	 * The single call site for `wp_safe_remote_get` against the verse endpoint (SPEC rule 16):
+	 * used by both `fetch()` and `Cli\VerseCommand::inspect()` so no other file needs its own.
+	 *
+	 * @param array<string, string> $headers Extra request headers (e.g. `If-None-Match`).
+	 * @return array|\WP_Error
+	 */
+	public static function request( array $headers = [] ) {
+		$user_agent = str_replace(
+			'{version}',
+			defined( 'TTM_CORE_VERSION' ) ? TTM_CORE_VERSION : '0.0.0',
+			(string) Config::get( 'verse.user_agent', 'TTM-Core/{version}' )
+		);
+
+		return wp_safe_remote_get(
+			self::endpoint(),
+			[
+				'timeout'    => (int) Config::get( 'verse.timeout_seconds', 8 ),
+				'user-agent' => $user_agent,
+				'headers'    => $headers,
+			]
+		);
+	}
+
+	/**
 	 * Fetch the endpoint (unless today's verse is already stored and not forced), parse it,
 	 * and store the result.
 	 *
@@ -138,24 +163,10 @@ class Fetcher {
 			];
 		}
 
-		$user_agent = str_replace(
-			'{version}',
-			defined( 'TTM_CORE_VERSION' ) ? TTM_CORE_VERSION : '0.0.0',
-			(string) Config::get( 'verse.user_agent', 'TTM-Core/{version}' )
-		);
+		$etag    = is_array( $current ) ? (string) ( $current['etag'] ?? '' ) : '';
+		$headers = '' !== $etag ? [ 'If-None-Match' => $etag ] : [];
 
-		$args = [
-			'timeout'    => (int) Config::get( 'verse.timeout_seconds', 8 ),
-			'user-agent' => $user_agent,
-			'headers'    => [],
-		];
-
-		$etag = is_array( $current ) ? (string) ( $current['etag'] ?? '' ) : '';
-		if ( '' !== $etag ) {
-			$args['headers']['If-None-Match'] = $etag;
-		}
-
-		$response = wp_safe_remote_get( self::endpoint(), $args );
+		$response = self::request( $headers );
 
 		if ( is_wp_error( $response ) ) {
 			$message = $response->get_error_message();

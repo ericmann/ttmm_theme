@@ -40,6 +40,7 @@ if ( file_exists( TTM_CORE_DIR . 'vendor/autoload.php' ) ) {
 			$relative = str_replace( '\\', '/', substr( $class_name, strlen( 'TTM\\Core\\' ) ) );
 			$file     = TTM_CORE_DIR . 'src/' . $relative . '.php';
 			if ( file_exists( $file ) ) {
+				// forbidden-patterns:allow-variable-include -- PSR-4 autoloader; $file is built only from the loaded class's own name under TTM\Core\, never from request input (SPEC rule 15).
 				require_once $file;
 			}
 		}
