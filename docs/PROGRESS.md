@@ -85,7 +85,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] R1-04 Verse module: F6 uses the stored last-good verse, Sept month format, site-timezone date, DST-safe cron
 - [x] R1-05 Front-page cells: F9 stale-year branch, journal.rail_count, journal slug constant; writing-cell F1/F2 semantics
 - [x] R1-06 migrate:politics child mode files Politics posts under Opinion; close-comments purges once
-- [ ] R1-07 wp ttm audit: fix missing-alt regex and broken-internal-link false positives
+- [x] R1-07 wp ttm audit: fix missing-alt regex and broken-internal-link false positives
 - [ ] R1-08 Cache-Control for HEAD requests
 - [ ] R1-09 Theme CSS and templates: honeypot rule, nested landmarks, CSS budget reconciled
 - [ ] R1-10 REST /series ?form=fiction filter per 05 §3
@@ -692,3 +692,24 @@ behavior and the single-purge-per-batch note.
 
 Verified via foundry_verify: composer lint/test:unit, npm lint/test:unit/build,
 forbidden-patterns.sh, npm run test:integration (357, +4, all green).
+
+### R1-07 — 3eda047
+has_missing_alt(): regex now captures the alt value in its own group
+(`alt\s*=\s*(["\'])(.*?)\1`) and checks trim() on that captured value, instead of trimming the
+whole match (e.g. `alt="tall"`) against the charlist "alt=\"' " -- every letter of "tall" is in
+that charlist, so trim() consumed the entire match and flagged real alt text as missing.
+
+has_broken_internal_link(): new private is_ignorable_internal_path($path) skips uploads (checked
+both against wp_get_upload_dir()['baseurl']'s path and a general '/wp-content/' substring),
+feed URLs, /page/N/ pagination, and date-archive paths (/YYYY, /YYYY/MM, /YYYY/MM/DD) before
+consulting the index -- link_index() never enumerated any of these. link_index() also now
+indexes attachment permalinks (post_type=attachment, post_status=inherit, batched) so a link to
+an image's own attachment page resolves.
+
+New tests: test_missing_alt_accepts_alt_text_made_of_a_l_t_letters,
+test_broken_internal_link_ignores_uploads_feeds_and_pagination,
+test_broken_internal_link_indexes_attachment_permalinks (all with pre_http_request throwing, to
+keep proving rule 16 -- no HTTP -- still holds).
+
+Verified via foundry_verify: composer lint/test:unit, npm lint/test:unit/build,
+forbidden-patterns.sh, npm run test:integration (360, +3, all green).
