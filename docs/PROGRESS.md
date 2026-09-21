@@ -73,7 +73,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P7-09 Push and manual check (Phase 7)
 - [x] P8-01 Spike: classic-to-block conversion script (jsdom + rawHandler)
 - [x] P8-02 CLI convert:export, convert:import, convert:revert
-- [ ] P8-03 CLI audit
+- [x] P8-03 CLI audit
 - [ ] P8-04 CLI migrate:politics, migrate:redirects, migrate:close-comments
 - [ ] P8-05 Spike: Jetpack Social share URLs to ttm_syndication
 - [ ] P8-06 Plugin README, MIGRATION and SETUP cross-check
@@ -433,3 +433,19 @@ import --dry-run) found and fixed a real bug: Loader::output() used only the
 first row's keys for WP_CLI\Utils\format_items(), which errored when later
 rows had different columns - fixed by unioning all rows' keys and
 backfilling missing values.
+
+### P8-03 — 7e83aa3
+Implemented wp ttm audit (AuditCommand.php): 11 checks (classic, no-excerpt,
+no-featured-image, missing-alt, multi-category, no-primary, uncategorized,
+politics, series-tag-candidate, legacy-footnotes, broken-internal-link), all
+batched (rule 12), zero HTTP (rule 16). broken-internal-link uses a
+once-built in-memory index of published post/page/term paths, never
+url_to_postid() or a remote request. --only restricts to a comma-separated
+check list. --format handled in a new Loader::output_audit() (table/csv/json)
+per the task's "wrapper formats per --format" wording. Added
+cli.series_tag_min=>3 to Config. 7 new integration tests all passing;
+foundry_verify fully green (325/325 integration). Manual wp-env check
+(`ttm audit --format=csv`) produced a clean, sensible 90-row report against
+the seeded site. Also gitignored the untracked FOUNDRY_FEEDBACK.md operator
+log (left in place, not committed/moved) so it stops blocking the clean-tree
+check.
