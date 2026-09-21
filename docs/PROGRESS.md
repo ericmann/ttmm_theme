@@ -22,7 +22,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P1-08 Jetpack provider on the shared form
 - [x] P1-09 Editor registration in every context (§6.7)
 - [x] P1-10 Newsletter poster per §6.1.8
-- [ ] P1-11 Phase 1 push — chrome screenshots
+- [x] P1-11 Phase 1 push — chrome screenshots
 - [ ] P2-01 Lead story CSS and markup per §6.1.3
 - [ ] P2-02 Verse box per §6.1.4
 - [ ] P2-03 Journal excerpt hard cap and `ttm/category-count` entries format
@@ -221,3 +221,15 @@ New FrontPageTest::test_poster_is_full_width_and_has_no_mailto...; all 6
 poster fidelity rows un-fixme'd (poster-btn's transparent expectation
 fixed to Chrome's real computed rgba(0,0,0,0), same class of bug as
 mast-hub's margin-left:auto). All verify commands green.
+
+### P1-11 — 4de9351
+css-coverage-allow.txt's "Phase 1 chrome" line was already gone (removed
+incrementally by P1-02/P1-06); 6 lines remain, all later-flight rows,
+well under the rule-34 cap. Re-seeded and re-ran npm run screenshots --
+all 7 PNGs regenerated in docs/feedback/phase-2/. Pushed to
+refine/2026-09-21 (147933f..4de9351).
+
+Manual check: NOT VERIFIED (human) — compare docs/feedback/phase-2/
+masthead.png with the top of docs/feedback/design_top.png and
+poster-footer.png with design_footer.png; the poster shows an email
+field and a ghost "Subscribe" button.
