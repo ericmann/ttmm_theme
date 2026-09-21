@@ -16,7 +16,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P1-04 Series index
 - [x] P1-05 Category stats and top tags
 - [x] P1-06 Series term admin: columns, edit fields, part list
-- [ ] P1-07 Editor sidebar panel
+- [x] P1-07 Editor sidebar panel
 - [ ] P1-08 Pre-publish checks and post list columns
 - [ ] P1-09 Admin settings page and general settings
 - [ ] P1-10 Books repeater
@@ -160,3 +160,11 @@ Test gotcha (documented for future admin-save tests): PHP's $_REQUEST supergloba
 Plugin::modules() now appends Taxonomy\SeriesAdmin.
 34 integration tests pass (4 new); full verify green.
 Manual check: NOT VERIFIED (human) — open a series term's edit screen in wp-admin and confirm fields/part list.
+
+### P1-07 — 844161c
+Installed @wordpress/{i18n,element,components,data,core-data,editor,plugins,blocks,block-editor,server-side-render,compose,hooks} as devDependencies (npm audit --audit-level=high: 0 vulnerabilities). npm's save behavior deleted the empty "dependencies": {} key entirely — restored it explicitly (CLAUDE.md rule 31 pins it to stay {}).
+plugins/ttm-core/src/editor/derive.js exports pure deriveForm({seriesForm,inWriting}) mirroring Meta\Form::derive exactly; 3 Jest tests in editor/test/derive.test.js. panel.js: PluginDocumentSettingPanel "ttm-panel", fields bound via useEntityProp('postType','post','meta'): primary section SelectControl (window.ttmEditorData.sections), series ComboboxControl (useEntityRecords taxonomy=series) + create-new via saveEntityRecord, part number/title (TextControl type=number — the experimental NumberControl is blocked by @wordpress/no-unsafe-wp-apis eslint rule), form SelectControl (sets ttm_form_locked=true on manual change; "Reset to automatic" clears the lock and calls deriveForm()), syndication x/mastodon/bluesky TextControl type=url, location (shown only in Journal), most-read ToggleControl.
+Editor\Sidebar::register() hooks enqueue_block_editor_assets, bails unless get_current_screen()->post_type==='post'; enqueues build/index.js using build/index.asset.php deps/version, wp_add_inline_script('before') injects window.ttmEditorData = {sections (nav-order category terms), journalId, writingId, seriesForms:[]}; wp_set_script_translations for ttm-core.
+Plugin::modules() now appends Editor\Sidebar.
+npm run build emits build/index.js (3.55 KiB) + index.asset.php; lint/test:unit(Jest)/test:integration all green (34 integration tests, no PHP behavior changed here — Sidebar.php is enqueue-only).
+Manual check: NOT VERIFIED (human) — open a post in the block editor and confirm the panel renders with all fields.
