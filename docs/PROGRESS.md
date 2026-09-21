@@ -24,7 +24,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P1-10 Newsletter poster per §6.1.8
 - [x] P1-11 Phase 1 push — chrome screenshots
 - [x] P2-01 Lead story CSS and markup per §6.1.3
-- [ ] P2-02 Verse box per §6.1.4
+- [x] P2-02 Verse box per §6.1.4
 - [ ] P2-03 Journal excerpt hard cap and `ttm/category-count` entries format
 - [ ] P2-04 Journal rail per §6.1.5
 - [ ] P2-05 Tuning — `journal.excerpt_max_words`
@@ -256,3 +256,16 @@ not matching the 15px "dek" token (which IS correct for the phone value)
 New LeadStoryTest::test_image_ratio_attribute_becomes_a_class and
 ::test_dek_keeps_inline_code_and_strips_other_tags; all 8 lead fidelity
 rows un-fixme'd. All verify commands green (budget 40143/40960).
+
+### P2-02 — b9d4519
+.ttm-verse padding literal 18px 20px. .ttm-verse .is-style-kicker
+overrides shared 12px to 11px (micro) + margin 0 0 12. .ttm-verse__text:
+synopsis(19px)/600/1.35/-0.01em/text colour, margin 0 0 10 literal.
+.ttm-verse__reference: ui(13px)/400 (was 600)/neutral-800 (was unset),
+margin 0 0 14 literal. .ttm-verse__attribution: caption(12px) (was
+micro/11px, wrong token). attribution a: added accent-700 + 
+text-underline-offset:3px. <=720: padding 16 18, text drops to body(18px).
+
+Un-fixme'd verse-box/kicker/text/ref/attr; verse-nocopy already passing.
+VerseOfTheDayTest untouched, still green. All verify commands green
+(budget 40616/40960 — tight but under).
