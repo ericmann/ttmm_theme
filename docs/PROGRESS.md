@@ -78,7 +78,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P8-05 Spike: Jetpack Social share URLs to ttm_syndication
 - [x] P8-06 Plugin README, MIGRATION and SETUP cross-check
 - [x] P8-07 Playwright + axe e2e suite and CI
-- [ ] P8-08 Push, final manual checks and HANDOFF (Phase 8)
+- [x] P8-08 Push, final manual checks and HANDOFF (Phase 8)
 
 ## Log
 (one entry per task, appended by implement)
@@ -509,3 +509,16 @@ threshold, fixed with an underline. 48/48 e2e tests passing; foundry_verify
 green including its own npm run test:e2e run (337/337 integration, 48/48
 e2e). CSS budget 32025->32990/33000. CI needs no changes (script name and
 artifact path unchanged).
+
+### P8-08 — 735e861
+Pushed build/2026-09-21 to origin (aa81e10..30b423f, then this commit).
+Wrote docs/HANDOFF.md: every Manual check line from the P0-P8 log, both
+spike outcomes (P8-01 Outcome A shipped, P8-05 only _publicize_done_external
+carries a URL), all 8 SPEC assumption-config-key tuning measurements (all
+kept at default) plus the two real CSS-budget bumps, the P7-04 Jetpack
+Outcome B finding, the P7-07 rule-24 warning list, and MIGRATION.md's
+§1-§2 rehearsal steps expanded into the exact wp ttm command sequence.
+Manual check: NOT VERIFIED (human) — CI green on the branch including the
+e2e job (Playwright report artifact); run docs/MIGRATION.md §1-§2 against a
+real archive or WXR export in wp-env per the sequence above; open the front
+page, /category/technology/ and a journal post after each step.
