@@ -43,7 +43,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P3-09 newsletter-form block with jetpack, mailto and none providers
 - [x] P3-10 Front-page patterns, rail, template and front CSS
 - [x] P3-11 Front-page fallback state tests (quiet, empty)
-- [ ] P3-12 Push and manual check (Phase 3)
+- [x] P3-12 Push and manual check (Phase 3)
 - [ ] P4-01 series-bar block
 - [ ] P4-02 series-toc block
 - [ ] P4-03 series-prev-next and syndicated-to blocks
@@ -306,3 +306,6 @@ Added the seven front patterns (lead-story, journal-rail, section-cell [header-l
 
 ### P3-11 — 87bde2d
 Added tests/integration/Fallbacks/FrontPageStatesTest.php covering F1/F2/F4/F6/F7/F9/F17/F18/F22/F25 against real seeder quiet/empty/normal states. Found and fixed a real Seeder bug: seed_posts() called wp_insert_post() with no post_category, so save_post_post (and Meta\PrimaryCategory::on_save()) fired and resolved "Uncategorized" as the primary category before the real categories were attached via the follow-up wp_set_post_categories() call (which doesn't refire save_post) — every seeded post's ttm_primary_category was stuck at Uncategorized, silently breaking every ttmPrimaryOnly query (section cells, journal rail, kicker/meta-line bindings) for seeded content. Fixed in Seeder.php by deleting the stale meta and re-running PrimaryCategory::on_save() right after wp_set_post_categories(). Full integration suite: 168 tests, 1 pre-existing skip, 0 failures.
+
+### P3-12 — b734618
+Pushed Phase 3 (build/2026-09-21, 84fe860..788781e) to origin. Manual check: NOT VERIFIED (human) -- http://localhost:8888/ vs prototype badge 2a at 1280 and 3a at 390: lead 44px with grayscale 16:9 image; rail verse box shows the seeded verse with the underlined dailymedtoday.com link; Technology spans 2 with a 3:2 image; Writing cell shows "The Quiet Ledger — Ch. 12"; series strip 3 rows; red poster; at 390 the nav scrolls horizontally and cells stack as zones.
