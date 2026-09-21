@@ -10,7 +10,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P0-05 Self-hosted Archivo fonts, theme enqueue and base CSS
 - [x] P0-06 theme.json v3 presets and token check
 - [x] P0-07 Push, CI and manual check (Phase 0)
-- [ ] P1-01 Series taxonomy, term meta, single-series enforcement
+- [x] P1-01 Series taxonomy, term meta, single-series enforcement
 - [ ] P1-02 Post meta registration and sanitizers
 - [ ] P1-03 Primary category, form derivation and word count on save
 - [ ] P1-04 Series index
@@ -123,3 +123,10 @@ scripts/check-theme-json.mjs rewritten: parses docs/_ds/modernist-.../styles.css
 Pushed build/2026-09-21 to origin (-u). Opened draft PR https://github.com/ericmann/ttmm_theme/pull/1 (base poc, title "poc: These Things Matter build"). CI run 35565102508 kicked off on push (in_progress at record time; not awaited). git log origin/build/2026-09-21 shows P0-01..P0-06 commits present.
 Push: done — origin/build/2026-09-21
 Manual check: NOT VERIFIED (human) — open http://localhost:8888/ after npx wp-env start: page renders in Archivo on #f3f2f2 with no request to fonts.googleapis.com or fonts.gstatic.com (DevTools Network); wp-admin shows no ttm-core/ttm-theme notice.
+
+### P1-01 — a9e9a2e
+Taxonomy\Series registered on 'post': hierarchical=false, public/show_in_rest/show_admin_column=true, rewrite slug=series/with_front=false, query_var=series. All 9 term-meta keys registered with typed sanitizers + REST schema (enum for status/form, array-of-object schema for purchase_links). enforce_single() hooks set_object_terms(10,6 args), keeps tt_ids[0] via wp_set_object_terms(...,false), static $enforcing guard prevents recursion.
+Pure sanitizers (unit-tested, no WP): sanitize_status/sanitize_form (enum fallback), sanitize_next_date (regex + checkdate), sanitize_cover_id (absint only). sanitize_cover_id_checked (the actual registered callback) wraps it with wp_attachment_is_image(). sanitize_purchase_links reads Config::get('series.max_purchase_links',6), drops non-http(s) urls after esc_url_raw, caps count.
+IMPORTANT for future integration tests: WP core's WP_UnitTestCase_Base::tear_down() calls unregister_all_meta_keys() after every single test (see /wordpress-phpunit/includes/abstract-testcase.php:225), wiping $wp_meta_keys globally — but taxonomies/post types are NOT wiped this way. Since the plugin registers everything via 'init' fired once at bootstrap, any test needing registered meta must re-fire it. Fixed generically: TTM_IntegrationTestCase::set_up() now calls do_action('init') before every test, re-invoking the still-attached init callbacks (register_taxonomy/register_meta are idempotent). All future modules that register meta on 'init' get this for free — no per-module test scaffolding needed.
+Plugin::modules() now [Compat\Theme::class, Taxonomy\Series::class].
+8 integration tests + 4 new unit tests pass (49 unit total); full verify green.
