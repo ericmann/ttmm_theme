@@ -11,6 +11,7 @@ namespace TTM\Core\Cli;
 
 use TTM\Core\Config;
 use TTM\Core\Support\Clock;
+use TTM\Core\Verse\Fetcher;
 
 /**
  * Seeds categories, pages, navigation, posts and images; idempotent by slug.
@@ -47,7 +48,7 @@ class Seeder {
 	 *
 	 * @return string
 	 */
-	private static function fixtures_root_dir(): string {
+	public static function fixtures_root_dir(): string {
 		$mapped = defined( 'WP_CONTENT_DIR' ) ? WP_CONTENT_DIR . '/ttm-fixtures' : '';
 		if ( $mapped && is_dir( $mapped ) ) {
 			return $mapped;
@@ -461,32 +462,22 @@ class Seeder {
 			return;
 		}
 
-		update_option( 'ttm_verse', self::map_verse_item( $items[0] ) );
-		update_option( 'ttm_verse_history', array_map( [ self::class, 'map_verse_item' ], array_slice( $items, 0, 6 ) ) );
+		update_option( 'ttm_verse', self::seed_verse_item( $items[0] ) );
+		update_option( 'ttm_verse_history', array_map( [ self::class, 'seed_verse_item' ], array_slice( $items, 0, 6 ) ) );
 	}
 
 	/**
-	 * Map one raw verse API item to the ttm_verse shape (SPEC Appendix A). P3-02's
-	 * Verse\Fetcher::parse() replaces this mapping; the seeder calls this single method
-	 * so that swap is one line.
+	 * Map one raw verse API item to the ttm_verse shape (SPEC Appendix A) via the same parsing
+	 * `Verse\Fetcher` uses, adding the `fetched_at` stamp `Fetcher::fetch()` would add.
 	 *
 	 * @param array<string, mixed> $item Raw API item.
 	 * @return array<string, mixed>
 	 */
-	public static function map_verse_item( array $item ): array {
-		$published    = Clock::at( $item['published_at'] );
-		$item_pattern = (string) Config::get( 'verse.item_url_pattern', 'https://dailymedtoday.com/meditation/%s' );
+	public static function seed_verse_item( array $item ): array {
+		$verse               = Fetcher::parse_item( $item );
+		$verse['fetched_at'] = Clock::now()->format( 'Y-m-d H:i:s' );
 
-		return [
-			'date'       => $published ? $published->format( 'Y-m-d' ) : '',
-			'text'       => $item['scripture_text'],
-			'reference'  => $item['scripture_reference'],
-			'title'      => $item['title'],
-			'url'        => sprintf( $item_pattern, $item['id'] ),
-			'source_id'  => $item['id'],
-			'copyright'  => $item['copyright_notice'],
-			'fetched_at' => Clock::now()->format( 'Y-m-d H:i:s' ),
-		];
+		return $verse;
 	}
 
 	/**

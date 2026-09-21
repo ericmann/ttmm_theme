@@ -44,6 +44,7 @@ class Plugin {
 			Fiction\Books::class,
 			Rest\SeriesController::class,
 			Rest\LeadController::class,
+			Rest\VerseController::class,
 			Cli\Loader::class,
 			Nav\CurrentSection::class,
 			Templates\Hierarchy::class,

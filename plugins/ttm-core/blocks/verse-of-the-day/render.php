@@ -36,10 +36,16 @@ if ( empty( $ttm_verse ) ) {
 	return '';
 }
 
-$ttm_verse_date  = Clock::at( $ttm_verse['date'] );
-$ttm_date_label  = $ttm_verse_date ? $ttm_verse_date->format( 'M j' ) : '';
-$ttm_url         = ! empty( $ttm_verse['url'] ) ? $ttm_verse['url'] : 'https://dailymedtoday.com/';
-$ttm_text        = wp_kses( Text::curly_quotes( $ttm_verse['text'] ?? '' ), [ 'em' => [], 'strong' => [] ] );
+$ttm_verse_date = Clock::at( $ttm_verse['date'] );
+$ttm_date_label = $ttm_verse_date ? $ttm_verse_date->format( 'M j' ) : '';
+$ttm_url        = ! empty( $ttm_verse['url'] ) ? $ttm_verse['url'] : 'https://dailymedtoday.com/';
+$ttm_text       = wp_kses(
+	Text::curly_quotes( $ttm_verse['text'] ?? '' ),
+	[
+		'em'     => [],
+		'strong' => [],
+	] 
+);
 
 $ttm_classes = [];
 if ( ! empty( $attributes['compact'] ) ) {
