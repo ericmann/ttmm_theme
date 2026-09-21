@@ -20,7 +20,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P1-08 Pre-publish checks and post list columns
 - [x] P1-09 Admin settings page and general settings
 - [x] P1-10 Books repeater
-- [ ] P1-11 REST series endpoints and lead stub
+- [x] P1-11 REST series endpoints and lead stub
 - [ ] P1-12 CLI recount, primary:assign, series:assign, series:rebuild
 - [ ] P1-13 Seeder core: categories, pages, navigation, posts, images
 - [ ] P1-14 Seeder fiction, verse, states and seed command; tuning series.max_purchase_links
@@ -192,3 +192,10 @@ Added Config key books.max=12 (ConfigTest updated). Plugin::modules() appends Fi
 Housekeeping: an incidental phpcbf run touched an unrelated already-committed file (tests/integration/Admin/GeneralSettingsTest.php, whitespace only); reverted that stray diff (git reset + checkout) rather than folding it into this task's commit, to keep HEAD's subject matching 'P1-10:' as required.
 4 new unit tests (58 total) + 2 new integration tests (44 total) pass; full verify green.
 Manual check: NOT VERIFIED (human) -- open Settings -> These Things Matter -> Books, add a row, save, confirm it persists.
+
+### P1-11 — 87a5a7d
+Rest\SeriesController: GET /ttm/v1/series (permission_callback __return_true, args status/form validated via enum against Taxonomy\Series::STATUSES/FORMS) and GET /ttm/v1/series/{slug} ([a-z0-9-]+). Rows included only when has_published_part(); public_row() filters parts to publish/future only, sets post_id=0 for future parts. Unknown slug -> WP_Error 404 ttm_not_found. Rest\LeadController: GET /ttm/v1/lead always returns WP_Error 404 ttm_lead_not_ready (P3-04 replaces get_item()).
+Plugin::modules() appends Rest\SeriesController, Rest\LeadController.
+Fixed two lint regressions found by a fresh phpcs pass against P1-09's Admin/Page.php and Admin/General.php (a stale local phpcs cache had hidden them): Page::handle_save()'s deliberate exit-omission (needed for direct PHPUnit callability) now has a justified phpcs:ignore for WordPressVIPMinimum.Security.ExitAfterRedirect.NoExit; General::save() got the same nonce-already-checked-upstream phpcs:disable/enable bracket used in Fiction\Books::save().
+52 integration tests pass (8 new); full verify green (composer lint, test:unit, npm lint/test:unit/build, forbidden-patterns, test:integration all confirmed green in this task).
+Manual check: none
