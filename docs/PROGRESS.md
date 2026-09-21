@@ -4,7 +4,7 @@ Started: 2026-09-21T19:10:39.166Z
 
 ## Tasks
 - [x] P0-01 CSS coverage lint script and allow-list
-- [ ] P0-02 Config keys for phase 2 and the fallback-literal test
+- [x] P0-02 Config keys for phase 2 and the fallback-literal test
 - [ ] P0-03 Boundaries table, CSS budget and SETUP note
 - [ ] P0-04 Fidelity and editors Playwright skeletons (all rows fixme)
 - [ ] P0-05 Screenshot script and phase-2 feedback folder
@@ -51,3 +51,10 @@ CSS scan: ttm.css + style.css.
 Allow-list: exactly the 7 lines specified in the task; current repo state has 0 missing/0 dead beyond it. `node scripts/check-css-coverage.mjs` prints "156 markup classes, 111 css classes, 7 allow-listed" and exits 0.
 Tests: scripts/test/check-css-coverage.test.js — class attr/className-json/wrapper() collection, is-state/prefix-literal exclusion, CSS class collection, glob brace/star matching, allow-list parsing (blank/comment skip), report missing/dead after allow, allowCount>=10 fails.
 npm run lint, npm run test:unit, composer lint, composer test:unit, npm run build, forbidden-patterns.sh all green (foundry_verify).
+
+### P0-02 — eea4274
+Added nav.front_current='lead', journal.excerpt_max_words=55, verse.copyright_placement='footer', newsletter.dev_accept=true to Config::defaults(); one-line comments added to cells.stale_count, writing.tile_columns, sections.technology_slug, and the four new keys. cells.thin_days was already absent (removed in an earlier flight) — confirmed via grep, nothing to remove.
+tests/unit/ConfigFallbacksTest.php (new): scans plugins/ttm-core/src/**/*.php + blocks/*/render.php for single-line `Config::get( 'key', <literal> )`; decodes string/int/float/bool literals, skips `[]` (key-existence only) and non-literal args (variables); asserts every referenced key exists in defaults() and every literal `==` its default.
+This surfaced a real bug: Verse/Fetcher.php's verse.user_agent fallback was 'TTM-Core/{version}' vs default 'TTM-Core/{version} (+https://eric.mann.blog)' — fixed the fallback literal to match (file added to Files touched beyond the task list, since the new acceptance test can't pass otherwise).
+ConfigTest.php's expected-keys list updated with the four new keys.
+Verified: composer test:unit (133/133), composer lint (0 errors), npm run lint, npm run test:unit, npm run build, forbidden-patterns, npm run test:integration (374/374) all green. grep -rn thin_days plugins tests: empty.
