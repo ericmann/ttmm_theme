@@ -39,7 +39,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P3-05 Bindings kicker, meta-line, short-date, relative-date, category-count, today; journal excerpt
 - [x] P3-06 lead-story block
 - [x] P3-07 series-list block
-- [ ] P3-08 Serials query and writing-cell block
+- [x] P3-08 Serials query and writing-cell block
 - [ ] P3-09 newsletter-form block with jetpack, mailto and none providers
 - [ ] P3-10 Front-page patterns, rail, template and front CSS
 - [ ] P3-11 Front-page fallback state tests (quiet, empty)
@@ -294,3 +294,6 @@ Added the ttm/lead-story block: resolves Query\Lead::compute(), renders nothing 
 
 ### P3-07 — dc8d316
 Added the ttm/series-list block: filters SeriesIndex::all() by status/form/inCategory (queried-object category term), F4 fallback from in-progress to complete (adds is-complete + data-ttm-empty-heading="Series" on the wrapper) when the requested status yields nothing but other series exist; returns '' only when the index itself is empty or the fallback also yields nothing. Sorts by updated (last_update desc)/title/started (first part date asc), slices to limit (falls back to Config's series.strip_limit when 0). Each row is one whole-row <a> (mark, title, optional dek from the term's description, optional categories line in nav order, optional right-column count "N of M"/"N parts" over the status word — open-endedness read from ttm_total_parts term meta directly, same pattern as P3-05/06). Filtering/sorting logic is kept in local closures rather than named functions, since render.php is require()'d fresh on every render within a request and a named top-level function/class would fatal on a second render of the same block on one page. Full integration suite: 141 tests, 1 pre-existing skip, 0 failures.
+
+### P3-08 — e17cc4e
+Added Fiction\Serials (pure static readers, no hooks/registration): active() picks the newest in-progress fiction row (form !== nonfiction) from SeriesIndex; completed(); has_any_fiction() gates F2; latest_chapter()/first_chapter_url() over a row's parts; stats() computes published/total (open-ended via ttm_total_parts meta, same pattern as P3-05/06/07), cadence/next_date term meta, and avg_minutes (mean ttm_word_count of published chapters / reading.words_per_minute); stories() is one bounded WP_Query on meta ttm_form=story. Added ttm/writing-cell: 'active' mode (featured chapter with kicker/headline/dek/buttons + "also running" list of other completed serials/stories, limited by alsoRunningLimit) when an in-progress serial with a published chapter exists; F1 'shelf' mode (kicker "From the shelf", same list, no buttons, footnote) when there's other fiction but nothing active, or when previewState=thin forces it; F2 'plain' mode (1 featured + 2 headlines from the Writing category, ttm-item classes) when there is no fiction at all. Confirmed in WritingCellTest that a genuine F2 state requires ttm_form_locked, since Meta\Form::on_save() already auto-derives ttm_form=story for any untouched Writing post with no series. Full integration suite: 149 tests, 1 pre-existing skip, 0 failures.
