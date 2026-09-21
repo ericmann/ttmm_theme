@@ -25,7 +25,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P1-13 Seeder core: categories, pages, navigation, posts, images
 - [x] P1-14 Seeder fiction, verse, states and seed command; tuning series.max_purchase_links
 - [x] P1-15 Push and manual check (Phase 1)
-- [ ] P2-01 Block styles, pattern categories, image sizes
+- [x] P2-01 Block styles, pattern categories, image sizes
 - [ ] P2-02 ttm.css foundation: bridge, grids, rules, type utilities, buttons, tags, inputs, body typography
 - [ ] P2-03 ttm.css chrome, nav.js, editor.css; CSS budget tuning
 - [ ] P2-04 Block variations and starter content
@@ -226,3 +226,9 @@ Manual check: NOT VERIFIED (human) -- open /wp-admin and browse the seeded serie
 Pushed build/2026-09-21 to origin (52754b0..8365879, then this empty commit). No source changes.
 Push: done -- origin/build/2026-09-21
 Manual check: NOT VERIFIED (human) -- after npm run env:seed: /wp-admin/post.php?post=<a seeded chapter id>&action=edit shows the "These Things Matter" sidebar with series, part "12 of 31", form Chapter; Pre-publish panel warns when the excerpt is cleared; /wp-admin/term.php?taxonomy=series&tag_ID=<the-quiet-ledger> shows all fields and the ordered part list; Settings -> These Things Matter has General and Books tabs; Posts list shows Primary section / Series / Words columns.
+
+### P2-01 — 3aaef0b
+block_styles() is a literal array of every {block,name,label} pair from 04 §3 (61 entries; multi-block rows like image/post-featured-image and buttons/button expanded per block; multi-slug cells like grid-8-4/grid-3-7-2/etc expanded per slug) — written as a literal, not generated with a variable label, because __($variable, domain) fails PHPCS's WordPress.WP.I18n.NonSingularStringLiteralText sniff. register_block_styles() hooks init, calls register_block_style() per entry (name/label/is_default only; no inline_style, CSS lives in ttm.css per P2-02/P2-03). primary buttons/button styles get is_default=true.
+patterns.php registers the 5 pattern categories (ttm-front/article/lists/fiction/marketing) on init. image-sizes.php: local literal sizes array (ttm-lead 1600x900, ttm-thumb 800x533, ttm-cover 600x900, ttm-tile 800x600, all hard crop) filtered through apply_filters('ttm_image_sizes', ...) per Decisions — theme never reads plugin Config, keeps its own copy. functions.php requires all three new inc/ files.
+tests/unit/Theme/fixtures/block-styles.php lists every block:name pair for set-equality against block_styles(). 61/61 unit tests pass (3 new); full verify green.
+Manual check: none
