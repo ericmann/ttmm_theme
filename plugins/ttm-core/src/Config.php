@@ -71,6 +71,7 @@ class Config {
 			'journal.relative_day_window'  => 6,
 
 			'series.strip_limit'           => 3,
+			'series.index_batch'           => 500,
 			'series.max_purchase_links'    => 6,
 			'series.hub_featured_parts'    => 12,
 			'writing.also_running_limit'   => 3,

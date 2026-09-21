@@ -34,6 +34,7 @@ class Plugin {
 			Meta\PrimaryCategory::class,
 			Meta\Form::class,
 			Meta\WordCount::class,
+			Query\SeriesIndex::class,
 		];
 	}
 
