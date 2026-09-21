@@ -67,7 +67,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P7-03 Newsletter handler, custom-url provider, settings
 - [x] P7-04 Jetpack unconnected-render check (assumption) and seed provider
 - [x] P7-05 Cache tuning: verse_boundary_hour, max_age_cap, min_age
-- [ ] P7-06 Newsletter tuning: token_ttl, rate limits
+- [x] P7-06 Newsletter tuning: token_ttl, rate limits
 - [ ] P7-07 Static audit: extend forbidden-patterns, run, fix
 - [ ] P7-08 Separability tests (theme without plugin, plugin with default theme)
 - [ ] P7-09 Push and manual check (Phase 7)
@@ -396,3 +396,7 @@ Full verify green: composer lint 0 errors, 109/109 unit, npm lint/build green, f
 ### P7-05 — 315cdc9
 Measurement table across a full day (America/Los_Angeles): computed ceiling is 64800s at exactly 06:00, well under the 86400s cap (cap never actually binds under this schedule, exists as a safety ceiling only). A page cached at 05:59 expires at 06:00 (after the 05:00 verse fetch). If the 05:00 fetch fails, staleness during 06:00-07:00 is actually bounded by Verse\Fetcher's ttm_purge_urls firing on a successful 07:00 retry (P7-02), not by the boundary math. newsletter.token_ttl (86400) >= cache.max_age_cap_seconds (86400): equal, holds. No Config.php changes made — all three defaults verified adequate.
 3 acceptance tests added (HeadersTuningTest). Full verify green: composer lint 0 errors, 112/112 unit, npm lint/build green, forbidden-patterns clean.
+
+### P7-06 — 7863560
+Measurement: worst-case token age (page generated 1s before a token_ttl boundary, cached the full max_age_cap_seconds) lands the token exactly at Handler::token_valid()'s "previous window" acceptance boundary with zero slack — confirms P7-05's finding that token_ttl must be >= max_age_cap_seconds. 20 submissions from one IP in 600s yield exactly 5 forwards (rate_limit_per_ip), rest silently dropped; window reset allows forwarding again. Shared-NAT reasoning: 5 per 10 minutes is generous for legitimate household bursts while still an effective bot deterrent for a low-traffic weekly form. All three defaults hold; no Config.php changes.
+3 acceptance tests added. Full verify green: composer lint 0 errors, 115/115 unit, npm lint/build green, forbidden-patterns clean.
