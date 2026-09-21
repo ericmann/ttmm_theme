@@ -75,14 +75,18 @@ class Sidebar {
 			}
 		}
 
-		$journal = get_term_by( 'slug', (string) Config::get( 'sections.journal_slug', 'journal' ), 'category' );
-		$writing = get_term_by( 'slug', (string) Config::get( 'sections.writing_slug', 'writing' ), 'category' );
+		$journal   = get_term_by( 'slug', (string) Config::get( 'sections.journal_slug', 'journal' ), 'category' );
+		$writing   = get_term_by( 'slug', (string) Config::get( 'sections.writing_slug', 'writing' ), 'category' );
+		$most_read = Checks::most_read();
 
 		return [
-			'sections'    => $sections,
-			'journalId'   => $journal && ! is_wp_error( $journal ) ? $journal->term_id : 0,
-			'writingId'   => $writing && ! is_wp_error( $writing ) ? $writing->term_id : 0,
-			'seriesForms' => [],
+			'sections'       => $sections,
+			'journalId'      => $journal && ! is_wp_error( $journal ) ? $journal->term_id : 0,
+			'writingId'      => $writing && ! is_wp_error( $writing ) ? $writing->term_id : 0,
+			'seriesForms'    => [],
+			'seriesParts'    => Checks::series_parts(),
+			'mostReadCounts' => $most_read['counts'],
+			'mostReadLimit'  => $most_read['limit'],
 		];
 	}
 }

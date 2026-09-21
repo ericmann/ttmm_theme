@@ -38,6 +38,7 @@ class Plugin {
 			Query\SeriesIndex::class,
 			Query\Stats::class,
 			Editor\Sidebar::class,
+			Editor\Columns::class,
 		];
 	}
 
