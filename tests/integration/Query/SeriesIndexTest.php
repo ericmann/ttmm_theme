@@ -147,13 +147,86 @@ class SeriesIndexTest extends TTM_IntegrationTestCase {
 		$this->assertSame( 'Filtered', $rows[0]['name'] );
 	}
 
-	public function test_delete_series_term_removes_row(): void {
+	public function test_last_update_is_latest_published_part_date_and_stable_across_rebuilds(): void {
+		$series = self::factory()->term->create( [ 'taxonomy' => 'series' ] );
+
+		$p1 = self::factory()->post->create(
+			[
+				'post_status' => 'publish',
+				'post_date'   => '2026-01-01 09:00:00',
+			]
+		);
+		update_post_meta( $p1, 'ttm_series_part', 1 );
+		wp_set_object_terms( $p1, [ $series ], 'series' );
+
+		$p2 = self::factory()->post->create(
+			[
+				'post_status' => 'publish',
+				'post_date'   => '2026-03-01 09:00:00',
+			]
+		);
+		update_post_meta( $p2, 'ttm_series_part', 2 );
+		wp_set_object_terms( $p2, [ $series ], 'series' );
+
+		$this->flush();
+		$row = SeriesIndex::get( $series );
+		$this->assertSame( '2026-03-01 09:00:00', $row['last_update'] );
+
+		// A second rebuild with no new parts must not change last_update -- previously it
+		// stamped Clock::now() on every rebuild, so "sorted by update" was meaningless.
+		$this->flush();
+		$row_again = SeriesIndex::get( $series );
+		$this->assertSame( '2026-03-01 09:00:00', $row_again['last_update'] );
+	}
+
+	public function test_last_update_falls_back_to_newest_part_of_any_status_when_none_published(): void {
+		$series = self::factory()->term->create( [ 'taxonomy' => 'series' ] );
+
+		$p1 = self::factory()->post->create(
+			[
+				'post_status' => 'draft',
+				'post_date'   => '2026-02-01 09:00:00',
+			]
+		);
+		update_post_meta( $p1, 'ttm_series_part', 1 );
+		wp_set_object_terms( $p1, [ $series ], 'series' );
+
+		$this->flush();
+		$row = SeriesIndex::get( $series );
+
+		$this->assertSame( '2026-02-01 09:00:00', $row['last_update'] );
+	}
+
+	public function test_publish_schedules_rebuild_on_shutdown(): void {
+		$series = self::factory()->term->create( [ 'taxonomy' => 'series' ] );
+
+		$p1 = self::factory()->post->create( [ 'post_status' => 'draft' ] );
+		update_post_meta( $p1, 'ttm_series_part', 1 );
+		wp_set_object_terms( $p1, [ $series ], 'series' );
+
+		// Publishing (rather than calling rebuild() directly) is what actually schedules the
+		// rebuild, via the registered save_post_post/transition_post_status hooks.
+		wp_publish_post( $p1 );
+
+		$this->assertNotFalse( has_action( 'shutdown', [ SeriesIndex::class, 'maybe_rebuild' ] ) );
+
+		SeriesIndex::maybe_rebuild();
+
+		$row = SeriesIndex::get( $series );
+		$this->assertNotNull( $row );
+		$this->assertSame( 1, $row['published'] );
+	}
+
+	public function test_delete_series_term_schedules_rebuild(): void {
 		$series = self::factory()->term->create( [ 'taxonomy' => 'series' ] );
 		$this->flush();
 		$this->assertNotNull( SeriesIndex::get( $series ) );
 
 		wp_delete_term( $series, 'series' );
-		$this->flush();
+
+		$this->assertNotFalse( has_action( 'shutdown', [ SeriesIndex::class, 'maybe_rebuild' ] ) );
+
+		SeriesIndex::maybe_rebuild();
 
 		$this->assertNull( SeriesIndex::get( $series ) );
 	}

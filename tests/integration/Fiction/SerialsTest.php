@@ -23,7 +23,13 @@ class SerialsTest extends TTM_IntegrationTestCase {
 		return (int) $created['term_id'];
 	}
 
-	private function make_serial( string $slug, string $name, string $form, string $status, int $writing_id, int $chapters ): int {
+	/**
+	 * @param string $latest_chapter_date The last chapter's post_date (SeriesIndex's
+	 *                                    `last_update` is the newest published part's
+	 *                                    post_date, per R1-03); earlier chapters get a fixed
+	 *                                    older date so it doesn't affect the result.
+	 */
+	private function make_serial( string $slug, string $name, string $form, string $status, int $writing_id, int $chapters, string $latest_chapter_date = '2026-01-01 09:00:00' ): int {
 		$term      = wp_insert_term( $name, 'series', [ 'slug' => $slug ] );
 		$series_id = (int) $term['term_id'];
 		update_term_meta( $series_id, 'ttm_form', $form );
@@ -34,6 +40,7 @@ class SerialsTest extends TTM_IntegrationTestCase {
 				[
 					'post_status'   => 'publish',
 					'post_category' => [ $writing_id ],
+					'post_date'     => $i === $chapters ? $latest_chapter_date : '2020-01-01 09:00:00',
 				]
 			);
 			update_post_meta( $post_id, 'ttm_series_part', $i );
@@ -47,24 +54,11 @@ class SerialsTest extends TTM_IntegrationTestCase {
 		return $series_id;
 	}
 
-	private function set_last_update( int $series_id, string $when ): void {
-		$rows = SeriesIndex::all();
-		foreach ( $rows as $key => $row ) {
-			if ( (int) $row['id'] === $series_id ) {
-				$rows[ $key ]['last_update'] = $when;
-			}
-		}
-		update_option( 'ttm_series_index', $rows );
-	}
-
 	public function test_active_is_newest_in_progress_fiction(): void {
 		$writing = $this->category_id( 'writing', 'Writing' );
 
-		$older = $this->make_serial( 'older-novel', 'Older Novel', 'novel', 'in-progress', $writing, 2 );
-		$newer = $this->make_serial( 'newer-novel', 'Newer Novel', 'novel', 'in-progress', $writing, 2 );
-
-		$this->set_last_update( $older, '2026-09-01 00:00:00' );
-		$this->set_last_update( $newer, '2026-09-20 00:00:00' );
+		$this->make_serial( 'older-novel', 'Older Novel', 'novel', 'in-progress', $writing, 2, '2026-09-01 00:00:00' );
+		$newer = $this->make_serial( 'newer-novel', 'Newer Novel', 'novel', 'in-progress', $writing, 2, '2026-09-20 00:00:00' );
 
 		$active = Serials::active();
 

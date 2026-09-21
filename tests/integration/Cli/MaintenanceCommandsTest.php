@@ -130,6 +130,35 @@ class MaintenanceCommandsTest extends TTM_IntegrationTestCase {
 		$this->assertSame( 'complete', get_term_meta( $term->term_id, 'ttm_status', true ) );
 	}
 
+	public function test_series_assign_with_fiction_form_derives_chapter_on_posts(): void {
+		wp_insert_term( 'novel-tag', 'post_tag', [ 'slug' => 'novel-tag' ] );
+
+		$p1 = self::factory()->post->create(
+			[
+				'tags_input' => [ 'novel-tag' ],
+				'post_date'  => '2024-01-01 00:00:00',
+			]
+		);
+		$p2 = self::factory()->post->create(
+			[
+				'tags_input' => [ 'novel-tag' ],
+				'post_date'  => '2024-02-01 00:00:00',
+			]
+		);
+
+		$result = ( new SeriesCommand() )->run(
+			[ 'a-novel' ],
+			[
+				'from-tag' => 'novel-tag',
+				'form'     => 'novel',
+			] 
+		);
+
+		$this->assertTrue( $result['ok'] );
+		$this->assertSame( 'chapter', get_post_meta( $p1, 'ttm_form', true ) );
+		$this->assertSame( 'chapter', get_post_meta( $p2, 'ttm_form', true ) );
+	}
+
 	public function test_series_rebuild_refreshes_option(): void {
 		self::factory()->term->create( [ 'taxonomy' => 'series' ] );
 

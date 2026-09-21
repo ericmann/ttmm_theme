@@ -23,11 +23,14 @@ class SeriesListTest extends TTM_IntegrationTestCase {
 	}
 
 	/**
-	 * Create a series term with one published part, and rebuild the index.
+	 * Create a series term with one published part dated `$part_date` (SeriesIndex's
+	 * `last_update` is now the newest published part's post_date, per R1-03 -- a distinct
+	 * date per series is what gives each row a distinct, stable `last_update`), and rebuild
+	 * the index.
 	 *
 	 * @return int Series term id.
 	 */
-	private function make_series( string $slug, string $name, string $status, string $form, int $category_id ): int {
+	private function make_series( string $slug, string $name, string $status, string $form, int $category_id, string $part_date = '2026-01-01 09:00:00' ): int {
 		$term      = wp_insert_term( $name, 'series', [ 'slug' => $slug ] );
 		$series_id = (int) $term['term_id'];
 		update_term_meta( $series_id, 'ttm_status', $status );
@@ -37,6 +40,7 @@ class SeriesListTest extends TTM_IntegrationTestCase {
 			[
 				'post_status'   => 'publish',
 				'post_category' => [ $category_id ],
+				'post_date'     => $part_date,
 			]
 		);
 		update_post_meta( $post_id, 'ttm_series_part', 1 );
@@ -48,20 +52,6 @@ class SeriesListTest extends TTM_IntegrationTestCase {
 		return $series_id;
 	}
 
-	/**
-	 * Force a distinct `last_update` for one row (SeriesIndex::build_row() always stamps
-	 * Clock::now() at rebuild time, so rows built in the same rebuild tie; set it directly).
-	 */
-	private function set_last_update( int $series_id, string $when ): void {
-		$rows = SeriesIndex::all();
-		foreach ( $rows as $key => $row ) {
-			if ( (int) $row['id'] === $series_id ) {
-				$rows[ $key ]['last_update'] = $when;
-			}
-		}
-		update_option( 'ttm_series_index', $rows );
-	}
-
 	private function render( array $attributes = [] ): string {
 		$json = empty( $attributes ) ? '' : ' ' . wp_json_encode( $attributes );
 
@@ -71,13 +61,9 @@ class SeriesListTest extends TTM_IntegrationTestCase {
 	public function test_lists_in_progress_series_limited_and_sorted_by_update(): void {
 		$tech = $this->category_id( 'technology', 'Technology' );
 
-		$a = $this->make_series( 'series-a', 'Series A', 'in-progress', 'nonfiction', $tech );
-		$b = $this->make_series( 'series-b', 'Series B', 'in-progress', 'nonfiction', $tech );
-		$c = $this->make_series( 'series-c', 'Series C', 'in-progress', 'nonfiction', $tech );
-
-		$this->set_last_update( $a, '2026-09-01 00:00:00' );
-		$this->set_last_update( $b, '2026-09-20 00:00:00' );
-		$this->set_last_update( $c, '2026-09-10 00:00:00' );
+		$this->make_series( 'series-a', 'Series A', 'in-progress', 'nonfiction', $tech, '2026-09-01 00:00:00' );
+		$this->make_series( 'series-b', 'Series B', 'in-progress', 'nonfiction', $tech, '2026-09-20 00:00:00' );
+		$this->make_series( 'series-c', 'Series C', 'in-progress', 'nonfiction', $tech, '2026-09-10 00:00:00' );
 
 		$html = $this->render( [ 'limit' => 2 ] );
 

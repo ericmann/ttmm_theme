@@ -131,7 +131,7 @@ class SeriesIndex {
 			'published'      => $published,
 			'total'          => $term_total > 0 ? $term_total : $published,
 			'categories'     => self::categories_for( $parts ),
-			'last_update'    => Clock::now()->format( 'Y-m-d H:i:s' ),
+			'last_update'    => self::last_update_for( $parts ),
 			'next_date'      => get_term_meta( $term->term_id, 'ttm_next_date', true ),
 			'first_post_id'  => $parts[0]['post_id'] ?? 0,
 			'latest_post_id' => end( $parts )['post_id'] ?? 0,
@@ -221,6 +221,30 @@ class SeriesIndex {
 		}
 
 		return array_values( array_merge( $sorted, array_values( $by_slug ) ) );
+	}
+
+	/**
+	 * The newest published part's `post_date`, so `last_update` is stable across rebuilds
+	 * (R1-03: previously stamped `Clock::now()` on every rebuild, which made "sorted by
+	 * update" meaningless -- every row tied at the current rebuild's timestamp). A series
+	 * with no published part yet uses its newest part of any status; a series with no parts
+	 * at all falls back to now.
+	 *
+	 * @param array<int, array<string, mixed>> $parts Parts.
+	 * @return string
+	 */
+	private static function last_update_for( array $parts ): string {
+		$published = array_filter( $parts, static fn ( array $part ): bool => 'publish' === $part['status'] );
+		$pool      = ! empty( $published ) ? $published : $parts;
+
+		if ( empty( $pool ) ) {
+			return Clock::now()->format( 'Y-m-d H:i:s' );
+		}
+
+		$dates = array_column( $pool, 'date' );
+		sort( $dates );
+
+		return (string) end( $dates );
 	}
 
 	/**

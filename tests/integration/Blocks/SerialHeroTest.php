@@ -156,6 +156,48 @@ class SerialHeroTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'Complete', $html );
 	}
 
+	public function test_f3_picks_most_recently_completed_of_two(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+
+		$this->make_serial(
+			'older-completed',
+			'Older Completed',
+			2,
+			[
+				[
+					'part' => 1,
+					'date' => '2025-01-01 09:00:00',
+				],
+				[
+					'part' => 2,
+					'date' => '2025-02-01 09:00:00',
+				],
+			],
+			[ 'ttm_status' => 'complete' ]
+		);
+		$this->make_serial(
+			'newer-completed',
+			'Newer Completed',
+			2,
+			[
+				[
+					'part' => 1,
+					'date' => '2026-06-01 09:00:00',
+				],
+				[
+					'part' => 2,
+					'date' => '2026-07-01 09:00:00',
+				],
+			],
+			[ 'ttm_status' => 'complete' ]
+		);
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'Newer Completed', $html );
+		$this->assertStringNotContainsString( 'Older Completed', $html );
+	}
+
 	public function test_f21_no_cover_adds_is_nocover_and_no_figure(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
 		$this->make_serial(

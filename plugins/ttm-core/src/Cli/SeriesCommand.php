@@ -11,6 +11,7 @@ declare( strict_types=1 );
 namespace TTM\Core\Cli;
 
 use TTM\Core\Config;
+use TTM\Core\Meta\Form;
 use TTM\Core\Query\SeriesIndex;
 use TTM\Core\Support\Clock;
 use TTM\Core\Support\Dates;
@@ -86,20 +87,30 @@ class SeriesCommand extends Command {
 			$term_id = (int) $term->term_id;
 		}
 
+		if ( $form ) {
+			update_term_meta( $term_id, 'ttm_form', $form );
+		}
+
 		$part = 1;
 		$out  = [];
 		foreach ( $rows as $post_id ) {
 			wp_set_object_terms( $post_id, [ $term_id ], 'series' );
 			update_post_meta( $post_id, 'ttm_series_part', $part );
+
+			// The series' `ttm_form` is set above (before this loop) precisely so that
+			// Meta\Form::on_save() -- which reads the post's *current* series term meta --
+			// derives 'chapter' for a fiction series right away, instead of waiting for the
+			// next unrelated save_post_post fire.
+			$post = get_post( $post_id );
+			if ( $post ) {
+				Form::on_save( $post_id, $post );
+			}
+
 			$out[] = [
 				'post_id' => $post_id,
 				'part'    => $part,
 			];
 			++$part;
-		}
-
-		if ( $form ) {
-			update_term_meta( $term_id, 'ttm_form', $form );
 		}
 
 		if ( ! empty( $rows ) ) {
