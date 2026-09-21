@@ -90,7 +90,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] R1-09 Theme CSS and templates: honeypot rule, nested landmarks, CSS budget reconciled
 - [x] R1-10 REST /series ?form=fiction filter per 05 §3
 - [x] R1-11 Nav current-section on series pages
-- [ ] R1-12 ttm/syndicated-to wrapper and escaping
+- [x] R1-12 ttm/syndicated-to wrapper and escaping
 - [ ] R1-13 Test gaps: binding empty values, separability non-empty blocks, permanent skip
 - [ ] R1-14 i18n: masthead labels from term names, Books row label, book-grid form caption, feed title
 - [ ] R1-15 Docs alignment: CLAUDE.md rule 16 file and module map, DEPLOYMENT real-IP, convert-classic report field
@@ -788,3 +788,26 @@ archive link).
 
 Verified via foundry_verify: composer lint/test:unit, npm lint/test:unit/build,
 forbidden-patterns.sh, npm run test:integration (364, +1, all green).
+
+### R1-12 — 05d76f1
+render.php: wrapper changed from `<p Helpers::wrapper('syndication')>...` to
+`<div Helpers::wrapper('syndication')><p>...</p></div>` (SPEC §6.1: div.ttm-syndication +
+data-ttm-block, inner p). The "Syndicated to %s" sentence (built from __() + Html::link()'d
+network names) is now passed through wp_kses(['a' => ['href' => []]]) before echoing, instead
+of being printf'd raw with an escape-suppression comment that only trusted the translator text
+-- a hostile gettext-filtered translation can no longer inject markup beyond a plain link.
+
+themes/ttm-theme/assets/css/ttm.css: 01 §4.13 specifies this component's own CSS (flex, 1px
+rule above, 14px top padding, 28px margin-top, 13px/neutral-700 text, accent-700 links) that
+ttm.css never actually had; added it (with a stylelint-disable-next-line for the same
+descending-specificity warning three other components already carry). cssBudgetBytes raised
+33000 -> 33200 to fit the addition; CLAUDE.md's constraint line updated to match.
+
+New tests: test_wrapper_is_div_with_data_ttm_block (regex-asserts the outer element is a div
+with the wrapper class + data-ttm-block, and a <p> follows); test_sentence_is_kses_filtered
+(gettext filter appends <script>alert(1)</script> to the translation; asserts no <script> tag
+survives -- wp_kses may still leave the inner text as harmless plain text, so only the tag
+itself is asserted absent).
+
+Verified via foundry_verify: composer lint/test:unit, npm lint/test:unit/build,
+forbidden-patterns.sh, npm run test:integration (366, +2, all green).
