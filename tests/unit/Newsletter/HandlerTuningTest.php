@@ -52,6 +52,9 @@ class HandlerTuningTest extends TestCase {
 			}
 		);
 		Functions\when( 'do_action' )->justReturn( null );
+		// Production so `CustomUrl::dev_accept_applies()` never suppresses the forwarder these
+		// tuning tests measure (see P1-06).
+		Functions\when( 'wp_get_environment_type' )->justReturn( 'production' );
 
 		Functions\when( 'get_transient' )->alias( fn ( string $key ) => $this->transients[ $key ] ?? false );
 		Functions\when( 'set_transient' )->alias(

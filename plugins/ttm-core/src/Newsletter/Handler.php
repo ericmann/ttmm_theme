@@ -104,9 +104,14 @@ class Handler {
 			return self::success_url( $target );
 		}
 
-		self::forward( $email );
+		// SPEC §6.3 "New": an empty endpoint with dev_accept applying accepts locally -- no
+		// forward, no log, just the same success redirect (this is what `wp ttm seed` configures
+		// so the dev poster submits a real form outside production).
+		if ( ! Provider\CustomUrl::dev_accept_applies() ) {
+			self::forward( $email );
 
-		do_action( 'ttm_newsletter_subscribed', hash( 'sha256', strtolower( $email ) ), 'custom-url' );
+			do_action( 'ttm_newsletter_subscribed', hash( 'sha256', strtolower( $email ) ), 'custom-url' );
+		}
 
 		return self::success_url( $target );
 	}

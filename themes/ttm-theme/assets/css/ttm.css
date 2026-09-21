@@ -875,28 +875,16 @@ blockquote.is-style-pull cite,
 	color: var(--wp--preset--color--neutral-800);
 }
 
-.ttm-newsletter-form {
+/* The email `.input` and submit `.btn`/`.btn-ghost`/`.btn-primary` classes already style
+ * themselves (§4.32 input, §4.30 buttons); this only owns the row layout. */
+.ttm-newsletter-form__form {
 	display: flex;
-	gap: var(--wp--preset--spacing--20);
+	align-items: center;
+	gap: 8px;
 }
 
-.ttm-newsletter-form input,
-.ttm-newsletter-form .wp-block-jetpack-subscriptions input[type="email"] {
-	border: var(--ttm-rule-1);
-	background: var(--wp--preset--color--bg);
-	font-size: var(--wp--preset--font-size--body-s);
-	padding: 8px 10px;
-	border-radius: 0;
-}
-
-.ttm-newsletter-form button,
-.ttm-newsletter-form .wp-block-jetpack-subscriptions button {
-	background: var(--wp--preset--color--accent);
-	color: var(--wp--preset--color--bg);
-	border: 0;
-	font-weight: 800;
-	padding: 8px 14px;
-	border-radius: 0;
+.ttm-newsletter-form__statement {
+	font-size: var(--wp--preset--font-size--caption);
 }
 
 .ttm-newsletter-form[data-state="subscribed"] form {
@@ -913,7 +901,7 @@ blockquote.is-style-pull cite,
 
 @media (max-width: 720px) {
 
-	.ttm-newsletter-form {
+	.ttm-newsletter-form__form {
 		flex-direction: column;
 	}
 }
@@ -926,6 +914,17 @@ blockquote.is-style-pull cite,
 	grid-template-columns: 1fr auto;
 	align-items: end;
 	gap: var(--wp--preset--spacing--60);
+}
+
+/* 01 §2.1's poster-ghost exception: no flat text colour on the accent poster background clears
+ * WCAG AA at 14px (the ghost button's usual transparent-bg/accent-700-text treatment measures
+ * well under 4.5:1 against `--color-accent`, confirmed via axe) -- a solid light pill, same
+ * text/bg pairing the rest of the site already relies on, is the one exception. Full poster
+ * layout/typography is P1-10's job; this is only the button's colour scheme. */
+.ttm-poster .btn-ghost {
+	background: var(--wp--preset--color--bg);
+	color: var(--wp--preset--color--text);
+	border: 0;
 }
 
 @media (max-width: 720px) {

@@ -62,6 +62,15 @@ class SeedStatesTest extends TTM_IntegrationTestCase {
 		}
 	}
 
+	public function test_seed_configures_custom_url_dev_accept(): void {
+		( new Seeder() )->run( 'normal' );
+
+		$html = (string) do_blocks( '<!-- wp:ttm/newsletter-form /-->' );
+
+		$this->assertStringContainsString( 'data-provider="custom-url"', $html );
+		$this->assertStringContainsString( '<form', $html );
+	}
+
 	public function test_seed_refuses_on_production(): void {
 		$this->assertFalse( SeedCommand::allowed( 'production' ) );
 		$this->assertTrue( SeedCommand::allowed( 'local' ) );

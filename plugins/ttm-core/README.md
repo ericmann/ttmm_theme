@@ -23,8 +23,12 @@ for how it was built; this file documents the plugin as it actually ships.
 - **Cache:** `Cache/Headers.php` (computed `Cache-Control`), `Cache/Batcache.php`,
   `Cache/Purge.php`/`Cache/Cloudflare.php` (the `ttm_purge_urls` action and its Cloudflare
   adapter).
-- **Newsletter:** the stateless-token form handler and pluggable providers (Jetpack, MailPoet,
-  custom URL).
+- **Newsletter:** the stateless-token form handler and pluggable providers (Jetpack, mailto,
+  custom URL). Every provider except `none` renders through `Newsletter\Form::render()`, the
+  one `.ttm-newsletter-form__form` markup shape (SPEC §6.3). `custom-url` accepts submissions
+  locally (no forward, no log) whenever `newsletter.endpoint` is empty, `newsletter.dev_accept`
+  is true, and the site isn't in production — this is what `wp ttm seed` configures, so the dev
+  poster shows and submits a real form without a real endpoint configured.
 - **Cron/fetch:** the daily verse fetch (`Verse\Fetcher`), the only scheduled outbound request.
 - **Migration/maintenance:** every `wp ttm …` command below.
 

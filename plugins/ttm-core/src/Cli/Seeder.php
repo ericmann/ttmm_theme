@@ -122,7 +122,7 @@ class Seeder {
 		$series     = 'empty' === $state ? [] : $this->seed_series();
 		$books      = 'empty' === $state ? [] : $this->seed_books();
 		$this->seed_verse();
-		$this->seed_jetpack();
+		$this->seed_newsletter();
 
 		// SPEC §6.5: the mock's tagline. A translatable literal here is fine -- seed content
 		// only, never read at request time.
@@ -521,55 +521,20 @@ class Seeder {
 	}
 
 	/**
-	 * ⚠️ ASSUMPTION verification (SPEC §8 Phase 7): install/activate Jetpack (best-effort, WP-CLI
-	 * only, network failures tolerated) and check whether `jetpack/subscriptions` actually
-	 * registers without a WordPress.com connection. It does not (the block's registration is
-	 * gated behind the `subscriptions` module, which itself refuses to activate unconnected —
-	 * confirmed live: `wp jetpack module activate subscriptions` returns "Newsletter could not
-	 * be activated" and the block stays unregistered), so the seed falls back the
-	 * `newsletter.provider` setting to `mailto` whenever the block isn't registered.
+	 * SPEC §6.3: `wp ttm seed` configures `custom-url` with an empty endpoint so
+	 * `newsletter.dev_accept` applies outside production and the dev poster shows and submits
+	 * a real, locally-accepted form. No Jetpack install (P1-06 dropped it; never seeded).
 	 */
-	private function seed_jetpack(): void {
-		if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
-			return;
-		}
-
-		try {
-			\WP_CLI::runcommand(
-				'plugin install jetpack --activate',
-				[
-					'launch'     => false,
-					'exit_error' => false,
-				]
-			);
-		} catch ( \Throwable $e ) {
-			// Network failures tolerated (e.g. no internet in this environment).
-			unset( $e );
-		}
-
-		$connected = class_exists( '\WP_Block_Type_Registry' )
-			&& \WP_Block_Type_Registry::get_instance()->is_registered( 'jetpack/subscriptions' );
-
+	private function seed_newsletter(): void {
 		$settings = get_option( 'ttm_settings', [] );
 		if ( ! is_array( $settings ) ) {
 			$settings = [];
 		}
 
-		if ( ! isset( $settings['newsletter'] ) || ! is_array( $settings['newsletter'] ) ) {
-			$settings['newsletter'] = [];
-		}
-
-		if ( $connected ) {
-			// Default (jetpack) applies.
-			unset( $settings['newsletter']['provider'] );
-		} else {
-			$settings['newsletter']['provider']       = 'mailto';
-			$settings['newsletter']['fallback_email'] = 'hello@example.com';
-		}
-
-		if ( empty( $settings['newsletter'] ) ) {
-			unset( $settings['newsletter'] );
-		}
+		$settings['newsletter'] = [
+			'provider' => 'custom-url',
+			'endpoint' => '',
+		];
 
 		update_option( 'ttm_settings', $settings );
 		Config::reset();

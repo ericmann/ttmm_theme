@@ -42,19 +42,29 @@ class Providers {
 	 * @return Provider
 	 */
 	public static function current(): Provider {
-		return self::resolve( (string) Config::get( 'newsletter.provider', 'jetpack' ), self::default_registry() );
+		return self::resolve(
+			(string) Config::get( 'newsletter.provider', 'jetpack' ),
+			self::default_registry(),
+			CustomUrl::dev_accept_applies()
+		);
 	}
 
 	/**
-	 * The configured provider if available, else `mailto` if available, else `none`.
+	 * The configured provider if available, else `custom-url` if `$dev_accept` and available,
+	 * else `mailto` if available, else `none`.
 	 *
 	 * @param string                  $configured Configured `newsletter.provider` slug.
 	 * @param array<string, Provider> $registry   Slug => Provider map.
+	 * @param bool                    $dev_accept Whether `custom-url`'s dev-accept applies.
 	 * @return Provider
 	 */
-	public static function resolve( string $configured, array $registry ): Provider {
+	public static function resolve( string $configured, array $registry, bool $dev_accept = false ): Provider {
 		if ( isset( $registry[ $configured ] ) && $registry[ $configured ]->available() ) {
 			return $registry[ $configured ];
+		}
+
+		if ( $dev_accept && isset( $registry['custom-url'] ) && $registry['custom-url']->available() ) {
+			return $registry['custom-url'];
 		}
 
 		if ( isset( $registry['mailto'] ) && $registry['mailto']->available() ) {

@@ -15,10 +15,24 @@ class NewsletterFormTest extends TTM_IntegrationTestCase {
 		$_GET = [];
 		update_option( 'ttm_settings', [] );
 		Config::reset();
+		\TTM\Core\Newsletter\Form::reset();
 		if ( WP_Block_Type_Registry::get_instance()->is_registered( 'jetpack/subscriptions' ) ) {
 			WP_Block_Type_Registry::get_instance()->unregister( 'jetpack/subscriptions' );
 		}
 		parent::tear_down();
+	}
+
+	private function configure_custom_url_dev_accept(): void {
+		update_option(
+			'ttm_settings',
+			[
+				'newsletter' => [
+					'provider' => 'custom-url',
+					'endpoint' => '',
+				],
+			]
+		);
+		Config::reset();
 	}
 
 	private function render( array $attributes = [] ): string {
@@ -60,8 +74,18 @@ class NewsletterFormTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_f26_none_renders_statement_only_no_form(): void {
-		// Neither jetpack/subscriptions is registered nor a fallback email configured: the
-		// default chain resolves to "none".
+		// Neither jetpack/subscriptions is registered nor a fallback email configured, and
+		// dev_accept is turned off here (P1-06: otherwise the default empty endpoint would
+		// make custom-url available and the chain would resolve there instead of "none").
+		add_filter(
+			'ttm_config',
+			static function ( array $config ): array {
+				$config['newsletter.dev_accept'] = false;
+				return $config;
+			}
+		);
+		Config::reset();
+
 		$html = $this->render();
 
 		$this->assertStringContainsString( 'data-provider="none"', $html );
@@ -84,5 +108,47 @@ class NewsletterFormTest extends TTM_IntegrationTestCase {
 
 		$this->assertStringNotContainsString( 'wpnonce', $html );
 		$this->assertStringNotContainsString( 'wp_nonce', $html );
+	}
+
+	public function test_custom_url_renders_the_shared_form_markup(): void {
+		$this->configure_custom_url_dev_accept();
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'data-provider="custom-url"', $html );
+		$this->assertStringContainsString( 'class="screen-reader-text"', $html );
+		$this->assertStringContainsString( 'for="ttm-nl-email-1"', $html );
+		$this->assertStringContainsString( 'id="ttm-nl-email-1"', $html );
+		$this->assertStringContainsString( 'type="email"', $html );
+		$this->assertStringContainsString( 'name="email"', $html );
+		$this->assertStringContainsString( 'placeholder="you@example.com"', $html );
+		$this->assertStringContainsString( 'autocomplete="email"', $html );
+		$this->assertStringContainsString( 'required', $html );
+		$this->assertStringContainsString( 'class="btn btn-ghost"', $html );
+		$this->assertStringContainsString( 'Check your inbox.', $html );
+		$this->assertStringNotContainsString( 'mailto:', $html );
+	}
+
+	public function test_subscribe_success_query_sets_subscribed_state(): void {
+		$_GET['subscribe'] = 'success';
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'data-state="subscribed"', $html );
+	}
+
+	public function test_ids_are_deterministic_per_request(): void {
+		$this->configure_custom_url_dev_accept();
+
+		$first  = $this->render();
+		$second = $this->render();
+
+		$this->assertStringContainsString( 'id="ttm-nl-email-1"', $first );
+		$this->assertStringContainsString( 'id="ttm-nl-email-2"', $second );
+
+		\TTM\Core\Newsletter\Form::reset();
+
+		$third = $this->render();
+		$this->assertStringContainsString( 'id="ttm-nl-email-1"', $third );
 	}
 }

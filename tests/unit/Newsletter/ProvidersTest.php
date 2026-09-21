@@ -52,4 +52,30 @@ class ProvidersTest extends TestCase {
 
 		$this->assertSame( 'mailto', Providers::resolve( 'custom-url', $registry )->slug() );
 	}
+
+	public function test_configured_provider_wins_when_available(): void {
+		$registry = [
+			'custom-url' => new StubProvider( 'custom-url', true ),
+			'mailto'     => new StubProvider( 'mailto', true ),
+			'none'       => new StubProvider( 'none', true ),
+		];
+
+		$this->assertSame( 'custom-url', Providers::resolve( 'custom-url', $registry, true )->slug() );
+	}
+
+	public function test_dev_accept_prefers_custom_url_over_mailto(): void {
+		$registry = [
+			'jetpack'    => new StubProvider( 'jetpack', false ),
+			'custom-url' => new StubProvider( 'custom-url', true ),
+			'mailto'     => new StubProvider( 'mailto', true ),
+			'none'       => new StubProvider( 'none', true ),
+		];
+
+		// Configured provider (jetpack) unavailable; dev_accept=true should reach custom-url
+		// before falling through to mailto.
+		$this->assertSame( 'custom-url', Providers::resolve( 'jetpack', $registry, true )->slug() );
+
+		// Without dev_accept, mailto still wins (unchanged fallback order).
+		$this->assertSame( 'mailto', Providers::resolve( 'jetpack', $registry, false )->slug() );
+	}
 }

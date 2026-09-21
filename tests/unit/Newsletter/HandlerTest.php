@@ -59,6 +59,10 @@ class HandlerTest extends TestCase {
 			}
 		);
 		Functions\when( 'do_action' )->justReturn( null );
+		// Production by default so `CustomUrl::dev_accept_applies()` never suppresses the
+		// forwarder in the tests below that exercise the traditional forward path; the
+		// dev-accept-specific tests override this to a non-production value.
+		Functions\when( 'wp_get_environment_type' )->justReturn( 'production' );
 
 		Functions\when( 'get_transient' )->alias(
 			fn ( string $key ) => $this->transients[ $key ] ?? false
@@ -209,5 +213,52 @@ class HandlerTest extends TestCase {
 
 		$this->assertStringStartsWith( 'https://example.com', $url );
 		$this->assertStringNotContainsString( 'evil.example', $url );
+	}
+
+	public function test_dev_accept_skips_forward_and_redirects_with_subscribed(): void {
+		Functions\when( 'wp_get_environment_type' )->justReturn( 'local' );
+
+		$now       = $this->now();
+		$forwarded = [];
+		Handler::set_forwarder(
+			static function ( string $email ) use ( &$forwarded ): void {
+				$forwarded[] = $email;
+			}
+		);
+
+		$url = Handler::handle(
+			[
+				'email'     => 'a@example.com',
+				'ttm_token' => Handler::token( intdiv( $now->getTimestamp(), 86400 ) ),
+			],
+			'6.6.6.6',
+			$now
+		);
+
+		$this->assertStringContainsString( 'subscribed=1', $url );
+		$this->assertEmpty( $forwarded, 'The forwarder must not be called when dev_accept applies.' );
+	}
+
+	public function test_dev_accept_never_applies_in_production(): void {
+		Functions\when( 'wp_get_environment_type' )->justReturn( 'production' );
+
+		$now       = $this->now();
+		$forwarded = [];
+		Handler::set_forwarder(
+			static function ( string $email ) use ( &$forwarded ): void {
+				$forwarded[] = $email;
+			}
+		);
+
+		Handler::handle(
+			[
+				'email'     => 'a@example.com',
+				'ttm_token' => Handler::token( intdiv( $now->getTimestamp(), 86400 ) ),
+			],
+			'7.7.7.7',
+			$now
+		);
+
+		$this->assertCount( 1, $forwarded, 'The forwarder must still be called in production, even with an empty endpoint.' );
 	}
 }
