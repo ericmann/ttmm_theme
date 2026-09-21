@@ -16,7 +16,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P1-02 Front masthead per §6.1.1 (pattern, CSS, nav hub class)
 - [x] P1-03 Front-page current section and nav label fill (`Nav\CurrentSection`)
 - [x] P1-04 Verse copyright placement and `ttm/verse-copyright` binding
-- [ ] P1-05 Footer per §6.1.8
+- [x] P1-05 Footer per §6.1.8
 - [ ] P1-06 Newsletter form contract — shared markup, provider chain, custom-url dev-accept, seed
 - [ ] P1-07 Spike — Jetpack Subscriptions widget POST contract
 - [ ] P1-08 Jetpack provider on the shared form
@@ -145,3 +145,10 @@ Bindings\Sources: new ttm/verse-copyright source (no uses_context), returns '' u
 Tests: FrontSourcesTest 2 new tests; VerseOfTheDayTest 1 new (absent by default) + 1 updated (sets placement 'box' via ttm_config filter + Config::reset() before asserting the box renders it). README binding list added (enumerates all ttm/* sources including the new one).
 Un-fixme'd verse-nocopy in fidelity.spec.mjs.
 Verified: composer lint 0 errors, npm run lint clean, npm run test:integration 392/392 (real wp-env), npm run test:e2e 60 passed/67 skipped (0 failed), composer test:unit, npm run build, forbidden-patterns all green. ttm-theme confirmed active; wp-env stopped after.
+
+### P1-05 — c8554c3
+footer.html: left group (layout default) now holds one <p class="ttm-footer__meta"> bound to ttm/today format=footer (whole line via new Values::footer_line) and one <p class="ttm-footer__copyright"> bound to ttm/verse-copyright (replaces the old three-paragraph flex group + separate year binding). Right nav gets className ttm-footer__nav, layout default (CSS owns the flex/gap/separator).
+Values::footer_line(site_name, year): pure, "{site} · © {year} Eric Mann · Built on WordPress". Sources::today() handles format=footer itself (get_bloginfo('name') + Clock::now()->format('Y')) since Values.php takes no WP reads.
+ttm.css /* 4.34 footer */: padding bumped to spacing--40 (16px, was 12px); added .ttm-footer__copyright:empty{display:none}, .ttm-footer__nav ul flex/gap:0, .ttm-footer__nav a 400/neutral-700 + :hover accent, the wp-block-navigation-item+wp-block-navigation-item::before{content:"·"} separator; minimal .ttm-footer__left/.ttm-footer__meta rules (coverage). Fixed a real pre-existing bug: `.ttm-footer.is-after-poster` never matched anything since wp:template-part's className lands on its own wrapper div, not the part's root element (confirmed via live render) — changed to `.is-after-poster .ttm-footer`.
+Tests: ValuesTest 1 new, FrontSourcesTest 1 new, ChromePartsTest 1 new (needed a real series term since F18 hides Series when the index is empty, or nav count would be 8 not 9).
+Verified: composer test:unit (135/135), composer lint 0 errors, npm run lint clean, npm run test:integration 394/394 (real wp-env), npm run test:e2e 66 passed/61 skipped (0 failed), npm run build, forbidden-patterns all green. ttm-theme confirmed active; wp-env stopped after.
