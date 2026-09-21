@@ -95,7 +95,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] R1-14 i18n: masthead labels from term names, Books row label, book-grid form caption, feed title
 - [x] R1-15 Docs alignment: CLAUDE.md rule 16 file and module map, DEPLOYMENT real-IP, convert-classic report field
 - [x] R2-01 F9 stale-year: plugin-side dek suppression, cached staleness, cells.stale_count key, rule-24 allow-list removed
-- [ ] R2-02 Test gaps: source-level empty values for ttm/short-date and ttm/relative-date; BoundariesTest sees inline fully-qualified references
+- [x] R2-02 Test gaps: source-level empty values for ttm/short-date and ttm/relative-date; BoundariesTest sees inline fully-qualified references
 - [ ] R2-03 Docs and duplication cleanup after round 1: CLAUDE.md module map, stale comments, HANDOFF correction, one pagination-label implementation
 
 ## Log
@@ -931,3 +931,21 @@ FrontPageStatesTest's do_action('init') re-fire was removed since patterns.php o
 depends on staleness.
 All verify commands green: composer lint/test:unit, npm lint/test:unit/build, forbidden-patterns,
 npm test:integration (370 tests), npm test:e2e (48 tests).
+
+### R2-02 — e07c215
+FrontSourcesTest::test_short_date_and_relative_date_empty_without_post: exercises Sources::
+short_date()/relative_date() directly (integration, real WP_Block_Bindings_Registry) with (a) an
+empty-context block stub and (b) a postId of 999999999 that resolves to no post; deleting either
+`if ( ! $post ) return '';` guard in Sources fails this test.
+ValuesTest::test_short_and_relative_date_empty_without_date renamed to
+test_short_and_relative_date_never_blank_for_a_valid_date -- it was always testing the pure-
+formatter total-function guarantee (now/now boundary), never an actual empty case; docblock
+already explained this, only the name was wrong.
+BoundariesTest gained inline_use_targets()/test_inline_fully_qualified_references_obey_the_spec_
+table: strips /* */ blocks, drops `use ` lines, cuts each line at the first `//`, then regex-
+matches leading-backslash `\TTM\Core\...` references and applies the same ROW_ORDER/
+NEVER_IMPORTS_BLOCKS check as the existing use-line scan. Manually verified (see commit) that an
+inline `\TTM\Core\Blocks\Helpers::wrapper()` written into Query/Lead.php trips it; reverted.
+No production code touched (task was test-only, out of scope for behaviour changes).
+Verify set green (composer lint/test:unit, npm lint/test:unit/build, forbidden-patterns,
+npm test:integration: 371 tests).
