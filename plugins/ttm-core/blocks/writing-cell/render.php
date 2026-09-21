@@ -12,6 +12,7 @@ declare( strict_types=1 );
 use TTM\Core\Blocks\Helpers;
 use TTM\Core\Config;
 use TTM\Core\Fiction\Serials;
+use TTM\Core\Query\Lead;
 
 if ( 'empty' === Helpers::preview_state( $attributes ) ) {
 	return '';
@@ -57,6 +58,14 @@ if ( $ttm_active ) {
 	$ttm_mode = 'shelf';
 }
 
+// F1's shelf list is capped by writing.shelf_limit, not writing.also_running_limit (which
+// caps the "Also running" list next to an *active* serial -- the two are visually and
+// semantically different lists that happened to share one variable before this fix).
+$ttm_rows_limit = $ttm_also_limit;
+if ( 'shelf' === $ttm_mode ) {
+	$ttm_rows_limit = (int) Config::get( 'writing.shelf_limit', 4 );
+}
+
 $ttm_also_rows = [];
 if ( 'active' === $ttm_mode || 'shelf' === $ttm_mode ) {
 	foreach ( Serials::completed() as $ttm_row ) {
@@ -70,7 +79,7 @@ if ( 'active' === $ttm_mode || 'shelf' === $ttm_mode ) {
 		];
 	}
 
-	foreach ( Serials::stories( $ttm_also_limit ) as $ttm_story_id ) {
+	foreach ( Serials::stories( $ttm_rows_limit ) as $ttm_story_id ) {
 		$ttm_also_rows[] = [
 			'title' => get_the_title( $ttm_story_id ),
 			'url'   => (string) get_permalink( $ttm_story_id ),
@@ -78,13 +87,15 @@ if ( 'active' === $ttm_mode || 'shelf' === $ttm_mode ) {
 		];
 	}
 
-	$ttm_also_rows = array_slice( $ttm_also_rows, 0, $ttm_also_limit );
+	$ttm_also_rows = array_slice( $ttm_also_rows, 0, $ttm_rows_limit );
 }//end if
 ?>
 <div <?php echo Helpers::wrapper( 'writing-cell', [ 'is-' . $ttm_mode ] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() output is already escaped. ?>>
 	<div class="ttm-cell-heading">
 		<h2><?php esc_html_e( 'Writing', 'ttm-core' ); ?></h2>
+		<?php if ( 'plain' !== $ttm_mode ) : ?>
 		<a href="<?php echo esc_url( home_url( '/writing/' ) ); ?>"><?php esc_html_e( 'All serials →', 'ttm-core' ); ?></a>
+		<?php endif; ?>
 	</div>
 
 	<?php if ( 'active' === $ttm_mode ) : ?>
@@ -145,15 +156,26 @@ if ( 'active' === $ttm_mode || 'shelf' === $ttm_mode ) {
 		<?php
 		$ttm_writing    = get_term_by( 'slug', (string) Config::get( 'sections.writing_slug', 'writing' ), 'category' );
 		$ttm_writing_id = $ttm_writing && ! is_wp_error( $ttm_writing ) ? $ttm_writing->term_id : 0;
+		$ttm_lead_id    = Lead::id();
 
+		// F2: an ordinary section cell -- same ttm_primary_category-only and lead-exclusion
+		// rules as every other front-page cell (Query\Cells::filter_query_vars()), just built
+		// directly since this branch isn't a `core/query` Query Loop block.
 		$ttm_query = new WP_Query(
 			[
 				'post_type'      => 'post',
 				'post_status'    => 'publish',
 				'category__in'   => [ $ttm_writing_id ],
-				'posts_per_page' => 3,
+				'posts_per_page' => (int) Config::get( 'writing.plain_count', 3 ),
 				'orderby'        => 'date',
 				'order'          => 'DESC',
+				'meta_query'     => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- ttm_primary_category is a single, indexed meta key; bounded by posts_per_page above.
+					[
+						'key'   => 'ttm_primary_category',
+						'value' => $ttm_writing_id,
+					],
+				],
+				'post__not_in'   => $ttm_lead_id ? [ $ttm_lead_id ] : [],
 			]
 		);
 		?>

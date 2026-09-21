@@ -45,10 +45,18 @@ function register_section_cells(): void {
 	$counts = class_exists( '\TTM\Core\Config' ) ? (array) \TTM\Core\Config::get( 'cells.counts', [] ) : [];
 
 	foreach ( $sections as $ttm_slug => $ttm_name ) {
+		// F9: a section whose newest post is over cells.stale_year_days old shows its 2 most
+		// recent posts (Query\Cells::filter_query_vars() enforces the count at render time
+		// regardless of per_page below) with no dek at all -- omitted here, server-side,
+		// rather than only hidden by CSS, since it's a genuine "this content doesn't apply"
+		// state (SPEC §9: theme reads plugin data via a guarded call, doesn't query itself).
+		$ttm_is_stale = class_exists( '\TTM\Core\Query\Cells' ) && \TTM\Core\Query\Cells::is_stale_year( $ttm_slug );
+
 		$ttm_section = [
 			'slug'     => $ttm_slug,
 			'name'     => $ttm_name,
-			'per_page' => $counts[ $ttm_slug ] ?? 3,
+			'per_page' => $ttm_is_stale ? 2 : ( $counts[ $ttm_slug ] ?? 3 ),
+			'show_dek' => ! $ttm_is_stale,
 		];
 
 		ob_start();

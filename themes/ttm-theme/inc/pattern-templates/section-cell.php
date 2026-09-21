@@ -8,7 +8,7 @@
  *
  * @package TTM\Theme
  *
- * @var array{slug: string, name: string, per_page: int} $ttm_section Section context.
+ * @var array{slug: string, name: string, per_page: int, show_dek: bool} $ttm_section Section context.
  */
 
 declare( strict_types=1 );
@@ -34,8 +34,10 @@ declare( strict_types=1 );
 			<!-- wp:group {"className":"ttm-item"} -->
 			<div class="wp-block-group ttm-item">
 				<!-- wp:post-title {"isLink":true,"className":"is-style-cell-lead"} /-->
+<?php if ( $ttm_section['show_dek'] ?? true ) : ?>
 
 				<!-- wp:post-excerpt {"className":"ttm-item__dek"} /-->
+<?php endif; ?>
 
 				<!-- wp:paragraph {"className":"ttm-item__meta","metadata":{"bindings":{"content":{"source":"ttm/meta-line","args":{"parts":["date","reading"]}}}}} -->
 				<p class="ttm-item__meta"></p>

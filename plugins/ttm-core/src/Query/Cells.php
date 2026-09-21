@@ -11,8 +11,11 @@ namespace TTM\Core\Query;
 
 use TTM\Core\Config;
 use TTM\Core\Meta\PrimaryCategory;
+use TTM\Core\Support\Clock;
+use TTM\Core\Support\Dates;
 use WP_Block;
 use WP_HTML_Tag_Processor;
+use WP_Query;
 
 /**
  * Filters `core/query` Query Loop blocks carrying a `ttmSection` context, and marks an
@@ -51,9 +54,17 @@ class Cells {
 			$query['category_name']       = $section;
 			$query['ignore_sticky_posts'] = 1;
 
-			$counts = (array) Config::get( 'cells.counts', [] );
-			if ( isset( $counts[ $section ] ) ) {
-				$query['posts_per_page'] = (int) $counts[ $section ];
+			if ( self::is_stale_year( $section ) ) {
+				// F9: the section's newest post is over a year old -- still show what exists,
+				// but only the 2 most recent (regardless of age; dates get their year via
+				// ttm/short-date), and CSS drops the dek via the `is-stale` class mark_empty()
+				// adds once the query has actually rendered these 2 rows.
+				$query['posts_per_page'] = 2;
+			} else {
+				$counts = (array) Config::get( 'cells.counts', [] );
+				if ( isset( $counts[ $section ] ) ) {
+					$query['posts_per_page'] = (int) $counts[ $section ];
+				}
 			}
 
 			if ( $primary_only ) {
@@ -112,9 +123,13 @@ class Cells {
 		// The journal-stream row (single-journal.html) reuses the journal section query but
 		// with journal.stream_count instead of cells.counts (which has no "journal" entry);
 		// ttmExcludeCurrent is what distinguishes it from the front page's journal-rail, which
-		// never has a "current" post to exclude.
-		if ( 'journal' === $section && $exclude_current ) {
-			$query['posts_per_page'] = (int) Config::get( 'journal.stream_count', 4 );
+		// never has a "current" post to exclude and instead takes its count from
+		// journal.rail_count (previously baked into the journal-rail pattern's own `perPage`
+		// attribute as a bare 3, rather than driven by Config).
+		if ( $journal_slug === $section ) {
+			$query['posts_per_page'] = $exclude_current
+				? (int) Config::get( 'journal.stream_count', 4 )
+				: (int) Config::get( 'journal.rail_count', 3 );
 		}
 
 		return $query;
@@ -135,9 +150,9 @@ class Cells {
 	public static function mark_empty( string $content, $parsed_block, $block ): string {
 		unset( $parsed_block );
 
-		$query_attrs   = $block->attributes['query'] ?? [];
-		$section       = (string) ( $query_attrs['ttmSection'] ?? '' );
-		$is_ttm_cell   = '' !== $section || ! empty( $query_attrs['ttmSameSection'] );
+		$query_attrs = $block->attributes['query'] ?? [];
+		$section     = (string) ( $query_attrs['ttmSection'] ?? '' );
+		$is_ttm_cell = '' !== $section || ! empty( $query_attrs['ttmSameSection'] );
 
 		if ( ! $is_ttm_cell ) {
 			return $content;
@@ -155,5 +170,47 @@ class Cells {
 		$processor->add_class( 'is-empty' );
 
 		return $processor->get_updated_html();
+	}
+
+	/**
+	 * F9: whether a category's newest post is older than `cells.stale_year_days` (365 by
+	 * default) -- "if < 1 post in a year, drop the dek and show the 2 most recent regardless
+	 * of age". A category with no posts at all is not "stale" (F17's `is-empty` covers that).
+	 *
+	 * Public: `themes/ttm-theme/inc/patterns.php` calls this (guarded by `class_exists()`,
+	 * SPEC §9) to decide, per request, whether to compile the `post-excerpt` block into that
+	 * section's `ttm/section-cell-{slug}` pattern at all -- the theme reads plugin data, it
+	 * doesn't query for it itself (rule 1).
+	 *
+	 * @param string $section Category slug.
+	 * @return bool
+	 */
+	public static function is_stale_year( string $section ): bool {
+		$query = new WP_Query(
+			[
+				'category_name'       => $section,
+				'posts_per_page'      => 1,
+				'orderby'             => 'date',
+				'order'               => 'DESC',
+				'fields'              => 'ids',
+				'no_found_rows'       => true,
+				'ignore_sticky_posts' => 1,
+			]
+		);
+
+		if ( empty( $query->posts ) ) {
+			return false;
+		}
+
+		$newest = get_post( (int) $query->posts[0] );
+		$date   = $newest ? Clock::at( $newest->post_date ) : null;
+
+		if ( ! $date ) {
+			return false;
+		}
+
+		$threshold = (int) Config::get( 'cells.stale_year_days', 365 );
+
+		return Dates::days_between( $date, Clock::now() ) > $threshold;
 	}
 }

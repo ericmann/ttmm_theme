@@ -101,6 +101,41 @@ class FrontPageStatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'ttm-writing-cell is-plain', $html );
 	}
 
+	public function test_f9_stale_year_section_shows_two_rows_without_dek(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$this->seed( 'empty' );
+
+		$security = get_term_by( 'slug', 'security', 'category' );
+		$this->assertNotFalse( $security );
+
+		foreach ( [ 'Old Security One', 'Old Security Two' ] as $i => $title ) {
+			$post_id = self::factory()->post->create(
+				[
+					'post_status'   => 'publish',
+					'post_category' => [ $security->term_id ],
+					'post_title'    => $title,
+					'post_excerpt'  => 'A real excerpt that must not appear.',
+					'post_date'     => sprintf( '2024-01-0%d 09:00:00', $i + 1 ),
+				]
+			);
+			update_post_meta( $post_id, 'ttm_primary_category', $security->term_id );
+		}
+
+		// Re-fire 'init' so themes/ttm-theme/inc/patterns.php's per-request pattern
+		// registration re-evaluates Query\Cells::is_stale_year( 'security' ) now that Security
+		// actually has (old) posts -- it already ran once, with an empty category, during
+		// set_up().
+		do_action( 'init' );
+
+		$html = (string) do_blocks( '<!-- wp:pattern {"slug":"ttm/section-cell-security"} /-->' );
+
+		$this->assertSame( 2, substr_count( $html, 'wp-block-post ' ) );
+		$this->assertStringContainsString( 'Old Security One', $html );
+		$this->assertStringContainsString( 'Old Security Two', $html );
+		$this->assertStringNotContainsString( 'ttm-item__dek', $html );
+		$this->assertStringNotContainsString( 'A real excerpt', $html );
+	}
+
 	public function test_normal_state_zero_count_link_reads_all_arrow_for_new_category(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
 		$this->seed( 'normal' );

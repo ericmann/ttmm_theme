@@ -144,6 +144,67 @@ class CellsTest extends TTM_IntegrationTestCase {
 		$this->assertStringNotContainsString( 'is-empty', $content );
 	}
 
+	public function test_stale_year_section_shows_two_posts_without_dek(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$security = $this->category_id( 'security', 'Security' );
+
+		self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $security ],
+				'post_date'     => '2024-01-01 09:00:00', // over cells.stale_year_days before "now".
+			]
+		);
+
+		$this->assertTrue( \TTM\Core\Query\Cells::is_stale_year( 'security' ) );
+		$this->assertFalse( \TTM\Core\Query\Cells::is_stale_year( 'technology' ) ); // no posts at all: not "stale", just empty.
+
+		$block = $this->make_block( [ 'ttmSection' => 'security' ] );
+		$query = apply_filters( 'query_loop_block_query_vars', [], $block, 1 );
+
+		$this->assertSame( 2, $query['posts_per_page'] );
+	}
+
+	public function test_journal_rail_posts_per_page_comes_from_config(): void {
+		$this->category_id( 'journal', 'Journal' );
+
+		add_filter(
+			'ttm_config',
+			static function ( array $config ): array {
+				$config['journal.rail_count'] = 7;
+				return $config;
+			}
+		);
+		\TTM\Core\Config::reset();
+
+		$block = $this->make_block( [ 'ttmSection' => 'journal' ] );
+		$query = apply_filters( 'query_loop_block_query_vars', [], $block, 1 );
+
+		$this->assertSame( 7, $query['posts_per_page'] );
+	}
+
+	public function test_journal_stream_uses_config_slug(): void {
+		add_filter(
+			'ttm_config',
+			static function ( array $config ): array {
+				$config['sections.journal_slug'] = 'renamed-journal';
+				return $config;
+			}
+		);
+		\TTM\Core\Config::reset();
+
+		$block = $this->make_block(
+			[
+				'ttmSection'        => 'renamed-journal',
+				'ttmExcludeCurrent' => true,
+			]
+		);
+
+		$query = apply_filters( 'query_loop_block_query_vars', [], $block, 1 );
+
+		$this->assertSame( (int) \TTM\Core\Config::get( 'journal.stream_count', 4 ), $query['posts_per_page'] );
+	}
+
 	public function test_lead_rest_returns_id_and_reason(): void {
 		$tech = $this->category_id( 'technology', 'Technology' );
 		$post = self::factory()->post->create(

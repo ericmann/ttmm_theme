@@ -11,6 +11,12 @@ use TTM\Core\Query\SeriesIndex;
 
 class WritingCellTest extends TTM_IntegrationTestCase {
 
+	public function tear_down(): void {
+		delete_transient( 'ttm_lead_id' );
+		delete_option( 'sticky_posts' );
+		parent::tear_down();
+	}
+
 	private function category_id( string $slug, string $name ): int {
 		$term = term_exists( $slug, 'category' );
 		if ( $term ) {
@@ -105,6 +111,63 @@ class WritingCellTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'Done Novel', $html );
 		$this->assertStringNotContainsString( 'btn-primary', $html );
 		$this->assertStringContainsString( 'Short fiction and the full index', $html );
+	}
+
+	public function test_f1_shelf_lists_up_to_writing_shelf_limit(): void {
+		$writing = $this->category_id( 'writing', 'Writing' );
+
+		for ( $i = 1; $i <= 5; $i++ ) {
+			$this->make_serial( "done-novel-{$i}", "Done Novel {$i}", 'novel', 'complete', $writing, 1 );
+		}
+
+		$html = $this->render();
+
+		$this->assertSame( (int) \TTM\Core\Config::get( 'writing.shelf_limit', 4 ), substr_count( $html, 'ttm-writing-cell__also-row' ) );
+	}
+
+	public function test_f2_plain_mode_excludes_lead_and_non_primary_posts(): void {
+		$writing  = $this->category_id( 'writing', 'Writing' );
+		$business = $this->category_id( 'business', 'Business' );
+
+		$lead = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $writing ],
+				'post_title'    => 'The Lead Post',
+			]
+		);
+		update_post_meta( $lead, 'ttm_form', 'article' );
+		update_post_meta( $lead, 'ttm_form_locked', true );
+		stick_post( $lead );
+
+		// In the Writing category, but its primary category is Business (e.g. cross-posted) --
+		// must not count as a Writing plain-cell candidate.
+		$non_primary = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $writing, $business ],
+				'post_title'    => 'Not Primarily Writing',
+			]
+		);
+		update_post_meta( $non_primary, 'ttm_primary_category', $business );
+		update_post_meta( $non_primary, 'ttm_form', 'article' );
+		update_post_meta( $non_primary, 'ttm_form_locked', true );
+
+		$included = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $writing ],
+				'post_title'    => 'A Real Writing Cell Post',
+			]
+		);
+		update_post_meta( $included, 'ttm_form', 'article' );
+		update_post_meta( $included, 'ttm_form_locked', true );
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'A Real Writing Cell Post', $html );
+		$this->assertStringNotContainsString( 'The Lead Post', $html );
+		$this->assertStringNotContainsString( 'Not Primarily Writing', $html );
 	}
 
 	public function test_f2_no_fiction_renders_plain_section_cell(): void {
