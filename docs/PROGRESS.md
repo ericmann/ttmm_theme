@@ -15,7 +15,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P1-03 Primary category, form derivation and word count on save
 - [x] P1-04 Series index
 - [x] P1-05 Category stats and top tags
-- [ ] P1-06 Series term admin: columns, edit fields, part list
+- [x] P1-06 Series term admin: columns, edit fields, part list
 - [ ] P1-07 Editor sidebar panel
 - [ ] P1-08 Pre-publish checks and post list columns
 - [ ] P1-09 Admin settings page and general settings
@@ -153,3 +153,10 @@ Added Config key series.index_batch=500 (ConfigTest updated to expect it).
 Query\Stats::category($term_id) returns {count,first_year,last_year,series_count} cached in transient ttm_category_stats_{id} (TTL stats.cache_seconds). count = get_term($id,'category')->count (WP's own publish-only maintained counter — avoids an extra query and the forbidden posts_per_page=>-1 pattern). first_year/last_year from two get_posts(posts_per_page=>1, orderby=date asc/desc) calls, parsed via Clock::at(). series_count = rows in SeriesIndex::all() whose categories array contains the term id. top_tags($term_id) cached in ttm_top_tags_{id} (TTL stats.tags_cache_seconds): one $wpdb->prepare() query joining term_relationships/term_taxonomy/terms via a category-membership subquery, GROUP BY + ORDER BY count DESC LIMIT archive.tag_filter_limit. flush($term_id) deletes both transients; flush_for_post($post_id) flushes every category a post belongs to; hooked to transition_post_status (only when post_type=post and the transition enters or leaves publish).
 Plugin::modules() now appends Query\Stats.
 30 integration tests pass (5 new); full verify green.
+
+### P1-06 — b9ca568
+Taxonomy\SeriesAdmin: series_add_form_fields/series_edit_form_fields render status/total_parts/form/genre/cadence/next_date/cover_id/featured/purchase_links (up to series.max_purchase_links rows). save() hooked to created_series/edited_series, gated by current_user_can('manage_categories') then check_admin_referer('update-tag_'.$id) for edit or wp_verify_nonce($_POST['_wpnonce_add-tag'],'add-tag') for add; reads $_POST only after that, unslash+sanitize inline (absint for cover_id before the wp_attachment_is_image check, map_deep(...,'sanitize_text_field') for the purchase_links array so PHPCS's ValidatedSanitizedInput sniff can see the sanitization) then writes through the P1-01 Series sanitizers. Part list is a read-only table from SeriesIndex::get($id)['parts'] with get_edit_post_link(). Columns: manage_edit-series_columns adds Status/Form/Parts; manage_series_custom_column renders them ("N of M" for parts).
+Test gotcha (documented for future admin-save tests): PHP's $_REQUEST superglobal is populated once at request bootstrap and is NOT kept in sync with later $_POST writes — check_admin_referer() reads $_REQUEST, so any test that sets $_POST and expects check_admin_referer() to see the nonce must also assign $_REQUEST = $_POST (or at least the nonce key) before calling the save handler.
+Plugin::modules() now appends Taxonomy\SeriesAdmin.
+34 integration tests pass (4 new); full verify green.
+Manual check: NOT VERIFIED (human) — open a series term's edit screen in wp-admin and confirm fields/part list.
