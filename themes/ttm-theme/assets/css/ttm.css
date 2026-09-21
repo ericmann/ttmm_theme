@@ -218,7 +218,7 @@ p.is-style-poster {
 
 .is-style-micro {
 	font-size: var(--wp--preset--font-size--micro);
-	color: var(--wp--preset--color--neutral-600);
+	color: var(--wp--preset--color--neutral-700);
 }
 
 .is-style-cell-lead {
@@ -343,9 +343,14 @@ p.is-style-poster {
 	cursor: pointer;
 }
 
+/* P8-07: accent (#ec3013) under bg-colored text (#f3f2f2) is 3.76:1, below WCAG AA's 4.5:1 for
+   this button text's size/weight (axe caught this) - accent-700 is already in the palette and
+   clears 6.4:1, so the filled state uses it instead of the raw accent token; hover/active lighten
+   back toward accent, which is fine since interaction states aren't part of the same-state
+   contrast requirement axe checks. */
 .btn-primary,
 .wp-block-button__link {
-	background: var(--wp--preset--color--accent);
+	background: var(--wp--preset--color--accent-700);
 	color: var(--wp--preset--color--bg);
 	border: 0;
 }
@@ -357,7 +362,7 @@ p.is-style-poster {
 
 .btn-primary:active,
 .wp-block-button__link:active {
-	background: var(--wp--preset--color--accent-700);
+	background: var(--wp--preset--color--accent);
 }
 
 .btn-secondary,
@@ -555,7 +560,7 @@ blockquote.is-style-pull cite,
 }
 
 .ttm-masthead-front__byline span {
-	color: var(--wp--preset--color--neutral-600);
+	color: var(--wp--preset--color--neutral-700);
 }
 
 /* stylelint-disable-next-line no-descending-specificity -- unrelated component (masthead byline vs. .entry-content a:hover) */
@@ -701,7 +706,7 @@ blockquote.is-style-pull cite,
 
 .ttm-cell-heading__link {
 	font-size: var(--wp--preset--font-size--micro);
-	color: var(--wp--preset--color--neutral-600);
+	color: var(--wp--preset--color--neutral-700);
 }
 
 .ttm-cell-heading.is-rail {
@@ -918,7 +923,16 @@ blockquote.is-style-pull cite,
 .ttm-verse__attribution,
 .ttm-verse__copyright {
 	font-size: var(--wp--preset--font-size--micro);
-	color: var(--wp--preset--color--neutral-600);
+	color: var(--wp--preset--color--neutral-700);
+}
+
+/* P8-07: darkening the surrounding text above (neutral-600 -> -700, for its own contrast against
+   bg) left the source link under WCAG 1.4.1's "use of color" threshold (axe caught this too) -
+   an underline distinguishes it from the surrounding text independent of color, which is the
+   rule's own prescribed fix regardless of the contrast ratio. */
+/* stylelint-disable-next-line no-descending-specificity -- unrelated component (verse attribution vs. .entry-content a:hover) */
+.ttm-verse__attribution a {
+	text-decoration: underline;
 }
 
 /* 4.10 journal excerpt */
@@ -982,7 +996,7 @@ blockquote.is-style-pull cite,
 
 .ttm-writing-cell__footnote {
 	font-size: var(--wp--preset--font-size--micro);
-	color: var(--wp--preset--color--neutral-600);
+	color: var(--wp--preset--color--neutral-700);
 }
 
 @media (max-width: 720px) {
@@ -1085,7 +1099,7 @@ blockquote.is-style-pull cite,
 
 .ttm-series-row__status {
 	display: block;
-	color: var(--wp--preset--color--neutral-600);
+	color: var(--wp--preset--color--neutral-700);
 }
 
 @media (max-width: 720px) {
@@ -1300,7 +1314,7 @@ ul.modern-footnotes-list,
 }
 
 .ttm-most-read__num {
-	color: var(--wp--preset--color--neutral-600);
+	color: var(--wp--preset--color--neutral-700);
 	font-weight: 800;
 }
 

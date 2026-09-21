@@ -60,10 +60,14 @@ These are the commands the Foundry pipeline runs after every task (`docs/foundry
 | `npm run test:unit` | Jest via `wp-scripts` | no |
 | `npm run build` | `wp-scripts build` for the plugin | no |
 | `npm run test:integration` | starts wp-env if needed, then PHPUnit with the WordPress test suite inside the `tests-cli` container (`tests/integration`) | yes |
-| `npm run test:e2e` | Playwright + axe against the running wp-env (`tests/e2e`, Phase 8) | yes |
+| `npm run test:e2e` | starts wp-env, reseeds it (`wp ttm seed --reset`), then Playwright + axe against the seven seeded screens at 1280×900 and 390×844 (`tests/e2e`) | yes |
 | `bash scripts/forbidden-patterns.sh` | greps for the mechanical rules in `SPEC.md §3` | no |
 
 Fix formatting automatically with `composer lint:fix` (phpcbf) and `npx wp-scripts format`.
+
+### How the e2e suite works
+
+`npm run test:e2e` runs against the wp-env **dev** site (`http://localhost:8888`), not the tests instance on `8889` - it reseeds the dev site itself (`wp-env run cli wp ttm seed --reset`) first, and `tests/e2e/playwright.config.mjs` sets `WP_BASE_URL` explicitly for the same reason: `wp-scripts test-playwright` otherwise defaults it to the *tests* environment's port when `@wordpress/env` is installed, which would run the suite against an empty, unseeded site. `tests/e2e/lib/urls.mjs` hard-codes the seven screens' paths from the seed fixtures (`docs/fixtures/seed/{posts,series}.json`); `screens.spec.mjs` checks one `<main>` landmark, zero `serious`/`critical` axe violations, and a single `img[fetchpriority="high"]` hero image on the front page and one article; `network.spec.mjs` asserts every request is same-origin, `data:`/`blob:`, or (only when Jetpack happens to be active) one of its own stats/subscribe hosts, and never hits `/wp-json/` or `admin-ajax.php`; `focus.spec.mjs` tabs through the front page and checks the skip link, first nav link, first `.ttm-item`, and first `.btn` all keep a visible focus outline. The HTML report lands at `playwright-report/` (`--open=never`); open it with `npx playwright show-report`.
 
 ### How the integration harness works
 
