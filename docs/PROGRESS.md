@@ -87,7 +87,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] R1-06 migrate:politics child mode files Politics posts under Opinion; close-comments purges once
 - [x] R1-07 wp ttm audit: fix missing-alt regex and broken-internal-link false positives
 - [x] R1-08 Cache-Control for HEAD requests
-- [ ] R1-09 Theme CSS and templates: honeypot rule, nested landmarks, CSS budget reconciled
+- [x] R1-09 Theme CSS and templates: honeypot rule, nested landmarks, CSS budget reconciled
 - [ ] R1-10 REST /series ?form=fiction filter per 05 §3
 - [ ] R1-11 Nav current-section on series pages
 - [ ] R1-12 ttm/syndicated-to wrapper and escaping
@@ -727,3 +727,33 @@ value, using set_now()). test_post_request_gets_nothing (integration) stays gree
 
 Verified via foundry_verify: composer lint/test:unit (122, +2), npm lint/test:unit/build,
 forbidden-patterns.sh, npm run test:integration (361, +1, all green).
+
+### R1-09 — fc45417
+ttm.css: added .ttm-hp (position:absolute, 1x1px, overflow:hidden, clip-path:inset(50%) --
+visually hidden but still DOM/tab-reachable, unlike display:none/visibility:hidden which would
+let a bot skip it). Trimmed: merged .is-style-rule-1/2's shared 3 properties, merged the 7
+.is-style-grid-* selectors' `display: grid` into one shared rule, condensed two multi-line P8-07
+axe-fix comments to one line each, and removed a dead `@media (max-width: 720px) { .btn-block {
+width: 100%; } }` override that duplicated .btn-block's unconditional base rule. Net: 32990 ->
+32612 bytes (including the new rule). cssBudgetBytes (scripts/check-budget.mjs) lowered 33000 ->
+32700; CLAUDE.md's constraint line (stale at 25600 since P5-04/P6-05) corrected to 32700.
+
+404.html/index.html/page.html: removed the redundant "tagName":"header"/"footer" from their
+wp:template-part references -- header-inner.html/footer.html already wrap themselves in
+<header>/<footer>, so the attribute was nesting a second landmark.
+
+serial-hero/render.php: title tag is now `(is_page() || is_category()) ? 'h1' : 'h2'`, since
+page-writing.html (via Templates\Hierarchy's category_template prepend) serves both /writing/
+and /category/writing/.
+
+Interpretation/deviation: making /category/writing/ get an h1 exposed a second, pre-existing,
+untested bug outside this task's file list -- themes/ttm-theme/patterns/masthead-inner.php's
+`wp:site-title` had no explicit `level`, defaulting to core's h1. That means page.html, 404.html,
+search.html, page-series.html and article-header.php (each already declaring their own explicit
+level-1 heading) already rendered two h1s on every request. Fixed at the root: masthead-inner's
+site-title is now level 2 (masthead-front, the true homepage h1, untouched).
+
+Verified via foundry_verify: composer lint/test:unit (123, +1), npm lint/test:unit/build,
+forbidden-patterns.sh, npm run test:integration (363, +1, all green). Also ran npm run test:e2e
+manually (not part of the standard verify set): 48/48 passed, zero serious/critical axe
+violations on every seeded screen including /writing/ and /category/security/.
