@@ -100,7 +100,9 @@ One row per post with flags: `classic`, `no-excerpt`, `no-featured-image`, `miss
 
 ```bash
 wp ttm migrate:politics --dry-run
-wp ttm migrate:politics            # creates `opinion` if missing, moves `politics` under it, keeps every post's terms
+wp ttm migrate:politics            # creates `opinion` if missing, moves `politics` under it, keeps every post's terms,
+                                    # adds `opinion` to every Politics post and sets it as that post's primary category
+                                    # (so PrimaryCategory::slug() reads "opinion" — Politics posts are Opinion posts now)
 wp ttm migrate:redirects --format=nginx   # prints `/category/politics/…` → `/category/opinion/politics/…` rules
 ```
 
@@ -181,7 +183,7 @@ wp ttm migrate:close-comments --dry-run
 wp ttm migrate:close-comments      # comment_status=closed, ping_status=closed on every post; default_comment_status=closed
 ```
 
-Existing comments are kept in the database and not rendered. Revisit after the content cleanup if you want them back.
+Existing comments are kept in the database and not rendered. Revisit after the content cleanup if you want them back. The command updates `comment_status`/`ping_status` directly (not through `wp_update_post()`) and fires the Cloudflare/Batcache purge exactly once for the whole batch, not once per post.
 
 ### 2.9 Verse
 

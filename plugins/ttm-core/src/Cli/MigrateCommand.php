@@ -93,6 +93,12 @@ class MigrateCommand extends Command {
 	 * `migrate:close-comments [--dry-run]`: closes comments/pingbacks on every post and page,
 	 * batched, and sets the site defaults to closed too.
 	 *
+	 * Updates `comment_status`/`ping_status` directly via `$wpdb` (clearing the post cache
+	 * itself) rather than `wp_update_post()`: that would fire `transition_post_status` once
+	 * per post, and `Cache\Purge::on_transition()` fires `ttm_purge_urls` on every one of
+	 * those -- a purge storm for what's really one bulk change. `ttm_purge_urls` fires exactly
+	 * once here, after the whole batch, covering every affected URL (SPEC rule 11).
+	 *
 	 * @param string[]             $args  Positional args (unused).
 	 * @param array<string, mixed> $assoc --dry-run.
 	 * @return array{ok: bool, rows: array<int, array<string, mixed>>, messages: string[]}
@@ -100,9 +106,12 @@ class MigrateCommand extends Command {
 	public function close_comments( array $args, array $assoc ): array {
 		unset( $args );
 
+		global $wpdb;
+
 		$dry_run = ! empty( $assoc['dry-run'] );
 		$batch   = (int) Config::get( 'cli.batch', 200 );
 		$rows    = [];
+		$urls    = [ home_url( '/' ) ];
 
 		foreach ( [ 'post', 'page' ] as $post_type ) {
 			$paged = 1;
@@ -126,15 +135,22 @@ class MigrateCommand extends Command {
 					$rows[] = [ 'post_id' => (int) $post_id ];
 
 					if ( ! $dry_run ) {
-						wp_update_post(
+						$wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- clean_post_cache() below covers caching; see docblock for why this bypasses wp_update_post().
+							$wpdb->posts,
 							[
-								'ID'             => $post_id,
 								'comment_status' => 'closed',
 								'ping_status'    => 'closed',
-							]
+							],
+							[ 'ID' => $post_id ]
 						);
+						clean_post_cache( $post_id );
+
+						$permalink = get_permalink( $post_id );
+						if ( is_string( $permalink ) ) {
+							$urls[] = $permalink;
+						}
 					}
-				}
+				}//end foreach
 
 				$found = count( $query->posts );
 				++$paged;
@@ -144,6 +160,10 @@ class MigrateCommand extends Command {
 		if ( ! $dry_run ) {
 			update_option( 'default_comment_status', 'closed' );
 			update_option( 'default_ping_status', 'closed' );
+
+			if ( ! empty( $rows ) ) {
+				$this->purge( $urls );
+			}
 		}
 
 		return [
@@ -158,8 +178,13 @@ class MigrateCommand extends Command {
 	}
 
 	/**
-	 * `--to=child`: reparent Politics under Opinion (creating Opinion if needed). Idempotent:
-	 * a second run sees Politics already parented under Opinion and does nothing further.
+	 * `--to=child`: reparent Politics under Opinion (creating Opinion if needed), add Opinion
+	 * to every Politics post (they keep Politics too -- it's a child now, not a replacement),
+	 * and set each post's `ttm_primary_category` to Opinion so `PrimaryCategory::slug()`
+	 * resolves to `'opinion'` (SPEC Q3: Politics posts are Opinion posts, kicker-wise; only
+	 * `Bindings\Sources::in_politics()`'s any-position check still finds "politics" on them).
+	 * Idempotent: a second run sees Politics already parented under Opinion and does nothing
+	 * further (including to individual posts).
 	 *
 	 * @param WP_Term $politics The Politics category term.
 	 * @param bool    $dry_run  Whether to only report the plan.
@@ -175,16 +200,33 @@ class MigrateCommand extends Command {
 			];
 		}
 
+		$posts = $this->posts_in_category( $politics->term_id );
+
 		if ( $dry_run ) {
 			return [
 				'ok'       => true,
-				'rows'     => [ [ 'term_id' => $politics->term_id ] ],
-				'messages' => [ sprintf( 'Would create/reuse "Opinion" and reparent Politics (term %d) under it.', $politics->term_id ) ],
+				'rows'     => array_map( static fn ( int $id ): array => [ 'post_id' => $id ], $posts ),
+				'messages' => [
+					sprintf( 'Would create/reuse "Opinion" and reparent Politics (term %d) under it.', $politics->term_id ),
+					sprintf( 'Would add Opinion to %d Politics post(s) and set it as their primary category.', count( $posts ) ),
+				],
 			];
 		}
 
 		$opinion_id = $this->ensure_opinion_term();
 		wp_update_term( $politics->term_id, 'category', [ 'parent' => $opinion_id ] );
+
+		$rows = [];
+		foreach ( $posts as $post_id ) {
+			$categories = wp_get_post_categories( $post_id, [ 'fields' => 'ids' ] );
+			if ( ! in_array( $opinion_id, $categories, true ) ) {
+				$categories[] = $opinion_id;
+				wp_set_post_categories( $post_id, array_values( array_unique( $categories ) ) );
+			}
+			update_post_meta( $post_id, 'ttm_primary_category', $opinion_id );
+
+			$rows[] = [ 'post_id' => $post_id ];
+		}
 
 		$this->record_redirects(
 			[
@@ -211,13 +253,8 @@ class MigrateCommand extends Command {
 
 		return [
 			'ok'       => true,
-			'rows'     => [
-				[
-					'term_id' => $politics->term_id,
-					'parent'  => $opinion_id,
-				],
-			],
-			'messages' => [ 'Politics is now a child of Opinion.' ],
+			'rows'     => $rows,
+			'messages' => [ sprintf( 'Politics is now a child of Opinion (%d post(s) updated).', count( $rows ) ) ],
 		];
 	}
 

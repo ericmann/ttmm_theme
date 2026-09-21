@@ -75,7 +75,7 @@ class Purge {
 			}
 		}
 
-		$series          = SeriesIndex::for_post( $post_id );
+		$series            = SeriesIndex::for_post( $post_id );
 		$is_fiction_series = $series && 'nonfiction' !== $series['form'];
 
 		if ( $series ) {

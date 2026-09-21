@@ -41,6 +41,42 @@ class MigrateCommandTest extends TTM_IntegrationTestCase {
 		$this->assertContains( '/category/politics/', $froms );
 	}
 
+	public function test_politics_child_mode_adds_opinion_to_politics_posts_and_sets_primary(): void {
+		$politics = $this->politics_id();
+		$post     = self::factory()->post->create( [ 'post_category' => [ $politics ] ] );
+		update_post_meta( $post, 'ttm_primary_category', $politics );
+
+		$result = ( new MigrateCommand() )->run( [], [] );
+
+		$this->assertTrue( $result['ok'] );
+
+		$categories = wp_get_post_categories( $post, [ 'fields' => 'slugs' ] );
+		$this->assertContains( 'politics', $categories );
+		$this->assertContains( 'opinion', $categories );
+
+		$opinion = get_term_by( 'slug', 'opinion', 'category' );
+		$this->assertNotFalse( $opinion );
+		$this->assertSame( (int) $opinion->term_id, (int) get_post_meta( $post, 'ttm_primary_category', true ) );
+		$this->assertSame( 'opinion', \TTM\Core\Meta\PrimaryCategory::slug( $post ) );
+	}
+
+	public function test_politics_child_mode_dry_run_reports_post_count_and_writes_nothing(): void {
+		$politics = $this->politics_id();
+		$post     = self::factory()->post->create( [ 'post_category' => [ $politics ] ] );
+		update_post_meta( $post, 'ttm_primary_category', $politics );
+
+		$result = ( new MigrateCommand() )->run( [], [ 'dry-run' => true ] );
+
+		$this->assertTrue( $result['ok'] );
+		$this->assertCount( 1, $result['rows'] );
+		$this->assertSame( $post, $result['rows'][0]['post_id'] );
+
+		$this->assertFalse( get_term_by( 'slug', 'opinion', 'category' ) );
+		$categories = wp_get_post_categories( $post, [ 'fields' => 'slugs' ] );
+		$this->assertNotContains( 'opinion', $categories );
+		$this->assertSame( $politics, (int) get_post_meta( $post, 'ttm_primary_category', true ) );
+	}
+
 	public function test_politics_dry_run_changes_nothing(): void {
 		$politics = $this->politics_id();
 
@@ -112,6 +148,44 @@ class MigrateCommandTest extends TTM_IntegrationTestCase {
 		$this->assertSame( 'closed', get_post( $page )->comment_status );
 		$this->assertSame( 'closed', get_option( 'default_comment_status' ) );
 		$this->assertSame( 'closed', get_option( 'default_ping_status' ) );
+	}
+
+	public function test_close_comments_fires_purge_once(): void {
+		$post_ids = self::factory()->post->create_many( 5, [ 'comment_status' => 'open' ] );
+
+		$fired = 0;
+		add_action(
+			'ttm_purge_urls',
+			static function () use ( &$fired ): void {
+				++$fired;
+			}
+		);
+
+		$result = ( new MigrateCommand() )->close_comments( [], [] );
+
+		$this->assertTrue( $result['ok'] );
+		$this->assertSame( 1, $fired );
+
+		foreach ( $post_ids as $post_id ) {
+			$this->assertSame( 'closed', get_post( $post_id )->comment_status );
+			$this->assertSame( 'closed', get_post( $post_id )->ping_status );
+		}
+	}
+
+	public function test_close_comments_dry_run_fires_no_purge(): void {
+		self::factory()->post->create_many( 3, [ 'comment_status' => 'open' ] );
+
+		$fired = 0;
+		add_action(
+			'ttm_purge_urls',
+			static function () use ( &$fired ): void {
+				++$fired;
+			}
+		);
+
+		( new MigrateCommand() )->close_comments( [], [ 'dry-run' => true ] );
+
+		$this->assertSame( 0, $fired );
 	}
 
 	public function test_politics_is_idempotent(): void {
