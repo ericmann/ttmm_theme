@@ -41,18 +41,27 @@ class NewsletterFormTest extends TTM_IntegrationTestCase {
 		return (string) do_blocks( '<!-- wp:ttm/newsletter-form' . $json . ' /-->' );
 	}
 
-	public function test_jetpack_provider_renders_subscriptions_block(): void {
-		register_block_type(
-			'jetpack/subscriptions',
-			[
-				'render_callback' => static fn (): string => '<div class="jetpack-subscribe-stub">Stub Form</div>',
-			]
-		);
+	public function test_jetpack_provider_renders_shared_form_with_widget_fields(): void {
+		register_block_type( 'jetpack/subscriptions', [] );
 
 		$html = $this->render();
 
-		$this->assertStringContainsString( 'jetpack-subscribe-stub', $html );
 		$this->assertStringContainsString( 'data-provider="jetpack"', $html );
+		$this->assertStringContainsString( 'class="ttm-newsletter-form__form"', $html );
+		$this->assertStringContainsString( 'name="action" value="subscribe"', $html );
+		$this->assertStringContainsString( 'name="sub-type" value="widget"', $html );
+		$this->assertStringContainsString( 'name="jetpack_subscriptions_widget"', $html );
+		$this->assertStringNotContainsString( 'mailto:', $html );
+	}
+
+	public function test_jetpack_unavailable_falls_through_to_custom_url_dev_accept(): void {
+		// jetpack/subscriptions is not registered, and Jetpack the class doesn't exist here:
+		// available() is false, so the chain falls through past jetpack to custom-url's
+		// dev-accept path (P1-06), not straight to mailto/none.
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'data-provider="custom-url"', $html );
+		$this->assertStringContainsString( '<form', $html );
 	}
 
 	public function test_mailto_provider_renders_mailto_link(): void {

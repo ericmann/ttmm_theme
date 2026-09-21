@@ -28,7 +28,12 @@ for how it was built; this file documents the plugin as it actually ships.
   one `.ttm-newsletter-form__form` markup shape (SPEC §6.3). `custom-url` accepts submissions
   locally (no forward, no log) whenever `newsletter.endpoint` is empty, `newsletter.dev_accept`
   is true, and the site isn't in production — this is what `wp ttm seed` configures, so the dev
-  poster shows and submits a real form without a real endpoint configured.
+  poster shows and submits a real form without a real endpoint configured. `jetpack` is
+  available only when Jetpack is actually connected (`Jetpack::is_connection_ready()`) or, for
+  tests, when `jetpack/subscriptions` is registered; it renders the shared form with the
+  widget's own hidden fields (`docs/spikes/P1-jetpack-form.md`) rather than the
+  `jetpack/subscriptions` block, and an installed-but-unconnected Jetpack falls through the
+  chain like any other unavailable provider.
 - **Cron/fetch:** the daily verse fetch (`Verse\Fetcher`), the only scheduled outbound request.
 - **Migration/maintenance:** every `wp ttm …` command below.
 
