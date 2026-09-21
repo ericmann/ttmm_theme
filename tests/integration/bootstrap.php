@@ -34,3 +34,5 @@ tests_add_filter(
 );
 
 require $ttm_tests_dir . '/includes/bootstrap.php';
+
+require_once __DIR__ . '/TestCase.php';

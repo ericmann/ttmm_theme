@@ -29,6 +29,7 @@ class Plugin {
 	public static function modules(): array {
 		return [
 			Compat\Theme::class,
+			Taxonomy\Series::class,
 		];
 	}
 
