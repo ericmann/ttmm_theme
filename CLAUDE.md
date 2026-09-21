@@ -28,11 +28,11 @@ Block theme `themes/ttm-theme` (presentation only) + companion plugin `plugins/t
 ## Module map
 Plugin `plugins/ttm-core/src/` (PSR-4 `TTM\Core\`), dependency arrow points down; `Cache`, `Verse`, `Newsletter` never import `Blocks`:
 - `Config.php` (imports nothing) · `Support/` Clock, Dates, Text, Html (imports Config)
-- `Taxonomy/` Series, SeriesAdmin · `Meta/` PostMeta, PrimaryCategory, WordCount, Form
-- `Query/` Lead, Cells, Archive, SeriesIndex, Stats, JournalExcerpt · `Fiction/` Serials, Books
+- `Taxonomy/` Series, SeriesAdmin · `Meta/` PostMeta, PrimaryCategory, WordCount, Form, SeriesPosition
+- `Query/` Lead, Cells (owns F9 stale-year end to end: cached staleness, count, dek suppression), Archive, SeriesIndex, Stats, JournalExcerpt · `Fiction/` Serials, Books
 - `Verse/` Fetcher, Cron, Admin · `Newsletter/` Handler, Settings, Providers, Provider/{Provider,Jetpack,CustomUrl,Mailto,None}
 - `Cache/` Headers, Purge, Cloudflare, Batcache · `Admin/` Page, General · `Templates/Hierarchy` · `Nav/CurrentSection` · `Compat/Theme`
-- `Bindings/` Sources (WP glue), Values (pure) · `Blocks/` Registrar, Helpers · `Editor/` Sidebar, Checks, Columns
+- `Bindings/` Sources (WP glue), Values (pure) · `Blocks/` Registrar, Helpers (registered `Plugin` module; owns the `ttm/archive-by-year` scope-flag hooks) · `Editor/` Sidebar, Checks, Columns, SeriesPartList
 - `Rest/` SeriesController, VerseController, LeadController · `Cli/` Loader, Command, *Command, Seeder · `Plugin.php` composition root
 - Blocks: `plugins/ttm-core/blocks/<name>/{block.json,render.php,index.js}`; editor JS `plugins/ttm-core/src/editor/`; entries from root `webpack.config.js`.
 

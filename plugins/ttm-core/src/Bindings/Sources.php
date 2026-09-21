@@ -31,6 +31,8 @@ class Sources {
 	 */
 	public static function register(): void {
 		add_action( 'init', [ self::class, 'register_sources' ] );
+		add_filter( 'render_block_core/query-pagination-next', [ self::class, 'label_next' ], 10, 3 );
+		add_filter( 'render_block_core/query-pagination-previous', [ self::class, 'label_previous' ], 10, 3 );
 	}
 
 	/**
@@ -441,7 +443,80 @@ class Sources {
 	public static function pagination_label( array $source_args, $block_instance, string $attribute_name ): string {
 		$dir = 'newer' === ( $source_args['dir'] ?? 'older' ) ? 'newer' : 'older';
 
-		return self::finalize( Archive::resolve_label( $dir ), $block_instance, $attribute_name );
+		return self::finalize( self::resolve_pagination_label( $dir ), $block_instance, $attribute_name );
+	}
+
+	/**
+	 * `render_block_core/query-pagination-next`: relabel "Older (2014–2022) →" when the
+	 * pagination's query inherits the main query.
+	 *
+	 * @param string               $content      Rendered block HTML.
+	 * @param array<string, mixed> $parsed_block Parsed block (unused).
+	 * @param WP_Block             $block        The pagination-next block.
+	 * @return string
+	 */
+	public static function label_next( string $content, $parsed_block, $block ): string {
+		unset( $parsed_block );
+
+		return self::relabel_pagination( $content, $block, 'older' );
+	}
+
+	/**
+	 * `render_block_core/query-pagination-previous`: relabel "← Newer (2023–2026)".
+	 *
+	 * @param string               $content      Rendered block HTML.
+	 * @param array<string, mixed> $parsed_block Parsed block (unused).
+	 * @param WP_Block             $block        The pagination-previous block.
+	 * @return string
+	 */
+	public static function label_previous( string $content, $parsed_block, $block ): string {
+		unset( $parsed_block );
+
+		return self::relabel_pagination( $content, $block, 'newer' );
+	}
+
+	/**
+	 * Swap a pagination link's text for the year-range label, only when the query inherits the
+	 * main query (a custom, non-inheriting query keeps core's own "Older"/"Newer" markup).
+	 *
+	 * @param string   $content Rendered block HTML.
+	 * @param WP_Block $block   The pagination-next/previous block.
+	 * @param string   $dir     `older` or `newer`.
+	 * @return string
+	 */
+	private static function relabel_pagination( string $content, $block, string $dir ): string {
+		if ( empty( $block->context['query']['inherit'] ) ) {
+			return $content;
+		}
+
+		$label = self::resolve_pagination_label( $dir );
+		if ( '' === $label ) {
+			return $content;
+		}
+
+		if ( preg_match( '/(<a[^>]*>)(.*?)(<\/a>)/s', $content, $matches ) ) {
+			return $matches[1] . esc_html( $label ) . $matches[3];
+		}
+
+		return $content;
+	}
+
+	/**
+	 * The formatted pagination label for a direction, from `Query\Archive::year_range()`'s pure
+	 * year-range lookup and `Values::pagination_label()`'s formatting -- the single source of
+	 * the "Older"/"← Newer" translatable strings. `''` when there is no target page.
+	 *
+	 * @param string $dir `older` or `newer`.
+	 * @return string
+	 */
+	public static function resolve_pagination_label( string $dir ): string {
+		$range = Archive::year_range( $dir );
+
+		if ( null === $range ) {
+			return '';
+		}
+
+		return Values::pagination_label( $dir, $range['from'], $range['to'] );
 	}
 
 	/**

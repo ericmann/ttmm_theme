@@ -197,6 +197,25 @@ class BoundariesTest extends TestCase {
 		return array_values( array_unique( $targets ) );
 	}
 
+	/**
+	 * Rule 32: `Bindings\Values::pagination_label()` is the single source of the two
+	 * translatable pagination strings -- a `Query\Archive::format_label()`-style duplicate
+	 * (fixed in R2-03) would fail this.
+	 */
+	public function test_pagination_label_strings_have_one_source(): void {
+		$src = rtrim( TTM_CORE_DIR, '/' ) . '/src';
+
+		foreach ( [ 'Older (%s) →', '← Newer (%s)' ] as $needle ) {
+			$count = 0;
+
+			foreach ( $this->php_files( $src ) as $file ) {
+				$count += substr_count( (string) file_get_contents( $file ), $needle );
+			}
+
+			$this->assertSame( 1, $count, "'{$needle}' should occur exactly once under plugins/ttm-core/src" );
+		}
+	}
+
 	public function test_no_directory_imports_a_later_row_of_the_spec_table(): void {
 		$src        = rtrim( TTM_CORE_DIR, '/' ) . '/src';
 		$violations = [];

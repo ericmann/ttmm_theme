@@ -7,8 +7,8 @@
 
 declare( strict_types=1 );
 
+use TTM\Core\Bindings\Sources;
 use TTM\Core\Config;
-use TTM\Core\Query\Archive;
 
 class ArchiveTest extends TTM_IntegrationTestCase {
 
@@ -142,7 +142,7 @@ class ArchiveTest extends TTM_IntegrationTestCase {
 
 		$this->go_to( (string) get_category_link( $tech ) );
 
-		$label = Archive::resolve_label( 'older' );
+		$label = Sources::resolve_pagination_label( 'older' );
 
 		$this->assertStringContainsString( 'Older (', $label );
 		$this->assertStringContainsString( '→', $label );

@@ -14,8 +14,11 @@ use WP_Query;
 use WP_Term;
 
 /**
- * `pre_get_posts` on the main front-end query only; also relabels the core query-pagination
- * next/previous blocks when their query inherits the main query (Decisions). The
+ * `pre_get_posts` on the main front-end query only, plus the pure year-range lookup the
+ * query-pagination relabel uses. The relabel filters themselves (and the "Older"/"← Newer"
+ * strings) live in `Bindings\Sources`/`Bindings\Values` — `Bindings\Values` is
+ * the single source of those strings (SPEC §4.2: `Bindings/` may import `Query/`, not the other
+ * way around, so the formatting belongs on that side of the boundary). The
  * `ttm/archive-by-year` inner post-template grouping (F15) lives in `Blocks\Helpers` — it is
  * purely block-render-scope state with no query dependency, and SPEC §4.2 forbids `Query/`
  * importing `Blocks/`.
@@ -27,8 +30,6 @@ class Archive {
 	 */
 	public static function register(): void {
 		add_action( 'pre_get_posts', [ self::class, 'shape' ] );
-		add_filter( 'render_block_core/query-pagination-next', [ self::class, 'label_next' ], 10, 3 );
-		add_filter( 'render_block_core/query-pagination-previous', [ self::class, 'label_previous' ], 10, 3 );
 	}
 
 	/**
@@ -77,73 +78,21 @@ class Archive {
 	}
 
 	/**
-	 * `render_block_core/query-pagination-next`: relabel "Older (2014–2022) →" when the
-	 * pagination's query inherits the main query.
-	 *
-	 * @param string               $content      Rendered block HTML.
-	 * @param array<string, mixed> $parsed_block Parsed block (unused).
-	 * @param \WP_Block            $block        The pagination-next block.
-	 * @return string
-	 */
-	public static function label_next( string $content, $parsed_block, $block ): string {
-		unset( $parsed_block );
-
-		return self::relabel( $content, $block, 'older' );
-	}
-
-	/**
-	 * `render_block_core/query-pagination-previous`: relabel "← Newer (2023–2026)".
-	 *
-	 * @param string               $content      Rendered block HTML.
-	 * @param array<string, mixed> $parsed_block Parsed block (unused).
-	 * @param \WP_Block            $block        The pagination-previous block.
-	 * @return string
-	 */
-	public static function label_previous( string $content, $parsed_block, $block ): string {
-		unset( $parsed_block );
-
-		return self::relabel( $content, $block, 'newer' );
-	}
-
-	/**
-	 * Swap a pagination link's text for the year-range label, only when the query inherits the
-	 * main query (a custom, non-inheriting query keeps core's own "Older"/"Newer" markup).
-	 *
-	 * @param string    $content Rendered block HTML.
-	 * @param \WP_Block $block  The pagination-next/previous block.
-	 * @param string    $dir     `older` or `newer`.
-	 * @return string
-	 */
-	private static function relabel( string $content, $block, string $dir ): string {
-		if ( empty( $block->context['query']['inherit'] ) ) {
-			return $content;
-		}
-
-		$label = self::resolve_label( $dir );
-		if ( '' === $label ) {
-			return $content;
-		}
-
-		if ( preg_match( '/(<a[^>]*>)(.*?)(<\/a>)/s', $content, $matches ) ) {
-			return $matches[1] . esc_html( $label ) . $matches[3];
-		}
-
-		return $content;
-	}
-
-	/**
-	 * The pagination label for a direction, from the main query's year range on the target
-	 * page (one bounded, ids-only `WP_Query` with the same query vars). `''` when there is no
-	 * such page.
+	 * The year range for a pagination direction's target page, from one bounded, ids-only
+	 * `WP_Query` reusing the main query's vars. `null` when there is no such page. Pure in the
+	 * sense that it hands back data, not a formatted string -- `Bindings\Sources` turns this
+	 * into "Older (2014–2022) →" / "← Newer (2023)" via `Bindings\Values::pagination_label()`,
+	 * the single source of those two strings (SPEC §4.2: `Query/` may not import `Bindings/`,
+	 * so the formatting cannot live here).
 	 *
 	 * @param string $dir `older` (next page) or `newer` (previous page).
-	 * @return string
+	 * @return array{from:int,to:int}|null
 	 */
-	public static function resolve_label( string $dir ): string {
+	public static function year_range( string $dir ): ?array {
 		global $wp_query;
 
 		if ( ! $wp_query instanceof WP_Query ) {
-			return '';
+			return null;
 		}
 
 		$paged   = (int) $wp_query->get( 'paged' );
@@ -151,12 +100,12 @@ class Archive {
 		$target  = 'newer' === $dir ? $current - 1 : $current + 1;
 
 		if ( $target < 1 ) {
-			return '';
+			return null;
 		}
 
 		$max_pages = (int) $wp_query->max_num_pages;
 		if ( $max_pages > 0 && $target > $max_pages ) {
-			return '';
+			return null;
 		}
 
 		$args                  = $wp_query->query_vars;
@@ -167,7 +116,7 @@ class Archive {
 		$target_query = new WP_Query( $args );
 
 		if ( empty( $target_query->posts ) ) {
-			return '';
+			return null;
 		}
 
 		$years = [];
@@ -175,30 +124,9 @@ class Archive {
 			$years[] = (int) get_the_date( 'Y', $post_id );
 		}
 
-		return self::format_label( $dir, min( $years ), max( $years ) );
-	}
-
-	/**
-	 * "Older (2014–2022) →" / "← Newer (2023)". Duplicates the tiny string built by
-	 * `Bindings\Values::pagination_label()` (used for the `ttm/pagination-label` binding) rather
-	 * than importing it, because `Query/` may not import `Bindings/` (SPEC §4.2).
-	 *
-	 * @param string $dir       `older` or `newer`.
-	 * @param int    $from_year Earliest year in range.
-	 * @param int    $to_year   Latest year in range.
-	 * @return string
-	 */
-	private static function format_label( string $dir, int $from_year, int $to_year ): string {
-		$lo    = min( $from_year, $to_year );
-		$hi    = max( $from_year, $to_year );
-		$range = $lo === $hi ? (string) $lo : $lo . '–' . $hi;
-
-		if ( 'newer' === $dir ) {
-			/* translators: %s: year or year range. */
-			return sprintf( __( '← Newer (%s)', 'ttm-core' ), $range );
-		}
-
-		/* translators: %s: year or year range. */
-		return sprintf( __( 'Older (%s) →', 'ttm-core' ), $range );
+		return [
+			'from' => min( $years ),
+			'to'   => max( $years ),
+		];
 	}
 }

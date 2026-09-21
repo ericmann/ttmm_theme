@@ -236,9 +236,10 @@ test; R1-14 i18n for masthead labels/Books/book-grid/feed title; R1-15 docs alig
   (new) owns the series part list/Parts column via its own hooks (Taxonomy/ may not import
   Editor/).
 - **R1-02** — rule 24's allow-list covers HTTP status codes plus `Query/Cells.php` and
-  `blocks/writing-cell/render.php` (both explicitly out of scope for this task; a separate
-  queued R-task owns them — none was queued this round, so they remain warnings-turned-silent
-  by the allow-list, not failures).
+  `blocks/writing-cell/render.php` (both explicitly out of scope for this task, left as literals
+  under a deliberate, documented allow-list rather than silently widening this task). Corrected
+  in round 2: R2-01 became that separate queued task, moved `Query/Cells.php`'s F9 literal to
+  `cells.stale_count`, and removed the allow-list entirely (see `## Round 2` below).
 - **R1-03** — `SeriesCommand::run()`'s `if ($form) update_term_meta(...)` block moved before
   the assignment loop so `Meta\Form::on_save()` (called per assigned post) reads the
   already-set `ttm_form` and derives `chapter` immediately.
