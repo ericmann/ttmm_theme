@@ -103,6 +103,11 @@ add_filter( 'ttm_config', function ( array $config ): array {
 } );
 ```
 
+`nav.front_current` (default `'lead'`) controls which section reads as current in the front-page
+nav: `'lead'` marks the lead post's primary category (`Nav\CurrentSection`, via `Query\Lead` and
+`Meta\PrimaryCategory`); `'none'` marks nothing. It only affects the front page — every other
+template's current-section mark (single post, category archive, series pages) is unconditional.
+
 A narrow subset (`newsletter.*`, `lead.sticky_days`, `lead.stale_days`, `journal_in_main_feed`,
 `comments_enabled`) is also editable from Settings → These Things Matter, stored in the
 `ttm_settings` option, and overlaid on top of the defaults before `ttm_config` runs.

@@ -651,8 +651,16 @@ blockquote.is-style-pull cite,
 	gap: 28px;
 }
 
-.ttm-masthead-front__nav .current-menu-item > a {
-	color: var(--wp--preset--color--accent);
+/* Decision "Colour vs a11y": accent (#ec3013 on bg) fails WCAG AA contrast at this weight/size,
+ * so every `.current-menu-item` (front masthead included) uses accent-700 instead of the SPEC
+ * table's literal "accent" -- `.ttm-masthead-front__nav` already carries the shared `.ttm-nav`
+ * class, so one rule covers both. `!important` needed: core's own
+ * `.wp-block-navigation-item__content.wp-block-navigation-item__content{color:inherit}` (a
+ * repeated-class specificity trick) matches at the same class-count as this selector and wins
+ * the cascade despite this selector's extra `a` type selector (confirmed via a live render) --
+ * see the identical note on `.ttm-nav__hub > a` below. */
+.ttm-nav .current-menu-item > a {
+	color: var(--wp--preset--color--accent-700) !important;
 }
 
 .ttm-masthead-front__nav .ttm-nav__hub {

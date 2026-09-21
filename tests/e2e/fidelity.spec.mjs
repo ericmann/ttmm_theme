@@ -113,14 +113,18 @@ test.describe( 'masthead', () => {
 		expect( await computed( list, 'column-gap' ) ).toBe( px( 28 ) );
 	} );
 
-	test.fixme( 'mast-current: .ttm-masthead-front__nav .current-menu-item > a @1280', async ( {
+	test( 'mast-current: .ttm-masthead-front__nav .current-menu-item > a @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
 		const current = page.locator(
 			'.ttm-masthead-front__nav .current-menu-item > a'
 		);
-		expect( await computed( current, 'color' ) ).toBe( color( 'accent' ) );
+		// Decision "Colour vs a11y": accent fails WCAG AA contrast at this size/weight, so this
+		// row uses accent-700 instead of the SPEC table's literal "accent" (see ttm.css).
+		expect( await computed( current, 'color' ) ).toBe(
+			color( 'accent-700' )
+		);
 	} );
 
 	test( 'mast-hub: .ttm-masthead-front__nav .ttm-nav__hub > a @1280', async ( {
