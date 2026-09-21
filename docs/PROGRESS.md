@@ -5,7 +5,7 @@ Started: 2026-09-21T19:10:39.166Z
 ## Tasks
 - [x] P0-01 CSS coverage lint script and allow-list
 - [x] P0-02 Config keys for phase 2 and the fallback-literal test
-- [ ] P0-03 Boundaries table, CSS budget and SETUP note
+- [x] P0-03 Boundaries table, CSS budget and SETUP note
 - [ ] P0-04 Fidelity and editors Playwright skeletons (all rows fixme)
 - [ ] P0-05 Screenshot script and phase-2 feedback folder
 - [ ] P0-06 Seeder prose library and tagline
@@ -58,3 +58,12 @@ tests/unit/ConfigFallbacksTest.php (new): scans plugins/ttm-core/src/**/*.php + 
 This surfaced a real bug: Verse/Fetcher.php's verse.user_agent fallback was 'TTM-Core/{version}' vs default 'TTM-Core/{version} (+https://eric.mann.blog)' — fixed the fallback literal to match (file added to Files touched beyond the task list, since the new acceptance test can't pass otherwise).
 ConfigTest.php's expected-keys list updated with the four new keys.
 Verified: composer test:unit (133/133), composer lint (0 errors), npm run lint, npm run test:unit, npm run build, forbidden-patterns, npm run test:integration (374/374) all green. grep -rn thin_days plugins tests: empty.
+
+### P0-03 — 568e7d6
+ROW_ORDER reordered to SPEC §4: ., Support, Taxonomy, Meta, Query, Fiction, Cache, Verse, Newsletter, Bindings, Blocks, Editor, Templates, Nav, Rest, Compat, Admin; Cli removed (exempt, always skipped as source, unmapped as target).
+New MAY_IMPORT const encodes the exact per-row "May import" column (not just rank); Blocks/tier-6 dirs list "everything above" explicitly.
+KNOWN_EXCEPTIONS (one-line reasons each): Cache->Meta, Cache->Query (Headers/Purge reading PrimaryCategory/SeriesIndex), Verse->Admin, Newsletter->Admin, Fiction->Admin (Admin\Page settings-screen inheritance). Applied in all three test methods so these don't fail; reported under "## Spec issues" in the commit body per task instructions — not refactored (cache/verse/newsletter internals out of scope).
+New test_may_import_column_is_enforced_per_directory: builds a [file => [dir, used_dirs]] map from the real tree and asserts zero violations against MAY_IMPORT+KNOWN_EXCEPTIONS+self; a synthetic Support/->Query fixture (dict literal, no disk I/O) is asserted to produce a violation, proving the check has teeth.
+scripts/check-budget.mjs: cssBudgetBytes 33200 -> 40960 (CLAUDE.md already said 40960; this file was stale). Current ttm.css is 33070 bytes, well under.
+docs/SETUP.md: added Troubleshooting row for the wp-env stale-bind-mount "theme disappears" symptom -> `npx wp-env stop && npx wp-env start`.
+Verified: composer test:unit (134/134), composer lint (0 errors), npm run lint (budget prints ".../40960 bytes"), npm run test:unit, npm run build, forbidden-patterns.sh all green.
