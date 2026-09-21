@@ -46,7 +46,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P3-12 Push and manual check (Phase 3)
 - [x] P4-01 series-bar block
 - [x] P4-02 series-toc block
-- [ ] P4-03 series-prev-next and syndicated-to blocks
+- [x] P4-03 series-prev-next and syndicated-to blocks
 - [ ] P4-04 Bindings reading-time, word-count, journal-subline, series-name, series-part
 - [ ] P4-05 Template routing, article and journal patterns and templates
 - [ ] P4-06 Article and journal CSS including classic content
@@ -315,3 +315,6 @@ Added the ttm/series-bar block: usesContext:["postId"] with get_the_ID() fallbac
 
 ### P4-02 — 00d3376
 Added the ttm/series-toc block: resolves a series via seriesId attribute (Writing page, no post context) -> the current post's own series -> Fiction\Serials::active() as a last resort, returning '' when none resolve (F11). Renders "In this series" (or the heading attribute) + a "Hub →" link, then one <li> per part numbered 01/02/... — unlinked for the current part or any not-yet-published part (F24 adds title="Scheduled Sept 26" on the latter), linked otherwise; F23 filters to published-only parts first when ttm_total_parts is open-ended (0/empty), before sorting (asc/desc) and applying limit. The chapters variant adds the ttm-numbered class and an optional dek line (showDek) from the chapter's excerpt. Full integration suite: 179 tests, 1 pre-existing skip, 0 failures.
+
+### P4-03 — f76060a
+Added ttm/series-prev-next: mode=series links adjacent published parts ("← Part N"/"Part N →"), mode=chronological (and auto's fallback when the post has no series) finds the nearest same-primary-category post before/after via a bounded WP_Query with date_query + ttm_primary_category meta_query (never get_adjacent_post, which ignores primary category) with "← Previously in {Category}"/"Next →" labels; a missing side renders an empty but present cell (F11), keeping the grid. Added ttm/syndicated-to: renders only on a single Journal post (primary category slug === sections.journal_slug) with at least one ttm_syndication URL (x/mastodon/bluesky), joining network links with "and" via Html::link(), plus the word count; F14 (no URLs) and non-Journal posts render nothing. Full integration suite: 188 tests, 1 pre-existing skip, 0 failures.
