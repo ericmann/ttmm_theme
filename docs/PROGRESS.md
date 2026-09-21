@@ -30,7 +30,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P2-03 ttm.css chrome, nav.js, editor.css; CSS budget tuning
 - [x] P2-04 Block variations and starter content
 - [x] P2-05 Template parts and chrome patterns
-- [ ] P2-06 page, 404, index and search-shell templates; current section and body classes
+- [x] P2-06 page, 404, index and search-shell templates; current section and body classes
 - [ ] P2-07 Push and manual check (Phase 2)
 - [ ] P3-01 Block registrar, shared helpers, webpack entries, verse-of-the-day block
 - [ ] P3-02 Verse fetcher
@@ -260,3 +260,11 @@ header-front.html/header-inner.html: contentOnly-locked header Group (skip link 
 newsletter-poster.php/newsletter-box.php/pull-quote.php/code-figure.php/stat-row.php: standard pattern-header PHP files (Title/Slug ttm/*/Categories/Inserter), auto-registered by WP core scanning themes/ttm-theme/patterns/*.php — no manual register_block_pattern() needed. Verified via WP_Block_Patterns_Registry::is_registered() in the test.
 80 integration tests pass (5 new); full verify green.
 Manual check: NOT VERIFIED (human) -- open the front page and an inner page, confirm the skip link/header landmarks/nav render; check the 7 new patterns appear in the editor inserter under their categories.
+
+### P2-06 — a852c0b
+index.html: inner header, main#main with core/query inherit=true (ttm-item rows: post-title/post-excerpt/post-date) + pagination, footer. page.html: inner header, main#main is-style-grid-8-4 with post-title/post-content(.entry-content) + an empty aside aria-label="Related", footer. 404.html: H1 "Not here." is-style-display-xl, dek paragraph, core/search, wp:pattern ttm/series-strip (renders nothing until P3-10), a 4-post "Latest" query. search.html: inner header, query-title type=search is-style-display-xl, core/search, results query+pagination, footer.
+Nav\CurrentSection::filter() hooks render_block_core/navigation-link: compares wp_parse_url(...,PHP_URL_PATH)+trailingslashit of the link URL against (a) the current singular post's PrimaryCategory::slug's category link, (b) '/series/' when the post has a series entry, or (c) the queried category's link on category archives — adds 'current-section' class via a regex insert into the rendered anchor's class attribute (or adds a class attribute if none exists). Removes the Series link entirely (returns '') when SeriesIndex::all() is empty (F18).
+Templates\Hierarchy::body_classes() (this task only — single_template/category_template routing is P4-05 per its own out-of-scope note): adds ttm-section-{slug} (primary category on singular post, queried category on archives), ttm-in-series when SeriesIndex::for_post() is non-null, ttm-form-{form} from post meta.
+Plugin::modules() appends Nav\CurrentSection, Templates\Hierarchy.
+87 integration tests pass (7 new); full verify green.
+Manual check: NOT VERIFIED (human) -- visit a post, its category archive, a 404, and search results; confirm current-section highlighting and the new template shells render.
