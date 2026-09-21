@@ -254,6 +254,52 @@ class CellsTest extends TTM_IntegrationTestCase {
 		$this->assertStringNotContainsString( 'A real excerpt', $html );
 	}
 
+	public function test_fresh_section_after_stale_section_keeps_its_dek(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$security   = $this->category_id( 'security', 'Security' );
+		$technology = $this->category_id( 'technology', 'Technology' );
+
+		self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $security ],
+				'post_title'    => 'Old Security Post',
+				'post_excerpt'  => 'A stale excerpt that must not appear.',
+				'post_date'     => '2024-01-01 09:00:00',
+			]
+		);
+
+		self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $technology ],
+				'post_title'    => 'Fresh Technology Post',
+				'post_excerpt'  => 'A fresh excerpt that must appear.',
+				'post_date'     => '2026-09-19 09:00:00',
+			]
+		);
+
+		$block = static function ( string $section ): string {
+			return '<!-- wp:query {"queryId":0,"query":{"perPage":2,"postType":"post","inherit":false,"ttmSection":"' . $section . '"}} -->' .
+				'<div class="wp-block-query">' .
+				'<!-- wp:post-template -->' .
+				'<!-- wp:post-title {"isLink":true} /-->' .
+				'<!-- wp:post-excerpt {"className":"ttm-item__dek"} /-->' .
+				'<!-- /wp:post-template -->' .
+				'</div>' .
+				'<!-- /wp:query -->';
+		};
+
+		$stale_html = (string) do_blocks( $block( 'security' ) );
+		$fresh_html = (string) do_blocks( $block( 'technology' ) );
+
+		$this->assertStringContainsString( 'is-stale', $stale_html );
+		$this->assertStringNotContainsString( 'ttm-item__dek', $stale_html );
+
+		$this->assertStringContainsString( 'ttm-item__dek', $fresh_html );
+		$this->assertStringContainsString( 'A fresh excerpt that must appear.', $fresh_html );
+	}
+
 	public function test_journal_rail_posts_per_page_comes_from_config(): void {
 		$this->category_id( 'journal', 'Journal' );
 

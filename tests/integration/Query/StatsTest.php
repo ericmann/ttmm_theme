@@ -46,6 +46,16 @@ class StatsTest extends TTM_IntegrationTestCase {
 		$this->assertSame( 2, $stats['count'] );
 		$this->assertSame( 2020, $stats['first_year'] );
 		$this->assertSame( 2024, $stats['last_year'] );
+		$this->assertSame( '2024-06-01 12:00:00', $stats['newest_date'] );
+	}
+
+	public function test_newest_date_is_null_for_an_empty_category(): void {
+		$cat = $this->category_id( 'empty-category', 'Empty Category' );
+
+		$stats = Stats::category( $cat );
+
+		$this->assertSame( 0, $stats['count'] );
+		$this->assertNull( $stats['newest_date'] );
 	}
 
 	public function test_series_count_uses_index_categories(): void {
