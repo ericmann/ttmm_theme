@@ -38,7 +38,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P3-04 Lead selection, cell query filter and lead REST
 - [x] P3-05 Bindings kicker, meta-line, short-date, relative-date, category-count, today; journal excerpt
 - [x] P3-06 lead-story block
-- [ ] P3-07 series-list block
+- [x] P3-07 series-list block
 - [ ] P3-08 Serials query and writing-cell block
 - [ ] P3-09 newsletter-form block with jetpack, mailto and none providers
 - [ ] P3-10 Front-page patterns, rail, template and front CSS
@@ -291,3 +291,6 @@ Added Bindings\Values (pure): kicker(ctx) (section + open-ended "part N" or "par
 
 ### P3-06 — 84306f9
 Added the ttm/lead-story block: resolves Query\Lead::compute(), renders nothing when reason==='none'; builds kicker/meta-line context the same way Bindings\Sources does (primary category, series position, previous published part via SeriesIndex::for_post, open-ended total from ttm_total_parts term meta) but calls Bindings\Values directly since render.php already has the resolved post rather than a consuming block's context; F8 text-only (no <figure>, class is-textonly) when there's no featured image or previewState=thin; F22 kicker always shows the lead's real section even on a sitewide fallback; image rendered via Blocks\Helpers::image with fetchpriority=high (which also suppresses loading=lazy); dek omitted when the excerpt is empty; previewState=empty returns ''. Full integration suite: 135 tests, 1 pre-existing skip, 0 failures.
+
+### P3-07 — dc8d316
+Added the ttm/series-list block: filters SeriesIndex::all() by status/form/inCategory (queried-object category term), F4 fallback from in-progress to complete (adds is-complete + data-ttm-empty-heading="Series" on the wrapper) when the requested status yields nothing but other series exist; returns '' only when the index itself is empty or the fallback also yields nothing. Sorts by updated (last_update desc)/title/started (first part date asc), slices to limit (falls back to Config's series.strip_limit when 0). Each row is one whole-row <a> (mark, title, optional dek from the term's description, optional categories line in nav order, optional right-column count "N of M"/"N parts" over the status word — open-endedness read from ttm_total_parts term meta directly, same pattern as P3-05/06). Filtering/sorting logic is kept in local closures rather than named functions, since render.php is require()'d fresh on every render within a request and a named top-level function/class would fatal on a second render of the same block on one page. Full integration suite: 141 tests, 1 pre-existing skip, 0 failures.
