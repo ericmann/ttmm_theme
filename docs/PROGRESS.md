@@ -75,7 +75,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P8-02 CLI convert:export, convert:import, convert:revert
 - [x] P8-03 CLI audit
 - [x] P8-04 CLI migrate:politics, migrate:redirects, migrate:close-comments
-- [ ] P8-05 Spike: Jetpack Social share URLs to ttm_syndication
+- [x] P8-05 Spike: Jetpack Social share URLs to ttm_syndication
 - [ ] P8-06 Plugin README, MIGRATION and SETUP cross-check
 - [ ] P8-07 Playwright + axe e2e suite and CI
 - [ ] P8-08 Push, final manual checks and HANDOFF (Phase 8)
@@ -463,3 +463,16 @@ core-option allow-list alongside the pre-existing default_comment_status.
 integration). Manual wp-env check confirmed correct idempotent no-op against
 the seed (which already applies the Q3 structure), plus spot-checked
 redirects json/nginx output and close-comments dry-run listing.
+
+### P8-05 — 76f8464
+Implemented wp ttm migrate:syndication (SyndicationCommand.php). Spike
+finding (docs/spikes/P8-05.md): of the three meta keys named in the task
+text, only _publicize_done_external carries a URL
+({service: {connection_id: url}} per Jetpack's own source, no live export
+available); _wpas_done_{service} and jetpack_social_post_already_shared are
+plain booleans and documented as examined-but-inert. Service slugs map to
+x/mastodon/bluesky; reuses the existing Meta\PostMeta::sanitize_syndication()
+rather than duplicating https/known-network enforcement. Never parses meta
+by hand - a non-array value (e.g. a raw string) is simply skipped. Added the
+command name to docs/MIGRATION.md §2.7. 5 new integration tests all passing;
+foundry_verify fully green (337/337 integration).
