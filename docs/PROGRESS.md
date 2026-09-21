@@ -21,7 +21,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P1-09 Admin settings page and general settings
 - [x] P1-10 Books repeater
 - [x] P1-11 REST series endpoints and lead stub
-- [ ] P1-12 CLI recount, primary:assign, series:assign, series:rebuild
+- [x] P1-12 CLI recount, primary:assign, series:assign, series:rebuild
 - [ ] P1-13 Seeder core: categories, pages, navigation, posts, images
 - [ ] P1-14 Seeder fiction, verse, states and seed command; tuning series.max_purchase_links
 - [ ] P1-15 Push and manual check (Phase 1)
@@ -199,3 +199,10 @@ Plugin::modules() appends Rest\SeriesController, Rest\LeadController.
 Fixed two lint regressions found by a fresh phpcs pass against P1-09's Admin/Page.php and Admin/General.php (a stale local phpcs cache had hidden them): Page::handle_save()'s deliberate exit-omission (needed for direct PHPUnit callability) now has a justified phpcs:ignore for WordPressVIPMinimum.Security.ExitAfterRedirect.NoExit; General::save() got the same nonce-already-checked-upstream phpcs:disable/enable bracket used in Fiction\Books::save().
 52 integration tests pass (8 new); full verify green (composer lint, test:unit, npm lint/test:unit/build, forbidden-patterns, test:integration all confirmed green in this task).
 Manual check: none
+
+### P1-12 — 5553796
+Cli\Command: abstract run(array $args, array $assoc): array{ok,rows,messages}. RecountCommand::run supports --post=<id> or --all (batched WP_Query fields=ids, Config cli.batch=200), writes ttm_word_count via Text::word_count. PrimaryCommand::run: --dry-run; fills ttm_primary_category only when empty via PrimaryCategory::id(), batched. SeriesCommand::run implements series:assign <slug> --from-tag=<tag> [--form=] [--dry-run]: finds/creates the series term, attaches every post tagged with --from-tag that has no series yet (reports skipped ones already in a series), numbers ttm_series_part by post_date ascending, sets ttm_form when --form given, sets ttm_status to complete when the newest assigned post is more than lead.stale_days old (via Clock::now()/Dates::days_between), then SeriesIndex::rebuild(); --dry-run writes nothing. SeriesCommand::rebuild() is the separate series:rebuild core (one class per PSR-4 file rule; two CLI subcommands via run()/rebuild()).
+Cli\Loader::register() (called directly by Plugin::boot(), not hooked) is a no-op unless defined('WP_CLI')&&WP_CLI; wraps each Command with WP_CLI::log()/format_items()/halt(1) on failure. Verified manually: `npx wp-env run cli wp ttm recount --all` printed "Recounted 1 post(s)." + a table — confirmed working end-to-end in wp-env.
+Added Config key cli.batch=200 (ConfigTest updated). Plugin::modules() appends Cli\Loader.
+60 integration tests pass (8 new); full verify green.
+Manual check: none (wp-env CLI run confirmed in this task).
