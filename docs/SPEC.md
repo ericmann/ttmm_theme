@@ -24,6 +24,7 @@ Goals:
 - Goal: The newsletter poster renders a real email form (input + button) for every provider except `none`, including on the seeded dev site, and posts somewhere that works in production (Jetpack, per the owner's decision Q5 in phase 1).
 - Goal: Every `ttm-*` class any template, part, pattern or block emits has a rule in `ttm.css`, enforced by a lint script, so "block emits class, theme forgot it" cannot recur.
 - Goal: Seed content reads like the mock (real sentences, realistic titles and deks, the mock's tagline and journal entries) so a human can compare screenshots.
+- Goal: Every `ttm/*` block is a supported block in the post editor, Site Editor and Customizer (§6.7); the "Your site doesn't include support for the ttm/… block" message the owner saw is a defect.
 - Goal: Screenshots of the result are produced by the flight itself (Playwright) and committed under `docs/feedback/phase-2/`.
 
 Non-goals (become `**Out of scope:**` lines on tasks):
@@ -252,6 +253,8 @@ Each row is one `expect(await el.evaluate(getComputedStyle...))` at the named vi
 | footer-nav | `.ttm-footer .wp-block-navigation-item` | 1280 | count | 9 |
 | footer-nav-sep | `.ttm-footer .wp-block-navigation-item:nth-child(2)::before` | 1280 | content | "·" |
 | footer-phone | `.ttm-footer` | 390 | flex-direction / font-size | column / 11px |
+| editor-sed | Site Editor, front-page template | 1280 | text / `wp.blocks.getBlockType` | no "doesn't include support for"; every `ttm/*` defined |
+| editor-customizer | `/wp-admin/customize.php` | 1280 | text / `wp.blocks.getBlockType` | no "doesn't include support for"; every `ttm/*` defined |
 | a11y | whole page | both | axe | 0 serious/critical |
 | network | whole page | both | requests | same-origin only; no `wp-json`, `admin-ajax`, `fonts.googleapis.com` |
 
@@ -307,6 +310,21 @@ The NIV notice must appear on the page (Zondervan's terms), but not in the box. 
 
 `npm run screenshots` (Playwright, added in Phase 0) writes `docs/feedback/phase-2/front-1280.png` and `front-390.png` (full page) plus one per zone at 1280 (`masthead`, `lead-row`, `section-rows`, `series-strip`, `poster-footer`) from the seeded site. Each phase's push task re-runs it and commits the PNGs so the owner compares against `docs/feedback/design_*.png`.
 
+### 6.7 Blocks are registered in every editor context
+
+The owner opened the Customizer (`/wp-admin/customize.php`) and saw "Your site doesn't include support for the ttm/lead-story block" for the lead story, verse of the day, writing cell, newsletter form and others. That message means the block *type* exists in PHP (`WP_Block_Type_Registry`) but not in the JavaScript registry of that editor, so the block is unsupported wherever the plugin's editor script did not load. It must not happen in the post editor, the Site Editor (`/wp-admin/site-editor.php`, templates and template parts), or the Customizer's widgets/menus editors (a block theme still exposes `customize.php`, and the live site runs Jetpack, which links to it).
+
+Contract:
+
+- Every `ttm/*` `block.json` `editorScript` resolves to a file that exists in the plugin as shipped (`build/blocks/<name>/index.js`, committed `build/` **or** built in CI before packaging — pick one and record it; today `Blocks\Registrar` strips `editorScript` when `build/` is absent, which silently produces exactly this message and must instead register the block with a no-op editor script plus an admin notice "run npm run build").
+- Each editor `index.js` declares only dependencies WordPress loads in every block-editor context (`wp-blocks`, `wp-element`, `wp-i18n`, `wp-block-editor`, `wp-components`, `wp-server-side-render`); the generated `index.asset.php` is the source of truth and an integration test asserts each handle in it is registered in `WP_Scripts` on `enqueue_block_editor_assets` and on `customize_controls_enqueue_scripts`.
+- `Blocks\Registrar` hooks `init` (not `enqueue_block_editor_assets` only) and the `block_categories_all` category `ttm` exists in every context.
+- Integration test: `get_block_editor_server_block_settings()` includes every `ttm/*` block with a non-empty `editorScript`/`editor_script_handles`; `WP_Block_Type_Registry::get_instance()->get_registered('ttm/lead-story')->editor_script_handles` is non-empty on a clean checkout after `npm run build`.
+- e2e (`tests/e2e/editors.spec.js`): log in as the seeded admin, open the Site Editor front-page template and the Customizer, wait for the editor to settle, and assert the text "doesn't include support for" appears nowhere and that `wp.blocks.getBlockType('ttm/lead-story')` (and every other `ttm/*`) is defined in the page. Rows `editor-sed` and `editor-customizer` join the fidelity table (§6.2).
+- `docs/SETUP.md` states that `npm run build` must run before the editors are opened in wp-env and that `npm run env:seed` runs it.
+
+The planner schedules this as its own task in Phase 1 (it is independent of the CSS work) with the diagnosis recorded in the log: which context lacked the script, and why.
+
 ## 7. Commands
 
 Unchanged from phase 1 except `npm run lint` now also runs `scripts/check-css-coverage.mjs`, and the e2e set gains `fidelity.spec.js` and the screenshot script.
@@ -361,7 +379,8 @@ Each phase ends with a task that runs `npm run screenshots`, commits the PNGs, p
 - Masthead front per §6.1.1: byline spacing, tagline alignment, nav gap/size, `ttm-nav__hub` unified, `Nav\CurrentSection` front-page current mark (`nav.front_current`), meta-row links without navigation chrome. Inner masthead: only what it shares (rules, nav hub class).
 - Footer per §6.1.8: single meta line via `ttm/today format=footer`, `ttm/verse-copyright` binding + `verse.copyright_placement`, nav separators, phone stacking. Verse block drops the `<small>` unless placement is `box`.
 - Poster per §6.1.8 and the newsletter form per §6.3: shared form markup, provider switch, `custom-url` dev-accept, Jetpack spike (bounded, one task) with fixture, seed sets `custom-url`. Integration tests: each provider's markup; handler dev-accept only outside production; Jetpack fields match the fixture.
-- Un-fixme rows: `rule-*`, `mast-*`, `verse-nocopy`, `poster-*`, `footer-*`.
+- Editor registration per §6.7 (own task): diagnose the missing editor script, fix `Blocks\\Registrar`/asset deps, integration test, `editors.spec.js`, SETUP note.
+- Un-fixme rows: `rule-*`, `mast-*`, `verse-nocopy`, `poster-*`, `footer-*`, `editor-*`.
 - **Visible result:** masthead and footer match; poster has an email field. Manual check: compare `masthead.png` and `poster-footer.png` with `design_top.png` / `design_footer.png`.
 
 ### Phase 2 — Lead row
