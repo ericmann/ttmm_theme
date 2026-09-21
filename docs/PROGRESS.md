@@ -37,7 +37,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P3-03 Verse cron, admin tab and CLI
 - [x] P3-04 Lead selection, cell query filter and lead REST
 - [x] P3-05 Bindings kicker, meta-line, short-date, relative-date, category-count, today; journal excerpt
-- [ ] P3-06 lead-story block
+- [x] P3-06 lead-story block
 - [ ] P3-07 series-list block
 - [ ] P3-08 Serials query and writing-cell block
 - [ ] P3-09 newsletter-form block with jetpack, mailto and none providers
@@ -288,3 +288,6 @@ Added Query\Lead: compute() is the single cached entry point (reads/writes the t
 
 ### P3-05 — 9c42cf1
 Added Bindings\Values (pure): kicker(ctx) (section + open-ended "part N" or "part N of M" series suffix, or "· Politics"), meta_line(parts,ctx) (date/reading/prev-part joined with " · ", prev-part as an Html::link), short_date/relative_date (relative_date reuses Dates::relative_day for the today/yesterday/weekday bands, falls to a bare short date within journal.rail_window_days, else always full-with-year even in the current year per the P3-05 Decision), category_count (0 -> "All →", articles singular/plural via _n, or short), today (masthead/compact/year). Added Bindings\Sources: registers ttm/kicker, ttm/meta-line, ttm/short-date, ttm/relative-date, ttm/category-count, ttm/today via register_block_bindings_source with uses_context [postId,postType] (guarded against re-registration across repeated init fires, same doing_it_wrong pattern as Blocks\Registrar); gathers post/primary-category/series-position/term-count data and calls Values; finalize() strips HTML from every source/attribute pair except ttm/meta-line's prev-part link into core/paragraph's own content attribute. Open-ended series total resolved by reading ttm_total_parts term meta directly (SeriesIndex's own computed total substitutes the published count when meta is empty, so it can't signal open-endedness). Added Query\JournalExcerpt: get_the_excerpt (priority 5) returns a sentence-trimmed excerpt for a Journal-primary post with no manual excerpt; excerpt_more returns '' for those posts so core's "[&hellip;]" marker never appears. Registered Bindings\Sources and Query\JournalExcerpt in Plugin::modules(). Full integration suite: 129 tests, 1 pre-existing skip, 0 failures.
+
+### P3-06 — 84306f9
+Added the ttm/lead-story block: resolves Query\Lead::compute(), renders nothing when reason==='none'; builds kicker/meta-line context the same way Bindings\Sources does (primary category, series position, previous published part via SeriesIndex::for_post, open-ended total from ttm_total_parts term meta) but calls Bindings\Values directly since render.php already has the resolved post rather than a consuming block's context; F8 text-only (no <figure>, class is-textonly) when there's no featured image or previewState=thin; F22 kicker always shows the lead's real section even on a sitewide fallback; image rendered via Blocks\Helpers::image with fetchpriority=high (which also suppresses loading=lazy); dek omitted when the excerpt is empty; previewState=empty returns ''. Full integration suite: 135 tests, 1 pre-existing skip, 0 failures.
