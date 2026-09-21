@@ -34,7 +34,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P2-07 Push and manual check (Phase 2)
 - [x] P3-01 Block registrar, shared helpers, webpack entries, verse-of-the-day block
 - [x] P3-02 Verse fetcher
-- [ ] P3-03 Verse cron, admin tab and CLI
+- [x] P3-03 Verse cron, admin tab and CLI
 - [ ] P3-04 Lead selection, cell query filter and lead REST
 - [ ] P3-05 Bindings kicker, meta-line, short-date, relative-date, category-count, today; journal excerpt
 - [ ] P3-06 lead-story block
@@ -279,3 +279,6 @@ Added Blocks\Registrar (discovers blocks/*/block.json, skips already-registered 
 
 ### P3-02 — 1bead02
 Added Verse\Fetcher: endpoint() trusts Config's verse.endpoint only when its host matches the ENDPOINT constant (never lets a filter redirect the request to a foreign host); parse() picks today's item by site-tz date else the newest item with date <= today (raw payload from the fixture); parse_item() maps fields per Appendix A, running scripture text/reference through wp_kses (em/strong only) and title/copyright through sanitize_text_field, never storing meditation_content; fetch() skips a re-fetch when today's verse is already stored (unless forced), sends If-None-Match from the stored etag, and logs/returns ok:false on WP_Error, non-200/304 status, or invalid JSON; store() pushes the previous verse onto ttm_verse_history (capped, newest first, skipped when source_id is unchanged) and fires ttm_purge_urls with the front page and the /verse REST URL; log() appends to ttm_verse_log capped at verse.log_size. Added Rest\VerseController (GET /verse, 404 when empty, copyright always included per spec). Swapped Cli\Seeder's duplicated map_verse_item() for a thin seed_verse_item() wrapper around Fetcher::parse_item() so the seed fixture and the real fetch path share one sanitisation rule. Registered VerseController in Plugin::modules(). Full integration suite: 100 tests, 1 pre-existing skip, 0 failures.
+
+### P3-03 — b4b960d
+Added Verse\Cron: schedules ttm_verse_fetch daily at verse.fetch_hour site time (next_run() pure, computed from Clock::now()); on failure schedules exactly one ttm_verse_retry at now+retry_delay_seconds (guarded so a pending retry is never duplicated); the retry hook itself just calls Fetcher::fetch() without re-arming, so a second failure only logs. Added Verse\Admin: read-only "Verse" tab (current text/reference/date/fetched_at, log table) registered via Admin\Page::register_tab() with no save callback, plus its own admin_post_ttm_verse_fetch handler (manage_options + check_admin_referer) driving a wp_nonce_url() "Fetch now" link outside the shared settings form since it triggers an immediate live fetch rather than persisting settings. Added Cli\VerseCommand (fetch/inspect/log dispatched off $args[0] under one `wp ttm verse` registration in Loader, following the existing Command contract) and registered Cron/Admin/VerseCommand. Manually verified `wp ttm verse inspect` against the live dailymedtoday.com endpoint in wp-env: returned and correctly parsed today's item. Full integration suite: 109 tests, 1 pre-existing skip, 0 failures.
