@@ -5,7 +5,7 @@ Started: 2026-09-21T05:15:08.115Z
 ## Tasks
 - [x] P0-01 Branch, harness confirmation, fixtures mapping
 - [x] P0-02 Config and Clock
-- [ ] P0-03 Dates, Text and Html helpers
+- [x] P0-03 Dates, Text and Html helpers
 - [ ] P0-04 Plugin composition root and API-version compat
 - [ ] P0-05 Self-hosted Archivo fonts, theme enqueue and base CSS
 - [ ] P0-06 theme.json v3 presets and token check
@@ -92,3 +92,10 @@ wp-env image pull/start time: ~43s (first start this run; images were already ca
 Config::defaults() returns all §5.4 keys as flat dotted strings plus journal_in_main_feed/comments_enabled/newsletter.list_id additions. Config::all() overlays get_option('ttm_settings',[]) (flattened one level: key.subkey) onto defaults for exactly 8 allowed keys, then apply_filters('ttm_config'), memoised in static $cache; Config::reset() clears it. Config::get($key,$fallback) — param renamed from $default (PHPCS reserved-keyword warning). Clock is the only DateTime* constructor site in plugins/ttm-core/src (forbidden-patterns.sh enforces via grep -v Support/Clock.php exclusion, confirmed clean). Clock::now()=apply_filters('ttm_now', new DateTimeImmutable('now', wp_timezone())); ::at() catches Exception on invalid strings and returns null.
 tests/unit/TestCase.php now stubs the shared Brain\Monkey WP function set named in the task (__, _x, esc_html__, esc_html, esc_attr, esc_url, esc_url_raw, wp_kses, sanitize_text_field, absint, wp_timezone→America/Los_Angeles, get_option→[], _n) plus a default pass-through apply_filters(tag,value)->value that individual tests override with Functions\when('apply_filters')->alias(...) for the specific tag under test (ttm_config, ttm_now). This pattern (override apply_filters per-test) will be needed by every future unit test that touches a filtered value — later tasks should follow ConfigTest/ClockTest as the model.
 13/13 unit tests pass; full verify set (incl. integration) green.
+
+### P0-03 — 9421779
+Dates::short_month/short/short_with_year/full/compact/masthead/weekday/relative_day/days_between implemented per 03 §13 formats; relative_day uses days_between(d,now) with midnight-normalized DateTimeImmutable::diff. Correction: task's worked example paired 2026-09-18 with "Thursday" but that date is actually a Friday given now=2026-09-20 (a Sunday, per the masthead example itself) — verified with `date -d`, implemented the real weekday and fixed the test's expected string.
+Text::word_count strips wp:code/wp:preformatted comment blocks, <pre>, shortcode tags (regex, tags only — inner content of paired shortcodes is kept), HTML comments, then wp_strip_all_tags + html_entity_decode, counts \S+ (unicode) tokens. sentence_excerpt implements the 4-step algorithm (exact/extend +15/cut-back to half/ellipsis) using PREG_OFFSET_CAPTURE token slicing and a terminator regex allowing trailing quote/bracket after .!?…. curly_quotes protects <tags> with \x01N\x01 placeholders before running quote-direction regex on the whole string, then restores tags — needed because quote "opening" context (start/space/(/[ ) must see real text, not reset at tag boundaries.
+Html::el/text/link/classes are thin escaping wrappers (href/src via esc_url, others esc_attr).
+Added wp_strip_all_tags stub to tests/unit/TestCase.php (aliases trim(strip_tags())) alongside the existing sanitize_text_field stub.
+29/29 unit tests pass; full verify green.
