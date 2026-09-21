@@ -60,16 +60,17 @@ class SeriesRestTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_form_filter_fiction_matches_non_nonfiction(): void {
-		$this->make_series( 'in-progress', 'novel' );
-		$this->make_series( 'in-progress', 'nonfiction' );
+		[ $novel_id ]      = $this->make_series( 'in-progress', 'novel' );
+		[ $nonfiction_id ] = $this->make_series( 'in-progress', 'nonfiction' );
 
 		$request = new WP_REST_Request( 'GET', '/ttm/v1/series' );
-		$request->set_param( 'form', 'novel' );
+		$request->set_param( 'form', 'fiction' );
 		$response = $this->server->dispatch( $request );
 
-		foreach ( $response->get_data() as $row ) {
-			$this->assertSame( 'novel', $row['form'] );
-		}
+		$ids = array_column( $response->get_data(), 'id' );
+
+		$this->assertContains( $novel_id, $ids );
+		$this->assertNotContains( $nonfiction_id, $ids );
 	}
 
 	public function test_single_series_by_slug_includes_parts(): void {

@@ -44,7 +44,10 @@ class SeriesController {
 					],
 					'form'   => [
 						'type' => 'string',
-						'enum' => Series::FORMS,
+						// Series::FORMS (the taxonomy's own term enum) plus 'fiction' (05 §3:
+						// `form=any|nonfiction|fiction`, matching every non-nonfiction row --
+						// the same "fiction" filter ttm/series-list's own `form` attribute uses).
+						'enum' => array_merge( Series::FORMS, [ 'fiction' ] ),
 					],
 				],
 				'callback'            => [ self::class, 'get_items' ],
@@ -78,7 +81,10 @@ class SeriesController {
 			$rows = array_filter( $rows, static fn ( array $row ): bool => $row['status'] === $status );
 		}
 		if ( $form ) {
-			$rows = array_filter( $rows, static fn ( array $row ): bool => $row['form'] === $form );
+			$rows = array_filter(
+				$rows,
+				static fn ( array $row ): bool => 'fiction' === $form ? 'nonfiction' !== $row['form'] : $row['form'] === $form
+			);
 		}
 
 		$rows = array_map( [ self::class, 'public_row' ], array_values( $rows ) );

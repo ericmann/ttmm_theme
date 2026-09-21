@@ -54,7 +54,7 @@ guarded with `function_exists()`/`class_exists()` (SPEC §3.1 rules 2–3).
 All routes are under `/wp-json/ttm/v1/`, `GET` only, public (`permission_callback =>
 '__return_true'`), and carry the same computed cache headers as front-end pages:
 
-- `GET /series` — the series index, with `?status=` / `?form=` filters.
+- `GET /series` — the series index, with `?status=` / `?form=` filters. `?form=` accepts a `series` term's own form (`nonfiction`/`novel`/`novella`/`story-cycle`) or `fiction` (05 §3: every row whose form isn't `nonfiction`).
 - `GET /series/{slug}` — one series entry with its full `parts` array.
 - `GET /verse` — the current `ttm_verse` record (including `copyright`).
 - `GET /lead` — `{id, reason}` for the computed lead story.
