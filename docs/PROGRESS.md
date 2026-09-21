@@ -77,7 +77,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P8-04 CLI migrate:politics, migrate:redirects, migrate:close-comments
 - [x] P8-05 Spike: Jetpack Social share URLs to ttm_syndication
 - [x] P8-06 Plugin README, MIGRATION and SETUP cross-check
-- [ ] P8-07 Playwright + axe e2e suite and CI
+- [x] P8-07 Playwright + axe e2e suite and CI
 - [ ] P8-08 Push, final manual checks and HANDOFF (Phase 8)
 
 ## Log
@@ -490,3 +490,22 @@ behaviour and found accurate, no changes. Found and fixed a real gap:
 uninstall.php's option cleanup list was missing P8-04's ttm_redirects
 option; added it. foundry_verify green (337/337 integration, unchanged -
 docs task).
+
+### P8-07 — c04a4c7
+Added tests/e2e/{playwright.config.mjs, lib/urls.mjs, specs/{screens,network,
+focus}.spec.mjs} covering the seven seeded screens x 2 viewports (1280/390).
+urls.mjs hard-codes real seeded slugs (technology-post-2 for "article",
+chosen for having a real featured image needed by the fetchpriority check).
+Fixed a real wp-scripts footgun: WP_BASE_URL must be set explicitly in
+package.json's test:e2e script, otherwise wp-scripts defaults it to the
+*tests* env port (8889), not the seeded dev site (8888). Added
+@playwright/test as an explicit devDependency. Found and fixed 3 real
+accessibility bugs via the axe scan itself (token *usage*, not palette
+*values*, which stay verbatim): neutral-600 text on bg was 3.84:1 (swapped
+to neutral-700, 5.83:1, already the dominant choice elsewhere); .btn-primary
+fill was 3.76:1 (swapped to accent-700, 6.4:1); the resulting darker verse
+text then dropped its embedded link below the color-only-distinction
+threshold, fixed with an underline. 48/48 e2e tests passing; foundry_verify
+green including its own npm run test:e2e run (337/337 integration, 48/48
+e2e). CSS budget 32025->32990/33000. CI needs no changes (script name and
+artifact path unchanged).
