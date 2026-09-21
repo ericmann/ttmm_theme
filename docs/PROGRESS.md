@@ -23,7 +23,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P1-11 REST series endpoints and lead stub
 - [x] P1-12 CLI recount, primary:assign, series:assign, series:rebuild
 - [x] P1-13 Seeder core: categories, pages, navigation, posts, images
-- [ ] P1-14 Seeder fiction, verse, states and seed command; tuning series.max_purchase_links
+- [x] P1-14 Seeder fiction, verse, states and seed command; tuning series.max_purchase_links
 - [ ] P1-15 Push and manual check (Phase 1)
 - [ ] P2-01 Block styles, pattern categories, image sizes
 - [ ] P2-02 ttm.css foundation: bridge, grids, rules, type utilities, buttons, tags, inputs, body typography
@@ -212,3 +212,12 @@ Cli\Seeder is a plain utility class (no register(), not in Plugin::modules()), u
 docs/fixtures/seed/posts.json (62 entries) generated to satisfy every stated per-section/flag minimum from the task text (verified via a one-off Python count check before committing): technology 19 (incl. deep-dive), business 11, faith 6, journal 11, writing 6, security 7, opinion 5 (2 also politics); 5 two-category posts; 4 most_read (2 technology); 3 posts without excerpt; one >=3000-word post; one classic-HTML post (plain <p> + <sup class="modern-footnotes-footnote">, no block markup) — content is placeholder lorem-style text, not hand-authored prose, since acceptance tests check structure/counts only.
 66 integration tests pass (6 new); full verify green.
 Manual check: none
+
+### P1-14 — f6bbd03
+Seeder additions: seed_series() creates the 4 seed series (hardening-wordpress in-progress 6/6 nonfiction across technology+security; reading-cves complete 4/4 nonfiction across business+security; the-quiet-ledger novel in-progress 31 total/13 chapters seeded (12 published+1 future), cover image, 2 purchase links, next_date +27d; salt-and-iron novella complete 9/9 chapters, no cover) then wp_set_object_terms+ttm_series_part per part and SeriesIndex::rebuild(). seed_books() maps books.json to the ttm_books option via Fiction\Books::sanitize() (2 books, one linked to salt-and-iron via series_slug lookup). seed_verse() maps docs/fixtures/verse-sample.json (item[0]->ttm_verse, items[0..5]->ttm_verse_history) via the new public static map_verse_item() — P3-02's Verse\Fetcher::parse() is meant to become the same mapping, this is a one-line swap point. Fixed a real bug found via the failing verse test: Seeder::fixtures_root_dir() (renamed/refactored from the old fixtures_dir() body) resolves docs/fixtures (the WP_CONTENT_DIR/ttm-fixtures wp-env mapping first, else dirname(TTM_CORE_DIR,3)/docs/fixtures) and is now shared by both fixtures_dir() (.../seed) and seed_verse() (verse-sample.json lives one level up from seed/) — seed_verse() originally computed its own dirname(...,3) path directly and never checked the wp-env mapping, so it silently found nothing inside the container.
+States: run($state) sets $this->state/$this->days_offset; "quiet" adds 120 days to every non-future post's days_ago (statuses unchanged); "empty" skips seed_series()/seed_books(), seed_posts() skips security/opinion-categorized rows plus every chapter (cross-referenced from series.json parts[].post_slug) and every story (slug prefix "story-"), and seed_verse() deletes ttm_verse/ttm_verse_history instead of seeding them.
+Cli\SeedCommand::run() refuses when wp_get_environment_type()==='production' (SeedCommand::allowed() is the pure, directly-testable check), else optional reset() then Seeder::run($state). Cli\Loader registers `wp ttm seed`.
+posts.json grew to 87 entries (13 quiet-ledger chapters, 9 salt-and-iron chapters, 3 standalone Writing stories one with a cover). Manually verified: `wp ttm seed --reset` → 8 categories/4 pages/87 posts/1 nav/4 series/2 books; `wp post list --format=count` → 88 (>=60 required, includes 1 pre-existing test post from earlier CLI runs).
+Measurement for series.max_purchase_links (assumption 6): max observed across the seed is 2 (the-quiet-ledger). Before: 6 (default). After: 6 kept — 2 is comfortably under the cap; no change warranted since the cap bounds the P1-06 admin repeater UI, not current content volume.
+72 integration tests pass (6 new); full verify green.
+Manual check: NOT VERIFIED (human) -- open /wp-admin and browse the seeded series/books once Phase 3+ front-end exists.
