@@ -19,7 +19,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P1-05 Footer per §6.1.8
 - [x] P1-06 Newsletter form contract — shared markup, provider chain, custom-url dev-accept, seed
 - [x] P1-07 Spike — Jetpack Subscriptions widget POST contract
-- [ ] P1-08 Jetpack provider on the shared form
+- [x] P1-08 Jetpack provider on the shared form
 - [ ] P1-09 Editor registration in every context (§6.7)
 - [ ] P1-10 Newsletter poster per §6.1.8
 - [ ] P1-11 Phase 1 push — chrome screenshots
@@ -171,3 +171,8 @@ Implications for P1-08 recorded in the spike doc's "For P1-08" section: the nonc
 docs/fixtures/jetpack-subscriptions.html: verbatim-transcribed form markup with literal {current URL}/{n}/{blog_id}/{nonce} placeholders, includes the nonce field (not omitted, since it's real).
 Cleanup: `wp plugin deactivate jetpack && wp plugin delete jetpack` — confirmed `wp plugin list --name=jetpack` now empty.
 Verified: all three task-specified checks pass (spike file non-empty with required headings, fixture has <form>+name="email", jetpack not installed). No code changed; ttm-theme confirmed active; wp-env stopped after.
+
+### P1-08 — 22bf747
+Provider\Jetpack: available() = Jetpack::is_connection_ready() (if class/method exist) || WP_Block_Type_Registry::is_registered('jetpack/subscriptions'). render() = Form::render($current_url, [action=subscribe, source=$current_url, sub-type=widget, redirect_fragment='ttm-newsletter-'.Form::next_id()], $placement, 'jetpack_subscriptions_widget') where $current_url = get_permalink() on singular else home_url('/'). No do_blocks('jetpack/subscriptions') anymore; no nonce (per this task's own explicit design, despite the P1-07 spike flagging that Jetpack's real widget does render one — task text was prescriptive, implemented as written).
+Tests: NewsletterFormTest::test_jetpack_provider_renders_shared_form_with_widget_fields replaces the old do_blocks-stub test (register_block_type with no render_callback is enough now, since Jetpack.php never calls do_blocks on it); ::test_jetpack_unavailable_falls_through_to_custom_url_dev_accept (chain now lands on custom-url dev-accept, not straight to mailto/none, matching P1-06). New tests/integration/Newsletter/JetpackFieldsTest.php: parses docs/fixtures/jetpack-subscriptions.html for every name="…" and asserts every field the provider emits (except email) appears there — uses Seeder::fixtures_root_dir() (wp-env mapping-aware) rather than a manual dirname() path, since the naive relative path resolved wrong inside the tests-cli container.
+Verified: composer lint 0 errors, npm run lint clean, npm run test:integration 400/400 (real wp-env), npm run test:e2e 66 passed/61 skipped (0 failed), composer test:unit, npm run build, forbidden-patterns all green. ttm-theme confirmed active; wp-env stopped after.
