@@ -66,7 +66,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P7-02 Purge and Cloudflare adapter
 - [x] P7-03 Newsletter handler, custom-url provider, settings
 - [x] P7-04 Jetpack unconnected-render check (assumption) and seed provider
-- [ ] P7-05 Cache tuning: verse_boundary_hour, max_age_cap, min_age
+- [x] P7-05 Cache tuning: verse_boundary_hour, max_age_cap, min_age
 - [ ] P7-06 Newsletter tuning: token_ttl, rate limits
 - [ ] P7-07 Static audit: extend forbidden-patterns, run, fix
 - [ ] P7-08 Separability tests (theme without plugin, plugin with default theme)
@@ -392,3 +392,7 @@ Added Newsletter\Handler (admin_post(_nopriv)_ttm_subscribe: rate limit -> honey
 Measurement: Jetpack unconnected renders form: NO. Live-verified in the wp-env container: `wp jetpack module activate subscriptions` fails ("Newsletter could not be activated") without a WordPress.com connection, so jetpack/subscriptions never registers at all (confirmed via WP_Block_Type_Registry and an empty do_blocks() output) — Outcome B, not the optimistic Outcome A.
 Added Seeder::seed_jetpack() (WP_CLI-guarded, network-failure-tolerant install/activate attempt, then live re-check of block registration rather than hardcoding the result) which sets ttm_settings.newsletter={provider:mailto, fallback_email:hello@example.com} when unregistered, else clears any provider override. Verified `npm run env:seed -- --reset` completes and produces the expected mailto fallback option.
 Full verify green: composer lint 0 errors, 109/109 unit, npm lint/build green, forbidden-patterns clean, 277 integration tests OK (1 pre-existing skip, WP_CLI never defined in PHPUnit so seed_jetpack() is a no-op there).
+
+### P7-05 — 315cdc9
+Measurement table across a full day (America/Los_Angeles): computed ceiling is 64800s at exactly 06:00, well under the 86400s cap (cap never actually binds under this schedule, exists as a safety ceiling only). A page cached at 05:59 expires at 06:00 (after the 05:00 verse fetch). If the 05:00 fetch fails, staleness during 06:00-07:00 is actually bounded by Verse\Fetcher's ttm_purge_urls firing on a successful 07:00 retry (P7-02), not by the boundary math. newsletter.token_ttl (86400) >= cache.max_age_cap_seconds (86400): equal, holds. No Config.php changes made — all three defaults verified adequate.
+3 acceptance tests added (HeadersTuningTest). Full verify green: composer lint 0 errors, 112/112 unit, npm lint/build green, forbidden-patterns clean.
