@@ -13,7 +13,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P1-01 Series taxonomy, term meta, single-series enforcement
 - [x] P1-02 Post meta registration and sanitizers
 - [x] P1-03 Primary category, form derivation and word count on save
-- [ ] P1-04 Series index
+- [x] P1-04 Series index
 - [ ] P1-05 Category stats and top tags
 - [ ] P1-06 Series term admin: columns, edit fields, part list
 - [ ] P1-07 Editor sidebar panel
@@ -141,3 +141,10 @@ PrimaryCategory::resolve (pure, nav-order pick else first assigned else null), :
 Plugin::modules() now appends PrimaryCategory, Form, WordCount after PostMeta.
 Test note: wp_create_post_autosave() requires wp-admin/includes/post.php loaded and a 'post_type' key in the data array (undefined-index fatal otherwise) — needed for test_autosave_does_not_write_meta.
 18 integration tests + 6 new unit tests pass (54 unit total); full verify green.
+
+### P1-04 — 3e3629a
+Query\SeriesIndex: rebuild() queries all series terms (get_terms), builds one row per §5.3 shape via collect_parts() (WP_Query tax_query on 'series', post_status=[publish,future,draft,pending,private], fields=ids, batched by Config series.index_batch=500 with a paged do-while loop). parts sorted by part asc then post_date; published=count(status===publish); total=ttm_total_parts if >0 else published; categories=distinct PrimaryCategory::id() of published parts, ordered by sections.order then any leftovers; last_update=Clock::now()->format('Y-m-d H:i:s'); first_post_id/latest_post_id = first/last of the sorted parts array. Stores via update_option (autoload=false) only when the JSON-encoded value changed, then fires ttm_purge_urls([home,home/series/]). apply_filters('ttm_series_index', $rows) applied before the diff/store so filtered rows are what's persisted and compared.
+Hooks: save_post_post@40, deleted_post, transition_post_status (only for post_type=post), created_series/edited_series/delete_series (WP's built-in per-taxonomy hooks, fired automatically by wp_insert_term/wp_update_term/wp_delete_term for taxonomy=series) all call schedule_rebuild() which debounces via a static flag + one add_action('shutdown', maybe_rebuild). rebuild() is also public for immediate/manual use (tests call it directly to avoid firing WP's real 'shutdown', which flushes output buffers and trips a PHPUnit risky-test check).
+Readers: all()/get($id)/by_slug($slug)/for_post($post_id)/sorted_by_update($rows).
+Added Config key series.index_batch=500 (ConfigTest updated to expect it).
+25 integration tests pass (7 new); full verify green.
