@@ -26,6 +26,7 @@ class ConfigTest extends TestCase {
 			'sections.journal_slug',
 			'sections.writing_slug',
 			'sections.politics_slug',
+			'sections.technology_slug',
 			'lead.sticky_days',
 			'lead.stale_days',
 			'lead.cache_seconds',
@@ -47,6 +48,8 @@ class ConfigTest extends TestCase {
 			'writing.story_tiles',
 			'writing.shelf_limit',
 			'books.max',
+			'books.blank_rows',
+			'books.link_rows',
 			'cli.batch',
 			'archive.per_page',
 			'archive.tag_filter_limit',
@@ -69,6 +72,7 @@ class ConfigTest extends TestCase {
 			'cache.cloudflare.zone_id',
 			'cache.cloudflare.api_token',
 			'cache.cloudflare.batch',
+			'cache.cloudflare.timeout_seconds',
 			'newsletter.provider',
 			'newsletter.endpoint',
 			'newsletter.list_id',
@@ -78,11 +82,13 @@ class ConfigTest extends TestCase {
 			'newsletter.rate_limit_window',
 			'newsletter.honeypot_field',
 			'newsletter.api_key',
+			'newsletter.timeout_seconds',
 			'images.sizes',
 			'stats.cache_seconds',
 			'stats.tags_cache_seconds',
 			'journal_in_main_feed',
 			'comments_enabled',
+			'seed.quiet_offset_days',
 		];
 
 		$defaults = Config::defaults();

@@ -75,16 +75,16 @@ class Seeder {
 	/**
 	 * Run the full seed for a given state.
 	 *
-	 * "quiet": every post's days_ago + 120 (nothing recent; statuses stay as fixtured).
-	 * "empty": normal minus Security/Opinion posts, series + chapters, stories, books,
-	 * and the verse options are deleted rather than seeded.
+	 * "quiet": every post's days_ago + `seed.quiet_offset_days` (nothing recent; statuses stay
+	 * as fixtured). "empty": normal minus Security/Opinion posts, series + chapters, stories,
+	 * books, and the verse options are deleted rather than seeded.
 	 *
 	 * @param string $state Seed state: "normal", "quiet", or "empty".
 	 * @return array{categories:int, pages:int, posts:int, navigation:int, series:int, books:int}
 	 */
 	public function run( string $state ): array {
 		$this->state       = $state;
-		$this->days_offset = 'quiet' === $state ? 120 : 0;
+		$this->days_offset = 'quiet' === $state ? (int) Config::get( 'seed.quiet_offset_days', 120 ) : 0;
 
 		$categories = $this->seed_categories();
 		$pages      = $this->seed_pages();

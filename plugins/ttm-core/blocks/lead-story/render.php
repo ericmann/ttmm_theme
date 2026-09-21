@@ -11,6 +11,7 @@ declare( strict_types=1 );
 
 use TTM\Core\Bindings\Values;
 use TTM\Core\Blocks\Helpers;
+use TTM\Core\Config;
 use TTM\Core\Meta\PrimaryCategory;
 use TTM\Core\Query\Lead;
 use TTM\Core\Query\SeriesIndex;
@@ -32,7 +33,7 @@ $ttm_has_category = $ttm_category && ! is_wp_error( $ttm_category );
 
 $ttm_ctx = [
 	'section_name' => $ttm_has_category ? $ttm_category->name : '',
-	'is_politics'  => $ttm_has_category && 'politics' === $ttm_category->slug,
+	'is_politics'  => $ttm_has_category && (string) Config::get( 'sections.politics_slug', 'politics' ) === $ttm_category->slug,
 ];
 
 $ttm_prev_part = null;

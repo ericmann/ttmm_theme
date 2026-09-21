@@ -177,7 +177,7 @@ class Sources {
 
 		$ctx = [
 			'section_name' => $has_category ? $category->name : '',
-			'is_politics'  => $has_category && 'politics' === $category->slug,
+			'is_politics'  => $has_category && (string) Config::get( 'sections.politics_slug', 'politics' ) === $category->slug,
 		];
 
 		$series = SeriesPosition::for_post( $post_id );
@@ -498,9 +498,11 @@ class Sources {
 	 * @return bool
 	 */
 	private static function in_politics( int $post_id ): bool {
+		$politics_slug = (string) Config::get( 'sections.politics_slug', 'politics' );
+
 		foreach ( wp_get_post_categories( $post_id ) as $category_id ) {
 			$category = get_term( $category_id, 'category' );
-			if ( $category && ! is_wp_error( $category ) && 'politics' === $category->slug ) {
+			if ( $category && ! is_wp_error( $category ) && $politics_slug === $category->slug ) {
 				return true;
 			}
 		}

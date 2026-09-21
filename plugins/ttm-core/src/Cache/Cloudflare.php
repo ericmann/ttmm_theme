@@ -58,13 +58,14 @@ class Cloudflare {
 
 		$zone  = (string) Config::get( 'cache.cloudflare.zone_id', '' );
 		$token = (string) Config::get( 'cache.cloudflare.api_token', '' );
-		$batch = max( 1, (int) Config::get( 'cache.cloudflare.batch', 30 ) );
+		$batch   = max( 1, (int) Config::get( 'cache.cloudflare.batch', 30 ) );
+		$timeout = (int) Config::get( 'cache.cloudflare.timeout_seconds', 10 );
 
 		foreach ( array_chunk( $urls, $batch ) as $chunk ) {
 			$response = wp_safe_remote_post(
 				sprintf( self::ENDPOINT, $zone ),
 				[
-					'timeout' => 10, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout -- deliberate: a slow purge/subscribe endpoint should not silently drop the request early; this runs off the request/response cycle path, not on a page load.
+					'timeout' => $timeout, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout -- deliberate: a slow purge/subscribe endpoint should not silently drop the request early; this runs off the request/response cycle path, not on a page load.
 					'headers' => [
 						'Authorization' => 'Bearer ' . $token,
 						'Content-Type'  => 'application/json',

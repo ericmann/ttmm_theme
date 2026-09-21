@@ -73,6 +73,35 @@ class FrontSourcesTest extends TTM_IntegrationTestCase {
 		$this->assertSame( 'Technology', $value );
 	}
 
+	public function test_kicker_politics_suffix_follows_sections_politics_slug(): void {
+		// Rename the politics slug via the `ttm_config` filter (SPEC rule 24: the slug is a
+		// Config key, not a hard-coded 'politics' literal) and confirm the kicker still
+		// appends the "Politics" suffix for a post whose primary category is the renamed term.
+		add_filter(
+			'ttm_config',
+			static function ( array $config ): array {
+				$config['sections.politics_slug'] = 'renamed-politics';
+				return $config;
+			}
+		);
+		\TTM\Core\Config::reset();
+
+		$politics = $this->category_id( 'renamed-politics', 'Political Takes' );
+
+		$post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $politics ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $politics );
+
+		$block = $this->make_block( 'core/paragraph', $post );
+		$value = $this->source_value( 'ttm/kicker', [], $block, 'content' );
+
+		$this->assertSame( 'Political Takes · Politics', $value );
+	}
+
 	public function test_meta_line_html_is_stripped_outside_paragraph_content(): void {
 		$post = self::factory()->post->create( [ 'post_status' => 'publish' ] );
 

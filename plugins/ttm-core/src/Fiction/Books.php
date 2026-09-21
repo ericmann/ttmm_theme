@@ -102,12 +102,13 @@ class Books {
 	}
 
 	/**
-	 * Render the repeater: existing rows plus three blank rows.
+	 * Render the repeater: existing rows plus `books.blank_rows` blank rows.
 	 */
 	public static function render(): void {
-		$books = (array) get_option( 'ttm_books', [] );
-		$max   = (int) Config::get( 'books.max', 12 );
-		$slots = min( $max, count( $books ) + 3 );
+		$books      = (array) get_option( 'ttm_books', [] );
+		$max        = (int) Config::get( 'books.max', 12 );
+		$blank_rows = (int) Config::get( 'books.blank_rows', 3 );
+		$slots      = min( $max, count( $books ) + $blank_rows );
 
 		for ( $i = 0; $i < $slots; $i++ ) {
 			$book = $books[ $i ] ?? [];
@@ -138,7 +139,9 @@ class Books {
 		printf( '<input type="text" placeholder="%s" name="%s[formats]" value="%s">', esc_attr__( 'Formats, comma separated', 'ttm-core' ), esc_attr( $name ), esc_attr( implode( ', ', (array) ( $book['formats'] ?? [] ) ) ) );
 		printf( '<input type="number" placeholder="%s" name="%s[series_id]" value="%s">', esc_attr__( 'Series term ID', 'ttm-core' ), esc_attr( $name ), esc_attr( (string) ( $book['series_id'] ?? '' ) ) );
 
-		for ( $l = 0; $l < 2; $l++ ) {
+		$link_rows = (int) Config::get( 'books.link_rows', 2 );
+
+		for ( $l = 0; $l < $link_rows; $l++ ) {
 			$link = $book['links'][ $l ] ?? [];
 			printf(
 				'<p><input type="text" placeholder="%s" name="%s[links][%d][label]" value="%s"> <input type="url" placeholder="%s" name="%s[links][%d][url]" value="%s"></p>',

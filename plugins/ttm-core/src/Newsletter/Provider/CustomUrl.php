@@ -98,7 +98,7 @@ class CustomUrl implements Provider {
 		wp_safe_remote_post(
 			$endpoint,
 			[
-				'timeout' => 10, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout -- deliberate: the newsletter forward runs after the visitor has already been redirected, not on their request/response cycle.
+				'timeout' => (int) Config::get( 'newsletter.timeout_seconds', 10 ), // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout -- deliberate: the newsletter forward runs after the visitor has already been redirected, not on their request/response cycle.
 				'headers' => $headers,
 				'body'    => (string) wp_json_encode(
 					[

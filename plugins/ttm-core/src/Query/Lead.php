@@ -137,7 +137,7 @@ class Lead {
 	 * @return WP_Post|null
 	 */
 	private static function technology_candidate(): ?WP_Post {
-		$term = get_term_by( 'slug', 'technology', 'category' );
+		$term = get_term_by( 'slug', (string) Config::get( 'sections.technology_slug', 'technology' ), 'category' );
 		if ( ! $term || is_wp_error( $term ) ) {
 			return null;
 		}

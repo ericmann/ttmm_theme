@@ -85,6 +85,30 @@ class LeadTest extends TTM_IntegrationTestCase {
 		$this->assertSame( 'technology', $result['reason'] );
 	}
 
+	public function test_technology_candidate_uses_sections_technology_slug(): void {
+		// Rename the technology slug via the `ttm_config` filter (SPEC rule 24: the slug is a
+		// Config key, not a hard-coded 'technology' literal) and confirm the technology
+		// candidate lookup follows it.
+		add_filter(
+			'ttm_config',
+			static function ( array $config ): array {
+				$config['sections.technology_slug'] = 'renamed-tech';
+				return $config;
+			}
+		);
+		\TTM\Core\Config::reset();
+
+		$this->set_now( '2026-09-20 12:00:00' );
+
+		$tech = $this->category_id( 'renamed-tech', 'Renamed Tech' );
+		$post = $this->post_with_primary( $tech, '2026-09-19 09:00:00' );
+
+		$result = Lead::compute();
+
+		$this->assertSame( $post, $result['id'] );
+		$this->assertSame( 'technology', $result['reason'] );
+	}
+
 	public function test_f22_stale_technology_falls_back_sitewide_excluding_journal(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
 
