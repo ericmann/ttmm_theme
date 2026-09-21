@@ -82,7 +82,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] R1-01 Fix upward module imports (Query→Bindings/Blocks, Bindings→Blocks, Taxonomy→Query) and add a boundary test
 - [x] R1-02 Rule 24: config keys for every hard-coded tunable in src/ and fail the forbidden-patterns rule-24 check
 - [x] R1-03 SeriesIndex last_update from the newest published part; hook-driven rebuild tests; series:assign derives ttm_form
-- [ ] R1-04 Verse module: F6 uses the stored last-good verse, Sept month format, site-timezone date, DST-safe cron
+- [x] R1-04 Verse module: F6 uses the stored last-good verse, Sept month format, site-timezone date, DST-safe cron
 - [ ] R1-05 Front-page cells: F9 stale-year branch, journal.rail_count, journal slug constant; writing-cell F1/F2 semantics
 - [ ] R1-06 migrate:politics child mode files Politics posts under Opinion; close-comments purges once
 - [ ] R1-07 wp ttm audit: fix missing-alt regex and broken-internal-link false positives
@@ -607,3 +607,30 @@ test_series_assign_with_fiction_form_derives_chapter_on_posts.
 
 Verified via foundry_verify: composer lint/test:unit, npm lint/test:unit/build,
 forbidden-patterns.sh, npm run test:integration (345 tests, +5 new, all green).
+
+### R1-04 — 9d99579
+render.php: F6 fallback logic changed from "use ttm_verse only if date === today, else
+history" to "use ttm_verse whenever its date is <= today (only look to history when it's
+missing or dated in the future)". Attribution date now uses Dates::short_month() + ->format('j')
+instead of DateTimeImmutable::format('M j') (fixes "Sep" vs required "Sept"). Reference field
+now wp_kses'd (em/strong allowed) instead of esc_html'd, matching the text field's treatment
+(rule 21); copyright untouched (still esc_html, plain text only).
+
+Fetcher::parse_item(): added $published->setTimezone(Clock::timezone()) after Clock::at() --
+PHP silently ignores DateTimeImmutable's $timezone constructor arg whenever the input string
+carries its own offset (published_at always does), so without this the Y-m-d was taken in
+whatever offset the API sent, not the site's.
+
+Cron: schedule()/run_fetch() no longer use wp_schedule_event(..., 'daily', ...); a new private
+schedule_next() computes next_run(Clock::now(), $hour) fresh and calls
+wp_schedule_single_event(), called from schedule() (first run) and again at the end of every
+run_fetch() (self-perpetuating chain). next_run() itself was already DST-correct (verified:
+DateTimeImmutable::setTime() against a real DateTimeZone recomputes the UTC offset per-date);
+the bug was entirely in trusting WP's fixed-86400s recurrence to keep re-deriving it.
+
+New tests: FetcherParseTest (UTC-crossing-midnight case + same-tz control), CronTest (spring-
+forward and fall-back DST transitions via Cron::next_run(), pure/unit). VerseOfTheDayTest
+gained the two named acceptance tests.
+
+Verified via foundry_verify: composer lint/test:unit (120, +4), npm lint/test:unit/build,
+forbidden-patterns.sh, npm run test:integration (347, +2, all green).
