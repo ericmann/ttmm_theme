@@ -168,7 +168,11 @@ Once converted, the `modern-footnotes` plugin can be deactivated.
 
 ### 2.7 Journal syndication (best effort)
 
-The Phase 8 spike populates `ttm_syndication` from Jetpack Social's per-post share records where they exist. Check a few journal posts: the syndication line appears only when at least one URL exists. Anything missing can be pasted into the post sidebar.
+```bash
+wp ttm migrate:syndication [--dry-run] [--post=<id>]
+```
+
+Reads Jetpack Social/Publicize's `_publicize_done_external` per-post meta (`{service: {id: url}}`) where it exists and populates `ttm_syndication` for `x`/`mastodon`/`bluesky`, `https` URLs only, never overwriting a post that already has a syndication value. See `docs/spikes/P8-05.md` for exactly which Jetpack meta keys were examined and why only this one carries usable URLs. Check a few journal posts: the syndication line appears only when at least one URL exists. Anything missing can be pasted into the post sidebar.
 
 ### 2.8 Comments
 
