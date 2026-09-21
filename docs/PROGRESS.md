@@ -23,7 +23,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P1-09 Editor registration in every context (§6.7)
 - [x] P1-10 Newsletter poster per §6.1.8
 - [x] P1-11 Phase 1 push — chrome screenshots
-- [ ] P2-01 Lead story CSS and markup per §6.1.3
+- [x] P2-01 Lead story CSS and markup per §6.1.3
 - [ ] P2-02 Verse box per §6.1.4
 - [ ] P2-03 Journal excerpt hard cap and `ttm/category-count` entries format
 - [ ] P2-04 Journal rail per §6.1.5
@@ -233,3 +233,26 @@ Manual check: NOT VERIFIED (human) — compare docs/feedback/phase-2/
 masthead.png with the top of docs/feedback/design_top.png and
 poster-footer.png with design_footer.png; the poster shows an email
 field and a ghost "Subscribe" button.
+
+### P2-01 — 304f663
+render.php: dropped inline style="aspect-ratio" (Decision "Lead media"),
+imageRatio:'4-3' -> literal is-ratio-4-3 class suffix (kept base class
+string literal, not a PHP variable, so the css-coverage markup scanner
+still sees it). Dek now wp_kses(get_the_excerpt(),['code'=>[]]) to keep
+inline <code>. ttm.css /* 4.7 lead */: .ttm-lead-row gets its own
+column-gap 40/row-gap 0/padding 28 0 32; .ttm-lead__media width 100% +
+surface bg + grayscale moved onto the figure (was the img); is-ratio-4-3
+modifier + forced 4/3 at <=720 regardless of attribute; new
+kicker/title/dek/meta rules per §6.1.3 + F8 is-textonly + <=720 overrides.
+
+Found two latent unit-name bugs while implementing: theme.json's "h2"
+font-size slug generates --font-size--h-2 (hyphen at letter/digit
+boundary), not --h2 -- .is-style-journal-title and .entry-content h2
+already reference the broken --h2 (pre-existing, out of this task's
+scope, left alone + documented). And §6.1.3's dek is literally 17px,
+not matching the 15px "dek" token (which IS correct for the phone value)
+-- used literal 17px at desktop.
+
+New LeadStoryTest::test_image_ratio_attribute_becomes_a_class and
+::test_dek_keeps_inline_code_and_strips_other_tags; all 8 lead fidelity
+rows un-fixme'd. All verify commands green (budget 40143/40960).
