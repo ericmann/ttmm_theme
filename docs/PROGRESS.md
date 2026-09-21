@@ -98,7 +98,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] R2-02 Test gaps: source-level empty values for ttm/short-date and ttm/relative-date; BoundariesTest sees inline fully-qualified references
 - [x] R2-03 Docs and duplication cleanup after round 1: CLAUDE.md module map, stale comments, HANDOFF correction, one pagination-label implementation
 - [x] R3-01 Rule 24: writing.tile_columns Config key for story-tiles; forbidden-patterns.sh rule 24 also matches plain `= N;` assignments
-- [ ] R3-02 F9 test gaps: stale-scope exit keeps later sections' deks; Stats newest_date asserted directly
+- [x] R3-02 F9 test gaps: stale-scope exit keeps later sections' deks; Stats newest_date asserted directly
 
 ## Log
 (one entry per task, appended by implement)
@@ -1001,3 +1001,21 @@ manual forbidden-patterns.sh round-trip (reintroduced `$ttm_columns = 2;`, confi
 exit 1, reverted, confirmed exit 0).
 
 Commit: b38798d
+
+### R3-02 — 8909f21
+Test-only task, no production code changes (Cells.php/Stats.php untouched in the final
+diff). Added CellsTest::test_fresh_section_after_stale_section_keeps_its_dek: renders a
+stale security core/query then a fresh technology core/query in the same request via
+do_blocks(), asserts the first has is-stale and no ttm-item__dek, the second has
+ttm-item__dek and its excerpt text. Added StatsTest::test_newest_date_is_null_for_an_empty_category
+and a newest_date === '2024-06-01 12:00:00' assertion to the existing
+test_category_stats_count_and_year_range.
+
+Reproduced the review's mutation: commented out
+`self::$stale_scope = max( 0, self::$stale_scope - 1 );` in Cells::mark_empty(), confirmed
+the new CellsTest fails (fresh section's dek stays suppressed because stale scope never
+closes), restored the line, confirmed CellsTest+StatsTest (25 tests) and the full
+integration suite (374 tests) pass. No leak found beyond the mutation itself, so nothing
+to report back per the task's "stop and report" clause.
+
+Commit: 8909f21
