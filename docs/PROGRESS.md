@@ -1,6 +1,6 @@
 # These Things Matter build progress
-Branch: (set by implement)
-Started: (set by implement)
+Branch: build/2026-09-21
+Started: 2026-09-21T05:15:08.115Z
 
 ## Tasks
 - [ ] P0-01 Branch, harness confirmation, fixtures mapping
