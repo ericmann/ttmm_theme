@@ -62,6 +62,44 @@ class LeadStoryTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'A short dek.', $html );
 		$this->assertStringContainsString( '2 min read', $html );
 		$this->assertStringContainsString( 'ttm-lead__media', $html );
+		$this->assertStringNotContainsString( 'style=', $html );
+	}
+
+	public function test_image_ratio_attribute_becomes_a_class(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+		$post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $tech );
+		set_post_thumbnail( $post, $this->attachment() );
+
+		$html_default = $this->render();
+		$this->assertStringNotContainsString( 'is-ratio-4-3', $html_default );
+
+		delete_transient( 'ttm_lead_id' );
+		$html_4x3 = $this->render( [ 'imageRatio' => '4-3' ] );
+		$this->assertStringContainsString( 'is-ratio-4-3', $html_4x3 );
+		$this->assertStringNotContainsString( 'style=', $html_4x3 );
+	}
+
+	public function test_dek_keeps_inline_code_and_strips_other_tags(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+		$post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+				'post_excerpt'  => 'Edit <code>wp_options</code> <strong>carefully</strong>.',
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $tech );
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( '<code>wp_options</code>', $html );
+		$this->assertStringNotContainsString( '<strong>', $html );
 	}
 
 	public function test_f8_no_image_adds_is_textonly_and_no_figure(): void {

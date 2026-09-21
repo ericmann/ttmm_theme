@@ -145,7 +145,7 @@ test.describe( 'masthead', () => {
 } );
 
 test.describe( 'lead', () => {
-	test.fixme( 'lead-row: .ttm-lead-row @1280', async ( { page } ) => {
+	test( 'lead-row: .ttm-lead-row @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const row = page.locator( '.ttm-lead-row' );
 		const cols = await tracks( row );
@@ -154,22 +154,20 @@ test.describe( 'lead', () => {
 		expect( await computed( row, 'column-gap' ) ).toBe( px( 40 ) );
 	} );
 
-	test.fixme( 'lead-media: .ttm-lead__media @1280', async ( { page } ) => {
+	test( 'lead-media: .ttm-lead__media @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const media = page.locator( '.ttm-lead__media' );
 		expect( await computed( media, 'aspect-ratio' ) ).toBe( '16 / 9' );
 		expect( await computed( media, 'filter' ) ).toContain( 'grayscale(1)' );
 	} );
 
-	test.fixme( 'lead-media-phone: .ttm-lead__media @390', async ( {
-		page,
-	} ) => {
+	test( 'lead-media-phone: .ttm-lead__media @390', async ( { page } ) => {
 		await gotoFront( page, 390 );
 		const media = page.locator( '.ttm-lead__media' );
 		expect( await computed( media, 'aspect-ratio' ) ).toBe( '4 / 3' );
 	} );
 
-	test.fixme( 'lead-kicker: .ttm-lead__kicker @1280', async ( { page } ) => {
+	test( 'lead-kicker: .ttm-lead__kicker @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const kicker = page.locator( '.ttm-lead__kicker' );
 		expect( await computed( kicker, 'font-size' ) ).toBe( px( 12 ) );
@@ -182,7 +180,7 @@ test.describe( 'lead', () => {
 		expect( await computed( kicker, 'letter-spacing' ) ).toBe( '0.96px' );
 	} );
 
-	test.fixme( 'lead-title: .ttm-lead__title @1280', async ( { page } ) => {
+	test( 'lead-title: .ttm-lead__title @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const title = page.locator( '.ttm-lead__title' );
 		expect( await computed( title, 'font-size' ) ).toBe( px( 44 ) );
@@ -190,22 +188,20 @@ test.describe( 'lead', () => {
 		expect( await computed( title, 'font-weight' ) ).toBe( '800' );
 	} );
 
-	test.fixme( 'lead-title-phone: .ttm-lead__title @390', async ( {
-		page,
-	} ) => {
+	test( 'lead-title-phone: .ttm-lead__title @390', async ( { page } ) => {
 		await gotoFront( page, 390 );
 		const title = page.locator( '.ttm-lead__title' );
 		expect( await computed( title, 'font-size' ) ).toBe( px( 30 ) );
 	} );
 
-	test.fixme( 'lead-dek: .ttm-lead__dek @1280', async ( { page } ) => {
+	test( 'lead-dek: .ttm-lead__dek @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const dek = page.locator( '.ttm-lead__dek' );
 		expect( await computed( dek, 'font-size' ) ).toBe( px( 17 ) );
 		expect( await computed( dek, 'color' ) ).toBe( color( 'neutral-800' ) );
 	} );
 
-	test.fixme( 'lead-meta: .ttm-lead__meta @1280', async ( { page } ) => {
+	test( 'lead-meta: .ttm-lead__meta @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const meta = page.locator( '.ttm-lead__meta' );
 		expect( await computed( meta, 'font-size' ) ).toBe( px( 12 ) );

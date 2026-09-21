@@ -1,4 +1,4 @@
-ttm-{lead-row,lead__inner,lead__kicker,lead__dek,lead__meta,journal-rail} # phase 2 pending: Phase 2 lead row
+ttm-{journal-rail} # phase 2 pending: Phase 2 lead row
 ttm-{writing-cell__featured,writing-cell__headline,writing-cell__dek,item-featured} # phase 2 pending: Phase 3
 ttm-{series-bar,series-toc,numbered,entry,syndication__words}* # 2b/2c article + journal chrome: later flight
 ttm-{archive,archive-year__rows,filter-row,most-read,category-stats,journal-stream} # 1e archives: later flight
