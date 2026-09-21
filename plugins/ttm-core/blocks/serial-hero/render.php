@@ -103,18 +103,18 @@ $ttm_latest = Serials::latest_chapter( $ttm_row );
 				<span class="ttm-stats__value tnum"><?php echo esc_html( sprintf( '%d / %d', $ttm_stats['published'], $ttm_stats['total'] ) ); ?></span>
 				<span class="ttm-stats__label"><?php esc_html_e( 'chapters published', 'ttm-core' ); ?></span>
 			</p>
-			<?php if ( '' !== $ttm_stats['cadence'] ) : ?>
+				<?php if ( '' !== $ttm_stats['cadence'] ) : ?>
 			<p>
 				<span class="ttm-stats__value"><?php echo esc_html( $ttm_stats['cadence'] ); ?></span>
-				<?php if ( '' !== $ttm_stats['next_date'] ) : ?>
+					<?php if ( '' !== $ttm_stats['next_date'] ) : ?>
 				<span class="ttm-stats__label">
-					<?php
-					printf(
+						<?php
+						printf(
 						/* translators: %s: next chapter's expected date. */
-						esc_html__( 'next: %s', 'ttm-core' ),
-						esc_html( Helpers::date_short( $ttm_stats['next_date'] ) )
-					);
-					?>
+							esc_html__( 'next: %s', 'ttm-core' ),
+							esc_html( Helpers::date_short( $ttm_stats['next_date'] ) )
+						);
+						?>
 				</span>
 				<?php endif; ?>
 			</p>
