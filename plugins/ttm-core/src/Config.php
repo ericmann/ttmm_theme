@@ -79,6 +79,7 @@ class Config {
 			'writing.story_tiles'          => 4,
 			'writing.shelf_limit'          => 4,
 			'books.max'                    => 12,
+			'cli.batch'                    => 200,
 
 			'archive.per_page'             => 12,
 			'archive.tag_filter_limit'     => 5,

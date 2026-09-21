@@ -47,6 +47,7 @@ class ConfigTest extends TestCase {
 			'writing.story_tiles',
 			'writing.shelf_limit',
 			'books.max',
+			'cli.batch',
 			'archive.per_page',
 			'archive.tag_filter_limit',
 			'archive.row_tags',

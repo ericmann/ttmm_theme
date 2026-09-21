@@ -44,6 +44,7 @@ class Plugin {
 			Fiction\Books::class,
 			Rest\SeriesController::class,
 			Rest\LeadController::class,
+			Cli\Loader::class,
 		];
 	}
 
