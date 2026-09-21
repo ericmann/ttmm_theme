@@ -53,7 +53,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P4-07 Push and manual check (Phase 4)
 - [x] P5-01 Archive query, pagination labels, section feeds, journal-in-main-feed
 - [x] P5-02 archive-by-year and tag-filter blocks
-- [ ] P5-03 category-stats and most-read blocks
+- [x] P5-03 category-stats and most-read blocks
 - [ ] P5-04 Archive and search patterns, templates and CSS
 - [ ] P5-05 Push and manual check (Phase 5)
 - [ ] P6-01 series-progress and series-stats blocks
@@ -336,3 +336,6 @@ Added Query\Archive: pre_get_posts on the main front-end query only (archive.per
 
 ### P5-02 — 685a15d
 Added ttm/archive-by-year (InnerBlocks container for one core/query) and ttm/tag-filter. Query\Archive gained render_block_data (increments Helpers::$archive_scope on seeing ttm/archive-by-year, before its inner blocks render) and render_block_core/post-template (while scope > 0, splits the rendered <li> rows by post-{id} class, groups by get_post_time('Y', false, $id), emits one ttm-archive-year div per year in encounter order — F15 keeps single-post years as their own group); archive-by-year's own render.php only decrements the scope and wraps the already-grouped $content, since WP renders a block's InnerBlocks before invoking its own render_callback. ttm/tag-filter reads Query\Stats::top_tags() on a category archive, links each to ?tag={slug} via add_query_arg, marks the active one (from get_query_var('tag'), already set by Archive::shape()) with tag-accent, and returns '' outside a category archive or with zero tags (F16). Full integration suite: 216 tests, 2 pre-existing/expected skips, 0 failures.
+
+### P5-03 — ec30be7
+Added ttm/category-stats (article count via _n, year range with en dash or a single year, series-touch line omitted at 0, "{Section} RSS" feed link — all from Query\Stats::category(), '' outside a category archive) and ttm/most-read (bounded WP_Query on ttm_featured_in_section=1 AND ttm_primary_category=current term, newest first, limit from the attribute or archive.most_read_limit; '' with zero results or outside a category archive). most-read's source attribute enum documents that "views" (Q6, not implemented) behaves identically to "manual" rather than silently ignored. Full integration suite: 222 tests, 2 pre-existing/expected skips, 0 failures.
