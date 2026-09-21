@@ -1,0 +1,29 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "ttm/newsletter-form",
+	"title": "Newsletter Form",
+	"category": "ttm",
+	"description": "The newsletter subscription form as a provider switch (jetpack/mailto/none, F26).",
+	"textdomain": "ttm-core",
+	"attributes": {
+		"placement": {
+			"type": "string",
+			"enum": [ "poster", "box" ],
+			"default": "poster"
+		},
+		"previewState": {
+			"type": "string",
+			"default": "normal"
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": false,
+		"color": false,
+		"typography": false,
+		"spacing": false
+	},
+	"render": "file:./render.php",
+	"editorScript": "file:./index.js"
+}

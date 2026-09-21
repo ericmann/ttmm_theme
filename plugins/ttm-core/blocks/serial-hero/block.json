@@ -1,0 +1,28 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "ttm/serial-hero",
+	"title": "Serial Hero",
+	"category": "ttm",
+	"description": "Writing page hero (02 §D zone 2, 01 §4.36/§4.37), F3, F21.",
+	"textdomain": "ttm-core",
+	"attributes": {
+		"seriesId": {
+			"type": "number",
+			"default": 0
+		},
+		"previewState": {
+			"type": "string",
+			"default": "normal"
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": false,
+		"color": false,
+		"typography": false,
+		"spacing": false
+	},
+	"render": "file:./render.php",
+	"editorScript": "file:./index.js"
+}

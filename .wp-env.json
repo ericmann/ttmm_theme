@@ -21,7 +21,8 @@
   },
   "mappings": {
     "wp-content/ttm-tests": "./tests",
-    "wp-content/ttm-vendor": "./vendor"
+    "wp-content/ttm-vendor": "./vendor",
+    "wp-content/ttm-fixtures": "./docs/fixtures"
   },
   "env": {
     "tests": {

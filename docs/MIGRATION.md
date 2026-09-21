@@ -100,7 +100,9 @@ One row per post with flags: `classic`, `no-excerpt`, `no-featured-image`, `miss
 
 ```bash
 wp ttm migrate:politics --dry-run
-wp ttm migrate:politics            # creates `opinion` if missing, moves `politics` under it, keeps every post's terms
+wp ttm migrate:politics            # creates `opinion` if missing, moves `politics` under it, keeps every post's terms,
+                                    # adds `opinion` to every Politics post and sets it as that post's primary category
+                                    # (so PrimaryCategory::slug() reads "opinion" — Politics posts are Opinion posts now)
 wp ttm migrate:redirects --format=nginx   # prints `/category/politics/…` → `/category/opinion/politics/…` rules
 ```
 
@@ -168,7 +170,11 @@ Once converted, the `modern-footnotes` plugin can be deactivated.
 
 ### 2.7 Journal syndication (best effort)
 
-The Phase 8 spike populates `ttm_syndication` from Jetpack Social's per-post share records where they exist. Check a few journal posts: the syndication line appears only when at least one URL exists. Anything missing can be pasted into the post sidebar.
+```bash
+wp ttm migrate:syndication [--dry-run] [--post=<id>]
+```
+
+Reads Jetpack Social/Publicize's `_publicize_done_external` per-post meta (`{service: {id: url}}`) where it exists and populates `ttm_syndication` for `x`/`mastodon`/`bluesky`, `https` URLs only, never overwriting a post that already has a syndication value. See `docs/spikes/P8-05.md` for exactly which Jetpack meta keys were examined and why only this one carries usable URLs. Check a few journal posts: the syndication line appears only when at least one URL exists. Anything missing can be pasted into the post sidebar.
 
 ### 2.8 Comments
 
@@ -177,7 +183,7 @@ wp ttm migrate:close-comments --dry-run
 wp ttm migrate:close-comments      # comment_status=closed, ping_status=closed on every post; default_comment_status=closed
 ```
 
-Existing comments are kept in the database and not rendered. Revisit after the content cleanup if you want them back.
+Existing comments are kept in the database and not rendered. Revisit after the content cleanup if you want them back. The command updates `comment_status`/`ping_status` directly (not through `wp_update_post()`) and fires the Cloudflare/Batcache purge exactly once for the whole batch, not once per post.
 
 ### 2.9 Verse
 

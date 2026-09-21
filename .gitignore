@@ -12,3 +12,4 @@ playwright-report/
 .foundry/implement.lock
 docs/fixtures/live-export*.xml
 docs/fixtures/live/
+FOUNDRY_FEEDBACK.md

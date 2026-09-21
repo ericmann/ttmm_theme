@@ -1,0 +1,55 @@
+<!-- wp:template-part {"slug":"header-inner"} /-->
+
+<!-- wp:group {"className":"is-style-grid-3-7-2 ttm-journal-head","layout":{"type":"constrained"}} -->
+<div class="wp-block-group is-style-grid-3-7-2 ttm-journal-head">
+	<!-- wp:group {"layout":{"type":"constrained"}} -->
+	<div class="wp-block-group">
+		<!-- wp:paragraph {"className":"is-style-kicker"} -->
+		<p class="is-style-kicker">Journal</p>
+		<!-- /wp:paragraph -->
+
+		<!-- wp:paragraph {"className":"is-style-journal-date","metadata":{"bindings":{"content":{"source":"ttm/short-date"}}}} -->
+		<p class="is-style-journal-date"></p>
+		<!-- /wp:paragraph -->
+
+		<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"ttm/journal-subline"}}}} -->
+		<p></p>
+		<!-- /wp:paragraph -->
+	</div>
+	<!-- /wp:group -->
+
+	<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+	<main class="wp-block-group" id="main">
+		<!-- wp:post-title {"className":"is-style-journal-title"} /-->
+
+		<!-- wp:post-content /-->
+
+		<!-- wp:ttm/syndicated-to /-->
+	</main>
+	<!-- /wp:group -->
+
+	<!-- wp:group {"layout":{"type":"constrained"}} -->
+	<div class="wp-block-group">
+		<!-- wp:paragraph {"className":"is-style-meta"} -->
+		<p class="is-style-meta">Short, dated entries. Longer writing lives in the sections.</p>
+		<!-- /wp:paragraph -->
+
+		<!-- wp:paragraph -->
+		<p><a href="/category/journal/feed/">Journal RSS</a></p>
+		<!-- /wp:paragraph -->
+
+		<!-- wp:paragraph {"className":"ttm-journal-head__count","metadata":{"bindings":{"content":{"source":"ttm/word-count"}}}} -->
+		<p class="ttm-journal-head__count"></p>
+		<!-- /wp:paragraph -->
+	</div>
+	<!-- /wp:group -->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:separator {"className":"is-style-rule-2"} -->
+<hr class="wp-block-separator has-alpha-channel-opacity is-style-rule-2"/>
+<!-- /wp:separator -->
+
+<!-- wp:pattern {"slug":"ttm/journal-stream"} /-->
+
+<!-- wp:template-part {"slug":"footer"} /-->

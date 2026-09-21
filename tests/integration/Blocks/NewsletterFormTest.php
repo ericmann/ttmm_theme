@@ -1,0 +1,88 @@
+<?php
+/**
+ * Integration tests for the ttm/newsletter-form block.
+ *
+ * @package TTM\Tests\Integration\Blocks
+ */
+
+declare( strict_types=1 );
+
+use TTM\Core\Config;
+
+class NewsletterFormTest extends TTM_IntegrationTestCase {
+
+	public function tear_down(): void {
+		$_GET = [];
+		update_option( 'ttm_settings', [] );
+		Config::reset();
+		if ( WP_Block_Type_Registry::get_instance()->is_registered( 'jetpack/subscriptions' ) ) {
+			WP_Block_Type_Registry::get_instance()->unregister( 'jetpack/subscriptions' );
+		}
+		parent::tear_down();
+	}
+
+	private function render( array $attributes = [] ): string {
+		$json = empty( $attributes ) ? '' : ' ' . wp_json_encode( $attributes );
+
+		return (string) do_blocks( '<!-- wp:ttm/newsletter-form' . $json . ' /-->' );
+	}
+
+	public function test_jetpack_provider_renders_subscriptions_block(): void {
+		register_block_type(
+			'jetpack/subscriptions',
+			[
+				'render_callback' => static fn (): string => '<div class="jetpack-subscribe-stub">Stub Form</div>',
+			]
+		);
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'jetpack-subscribe-stub', $html );
+		$this->assertStringContainsString( 'data-provider="jetpack"', $html );
+	}
+
+	public function test_mailto_provider_renders_mailto_link(): void {
+		update_option(
+			'ttm_settings',
+			[
+				'newsletter' => [
+					'provider'       => 'mailto',
+					'fallback_email' => 'editor@example.com',
+				],
+			]
+		);
+		Config::reset();
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'href="mailto:editor@example.com?subject=Subscribe"', $html );
+		$this->assertStringContainsString( 'data-provider="mailto"', $html );
+	}
+
+	public function test_f26_none_renders_statement_only_no_form(): void {
+		// Neither jetpack/subscriptions is registered nor a fallback email configured: the
+		// default chain resolves to "none".
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'data-provider="none"', $html );
+		$this->assertStringContainsString( 'The weekly issue lands on Sundays.', $html );
+		$this->assertStringNotContainsString( '<form', $html );
+		$this->assertStringNotContainsString( '<input', $html );
+	}
+
+	public function test_subscribed_query_sets_data_state_without_reflecting_input(): void {
+		$_GET['subscribed'] = '<script>alert(1)</script>';
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'data-state="subscribed"', $html );
+		$this->assertStringNotContainsString( '<script>', $html );
+	}
+
+	public function test_output_contains_no_nonce_field(): void {
+		$html = $this->render();
+
+		$this->assertStringNotContainsString( 'wpnonce', $html );
+		$this->assertStringNotContainsString( 'wp_nonce', $html );
+	}
+}

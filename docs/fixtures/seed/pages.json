@@ -1,0 +1,26 @@
+[
+	{
+		"slug": "series",
+		"title": "Series",
+		"template": "page-series",
+		"content": "<!-- wp:paragraph --><p>Every ongoing series on this site, gathered in one place.</p><!-- /wp:paragraph -->"
+	},
+	{
+		"slug": "writing",
+		"title": "Writing",
+		"template": "page-writing",
+		"content": "<!-- wp:paragraph --><p>Fiction, serials and books, past and in progress.</p><!-- /wp:paragraph -->"
+	},
+	{
+		"slug": "newsletter",
+		"title": "Newsletter",
+		"template": "page",
+		"content": "<!-- wp:paragraph --><p>Subscribe to get new posts by email, roughly weekly.</p><!-- /wp:paragraph -->"
+	},
+	{
+		"slug": "about",
+		"title": "About",
+		"template": "page",
+		"content": "<!-- wp:paragraph --><p>Technology, business, faith and the occasional story, from someone who works in all four.</p><!-- /wp:paragraph -->"
+	}
+]

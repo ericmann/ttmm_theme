@@ -1,0 +1,57 @@
+<!-- wp:template-part {"slug":"header-inner"} /-->
+
+<!-- wp:ttm/serial-hero /-->
+
+<!-- wp:separator {"className":"is-style-rule-2","lock":{"move":false,"remove":false}} -->
+<hr class="wp-block-separator has-alpha-channel-opacity is-style-rule-2"/>
+<!-- /wp:separator -->
+
+<!-- wp:group {"className":"is-style-grid-7-5 ttm-writing-body","layout":{"type":"constrained"}} -->
+<div class="wp-block-group is-style-grid-7-5 ttm-writing-body">
+	<!-- wp:group {"tagName":"main","layout":{"type":"flex","orientation":"vertical"}} -->
+	<main class="wp-block-group" id="main">
+		<!-- wp:group {"className":"ttm-cell-heading","layout":{"type":"flex","justifyContent":"space-between"}} -->
+		<div class="wp-block-group ttm-cell-heading">
+			<!-- wp:heading {"level":3,"className":"ttm-cell-heading__label"} -->
+			<h3 class="ttm-cell-heading__label">All serials</h3>
+			<!-- /wp:heading -->
+
+			<!-- wp:paragraph {"className":"ttm-cell-heading__link"} -->
+			<p class="ttm-cell-heading__link">Newest activity first</p>
+			<!-- /wp:paragraph -->
+		</div>
+		<!-- /wp:group -->
+
+		<!-- wp:ttm/series-list {"form":"fiction","status":"any","limit":10,"layout":"rows","showDek":true,"showCount":true} /-->
+
+		<!-- wp:ttm/series-toc {"variant":"chapters","order":"desc","limit":4,"showDek":true,"heading":"Recent chapters"} /-->
+	</main>
+	<!-- /wp:group -->
+
+	<!-- wp:group {"tagName":"aside","layout":{"type":"flex","orientation":"vertical"}} -->
+	<aside class="wp-block-group" aria-label="Fiction extras">
+		<!-- wp:group {"className":"ttm-writing-body__stories","layout":{"type":"constrained"}} -->
+		<div class="wp-block-group ttm-writing-body__stories">
+			<!-- wp:heading {"level":3,"className":"ttm-cell-heading__label"} -->
+			<h3 class="ttm-cell-heading__label">Short fiction</h3>
+			<!-- /wp:heading -->
+
+			<!-- wp:ttm/story-tiles /-->
+		</div>
+		<!-- /wp:group -->
+
+		<!-- wp:group {"className":"ttm-writing-body__books","layout":{"type":"constrained"}} -->
+		<div class="wp-block-group ttm-writing-body__books">
+			<!-- wp:heading {"level":3,"className":"ttm-cell-heading__label"} -->
+			<h3 class="ttm-cell-heading__label">In print</h3>
+			<!-- /wp:heading -->
+
+			<!-- wp:ttm/book-grid /-->
+		</div>
+		<!-- /wp:group -->
+	</aside>
+	<!-- /wp:group -->
+</div>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer"} /-->

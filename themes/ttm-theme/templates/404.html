@@ -1,0 +1,36 @@
+<!-- wp:template-part {"slug":"header-inner"} /-->
+
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<main class="wp-block-group" id="main">
+	<!-- wp:heading {"level":1,"className":"is-style-display-xl"} -->
+	<h1 class="is-style-display-xl">Not here.</h1>
+	<!-- /wp:heading -->
+
+	<!-- wp:paragraph {"className":"is-style-dek"} -->
+	<p class="is-style-dek">The page you're looking for doesn't exist. Try a search.</p>
+	<!-- /wp:paragraph -->
+
+	<!-- wp:search {"label":"Search","buttonText":"Search"} /-->
+
+	<!-- wp:pattern {"slug":"ttm/series-strip"} /-->
+
+	<!-- wp:heading {"level":2,"className":"is-style-cell-lead"} -->
+	<h2 class="is-style-cell-lead">Latest</h2>
+	<!-- /wp:heading -->
+
+	<!-- wp:query {"queryId":1,"query":{"perPage":4,"postType":"post","inherit":false},"namespace":"ttm/section-query"} -->
+	<div class="wp-block-query">
+		<!-- wp:post-template -->
+		<!-- wp:group {"className":"ttm-item"} -->
+		<div class="wp-block-group ttm-item">
+			<!-- wp:post-title {"isLink":true,"level":3} /-->
+			<!-- wp:post-date {"className":"ttm-item__meta"} /-->
+		</div>
+		<!-- /wp:group -->
+		<!-- /wp:post-template -->
+	</div>
+	<!-- /wp:query -->
+</main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer"} /-->

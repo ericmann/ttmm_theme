@@ -60,16 +60,26 @@ These are the commands the Foundry pipeline runs after every task (`docs/foundry
 | `npm run test:unit` | Jest via `wp-scripts` | no |
 | `npm run build` | `wp-scripts build` for the plugin | no |
 | `npm run test:integration` | starts wp-env if needed, then PHPUnit with the WordPress test suite inside the `tests-cli` container (`tests/integration`) | yes |
-| `npm run test:e2e` | Playwright + axe against the running wp-env (`tests/e2e`, Phase 8) | yes |
+| `npm run test:e2e` | starts wp-env, reseeds it (`wp ttm seed --reset`), then Playwright + axe against the seven seeded screens at 1280×900 and 390×844 (`tests/e2e`) | yes |
 | `bash scripts/forbidden-patterns.sh` | greps for the mechanical rules in `SPEC.md §3` | no |
 
 Fix formatting automatically with `composer lint:fix` (phpcbf) and `npx wp-scripts format`.
+
+### How the e2e suite works
+
+`npm run test:e2e` runs against the wp-env **dev** site (`http://localhost:8888`), not the tests instance on `8889` - it reseeds the dev site itself (`wp-env run cli wp ttm seed --reset`) first, and `tests/e2e/playwright.config.mjs` sets `WP_BASE_URL` explicitly for the same reason: `wp-scripts test-playwright` otherwise defaults it to the *tests* environment's port when `@wordpress/env` is installed, which would run the suite against an empty, unseeded site. `tests/e2e/lib/urls.mjs` hard-codes the seven screens' paths from the seed fixtures (`docs/fixtures/seed/{posts,series}.json`); `screens.spec.mjs` checks one `<main>` landmark, zero `serious`/`critical` axe violations, and a single `img[fetchpriority="high"]` hero image on the front page and one article; `network.spec.mjs` asserts every request is same-origin, `data:`/`blob:`, or (only when Jetpack happens to be active) one of its own stats/subscribe hosts, and never hits `/wp-json/` or `admin-ajax.php`; `focus.spec.mjs` tabs through the front page and checks the skip link, first nav link, first `.ttm-item`, and first `.btn` all keep a visible focus outline. The HTML report lands at `playwright-report/` (`--open=never`); open it with `npx playwright show-report`.
 
 ### How the integration harness works
 
 `.wp-env.json` maps `./tests` to `wp-content/ttm-tests` and `./vendor` to `wp-content/ttm-vendor` in both containers. `npm run test:integration` runs `phpunit` from inside the tests container with `tests/integration/bootstrap.php`, which loads the WordPress test suite wp-env ships at `/wordpress-phpunit`, loads `ttm-core` as an mu-plugin and switches to `ttm-theme`. Tests extend `WP_UnitTestCase`; every test runs in a transaction that is rolled back.
 
 Run a single file: `npx wp-env run tests-cli --env-cwd=wp-content/ttm-tests php ../ttm-vendor/bin/phpunit -c integration/phpunit.xml.dist --filter BootTest`.
+
+`.wp-env.json` also maps `./docs/fixtures` to `wp-content/ttm-fixtures`, so integration tests can read fixed sample payloads (a Verse API response, a classic-editor HTML sample) with plain `file_exists()`/`file_get_contents()` calls against `WP_CONTENT_DIR . '/ttm-fixtures/...'` instead of embedding them inline. If a mapping does not appear after editing `.wp-env.json`, run `npx wp-env destroy && npx wp-env start` to force a rebuild.
+
+## Seed states
+
+`npm run env:seed` runs `wp ttm seed` (state `normal` by default), which fully populates the seven sections, four pages, navigation, ~90 posts, the four seed series (two nonfiction, two fiction, one with a cover), two books and the current verse from `docs/fixtures/verse-sample.json`. `npx wp-env run cli wp ttm seed --state=quiet` shifts every post 120 days into the past (no cell has anything within 90 days, journal nothing within 30) without changing any series status. `npx wp-env run cli wp ttm seed --state=empty` seeds everything except Security/Opinion posts, series (and their chapters), stories and books, and deletes the verse options — useful for exercising every documented fallback (`06-fallbacks.md`). Add `--reset` to any of these to delete every previously seeded object (identified by `_ttm_seed` post/term meta) first; seeding itself is idempotent by slug, so re-running `wp ttm seed` without `--reset` never duplicates content. Seeding refuses to run when `wp_get_environment_type()` returns `production`.
 
 ## Repository layout
 
@@ -111,5 +121,5 @@ The planner reads `docs/SPEC.md`, writes `docs/PLAN.md`, `docs/PROGRESS.md`, `do
 | Port 8888 in use | Set `"port": 8890` in `.wp-env.override.json`. |
 | `WordPress test suite not found at /wordpress-phpunit` | You ran phpunit on the host. Use `npm run test:integration`. |
 | PHPCS says a prefix is too short | The `ttm` prefix is intentional; the sniff is excluded in `phpcs.xml.dist`. Any other prefix is a real error. |
-| Fonts render as Helvetica | The Archivo woff2 files are not in `themes/ttm-theme/assets/fonts/`; Phase 0 of the build adds them. |
-| Front page shows the default index | The templates land in Phases 2–3; run `npm run env:seed` after they exist. |
+| Fonts render as Helvetica | Confirm the Archivo woff2 files are present in `themes/ttm-theme/assets/fonts/` (shipped since Phase 0) and that the browser cache isn't serving a stale `style.css`. |
+| Front page shows the default index | Run `npm run env:seed` — `front-page.html` and the rest of `themes/ttm-theme/templates/` render only once there is content to query. |
