@@ -28,7 +28,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P2-01 Block styles, pattern categories, image sizes
 - [x] P2-02 ttm.css foundation: bridge, grids, rules, type utilities, buttons, tags, inputs, body typography
 - [x] P2-03 ttm.css chrome, nav.js, editor.css; CSS budget tuning
-- [ ] P2-04 Block variations and starter content
+- [x] P2-04 Block variations and starter content
 - [ ] P2-05 Template parts and chrome patterns
 - [ ] P2-06 page, 404, index and search-shell templates; current section and body classes
 - [ ] P2-07 Push and manual check (Phase 2)
@@ -247,3 +247,10 @@ Measurement (cssBudgetBytes assumption): before 10858 bytes, after 18335 bytes (
 Fixed 2 stylelint no-descending-specificity false positives (masthead byline link and core-nav link vs. the unrelated .entry-content a:hover from P2-02) with justified stylelint-disable-next-line comments, since these are genuinely independent components sharing the bare "a" tail that the linter's cascade heuristic conflates.
 72/72 integration + 63/63 unit tests pass; full verify green.
 Manual check: NOT VERIFIED (human) -- open the front page and an inner page, resize to <=720px, confirm the nav overlay opens/closes and closes on link tap; confirm the inner masthead nav is not overlaid at >=721px.
+
+### P2-04 — f2f5d5d
+variations.js registers 3 wp.blocks.registerBlockVariation calls on wp.domReady: ttm/section-query and ttm/journal-query on core/query (isActive:['namespace'], scope inserter+transform, the exact query attribute shapes from §6.2/task text incl. ttmSection/ttmExcludeLead/ttmPrimaryOnly), ttm/sections-nav on core/navigation (overlayMenu:'always', hasIcon:false, className:'ttm-nav'). Enqueued in functions.php on enqueue_block_editor_assets only, deps [wp-blocks,wp-i18n,wp-dom-ready], no build step.
+starter-content.php::create_starter_content() hooked after_switch_theme: creates the 7 categories via get_category_by_slug/wp_insert_term (skip if exists), 4 pages via get_page_by_path/wp_insert_post (reused by slug, template meta always (re)assigned via update_post_meta even on reuse), and a wp_navigation post slug=ttm-sections with navigation-link blocks to each category (get_category_link) plus Series->home_url('/series/') — all via allowed calls only (get_posts never used, including for the nav-post existence check, which also goes through get_page_by_path since it accepts any single post type).
+Fixed tests/unit/Theme/FontsTest.php::test_only_nav_js_is_enqueued_on_the_front_end — it previously regex-scanned the WHOLE functions.php for any wp_enqueue_script call and asserted all name nav.js; now scoped to just the wp_enqueue_scripts callback block, since variations.js is a second, legitimate, editor-only enqueue under a different hook.
+65/65 unit + 75/75 integration tests pass (5 new); full verify green.
+Manual check: NOT VERIFIED (human) -- deactivate/reactivate the theme on a fresh site and confirm 7 categories/4 pages(with templates)/Sections nav appear; open the editor and confirm the 3 variations appear in the inserter.
