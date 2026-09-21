@@ -20,7 +20,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P1-06 Newsletter form contract — shared markup, provider chain, custom-url dev-accept, seed
 - [x] P1-07 Spike — Jetpack Subscriptions widget POST contract
 - [x] P1-08 Jetpack provider on the shared form
-- [ ] P1-09 Editor registration in every context (§6.7)
+- [x] P1-09 Editor registration in every context (§6.7)
 - [ ] P1-10 Newsletter poster per §6.1.8
 - [ ] P1-11 Phase 1 push — chrome screenshots
 - [ ] P2-01 Lead story CSS and markup per §6.1.3
@@ -176,3 +176,25 @@ Verified: all three task-specified checks pass (spike file non-empty with requir
 Provider\Jetpack: available() = Jetpack::is_connection_ready() (if class/method exist) || WP_Block_Type_Registry::is_registered('jetpack/subscriptions'). render() = Form::render($current_url, [action=subscribe, source=$current_url, sub-type=widget, redirect_fragment='ttm-newsletter-'.Form::next_id()], $placement, 'jetpack_subscriptions_widget') where $current_url = get_permalink() on singular else home_url('/'). No do_blocks('jetpack/subscriptions') anymore; no nonce (per this task's own explicit design, despite the P1-07 spike flagging that Jetpack's real widget does render one — task text was prescriptive, implemented as written).
 Tests: NewsletterFormTest::test_jetpack_provider_renders_shared_form_with_widget_fields replaces the old do_blocks-stub test (register_block_type with no render_callback is enough now, since Jetpack.php never calls do_blocks on it); ::test_jetpack_unavailable_falls_through_to_custom_url_dev_accept (chain now lands on custom-url dev-accept, not straight to mailto/none, matching P1-06). New tests/integration/Newsletter/JetpackFieldsTest.php: parses docs/fixtures/jetpack-subscriptions.html for every name="…" and asserts every field the provider emits (except email) appears there — uses Seeder::fixtures_root_dir() (wp-env mapping-aware) rather than a manual dirname() path, since the naive relative path resolved wrong inside the tests-cli container.
 Verified: composer lint 0 errors, npm run lint clean, npm run test:integration 400/400 (real wp-env), npm run test:e2e 66 passed/61 skipped (0 failed), composer test:unit, npm run build, forbidden-patterns all green. ttm-theme confirmed active; wp-env stopped after.
+
+### P1-09 — 754dcdf
+Real defect was block.json's "editorScript":"file:./index.js" resolving
+relative to block.json's own SOURCE directory, never build/blocks/{slug}/
+-- every editor context loaded raw ES-module source, "Cannot use import
+statement outside a module" for all 19 blocks in Site Editor + Customizer
+alike. Fixed by registering an explicit ttm-{slug}-editor-script handle
+from the real build/ file + asset deps in Registrar::drop_missing_
+editor_script(), instead of letting WP resolve the file: path itself.
+
+Second defect once that was fixed: Customizer still didn't register
+blocks because each index.js's client-side registerBlockType(name,
+{edit,save}) needs a full definition already bootstrapped into the JS
+registry -- Gutenberg's own editors do this automatically, core's
+Customizer widgets screen does it too but only when
+wp_use_widgets_block_editor() is true (never, for this theme). Added
+the same wp.blocks.unstable__bootstrapServerSideBlockDefinitions() call
+core uses, fed from get_block_editor_server_block_settings().
+
+New tests/integration/Blocks/EditorAssetsTest.php; editors.spec.mjs
+un-fixme'd (also fixed a networkidle-never-resolves wait bug on the
+Site Editor). All verify commands green.
