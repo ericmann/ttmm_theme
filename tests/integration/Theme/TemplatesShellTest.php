@@ -38,4 +38,16 @@ class TemplatesShellTest extends TTM_IntegrationTestCase {
 
 		$this->assertStringContainsString( 'Hello Index', $html );
 	}
+
+	public function test_page_404_index_render_exactly_one_header_and_footer_landmark(): void {
+		// Regression: 404.html/index.html/page.html used to wrap the header-inner/footer
+		// template-part references with their own `"tagName":"header"/"footer"`, nesting a
+		// second landmark around the part's own <header>/<footer> element.
+		foreach ( [ 'page', '404', 'index' ] as $slug ) {
+			$html = $this->render( $slug );
+
+			$this->assertSame( 1, substr_count( $html, '<header' ), "{$slug}.html renders more than one <header landmark" );
+			$this->assertSame( 1, substr_count( $html, '<footer' ), "{$slug}.html renders more than one <footer landmark" );
+		}
+	}
 }

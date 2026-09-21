@@ -52,7 +52,10 @@ $ttm_kicker = $ttm_is_complete
 	)
 	: __( 'Writing · Serial in progress', 'ttm-core' );
 
-$ttm_title_tag = is_page() ? 'h1' : 'h2';
+// page-writing.html serves both the /writing/ Page (is_page()) and, via
+// Templates\Hierarchy's category_template prepend, the Writing category archive
+// (is_category()) -- the hero is that page's one h1 either way.
+$ttm_title_tag = ( is_page() || is_category() ) ? 'h1' : 'h2';
 
 $ttm_purchase_links = $ttm_is_complete ? Serials::purchase_links( $ttm_row ) : [];
 $ttm_purchase_link  = $ttm_purchase_links[0] ?? null;

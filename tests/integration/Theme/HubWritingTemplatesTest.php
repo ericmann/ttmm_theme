@@ -179,6 +179,26 @@ class HubWritingTemplatesTest extends TTM_IntegrationTestCase {
 		$this->assertSame( 'page-writing', $hierarchy[0] );
 	}
 
+	public function test_writing_category_archive_has_one_h1(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$this->make_series(
+			'the-quiet-ledger',
+			'The Quiet Ledger',
+			31,
+			[ [ 'part' => 1 ] ],
+			[ 'ttm_form' => 'novel' ],
+			'writing'
+		);
+
+		$writing = $this->category_id( 'writing', 'Writing' );
+		$this->go_to( (string) get_category_link( $writing ) );
+
+		$html = $this->render_template( 'page-writing' );
+
+		$this->assertSame( 1, substr_count( $html, '<h1' ) );
+		$this->assertStringContainsString( '<h1 class="ttm-serial-hero__title', $html );
+	}
+
 	public function test_cover_shadow_class_only_in_hero(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
 		$attachment_id = $this->attachment();

@@ -7,8 +7,8 @@
 }
 
 /* 2.6 rules */
+.is-style-rule-1,
 .is-style-rule-2 {
-	height: 2px;
 	background: var(--wp--preset--color--divider);
 	border: 0;
 	opacity: 1;
@@ -16,50 +16,54 @@
 
 .is-style-rule-1 {
 	height: 1px;
-	background: var(--wp--preset--color--divider);
-	border: 0;
-	opacity: 1;
+}
+
+.is-style-rule-2 {
+	height: 2px;
 }
 
 /* 3 grids */
-.is-style-grid-8-4 {
+.is-style-grid-8-4,
+.is-style-grid-3-7-2,
+.is-style-grid-5-7,
+.is-style-grid-7-5,
+.is-style-grid-3,
+.is-style-grid-2,
+.is-style-grid-4 {
 	display: grid;
+}
+
+.is-style-grid-8-4 {
 	grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
 	gap: var(--wp--preset--spacing--90);
 }
 
 .is-style-grid-3-7-2 {
-	display: grid;
 	grid-template-columns: minmax(0, 3fr) minmax(0, 7fr) minmax(0, 2fr);
 	gap: var(--wp--preset--spacing--80);
 }
 
 .is-style-grid-5-7 {
-	display: grid;
 	grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
 	gap: var(--wp--preset--spacing--90);
 }
 
 .is-style-grid-7-5 {
-	display: grid;
 	grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
 	gap: var(--wp--preset--spacing--90);
 }
 
 .is-style-grid-3 {
-	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
 	gap: var(--wp--preset--spacing--50);
 }
 
 .is-style-grid-2 {
-	display: grid;
 	grid-template-columns: 1fr 1fr;
 	gap: 0 var(--wp--preset--spacing--70);
 }
 
 .is-style-grid-4 {
-	display: grid;
 	grid-template-columns: repeat(4, minmax(0, 1fr));
 	gap: 0 var(--wp--preset--spacing--60);
 }
@@ -343,11 +347,7 @@ p.is-style-poster {
 	cursor: pointer;
 }
 
-/* P8-07: accent (#ec3013) under bg-colored text (#f3f2f2) is 3.76:1, below WCAG AA's 4.5:1 for
-   this button text's size/weight (axe caught this) - accent-700 is already in the palette and
-   clears 6.4:1, so the filled state uses it instead of the raw accent token; hover/active lighten
-   back toward accent, which is fine since interaction states aren't part of the same-state
-   contrast requirement axe checks. */
+/* P8-07: accent-on-bg fails WCAG AA (3.76:1); accent-700 clears 6.4:1 (axe). */
 .btn-primary,
 .wp-block-button__link {
 	background: var(--wp--preset--color--accent-700);
@@ -397,13 +397,6 @@ p.is-style-poster {
 	background: color-mix(in oklch, var(--wp--preset--color--text) 7%, transparent);
 }
 
-@media (max-width: 720px) {
-
-	.btn-block {
-		width: 100%;
-	}
-}
-
 /* 4.32 input */
 .input {
 	border: var(--ttm-rule-1);
@@ -411,6 +404,16 @@ p.is-style-poster {
 	font-size: var(--wp--preset--font-size--body-s);
 	padding: 8px 10px;
 	border-radius: 0;
+}
+
+/* Newsletter honeypot (Provider/CustomUrl.php): visually hidden, still tab/DOM-reachable so a
+   bot filling every field trips it; real visitors never see or reach it. */
+.ttm-hp {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
 }
 
 /* 4.24 body typography */
@@ -926,10 +929,7 @@ blockquote.is-style-pull cite,
 	color: var(--wp--preset--color--neutral-700);
 }
 
-/* P8-07: darkening the surrounding text above (neutral-600 -> -700, for its own contrast against
-   bg) left the source link under WCAG 1.4.1's "use of color" threshold (axe caught this too) -
-   an underline distinguishes it from the surrounding text independent of color, which is the
-   rule's own prescribed fix regardless of the contrast ratio. */
+/* P8-07: underline for WCAG 1.4.1 -- color alone no longer distinguishes the link (axe). */
 /* stylelint-disable-next-line no-descending-specificity -- unrelated component (verse attribution vs. .entry-content a:hover) */
 .ttm-verse__attribution a {
 	text-decoration: underline;
