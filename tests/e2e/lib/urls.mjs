@@ -31,3 +31,9 @@ export const SCREENS = {
 };
 
 export const SCREEN_URLS = Object.values( SCREENS );
+
+/**
+ * wp-env's fixed admin credentials (`.wp-env.json` default), used by `editors.spec.mjs` to log
+ * into `/wp-login.php` before opening the Site Editor / Customizer.
+ */
+export const ADMIN = { user: 'admin', pass: 'password' };

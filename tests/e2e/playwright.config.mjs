@@ -24,6 +24,7 @@ export default defineConfig( {
 	projects: [
 		{
 			name: 'desktop',
+			testIgnore: /(fidelity|editors)\.spec\.mjs$/,
 			use: {
 				...devices[ 'Desktop Chrome' ],
 				viewport: { width: 1280, height: 900 },
@@ -31,9 +32,21 @@ export default defineConfig( {
 		},
 		{
 			name: 'phone',
+			testIgnore: /(fidelity|editors)\.spec\.mjs$/,
 			use: {
 				...devices[ 'Desktop Chrome' ],
 				viewport: { width: 390, height: 844 },
+			},
+		},
+		{
+			// SPEC §3.2 rule 38 / §6.2: every front-page fidelity assertion and the two
+			// editor-registration checks, run against the `fidelity`/`editors` spec files that
+			// live directly under tests/e2e/ (not tests/e2e/specs/, which is phase 1's suite).
+			name: 'fidelity',
+			testDir: '.',
+			testMatch: /(fidelity|editors)\.spec\.mjs$/,
+			use: {
+				...devices[ 'Desktop Chrome' ],
 			},
 		},
 	],

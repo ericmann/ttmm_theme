@@ -7,7 +7,7 @@ Block theme `themes/ttm-theme` (presentation only) + companion plugin `plugins/t
 - [ ] Every page renders correctly as a cached static document: no per-visitor markup, no nonces on cacheable output, no front-end network requests (§3.2). Markup never varies per viewport; CSS does.
 - [ ] All "now" reads go through `TTM\Core\Support\Clock` (rule 9).
 - [ ] Every tunable is a `Config` key read as `Config::get('key', <default equal to defaults()>)`; ⚠️ ASSUMPTION values live only in `Config.php` / `scripts/check-budget.mjs` (rule 24 amended, rule 30).
-- [ ] Fidelity is a test: every §6.2 row is a Playwright test in `tests/e2e/fidelity.spec.js`; a front-page CSS change without its row is rejected (rule 38).
+- [ ] Fidelity is a test: every §6.2 row is a Playwright test in `tests/e2e/fidelity.spec.mjs`; a front-page CSS change without its row is rejected (rule 38).
 - [ ] Rules are full width; grid groups use `"layout":{"type":"default"}` and `ttm.css` owns layout (rules 35/36).
 - [ ] Every fallback row in `docs/06-fallbacks.md` stays a server-side branch with a test; blocks never render empty wrappers or placeholder copy.
 - [ ] Security by construction: sanitize on read, escape on output, capability + nonce on every write, one outbound URL per integration, secrets are constants (§3.3).
@@ -22,7 +22,7 @@ Block theme `themes/ttm-theme` (presentation only) + companion plugin `plugins/t
 - `npm run build` — wp-scripts build → `plugins/ttm-core/build/` (editor bundle + `blocks/<name>/`); run it before opening any editor in wp-env
 - `bash scripts/forbidden-patterns.sh` — SPEC §3 greps
 - `npm run test:integration` — wp-env (WP 7.1.1 / PHP 8.3) + PHPUnit `tests/integration` (needs Docker)
-- `npm run test:e2e` — starts wp-env, reseeds, runs Playwright + axe: phase 1 `specs/*.spec.mjs` (desktop/phone projects) and the `fidelity` project (`fidelity.spec.js`, `editors.spec.js`)
+- `npm run test:e2e` — starts wp-env, reseeds, runs Playwright + axe: phase 1 `specs/*.spec.mjs` (desktop/phone projects) and the `fidelity` project (`fidelity.spec.mjs`, `editors.spec.mjs`)
 - `npm run screenshots` — writes `docs/feedback/phase-2/*.png` from the running seeded site (from P0-05)
 - `npm run env:seed` / `npm run env:cli -- ttm seed --state=quiet|empty --reset` — demo content (`docs/fixtures/seed/*.json`)
 - Stale wp-env mounts after a branch switch: `npx wp-env stop && npx wp-env start`
@@ -39,7 +39,7 @@ Plugin `plugins/ttm-core/src/` (PSR-4 `TTM\Core\`), SPEC §4 table; the arrow po
 
 Theme `themes/ttm-theme/`: `theme.json`, `style.css`, `functions.php`, `inc/{block-styles,patterns,image-sizes,bindings-compat,starter-content}.php` + `inc/pattern-templates/section-cell.php`, `templates/*.html`, `parts/{header-front,header-inner,rail,footer}.html`, `patterns/*.php`, `assets/{css/ttm.css,css/editor.css,js/nav.js,js/variations.js,fonts/}`. `ttm.css` is organised by `docs/01-design-language.md §4` component numbers, one comment header per component.
 
-Tests: `tests/unit` (Brain\Monkey; `BoundariesTest` encodes §4, `ConfigFallbacksTest` encodes rule 24), `tests/integration` (WP suite in wp-env; `TTM_IntegrationTestCase` with `set_now()`, `seed()`, `render_template()`), `tests/e2e` (Playwright: `specs/*.spec.mjs`, `fidelity.spec.js`, `editors.spec.js`, `lib/{urls,presets,style}.mjs`). Fixtures: `docs/fixtures/` (mapped into wp-env at `wp-content/ttm-fixtures`). Screenshots: `docs/feedback/phase-2/`.
+Tests: `tests/unit` (Brain\Monkey; `BoundariesTest` encodes §4, `ConfigFallbacksTest` encodes rule 24), `tests/integration` (WP suite in wp-env; `TTM_IntegrationTestCase` with `set_now()`, `seed()`, `render_template()`), `tests/e2e` (Playwright: `specs/*.spec.mjs`, `fidelity.spec.mjs`, `editors.spec.mjs`, `lib/{urls,presets,style}.mjs`). Fixtures: `docs/fixtures/` (mapped into wp-env at `wp-content/ttm-fixtures`). Screenshots: `docs/feedback/phase-2/`.
 
 ## Constraints
 - No `register_taxonomy|register_post_type|register_post_meta|register_term_meta|add_option|update_option|get_term_meta|get_post_meta|WP_Query|get_posts|wp_remote_` under `themes/ttm-theme/`; this flight adds no data call to `themes/` — counts, copyright and the current-section mark come from plugin bindings/filters (rule 40).
