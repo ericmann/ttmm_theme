@@ -79,6 +79,21 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P8-06 Plugin README, MIGRATION and SETUP cross-check
 - [x] P8-07 Playwright + axe e2e suite and CI
 - [x] P8-08 Push, final manual checks and HANDOFF (Phase 8)
+- [ ] R1-01 Fix upward module imports (Query→Bindings/Blocks, Bindings→Blocks, Taxonomy→Query) and add a boundary test
+- [ ] R1-02 Rule 24: config keys for every hard-coded tunable in src/ and fail the forbidden-patterns rule-24 check
+- [ ] R1-03 SeriesIndex last_update from the newest published part; hook-driven rebuild tests; series:assign derives ttm_form
+- [ ] R1-04 Verse module: F6 uses the stored last-good verse, Sept month format, site-timezone date, DST-safe cron
+- [ ] R1-05 Front-page cells: F9 stale-year branch, journal.rail_count, journal slug constant; writing-cell F1/F2 semantics
+- [ ] R1-06 migrate:politics child mode files Politics posts under Opinion; close-comments purges once
+- [ ] R1-07 wp ttm audit: fix missing-alt regex and broken-internal-link false positives
+- [ ] R1-08 Cache-Control for HEAD requests
+- [ ] R1-09 Theme CSS and templates: honeypot rule, nested landmarks, CSS budget reconciled
+- [ ] R1-10 REST /series ?form=fiction filter per 05 §3
+- [ ] R1-11 Nav current-section on series pages
+- [ ] R1-12 ttm/syndicated-to wrapper and escaping
+- [ ] R1-13 Test gaps: binding empty values, separability non-empty blocks, permanent skip
+- [ ] R1-14 i18n: masthead labels from term names, Books row label, book-grid form caption, feed title
+- [ ] R1-15 Docs alignment: CLAUDE.md rule 16 file and module map, DEPLOYMENT real-IP, convert-classic report field
 
 ## Log
 (one entry per task, appended by implement)

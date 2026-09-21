@@ -766,3 +766,140 @@ Derived from docs/SPEC.md v0.2 on 2026-09-20. SPEC.md wins over this file.
 - **Front-page journal heading.** 02 §A shows "All 87 entries"; the `ttm/category-count` binding renders "87 →". Resolution: count form everywhere so F25 applies uniformly (P3-10).
 - **PHPCS VIP warnings.** `composer lint` prints `FileGetContentsUnknown` warnings for the unit tests' `file_get_contents`; `ignore_warnings_on_exit` keeps them non-fatal. No change; CLI file reads in `Cli/` will add more warnings, never errors.
 - **`variations.js` and rule 6.** Rule 6 says front-end JS is exactly `nav.js`; 04 §1 also ships `assets/js/variations.js`. It is editor-only (`enqueue_block_editor_assets`), so rule 6 holds on the front end; the P8-07 network test is the proof.
+
+## Review fixes (round 1)
+
+### R1-01: Fix upward module imports (Query→Bindings/Blocks, Bindings→Blocks, Taxonomy→Query) and add a boundary test
+**Goal:** Make plugins/ttm-core/src honour SPEC §4.2's dependency direction: Query/Archive.php must not import Bindings\Values or Blocks\Helpers, Bindings/Sources.php must not import Blocks\Helpers, Taxonomy/SeriesAdmin.php must not import Query\SeriesIndex — and add a unit test that parses every `use TTM\Core\…` line per directory and fails on any upward import.
+**Files touched:** plugins/ttm-core/src/Query/Archive.php, plugins/ttm-core/src/Bindings/Sources.php, plugins/ttm-core/src/Blocks/Helpers.php, plugins/ttm-core/src/Taxonomy/SeriesAdmin.php, plugins/ttm-core/src/Editor/SeriesPartList.php, plugins/ttm-core/src/Meta/SeriesPosition.php, plugins/ttm-core/src/Plugin.php, tests/unit/BoundariesTest.php, tests/integration/Taxonomy/SeriesAdminTest.php
+**Design constraints:** SPEC §4.2 table order is the contract (later rows may import earlier rows; Cache/Verse/Newsletter never import Blocks). Suggested moves: the ttm/archive-by-year scope counter becomes a private static on Query\Archive (Blocks\Helpers reads it through a Query accessor, not the reverse); the query-pagination relabel filters (label_next/label_previous, which need Values::pagination_label) move to Bindings\Sources with Archive exposing only a pure year_range() helper; Helpers::series_position/date_short/reading_time move to Meta\SeriesPosition / Support\Dates with Blocks\Helpers delegating; SeriesAdmin's part list and Parts column move to Editor\SeriesPartList (Editor already reads SeriesIndex). No behaviour change: every existing block/binding/admin test must still pass unchanged.
+**Acceptance tests:** tests/unit/BoundariesTest::test_no_directory_imports_a_later_row_of_the_spec_table (encodes the §4.2 row order and asserts each `use TTM\Core\X` in src/<dir>/*.php refers to an earlier row or the same directory; this test fails on the current tree). Existing ArchiveTest, ArchiveByYearTest, FrontSourcesTest, ArticleSourcesTest, PaginationValuesTest, SeriesAdminTest stay green.
+**Out of scope:** Downward-but-unlisted imports (Editor/Templates/Cache/Rest → Query/Meta/Taxonomy) — recorded as spec issue SI-2, leave them.
+**Verification:** verify set; npm run test:integration.
+**Depends on:** none
+
+### R1-02: Rule 24: config keys for every hard-coded tunable in src/ and fail the forbidden-patterns rule-24 check
+**Goal:** Every numeric/string tunable outside Config.php becomes a Config key read via Config::get(), and scripts/forbidden-patterns.sh rule 24 fails (not warns) on plugins/ttm-core/src and blocks with an explicit allow-list for HTTP status codes.
+**Files touched:** plugins/ttm-core/src/Config.php, plugins/ttm-core/src/Cache/Cloudflare.php, plugins/ttm-core/src/Newsletter/Provider/CustomUrl.php, plugins/ttm-core/src/Bindings/Sources.php, plugins/ttm-core/blocks/lead-story/render.php, plugins/ttm-core/src/Query/Lead.php, plugins/ttm-core/src/Fiction/Books.php, plugins/ttm-core/src/Cli/Seeder.php, scripts/forbidden-patterns.sh, tests/unit/ConfigTest.php, tests/integration/Bindings/FrontSourcesTest.php, tests/integration/Query/LeadTest.php
+**Design constraints:** New keys with SPEC-consistent names: cache.cloudflare.timeout_seconds (10), newsletter.timeout_seconds (10), sections.technology_slug ('technology'), books.blank_rows (3), books.link_rows (2), seed.quiet_offset_days (120). Use the existing sections.politics_slug in Sources.php:178/467 and lead-story/render.php:35. Keep the REST 404 literals (allow-listed). Do not touch Cells.php or writing-cell (R-task for Cells/writing-cell owns those).
+**Acceptance tests:** ConfigTest::test_defaults_contain_every_spec_key updated for the new keys; FrontSourcesTest::test_kicker_politics_suffix_follows_sections_politics_slug (ttm_config filter renames the slug, kicker still says Politics for the renamed term); LeadTest::test_technology_candidate_uses_sections_technology_slug; `bash scripts/forbidden-patterns.sh` exits 1 when a `'timeout' => 10` literal is reintroduced (add a self-test case or document the manual check in the commit body).
+**Out of scope:** CSS values in ttm.css/theme.json; the writing-cell and Cells literals (separate task); Seeder image RGB literals may stay if documented as fixture colours in an allow-list.
+**Verification:** verify set; bash scripts/forbidden-patterns.sh; npm run test:integration.
+**Depends on:** none
+
+### R1-03: SeriesIndex last_update from the newest published part; hook-driven rebuild tests; series:assign derives ttm_form
+**Goal:** Query\SeriesIndex::rebuild() writes last_update as the newest published part's post_date (stable across rebuilds) so sorted_by_update(), series-list orderby=updated, Fiction\Serials::active() and serial-hero's F3 fallback order by real recency; SeriesIndexTest exercises the registered hooks instead of calling rebuild() directly; Cli\SeriesCommand::run() calls Meta\Form::on_save() for each assigned post so --form=<fiction> yields ttm_form=chapter.
+**Files touched:** plugins/ttm-core/src/Query/SeriesIndex.php, plugins/ttm-core/src/Cli/SeriesCommand.php, tests/integration/Query/SeriesIndexTest.php, tests/integration/Blocks/SeriesListTest.php, tests/integration/Fiction/SerialsTest.php, tests/integration/Blocks/SerialHeroTest.php, tests/integration/Cli/MaintenanceCommandsTest.php
+**Design constraints:** SPEC §5.3 shape unchanged (last_update stays 'Y-m-d H:i:s'). A series with no published part uses its newest part of any status. Remove the set_last_update() test back-doors in SeriesListTest/SerialsTest and create parts with distinct dates + rebuild() instead. Do not fire WP's real shutdown in tests; assert has_action('shutdown', [SeriesIndex::class,'maybe_rebuild']) then call maybe_rebuild().
+**Acceptance tests:** SeriesIndexTest::test_last_update_is_latest_published_part_date_and_stable_across_rebuilds; SeriesIndexTest::test_publish_schedules_rebuild_on_shutdown; SeriesIndexTest::test_delete_series_term_schedules_rebuild; SeriesListTest::test_lists_in_progress_series_limited_and_sorted_by_update (rewritten without set_last_update); SerialsTest::test_active_is_newest_in_progress_fiction (rewritten); SerialHeroTest::test_f3_picks_most_recently_completed_of_two; MaintenanceCommandsTest::test_series_assign_with_fiction_form_derives_chapter_on_posts.
+**Out of scope:** series-featured's own newest-part pick (already correct); CLI output format.
+**Verification:** verify set; npm run test:integration.
+**Depends on:** none
+
+### R1-04: Verse module: F6 uses the stored last-good verse, Sept month format, site-timezone date, DST-safe cron
+**Goal:** ttm/verse-of-the-day treats the stored ttm_verse as the first fallback candidate when its date is ≤ today (then history), formats the attribution date with Dates::short_month ('Sept 18'), renders the wp_kses'd reference without double-escaping allowed em/strong; Verse\Fetcher::parse_item converts published_at to the site timezone before taking Y-m-d; Verse\Cron re-anchors the daily fetch to verse.fetch_hour local time across DST instead of a fixed-UTC 'daily' recurrence.
+**Files touched:** plugins/ttm-core/blocks/verse-of-the-day/render.php, plugins/ttm-core/src/Verse/Fetcher.php, plugins/ttm-core/src/Verse/Cron.php, plugins/ttm-core/src/Support/Clock.php, tests/integration/Blocks/VerseOfTheDayTest.php, tests/unit/Verse/FetcherParseTest.php, tests/unit/Verse/CronTest.php
+**Design constraints:** Rule 21 (wp_kses em/strong on text and reference; copyright esc_html); rule 9 (all time via Clock); rule 16 unchanged; the block still returns '' when neither store has a usable entry.
+**Acceptance tests:** VerseOfTheDayTest::test_f6_shows_stored_verse_from_yesterday_not_history_head (ttm_verse dated yesterday, history head two days ago, assert yesterday's text and 'Meditation for Sept N'); VerseOfTheDayTest::test_attribution_uses_sept_abbreviation (September fixture); FetcherParseTest::test_published_at_in_utc_maps_to_site_local_date (a +00:00 timestamp just after UTC midnight must yield the previous LA date); CronTest::test_next_run_keeps_local_fetch_hour_across_dst_transition.
+**Out of scope:** Verse admin tab UI; REST /verse shape.
+**Verification:** verify set; npm run test:integration.
+**Depends on:** none
+
+### R1-05: Front-page cells: F9 stale-year branch, journal.rail_count, journal slug constant; writing-cell F1/F2 semantics
+**Goal:** Query\Cells implements 06 F9's stale-year branch (when a section's newest post is older than cells.stale_year_days: posts_per_page 2, is-stale class, dek hidden) and sets the journal rail's posts_per_page from journal.rail_count; the literal 'journal' at Cells.php:116 uses the config slug; ttm/writing-cell's F2 plain mode reads its count from a new writing.plain_count key, applies the ttm_primary_category meta query and Lead exclusion like every other cell and drops the fiction heading link, and its F1 shelf mode is capped by writing.shelf_limit.
+**Files touched:** plugins/ttm-core/src/Query/Cells.php, plugins/ttm-core/src/Config.php, plugins/ttm-core/blocks/writing-cell/render.php, plugins/ttm-core/blocks/writing-cell/block.json, themes/ttm-theme/patterns/journal-rail.php, themes/ttm-theme/assets/css/ttm.css, tests/integration/Query/CellsTest.php, tests/integration/Blocks/WritingCellTest.php, tests/integration/Fallbacks/FrontPageStatesTest.php
+**Design constraints:** SPEC §6.4 and 03 §8; rule 12 (bounded); cells.thin_days may be consumed for the 'still show what exists' branch or removed from Config with a log note — no dead keys remain. CSS additions must fit the budget agreed in the theme CSS task.
+**Acceptance tests:** CellsTest::test_stale_year_section_shows_two_posts_without_dek; CellsTest::test_journal_rail_posts_per_page_comes_from_config; CellsTest::test_journal_stream_uses_config_slug (ttm_config renames sections.journal_slug); WritingCellTest::test_f1_shelf_lists_up_to_writing_shelf_limit (4 finished serials/stories → 4 rows); WritingCellTest::test_f2_plain_mode_excludes_lead_and_non_primary_posts; FrontPageStatesTest stale-year state asserting 2 rows and no ttm-item__dek.
+**Out of scope:** Other blocks' counts; the Seeder except a stale-year fixture if needed.
+**Verification:** verify set; npm run test:integration.
+**Depends on:** R0-02
+
+### R1-06: migrate:politics child mode files Politics posts under Opinion; close-comments purges once
+**Goal:** wp ttm migrate:politics --to=child adds the opinion term to every post in Politics (dry-run reports the count) and recomputes ttm_primary_category so PrimaryCategory::slug() is 'opinion'; migrate:close-comments detaches Cache\Purge for the batch (or updates comment_status/ping_status via $wpdb) and fires ttm_purge_urls exactly once at the end.
+**Files touched:** plugins/ttm-core/src/Cli/MigrateCommand.php, plugins/ttm-core/src/Cache/Purge.php, docs/MIGRATION.md, tests/integration/Cli/MigrateCommandTest.php
+**Design constraints:** SPEC Q3 (child category opinion/politics, live term id 112), rule 11 (purge on publish transitions stays), rule 12 (batched by cli.batch), --dry-run writes nothing, idempotent on re-run.
+**Acceptance tests:** MigrateCommandTest::test_politics_child_mode_adds_opinion_to_politics_posts_and_sets_primary; MigrateCommandTest::test_politics_child_mode_dry_run_reports_post_count_and_writes_nothing; MigrateCommandTest::test_close_comments_fires_purge_once (count ttm_purge_urls invocations over 5 posts).
+**Out of scope:** --to=tag mode semantics; redirect map format.
+**Verification:** verify set; npm run test:integration.
+**Depends on:** none
+
+### R1-07: wp ttm audit: fix missing-alt regex and broken-internal-link false positives
+**Goal:** AuditCommand::has_missing_alt captures the alt value itself and flags only empty/whitespace values; has_broken_internal_link ignores uploads (wp_get_upload_dir baseurl path and /wp-content/), feeds, /page/N/ pagination and date archives, and indexes attachment permalinks.
+**Files touched:** plugins/ttm-core/src/Cli/AuditCommand.php, tests/integration/Cli/AuditCommandTest.php
+**Design constraints:** No HTTP (rule 16); batched (rule 12); output columns unchanged.
+**Acceptance tests:** AuditCommandTest::test_missing_alt_accepts_alt_text_made_of_a_l_t_letters (alt="tall" not flagged, alt="" flagged); AuditCommandTest::test_broken_internal_link_ignores_uploads_feeds_and_pagination.
+**Out of scope:** New audit checks.
+**Verification:** verify set; npm run test:integration.
+**Depends on:** none
+
+### R1-08: Cache-Control for HEAD requests
+**Goal:** Cache\Headers::for_request treats HEAD like GET so `curl -I` and HEAD-based monitors see the computed public max-age; non-GET/HEAD methods still get nothing.
+**Files touched:** plugins/ttm-core/src/Cache/Headers.php, tests/unit/Cache/HeadersTest.php, tests/integration/Cache/HeadersTest.php
+**Design constraints:** SPEC §6.10; rule 8 (is_user_logged_in only here).
+**Acceptance tests:** tests/unit/Cache/HeadersTest::test_head_request_gets_public_max_age; test_post_request_gets_no_header stays.
+**Out of scope:** Vary headers; Batcache.
+**Verification:** verify set.
+**Depends on:** none
+
+### R1-09: Theme CSS and templates: honeypot rule, nested landmarks, CSS budget reconciled
+**Goal:** ttm.css gains the `.ttm-hp` visually-hidden rule the custom-url honeypot relies on; 404.html, index.html and page.html stop wrapping header-inner/footer parts with tagName (the parts already render the landmarks); serial-hero renders h1 on /category/writing/ as well as /writing/; then ttm.css is tightened (duplicate button/grid rules, comment blocks, responsive overrides) and the single cssBudgetBytes in scripts/check-budget.mjs is set once with a before/after Measurement, CLAUDE.md's constraint line updated to match.
+**Files touched:** themes/ttm-theme/assets/css/ttm.css, themes/ttm-theme/templates/404.html, themes/ttm-theme/templates/index.html, themes/ttm-theme/templates/page.html, plugins/ttm-core/blocks/serial-hero/render.php, scripts/check-budget.mjs, CLAUDE.md, tests/unit/Theme/CssBudgetTest.php, tests/integration/Theme/TemplatesShellTest.php, tests/integration/Theme/HubWritingTemplatesTest.php, tests/integration/Newsletter/HandlerTest.php
+**Design constraints:** Rule 30 (plain CSS, presets only, no hex literals); rule 2 (no plugin CSS); the budget value lives only in check-budget.mjs; aim for ≤25600 first and only keep a higher number with a Measurement line explaining what could not be removed.
+**Acceptance tests:** tests/unit/Theme/CssBudgetTest::test_ttm_css_has_visually_hidden_honeypot_rule; TemplatesShellTest::test_page_404_index_render_exactly_one_header_and_footer_landmark (substr_count '<header' === 1); HubWritingTemplatesTest::test_writing_category_archive_has_one_h1; HandlerTest::test_form_markup_has_token_honeypot_and_no_nonce extended to assert class ttm-hp.
+**Out of scope:** Visual redesign; any new component CSS.
+**Verification:** verify set (npm run check:budget); npm run test:integration; npm run test:e2e.
+**Depends on:** none
+
+### R1-10: REST /series ?form=fiction filter per 05 §3
+**Goal:** GET /ttm/v1/series accepts form=any|nonfiction|fiction in addition to the term enum; fiction returns every row whose form !== nonfiction.
+**Files touched:** plugins/ttm-core/src/Rest/SeriesController.php, tests/integration/Rest/SeriesRestTest.php, plugins/ttm-core/README.md
+**Design constraints:** GET only, permission_callback __return_true, only public data (rule 18).
+**Acceptance tests:** SeriesRestTest::test_form_filter_fiction_matches_non_nonfiction sends form=fiction and asserts a novel row present and the nonfiction row absent (the current test sends form=novel and must be restored).
+**Out of scope:** New REST routes.
+**Verification:** verify set; npm run test:integration.
+**Depends on:** none
+
+### R1-11: Nav current-section on series pages
+**Goal:** Nav\CurrentSection marks the Series navigation item current-section on the /series/ hub page and on series taxonomy archives, per PLAN P2-06 / SPEC §6.4.
+**Files touched:** plugins/ttm-core/src/Nav/CurrentSection.php, tests/integration/Nav/CurrentSectionTest.php
+**Design constraints:** Rule 8 (no per-visitor markup); F18 removal when the index is empty unchanged.
+**Acceptance tests:** CurrentSectionTest::test_series_item_current_on_hub_page_and_series_archive.
+**Out of scope:** Theme nav markup.
+**Verification:** verify set; npm run test:integration.
+**Depends on:** none
+
+### R1-12: ttm/syndicated-to wrapper and escaping
+**Goal:** ttm/syndicated-to renders the SPEC §6.1 `<div class="ttm-syndication" data-ttm-block>` wrapper with an inner <p>, and the translated 'Syndicated to %s' sentence is passed through wp_kses with an a[href] allow-list.
+**Files touched:** plugins/ttm-core/blocks/syndicated-to/render.php, themes/ttm-theme/assets/css/ttm.css, tests/integration/Blocks/SyndicatedToTest.php
+**Design constraints:** Rule 14 (every echo escaped); F14 behaviour unchanged.
+**Acceptance tests:** SyndicatedToTest::test_wrapper_is_div_with_data_ttm_block; SyndicatedToTest::test_sentence_is_kses_filtered (a gettext filter injecting <script> is stripped).
+**Out of scope:** Other blocks.
+**Verification:** verify set; npm run test:integration.
+**Depends on:** none
+
+### R1-13: Test gaps: binding empty values, separability non-empty blocks, permanent skip
+**Goal:** Rule 26 empty-value unit tests exist for kicker, meta_line, short_date and relative_date; PluginAloneTest asserts most-read and tag-filter render their wrapper under the default theme (fixture gains a featured post and a tag); ChromePartsTest's permanently skipped test is removed or implemented.
+**Files touched:** tests/unit/Bindings/ValuesTest.php, tests/integration/Separability/PluginAloneTest.php, tests/integration/Theme/ChromePartsTest.php
+**Design constraints:** Unit tests never load WordPress (rule 28); no production code changes in this task.
+**Acceptance tests:** ValuesTest::test_kicker_empty_without_section; ValuesTest::test_meta_line_empty_without_parts; ValuesTest::test_short_and_relative_date_empty_without_date; PluginAloneTest most-read/tag-filter rows flipped to expect_non_empty=true; suite reports 0 skipped.
+**Out of scope:** New mechanics.
+**Verification:** verify set; npm run test:integration.
+**Depends on:** none
+
+### R1-14: i18n: masthead labels from term names, Books row label, book-grid form caption, feed title
+**Goal:** masthead-front/inner patterns use the real category names (translated fallback list only when a term is missing); Fiction\Books' 'Book %d' label, ttm/book-grid's form caption and functions.php's '%s RSS' feed title go through __()/_n() with the right text domain.
+**Files touched:** themes/ttm-theme/patterns/masthead-front.php, themes/ttm-theme/patterns/masthead-inner.php, plugins/ttm-core/src/Fiction/Books.php, plugins/ttm-core/blocks/book-grid/render.php, themes/ttm-theme/functions.php, tests/integration/Theme/ChromePartsTest.php, tests/integration/Blocks/BookGridTest.php
+**Design constraints:** Rule 32; rule 1 (theme reads categories only via get_category_by_slug); rule 3 guards.
+**Acceptance tests:** ChromePartsTest::test_masthead_nav_uses_category_names (rename a seeded category, assert the new name appears); BookGridTest::test_form_caption_is_translatable (gettext filter changes 'Novel').
+**Out of scope:** CLI developer-facing messages.
+**Verification:** verify set; npm run test:integration.
+**Depends on:** none
+
+### R1-15: Docs alignment: CLAUDE.md rule 16 file and module map, DEPLOYMENT real-IP, convert-classic report field
+**Goal:** CLAUDE.md names Newsletter/Provider/CustomUrl.php (not Handler.php) as the wp_safe_remote_post site and drops inc/template-hierarchy.php from the theme module map; docs/DEPLOYMENT.md requires restoring the client IP from CF-Connecting-IP at the tunnel/ingress for the custom-url rate limit; scripts/convert-classic.mjs's report.html is the core/html block count as PLAN P8-01 specifies (or the PLAN contract is corrected in the README/spike doc).
+**Files touched:** CLAUDE.md, docs/DEPLOYMENT.md, scripts/convert-classic.mjs, scripts/test/convert-classic.test.js, docs/spikes/P8-01.md
+**Design constraints:** No behavioural change beyond the report field; CLAUDE.md's budget line is owned by the theme CSS task.
+**Acceptance tests:** scripts/test/convert-classic.test.js::reports core/html count separately from freeform (pure footnotes/report helper test that runs without block-library); tests/unit/ScaffoldTest::test_claude_md_names_custom_url_as_remote_post_site.
+**Out of scope:** SPEC.md edits (spec issues are for the owner).
+**Verification:** verify set.
+**Depends on:** R0-09
