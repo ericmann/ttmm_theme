@@ -1095,3 +1095,142 @@ blockquote.is-style-pull cite,
 		grid-template-columns: 1fr;
 	}
 }
+
+/* 4.22 article head + byline */
+.ttm-article-head {
+	margin-bottom: var(--wp--preset--spacing--60);
+}
+
+.ttm-byline {
+	display: flex;
+	align-items: center;
+	gap: 18px;
+	padding: 14px 0;
+	border-top: var(--ttm-rule-2);
+	border-bottom: var(--ttm-rule-1);
+	font-size: 13px;
+	color: var(--wp--preset--color--neutral-700);
+	font-feature-settings: "tnum";
+}
+
+/* 4.21 prev/next */
+.ttm-prevnext {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	border-top: var(--ttm-rule-2);
+	margin-top: 40px;
+}
+
+.ttm-prevnext__prev,
+.ttm-prevnext__next {
+	padding: 20px;
+}
+
+.ttm-prevnext__next {
+	border-left: var(--ttm-rule-1);
+}
+
+.ttm-prevnext__label {
+	display: block;
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--wp--preset--color--neutral-700);
+	margin-bottom: 8px;
+}
+
+.ttm-prevnext__title {
+	display: block;
+	font-size: 18px;
+	font-weight: 800;
+	line-height: 1.25;
+}
+
+/* stylelint-disable-next-line no-descending-specificity -- unrelated component (prev/next link vs. .entry-content a:hover) */
+.ttm-prevnext a {
+	color: inherit;
+	text-decoration: none;
+}
+
+/* 4.20/4.13 more-in + journal head/row */
+.ttm-more-in {
+	margin-top: 40px;
+}
+
+.ttm-more-in:has(.is-empty) {
+	display: none;
+}
+
+.ttm-journal-row {
+	border-top: var(--ttm-rule-1);
+	padding: var(--wp--preset--spacing--30) 0;
+}
+
+.is-style-journal-stream-date {
+	font-size: 12px;
+	color: var(--wp--preset--color--neutral-700);
+}
+
+.ttm-journal-head:has(.ttm-syndication) .ttm-journal-head__count {
+	display: none;
+}
+
+/* Q-M1/Q-M2 classic content: footnotes */
+.entry-content sup.modern-footnotes-footnote a {
+	text-decoration: none;
+}
+
+.modern-footnotes-footnote__note {
+	font-size: 13px;
+	color: var(--wp--preset--color--neutral-700);
+}
+
+.modern-footnotes-footnote__note::before {
+	content: "[";
+}
+
+.modern-footnotes-footnote__note::after {
+	content: "]";
+}
+
+ul.modern-footnotes-list,
+.wp-block-footnotes {
+	font-size: 12px;
+	border-top: var(--ttm-rule-1);
+	padding-top: 10px;
+	margin-top: 20px;
+}
+
+@media (max-width: 1024px) {
+
+	.ttm-article,
+	.ttm-prevnext,
+	.ttm-journal-head {
+		grid-template-columns: 1fr;
+	}
+
+	.ttm-prevnext__next {
+		border-left: 0;
+		border-top: var(--ttm-rule-1);
+	}
+}
+
+@media (max-width: 720px) {
+
+	.ttm-article-head figure,
+	.entry-content pre {
+		margin-left: -20px;
+		margin-right: -20px;
+		width: calc(100% + 40px);
+	}
+
+	.ttm-series-bar__label,
+	.ttm-series-bar__view {
+		display: none;
+	}
+
+	.ttm-series-bar__seg {
+		width: 12px;
+		height: 4px;
+	}
+}
