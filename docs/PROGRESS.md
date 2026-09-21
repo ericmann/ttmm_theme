@@ -6,7 +6,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P0-01 Branch, harness confirmation, fixtures mapping
 - [x] P0-02 Config and Clock
 - [x] P0-03 Dates, Text and Html helpers
-- [ ] P0-04 Plugin composition root and API-version compat
+- [x] P0-04 Plugin composition root and API-version compat
 - [ ] P0-05 Self-hosted Archivo fonts, theme enqueue and base CSS
 - [ ] P0-06 theme.json v3 presets and token check
 - [ ] P0-07 Push, CI and manual check (Phase 0)
@@ -99,3 +99,9 @@ Text::word_count strips wp:code/wp:preformatted comment blocks, <pre>, shortcode
 Html::el/text/link/classes are thin escaping wrappers (href/src via esc_url, others esc_attr).
 Added wp_strip_all_tags stub to tests/unit/TestCase.php (aliases trim(strip_tags())) alongside the existing sanitize_text_field stub.
 29/29 unit tests pass; full verify green.
+
+### P0-04 — 4480d1d
+Plugin::modules() returns [Compat\Theme::class]; Plugin::boot() is idempotent via a static $booted guard, calls ::register() on each module once. Added Plugin::reset() (test-only) to clear the guard between tests. Compat\Theme::register() hooks admin_notices→maybe_notice; maybe_notice bails unless get_current_screen()->id is themes/plugins, shows a non-dismissible error when Theme::mismatch(theme_requires, TTM_CORE_API) is true. Theme::mismatch(?int,int) is pure: false when theme declares nothing (null), false when equal, true otherwise.
+themes/ttm-theme/inc/bindings-compat.php defines TTM_THEME_REQUIRES_API=1 and mirrors the same admin_notices logic: info notice when ttm-core absent, error when TTM_CORE_API !== TTM_THEME_REQUIRES_API; required from functions.php. Never fatals — every TTM_CORE_API/get_current_screen access is guarded.
+uninstall.php: added a bounded $wpdb->prepare() DELETE on options table only, LIKE '_transient_ttm_%' / '_transient_timeout_ttm_%' (esc_like'd), still gated by TTM_REMOVE_DATA === true; terms/meta untouched. PHPCS direct-DB-query warnings are expected/unavoidable for uninstall.php and don't fail lint (warnings, not errors).
+34/34 unit tests pass; BootTest integration tests still green; full verify green.
