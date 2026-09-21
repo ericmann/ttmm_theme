@@ -92,7 +92,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] R1-11 Nav current-section on series pages
 - [x] R1-12 ttm/syndicated-to wrapper and escaping
 - [x] R1-13 Test gaps: binding empty values, separability non-empty blocks, permanent skip
-- [ ] R1-14 i18n: masthead labels from term names, Books row label, book-grid form caption, feed title
+- [x] R1-14 i18n: masthead labels from term names, Books row label, book-grid form caption, feed title
 - [ ] R1-15 Docs alignment: CLAUDE.md rule 16 file and module map, DEPLOYMENT real-IP, convert-classic report field
 
 ## Log
@@ -836,3 +836,32 @@ suggested fix.
 Verified via foundry_verify: composer lint/test:unit (126, +3), npm lint/test:unit/build,
 forbidden-patterns.sh, npm run test:integration -- "OK (365 tests, ...)", 0 skipped (down from
 1), all green.
+
+### R1-14 — 546d954
+masthead-front.php/masthead-inner.php: the loop now resolves each section's nav label from
+get_category_by_slug()->name when the term exists, falling back to a __()-wrapped default
+(renamed loop var to $ttm_fallback_name) only when it doesn't -- previously the hard-coded
+English name in $ttm_sections was always used regardless of the term's real (possibly owner-
+renamed) name, and wasn't translatable either.
+
+Fiction\Books::render_row(): 'Book %d' legend now __()'d (text domain ttm-core).
+
+book-grid/render.php: form caption now a translatable lookup table
+(novel/novella/story-cycle/collection/nonfiction -> __()'d captions) instead of
+ucfirst(str_replace('-',' ',$form)); unrecognised values still fall back to that transform
+(defensive -- Books::sanitize() already constrains stored values to FORMS).
+
+functions.php print_section_feeds(): 'title="%s RSS"' literal moved into a proper
+__('%s RSS', 'ttm-theme') translatable string built via sprintf() before the printf().
+
+New tests: ChromePartsTest::test_masthead_nav_uses_category_names -- executes
+patterns/masthead-front.php directly (require + ob_start) rather than through the
+`wp:pattern` block reference parts/header-front.html uses, because WordPress caches theme
+patterns/*.php's scanned output in a transient keyed by file mtimes; a rename inside the test
+(even after re-firing 'init', which didn't help) wouldn't show through that registry.
+BookGridTest::test_form_caption_is_translatable -- gettext filter for domain=ttm-core,
+text='Novel' -> 'Roman'; asserts 'Roman' present and 'Novel' absent.
+
+Verified via foundry_verify: composer lint/test:unit (126, +1... actually no unit tests added
+here, count matches R1-13's), npm lint/test:unit/build, forbidden-patterns.sh, npm run
+test:integration -- "OK (367 tests, ...)", all green.
