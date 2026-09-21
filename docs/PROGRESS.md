@@ -18,7 +18,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P1-04 Verse copyright placement and `ttm/verse-copyright` binding
 - [x] P1-05 Footer per §6.1.8
 - [x] P1-06 Newsletter form contract — shared markup, provider chain, custom-url dev-accept, seed
-- [ ] P1-07 Spike — Jetpack Subscriptions widget POST contract
+- [x] P1-07 Spike — Jetpack Subscriptions widget POST contract
 - [ ] P1-08 Jetpack provider on the shared form
 - [ ] P1-09 Editor registration in every context (§6.7)
 - [ ] P1-10 Newsletter poster per §6.1.8
@@ -163,3 +163,11 @@ Seeder: seed_jetpack() replaced with seed_newsletter() — no WP-CLI Jetpack ins
 ttm.css: .ttm-newsletter-form__form flex/gap:8/align-center (input/.btn classes already self-style, redundant duplicate rules removed); .ttm-newsletter-form__statement 12px; dropped .wp-block-jetpack-subscriptions selectors. NEW: .ttm-poster .btn-ghost override (solid bg/text) — see Interpretation, a real a11y bug this task's own change surfaced.
 Tests: unit ProvidersTest 2 new, HandlerTest 2 new (+ wp_get_environment_type stubbed 'production' in setUp for both HandlerTest and HandlerTuningTest, not in Files touched but required — see commit); integration NewsletterFormTest 3 new (+ f26-none test now explicitly disables dev_accept), SeedStatesTest 1 new, integration/Newsletter/HandlerTest.php extended with shared-markup assertions.
 Verified: composer lint 0 errors, composer test:unit 139/139, npm run lint clean, npm run test:integration 398/398 (real wp-env), curl grep -c ttm-newsletter-form__form = 1, npm run test:e2e 66 passed/61 skipped (0 failed, axe clean after the poster-ghost fix), npm run build, forbidden-patterns all green. ttm-theme confirmed active; wp-env stopped after.
+
+### P1-07 — d001218
+Outcome B (recorded in docs/spikes/P1-jetpack-form.md with ## Outcome and ## Field list headings). Checked Jetpack 16.2 (already installed/active from an earlier phase) via reading wp-content/plugins/jetpack/modules/subscriptions/views.php's Jetpack_Subscriptions_Widget::render_widget_subscription_form(), self::is_jetpack() branch (lines 518-582) directly — no wp eval render needed, no WordPress.com connection made or attempted.
+Findings: action=subscribe/source={referer}/sub-type=widget/redirect_fragment/submit name=jetpack_subscriptions_widget/email field all match SPEC §6.3's names and semantics (line refs in the spike doc), EXCEPT: (1) redirect_fragment's actual value is Jetpack's own "subscribe-blog[-N]" id scheme, not literal "ttm-newsletter-{n}"; (2) SPEC's "No nonce" claim is wrong — the form renders `wp_nonce_field('blogsub_subscribe_'.blog_id)` (line 562); (3) `Jetpack_Subscriptions_Widget::process_subscription`, SPEC's named handler method, does not exist anywhere in 16.2 (grep -rl across the whole plugin returns nothing) — no handler traceable without a real connection, out of scope here.
+Implications for P1-08 recorded in the spike doc's "For P1-08" section: the nonce conflicts with cacheable-output treatment unless the block defers to Jetpack's own block/widget render rather than reconstructing markup itself (matches how NewsletterFormTest already treats jetpack as an opaque rendered block).
+docs/fixtures/jetpack-subscriptions.html: verbatim-transcribed form markup with literal {current URL}/{n}/{blog_id}/{nonce} placeholders, includes the nonce field (not omitted, since it's real).
+Cleanup: `wp plugin deactivate jetpack && wp plugin delete jetpack` — confirmed `wp plugin list --name=jetpack` now empty.
+Verified: all three task-specified checks pass (spike file non-empty with required headings, fixture has <form>+name="email", jetpack not installed). No code changed; ttm-theme confirmed active; wp-env stopped after.
