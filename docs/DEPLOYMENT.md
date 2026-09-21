@@ -108,3 +108,22 @@ Avoid adding any of these without a plan for cache keys:
 3. `wp ttm series:rebuild && wp ttm verse fetch` after deploy.
 4. Purge Cloudflare everything once; then load the front page twice and confirm `cf-cache-status: HIT` and a `Cache-Control` that ends at the next local midnight or 06:00.
 5. `curl -s https://eric.mann.blog/ | grep -c 'wp-json\|admin-ajax'` returns `0`.
+
+## 10. Hosting on k3s (target for the migration)
+
+The live site is a Docker Compose stack on the `hive` NUC behind a Cloudflare Tunnel; the migration (`MIGRATION.md §3`) stands the new site up on the k3s cluster privately and moves the tunnel hostname at cut-over. The shape, without prescribing a chart:
+
+| Component | Choice | Notes |
+|---|---|---|
+| WordPress | `wordpress:php8.3-apache` (or fpm + nginx) Deployment, 1 replica to start | Mount the repo's `plugins/ttm-core` and `themes/ttm-theme` from an image built in CI (copy `build/` in), not from a hostPath. |
+| Database | MariaDB 11 StatefulSet with a PVC (or the Bitnami/`mariadb-operator` chart) | `utf8mb4`; `innodb_buffer_pool_size` sized to the NUC. |
+| Uploads | PVC (RWO is fine at one replica; RWX or S3-offload via a media plugin if replicas grow) | The theme applies grayscale in CSS; nothing rewrites images. |
+| Object cache | Memcached Deployment (`memcached:alpine`, 256 MB) + `wp-memcached` drop-in | Required for Batcache (§4). |
+| Cron | Kubernetes CronJob every 5 minutes running `wp cron event run --due-now` in a `wp-cli` container against the same volumes and DB | With `DISABLE_WP_CRON` true. |
+| Ingress | Cloudflare Tunnel (`cloudflared` Deployment, token in a Secret) → Service | No public IP, no cert-manager needed. Staging hostname behind Cloudflare Access. |
+| Secrets | `wp-config.php` constants from a Secret mounted as a PHP file included by `wp-config.php` (`TTM_CLOUDFLARE_*`, DB credentials, salts) | Never in the image or the repo. |
+| DB backups | CronJob nightly: `mysqldump --single-transaction` → gzip → `aws s3 cp` to a versioned bucket with lifecycle (30 daily, 12 monthly) | Test a restore into wp-env quarterly using `MIGRATION.md §1.2`. |
+| Media backups | CronJob nightly: `restic` (or `rclone sync`) of the uploads PVC to the same bucket | `restic` gives dedup + snapshots; either is fine. |
+| Monitoring | Uptime check on `/` expecting `cf-cache-status`, and on `/wp-json/ttm/v1/verse` expecting today's date after 06:00 | The verse endpoint is the cheapest "cron is alive" probe. |
+
+Restore drill: `MIGRATION.md §1.2` is literally the restore procedure; if it works into wp-env it works into a fresh k3s namespace.

@@ -11,3 +11,4 @@ test-results/
 playwright-report/
 .foundry/implement.lock
 docs/fixtures/live-export*.xml
+docs/fixtures/live/

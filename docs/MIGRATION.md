@@ -18,25 +18,71 @@ The CLI commands are specified in `docs/SPEC.md §6.7` and built in Phases 1 and
 | Comments open on old posts | Closed everywhere | `wp ttm migrate:close-comments` |
 | `/writing/` page exists; no `/series/` | Both pages with templates | theme starter content |
 
+## Strategy: blue/green, never in place
+
+The live site is a Docker Compose stack on the `hive` NUC behind a Cloudflare Tunnel. The migration does **not** touch it. Instead:
+
+1. **Rehearse locally.** Pull a full archive (database + uploads) from `hive` into wp-env and run the whole plan against real content until it is boring.
+2. **Build the green deployment on k3s**, private (tunnel hostname not published, Cloudflare Access in front, search engines told to go away), restore the same archive there, run the plan for real, and do the content cleanup at leisure.
+3. **Cut over** by pointing the public Cloudflare Tunnel hostname at the k3s ingress, then purge Cloudflare. The `hive` stack stays running as the rollback for a week.
+
+`DEPLOYMENT.md §10` covers the k3s side (backups to S3, secrets, cron). A later move to an Automattic-hosted environment follows the same archive → restore → cut-over shape.
+
 ## 0. Before you start
 
 1. **Decide the series list.** Write down each multi-part work: its name, slug, the tag (or title pattern) that identifies its posts, whether it is fiction, status, and planned part count. `wp ttm audit --only=series-tag-candidate` lists tags with ≥ 3 posts that look like series. Known candidates on the live site: `boundless-summer-challenge` (21), `boundless` (23), `cryptopals` (9).
 2. **Decide the fiction.** The live `writing` category currently holds posts *about* writing, not chapters. Until chapters are filed in Writing with a fiction `series` term, the front-page Writing cell renders fallback F2 (an ordinary cell). That is by design; there is nothing to migrate for fiction today.
-3. **Export.** In production: Tools → Export → All content, or `wp export --dir=/tmp --skip_comments`. Copy the WXR file to `docs/fixtures/live-export.xml` locally (gitignored).
-4. **Export media list** (optional, for the rehearsal): `wp media list --format=csv > media.csv` so image counts can be checked after import.
+3. **Take the archive** (§1.1). A WXR export is the fallback, but the archive is what both the rehearsal and the k3s deployment restore from, so the two are identical.
 
-## 1. Rehearse in wp-env
+## 1. Rehearse in wp-env with the real archive
+
+### 1.1 Pull the archive from `hive`
+
+On the NUC, from the Compose project directory (adjust service names to the stack):
+
+```bash
+STAMP=$(date +%F)
+docker compose exec -T db sh -c 'exec mysqldump --single-transaction --quick --default-character-set=utf8mb4 -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE"' | gzip > eric-mann-blog-$STAMP.sql.gz
+docker compose exec -T wordpress tar -C /var/www/html/wp-content -czf - uploads > uploads-$STAMP.tar.gz
+docker compose exec -T wordpress wp option get siteurl --allow-root     # note it; the restore rewrites it
+```
+
+Copy both files to the workstation into `docs/fixtures/live/` (gitignored: add `docs/fixtures/live/` to `.gitignore` if it is not there yet). Keep a copy in S3 as well; this is also the first backup of the new setup.
+
+If the Compose stack has no `wp` binary in the container, the WXR route still works: Tools → Export → All content, then `wp import` as in §1.3.
+
+### 1.2 Restore into wp-env
 
 ```bash
 npx wp-env start
-npx wp-env run cli wp plugin install wordpress-importer --activate
-npx wp-env run cli wp plugin install jetpack --activate       # so the newsletter block registers; no connection needed
-npx wp-env run cli wp import /var/www/html/wp-content/ttm-tests/../../docs/fixtures/live-export.xml --authors=create --skip=attachment
+# Database: import, then rewrite URLs (search-replace handles serialized data)
+gunzip -c docs/fixtures/live/eric-mann-blog-*.sql.gz > /tmp/live.sql
+npx wp-env run cli wp db import /var/www/html/wp-content/ttm-tests/../../../tmp/live.sql   # or copy the file into the container first: docker cp /tmp/live.sql $(docker ps -qf name=wordpress):/tmp/
+npx wp-env run cli wp search-replace 'https://eric.mann.blog' 'http://localhost:8888' --all-tables --precise
+npx wp-env run cli wp cache flush
+# Uploads
+docker cp docs/fixtures/live/uploads-*.tar.gz $(docker ps -qf name=ttmm_theme.*wordpress-1):/tmp/uploads.tar.gz   # container name from `docker ps`
+npx wp-env run cli sh -c 'tar -C /var/www/html/wp-content -xzf /tmp/uploads.tar.gz && chown -R www-data:www-data /var/www/html/wp-content/uploads'
+# Plugins the archive references but wp-env does not have
+npx wp-env run cli wp plugin install jetpack modern-footnotes --activate
+npx wp-env run cli wp plugin activate ttm-core && npx wp-env run cli wp theme activate ttm-theme
+npx wp-env run cli wp user update admin --user_pass=password   # the archive's users replace wp-env's
 ```
 
-Use `--skip=attachment` for a fast rehearsal (featured images will be missing; the theme's fallbacks handle that). Drop the flag to pull every image from the live site (slow; respects Cloudflare rate limits poorly, so run it once and keep the container).
+Jetpack will run disconnected; that is fine for the rehearsal (the newsletter block still registers). Deactivate anything from the archive that phones home (Jetpack Boost, stats) if it gets noisy.
 
-Then run the plan below with `--dry-run` first, read the output, and run it for real. Open `http://localhost:8888` after each step; the front page, `/category/technology/`, and a journal post are the fastest smoke tests.
+### 1.3 WXR fallback
+
+```bash
+npx wp-env run cli wp plugin install wordpress-importer --activate
+npx wp-env run cli wp import /path/inside/container/export.xml --authors=create --skip=attachment
+```
+
+`--skip=attachment` gives a fast rehearsal without images; drop it to fetch every image from the live site (slow).
+
+### 1.4 Run the plan
+
+Run §2 below with `--dry-run` first, read the output, then for real. Open `http://localhost:8888` after each step; the front page, `/category/technology/`, and a journal post are the fastest smoke tests. Repeat from §1.2 (`npm run env:destroy`, start again) until the plan runs clean without manual intervention. Write down every hand-correction you had to make; those become the cleanup worklist in §5.
 
 ## 2. The migration plan (same order on production)
 
@@ -144,18 +190,37 @@ Activating `ttm-theme` runs its starter content once: creates any missing sectio
 
 The live `blog` and `speaking` pages keep working with `page.html`.
 
-## 3. Production cut-over
+## 3. The real migration on k3s (private), then cut-over
 
-1. Put the site in maintenance mode or accept a few minutes of mixed rendering.
-2. `git pull` the release on the server; `composer install --no-dev` is **not** needed (the plugin has a classmap autoload fallback); `npm run build` output (`plugins/ttm-core/build`) must be present, so build in CI and deploy the artifact, or build on the server.
-3. Activate `ttm-core` first, then run §2.1–2.5 and 2.8–2.9. Conversion (§2.6) can run before or after the theme switch; it is independent.
-4. Switch the theme to `ttm-theme`. Verify the pages and navigation (§2.10).
-5. Add the redirect rules, then purge Cloudflare completely once (`DEPLOYMENT.md`).
-6. Walk the front page, one post per section, a journal post, a series hub, `/writing/`, `/category/opinion/politics/`, a tag archive, search, and a 404.
-7. Keep Powder installed for a week in case of rollback (switching back is one click; the plugin's data is untouched by the theme).
+### 3.1 Stand up green, privately
+
+1. Deploy WordPress on k3s per `DEPLOYMENT.md §10` (MariaDB or MySQL with PVC, uploads PVC, S3 backup CronJobs, secrets for `wp-config.php` constants).
+2. Expose it **only** through a Cloudflare Tunnel hostname that is not linked anywhere (for example `next.eric.mann.blog`) with a **Cloudflare Access** policy (email OTP or your identity provider) in front, and `wp option update blog_public 0` so it emits `noindex`. Do not add it to any sitemap or Jetpack site list.
+3. Restore the archive from §1.1 exactly as in §1.2, using `next.eric.mann.blog` in the search-replace.
+4. Install `ttm-core`, `ttm-theme`, the Jetpack plugin (leave it **disconnected** until cut-over; connecting a second site to the same WordPress.com account would split stats and subscribers), and the Cloudflare plugin (also unconfigured for now).
+
+### 3.2 Migrate and clean up
+
+Run §2 in order. Take a fresh archive from `hive` first if more than a day has passed since §1.1, because anything published on the live site after the archive will otherwise be lost. From this point on, **stop publishing on `hive`**; new posts go on green (they are invisible to the public until cut-over, which is fine for drafts and scheduled posts).
+
+Content cleanup (§5) happens here, at leisure, with Access-protected previews. Nothing is public.
+
+### 3.3 Cut over
+
+1. Final check on green: front page, one post per section, a journal post, a series hub, `/writing/`, `/category/opinion/politics/`, a tag archive, search, a 404; `wp ttm audit` shows what you expect; `wp cron event list` shows `ttm_verse_fetch`.
+2. `wp search-replace 'https://next.eric.mann.blog' 'https://eric.mann.blog' --all-tables --precise` on green, then `wp option update blog_public 1`.
+3. In Cloudflare Zero Trust → Tunnels, move the public hostname `eric.mann.blog` (and `www`) from the `hive` tunnel to the k3s tunnel/ingress. Remove the Access policy from the public hostname (keep it on `next.` if that hostname stays for staging).
+4. Connect Jetpack on green (it inherits the site by URL; use "Transfer connection" if Jetpack complains about a site already connected), configure the Cloudflare plugin, add the redirect rules from §2.2, then **Purge Everything** once.
+5. `wp ttm verse fetch`, `wp ttm series:rebuild` on green.
+6. Watch the tunnel logs and `cf-cache-status` for a few minutes. `hive` keeps running untouched.
+
+### 3.4 After a week
+
+Stop the `hive` Compose stack, keep its last archive in S3, and decommission.
 
 ## 4. Rollback
 
+- Cut-over: move the tunnel hostname back to `hive`. Anything published on green after cut-over must be exported and re-imported on `hive` (WXR of posts newer than the cut-over date), which is why `hive` is kept for a week and not longer.
 - Theme: switch back to Powder. All content and the new taxonomy/meta remain and are simply not displayed.
 - Categories: `politics` can be reparented to top level in the admin; the redirect rules can be removed.
 - Conversion: `wp ttm convert:revert --all` restores every converted post's original HTML from `ttm_classic_backup`.
