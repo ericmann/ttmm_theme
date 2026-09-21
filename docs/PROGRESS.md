@@ -13,7 +13,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P0-08 Seed rewrite — series and fiction
 - [x] P0-09 Phase 0 push — baseline screenshots
 - [x] P1-01 Full-width rules and unconstrained grids (rules 35/36)
-- [ ] P1-02 Front masthead per §6.1.1 (pattern, CSS, nav hub class)
+- [x] P1-02 Front masthead per §6.1.1 (pattern, CSS, nav hub class)
 - [ ] P1-03 Front-page current section and nav label fill (`Nav\CurrentSection`)
 - [ ] P1-04 Verse copyright placement and `ttm/verse-copyright` binding
 - [ ] P1-05 Footer per §6.1.8
@@ -123,3 +123,11 @@ FLIGHT CONTROLLER NOTE (relayed, recorded for future tasks, not actioned here �
 1. .ttm-skip visible instead of screen-reader-only-until-focus -> Phase 1 masthead task (add fidelity row skip-hidden).
 2. Writing cell "Also running" lists the featured serial's own ch.12 as a story -> Phase 3 Writing cell task (check ttm_form derivation + block exclusion logic).
 3. technology-post-2 seeded as Hardening part 2 but mock's part 2 is "Salts, keys and the rotation you skipped" -> next task touching docs/fixtures/seed, or the Phase 2 push task.
+
+### P1-02 — 8eaf63f
+masthead-front.php: meta row's core/navigation block replaced with a plain <p class="ttm-masthead-front__links"><a>Newsletter</a><a>RSS</a><a>About</a></p> (Decision "Masthead meta links"). masthead-inner.php needed no change — already emitted ttm-nav__hub.
+ttm.css: new /* 0.1 skip link */ (.ttm-skip clip-path:inset(50%) until :focus, then fixed top-left bg + 2px accent outline — fixes flight-controller item 1). 4.1 masthead front rewritten: meta row align-items:center + font-feature-settings:"tnum" 1 + padding 14px 0 (was spacing--30 token); title row gap:32px added; byline margin-top flipped from -12px (bug) to spacing--30 (12px, positive) and font-size to dek(15px); nav ul gets its own display:flex/gap:28px rule (fidelity row targets `.ttm-masthead-front__nav ul`, not the nav wrapper); .ttm-nav-series renamed to .ttm-nav__hub, split into wrapper (margin-left:auto, real visual effect) + `>a` (margin-left:auto for the row's literal check, font-weight:400, color neutral-700 !important — needed to beat core's `.wp-block-navigation-item__content.wp-block-navigation-item__content{color:inherit}` repeated-class trick, confirmed via live render); phone breakpoint gained byline 12px/meta 11px/links-a-not-first-child:none. Added minimal real CSS for .ttm-masthead-front and shared .ttm-nav (both previously allow-listed with no selector at all).
+scripts/css-coverage-allow.txt: removed masthead-front, nav, nav__hub, nav-series, skip from the Phase 1 line (only newsletter-custom-url/newsletter-form__statement remain there).
+Tests: ChromePartsTest 2 new tests. Un-fixme'd mast-meta/title/byline/byline-phone/nav/nav-gap/hub in fidelity.spec.mjs; fixed mast-hub's own margin-left assertion (was `toBe('auto')`, impossible since getComputedStyle never returns the literal keyword for resolved margins — SPEC's own "(x >= 1000)" annotation means a bounding-box position check, so switched to that). Added a non-SPEC skip-hidden row per the flight-controller note.
+FLIGHT CONTROLLER FOLLOW-UP: item 1 (.ttm-skip visible) fixed here — see commit body for the .ttm-skip CSS and the coexistence with WP core's own auto-injected #wp-skip-link (confirmed via curl; not a conflict, ChromePartsTest needs the theme's own). Items 2 (Writing cell "Also running") and 3 (Hardening part 2 seed mismatch) still open, owned by later tasks.
+Verified: npm run lint clean, composer lint 0 errors, npm run test:integration 385/385, npm run test:e2e 58 passed/69 skipped (0 failed), composer test:unit, npm run build, forbidden-patterns all green. ttm-theme confirmed active; wp-env stopped after.
