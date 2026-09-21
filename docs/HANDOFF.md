@@ -314,3 +314,96 @@ the standard verify set). Three deviations from the queued task files are worth 
 review, all documented above with the reasoning: `Blocks\Helpers` becoming a `Plugin` module
 (R1-01), `themes/ttm-theme/patterns/masthead-inner.php`'s site-title level fix (R1-09), and the
 new `scripts/lib/report.mjs` (R1-15).
+
+## Round 2
+
+Branch: `build/2026-09-21` (base `4810032`, head `d9a3f6d`). 3 R2-* review-fix tasks, all `[x]`
+done, 0 blocked, 0 skipped. Overall PROGRESS.md: 94/94 tasks done, 0 open. Commits stay unsigned
+this run (`commit.gpgsign=false`, 1Password agent unavailable — owner authorized this and will
+rebase-sign later, per this round's operator note).
+
+**Task list:**
+- **R2-01** — `Query\Cells` now owns F9 stale-year end to end. `is_stale_year()` reads
+  `Query\Stats::category()`'s new cached `newest_date` field (on the existing
+  `ttm_category_stats_{id}` transient, flushed on `transition_post_status`) instead of running
+  its own `WP_Query`. New `cells.stale_count` Config key (default 2) replaces the hard-coded
+  `posts_per_page = 2`. Dek suppression moved entirely plugin-side: a `render_block_data` /
+  `render_block_core/query` scope-counter pair (`Cells::$stale_scope`, mirroring
+  `Blocks\Helpers::$archive_scope`) plus a `render_block_core/post-excerpt` filter that drops
+  content while the scope is entered; `mark_empty()` also adds an `is-stale` class.
+  `themes/ttm-theme/inc/patterns.php`/`pattern-templates/section-cell.php` no longer call
+  `Query\Cells` or vary their output per request — the `post-excerpt` block is now always
+  compiled into the pattern, and the plugin decides at render time whether it renders.
+  `forbidden-patterns.sh` rule 24's `Query/Cells.php`/`writing-cell/render.php` allow-list was
+  removed outright (no literals remain there to allow).
+- **R2-02** — test-only. `FrontSourcesTest::test_short_date_and_relative_date_empty_without_post`
+  now covers rule 26's actual empty case for `ttm/short-date`/`ttm/relative-date` at the
+  `Bindings\Sources` layer (no `postId` in context, and a `postId` that resolves to no post) —
+  the old `ValuesTest::test_short_and_relative_date_empty_without_date` never exercised an empty
+  case at all (`Values` is a pure formatter with no "no date" input), so it was renamed to
+  `test_short_and_relative_date_never_blank_for_a_valid_date`, which is what it actually proves.
+  `BoundariesTest` gained an inline-fully-qualified-reference scanner
+  (`test_inline_fully_qualified_references_obey_the_spec_table`) so a `\TTM\Core\Blocks\...`
+  reference written inline, rather than imported via `use`, can no longer bypass the §4.2
+  row-order guard.
+- **R2-03** — docs/comments alignment plus one real duplication fix. `Query\Archive` now
+  exposes only the pure `year_range($dir)` lookup; the query-pagination relabel filters
+  (`label_next`/`label_previous`) and a new `resolve_pagination_label($dir)` moved to
+  `Bindings\Sources`, which formats through `Bindings\Values::pagination_label()` — the single
+  source of the "Older (%s) →" / "← Newer (%s)" strings (this also fixed a pre-existing bug
+  where the `ttm/pagination-label` binding and the query-pagination relabel silently duplicated
+  that formatting instead of sharing it). CLAUDE.md's module map gained `Meta/SeriesPosition`,
+  `Editor/SeriesPartList`, and notes that `Query/Cells` owns F9 end-to-end and `Blocks/Helpers`
+  is a registered `Plugin` module owning the archive-scope hooks; `docs/HANDOFF.md`'s Round 1
+  R1-02 bullet now points at R2-01 as the task that closed the rule-24 allow-list, rather than
+  claiming no task was queued for it; `archive-by-year/render.php`'s docblock now names
+  `Blocks\Helpers::group_by_year()` (it previously named a `Query\Archive::group_by_year()`
+  that never existed).
+
+**Blocked/skipped:** none. All three R2-* tasks completed; no `foundry_task_block` calls this
+round.
+
+**Interpretation choices, by task:**
+- **R2-01** — `Cells::is_stale_year()` resolves the category by `get_term_by( 'slug', ... )`
+  before reading `Stats::category()`; this is a term lookup (object-cache-backed), not the
+  request-time `WP_Query` the task asked to eliminate, so it stays. The `is-stale` class and the
+  `is-empty` class are independent conditions in `mark_empty()` (a stale section can also be
+  non-empty, which is the common case) — both can be added to the same wrapper if both are ever
+  true, though in practice a stale section always has 1–2 posts once it exists at all, so
+  `is-empty` doesn't co-occur.
+- **R2-02** — the inline-reference scanner in `BoundariesTest` strips `/* */` blocks and
+  `use `-prefixed lines, then cuts each remaining line at its first `//`, before matching
+  leading-backslash `\TTM\Core\...` references. This is deliberately simple (not a real PHP
+  tokenizer) and would mis-parse a `//` inside a string literal on the same line as a reference;
+  no such line exists in the current tree, but a reviewer adding one should know the scanner
+  isn't token-aware.
+- **R2-03** — `Query\Archive::year_range()` keeps the `WP_Query`-based lookup exactly as
+  `resolve_label()` had it (same bounded ids-only re-query of the target page); only the
+  formatting moved. `ScaffoldTest`'s new module-map test checks class names against the whole
+  physical CLAUDE.md line for a directory's `Dir/` marker (not a stricter per-segment parse), and
+  explicitly allows `Cli/`'s pre-existing `*Command` wildcard shorthand rather than requiring
+  every `*Command` subclass to be spelled out.
+
+**⚠️ ASSUMPTION config keys:** `cells.stale_count` (R2-01, new; default `2`, copied from the
+previous hard-coded stale-year row count — not tuned this round).
+
+**What a human must check by hand, per task (all `NOT VERIFIED (human)` — this run is
+non-interactive and never opened a browser):**
+- **R2-01** — once a section genuinely goes stale in production (a category's newest post
+  crosses `cells.stale_year_days`), spot-check that section cell: confirm the dek is truly absent
+  from the rendered HTML (not just CSS-hidden) and that exactly `cells.stale_count` rows show.
+- **R2-03** — the `ttm/pagination-label` binding and the query-pagination relabel filters now
+  share one code path (`Sources::resolve_pagination_label()`); a human should page through a
+  seeded category archive with more than one page of posts and confirm "Older (…) →" / "←
+  Newer (…)" still render correctly on both the block-bound and the pagination-next/previous
+  markup.
+
+**For a reviewer who hasn't seen this code:** every R2-* task's acceptance tests pass, plus the
+full verify set — `composer lint` (0 errors), `composer test:unit` (131), `npm run lint` (CSS
+budget unchanged: 33070/33200 bytes — no CSS was touched this round), `npm run test:unit` (JS,
+12 passed/2 pre-existing skipped), `npm run build`, `bash scripts/forbidden-patterns.sh`, and
+`npm run test:integration` (371 tests, up from 367 at the end of Round 1). `npm run test:e2e`
+(48/48) was also run manually after R2-01, since F9's dek-suppression mechanism changed
+end-to-end. Every manual check noted above (`bash scripts/forbidden-patterns.sh` catching a
+reintroduced literal in R2-01; the inline-reference fixture in R2-02; the CLAUDE.md module-map
+regression fixture in R2-03) was reproduced and reverted during this run, not just asserted.
