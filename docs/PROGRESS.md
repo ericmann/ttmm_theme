@@ -47,7 +47,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P4-01 series-bar block
 - [x] P4-02 series-toc block
 - [x] P4-03 series-prev-next and syndicated-to blocks
-- [ ] P4-04 Bindings reading-time, word-count, journal-subline, series-name, series-part
+- [x] P4-04 Bindings reading-time, word-count, journal-subline, series-name, series-part
 - [ ] P4-05 Template routing, article and journal patterns and templates
 - [ ] P4-06 Article and journal CSS including classic content
 - [ ] P4-07 Push and manual check (Phase 4)
@@ -318,3 +318,6 @@ Added the ttm/series-toc block: resolves a series via seriesId attribute (Writin
 
 ### P4-03 — f76060a
 Added ttm/series-prev-next: mode=series links adjacent published parts ("← Part N"/"Part N →"), mode=chronological (and auto's fallback when the post has no series) finds the nearest same-primary-category post before/after via a bounded WP_Query with date_query + ttm_primary_category meta_query (never get_adjacent_post, which ignores primary category) with "← Previously in {Category}"/"Next →" labels; a missing side renders an empty but present cell (F11), keeping the grid. Added ttm/syndicated-to: renders only on a single Journal post (primary category slug === sections.journal_slug) with at least one ttm_syndication URL (x/mastodon/bluesky), joining network links with "and" via Html::link(), plus the word count; F14 (no URLs) and non-Journal posts render nothing. Full integration suite: 188 tests, 1 pre-existing skip, 0 failures.
+
+### P4-04 — 1bf03b7
+Added Values::reading_time/word_count/journal_subline/series_name/series_part (pure) and registered the matching Sources: ttm/reading-time, ttm/word-count, ttm/journal-subline, ttm/series-name, ttm/series-part (11 sources total). reading_time suppresses output entirely for a Journal-primary post (03 §10) via an explicit $is_journal bool computed by Sources::is_journal_post(). series_name/series_part reuse Blocks\Helpers::series_position(), with Sources overriding 'total' to null when ttm_total_parts is open-ended before calling Values (same pattern as P3-05/06/07/08, since SeriesIndex's own total substitutes the published count). Full integration suite: 191 tests, 1 pre-existing skip, 0 failures.
