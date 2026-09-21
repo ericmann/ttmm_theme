@@ -49,7 +49,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P4-03 series-prev-next and syndicated-to blocks
 - [x] P4-04 Bindings reading-time, word-count, journal-subline, series-name, series-part
 - [x] P4-05 Template routing, article and journal patterns and templates
-- [ ] P4-06 Article and journal CSS including classic content
+- [x] P4-06 Article and journal CSS including classic content
 - [ ] P4-07 Push and manual check (Phase 4)
 - [ ] P5-01 Archive query, pagination labels, section feeds, journal-in-main-feed
 - [ ] P5-02 archive-by-year and tag-filter blocks
@@ -324,3 +324,6 @@ Added Values::reading_time/word_count/journal_subline/series_name/series_part (p
 
 ### P4-05 — f92e8bb
 Added Templates\Hierarchy::single_hierarchy() (prepends single-journal when the post's primary category is Journal) and category_hierarchy() (prepends page-writing for the Writing category), using WP's generic single_template_hierarchy/category_template_hierarchy filters — no existence check needed, a missing template file falls through on WP's own machinery (rule 3). Extended Query\Cells with ttmSameSection (meta_query on the current post's primary category, posts_per_page from article.more_in_section) and ttmExcludeCurrent (post__not_in current post); journal-stream reuses the journal ttmSection branch but overrides posts_per_page from journal.stream_count specifically when ttmExcludeCurrent is set (the signal distinguishing it from the front page's journal-rail). F17 is-empty marking now also fires for ttmSameSection queries so more-in-section gets F13. Added article-header/more-in-section/journal-stream patterns and single.html/single-journal.html templates. Found and fixed a test-helper ordering bug: go_to() resets $wp_query and the $pages/$page/$multipage globals setup_postdata() sets, so it must run before setup_postdata(), not after, or core/post-content fatals. Full integration suite: 201 tests, 2 skips (1 pre-existing, 1 expected pending page-writing.html/P6-05), 0 failures.
+
+### P4-06 — 09b086c
+Added article/journal CSS: byline, prev/next (grid, labels, titles), more-in-section's F13 is-empty collapse, journal row/date, F14's ttm-journal-head__count hide-when-syndicated rule (renamed the paragraph's class from a provisional ttm-journal-head__words to match), classic-content modern-footnotes selectors (sup link, ::before/::after bracketed note, footnotes list rule, core .wp-block-footnotes), and ≤1024/≤720 responsive rules (single column, full-bleed hero/code, compact series bar). ttm.css grew 22989 -> 25451 of the 25600-byte budget (one new stylelint false-positive suppressed the same way as three earlier ones). Full integration suite: 201 tests, 2 pre-existing/expected skips, 0 failures.
