@@ -3,7 +3,7 @@ Branch: refine/2026-09-21
 Started: 2026-09-21T19:10:39.166Z
 
 ## Tasks
-- [ ] P0-01 CSS coverage lint script and allow-list
+- [x] P0-01 CSS coverage lint script and allow-list
 - [ ] P0-02 Config keys for phase 2 and the fallback-literal test
 - [ ] P0-03 Boundaries table, CSS budget and SETUP note
 - [ ] P0-04 Fidelity and editors Playwright skeletons (all rows fixme)
@@ -43,3 +43,11 @@ Started: 2026-09-21T19:10:39.166Z
 
 ## Log
 (one entry per task, appended by implement)
+
+### P0-01 — 93dfc47
+Added scripts/lib/css-coverage.mjs (pure fns: collectMarkupClasses, collectCssClasses, globToRegExp, parseAllowList, report) and scripts/check-css-coverage.mjs (CLI). Wired as npm run check:css-coverage, appended to npm run lint. CI push branches now include refine/**.
+Markup scan: themes/ttm-theme/{templates,parts,patterns,inc}/**, plugins/ttm-core/blocks/*/render.php, plugins/ttm-core/src/**/*.php (SRC_SKIP left empty — no false positives found today, kept as an extension point).
+CSS scan: ttm.css + style.css.
+Allow-list: exactly the 7 lines specified in the task; current repo state has 0 missing/0 dead beyond it. `node scripts/check-css-coverage.mjs` prints "156 markup classes, 111 css classes, 7 allow-listed" and exits 0.
+Tests: scripts/test/check-css-coverage.test.js — class attr/className-json/wrapper() collection, is-state/prefix-literal exclusion, CSS class collection, glob brace/star matching, allow-list parsing (blank/comment skip), report missing/dead after allow, allowCount>=10 fails.
+npm run lint, npm run test:unit, composer lint, composer test:unit, npm run build, forbidden-patterns.sh all green (foundry_verify).
