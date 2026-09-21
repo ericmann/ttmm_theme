@@ -203,4 +203,16 @@ class FrontSourcesTest extends TTM_IntegrationTestCase {
 			\TTM\Core\Config::reset();
 		}
 	}
+
+	public function test_today_footer_format_uses_blogname(): void {
+		update_option( 'blogname', 'These Things Matter' );
+
+		$block = $this->make_block( 'core/paragraph', 0 );
+		$value = $this->source_value( 'ttm/today', [ 'format' => 'footer' ], $block, 'content' );
+
+		$this->assertMatchesRegularExpression(
+			'/^These Things Matter · © \d{4} Eric Mann · Built on WordPress$/',
+			$value
+		);
+	}
 }

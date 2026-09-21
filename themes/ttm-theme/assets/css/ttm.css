@@ -940,15 +940,48 @@ blockquote.is-style-pull cite,
 .ttm-footer {
 	display: flex;
 	justify-content: space-between;
-	padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--80);
+	padding: var(--wp--preset--spacing--40) var(--wp--preset--spacing--80);
 	font-size: var(--wp--preset--font-size--caption);
 	color: var(--wp--preset--color--neutral-700);
 	border-top: var(--ttm-rule-2);
 }
 
-.ttm-footer.is-after-poster {
+/* `wp:template-part`'s own `className` lands on its wrapper div, not the `<footer>` itself. */
+.is-after-poster .ttm-footer {
 	border-top: 0;
-	padding-top: var(--wp--preset--spacing--40);
+}
+
+.ttm-footer__left {
+	display: block;
+}
+
+.ttm-footer__meta {
+	margin: 0;
+}
+
+.ttm-footer__copyright:empty {
+	display: none;
+}
+
+.ttm-footer__nav ul {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0;
+}
+
+/* stylelint-disable-next-line no-descending-specificity -- unrelated component (footer nav vs. .entry-content a:hover) */
+.ttm-footer__nav a {
+	font-weight: 400;
+	color: var(--wp--preset--color--neutral-700);
+}
+
+.ttm-footer__nav a:hover {
+	color: var(--wp--preset--color--accent);
+}
+
+.ttm-footer .wp-block-navigation-item + .wp-block-navigation-item::before {
+	content: "·";
+	margin: 0 0.4em;
 }
 
 @media (max-width: 720px) {

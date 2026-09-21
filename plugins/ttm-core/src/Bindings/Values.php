@@ -195,6 +195,19 @@ class Values {
 	}
 
 	/**
+	 * "These Things Matter · © 2026 Eric Mann · Built on WordPress" (SPEC §6.1.8): the
+	 * footer's single meta line, bound via `ttm/today format=footer`.
+	 *
+	 * @param string $site_name Site name (`get_bloginfo('name')`).
+	 * @param string $year      Four-digit year.
+	 * @return string
+	 */
+	public static function footer_line( string $site_name, string $year ): string {
+		/* translators: 1: site name, 2: four-digit year. */
+		return sprintf( __( '%1$s · © %2$s Eric Mann · Built on WordPress', 'ttm-core' ), $site_name, $year );
+	}
+
+	/**
 	 * "14 min read" / "14 min"; `''` for a Journal post (03 §10: not shown there).
 	 *
 	 * @param int    $words      Word count.

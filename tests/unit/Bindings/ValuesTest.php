@@ -141,4 +141,11 @@ class ValuesTest extends TestCase {
 		$this->assertSame( 'Sun, Sept 20, 2026', Values::today( $now, 'compact' ) );
 		$this->assertSame( '2026', Values::today( $now, 'year' ) );
 	}
+
+	public function test_footer_line_joins_site_year_author_and_platform(): void {
+		$this->assertSame(
+			'These Things Matter · © 2026 Eric Mann · Built on WordPress',
+			Values::footer_line( 'These Things Matter', '2026' )
+		);
+	}
 }

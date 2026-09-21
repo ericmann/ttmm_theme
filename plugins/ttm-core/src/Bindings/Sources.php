@@ -351,6 +351,11 @@ class Sources {
 	public static function today( array $source_args, $block_instance, string $attribute_name ): string {
 		$format = (string) ( $source_args['format'] ?? 'masthead' );
 
+		if ( 'footer' === $format ) {
+			$value = Values::footer_line( get_bloginfo( 'name' ), Clock::now()->format( 'Y' ) );
+			return self::finalize( $value, $block_instance, $attribute_name );
+		}
+
 		return self::finalize( Values::today( Clock::now(), $format ), $block_instance, $attribute_name );
 	}
 

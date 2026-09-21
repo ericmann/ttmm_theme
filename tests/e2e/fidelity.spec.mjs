@@ -752,7 +752,7 @@ test.describe( 'newsletter poster', () => {
 } );
 
 test.describe( 'footer', () => {
-	test.fixme( 'footer: .ttm-footer @1280', async ( { page } ) => {
+	test( 'footer: .ttm-footer @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const footer = page.locator( '.ttm-footer' );
 		expect( await computed( footer, 'padding' ) ).toBe( '16px 48px' );
@@ -763,7 +763,7 @@ test.describe( 'footer', () => {
 		expect( await computed( footer, 'border-top-width' ) ).toBe( px( 0 ) );
 	} );
 
-	test.fixme( 'footer-left: .ttm-footer__meta @1280', async ( { page } ) => {
+	test( 'footer-left: .ttm-footer__meta @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const meta = page.locator( '.ttm-footer__meta' );
 		expect( await meta.innerText() ).toMatch(
@@ -771,16 +771,14 @@ test.describe( 'footer', () => {
 		);
 	} );
 
-	test.fixme( 'footer-copy: .ttm-footer__copyright @1280', async ( {
-		page,
-	} ) => {
+	test( 'footer-copy: .ttm-footer__copyright @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const copyright = page.locator( '.ttm-footer__copyright' );
 		expect( await copyright.count() ).toBe( 1 );
 		expect( await computed( copyright, 'font-size' ) ).toBe( px( 12 ) );
 	} );
 
-	test.fixme( 'footer-nav: .ttm-footer .wp-block-navigation-item @1280', async ( {
+	test( 'footer-nav: .ttm-footer .wp-block-navigation-item @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -791,7 +789,7 @@ test.describe( 'footer', () => {
 		).toBe( 9 );
 	} );
 
-	test.fixme( 'footer-nav-sep: .ttm-footer .wp-block-navigation-item:nth-child(2)::before @1280', async ( {
+	test( 'footer-nav-sep: .ttm-footer .wp-block-navigation-item:nth-child(2)::before @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -801,7 +799,7 @@ test.describe( 'footer', () => {
 		expect( await before( item, 'content' ) ).toBe( '"·"' );
 	} );
 
-	test.fixme( 'footer-phone: .ttm-footer @390', async ( { page } ) => {
+	test( 'footer-phone: .ttm-footer @390', async ( { page } ) => {
 		await gotoFront( page, 390 );
 		const footer = page.locator( '.ttm-footer' );
 		expect( await computed( footer, 'flex-direction' ) ).toBe( 'column' );
