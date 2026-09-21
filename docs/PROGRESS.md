@@ -15,7 +15,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P1-01 Full-width rules and unconstrained grids (rules 35/36)
 - [x] P1-02 Front masthead per §6.1.1 (pattern, CSS, nav hub class)
 - [x] P1-03 Front-page current section and nav label fill (`Nav\CurrentSection`)
-- [ ] P1-04 Verse copyright placement and `ttm/verse-copyright` binding
+- [x] P1-04 Verse copyright placement and `ttm/verse-copyright` binding
 - [ ] P1-05 Footer per §6.1.8
 - [ ] P1-06 Newsletter form contract — shared markup, provider chain, custom-url dev-accept, seed
 - [ ] P1-07 Spike — Jetpack Subscriptions widget POST contract
@@ -139,3 +139,9 @@ Tests: CurrentSectionTest 4 new tests (Config::reset() needed after add_filter('
 FIXED A BUG in my own P0-04 fidelity test: mast-current expected color('accent') but that fails WCAG AA contrast at 14px (axe caught it: 3.75:1 on the live front page) — Decision "Colour vs a11y" (already referenced in P0-04's own docblock but not applied) means accent-700; corrected the assertion and the CSS together.
 plugins/ttm-core/README.md: added a paragraph on nav.front_current under Configuration.
 Verified: composer lint 0 errors, npm run lint clean, npm run test:integration 389/389, npm run test:e2e 59 passed/68 skipped (0 failed, including axe on the front page), composer test:unit, npm run build, forbidden-patterns all green. ttm-theme confirmed active; wp-env stopped after.
+
+### P1-04 — 1e6bf8e
+Bindings\Sources: new ttm/verse-copyright source (no uses_context), returns '' unless verse.copyright_placement==='footer' and a verse is stored, plain text via finalize(). verse-of-the-day/render.php: the <small class="ttm-verse__copyright"> now also requires Config::get('verse.copyright_placement','footer')==='box' (previously rendered whenever the copyright string was non-empty, regardless of placement).
+Tests: FrontSourcesTest 2 new tests; VerseOfTheDayTest 1 new (absent by default) + 1 updated (sets placement 'box' via ttm_config filter + Config::reset() before asserting the box renders it). README binding list added (enumerates all ttm/* sources including the new one).
+Un-fixme'd verse-nocopy in fidelity.spec.mjs.
+Verified: composer lint 0 errors, npm run lint clean, npm run test:integration 392/392 (real wp-env), npm run test:e2e 60 passed/67 skipped (0 failed), composer test:unit, npm run build, forbidden-patterns all green. ttm-theme confirmed active; wp-env stopped after.
