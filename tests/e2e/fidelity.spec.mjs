@@ -693,7 +693,7 @@ test.describe( 'series strip', () => {
 } );
 
 test.describe( 'newsletter poster', () => {
-	test.fixme( 'poster: .ttm-poster @1280', async ( { page } ) => {
+	test( 'poster: .ttm-poster @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const poster = page.locator( '.ttm-poster' );
 		expect( await computed( poster, 'background-color' ) ).toBe(
@@ -702,7 +702,7 @@ test.describe( 'newsletter poster', () => {
 		expect( await computed( poster, 'padding' ) ).toBe( '36px 48px 32px' );
 	} );
 
-	test.fixme( 'poster-h3: .ttm-poster h3 @1280', async ( { page } ) => {
+	test( 'poster-h3: .ttm-poster h3 @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const h3 = page.locator( '.ttm-poster h3' );
 		expect( await computed( h3, 'font-size' ) ).toBe( px( 40 ) );
@@ -710,7 +710,7 @@ test.describe( 'newsletter poster', () => {
 		expect( await computed( h3, 'text-align' ) ).toBe( 'left' );
 	} );
 
-	test.fixme( 'poster-input: .ttm-poster input[type="email"] @1280', async ( {
+	test( 'poster-input: .ttm-poster input[type="email"] @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -721,7 +721,7 @@ test.describe( 'newsletter poster', () => {
 		);
 	} );
 
-	test.fixme( 'poster-btn: .ttm-poster button, .ttm-poster .btn-ghost @1280', async ( {
+	test( 'poster-btn: .ttm-poster button, .ttm-poster .btn-ghost @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -730,12 +730,15 @@ test.describe( 'newsletter poster', () => {
 			.first();
 		expect( await computed( btn, 'color' ) ).toBe( color( 'bg' ) );
 		expect( await computed( btn, 'border-width' ) ).toBe( px( 1 ) );
+		// A `background: transparent` declaration's *computed* value is Chrome's canonical
+		// `rgba(0, 0, 0, 0)`, never the literal keyword -- same category of getComputedStyle()
+		// normalization as the `margin-left: auto` fix in mast-hub (P1-02).
 		expect( await computed( btn, 'background-color' ) ).toBe(
-			'transparent'
+			'rgba(0, 0, 0, 0)'
 		);
 	} );
 
-	test.fixme( 'poster-nomailto: .ttm-poster a[href^="mailto:"] @1280', async ( {
+	test( 'poster-nomailto: .ttm-poster a[href^="mailto:"] @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -744,7 +747,7 @@ test.describe( 'newsletter poster', () => {
 		).toBe( 0 );
 	} );
 
-	test.fixme( 'poster-phone: .ttm-poster h3 @390', async ( { page } ) => {
+	test( 'poster-phone: .ttm-poster h3 @390', async ( { page } ) => {
 		await gotoFront( page, 390 );
 		const h3 = page.locator( '.ttm-poster h3' );
 		expect( await computed( h3, 'font-size' ) ).toBe( px( 28 ) );

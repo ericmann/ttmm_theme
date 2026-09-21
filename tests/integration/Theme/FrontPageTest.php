@@ -198,4 +198,22 @@ class FrontPageTest extends TTM_IntegrationTestCase {
 		$this->assertDoesNotMatchRegularExpression( '/is-style-grid-[0-9a-z-]+[^"]*is-layout-constrained/', $html );
 		$this->assertDoesNotMatchRegularExpression( '/ttm-section-row[^"]*is-layout-constrained/', $html );
 	}
+
+	public function test_poster_is_full_width_and_has_no_mailto_when_custom_url_is_configured(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$this->seed( 'normal' );
+		$this->go_to( '/' );
+
+		$html = $this->render_template( 'front-page' );
+
+		$this->assertMatchesRegularExpression( '/class="wp-block-group alignfull ttm-poster[^"]*"/', $html );
+
+		$poster_start = strpos( $html, 'ttm-poster' );
+		$footer_start = strpos( $html, 'is-after-poster' );
+		$this->assertIsInt( $poster_start );
+		$this->assertIsInt( $footer_start );
+
+		$poster_html = substr( $html, $poster_start, $footer_start - $poster_start );
+		$this->assertStringNotContainsString( 'href="mailto:', $poster_html );
+	}
 }

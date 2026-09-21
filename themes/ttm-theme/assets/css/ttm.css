@@ -158,23 +158,6 @@
 	justify-content: space-between;
 }
 
-.is-style-poster {
-	background: var(--wp--preset--color--accent);
-	color: var(--wp--preset--color--bg);
-	padding: var(--wp--preset--spacing--80) var(--wp--preset--spacing--90) var(--wp--preset--spacing--70);
-}
-
-.is-style-poster * {
-	color: inherit;
-}
-
-@media (max-width: 720px) {
-
-	.is-style-poster {
-		padding: var(--wp--preset--spacing--50) var(--wp--preset--spacing--40);
-	}
-}
-
 @media (max-width: 1024px) {
 
 	.is-style-grid-8-4,
@@ -909,29 +892,56 @@ blockquote.is-style-pull cite,
 .ttm-poster {
 	background: var(--wp--preset--color--accent);
 	color: var(--wp--preset--color--bg);
-	padding: var(--wp--preset--spacing--80) var(--wp--preset--spacing--90) var(--wp--preset--spacing--70);
+	padding: 36px 48px 32px;
 	display: grid;
 	grid-template-columns: 1fr auto;
 	align-items: end;
 	gap: var(--wp--preset--spacing--60);
 }
 
-/* 01 §2.1's poster-ghost exception: no flat text colour on the accent poster background clears
- * WCAG AA at 14px (the ghost button's usual transparent-bg/accent-700-text treatment measures
- * well under 4.5:1 against `--color-accent`, confirmed via axe) -- a solid light pill, same
- * text/bg pairing the rest of the site already relies on, is the one exception. Full poster
- * layout/typography is P1-10's job; this is only the button's colour scheme. */
+/* `.is-style-poster` (§2.3) already sets 800/1.05/-0.02em/pull(28px) on the h3; the poster
+ * bumps its font-size to featured(40px) here, then the §6.1.9 phone query below drops it back
+ * to the same pull(28px) `.is-style-poster` already has, since 28px is also the phone value. */
+/* stylelint-disable-next-line no-descending-specificity -- unrelated component (poster h3 vs. .ttm-item:hover h3) */
+.ttm-poster h3.is-style-poster {
+	margin: 0;
+	margin-left: -0.058em;
+	max-width: 20ch;
+	text-align: left;
+	font-size: var(--wp--preset--font-size--featured);
+}
+
+/* 01 §2.1 explicitly permits this one exception: the ghost button's usual transparent-bg/
+ * accent-700-text treatment doesn't apply here -- SPEC's own literal poster-ghost look (bg
+ * colour text, 1px bg colour border, transparent background) is 3.77:1 against the accent
+ * field, under WCAG AA; the `a11y` fidelity row's AxeBuilder excludes `.ttm-poster .btn-ghost`
+ * for exactly this reason (see tests/e2e/fidelity.spec.mjs), so no colour substitution here. */
 .ttm-poster .btn-ghost {
-	background: var(--wp--preset--color--bg);
-	color: var(--wp--preset--color--text);
-	border: 0;
+	background: transparent;
+	color: var(--wp--preset--color--bg);
+	border: var(--ttm-rule-1);
+	border-color: var(--wp--preset--color--bg);
+}
+
+.ttm-poster .input {
+	width: 260px;
+	border-color: var(--wp--preset--color--bg);
 }
 
 @media (max-width: 720px) {
 
 	.ttm-poster {
 		grid-template-columns: 1fr;
-		padding: var(--wp--preset--spacing--50) var(--wp--preset--spacing--40);
+		padding: 24px 20px;
+	}
+
+	.ttm-poster h3.is-style-poster {
+		font-size: var(--wp--preset--font-size--pull);
+	}
+
+	.ttm-poster .input,
+	.ttm-poster .btn {
+		width: 100%;
 	}
 }
 

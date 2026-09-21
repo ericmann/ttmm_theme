@@ -22,7 +22,12 @@ for ( const [ name, path ] of Object.entries( SCREENS ) ) {
 		} ) => {
 			await page.goto( path );
 
-			const results = await new AxeBuilder( { page } ).analyze();
+			// 01 §2.1's one permitted exception (SPEC §6.1.8, Decision "Colour vs a11y"): the
+			// poster's ghost button keeps its literal bg-colour-on-accent look, 3.75:1, under
+			// WCAG AA -- the fidelity `a11y` row already excludes it for the same reason.
+			const results = await new AxeBuilder( { page } )
+				.exclude( '.ttm-poster .btn-ghost' )
+				.analyze();
 			const blocking = results.violations.filter( ( violation ) =>
 				SERIOUS_IMPACTS.includes( violation.impact )
 			);
