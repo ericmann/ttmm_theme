@@ -21,6 +21,10 @@
 			"type": "boolean",
 			"default": false
 		},
+		"excludeCurrent": {
+			"type": "boolean",
+			"default": false
+		},
 		"limit": {
 			"type": "number",
 			"default": 0

@@ -11,8 +11,8 @@
 declare( strict_types=1 );
 
 ?>
-<!-- wp:group {"className":"is-style-surface-box ttm-newsletter-box","layout":{"type":"constrained"}} -->
-<div class="wp-block-group is-style-surface-box ttm-newsletter-box">
+<!-- wp:group {"anchor":"newsletter","className":"is-style-surface-box ttm-newsletter-box","layout":{"type":"constrained"}} -->
+<div class="wp-block-group is-style-surface-box ttm-newsletter-box" id="newsletter">
 	<!-- wp:paragraph {"className":"ttm-newsletter-box__title"} -->
 	<p class="ttm-newsletter-box__title"><?php esc_html_e( 'The weekly issue.', 'ttm-theme' ); ?></p>
 	<!-- /wp:paragraph -->

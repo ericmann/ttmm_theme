@@ -22,14 +22,15 @@ if ( empty( $ttm_all ) ) {
 	return '';
 }
 
-$ttm_status      = (string) ( $attributes['status'] ?? 'in-progress' );
-$ttm_form        = (string) ( $attributes['form'] ?? 'any' );
-$ttm_in_category = ! empty( $attributes['inCategory'] );
-$ttm_layout      = (string) ( $attributes['layout'] ?? 'rows' );
-$ttm_orderby     = (string) ( $attributes['orderby'] ?? 'updated' );
-$ttm_show_dek    = ! isset( $attributes['showDek'] ) || $attributes['showDek'];
-$ttm_show_cats   = ! isset( $attributes['showCategories'] ) || $attributes['showCategories'];
-$ttm_show_count  = ! isset( $attributes['showCount'] ) || $attributes['showCount'];
+$ttm_status          = (string) ( $attributes['status'] ?? 'in-progress' );
+$ttm_form            = (string) ( $attributes['form'] ?? 'any' );
+$ttm_in_category     = ! empty( $attributes['inCategory'] );
+$ttm_exclude_current = ! empty( $attributes['excludeCurrent'] );
+$ttm_layout          = (string) ( $attributes['layout'] ?? 'rows' );
+$ttm_orderby         = (string) ( $attributes['orderby'] ?? 'updated' );
+$ttm_show_dek        = ! isset( $attributes['showDek'] ) || $attributes['showDek'];
+$ttm_show_cats       = ! isset( $attributes['showCategories'] ) || $attributes['showCategories'];
+$ttm_show_count      = ! isset( $attributes['showCount'] ) || $attributes['showCount'];
 
 $ttm_limit = (int) ( $attributes['limit'] ?? 0 );
 if ( $ttm_limit <= 0 ) {
@@ -44,11 +45,19 @@ if ( $ttm_in_category ) {
 	}
 }
 
-$ttm_filter = static function ( array $rows, string $status ) use ( $ttm_form, $ttm_in_category, $ttm_queried_category_id ): array {
+$ttm_current_series_id = 0;
+if ( $ttm_exclude_current ) {
+	$ttm_queried_series = get_queried_object();
+	if ( $ttm_queried_series instanceof \WP_Term && 'series' === $ttm_queried_series->taxonomy ) {
+		$ttm_current_series_id = $ttm_queried_series->term_id;
+	}
+}
+
+$ttm_filter = static function ( array $rows, string $status ) use ( $ttm_form, $ttm_in_category, $ttm_queried_category_id, $ttm_current_series_id ): array {
 	return array_values(
 		array_filter(
 			$rows,
-			static function ( array $row ) use ( $status, $ttm_form, $ttm_in_category, $ttm_queried_category_id ): bool {
+			static function ( array $row ) use ( $status, $ttm_form, $ttm_in_category, $ttm_queried_category_id, $ttm_current_series_id ): bool {
 				if ( 'any' !== $status && $row['status'] !== $status ) {
 					return false;
 				}
@@ -59,6 +68,9 @@ $ttm_filter = static function ( array $rows, string $status ) use ( $ttm_form, $
 					return false;
 				}
 				if ( $ttm_in_category && ! in_array( $ttm_queried_category_id, $row['categories'], true ) ) {
+					return false;
+				}
+				if ( $ttm_current_series_id && (int) $row['id'] === $ttm_current_series_id ) {
 					return false;
 				}
 				return true;

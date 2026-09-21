@@ -1,14 +1,19 @@
 <?php
 /**
- * `ttm/series-featured` render: series hub featured slot (01 §4.38).
- * Auto-pick per 03 §3: `ttm_featured` term meta if set, else the in-progress series with the
- * newest part, else the most recently completed (F5: single button, "Complete · {categories}"
+ * `ttm/series-featured` render: series hub featured slot (01 §4.38), also reused full-width
+ * on `taxonomy-series.html` (02 §F single-series zone).
+ * Resolution: `seriesId` attribute -> the queried `series` term (taxonomy-series.html) ->
+ * auto-pick per 03 §3 (`ttm_featured` term meta if set, else the in-progress series with the
+ * newest part, else the most recently completed - F5: single button, "Complete · {categories}"
  * kicker). F24: scheduled parts render unlinked with a "Scheduled {date}" title attribute.
  * Zero series (or an explicit `seriesId` that resolves to nothing) -> ''.
+ * `partsLimit` explicitly set to `0` in the block markup (not merely absent/defaulted) means
+ * "no cap" -- the full part list renders and no "All N" link is shown (taxonomy-series.html).
  *
  * @package TTM\Core\Blocks
  *
  * @var array<string, mixed> $attributes Block attributes.
+ * @var WP_Block              $block      Block instance (parsed_block for the raw attrs).
  */
 
 declare( strict_types=1 );
@@ -38,9 +43,13 @@ $ttm_latest_part_date = static function ( array $row ): string {
 };
 
 $ttm_series_id = (int) ( $attributes['seriesId'] ?? 0 );
+$ttm_queried   = get_queried_object();
 
 if ( $ttm_series_id ) {
 	$ttm_row = SeriesIndex::get( $ttm_series_id );
+} elseif ( $ttm_queried instanceof WP_Term && 'series' === $ttm_queried->taxonomy ) {
+	// taxonomy-series.html: feature the series being viewed, not an auto-pick.
+	$ttm_row = SeriesIndex::get( $ttm_queried->term_id );
 } else {
 	$ttm_rows = SeriesIndex::all();
 
@@ -90,16 +99,20 @@ $ttm_progress = render_block(
 	]
 );
 
+$ttm_raw_attrs      = $block->parsed_block['attrs'] ?? [];
+$ttm_limit_explicit = array_key_exists( 'partsLimit', $ttm_raw_attrs );
+$ttm_uncapped       = $ttm_limit_explicit && 0 === (int) $ttm_raw_attrs['partsLimit'];
+
 $ttm_limit = (int) ( $attributes['partsLimit'] ?? 0 );
-if ( $ttm_limit <= 0 ) {
+if ( ! $ttm_uncapped && $ttm_limit <= 0 ) {
 	$ttm_limit = (int) Config::get( 'series.hub_featured_parts', 12 );
 }
 
 $ttm_parts    = $ttm_row['parts'];
 $ttm_all_link = get_term_link( (int) $ttm_row['id'], 'series' );
 $ttm_all_link = is_string( $ttm_all_link ) ? $ttm_all_link : '';
-$ttm_has_more = count( $ttm_parts ) > $ttm_limit;
-$ttm_visible  = array_slice( $ttm_parts, 0, $ttm_limit );
+$ttm_has_more = ! $ttm_uncapped && count( $ttm_parts ) > $ttm_limit;
+$ttm_visible  = $ttm_uncapped ? $ttm_parts : array_slice( $ttm_parts, 0, $ttm_limit );
 ?>
 <div <?php echo Helpers::wrapper( 'series-featured' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() output is already escaped. ?>>
 	<div class="ttm-series-featured__main">
