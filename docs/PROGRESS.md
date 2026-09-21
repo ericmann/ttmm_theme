@@ -29,7 +29,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P2-02 ttm.css foundation: bridge, grids, rules, type utilities, buttons, tags, inputs, body typography
 - [x] P2-03 ttm.css chrome, nav.js, editor.css; CSS budget tuning
 - [x] P2-04 Block variations and starter content
-- [ ] P2-05 Template parts and chrome patterns
+- [x] P2-05 Template parts and chrome patterns
 - [ ] P2-06 page, 404, index and search-shell templates; current section and body classes
 - [ ] P2-07 Push and manual check (Phase 2)
 - [ ] P3-01 Block registrar, shared helpers, webpack entries, verse-of-the-day block
@@ -254,3 +254,9 @@ starter-content.php::create_starter_content() hooked after_switch_theme: creates
 Fixed tests/unit/Theme/FontsTest.php::test_only_nav_js_is_enqueued_on_the_front_end — it previously regex-scanned the WHOLE functions.php for any wp_enqueue_script call and asserted all name nav.js; now scoped to just the wp_enqueue_scripts callback block, since variations.js is a second, legitimate, editor-only enqueue under a different hook.
 65/65 unit + 75/75 integration tests pass (5 new); full verify green.
 Manual check: NOT VERIFIED (human) -- deactivate/reactivate the theme on a fresh site and confirm 7 categories/4 pages(with templates)/Sections nav appear; open the editor and confirm the 3 variations appear in the inserter.
+
+### P2-05 — 4dae65e
+header-front.html/header-inner.html: contentOnly-locked header Group (skip link core/html "ttm-skip" -> #main) wrapping a wp:pattern reference to masthead-front/masthead-inner. Both masthead patterns build per-section nav links in PHP (get_category_by_slug/get_category_link fallback to home_url('/category/<slug>/')) plus RSS (get_feed_link)/Newsletter/About links, with aria-label "Sections" on the nav via the navigation block's ariaLabel attribute; masthead-inner uses overlayMenu:"always" + hasIcon:false so the phone toggle shows literal "Menu" text (core behavior). footer.html/rail.html are pure static block markup (no PHP allowed outside patterns) — footer uses root-relative hrefs (/category/<slug>/, /series/, /feed/) and a ttm/today {format:year} paragraph binding for the copyright year (no PHP date call, per rule 9); rail.html references the not-yet-existing ttm/verse-of-the-day block and ttm/journal-rail pattern, which render as nothing until Phase 3 (confirmed no PHP notices with plugin blocks unregistered). The "is-after-poster" footer variant is exercised via core's built-in wp:template-part className passthrough rather than a second footer file.
+newsletter-poster.php/newsletter-box.php/pull-quote.php/code-figure.php/stat-row.php: standard pattern-header PHP files (Title/Slug ttm/*/Categories/Inserter), auto-registered by WP core scanning themes/ttm-theme/patterns/*.php — no manual register_block_pattern() needed. Verified via WP_Block_Patterns_Registry::is_registered() in the test.
+80 integration tests pass (5 new); full verify green.
+Manual check: NOT VERIFIED (human) -- open the front page and an inner page, confirm the skip link/header landmarks/nav render; check the 7 new patterns appear in the editor inserter under their categories.
