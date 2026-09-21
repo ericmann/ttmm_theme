@@ -1,0 +1,10 @@
+{
+  "extends": ["@wordpress/stylelint-config"],
+  "plugins": ["@stylistic/stylelint-plugin"],
+  "rules": {
+    "@stylistic/max-line-length": null,
+    "selector-class-pattern": null,
+    "declaration-property-unit-allowed-list": null,
+    "font-weight-notation": null
+  }
+}

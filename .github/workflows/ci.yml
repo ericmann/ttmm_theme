@@ -1,0 +1,131 @@
+name: CI
+
+on:
+  push:
+    branches: [main, poc, "poc/**", "build/**"]
+  pull_request:
+    branches: [main, poc]
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  php:
+    name: PHP lint + unit
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ["8.1", "8.3"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: composer:v2
+      - uses: ramsey/composer-install@v3
+      - run: composer lint
+      - run: composer test:unit
+
+  js:
+    name: JS lint + unit + build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run test:unit
+      - run: npm run build
+
+  integration:
+    name: wp-env integration (WP 7.1.1 / PHP 8.3)
+    runs-on: ubuntu-latest
+    needs: [php, js]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          coverage: none
+          tools: composer:v2
+      - uses: ramsey/composer-install@v3
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test:integration
+      - name: Container logs on failure
+        if: failure()
+        run: npx wp-env logs tests || true
+
+  e2e:
+    name: Playwright + axe
+    runs-on: ubuntu-latest
+    needs: [integration]
+    if: hashFiles('tests/e2e/playwright.config.mjs') != ''
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run env:start
+      - run: npm run env:seed
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  security:
+    name: Security audits
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          coverage: none
+          tools: composer:v2
+      - uses: ramsey/composer-install@v3
+      - run: npm ci
+      - run: composer audit
+      - run: npm audit --audit-level=high
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Forbidden patterns (SPEC §3)
+        run: bash scripts/forbidden-patterns.sh
+
+  codeql:
+    name: CodeQL (JavaScript)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+      - uses: github/codeql-action/analyze@v3

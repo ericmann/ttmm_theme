@@ -1,0 +1,34 @@
+{
+  "name": "these-things-matter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "These Things Matter — block theme (ttm-theme) and companion plugin (ttm-core) for eric.mann.blog",
+  "license": "GPL-2.0-or-later",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build": "wp-scripts build --webpack-src-dir=plugins/ttm-core/src --output-path=plugins/ttm-core/build",
+    "start": "wp-scripts start --webpack-src-dir=plugins/ttm-core/src --output-path=plugins/ttm-core/build",
+    "lint": "npm run lint:js && npm run lint:css && npm run check:theme-json && npm run check:block-json && npm run check:budget",
+    "lint:js": "wp-scripts lint-js plugins/ttm-core/src themes/ttm-theme/assets/js scripts tests/e2e --no-error-on-unmatched-pattern",
+    "lint:css": "wp-scripts lint-style 'themes/ttm-theme/assets/css/**/*.css' --allow-empty-input",
+    "check:theme-json": "node scripts/check-theme-json.mjs",
+    "check:block-json": "node scripts/check-block-json.mjs",
+    "check:budget": "node scripts/check-budget.mjs",
+    "test:unit": "wp-scripts test-unit-js --passWithNoTests",
+    "test:integration": "npm run env:start && wp-env run tests-cli --env-cwd=wp-content/ttm-tests php ../ttm-vendor/bin/phpunit -c integration/phpunit.xml.dist",
+    "test:e2e": "wp-scripts test-playwright --config tests/e2e/playwright.config.mjs",
+    "env:start": "wp-env start",
+    "env:stop": "wp-env stop",
+    "env:destroy": "wp-env destroy",
+    "env:seed": "wp-env run cli wp ttm seed",
+    "env:cli": "wp-env run cli wp",
+    "env:logs": "wp-env logs"
+  },
+  "devDependencies": {
+    "@wordpress/env": "*",
+    "@wordpress/scripts": "*",
+    "@wordpress/e2e-test-utils-playwright": "*",
+    "@axe-core/playwright": "*"
+  },
+  "dependencies": {}
+}
