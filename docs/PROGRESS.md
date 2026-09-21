@@ -32,7 +32,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P2-05 Template parts and chrome patterns
 - [x] P2-06 page, 404, index and search-shell templates; current section and body classes
 - [x] P2-07 Push and manual check (Phase 2)
-- [ ] P3-01 Block registrar, shared helpers, webpack entries, verse-of-the-day block
+- [x] P3-01 Block registrar, shared helpers, webpack entries, verse-of-the-day block
 - [ ] P3-02 Verse fetcher
 - [ ] P3-03 Verse cron, admin tab and CLI
 - [ ] P3-04 Lead selection, cell query filter and lead REST
@@ -273,3 +273,6 @@ Manual check: NOT VERIFIED (human) -- visit a post, its category archive, a 404,
 Pushed build/2026-09-21 to origin. No source changes.
 Push: done -- origin/build/2026-09-21
 Manual check: NOT VERIFIED (human) -- http://localhost:8888/about/ at 1280: inner masthead (22px title, nav, "Newsletter"), H1 56px, body 18/1.65 in the 8-col column, footer links; at 390: title 18px, "Menu" opens a full-screen ground overlay with 24px items and 1px rules, closes with x; no Google Fonts requests.
+
+### P3-01 — 01f44e3
+Added Blocks\Registrar (discovers blocks/*/block.json, skips already-registered names to avoid doing_it_wrong on repeated init fires in tests, drops editorScript when build/blocks/<slug>/index.asset.php is missing, adds "ttm" block category) and Blocks\Helpers (wrapper, preview-state gating, kicker/reading-time/series-position/status-word/date/image helpers) shared by future blocks. webpack.config.js now emits one entry per plugins/ttm-core/blocks/*/index.js plus the existing editor bundle, all under plugins/ttm-core/build/. Shipped the first block, ttm/verse-of-the-day: server-rendered from the F6 daily-verse fallback (today's ttm_verse option, else newest ttm_verse_history entry with its own date), curly-quoted + wp_kses'd body, escaped copyright, attribution link falling back to https://dailymedtoday.com/, and a shared PreviewStateControl (normal/empty/thin) in the editor sidebar via ServerSideRender. Fixed two bugs found during verify: a doc-comment containing a literal "*/" inside backticks prematurely closed the block in Registrar.php's file header (PHP parse error); and the integration test helper was json-encoding an empty attributes array to "[]", which WP's block-comment parser only matches as "{...}", so blocks rendered as literal unparsed comments — changed to omit the JSON entirely when attributes are empty. Full integration suite: 94 tests, 1 pre-existing skip, 0 failures.
