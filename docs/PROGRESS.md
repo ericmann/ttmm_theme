@@ -40,7 +40,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P3-06 lead-story block
 - [x] P3-07 series-list block
 - [x] P3-08 Serials query and writing-cell block
-- [ ] P3-09 newsletter-form block with jetpack, mailto and none providers
+- [x] P3-09 newsletter-form block with jetpack, mailto and none providers
 - [ ] P3-10 Front-page patterns, rail, template and front CSS
 - [ ] P3-11 Front-page fallback state tests (quiet, empty)
 - [ ] P3-12 Push and manual check (Phase 3)
@@ -297,3 +297,6 @@ Added the ttm/series-list block: filters SeriesIndex::all() by status/form/inCat
 
 ### P3-08 — e17cc4e
 Added Fiction\Serials (pure static readers, no hooks/registration): active() picks the newest in-progress fiction row (form !== nonfiction) from SeriesIndex; completed(); has_any_fiction() gates F2; latest_chapter()/first_chapter_url() over a row's parts; stats() computes published/total (open-ended via ttm_total_parts meta, same pattern as P3-05/06/07), cadence/next_date term meta, and avg_minutes (mean ttm_word_count of published chapters / reading.words_per_minute); stories() is one bounded WP_Query on meta ttm_form=story. Added ttm/writing-cell: 'active' mode (featured chapter with kicker/headline/dek/buttons + "also running" list of other completed serials/stories, limited by alsoRunningLimit) when an in-progress serial with a published chapter exists; F1 'shelf' mode (kicker "From the shelf", same list, no buttons, footnote) when there's other fiction but nothing active, or when previewState=thin forces it; F2 'plain' mode (1 featured + 2 headlines from the Writing category, ttm-item classes) when there is no fiction at all. Confirmed in WritingCellTest that a genuine F2 state requires ttm_form_locked, since Meta\Form::on_save() already auto-derives ttm_form=story for any untouched Writing post with no series. Full integration suite: 149 tests, 1 pre-existing skip, 0 failures.
+
+### P3-09 — d183c97
+Added Newsletter\Provider\{Provider interface, Jetpack, Mailto, None} and Newsletter\Providers: resolve(configured, registry) is pure over an injected slug=>Provider map (configured provider if available, else mailto if available, else none), unit-testable without WordPress via a StubProvider; default_registry() wires the three real classes (custom-url has no class yet per P7-03 and is simply absent, so it falls through the same chain as any unavailable provider). Jetpack::available() checks WP_Block_Type_Registry for jetpack/subscriptions and render() does_blocks() it; Mailto::available() checks newsletter.fallback_email and renders a plain mailto: link; None is the guaranteed always-available F26 statement. Added ttm/newsletter-form: render.php owns the shared wrapper (data-provider, is-poster/is-box, the always-present "Check your inbox" message shown only via CSS in the subscribed state) and reads isset($_GET['subscribed']) only, never reflecting its value, per rule 7 (no nonces on cacheable output). Full integration suite: 154 tests, 1 pre-existing skip, 0 failures.
