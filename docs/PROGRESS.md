@@ -19,7 +19,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P1-07 Editor sidebar panel
 - [x] P1-08 Pre-publish checks and post list columns
 - [x] P1-09 Admin settings page and general settings
-- [ ] P1-10 Books repeater
+- [x] P1-10 Books repeater
 - [ ] P1-11 REST series endpoints and lead stub
 - [ ] P1-12 CLI recount, primary:assign, series:assign, series:rebuild
 - [ ] P1-13 Seeder core: categories, pages, navigation, posts, images
@@ -185,3 +185,10 @@ Important fix: handle_save() must NOT call a literal `exit` after wp_safe_redire
 Plugin::modules() now appends Admin\Page, Admin\General.
 42 integration tests pass (5 new); full verify green.
 Manual check: NOT VERIFIED (human) -- open Settings -> These Things Matter, save the General tab, confirm it round-trips.
+
+### P1-10 — a714ade
+Fiction\Books registers the 'books' tab on Page (via 'init'). sanitize(array $rows): pure, drops blank-title rows, casts year/cover_id/series_id, enum-falls-back form to 'novel', filters formats to non-empty sanitized strings, validates links (esc_url_raw + http(s)-only regex), caps at Config books.max=12. all() re-sanitizes on read (defense in depth). save() reads $_POST['ttm_books'] (nonce/capability already checked upstream by Admin\Page::handle_save()), splits formats CSV into an array before sanitize(), stores, fires ttm_purge_urls([home_url('/writing/')]).
+Added Config key books.max=12 (ConfigTest updated). Plugin::modules() appends Fiction\Books.
+Housekeeping: an incidental phpcbf run touched an unrelated already-committed file (tests/integration/Admin/GeneralSettingsTest.php, whitespace only); reverted that stray diff (git reset + checkout) rather than folding it into this task's commit, to keep HEAD's subject matching 'P1-10:' as required.
+4 new unit tests (58 total) + 2 new integration tests (44 total) pass; full verify green.
+Manual check: NOT VERIFIED (human) -- open Settings -> These Things Matter -> Books, add a row, save, confirm it persists.
