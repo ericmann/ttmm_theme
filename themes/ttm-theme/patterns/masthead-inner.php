@@ -22,8 +22,8 @@ $ttm_sections = [
 
 $ttm_nav_links = '';
 foreach ( $ttm_sections as $ttm_slug => $ttm_name ) {
-	$ttm_term = get_category_by_slug( $ttm_slug );
-	$ttm_url  = $ttm_term ? get_category_link( $ttm_term ) : home_url( '/category/' . $ttm_slug . '/' );
+	$ttm_term       = get_category_by_slug( $ttm_slug );
+	$ttm_url        = $ttm_term ? get_category_link( $ttm_term ) : home_url( '/category/' . $ttm_slug . '/' );
 	$ttm_nav_links .= sprintf(
 		'<!-- wp:navigation-link {"label":"%s","url":"%s","kind":"custom"} /-->',
 		esc_attr( $ttm_name ),

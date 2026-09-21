@@ -45,6 +45,8 @@ class Plugin {
 			Rest\SeriesController::class,
 			Rest\LeadController::class,
 			Cli\Loader::class,
+			Nav\CurrentSection::class,
+			Templates\Hierarchy::class,
 		];
 	}
 
