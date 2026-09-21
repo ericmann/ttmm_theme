@@ -114,7 +114,7 @@ class FrontPageStatesTest extends TTM_IntegrationTestCase {
 		];
 
 		ob_start();
-		require get_stylesheet_directory() . '/patterns/section-cell.php';
+		require get_stylesheet_directory() . '/inc/pattern-templates/section-cell.php';
 		$content = (string) ob_get_clean();
 
 		$html = (string) do_blocks( $content );

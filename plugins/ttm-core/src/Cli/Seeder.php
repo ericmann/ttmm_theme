@@ -278,7 +278,15 @@ class Seeder {
 			if ( 'empty' === $this->state ) {
 				$in_excluded_categories = array_intersect( $row['categories'], [ 'security', 'opinion' ] );
 				$is_chapter_or_story    = in_array( $row['slug'], $excluded, true ) || str_starts_with( $row['slug'], 'story-' );
-				if ( $in_excluded_categories || $is_chapter_or_story ) {
+				// Every other Writing-category post in the fixture (e.g. "writing-post-*") has
+				// no series, so per 03 §4 ("Story = a Writing post ... with no series") it would
+				// auto-classify as a Story the moment Form::on_save() sees its real category
+				// (below) -- found live via P7-08's separability test once the seeder's stale
+				// ttm_form bug (see the re-derive call below) was fixed: the "empty" state is
+				// meant to have zero fiction, so any Writing post must be excluded outright here,
+				// not just the ones the fixture happens to name like a chapter or a story.
+				$is_writing = in_array( 'writing', $row['categories'], true );
+				if ( $in_excluded_categories || $is_chapter_or_story || $is_writing ) {
 					continue;
 				}
 			}
@@ -325,13 +333,17 @@ class Seeder {
 			if ( $category_ids ) {
 				wp_set_post_categories( $post_id, $category_ids );
 
-				// wp_insert_post() above fired save_post_post (and PrimaryCategory::on_save())
-				// before these categories were attached, so it resolved and stored "Uncategorized"
-				// as the primary category. wp_set_post_categories() does not refire save_post, so
-				// that stale value would otherwise persist forever: force a fresh resolve now that
-				// the post's real categories are in place.
+				// wp_insert_post() above fired save_post_post (and PrimaryCategory::on_save(),
+				// Form::on_save()) before these categories were attached, so PrimaryCategory
+				// resolved and stored "Uncategorized" and Form derived "article" for every post
+				// (a standalone Writing story looked like it had no category, so `in_writing`
+				// was false). wp_set_post_categories() does not refire save_post, so those stale
+				// values would otherwise persist forever (found live via P7-08's separability
+				// test, which seeds a real ttm/story-tiles render and got nothing back): force a
+				// fresh resolve of both now that the post's real categories are in place.
 				delete_post_meta( $post_id, 'ttm_primary_category' );
 				\TTM\Core\Meta\PrimaryCategory::on_save( $post_id, get_post( $post_id ) );
+				\TTM\Core\Meta\Form::on_save( $post_id, get_post( $post_id ) );
 			}
 
 			if ( ! empty( $row['featured_image'] ) ) {
