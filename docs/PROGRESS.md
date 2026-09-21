@@ -89,7 +89,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] R1-08 Cache-Control for HEAD requests
 - [x] R1-09 Theme CSS and templates: honeypot rule, nested landmarks, CSS budget reconciled
 - [x] R1-10 REST /series ?form=fiction filter per 05 §3
-- [ ] R1-11 Nav current-section on series pages
+- [x] R1-11 Nav current-section on series pages
 - [ ] R1-12 ttm/syndicated-to wrapper and escaping
 - [ ] R1-13 Test gaps: binding empty values, separability non-empty blocks, permanent skip
 - [ ] R1-14 i18n: masthead labels from term names, Books row label, book-grid form caption, feed title
@@ -773,3 +773,18 @@ nonfiction row").
 
 Verified via foundry_verify: composer lint/test:unit, npm lint/test:unit/build,
 forbidden-patterns.sh, npm run test:integration (363, all green).
+
+### R1-11 — 72d71bb
+CurrentSection::is_current_section() gained a third branch (alongside is_singular('post') and
+is_category()): when the nav link's own path is '/series/', current-section applies whenever the
+request is a single series taxonomy archive (is_tax('series')) or the /series/ hub page itself
+(is_page() whose post_name matches Config::get('sections.nav_hub_slug', 'series')). F18's
+empty-index removal (checked earlier in filter()) is untouched.
+
+New test: test_series_item_current_on_hub_page_and_series_archive -- creates a series with one
+published part (so the F18 hide doesn't trigger), a page with post_name 'series', asserts
+current-section on go_to(hub page), then asserts it again on go_to(the series term's own
+archive link).
+
+Verified via foundry_verify: composer lint/test:unit, npm lint/test:unit/build,
+forbidden-patterns.sh, npm run test:integration (364, +1, all green).
