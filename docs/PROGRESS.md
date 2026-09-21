@@ -80,7 +80,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P8-07 Playwright + axe e2e suite and CI
 - [x] P8-08 Push, final manual checks and HANDOFF (Phase 8)
 - [x] R1-01 Fix upward module imports (Query→Bindings/Blocks, Bindings→Blocks, Taxonomy→Query) and add a boundary test
-- [ ] R1-02 Rule 24: config keys for every hard-coded tunable in src/ and fail the forbidden-patterns rule-24 check
+- [x] R1-02 Rule 24: config keys for every hard-coded tunable in src/ and fail the forbidden-patterns rule-24 check
 - [ ] R1-03 SeriesIndex last_update from the newest published part; hook-driven rebuild tests; series:assign derives ttm_form
 - [ ] R1-04 Verse module: F6 uses the stored last-good verse, Sept month format, site-timezone date, DST-safe cron
 - [ ] R1-05 Front-page cells: F9 stale-year branch, journal.rail_count, journal slug constant; writing-cell F1/F2 semantics
@@ -564,3 +564,25 @@ table, pre-existing gap, left alone per SI-2 precedent) and fails on any upward 
 
 Verified: composer lint, composer test:unit (116 tests), npm run lint/test:unit/build,
 forbidden-patterns.sh, npm run test:integration (338 tests, all green) via foundry_verify.
+
+### R1-02 — 0e23735
+New Config keys: cache.cloudflare.timeout_seconds (10), newsletter.timeout_seconds (10),
+sections.technology_slug ('technology'), books.blank_rows (3), books.link_rows (2),
+seed.quiet_offset_days (120). Reused existing sections.politics_slug in Sources.php
+(kicker's is_politics + in_politics()) and lead-story/render.php.
+
+scripts/forbidden-patterns.sh rule 24 now `hit`s (fails) instead of warning. Allow-list:
+'status' => NNN (HTTP status codes, not tunables) plus Query/Cells.php and
+blocks/writing-cell/render.php literals, explicitly out of scope per task text (separate
+queued R-task) — documented inline with a comment so the exclusion isn't mistaken for
+permanent. Verified the fail path manually: reintroduced 'timeout' => 10 in Cloudflare.php,
+confirmed exit 1, reverted.
+
+New tests: ConfigTest defaults list extended; FrontSourcesTest::
+test_kicker_politics_suffix_follows_sections_politics_slug (renames slug via ttm_config
+filter, primary category = renamed term, asserts kicker still appends "Politics");
+LeadTest::test_technology_candidate_uses_sections_technology_slug (same pattern for the
+technology candidate lookup).
+
+Verified via foundry_verify: composer lint/test:unit, npm lint/test:unit/build,
+forbidden-patterns.sh, npm run test:integration (340 tests, +2 new, all green).
