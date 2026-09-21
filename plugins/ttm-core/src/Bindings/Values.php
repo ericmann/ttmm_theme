@@ -12,6 +12,7 @@ namespace TTM\Core\Bindings;
 use DateTimeImmutable;
 use TTM\Core\Support\Dates;
 use TTM\Core\Support\Html;
+use TTM\Core\Support\Text;
 
 /**
  * No WordPress data reads: every input is already-resolved arrays/DateTimeImmutable so these
@@ -186,5 +187,93 @@ class Values {
 			default:
 				return Dates::masthead( $now );
 		}
+	}
+
+	/**
+	 * "14 min read" / "14 min"; `''` for a Journal post (03 §10: not shown there).
+	 *
+	 * @param int    $words      Word count.
+	 * @param int    $wpm        Reading speed (reading.words_per_minute).
+	 * @param string $format     `long` or `short`.
+	 * @param bool   $is_journal Whether the post's primary category is Journal.
+	 * @return string
+	 */
+	public static function reading_time( int $words, int $wpm, string $format, bool $is_journal ): string {
+		if ( $is_journal ) {
+			return '';
+		}
+
+		$minutes = Text::reading_minutes( $words, $wpm );
+
+		if ( 'short' === $format ) {
+			/* translators: %d: minutes to read. */
+			return sprintf( __( '%d min', 'ttm-core' ), $minutes );
+		}
+
+		/* translators: %d: minutes to read. */
+		return sprintf( __( '%d min read', 'ttm-core' ), $minutes );
+	}
+
+	/**
+	 * "248 words"; `''` when the count is 0 (not yet computed).
+	 *
+	 * @param int $words Word count.
+	 * @return string
+	 */
+	public static function word_count( int $words ): string {
+		if ( 0 === $words ) {
+			return '';
+		}
+
+		/* translators: %d: word count. */
+		return sprintf( _n( '%d word', '%d words', $words, 'ttm-core' ), $words );
+	}
+
+	/**
+	 * "Sunday · Portland"; location appended only when set.
+	 *
+	 * @param DateTimeImmutable $date     Post date.
+	 * @param string            $location `ttm_location` meta, or ''.
+	 * @return string
+	 */
+	public static function journal_subline( DateTimeImmutable $date, string $location ): string {
+		$weekday = Dates::weekday( $date );
+
+		return '' !== $location ? $weekday . ' · ' . $location : $weekday;
+	}
+
+	/**
+	 * The series name, or `''` without a series.
+	 *
+	 * @param array{name?: string}|null $position `Blocks\Helpers::series_position()` shape.
+	 * @return string
+	 */
+	public static function series_name( ?array $position ): string {
+		return null !== $position ? (string) ( $position['name'] ?? '' ) : '';
+	}
+
+	/**
+	 * "Part 3 of 6", or F23's open-ended "Part 3"; `''` without a series.
+	 *
+	 * @param array{part?: int, total?: int|null}|null $position `Blocks\Helpers::series_position()`
+	 *                                                            shape, with `total` overridden to
+	 *                                                            null when open-ended.
+	 * @return string
+	 */
+	public static function series_part( ?array $position ): string {
+		if ( null === $position ) {
+			return '';
+		}
+
+		$part  = (int) ( $position['part'] ?? 0 );
+		$total = $position['total'] ?? null;
+
+		if ( null === $total ) {
+			/* translators: %d: part number. */
+			return sprintf( __( 'Part %d', 'ttm-core' ), $part );
+		}
+
+		/* translators: 1: part number, 2: total parts. */
+		return sprintf( __( 'Part %1$d of %2$d', 'ttm-core' ), $part, (int) $total );
 	}
 }

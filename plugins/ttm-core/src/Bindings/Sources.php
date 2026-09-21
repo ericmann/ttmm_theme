@@ -97,6 +97,51 @@ class Sources {
 				'uses_context'       => [ 'postId', 'postType' ],
 			]
 		);
+
+		register_block_bindings_source(
+			'ttm/reading-time',
+			[
+				'label'              => __( 'TTM: Reading time', 'ttm-core' ),
+				'get_value_callback' => [ self::class, 'reading_time' ],
+				'uses_context'       => [ 'postId', 'postType' ],
+			]
+		);
+
+		register_block_bindings_source(
+			'ttm/word-count',
+			[
+				'label'              => __( 'TTM: Word count', 'ttm-core' ),
+				'get_value_callback' => [ self::class, 'word_count' ],
+				'uses_context'       => [ 'postId', 'postType' ],
+			]
+		);
+
+		register_block_bindings_source(
+			'ttm/journal-subline',
+			[
+				'label'              => __( 'TTM: Journal subline', 'ttm-core' ),
+				'get_value_callback' => [ self::class, 'journal_subline' ],
+				'uses_context'       => [ 'postId', 'postType' ],
+			]
+		);
+
+		register_block_bindings_source(
+			'ttm/series-name',
+			[
+				'label'              => __( 'TTM: Series name', 'ttm-core' ),
+				'get_value_callback' => [ self::class, 'series_name' ],
+				'uses_context'       => [ 'postId', 'postType' ],
+			]
+		);
+
+		register_block_bindings_source(
+			'ttm/series-part',
+			[
+				'label'              => __( 'TTM: Series part', 'ttm-core' ),
+				'get_value_callback' => [ self::class, 'series_part' ],
+				'uses_context'       => [ 'postId', 'postType' ],
+			]
+		);
 	}
 
 	/**
@@ -264,6 +309,113 @@ class Sources {
 	}
 
 	/**
+	 * `ttm/reading-time`. `''` for a Journal post (03 §10: reading time is not shown there).
+	 *
+	 * @param array{format?: string} $source_args    `{format: long|short}`.
+	 * @param WP_Block               $block_instance Consuming block.
+	 * @param string                 $attribute_name Consuming attribute.
+	 * @return string
+	 */
+	public static function reading_time( array $source_args, $block_instance, string $attribute_name ): string {
+		$format  = 'short' === ( $source_args['format'] ?? 'long' ) ? 'short' : 'long';
+		$post_id = (int) ( $block_instance->context['postId'] ?? 0 );
+
+		if ( ! $post_id ) {
+			return '';
+		}
+
+		$words = (int) get_post_meta( $post_id, 'ttm_word_count', true );
+		$wpm   = (int) Config::get( 'reading.words_per_minute', 230 );
+
+		return self::finalize( Values::reading_time( $words, $wpm, $format, self::is_journal_post( $post_id ) ), $block_instance, $attribute_name );
+	}
+
+	/**
+	 * `ttm/word-count`.
+	 *
+	 * @param array<string, mixed> $source_args    Unused: no args.
+	 * @param WP_Block             $block_instance Consuming block.
+	 * @param string               $attribute_name Consuming attribute.
+	 * @return string
+	 */
+	public static function word_count( array $source_args, $block_instance, string $attribute_name ): string {
+		unset( $source_args );
+
+		$post_id = (int) ( $block_instance->context['postId'] ?? 0 );
+		if ( ! $post_id ) {
+			return '';
+		}
+
+		$words = (int) get_post_meta( $post_id, 'ttm_word_count', true );
+
+		return self::finalize( Values::word_count( $words ), $block_instance, $attribute_name );
+	}
+
+	/**
+	 * `ttm/journal-subline`: "Sunday · Portland" (location appended only when set).
+	 *
+	 * @param array<string, mixed> $source_args    Unused: no args.
+	 * @param WP_Block             $block_instance Consuming block.
+	 * @param string               $attribute_name Consuming attribute.
+	 * @return string
+	 */
+	public static function journal_subline( array $source_args, $block_instance, string $attribute_name ): string {
+		unset( $source_args );
+
+		$post = self::context_post( $block_instance );
+		if ( ! $post ) {
+			return '';
+		}
+
+		$date = Clock::at( $post->post_date );
+		if ( ! $date ) {
+			return '';
+		}
+
+		$location = (string) get_post_meta( $post->ID, 'ttm_location', true );
+
+		return self::finalize( Values::journal_subline( $date, $location ), $block_instance, $attribute_name );
+	}
+
+	/**
+	 * `ttm/series-name`.
+	 *
+	 * @param array<string, mixed> $source_args    Unused: no args.
+	 * @param WP_Block             $block_instance Consuming block.
+	 * @param string               $attribute_name Consuming attribute.
+	 * @return string
+	 */
+	public static function series_name( array $source_args, $block_instance, string $attribute_name ): string {
+		unset( $source_args );
+
+		$post_id  = (int) ( $block_instance->context['postId'] ?? 0 );
+		$position = $post_id ? Helpers::series_position( $post_id ) : null;
+
+		return self::finalize( Values::series_name( $position ), $block_instance, $attribute_name );
+	}
+
+	/**
+	 * `ttm/series-part`: "Part 3 of 6", or F23's open-ended "Part 3".
+	 *
+	 * @param array<string, mixed> $source_args    Unused: no args.
+	 * @param WP_Block             $block_instance Consuming block.
+	 * @param string               $attribute_name Consuming attribute.
+	 * @return string
+	 */
+	public static function series_part( array $source_args, $block_instance, string $attribute_name ): string {
+		unset( $source_args );
+
+		$post_id  = (int) ( $block_instance->context['postId'] ?? 0 );
+		$position = $post_id ? Helpers::series_position( $post_id ) : null;
+
+		if ( null !== $position ) {
+			$position['total'] = self::open_ended_total( $position['slug'] );
+		}
+
+		return self::finalize( Values::series_part( $position ), $block_instance, $attribute_name );
+	}
+
+	/**
 	 * The consuming block's contextual post, or null.
 	 *
 	 * @param WP_Block $block_instance Consuming block.
@@ -328,6 +480,23 @@ class Sources {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Whether a post's primary category is Journal.
+	 *
+	 * @param int $post_id Post id.
+	 * @return bool
+	 */
+	private static function is_journal_post( int $post_id ): bool {
+		$category_id = PrimaryCategory::id( $post_id );
+		if ( ! $category_id ) {
+			return false;
+		}
+
+		$category = get_term( $category_id, 'category' );
+
+		return $category && ! is_wp_error( $category ) && (string) Config::get( 'sections.journal_slug', 'journal' ) === $category->slug;
 	}
 
 	/**
