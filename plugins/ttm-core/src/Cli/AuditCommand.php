@@ -149,10 +149,14 @@ class AuditCommand extends Command {
 
 		if ( preg_match_all( '/<img\b[^>]*>/i', (string) $post->post_content, $matches ) ) {
 			foreach ( $matches[0] as $tag ) {
-				if ( ! preg_match( '/\balt\s*=\s*(["\'])[^"\']*\1/i', $tag, $alt_match ) ) {
+				// Group 2 is the alt *value* itself. The previous version trimmed the whole
+				// match (group 0, e.g. `alt="tall"`) against the charlist "alt=\"' " -- since
+				// every letter of a value like "tall" is also in that charlist, trim() ate the
+				// value too and flagged real alt text as missing.
+				if ( ! preg_match( '/\balt\s*=\s*(["\'])(.*?)\1/i', $tag, $alt_match ) ) {
 					return true;
 				}
-				if ( '' === trim( $alt_match[0], "alt=\"' " ) ) {
+				if ( '' === trim( $alt_match[2] ) ) {
 					return true;
 				}
 			}
@@ -248,6 +252,29 @@ class AuditCommand extends Command {
 			}
 		}
 
+		// Attachment permalinks (the attachment's own page, distinct from the raw file URL
+		// under uploads/ that is_ignorable_internal_path() already lets through) -- a post can
+		// legitimately link to an image's attachment page.
+		$paged = 1;
+		do {
+			$query = new WP_Query(
+				[
+					'post_type'      => 'attachment',
+					'post_status'    => 'inherit',
+					'posts_per_page' => $batch,
+					'paged'          => $paged,
+					'fields'         => 'ids',
+				]
+			);
+
+			foreach ( $query->posts as $id ) {
+				$paths[ $this->path_of( (string) get_permalink( $id ) ) ] = true;
+			}
+
+			$found = count( $query->posts );
+			++$paged;
+		} while ( $found === $batch );
+
 		return [
 			'host'  => $host,
 			'paths' => $paths,
@@ -255,7 +282,8 @@ class AuditCommand extends Command {
 	}
 
 	/**
-	 * True when the content has a `href` to this host whose path isn't in the local index.
+	 * True when the content has a `href` to this host whose path isn't in the local index and
+	 * isn't one of the URL kinds `link_index()` deliberately doesn't enumerate.
 	 *
 	 * @param string                                               $content Post content.
 	 * @param array{host: string|null, paths: array<string, bool>} $index   Local link index.
@@ -269,6 +297,11 @@ class AuditCommand extends Command {
 		foreach ( $matches[1] as $href ) {
 			$host = wp_parse_url( $href, PHP_URL_HOST );
 			if ( empty( $host ) || $host !== $index['host'] ) {
+				continue;
+			}
+
+			$path = (string) wp_parse_url( $href, PHP_URL_PATH );
+			if ( $this->is_ignorable_internal_path( $path ) ) {
 				continue;
 			}
 
@@ -290,5 +323,42 @@ class AuditCommand extends Command {
 		$path = (string) wp_parse_url( $url, PHP_URL_PATH );
 
 		return '' === $path ? $path : rtrim( $path, '/' );
+	}
+
+	/**
+	 * URL kinds `link_index()` doesn't (and, for feeds/pagination/date archives, practically
+	 * can't) enumerate every value of -- a link to one of these is never "broken" just because
+	 * it isn't in the post/page/term index.
+	 *
+	 * @param string $path URL path (from `wp_parse_url( $href, PHP_URL_PATH )`).
+	 * @return bool
+	 */
+	private function is_ignorable_internal_path( string $path ): bool {
+		if ( '' === $path ) {
+			return false;
+		}
+
+		$upload_path = (string) wp_parse_url( (string) ( wp_get_upload_dir()['baseurl'] ?? '' ), PHP_URL_PATH );
+		if ( '' !== $upload_path && 0 === strpos( $path, $upload_path ) ) {
+			return true;
+		}
+
+		if ( false !== strpos( $path, '/wp-content/' ) ) {
+			return true;
+		}
+
+		if ( preg_match( '#(^|/)feed(/|$)#', $path ) ) {
+			return true;
+		}
+
+		if ( preg_match( '#/page/\d+/?$#', $path ) ) {
+			return true;
+		}
+
+		if ( preg_match( '#^/\d{4}(/\d{1,2}(/\d{1,2})?)?/?$#', $path ) ) {
+			return true;
+		}
+
+		return false;
 	}
 }

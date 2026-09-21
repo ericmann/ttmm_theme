@@ -136,6 +136,78 @@ class AuditCommandTest extends TTM_IntegrationTestCase {
 		$this->assertNotContains( 'broken-internal-link', $this->flags_for( $result, $clean ) );
 	}
 
+	public function test_missing_alt_accepts_alt_text_made_of_a_l_t_letters(): void {
+		// Regression: the previous implementation trimmed the whole `alt="tall"` match against
+		// the charlist "alt=\"' ", and every letter of "tall" is in that charlist -- the value
+		// itself got trimmed away, flagging real alt text as missing.
+		$has_alt = self::factory()->post->create( [ 'post_content' => '<p><img src="x.jpg" alt="tall"></p>' ] );
+		$no_alt  = self::factory()->post->create( [ 'post_content' => '<p><img src="x.jpg" alt=""></p>' ] );
+
+		$result = ( new AuditCommand() )->run( [], [] );
+
+		$this->assertNotContains( 'missing-alt', $this->flags_for( $result, $has_alt ) );
+		$this->assertContains( 'missing-alt', $this->flags_for( $result, $no_alt ) );
+	}
+
+	public function test_broken_internal_link_ignores_uploads_feeds_and_pagination(): void {
+		add_filter(
+			'pre_http_request',
+			static function () {
+				throw new Exception( 'HTTP must never be reached by convert:audit.' );
+			}
+		);
+
+		$upload_path = (string) wp_parse_url( (string) wp_get_upload_dir()['baseurl'], PHP_URL_PATH );
+
+		$post = self::factory()->post->create(
+			[
+				'post_content' => sprintf(
+					'<p><a href="%1$s">upload</a> <a href="%2$s">feed</a> <a href="%3$s">page 2</a> <a href="%4$s">date archive</a></p>',
+					home_url( $upload_path . '/2026/09/photo.jpg' ),
+					home_url( '/feed/' ),
+					home_url( '/category/technology/page/2/' ),
+					home_url( '/2026/09/' )
+				),
+			]
+		);
+
+		$result = ( new AuditCommand() )->run( [], [] );
+
+		remove_all_filters( 'pre_http_request' );
+
+		$this->assertNotContains( 'broken-internal-link', $this->flags_for( $result, $post ) );
+	}
+
+	public function test_broken_internal_link_indexes_attachment_permalinks(): void {
+		add_filter(
+			'pre_http_request',
+			static function () {
+				throw new Exception( 'HTTP must never be reached by convert:audit.' );
+			}
+		);
+
+		$attachment_id = self::factory()->attachment->create_object(
+			[
+				'file'           => 'cover.jpg',
+				'post_parent'    => 0,
+				'post_mime_type' => 'image/jpeg',
+				'post_status'    => 'inherit',
+			]
+		);
+
+		$post = self::factory()->post->create(
+			[
+				'post_content' => sprintf( '<p><a href="%s">the image</a></p>', get_permalink( $attachment_id ) ),
+			]
+		);
+
+		$result = ( new AuditCommand() )->run( [], [] );
+
+		remove_all_filters( 'pre_http_request' );
+
+		$this->assertNotContains( 'broken-internal-link', $this->flags_for( $result, $post ) );
+	}
+
 	public function test_only_filter_restricts_checks(): void {
 		$post = self::factory()->post->create(
 			[
