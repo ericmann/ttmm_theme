@@ -76,7 +76,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P8-03 CLI audit
 - [x] P8-04 CLI migrate:politics, migrate:redirects, migrate:close-comments
 - [x] P8-05 Spike: Jetpack Social share URLs to ttm_syndication
-- [ ] P8-06 Plugin README, MIGRATION and SETUP cross-check
+- [x] P8-06 Plugin README, MIGRATION and SETUP cross-check
 - [ ] P8-07 Playwright + axe e2e suite and CI
 - [ ] P8-08 Push, final manual checks and HANDOFF (Phase 8)
 
@@ -476,3 +476,17 @@ rather than duplicating https/known-network enforcement. Never parses meta
 by hand - a non-array value (e.g. a raw string) is simply skipped. Added the
 command name to docs/MIGRATION.md §2.7. 5 new integration tests all passing;
 foundry_verify fully green (337/337 integration).
+
+### P8-06 — b076632
+Wrote plugins/ttm-core/README.md (What it owns, Requirements, Hooks table
+cross-checked against every apply_filters/do_action call site, REST,
+WP-CLI table with every flag copied from each Cli/*Command.php's own
+parsing, Configuration, Uninstall). Updated docs/SETUP.md's two stale
+troubleshooting rows (fonts and templates have shipped since earlier
+phases, reworded from future tense). Cross-checked docs/MIGRATION.md - all
+wp ttm commands match Cli/Loader.php exactly; only needed the P8-05 fix
+already applied. docs/DEPLOYMENT.md checked against real cache/purge
+behaviour and found accurate, no changes. Found and fixed a real gap:
+uninstall.php's option cleanup list was missing P8-04's ttm_redirects
+option; added it. foundry_verify green (337/337 integration, unchanged -
+docs task).
