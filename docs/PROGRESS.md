@@ -57,7 +57,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P5-04 Archive and search patterns, templates and CSS
 - [x] P5-05 Push and manual check (Phase 5)
 - [x] P6-01 series-progress and series-stats blocks
-- [ ] P6-02 series-featured block; tuning series.hub_featured_parts
+- [x] P6-02 series-featured block; tuning series.hub_featured_parts
 - [ ] P6-03 serial-hero block
 - [ ] P6-04 story-tiles and book-grid blocks
 - [ ] P6-05 Hub and Writing templates and CSS
@@ -353,3 +353,8 @@ Manual check: NOT VERIFIED (human) — /category/security/ vs badge 1e: 80px H1,
 ### P6-01 — c290a07
 Added ttm/series-progress (segmented bar + meta line, resolves seriesId attr -> queried series term -> post's series via context, F23 open-ended equal-done-segments + trailing neutral segment reusing series-bar's approach minus "current"; "finished {date}" when ttm_status=complete, else "next part {date}" from ttm_next_date when set) and ttm/series-stats (hub header "N series · M in progress" + "Spanning {categories}" in nav order, reading SeriesIndex::all() directly with an inline nav-order sort mirroring SeriesIndex's private categories_for()).
 5 SeriesProgressTest + 2 SeriesStatsTest acceptance tests. Full verify green: composer lint 0 errors, 97/97 unit, npm lint/build green, forbidden-patterns clean, 235 integration tests OK (2 pre-existing skips).
+
+### P6-02 — fa755da
+Added ttm/series-featured: auto-pick order ttm_featured meta -> in-progress row with newest part (by highest-part-number entry's date, not last_update which is always "now") -> most recently completed row, else ''. F5 styling (single button, no "Follow this series") keyed off resolved row's actual status==='complete'. Progress bar/meta reused via render_block() calling ttm/series-progress directly with seriesId. Part list capped at partsLimit attr or series.hub_featured_parts config, "All N ->" link when more parts exist than the cap; F24 scheduled parts unlinked with Scheduled-date title attr.
+Measurement: series.hub_featured_parts kept at 12 (unchanged) - no real 1280px prototype/live-site access available; seeded max (the-quiet-ledger, 13 parts) already exceeds it by one row, exercising the overflow link reasonably.
+6 acceptance tests added. Full verify green: composer lint 0 errors, 97/97 unit, npm lint/build green, forbidden-patterns clean, 241 integration tests OK (2 pre-existing skips).
