@@ -323,6 +323,14 @@ class Seeder {
 			}
 			if ( $category_ids ) {
 				wp_set_post_categories( $post_id, $category_ids );
+
+				// wp_insert_post() above fired save_post_post (and PrimaryCategory::on_save())
+				// before these categories were attached, so it resolved and stored "Uncategorized"
+				// as the primary category. wp_set_post_categories() does not refire save_post, so
+				// that stale value would otherwise persist forever: force a fresh resolve now that
+				// the post's real categories are in place.
+				delete_post_meta( $post_id, 'ttm_primary_category' );
+				\TTM\Core\Meta\PrimaryCategory::on_save( $post_id, get_post( $post_id ) );
 			}
 
 			if ( ! empty( $row['featured_image'] ) ) {
