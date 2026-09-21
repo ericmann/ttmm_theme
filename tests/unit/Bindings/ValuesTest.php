@@ -117,7 +117,7 @@ class ValuesTest extends TestCase {
 	 * never degrade to blank output, even at the most degenerate boundary they can be given --
 	 * the reference date and "now" being the identical instant.
 	 */
-	public function test_short_and_relative_date_empty_without_date(): void {
+	public function test_short_and_relative_date_never_blank_for_a_valid_date(): void {
 		$now = $this->date( '2026-09-20 12:00:00' );
 
 		$this->assertNotSame( '', Values::short_date( $now, $now ) );

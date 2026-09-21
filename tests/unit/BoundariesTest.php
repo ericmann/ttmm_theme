@@ -109,6 +109,94 @@ class BoundariesTest extends TestCase {
 		return $files;
 	}
 
+	/**
+	 * The `use` scan above misses an upward dependency spelled out inline (`\TTM\Core\Blocks\
+	 * Helpers::wrapper(...)`) instead of imported at the top of the file -- this walks every
+	 * `plugins/ttm-core/src/**\/*.php` file's body (docblocks, `//` comments and `use` lines
+	 * stripped first, since a reference *inside* one of those isn't a dependency) for a
+	 * leading-backslash `\TTM\Core\...` reference and applies the same §4.2 row-order rule.
+	 */
+	public function test_inline_fully_qualified_references_obey_the_spec_table(): void {
+		$src        = rtrim( TTM_CORE_DIR, '/' ) . '/src';
+		$violations = [];
+
+		foreach ( $this->php_files( $src ) as $file ) {
+			$dir = $this->top_level_dir( $src, $file );
+
+			if ( ! in_array( $dir, self::ROW_ORDER, true ) ) {
+				continue;
+			}
+
+			$dir_rank = array_search( $dir, self::ROW_ORDER, true );
+
+			foreach ( $this->inline_use_targets( $file ) as $used_dir ) {
+				if ( in_array( $dir, self::NEVER_IMPORTS_BLOCKS, true ) && 'Blocks' === $used_dir ) {
+					$violations[] = sprintf( '%s (%s/) must never reference Blocks/ inline (used %s)', $file, $dir, $used_dir );
+					continue;
+				}
+
+				if ( ! in_array( $used_dir, self::ROW_ORDER, true ) ) {
+					continue;
+				}
+
+				$used_rank = array_search( $used_dir, self::ROW_ORDER, true );
+
+				if ( $used_rank > $dir_rank ) {
+					$violations[] = sprintf(
+						'%s (%s/, row %d) references %s/ (row %d) inline — upward reference',
+						$file,
+						$dir,
+						$dir_rank,
+						$used_dir,
+						$used_rank
+					);
+				}
+			}
+		}
+
+		$this->assertSame( [], $violations, "Upward inline SPEC §4.2 references found:\n" . implode( "\n", $violations ) );
+	}
+
+	/**
+	 * Every distinct `TTM\Core\<Dir>\…` directory referenced inline as `\TTM\Core\...` in the
+	 * file's body, with docblocks, `//` comments and `use` lines stripped first.
+	 *
+	 * @param string $file Absolute file path.
+	 * @return string[]
+	 */
+	private function inline_use_targets( string $file ): array {
+		$contents = (string) file_get_contents( $file );
+		$contents = (string) preg_replace( '#/\*.*?\*/#s', '', $contents );
+
+		$lines = [];
+		foreach ( explode( "\n", $contents ) as $line ) {
+			if ( 0 === strpos( ltrim( $line ), 'use ' ) ) {
+				continue;
+			}
+
+			$comment_at = strpos( $line, '//' );
+			if ( false !== $comment_at ) {
+				$line = substr( $line, 0, $comment_at );
+			}
+
+			$lines[] = $line;
+		}
+
+		$clean = implode( "\n", $lines );
+		$targets = [];
+
+		if ( ! preg_match_all( '/\\\\TTM\\\\Core\\\\([A-Za-z0-9_\\\\]+)/', $clean, $matches ) ) {
+			return $targets;
+		}
+
+		foreach ( $matches[1] as $used ) {
+			$segments  = explode( '\\', trim( $used, '\\' ) );
+			$targets[] = count( $segments ) > 1 ? $segments[0] : '.';
+		}
+
+		return array_values( array_unique( $targets ) );
+	}
+
 	public function test_no_directory_imports_a_later_row_of_the_spec_table(): void {
 		$src        = rtrim( TTM_CORE_DIR, '/' ) . '/src';
 		$violations = [];

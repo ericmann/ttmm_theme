@@ -102,6 +102,29 @@ class FrontSourcesTest extends TTM_IntegrationTestCase {
 		$this->assertSame( 'Political Takes · Politics', $value );
 	}
 
+	/**
+	 * Rule 26: `ttm/short-date` and `ttm/relative-date` must resolve to `''` (never render a
+	 * "blank" bound attribute or a warning) with no `postId` in context, and with a `postId`
+	 * that does not resolve to a post -- both cases `Sources::context_post()` handles via its
+	 * `if ( ! $post ) return '';` guards in `short_date()`/`relative_date()`. This asserts at
+	 * the source level (not `Values`, which never sees a missing post at all) so removing
+	 * either guard fails here.
+	 */
+	public function test_short_date_and_relative_date_empty_without_post(): void {
+		$no_context_block = new class() {
+			public string $name = 'core/paragraph';
+			public array $context = [];
+		};
+
+		$this->assertSame( '', $this->source_value( 'ttm/short-date', [], $no_context_block, 'content' ) );
+		$this->assertSame( '', $this->source_value( 'ttm/relative-date', [], $no_context_block, 'content' ) );
+
+		$missing_post_block = $this->make_block( 'core/paragraph', 999999999 );
+
+		$this->assertSame( '', $this->source_value( 'ttm/short-date', [], $missing_post_block, 'content' ) );
+		$this->assertSame( '', $this->source_value( 'ttm/relative-date', [], $missing_post_block, 'content' ) );
+	}
+
 	public function test_meta_line_html_is_stripped_outside_paragraph_content(): void {
 		$post = self::factory()->post->create( [ 'post_status' => 'publish' ] );
 
