@@ -16,7 +16,7 @@
   },
   "build": ["npm run build"],
   "baseBranch": "poc",
-  "branchPrefix": "poc/",
+  "branchPrefix": "build/",
   "maxRounds": 3,
   "commandTimeoutMs": 900000
 }
