@@ -11,7 +11,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P0-06 theme.json v3 presets and token check
 - [x] P0-07 Push, CI and manual check (Phase 0)
 - [x] P1-01 Series taxonomy, term meta, single-series enforcement
-- [ ] P1-02 Post meta registration and sanitizers
+- [x] P1-02 Post meta registration and sanitizers
 - [ ] P1-03 Primary category, form derivation and word count on save
 - [ ] P1-04 Series index
 - [ ] P1-05 Category stats and top tags
@@ -130,3 +130,8 @@ Pure sanitizers (unit-tested, no WP): sanitize_status/sanitize_form (enum fallba
 IMPORTANT for future integration tests: WP core's WP_UnitTestCase_Base::tear_down() calls unregister_all_meta_keys() after every single test (see /wordpress-phpunit/includes/abstract-testcase.php:225), wiping $wp_meta_keys globally — but taxonomies/post types are NOT wiped this way. Since the plugin registers everything via 'init' fired once at bootstrap, any test needing registered meta must re-fire it. Fixed generically: TTM_IntegrationTestCase::set_up() now calls do_action('init') before every test, re-invoking the still-attached init callbacks (register_taxonomy/register_meta are idempotent). All future modules that register meta on 'init' get this for free — no per-module test scaffolding needed.
 Plugin::modules() now [Compat\Theme::class, Taxonomy\Series::class].
 8 integration tests + 4 new unit tests pass (49 unit total); full verify green.
+
+### P1-02 — e7c3dfb
+Meta\PostMeta registers all 9 ttm_* post-meta keys on 'post' with auth_callback current_user_can('edit_post',$post_id). ttm_form/ttm_syndication have REST enum/object schemas. sanitize_part: custom (int)-cast + "<1 => 0" logic, NOT literal absint() — absint(-5)===5 (abs-conversion) would wrongly accept negative input as a valid positive part number; used to satisfy the task's own "rejects zero and negatives" test. sanitize_primary_category: absint then term_exists($id,'category') check, else 0. sanitize_form: enum fallback to 'article'. sanitize_syndication: only x/mastodon/bluesky keys, esc_url_raw(...,['https']) drops non-https and unknown-scheme URLs, unknown network keys silently ignored.
+Plugin::modules() now [Compat\Theme::class, Taxonomy\Series::class, Meta\PostMeta::class] — picks up the TTM_IntegrationTestCase::set_up() do_action('init') refire from P1-01 automatically, no new test scaffolding needed.
+12 integration tests + 3 new unit tests pass (48 unit total); full verify green.
