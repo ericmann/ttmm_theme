@@ -407,3 +407,71 @@ budget unchanged: 33070/33200 bytes — no CSS was touched this round), `npm run
 end-to-end. Every manual check noted above (`bash scripts/forbidden-patterns.sh` catching a
 reintroduced literal in R2-01; the inline-reference fixture in R2-02; the CLAUDE.md module-map
 regression fixture in R2-03) was reproduced and reverted during this run, not just asserted.
+
+## Round 3
+
+Branch: `build/2026-09-21` (base `5b011aa`, head `0c9d8dd`). 2 R3-* review-fix tasks, both `[x]`
+done, 0 blocked, 0 skipped. Overall PROGRESS.md: 96/96 tasks done, 0 open. Commits stay unsigned
+this run (`commit.gpgsign=false`, 1Password agent unavailable — owner authorized this and will
+rebase-sign later, per this round's operator note). The untracked `FOUNDRY_FEEDBACK.md` at the
+repo root is the user's operator log and was left untouched (not staged, moved or deleted).
+
+**Task list:**
+- **R3-01** — `plugins/ttm-core/blocks/story-tiles/render.php`'s bare `$ttm_columns = 2;`
+  fallback (review C1) is now a `Config` key, `writing.tile_columns` (default 2), read via
+  `Config::get( 'writing.tile_columns', 2 )` exactly like every other block default in that
+  file. `scripts/forbidden-patterns.sh` rule 24 gained a second grep for plain `identifier = N;`
+  assignments (`plugins/ttm-core/src`, excluding `Config.php`, and `plugins/ttm-core/blocks/*/render.php`),
+  mirroring the existing `=>`-array-literal grep and its HTTP-status allow-list, so the class of
+  literal that hid `$query['posts_per_page'] = 2;` through round 1 now fails the build in either
+  form. `ConfigTest`'s key list and `StoryTilesTest` both gained coverage.
+- **R3-02** — test-only (review T1). `CellsTest::test_fresh_section_after_stale_section_keeps_its_dek`
+  now covers the `self::$stale_scope` decrement in `Cells::mark_empty()`: it renders a stale
+  security-section `core/query` followed by a fresh technology-section `core/query` in the same
+  request and asserts the second section's dek survives. `StatsTest::test_category_stats_count_and_year_range`
+  gained a direct `newest_date` assertion, and `StatsTest::test_newest_date_is_null_for_an_empty_category`
+  is new — both close the gap left when R2-01 added `newest_date` without a `StatsTest` assertion.
+  No production code changed for this task.
+
+**Blocked/skipped:** none. Both R3-* tasks completed; no `foundry_task_block` calls this round.
+
+**Interpretation choices, by task:**
+- **R3-01** — the new plain-assignment grep is scoped identically to the existing `=>` grep
+  (same numeric ranges, same `'status' => NNN`-style allow-list translated to `status = NNN;`)
+  rather than widened to cover function arguments or comparisons, per the task's explicit
+  instruction. Checked before adding it: no literal in `plugins/ttm-core/src` (outside
+  `Config.php`) or any `render.php` matched the new pattern except the one being fixed, so no
+  allow-list additions were needed for the reviewed-and-accepted HTTP-status/`intdiv`/`count`/
+  seeder literals the task called out.
+- **R3-02** — no interpretation needed; both acceptance tests were written exactly as specified
+  in the task text (same fixture dates, same block markup, same assertions).
+
+**⚠️ ASSUMPTION config keys:** `writing.tile_columns` (R3-01, new; default `2`, copied from the
+previous hard-coded fallback value — not tuned this round, since round 3 review didn't ask for a
+different default, only for the literal to become a `Config` key).
+
+**Gotcha for reviewers/future tasks (surfaced during R3-01):** `Config::all()` memoises its
+merged result in a static class property at first call, and nothing resets it automatically.
+Any test that registers a `ttm_config` filter must call `Config::reset()` immediately after
+`add_filter()`, or the filter is invisible for the rest of that test (the config was already
+cached from an earlier point in the same PHP process, e.g. plugin bootstrap). This precedent
+already existed in `LeadTest::test_technology_candidate_uses_sections_technology_slug`; my first
+draft of `StoryTilesTest::test_default_columns_come_from_config` missed it and failed against the
+real (non-mutated) code until `Config::reset()` was added.
+
+**What a human must check by hand, per task (all `NOT VERIFIED (human)` — this run is
+non-interactive and never opened a browser):**
+- **R3-01** — no visual change (same markup, same `is-cols-N` classes); nothing new to eyeball.
+- **R3-02** — test-only, no behavioural change to verify visually; the existing F9 stale-year
+  manual check from Round 1/2 (spot-check a genuinely stale section in production) still applies
+  and is unchanged by this round.
+
+**For a reviewer who hasn't seen this code:** every R3-* task's acceptance tests pass, plus the
+full verify set — `composer lint` (0 errors), `composer test:unit` (131), `npm run lint` (CSS
+budget unchanged: 33070/33200 bytes — no CSS touched this round), `npm run test:unit` (JS, 12
+passed/2 pre-existing skipped), `npm run build`, `bash scripts/forbidden-patterns.sh`, and
+`npm run test:integration` (374 tests, up from 371 at the end of Round 2). Both mutation-style
+manual checks named in the task text were reproduced and reverted during this run, not just
+asserted: R3-01's literal reintroduction making `forbidden-patterns.sh` exit 1, and R3-02's
+`self::$stale_scope` decrement removal making the new `CellsTest` fail for the documented reason
+(fresh section's dek stays suppressed because the stale scope never closes).
