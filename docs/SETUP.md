@@ -123,3 +123,4 @@ The planner reads `docs/SPEC.md`, writes `docs/PLAN.md`, `docs/PROGRESS.md`, `do
 | PHPCS says a prefix is too short | The `ttm` prefix is intentional; the sniff is excluded in `phpcs.xml.dist`. Any other prefix is a real error. |
 | Fonts render as Helvetica | Confirm the Archivo woff2 files are present in `themes/ttm-theme/assets/fonts/` (shipped since Phase 0) and that the browser cache isn't serving a stale `style.css`. |
 | Front page shows the default index | Run `npm run env:seed` — `front-page.html` and the rest of `themes/ttm-theme/templates/` render only once there is content to query. |
+| Theme "disappears" (blank admin, `ttm-theme` not listed) after a branch switch | The switch recreated `themes/`/`plugins/` directories under wp-env's stale bind mount. Run `npx wp-env stop && npx wp-env start` (§7). |
