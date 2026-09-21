@@ -86,7 +86,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] R1-05 Front-page cells: F9 stale-year branch, journal.rail_count, journal slug constant; writing-cell F1/F2 semantics
 - [x] R1-06 migrate:politics child mode files Politics posts under Opinion; close-comments purges once
 - [x] R1-07 wp ttm audit: fix missing-alt regex and broken-internal-link false positives
-- [ ] R1-08 Cache-Control for HEAD requests
+- [x] R1-08 Cache-Control for HEAD requests
 - [ ] R1-09 Theme CSS and templates: honeypot rule, nested landmarks, CSS budget reconciled
 - [ ] R1-10 REST /series ?form=fiction filter per 05 §3
 - [ ] R1-11 Nav current-section on series pages
@@ -713,3 +713,17 @@ keep proving rule 16 -- no HTTP -- still holds).
 
 Verified via foundry_verify: composer lint/test:unit, npm lint/test:unit/build,
 forbidden-patterns.sh, npm run test:integration (360, +3, all green).
+
+### R1-08 — 7728514
+Headers::for_request()'s method check changed from `'GET' !== strtoupper(...)` to
+`! in_array(strtoupper(...), ['GET', 'HEAD'], true)`, so HEAD gets the same computed
+public max-age as GET; everything else (POST, PUT, etc.) still returns null.
+
+New tests: tests/unit/Cache/HeadersTest.php::test_head_request_gets_public_max_age (asserts
+non-null + 'public, max-age=' prefix, not an exact value, since Clock::now() isn't fixed in
+this unit test's apply_filters stub) and test_post_request_gets_no_header (asserts null);
+tests/integration/Cache/HeadersTest.php::test_head_request_gets_same_max_age_as_get (exact
+value, using set_now()). test_post_request_gets_nothing (integration) stays green unchanged.
+
+Verified via foundry_verify: composer lint/test:unit (122, +2), npm lint/test:unit/build,
+forbidden-patterns.sh, npm run test:integration (361, +1, all green).
