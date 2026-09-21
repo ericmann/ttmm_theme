@@ -97,6 +97,8 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] R2-01 F9 stale-year: plugin-side dek suppression, cached staleness, cells.stale_count key, rule-24 allow-list removed
 - [x] R2-02 Test gaps: source-level empty values for ttm/short-date and ttm/relative-date; BoundariesTest sees inline fully-qualified references
 - [x] R2-03 Docs and duplication cleanup after round 1: CLAUDE.md module map, stale comments, HANDOFF correction, one pagination-label implementation
+- [ ] R3-01 Rule 24: writing.tile_columns Config key for story-tiles; forbidden-patterns.sh rule 24 also matches plain `= N;` assignments
+- [ ] R3-02 F9 test gaps: stale-scope exit keeps later sections' deks; Stats newest_date asserted directly
 
 ## Log
 (one entry per task, appended by implement)

@@ -1,150 +1,139 @@
 # Review — These Things Matter build
-Round: 2
+Round: 3
 
-Branch `build/2026-09-21` (base `poc` @ `8379c6f`, head `e8e3366`). 91 tasks (76 build + 15 round-1
-fixes), all done, 0 blocked, 0 skipped. This review covers the whole branch, with the round-1 fix
-commits (`dcc90ef`..`ce7d3e3`) read diff-by-diff against PLAN `## Review fixes (round 1)` and the
-SPEC sections each cites, and the round-1 findings re-checked against the code as it now stands.
+Branch `build/2026-09-21` (base `poc` @ `8379c6f`, head `7429291`). 94 tasks (76 build + 15
+round-1 fixes + 3 round-2 fixes), all done, 0 blocked, 0 skipped. This review covers the whole
+branch: the three round-2 fix commits (`7dc3c72`, `e07c215`, `21df0e8`) were read diff-by-diff
+against PLAN `## Review fixes (round 2)` and the SPEC sections each cites; every round-2 finding
+(C1, C2, B1, T1, T2, S2, S3) was re-checked against the code as it now stands; and the CLAUDE.md
+`## Constraints` greps were re-run over the entire tree, not just the round-2 diff.
 
 ## Verdict: CHANGES REQUESTED
 
 What was verified by this reviewer (not taken from the log):
 
-- `foundry_verify` base set green: `composer lint` 0 errors, `composer test:unit` 127/127,
-  `npm run lint` (theme.json, block.json, budget 33070/33200), `npm run test:unit` 12 passed /
-  2 pre-existing skips, `npm run build`, `bash scripts/forbidden-patterns.sh` clean.
-- `npm run test:integration` 367/367 (0 skipped, 1134 assertions); `npm run test:e2e` 48/48.
-- Mutation sampling, every one caught by the named test: added an upward `use` to
-  `Query/Archive.php` (BoundariesTest); dropped HEAD from `Cache\Headers` (unit HeadersTest);
-  inverted `Cells::is_stale_year()` (CellsTest + FrontPageStatesTest); `last_update = now`
-  (SeriesIndexTest, SeriesListTest, SerialsTest); verse F6 back to `!== today`
-  (VerseOfTheDayTest); audit alt-regex regression (AuditCommandTest); `migrate:politics` without
-  the primary-meta write and `close-comments` without the purge (MigrateCommandTest); REST
-  `form=fiction` exact-match (SeriesRestTest); series archive not current (CurrentSectionTest);
-  masthead ignoring the term name (ChromePartsTest); syndicated-to `<p>` wrapper
-  (SyndicatedToTest); `series:assign` without `Form::on_save` (MaintenanceCommandsTest).
-- Every round-1 finding (C1–C4, B1–B3, T1–T5, P1, S1–S13, i18n items) is closed in code, with
-  three residues that are the findings below.
+- `foundry_verify` base set green: `composer lint` 0 errors, `composer test:unit` 131/131
+  (950 assertions), `npm run lint` (theme.json, block.json, budget 33070/33200), `npm run
+  test:unit` 12 passed / 2 pre-existing skips, `npm run build`, `bash
+  scripts/forbidden-patterns.sh` clean.
+- `npm run test:integration` 371/371 (1146 assertions, 0 skipped). `npm run test:e2e` 48/48 (reseeded wp-env, 2 viewports, axe clean).
+- Mutation sampling, each caught by the named test: `suppress_stale_dek()` returning content
+  unchanged (CellsTest stale-query test + FrontPageStatesTest F9); `is_stale_year()` issuing a
+  query per call (CellsTest warm-cache test, 423 vs 422 queries); `posts_per_page` back to a
+  literal `2` (CellsTest config-count test); `Sources::short_date()` without its `! $post` guard
+  (FrontSourcesTest empty-value test, TypeError); a duplicated `Older (%s) →` in `Archive.php`
+  (BoundariesTest one-source test); an inline `\TTM\Core\Blocks\Helpers::class` in
+  `Query/Lead.php` (BoundariesTest inline-reference test); `SeriesPosition` removed from
+  CLAUDE.md (ScaffoldTest module-map test); a guarded `\TTM\Core\Query\Cells` call in
+  `themes/ttm-theme/inc/patterns.php` (BoundariesTest theme-references test).
+- One mutation was **not** caught: removing the `$stale_scope` decrement in
+  `Cells::mark_empty()` passes all 28 F9/front-page tests (T1 below).
+- Whole-tree constraint greps: theme owns no data, every `TTM\Core` reference under `themes/`
+  is `Config` and guarded, no inline styles outside the allow-list, no nonces/per-visitor calls
+  in cacheable output, no clock reads outside `Support/Clock.php`, no unbounded queries, no
+  `wp_safe_remote_*` outside the three call sites, no dangerous PHP, front-end JS is `nav.js`
+  only, no `view.js`. One rule-24 literal (C1 below).
+- Every round-2 finding is closed in code: C1 (`cells.stale_count`, allow-list gone), C2
+  (`Stats::category()['newest_date']`, zero queries when warm), B1 (`patterns.php` reads only
+  `Config`; `section-cell.php` always emits `post-excerpt`; dek suppressed plugin-side), T1
+  (source-level empty test), T2 (inline-reference scanner), S2 (one source for the pagination
+  strings, relabel filters in `Bindings\Sources`), S3 (CLAUDE.md map, render.php docblock,
+  HANDOFF R1-02 bullet).
 
-Approval is withheld because categories 1–3 are not clean: R1-05's F9 implementation introduced
-a hard-coded tunable and a stale rule-24 allow-list (rule 24), an uncached per-request query on
-every request site-wide (rule 13 / SPEC §3.2), and a new theme→plugin data call at `init`
-(rule 1 / SPEC §4.2); and the rule-26 empty-value gap for `ttm/short-date`/`ttm/relative-date`
-was closed with a test that does not test an empty value. Everything else on the branch holds.
+Approval is withheld because categories 1 and 3 are not clean across the branch: one bare
+numeric tunable survives in a `render.php` and the rule-24 script cannot see it (C1), and the
+round-2 F9 mechanism ships a scope counter whose exit path has no test and whose failure mode
+is site-wide (T1). Both are small; nothing else on the branch is wrong.
 
 ## Findings (most severe first)
 
 ### 1. Constraints (CLAUDE.md `## Constraints`)
 
-**C1 — Rule 24: F9's stale-section count is a bare literal, and the rule-24 allow-list is stale.**
-`plugins/ttm-core/src/Query/Cells.php:62` `$query['posts_per_page'] = 2;` and
-`themes/ttm-theme/inc/patterns.php:58` `'per_page' => $ttm_is_stale ? 2 : …` — 06 F9's "show 2"
-has no `Config` key (every other cell count does: `cells.counts`, `journal.rail_count`,
-`writing.plain_count`). `scripts/forbidden-patterns.sh:101` still pipes through
-`grep -v 'Query/Cells.php' | grep -v 'blocks/writing-cell/render.php'` with a comment saying a
-"separate, already-queued R-task" owns those files; that task was R1-05 and it is done. The
-check passes with both exclusions removed (verified), so the allow-list now only hides future
-regressions in those two files. HANDOFF §Round 1 R1-02 also states "none was queued this round",
-which is wrong. What breaks: the constraint is silently narrower than CLAUDE.md says. Fix:
-`cells.stale_count` (2) read via `Config::get()` in `Cells` only (the theme should not need the
-number at all, see B1), delete the two `grep -v`s and the comment. Task R1-05, R1-02.
+**C1 — Rule 24: a bare tile-column literal in `story-tiles`, and `forbidden-patterns.sh` rule 24
+only sees `=>` array syntax.** `plugins/ttm-core/blocks/story-tiles/render.php:29`
+`$ttm_columns = 2;` is the default column count when the block's `columns` attribute is `0`
+(its `block.json` default), so it is the value every seeded `/writing/` page renders with
+(`is-cols-2`). Every sibling default in the same file and in every other block goes through
+`Config::get()` (`writing.story_tiles`, `writing.plain_count`, `books.*`). `scripts/
+forbidden-patterns.sh:97` matches `=>\s*[2-9]…` only, so a plain assignment is invisible to the
+check that is supposed to enforce rule 24 — the R2-01 commit body records exactly this ("a bare
+`= 2` assignment does not match the rule 24 regex"), which is how the original
+`$query['posts_per_page'] = 2;` sat unflagged through round 1. What breaks: the constraint is
+narrower than CLAUDE.md says, and the next `= N;` tunable lands silently. Fix: a
+`writing.tile_columns` Config key (default `2`, design's "tiles 2-col") read in `render.php` and
+listed in `ConfigTest`; extend rule 24's grep with `=\s*[2-9][0-9]*\s*;` / `=\s*[0-9]{2,}\s*;`
+(same `Config.php` and HTTP-status exclusions). Reviewed and deliberately left as-is: HTTP status
+codes (`Verse/Fetcher.php:192,201` `304`/`200`, the REST `404`s), structural arithmetic
+(`Support/Text.php:72` `intdiv(…, 2)`, `Blocks/Helpers.php:72` `count(...) < 2`,
+`Cli/Seeder.php:57` `dirname(…, 3)`), and the DEV-ONLY seeder's fixture literals
+(`Cli/Seeder.php:487,572,575`). Task P6-04 / R1-02.
 
-**C2 — Rule 13 / SPEC §3.2 rule 13, §4.4: staleness is recomputed with an uncached `WP_Query` on
-every request.** `Cells::is_stale_year()` (`Cells.php:188-213`) runs a `WP_Query` per call and
-caches nothing. It is called four times at `init` on *every* request — front page, admin, REST,
-cron, CLI — by `themes/ttm-theme/inc/patterns.php:52` (once per section-cell pattern), and again
-per section query in `filter_query_vars()` (`Cells.php:57`). The front page pays ~8 extra
-queries; every other request pays 4 it never uses. The PROGRESS log records that a static memo
-"broke re-registration when `init` fires twice", which is a symptom of computing this at pattern
-registration rather than a reason not to cache. The `WP_Query` also has no explicit
-`post_status`, so a logged-in user with private posts can get a different staleness than an
-anonymous visitor (rule 8, minor). Fix: derive "newest post date" from the per-category transient
-`Query\Stats` already maintains (`ttm_category_stats_{id}`, flushed on publish transitions via
-`Stats::flush_for_post()`) — add a `newest_date` field there — or a sibling transient with the
-same flush; `is_stale_year()` then reads the transient and issues no query on a warm cache.
-Task R1-05.
+No other constraint hits anywhere in the tree (see the grep list above).
 
 ### 2. Boundaries (SPEC §3.1 rule 1, §4.2)
 
-**B1 — The theme now calls `Query\Cells` to decide markup.** `themes/ttm-theme/inc/patterns.php:52`
-`\TTM\Core\Query\Cells::is_stale_year( $ttm_slug )` and `inc/pattern-templates/section-cell.php:37`
-omit the `core/post-excerpt` block when the plugin says a section is stale, so the registered
-pattern content differs per request depending on data. Rule 1 says the theme reads plugin data
-only through `ttm/*` blocks and bindings; the guarded `Config::get('cells.counts')` read accepted
-in round 1 is configuration, this is a query result. The awkwardness shows in
-`tests/integration/Fallbacks/FrontPageStatesTest.php:125`, which has to re-fire `init` to see the
-branch. Fix (plugin side, no theme data call): `Cells` suppresses the dek itself — a
-`render_block_core/post-excerpt` (or `render_block_data`) filter that returns `''` while a
-section query whose `ttmSection` is stale is rendering (the scoped-flag technique
-`Blocks\Helpers::track_archive_scope()` already uses), plus `is-stale` on the query wrapper from
-`mark_empty()`; `section-cell.php` goes back to unconditional markup and `patterns.php` back to
-`cells.counts` only. Task R1-05.
-
-No other boundary crossings: `BoundariesTest` is green and killed the sampled upward import;
-no file under `Cache/`, `Verse/`, `Newsletter/` imports `Blocks/`; theme rules 1/3 clean
-(`grep` for the forbidden calls under `themes/` is empty; every `\TTM\Core` reference is guarded).
+Clean. `themes/ttm-theme/**/*.php` references only `\TTM\Core\Config` (guarded) and
+`BoundariesTest::test_theme_php_references_only_config_from_the_plugin` now enforces it; the
+`use`-line and inline-reference scans are both green and both killed their sampled mutation; no
+file under `Cache/`, `Verse/`, `Newsletter/` references `Blocks/`. The relabel filters moving
+from `Query\Archive` to `Bindings\Sources` is downward (`Bindings` may import `Query`); see
+SI-11 for the §4.2 wording it leaves behind.
 
 ### 3. Tests
 
-**T1 — Rule 26: `ttm/short-date` / `ttm/relative-date` still have no empty-value test.**
-`tests/unit/Bindings/ValuesTest.php:136` `test_short_and_relative_date_empty_without_date`
-asserts `assertNotSame('', …)` for a *valid* date — it proves the formatter is non-empty, not
-that the empty value is `''`. The genuine empty branch is `Bindings\Sources::short_date()`
-(`Sources.php:254-262`: no `postId` in context, or an unparsable `post_date`, → `''`) and the
-matching lines in `relative_date()`; no test in `tests/integration/Bindings/` exercises it
-(grep for empty/missing/without cases: none). Deleting the `if ( ! $post ) return '';` guard
-fails nothing today. Fix: `FrontSourcesTest::test_short_date_and_relative_date_empty_without_post`
-resolving both sources for a block with no `postId` and for a nonexistent id, asserting `''`;
-rename the unit test to what it proves (`…_never_blank_for_a_valid_date`) or drop it. Task R1-13.
+**T1 — Rule 27: the stale-scope exit in `Cells::mark_empty()` has no test, and its failure mode
+is every later section losing its dek.** `plugins/ttm-core/src/Query/Cells.php:212-214`
+decrements `self::$stale_scope` after a stale `core/query` has rendered; `:181-183`
+`suppress_stale_dek()` blanks *every* `core/post-excerpt` while the counter is above zero. With
+the decrement deleted, all 28 tests matching `CellsTest|FrontPageStatesTest|FrontPageTest` still
+pass (verified), because each renders at most one stale section and nothing after it. A
+throwaway test that renders a stale Security query and then a fresh Technology query in the same
+request fails under that mutation: the Technology row comes back with no `ttm-item__dek` at all.
+On the real front page that is every section cell after the first stale one (and any
+`post-excerpt` elsewhere on the page) — exactly the "cached HTML is wrong for everyone" class of
+bug SPEC §3.2 exists to prevent. Fix:
+`CellsTest::test_fresh_section_after_stale_section_keeps_its_dek` — stale section then fresh
+section through `do_blocks()` in one test, assert the stale query has `is-stale` and no
+`ttm-item__dek`, and the fresh query still contains `ttm-item__dek` and its excerpt text. While
+in that file, `Stats::category()['newest_date']` (`Stats.php:94,108`, the field the whole F9
+decision now rests on) has no direct assertion — R2-01 listed `StatsTest.php` in its files but
+did not touch it; add `newest_date` to `StatsTest::test_category_stats_count_and_year_range`
+(equals the newest post's `post_date`, `null` for an empty category). Task R2-01.
 
-**T2 — `tests/unit/BoundariesTest.php:139` only parses `^use TTM\Core\…` lines.** Inline
-fully-qualified references (`plugins/ttm-core/src/Editor/Columns.php:64`
-`\TTM\Core\Query\SeriesIndex::for_post`, `Cli/Seeder.php:345,346,425,459,633`) are invisible,
-so an upward import written inline passes the guard. Today's inline references are all
-downward. Fix: also collect `\TTM\Core\<Dir>\` occurrences outside `use` lines and comments.
-Task R1-01.
+Everything else in this category holds: the acceptance tests named by R2-01/R2-02/R2-03 all
+exist, test the mechanic rather than re-deriving it, and each failed under its sampled mutation.
 
 ### 4. Performance (SPEC §3.2)
 
-Covered by C2. Nothing else new: `close_comments` now purges once (mutation confirmed),
-`posts_in_category()` and the audit attachment index are batched by `cli.batch`.
+Nothing new. `is_stale_year()` is now `get_term_by()` (object-cached) plus one transient read;
+the warm-cache test pins it at zero queries. `Archive::year_range()` keeps the one bounded,
+ids-only re-query per pagination link accepted in round 2. The transient's TTL-driven
+recompute on a front-end request is what SPEC §5.3 itself specifies for `ttm_category_stats_*`.
 
 ### 5. Spec drift / low
 
-**S1 — `cssBudgetBytes` moved again.** R1-09 tightened 33000→32700 with a Measurement; R1-12
-raised 32700→33200 (`scripts/check-budget.mjs:16`, 33070 used) for 01 §4.13's missing
-`.ttm-syndication` rule, also with a Measurement, and CLAUDE.md agrees. Code and constraint are
-consistent; SPEC rule 30's 25 KB is the open owner decision (SI-6 below). Not a code finding.
+**S1 — Docblock residue.** `plugins/ttm-core/src/Query/Cells.php:26-30` says the counter "lives
+on the filter pair rather than in `Query\Archive`" — `Archive` was never a candidate for
+section-cell state; the sentence was copied from `Blocks\Helpers::$archive_scope`. No task;
+fix it if `Cells.php` is touched again.
 
-**S2 — Duplicated translator-facing strings.** `plugins/ttm-core/src/Query/Archive.php:191-203`
-`format_label()` re-implements `Bindings\Values::pagination_label()` including both `__()`
-strings, because R1-01 kept the relabel filters on `Archive` (PLAN R1-01 asked for them to move
-to `Bindings\Sources`; the stated reason is that `ArchiveTest` calls `Archive::resolve_label()`).
-Two copies of the same string will drift. Low. Task R1-01.
+Not findings: `cssBudgetBytes` is unchanged this round (33070/33200 used, CLAUDE.md agrees);
+`plugins/ttm-core/README.md` §Configuration deliberately lists no per-key table, so
+`cells.stale_count` needs no README entry; `SPEC §5.4` still lists `cells.thin_days` (SI-8,
+owner).
 
-**S3 — Docs drift left by round 1.** `CLAUDE.md:31,35` module map lacks `Meta/SeriesPosition`,
-`Editor/SeriesPartList`, and `Blocks/Helpers` as a registered `Plugin` module that owns the
-archive-scope hooks; `plugins/ttm-core/blocks/archive-by-year/render.php:5` says grouping happens
-in `Query\Archive::group_by_year()` (it is `Blocks\Helpers` now); `Cells.php:59-61` describes the
-reverted "CSS drops the dek via `is-stale`" approach; HANDOFF §Round 1 R1-02 bullet (see C1).
-R1-15 was the docs-alignment task and predates none of these. Task R1-15.
+### 6. Interpretation choices (HANDOFF §Round 2)
 
-### 6. Interpretation choices (HANDOFF §Round 1)
+Accepted as the reading most consistent with SPEC: R2-01 resolving the category with
+`get_term_by('slug')` before the transient read (a cached term lookup, not the request-time
+`WP_Query` the task removed); `is-stale` and `is-empty` as independent classes on the same
+wrapper; R2-02's deliberately simple comment stripper in the inline scanner (documented, and it
+kills the sampled mutation); R2-03 keeping `Archive::year_range()`'s bounded re-query exactly as
+`resolve_label()` had it, and ScaffoldTest's line-scoped module-map check with the `*Command`
+shorthand.
 
-Accepted as the reading most consistent with SPEC: R1-01 `Meta\SeriesPosition` reading the
-`ttm_series_index` option directly (that is exactly "derived data is read from options"),
-`Editor\SeriesPartList` owning the part list, `Blocks\Helpers` as a module; R1-03 setting the
-term's `ttm_form` before the assignment loop; R1-04 `date > today` (a stored verse dated today
-or earlier is the last good verse) and the self-rescheduling single cron event (`schedule()` on
-`init` re-arms the chain if a run ever fails to reschedule); R1-05 removing `cells.thin_days`
-(F9's "show what exists" needs no code — spec issue SI-8); R1-06 `$wpdb->update` +
-`clean_post_cache()`; R1-09 fixing `masthead-inner`'s site-title level at the root; R1-14
-executing the pattern file directly in the test; R1-15 `scripts/lib/report.mjs`.
-
-Not accepted: R1-01 duplicating the pagination-label strings instead of moving the filters (S2);
-R1-02's Cells/writing-cell allow-list surviving R1-05 (C1); R1-05's server-side dek omission
-being done by the theme at pattern registration with a per-request query (C2, B1); R1-13's
-"no empty input exists at this layer" as a reason to skip the source-level empty test (T1).
+Not accepted: none — the round-2 choices are all sound. The gap in R2-01 is a missing test (T1),
+not a wrong reading.
 
 ### 7. Blocked and skipped tasks
 
@@ -152,48 +141,48 @@ None. Nothing to unblock.
 
 ### 8. Readability / naming
 
-Covered by S2 and S3. Otherwise the round-1 code reads well: the new tests are hook-driven where
-the plan asked (SeriesIndexTest asserts `has_action('shutdown', …)` then calls `maybe_rebuild()`),
-and every fix commit names its tests and its interpretation.
+Good. `Sources::resolve_pagination_label()` reads clearly as "lookup then format"; the R2 tests
+say what they prove in their names (the `…_never_blank_for_a_valid_date` rename was right). S1
+is the only residue.
 
-## Round-1 findings, verified closed
+## Round-2 findings, verified closed
 
-C1 budget (reconciled, one value, CLAUDE.md matches); C2 rule-24 keys (`sections.technology_slug`,
-`cache.cloudflare.timeout_seconds`, `newsletter.timeout_seconds`, `books.blank_rows`,
-`books.link_rows`, `seed.quiet_offset_days`, `journal.rail_count` read, `writing.shelf_limit`
-read, `writing.plain_count`; residue: C1 above); C3 syndicated-to `<div>` + `wp_kses`; C4 kicker
-and meta_line empty tests (residue: T1); B1–B3 all three upward imports gone, guard test added;
-T1 hook-driven SeriesIndex tests; T2 `form=fiction`; T3 most-read/tag-filter `expect_non_empty`;
-T4 permanent skip removed; T5 F6 test now exercises the stored-verse branch and asserts `Sept`;
-P1 one purge per batch; S1 F6 order; S2 `last_update` from parts; S3 Politics posts under
-Opinion with primary set; S4 F9 (implemented, but see C1/C2/B1); S5 `series:assign` derives
-`chapter`; S6 series current-section; S7 HEAD; S8 `.ttm-hp`; S9 `Sept` + site-local
-`published_at`; S10 audit alt/link fixes; S11 landmarks; S12 writing-cell F1/F2; S13 DST cron,
-`/category/writing/` h1, `report.html` count; i18n items (masthead names, `Book %d`, form
-captions, `%s RSS`); DEPLOYMENT real-IP note; CLAUDE.md rule 16 and module-map file.
+C1 `cells.stale_count` read in `Cells` only, `forbidden-patterns.sh` allow-list removed (script
+still clean); C2 `Stats::category()` carries `newest_date`, flushed on `transition_post_status`,
+`is_stale_year()` issues no query when warm (mutation confirmed); B1 `patterns.php` and
+`section-cell.php` no longer vary per request, dek suppressed by `render_block_core/post-excerpt`
+inside a `render_block_data`/`render_block_core/query` scope pair, `is-stale` from `mark_empty()`,
+`FrontPageStatesTest` F9 green without the `init` re-fire, theme-reference guard test added;
+T1 `FrontSourcesTest::test_short_date_and_relative_date_empty_without_post` (no `postId`, and a
+nonexistent id) and the unit test renamed; T2 inline-reference scanner; S2 one source for both
+pagination strings with the relabel filters in `Bindings\Sources`; S3 CLAUDE.md module map,
+`archive-by-year/render.php` docblock, `Cells.php` comments, HANDOFF R1-02 bullet.
 
 ## Spec issues
 
-Carried from round 1 and still open for the owner: **SI-1** (rule 15 "JSON" vs typed
-`show_in_rest` arrays), **SI-2** (§4.2 "May import" column narrower than the design needs;
-`Editor`/`Templates`/`Cache`/`Rest` downward imports), **SI-3** (`sections.technology_slug` now
-exists in code; add to §5.4), **SI-4** (`inc/template-hierarchy.php` listed in §4.3 and 04 §1
-but not built; CLAUDE.md now dropped it), **SI-5** (rule 12 vs CLI term enumeration), **SI-6**
-(rule 30's 25 KB budget vs 33 KB measured; the number should be decided once), **SI-7** (§6.10
-"GET" should read "GET/HEAD"; code now does HEAD).
+Carried from rounds 1–2 and still open for the owner: **SI-1** (rule 15 "JSON" vs typed
+`show_in_rest` arrays), **SI-2** (§4.2 "May import" column narrower than the design needs),
+**SI-3** (`sections.technology_slug` missing from §5.4), **SI-4** (`inc/template-hierarchy.php`
+listed in §4.3 / 04 §1 but not built), **SI-5** (rule 12 vs CLI term enumeration), **SI-6**
+(rule 30's 25 KB budget vs 33 KB measured — decide the number once), **SI-7** (§6.10 "GET" should
+read "GET/HEAD"), **SI-8** (`cells.thin_days` needs no code; remove from §5.4 / 06 F9), **SI-9**
+(`Verse` → `Cache` import vs table order), **SI-10** (§5.4 has no F9 count key; code now has
+`cells.stale_count = 2`).
 
 New this round:
 
-- **SI-8** §5.4 lists `cells.thin_days = 90` "F9 no posts in 90 days → still show what exists".
-  That branch needs no code (the cell query has no date filter), so R1-05 removed the key;
-  recommend removing it from §5.4 and 06 F9's first clause, or stating it is informational.
-- **SI-9** §4.2 says `Verse/` may import `Cache/`, but the table order puts `Cache` below
-  `Verse`, so a strict "arrow points down" reading (which `BoundariesTest` encodes) forbids it.
-  Code uses `do_action('ttm_purge_urls')` and imports nothing, so nothing is broken; recommend
-  either moving `Cache` above `Verse` in the table or dropping `Cache` from `Verse`'s column.
-- **SI-10** §5.4 has no key for F9's "show the 2 most recent" count; C1 adds `cells.stale_count`.
+- **SI-11** §4.2 lists "pagination labels" under `Query/Archive` and "year grouping" too, but the
+  same table forbids `Query/` importing `Bindings/` or `Blocks/`, so after R1-01/R2-03 the year
+  grouping lives in `Blocks\Helpers` and the labels/relabel filters in `Bindings\Sources` (with
+  `Archive` keeping only the year-range lookup). Recommend rewording the `Query/` and
+  `Bindings/` rows to match, so the responsibility column and the import column agree.
+- **SI-12** Rule 24's exception list ("`0`, `1`, `-1` for `array_search` results, array indices,
+  and CSS values") does not cover HTTP status codes or structural arithmetic (`intdiv(…, 2)`,
+  `count(…) < 2`, `dirname(…, 3)`), which the tree necessarily contains and the script
+  allow-lists. Recommend the rule name those classes explicitly so the enforcement script's
+  allow-list has a spec basis.
 
-## Manual checks still owed (copied from HANDOFF.md §2 and §Round 1)
+## Manual checks still owed (copied from HANDOFF.md §2, §Round 1, §Round 2)
 
 **Phase 0**
 - Open the site and confirm fonts render with zero requests to `fonts.googleapis.com`/`fonts.gstatic.com`.
@@ -257,3 +246,11 @@ New this round:
 - R1-12: open a single Journal post with syndication URLs and confirm the new `.ttm-syndication` CSS
   matches 01 §4.13 (never visually reviewed).
 - R1-14: rename a live category in wp-admin and confirm the masthead nav picks it up immediately.
+
+**Round 2**
+- R2-01: once a section genuinely goes stale in production (its newest post crosses
+  `cells.stale_year_days`), confirm the dek is absent from the rendered HTML (not CSS-hidden), exactly
+  `cells.stale_count` rows show, and — per T1 — that the sections rendered *after* it still show
+  their deks.
+- R2-03: page through a seeded category archive with more than one page and confirm "Older (…) →" /
+  "← Newer (…)" render on both the block-bound label and the query-pagination next/previous links.
