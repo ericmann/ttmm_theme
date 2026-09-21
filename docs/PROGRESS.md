@@ -84,7 +84,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] R1-03 SeriesIndex last_update from the newest published part; hook-driven rebuild tests; series:assign derives ttm_form
 - [x] R1-04 Verse module: F6 uses the stored last-good verse, Sept month format, site-timezone date, DST-safe cron
 - [x] R1-05 Front-page cells: F9 stale-year branch, journal.rail_count, journal slug constant; writing-cell F1/F2 semantics
-- [ ] R1-06 migrate:politics child mode files Politics posts under Opinion; close-comments purges once
+- [x] R1-06 migrate:politics child mode files Politics posts under Opinion; close-comments purges once
 - [ ] R1-07 wp ttm audit: fix missing-alt regex and broken-internal-link false positives
 - [ ] R1-08 Cache-Control for HEAD requests
 - [ ] R1-09 Theme CSS and templates: honeypot rule, nested landmarks, CSS budget reconciled
@@ -669,3 +669,26 @@ query already has no date filter); added writing.plain_count. ConfigTest updated
 Verified via foundry_verify: composer lint/test:unit (120), npm lint/test:unit/build,
 forbidden-patterns.sh, npm run test:integration (353, +6, all green). CSS budget unchanged
 (32990/33000).
+
+### R1-06 — f077297
+politics_child(): after reparenting Politics under Opinion, iterates posts_in_category(politics
+term id) adding the opinion term (keeping politics too) and setting ttm_primary_category to the
+opinion term id, so PrimaryCategory::slug() reads 'opinion'. Dry-run reports the post count via
+`rows` (array of {post_id}) and writes nothing (verified: no opinion term created, no category
+change, ttm_primary_category unchanged). Idempotency preserved: the existing early-return
+("Politics already a child of Opinion") skips post processing entirely on a second run.
+
+close_comments(): switched from wp_update_post() to $wpdb->update() on comment_status/
+ping_status + clean_post_cache(), because wp_update_post() fires transition_post_status per
+post and Cache\Purge::on_transition() purges on every one -- N posts meant N purges. Now
+collects affected permalinks into $urls during the batch and fires ttm_purge_urls exactly once
+at the end (only when rows is non-empty; dry-run fires none).
+
+Purge.php: no functional change: only a pre-existing alignment fix that phpcbf applied while
+linting (docblock/`$series` variable alignment), left in.
+
+docs/MIGRATION.md: §2.2 and §2.8 updated to describe the new per-post opinion/primary-category
+behavior and the single-purge-per-batch note.
+
+Verified via foundry_verify: composer lint/test:unit, npm lint/test:unit/build,
+forbidden-patterns.sh, npm run test:integration (357, +4, all green).
