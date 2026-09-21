@@ -68,7 +68,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P7-04 Jetpack unconnected-render check (assumption) and seed provider
 - [x] P7-05 Cache tuning: verse_boundary_hour, max_age_cap, min_age
 - [x] P7-06 Newsletter tuning: token_ttl, rate limits
-- [ ] P7-07 Static audit: extend forbidden-patterns, run, fix
+- [x] P7-07 Static audit: extend forbidden-patterns, run, fix
 - [ ] P7-08 Separability tests (theme without plugin, plugin with default theme)
 - [ ] P7-09 Push and manual check (Phase 7)
 - [ ] P8-01 Spike: classic-to-block conversion script (jsdom + rawHandler)
@@ -400,3 +400,7 @@ Measurement table across a full day (America/Los_Angeles): computed ceiling is 6
 ### P7-06 — 7863560
 Measurement: worst-case token age (page generated 1s before a token_ttl boundary, cached the full max_age_cap_seconds) lands the token exactly at Handler::token_valid()'s "previous window" acceptance boundary with zero slack — confirms P7-05's finding that token_ttl must be >= max_age_cap_seconds. 20 submissions from one IP in 600s yield exactly 5 forwards (rate_limit_per_ip), rest silently dropped; window reset allows forwarding again. Shared-NAT reasoning: 5 per 10 minutes is generous for legitimate household bursts while still an effective bot deterrent for a low-traffic weekly form. All three defaults hold; no Config.php changes.
 3 acceptance tests added. Full verify green: composer lint 0 errors, 115/115 unit, npm lint/build green, forbidden-patterns clean.
+
+### P7-07 — 07496f1
+Extended forbidden-patterns.sh for rules 1,3,5,7,8,12,15,16,17,24,32. Fixed real violation: VerseCommand::inspect() duplicated wp_safe_remote_get instead of going through Fetcher — extracted Fetcher::request() as the single call site, used by both fetch() and inspect(). Documented two legitimate variable-include cases (PSR-4 autoloader, build-asset require) with a marker comment rather than rewriting them. Rule 3 needed a small inline python3 context-check (2-line lookback) since grep alone can't express it. Rule 5's allow-list extended globally to cover sticky_posts (found live in Query/Lead.php reading WP's native sticky-post feature). Rule 16's file allow-list corrected to Newsletter/Provider/CustomUrl.php (the actual call site) rather than Handler.php per the task text. Rule 24 run as warning-only per its own scope; recorded the list (three REST 404 status codes, two justified timeout=>10 literals, one real future-Config-key candidate: writing-cell/render.php's posts_per_page=>3, left unfixed per "no behavioural changes" scope).
+`bash scripts/forbidden-patterns.sh` exits 0. Full verify green: composer lint 0 errors, 115/115 unit, npm lint/build green, 277 integration tests OK (1 pre-existing skip).
