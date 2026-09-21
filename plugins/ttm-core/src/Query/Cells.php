@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace TTM\Core\Query;
 
 use TTM\Core\Config;
+use TTM\Core\Meta\PrimaryCategory;
 use WP_Block;
 use WP_HTML_Tag_Processor;
 
@@ -39,10 +40,12 @@ class Cells {
 	public static function filter_query_vars( array $query, $block, int $page ): array {
 		unset( $page );
 
-		$context      = $block->context['query'] ?? [];
-		$section      = (string) ( $context['ttmSection'] ?? '' );
-		$exclude_lead = ! empty( $context['ttmExcludeLead'] );
-		$primary_only = array_key_exists( 'ttmPrimaryOnly', $context ) ? (bool) $context['ttmPrimaryOnly'] : ( '' !== $section );
+		$context         = $block->context['query'] ?? [];
+		$section         = (string) ( $context['ttmSection'] ?? '' );
+		$exclude_lead    = ! empty( $context['ttmExcludeLead'] );
+		$primary_only    = array_key_exists( 'ttmPrimaryOnly', $context ) ? (bool) $context['ttmPrimaryOnly'] : ( '' !== $section );
+		$same_section    = ! empty( $context['ttmSameSection'] );
+		$exclude_current = ! empty( $context['ttmExcludeCurrent'] );
 
 		if ( '' !== $section ) {
 			$query['category_name']       = $section;
@@ -66,6 +69,30 @@ class Cells {
 			}
 		}//end if
 
+		if ( $same_section ) {
+			$current_id  = (int) get_the_ID();
+			$category_id = $current_id ? PrimaryCategory::id( $current_id ) : 0;
+
+			if ( $category_id ) {
+				$query['meta_query'] = [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- ttm_primary_category is a single, indexed meta key; bounded by posts_per_page.
+					[
+						'key'   => 'ttm_primary_category',
+						'value' => $category_id,
+					],
+				];
+			}
+
+			$query['posts_per_page']      = (int) Config::get( 'article.more_in_section', 3 );
+			$query['ignore_sticky_posts'] = 1;
+		}
+
+		if ( $exclude_current ) {
+			$current_id = (int) get_the_ID();
+			if ( $current_id ) {
+				$query['post__not_in'] = array_merge( $query['post__not_in'] ?? [], [ $current_id ] );
+			}
+		}
+
 		if ( $exclude_lead ) {
 			$lead_id = Lead::id();
 			if ( $lead_id ) {
@@ -80,6 +107,14 @@ class Cells {
 			if ( $journal && ! is_wp_error( $journal ) ) {
 				$query['category__not_in'] = array_merge( $query['category__not_in'] ?? [], [ $journal->term_id ] );
 			}
+		}
+
+		// The journal-stream row (single-journal.html) reuses the journal section query but
+		// with journal.stream_count instead of cells.counts (which has no "journal" entry);
+		// ttmExcludeCurrent is what distinguishes it from the front page's journal-rail, which
+		// never has a "current" post to exclude.
+		if ( 'journal' === $section && $exclude_current ) {
+			$query['posts_per_page'] = (int) Config::get( 'journal.stream_count', 4 );
 		}
 
 		return $query;
@@ -100,8 +135,11 @@ class Cells {
 	public static function mark_empty( string $content, $parsed_block, $block ): string {
 		unset( $parsed_block );
 
-		$section = (string) ( $block->attributes['query']['ttmSection'] ?? '' );
-		if ( '' === $section ) {
+		$query_attrs   = $block->attributes['query'] ?? [];
+		$section       = (string) ( $query_attrs['ttmSection'] ?? '' );
+		$is_ttm_cell   = '' !== $section || ! empty( $query_attrs['ttmSameSection'] );
+
+		if ( ! $is_ttm_cell ) {
 			return $content;
 		}
 
