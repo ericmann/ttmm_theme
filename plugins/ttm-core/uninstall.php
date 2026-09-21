@@ -17,3 +17,15 @@ if ( ! defined( 'TTM_REMOVE_DATA' ) || true !== TTM_REMOVE_DATA ) {
 foreach ( array( 'ttm_verse', 'ttm_verse_history', 'ttm_verse_log', 'ttm_books', 'ttm_settings', 'ttm_series_index' ) as $ttm_option ) {
 	delete_option( $ttm_option );
 }
+
+global $wpdb;
+if ( isset( $wpdb ) ) {
+	// Options table only, bounded LIKE on our own transient prefix — never terms or meta (SPEC §3.3 rule 23).
+	$wpdb->query(
+		$wpdb->prepare(
+			"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->esc_like( '_transient_ttm_' ) . '%',
+			$wpdb->esc_like( '_transient_timeout_ttm_' ) . '%'
+		)
+	);
+}
