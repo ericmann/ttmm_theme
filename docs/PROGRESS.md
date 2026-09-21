@@ -62,7 +62,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P6-04 story-tiles and book-grid blocks
 - [x] P6-05 Hub and Writing templates and CSS
 - [x] P6-06 Push and manual check (Phase 6)
-- [ ] P7-01 Cache headers and Batcache
+- [x] P7-01 Cache headers and Batcache
 - [ ] P7-02 Purge and Cloudflare adapter
 - [ ] P7-03 Newsletter handler, custom-url provider, settings
 - [ ] P7-04 Jetpack unconnected-render check (assumption) and seed provider
@@ -375,3 +375,7 @@ Measurement: ttm.css 27358 -> 32025 bytes; bumped scripts/check-budget.mjs cssBu
 ### P6-06 — 29a4769
 Pushed build/2026-09-21 through P6-05 (c8f053a) to origin.
 Manual check: NOT VERIFIED (human) — /series/ vs badge 1f: header stats, featured series 5/7 with part list and dates, All series 2-col grid with status squares; /series/the-quiet-ledger/ renders the full part list and Other series; /writing/ vs 2d: cover with shadow (the only shadow on the site), 64px title, three buttons, stat row; tiles 2-col with one cover tile in colour; In print grid without shadows; /category/writing/ shows the same layout.
+
+### P7-01 — 73c1961
+Added Cache\Headers (send_headers for anonymous front-end GETs: public max-age clamped between cache.min_age_seconds and cache.max_age_cap_seconds to the earlier of next local midnight / cache.verse_boundary_hour:00, computed via real DateTimeImmutable timestamp diffs so DST transitions are handled automatically; feeds get cache.feed_seconds; admin/logged-in get no-store; non-GET gets nothing) and Cache\Batcache (init: sets $GLOBALS['batcache']['max_age']). rest_post_dispatch hook adds the same header to ttm/v1 REST responses. Headers::send() guards with headers_sent() since PHP-CLI test runs already have output started, which broke many unrelated integration tests until guarded. Added cache.feed_seconds (3600) to Config::defaults()/ConfigTest.
+7 unit + 6 integration acceptance tests added. Full verify green: composer lint 0 errors, 104/104 unit, npm lint/build green, forbidden-patterns clean, 265 integration tests OK (1 pre-existing skip).
