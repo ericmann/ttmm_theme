@@ -81,7 +81,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P8-08 Push, final manual checks and HANDOFF (Phase 8)
 - [x] R1-01 Fix upward module imports (Query→Bindings/Blocks, Bindings→Blocks, Taxonomy→Query) and add a boundary test
 - [x] R1-02 Rule 24: config keys for every hard-coded tunable in src/ and fail the forbidden-patterns rule-24 check
-- [ ] R1-03 SeriesIndex last_update from the newest published part; hook-driven rebuild tests; series:assign derives ttm_form
+- [x] R1-03 SeriesIndex last_update from the newest published part; hook-driven rebuild tests; series:assign derives ttm_form
 - [ ] R1-04 Verse module: F6 uses the stored last-good verse, Sept month format, site-timezone date, DST-safe cron
 - [ ] R1-05 Front-page cells: F9 stale-year branch, journal.rail_count, journal slug constant; writing-cell F1/F2 semantics
 - [ ] R1-06 migrate:politics child mode files Politics posts under Opinion; close-comments purges once
@@ -586,3 +586,24 @@ technology candidate lookup).
 
 Verified via foundry_verify: composer lint/test:unit, npm lint/test:unit/build,
 forbidden-patterns.sh, npm run test:integration (340 tests, +2 new, all green).
+
+### R1-03 — b6ee115
+SeriesIndex::build_row() now computes last_update via new private last_update_for($parts):
+newest published part's post_date, falling back to newest part of any status when none
+published, falling back to Clock::now() only when a series has zero parts at all. Stable
+across rebuilds (previously Clock::now() every rebuild, breaking "sorted by update").
+
+SeriesCommand::run(): moved the `if ($form) update_term_meta(...)` block before the
+assignment loop, and added a Meta\Form::on_save($post_id, $post) call per assigned post
+(after wp_set_object_terms) so --form=<fiction> derives ttm_form=chapter immediately.
+
+Tests: SeriesIndexTest gained 4 tests (last_update stability + fallback, publish/delete
+schedule-rebuild-via-real-hooks using has_action() + manual maybe_rebuild(), replacing
+test_delete_series_term_removes_row). SeriesListTest/SerialsTest's set_last_update() private
+back-door removed; make_series()/make_serial() now take an explicit part/chapter date so
+distinct last_update values come from real rebuild() computation. SerialHeroTest gained
+test_f3_picks_most_recently_completed_of_two. MaintenanceCommandsTest gained
+test_series_assign_with_fiction_form_derives_chapter_on_posts.
+
+Verified via foundry_verify: composer lint/test:unit, npm lint/test:unit/build,
+forbidden-patterns.sh, npm run test:integration (345 tests, +5 new, all green).
