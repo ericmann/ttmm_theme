@@ -27,7 +27,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P1-15 Push and manual check (Phase 1)
 - [x] P2-01 Block styles, pattern categories, image sizes
 - [x] P2-02 ttm.css foundation: bridge, grids, rules, type utilities, buttons, tags, inputs, body typography
-- [ ] P2-03 ttm.css chrome, nav.js, editor.css; CSS budget tuning
+- [x] P2-03 ttm.css chrome, nav.js, editor.css; CSS budget tuning
 - [ ] P2-04 Block variations and starter content
 - [ ] P2-05 Template parts and chrome patterns
 - [ ] P2-06 page, 404, index and search-shell templates; current section and body classes
@@ -239,3 +239,11 @@ All values reference theme.json presets (var(--wp--preset--...)) or the P0-05 --
 Interpretation: grid-8-4/5-7/7-5/3-7-2 use one canonical gap per slug (a single is-style-* class can't carry the two different gaps 01§3 assigns the same track ratio across different screens); grid-3/grid-2/grid-4 map to the front series strip / series-hub "all series" / front section-row tracks (the only 3-, 2- and 4-col tracks in 01§3 without their own named slug).
 61/61 unit + 72/72 integration tests still pass (no test changes, CSS-only task); full verify green; stylelint and check:budget both pass.
 Manual check: none
+
+### P2-03 — 85923a3
+nav.js: toggles html.ttm-nav-open via MutationObserver on .wp-block-navigation__responsive-container class changes (is-menu-open), closes the overlay on in-page link click by invoking the core close button's own click handler (no reimplemented close logic) — no fetch/XHR/apiFetch/wp-json/admin-ajax, 1304 bytes (<2KB). 2 new unit tests pass.
+ttm.css additions: 4.1 masthead-front (meta row/title row/nav row incl. front-nav scroll-row + scrollbar-width:none <=720), 4.2 masthead-inner (grid auto/1fr/auto, the >=721px un-overlay override from Decisions verbatim, phone collapse), 4.3 nav (core Navigation link colors/hover/current, overlay full-screen ground bg with 24px/800 stacked items + 1px rules), 4.4 cell-heading (+ .is-rail 2px-underline variant), 4.5 headline item (.ttm-item whole-row link, dek, meta), 4.6 featured item (200px/1fr grid, 3:2 grayscale image), 4.32/4.33 newsletter box + poster (incl. Jetpack subscription input/button mapping and [data-state=subscribed] hide/show), 4.34 footer (.is-after-poster drops the top rule).
+Measurement (cssBudgetBytes assumption): before 10858 bytes, after 18335 bytes (budget 25600, 72% used). Did not change cssBudgetBytes — current usage fits; flagged for later-phase implementers that the ~9-10KB of remaining component CSS (Phases 3-6) could approach or exceed the budget and may need tightening or a documented bump then, per the task's "only change if it can't fit" instruction — it currently fits.
+Fixed 2 stylelint no-descending-specificity false positives (masthead byline link and core-nav link vs. the unrelated .entry-content a:hover from P2-02) with justified stylelint-disable-next-line comments, since these are genuinely independent components sharing the bare "a" tail that the linter's cascade heuristic conflates.
+72/72 integration + 63/63 unit tests pass; full verify green.
+Manual check: NOT VERIFIED (human) -- open the front page and an inner page, resize to <=720px, confirm the nav overlay opens/closes and closes on link tap; confirm the inner masthead nav is not overlaid at >=721px.
