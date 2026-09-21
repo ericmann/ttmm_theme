@@ -12,7 +12,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P0-07 Push, CI and manual check (Phase 0)
 - [x] P1-01 Series taxonomy, term meta, single-series enforcement
 - [x] P1-02 Post meta registration and sanitizers
-- [ ] P1-03 Primary category, form derivation and word count on save
+- [x] P1-03 Primary category, form derivation and word count on save
 - [ ] P1-04 Series index
 - [ ] P1-05 Category stats and top tags
 - [ ] P1-06 Series term admin: columns, edit fields, part list
@@ -135,3 +135,9 @@ Plugin::modules() now [Compat\Theme::class, Taxonomy\Series::class].
 Meta\PostMeta registers all 9 ttm_* post-meta keys on 'post' with auth_callback current_user_can('edit_post',$post_id). ttm_form/ttm_syndication have REST enum/object schemas. sanitize_part: custom (int)-cast + "<1 => 0" logic, NOT literal absint() — absint(-5)===5 (abs-conversion) would wrongly accept negative input as a valid positive part number; used to satisfy the task's own "rejects zero and negatives" test. sanitize_primary_category: absint then term_exists($id,'category') check, else 0. sanitize_form: enum fallback to 'article'. sanitize_syndication: only x/mastodon/bluesky keys, esc_url_raw(...,['https']) drops non-https and unknown-scheme URLs, unknown network keys silently ignored.
 Plugin::modules() now [Compat\Theme::class, Taxonomy\Series::class, Meta\PostMeta::class] — picks up the TTM_IntegrationTestCase::set_up() do_action('init') refire from P1-01 automatically, no new test scaffolding needed.
 12 integration tests + 3 new unit tests pass (48 unit total); full verify green.
+
+### P1-03 — e2c6240
+PrimaryCategory::resolve (pure, nav-order pick else first assigned else null), ::on_save (save_post_post@20, skips autosave/revision/auto-draft, writes only when empty or stored term no longer assigned), ::id()/::slug() are read-only helpers that resolve on the fly without writing. Form::derive (pure: series form!=nonfiction->chapter; no series+in Writing->story; else article), ::on_save (@25, skipped when ttm_form_locked). WordCount::on_save (@30, Text::word_count(post_content), skips autosave/revision). All three hook save_post_post directly in register() (not via 'init'), so they persist across tests without needing the do_action('init') refire pattern from P1-01/P1-02.
+Plugin::modules() now appends PrimaryCategory, Form, WordCount after PostMeta.
+Test note: wp_create_post_autosave() requires wp-admin/includes/post.php loaded and a 'post_type' key in the data array (undefined-index fatal otherwise) — needed for test_autosave_does_not_write_meta.
+18 integration tests + 6 new unit tests pass (54 unit total); full verify green.
