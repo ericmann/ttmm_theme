@@ -21,7 +21,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P1-07 Spike — Jetpack Subscriptions widget POST contract
 - [x] P1-08 Jetpack provider on the shared form
 - [x] P1-09 Editor registration in every context (§6.7)
-- [ ] P1-10 Newsletter poster per §6.1.8
+- [x] P1-10 Newsletter poster per §6.1.8
 - [ ] P1-11 Phase 1 push — chrome screenshots
 - [ ] P2-01 Lead story CSS and markup per §6.1.3
 - [ ] P2-02 Verse box per §6.1.4
@@ -198,3 +198,26 @@ core uses, fed from get_block_editor_server_block_settings().
 New tests/integration/Blocks/EditorAssetsTest.php; editors.spec.mjs
 un-fixme'd (also fixed a networkidle-never-resolves wait bug on the
 Site Editor). All verify commands green.
+
+### P1-10 — e55a8b5
+Pattern group gets "align":"full" (alignfull) for full-bleed; dropped
+is-style-poster from the group (ttm-poster owns layout/colour now, style
+stays registered in inc/block-styles.php just unused here). Folded old
+.is-style-poster layout rules into .ttm-poster (padding 36 48 32 literal
+px, grid 1fr auto/32/end); kept its typography rule for the h3, added
+.ttm-poster h3.is-style-poster (needs the doubled class for specificity
+over .is-style-poster.is-style-poster) for margin-left/max-width/
+text-align/40px-desktop-featured-size. .ttm-poster .input: 260px, bg
+border. .ttm-poster .btn-ghost: replaced P1-06's solid-pill a11y override
+with SPEC's literal look (transparent/bg-text/1px-bg-border) -- re-reading
+"Colour vs a11y" now that the full picture is visible, this IS 01 §2.1's
+permitted exception, and the fidelity a11y row already excludes this
+selector from axe for exactly that reason, so P1-06's substitution wasn't
+needed. That exception surfaced tests/e2e/specs/screens.spec.mjs's
+separate "front" axe scan (no exclude) newly failing color-contrast on
+the poster button -- added the same exclude() there.
+
+New FrontPageTest::test_poster_is_full_width_and_has_no_mailto...; all 6
+poster fidelity rows un-fixme'd (poster-btn's transparent expectation
+fixed to Chrome's real computed rgba(0,0,0,0), same class of bug as
+mast-hub's margin-left:auto). All verify commands green.
