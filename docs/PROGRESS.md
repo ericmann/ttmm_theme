@@ -3,7 +3,7 @@ Branch: build/2026-09-21
 Started: 2026-09-21T05:15:08.115Z
 
 ## Tasks
-- [ ] P0-01 Branch, harness confirmation, fixtures mapping
+- [x] P0-01 Branch, harness confirmation, fixtures mapping
 - [ ] P0-02 Config and Clock
 - [ ] P0-03 Dates, Text and Html helpers
 - [ ] P0-04 Plugin composition root and API-version compat
@@ -82,3 +82,8 @@ Started: 2026-09-21T05:15:08.115Z
 
 ## Log
 (one entry per task, appended by implement)
+
+### P0-01 — 33d8341
+Verified full scaffold green: composer lint/test:unit, npm lint/test:unit/build, forbidden-patterns, and npm run test:integration (wp-env start ~42s, phpunit 2/2 pass) all pass on clean checkout. Added "wp-content/ttm-fixtures": "./docs/fixtures" mapping to .wp-env.json (kept ttm-tests/ttm-vendor mappings). Added BootTest::test_fixtures_are_mapped_into_the_container asserting file_exists() for verse-sample.json and classic-sample.html via WP_CONTENT_DIR. Documented the fixtures mapping in docs/SETUP.md under "How the integration harness works", including the wp-env destroy/start rebuild tip.
+Separately fixed docs/foundry.json: branchPrefix "poc/" collided with baseBranch "poc" (git can't hold both a "poc" ref and "poc/*" refs) — changed branchPrefix to "build/" so foundry_run_start could create the run branch at all. This is a pipeline-config fix, not a SPEC/PLAN task deliverable.
+wp-env image pull/start time: ~43s (first start this run; images were already cached locally).
