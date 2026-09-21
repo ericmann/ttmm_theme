@@ -52,13 +52,24 @@ async function login( page ) {
  * @return {Promise<void>}
  */
 async function assertBlocksRegistered( page ) {
-	await page.waitForLoadState( 'networkidle' );
+	// `networkidle` never resolves on the Site Editor -- it keeps a persistent heartbeat/autosave
+	// connection open -- so wait for the block registry itself to settle instead: every `ttm/*`
+	// block name to either be registered or have given up waiting.
+	const names = ttmBlockNames();
+	await page
+		.waitForFunction(
+			( blockNames ) =>
+				window.wp?.blocks &&
+				blockNames.every( ( n ) => window.wp.blocks.getBlockType( n ) ),
+			names,
+			{ timeout: 20000 }
+		)
+		.catch( () => {} );
 
 	expect(
 		await page.getByText( "doesn't include support for" ).count()
 	).toBe( 0 );
 
-	const names = ttmBlockNames();
 	const missing = await page.evaluate(
 		( blockNames ) =>
 			blockNames.filter(
@@ -70,7 +81,7 @@ async function assertBlocksRegistered( page ) {
 }
 
 test.describe( 'editor registration', () => {
-	test.fixme( 'editor-sed: Site Editor, front-page template @1280', async ( {
+	test( 'editor-sed: Site Editor, front-page template @1280', async ( {
 		page,
 	} ) => {
 		await page.setViewportSize( { width: 1280, height: 900 } );
@@ -81,7 +92,7 @@ test.describe( 'editor registration', () => {
 		await assertBlocksRegistered( page );
 	} );
 
-	test.fixme( 'editor-customizer: /wp-admin/customize.php @1280', async ( {
+	test( 'editor-customizer: /wp-admin/customize.php @1280', async ( {
 		page,
 	} ) => {
 		await page.setViewportSize( { width: 1280, height: 900 } );

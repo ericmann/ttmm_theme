@@ -48,6 +48,13 @@ npm run env:destroy        # wipe containers and database
 
 `WP_DEBUG_LOG` is on, so PHP notices land in `wp-content/debug.log` inside the container: `npx wp-env run cli tail -f /var/www/html/wp-content/debug.log`.
 
+`npm run build` must run before opening any `ttm/*` block in an editor (post editor, Site
+Editor, or Customizer) in wp-env — `npm run env:seed` runs it for you (SPEC §6.7). Without a
+build, `Blocks\Registrar` swaps each block's `editorScript` for a committed fallback
+(`plugins/ttm-core/assets/editor-fallback.js`, plain, no build step) instead of dropping it, so
+the block still shows up (server-side rendered) rather than "doesn't include support for the
+… block" — and an admin notice on every `wp-admin` screen tells you to build.
+
 ## Tests and checks
 
 These are the commands the Foundry pipeline runs after every task (`docs/foundry.json`) and CI runs on every push. All of them exit non-zero on failure.

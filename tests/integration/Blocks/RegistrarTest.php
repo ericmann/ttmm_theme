@@ -24,7 +24,7 @@ class RegistrarTest extends TTM_IntegrationTestCase {
 		}
 	}
 
-	public function test_editor_script_is_dropped_when_build_missing(): void {
+	public function test_missing_build_uses_fallback_editor_script_instead_of_dropping_it(): void {
 		// A ttm/* block name whose build output can never exist, so the "missing" branch is exercised
 		// regardless of whether this checkout has actually been built.
 		$metadata = [
@@ -34,6 +34,8 @@ class RegistrarTest extends TTM_IntegrationTestCase {
 
 		$filtered = Registrar::drop_missing_editor_script( $metadata );
 
-		$this->assertArrayNotHasKey( 'editorScript', $filtered );
+		$this->assertArrayHasKey( 'editorScript', $filtered );
+		$this->assertSame( 'ttm-core-editor-fallback', $filtered['editorScript'] );
+		$this->assertContains( 'ttm/does-not-exist-in-the-build', Registrar::fallback_blocks() );
 	}
 }

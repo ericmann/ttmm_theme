@@ -24,7 +24,7 @@
     "env:start": "wp-env start",
     "env:stop": "wp-env stop",
     "env:destroy": "wp-env destroy",
-    "env:seed": "wp-env run cli wp ttm seed",
+    "env:seed": "npm run build && wp-env run cli wp ttm seed",
     "env:cli": "wp-env run cli wp",
     "env:logs": "wp-env logs"
   },
