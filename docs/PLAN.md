@@ -812,7 +812,7 @@ Derived from docs/SPEC.md v0.2 on 2026-09-20. SPEC.md wins over this file.
 **Acceptance tests:** CellsTest::test_stale_year_section_shows_two_posts_without_dek; CellsTest::test_journal_rail_posts_per_page_comes_from_config; CellsTest::test_journal_stream_uses_config_slug (ttm_config renames sections.journal_slug); WritingCellTest::test_f1_shelf_lists_up_to_writing_shelf_limit (4 finished serials/stories → 4 rows); WritingCellTest::test_f2_plain_mode_excludes_lead_and_non_primary_posts; FrontPageStatesTest stale-year state asserting 2 rows and no ttm-item__dek.
 **Out of scope:** Other blocks' counts; the Seeder except a stale-year fixture if needed.
 **Verification:** verify set; npm run test:integration.
-**Depends on:** R0-02
+**Depends on:** R1-02
 
 ### R1-06: migrate:politics child mode files Politics posts under Opinion; close-comments purges once
 **Goal:** wp ttm migrate:politics --to=child adds the opinion term to every post in Politics (dry-run reports the count) and recomputes ttm_primary_category so PrimaryCategory::slug() is 'opinion'; migrate:close-comments detaches Cache\Purge for the batch (or updates comment_status/ping_status via $wpdb) and fires ttm_purge_urls exactly once at the end.
@@ -902,4 +902,4 @@ Derived from docs/SPEC.md v0.2 on 2026-09-20. SPEC.md wins over this file.
 **Acceptance tests:** scripts/test/convert-classic.test.js::reports core/html count separately from freeform (pure footnotes/report helper test that runs without block-library); tests/unit/ScaffoldTest::test_claude_md_names_custom_url_as_remote_post_site.
 **Out of scope:** SPEC.md edits (spec issues are for the owner).
 **Verification:** verify set.
-**Depends on:** R0-09
+**Depends on:** R1-09
