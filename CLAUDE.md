@@ -36,7 +36,7 @@ Plugin `plugins/ttm-core/src/` (PSR-4 `TTM\Core\`), dependency arrow points down
 - `Rest/` SeriesController, VerseController, LeadController · `Cli/` Loader, Command, *Command, Seeder · `Plugin.php` composition root
 - Blocks: `plugins/ttm-core/blocks/<name>/{block.json,render.php,index.js}`; editor JS `plugins/ttm-core/src/editor/`; entries from root `webpack.config.js`.
 
-Theme `themes/ttm-theme/`: `theme.json`, `style.css`, `functions.php`, `inc/{block-styles,patterns,image-sizes,template-hierarchy,bindings-compat,starter-content}.php`, `templates/*.html`, `parts/{header-front,header-inner,rail,footer}.html`, `patterns/*.php`, `assets/{css/ttm.css,css/editor.css,js/nav.js,js/variations.js,fonts/}`.
+Theme `themes/ttm-theme/`: `theme.json`, `style.css`, `functions.php`, `inc/{block-styles,patterns,image-sizes,bindings-compat,starter-content}.php`, `templates/*.html`, `parts/{header-front,header-inner,rail,footer}.html`, `patterns/*.php`, `assets/{css/ttm.css,css/editor.css,js/nav.js,js/variations.js,fonts/}`.
 
 Tests: `tests/unit` (Brain\Monkey), `tests/integration` (WP test suite in wp-env; `TTM_IntegrationTestCase`), `tests/e2e` (Playwright). Fixtures: `docs/fixtures/` (mapped into wp-env at `wp-content/ttm-fixtures`).
 
@@ -52,7 +52,7 @@ Tests: `tests/unit` (Brain\Monkey), `tests/integration` (WP test suite in wp-env
 - No `time()`, `date(`, `wp_date(`, `current_time(`, `current_datetime(`, `new DateTime*` outside `src/Support/Clock.php`.
 - No `posts_per_page => -1`, `nopaging => true`, `numberposts => -1`, `number => 0` under `plugins/ttm-core/src/` or `render.php`.
 - Derived data (series index, stats, top tags, lead id, verse) is read from options/transients, recomputed only on write hooks.
-- `wp_safe_remote_*` only in `Verse/Fetcher.php`, `Cache/Cloudflare.php`, `Newsletter/Handler.php`; targets never come from request input or admin-editable options except the validated `https` custom-url endpoint.
+- `wp_safe_remote_*` only in `Verse/Fetcher.php`, `Cache/Cloudflare.php`, `Newsletter/Provider/CustomUrl.php`; targets never come from request input or admin-editable options except the validated `https` custom-url endpoint.
 - No `eval|unserialize|extract|create_function|assert|system|exec|shell_exec|passthru|proc_open|curl_|file_get_contents('http|fopen('http` or variable-path `include`/`require` under `plugins/` or `themes/`; structured meta is JSON via `wp_json_encode`/`json_decode(..., true)`.
 - Secrets (`TTM_NEWSLETTER_API_KEY`, `TTM_CLOUDFLARE_API_TOKEN`, `TTM_CLOUDFLARE_ZONE_ID`) are constants: never in options, never `show_in_rest`, never printed.
 - Every non-`GET` REST route and every `admin_post_*`/settings save checks a capability and a nonce; public `ttm/v1` routes are `GET` with `permission_callback => '__return_true'`.

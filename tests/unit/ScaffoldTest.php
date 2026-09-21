@@ -24,6 +24,18 @@ class ScaffoldTest extends TestCase {
 		$this->assertSame( 3, $json['version'] );
 	}
 
+	/**
+	 * R1-15: the wp_safe_remote_* call site for the newsletter's custom-url provider is
+	 * Newsletter/Provider/CustomUrl.php, not Newsletter/Handler.php (Handler only decides
+	 * whether to forward -- see scripts/forbidden-patterns.sh rule 16's own allow-list).
+	 */
+	public function test_claude_md_names_custom_url_as_remote_post_site(): void {
+		$claude_md = (string) file_get_contents( dirname( TTM_CORE_DIR, 2 ) . '/CLAUDE.md' );
+
+		$this->assertStringContainsString( 'Newsletter/Provider/CustomUrl.php', $claude_md );
+		$this->assertStringNotContainsString( 'Newsletter/Handler.php', $claude_md );
+	}
+
 	public function test_brain_monkey_is_wired(): void {
 		\Brain\Monkey\Functions\when( 'esc_html' )->returnArg();
 		$this->assertSame( 'ok', esc_html( 'ok' ) );

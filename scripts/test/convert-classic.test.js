@@ -81,6 +81,34 @@ describe( 'transformFootnotes', () => {
 	} );
 } );
 
+describe( 'buildBlockReport (no jsdom/block-library needed)', () => {
+	// convert-classic.mjs's own report-counting logic, extracted to scripts/lib/report.mjs so
+	// this can be exercised without pulling in `jsdom` at all (convert-classic.mjs's top-level
+	// `require('jsdom')` only runs inside setUpBlockEditorEnvironment(), but Jest's dynamic
+	// `import()` of that file still fails to load under this environment the same way
+	// `@wordpress/block-library` does below -- spike Outcome B). PLAN P8-01's report contract:
+	// report.freeform and report.html are the `core/freeform`/`core/html` counts respectively,
+	// not one merged count.
+	it( 'reports core/html count separately from freeform', async () => {
+		const { buildBlockReport } = await import( '../lib/report.mjs' );
+
+		const fakeBlocks = [
+			{ name: 'core/paragraph' },
+			{ name: 'core/freeform' },
+			{ name: 'core/html' },
+			{ name: 'core/html' },
+		];
+
+		const report = buildBlockReport( fakeBlocks );
+
+		expect( report.freeform ).toBe( 1 );
+		expect( report.html ).toBe( 2 );
+		expect( report.blockCounts[ 'core/html' ] ).toBe( 2 );
+		expect( report.blockCounts[ 'core/freeform' ] ).toBe( 1 );
+		expect( report.blockCounts[ 'core/paragraph' ] ).toBe( 1 );
+	} );
+} );
+
 describe( 'convert-classic (rawHandler under jsdom)', () => {
 	const editor = loadEditor();
 	const maybeIt = editor ? it : it.skip;
