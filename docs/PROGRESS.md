@@ -6,7 +6,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P0-01 CSS coverage lint script and allow-list
 - [x] P0-02 Config keys for phase 2 and the fallback-literal test
 - [x] P0-03 Boundaries table, CSS budget and SETUP note
-- [ ] P0-04 Fidelity and editors Playwright skeletons (all rows fixme)
+- [x] P0-04 Fidelity and editors Playwright skeletons (all rows fixme)
 - [ ] P0-05 Screenshot script and phase-2 feedback folder
 - [ ] P0-06 Seeder prose library and tagline
 - [ ] P0-07 Seed rewrite — sections, journal and pages
@@ -67,3 +67,11 @@ New test_may_import_column_is_enforced_per_directory: builds a [file => [dir, us
 scripts/check-budget.mjs: cssBudgetBytes 33200 -> 40960 (CLAUDE.md already said 40960; this file was stale). Current ttm.css is 33070 bytes, well under.
 docs/SETUP.md: added Troubleshooting row for the wp-env stale-bind-mount "theme disappears" symptom -> `npx wp-env stop && npx wp-env start`.
 Verified: composer test:unit (134/134), composer lint (0 errors), npm run lint (budget prints ".../40960 bytes"), npm run test:unit, npm run build, forbidden-patterns.sh all green.
+
+### P0-04 — e761ded
+tests/e2e/fidelity.spec.mjs: every SPEC §6.2 row transcribed as test.fixme, grouped by id+viewport (rule-2, lead-row merged per the task rule), organized into test.describe zones matching §6.1 order. a11y/network "both" rows split into @1280/@390 tests each. tests/e2e/editors.spec.mjs: editor-sed, editor-customizer as fixme, reading ttm/* names from plugins/ttm-core/blocks/*/block.json at test time.
+tests/e2e/lib/presets.mjs: color(slug) reads theme.json palette, hex->rgb (rgba presets like divider pass through); px(n). tests/e2e/lib/style.mjs: computed(locator,prop), tracks(locator) (grid-template-columns -> number[]), before(locator,prop) (::before pseudo). tests/e2e/lib/urls.mjs: added ADMIN={user:'admin',pass:'password'}.
+playwright.config.mjs: new `fidelity` project (testDir:'.', testMatch on the two files), testIgnore added to desktop/phone.
+INTERPRETATION (important for future tasks): files are named fidelity.spec.mjs/editors.spec.mjs, not .spec.js as SPEC/PLAN literally say — Playwright's transform runs .js test files as CommonJS here, which can't require() the real-ESM lib/*.mjs helpers (confirmed failure under the actual `npm run test:e2e`); every existing tests/e2e/specs/*.mjs file already uses .mjs for this exact reason. Updated CLAUDE.md's two references and docs/SETUP.md to match; SPEC.md/PLAN.md still say .spec.js (not edited, not mine to touch) — later tasks whose "Files touched" says "tests/e2e/fidelity.spec.js" mean this file. Also avoided import.meta.url (same CJS-transform incompatibility) in favor of process.cwd()-relative paths.
+Test count: 78 total (76 fidelity + 2 editors), not the task text's "84 fidelity ... 2 editors" — SPEC §6.2 has 77 data rows, one duplicate (lead-row) merges, a11y/network double via "both" viewport; recounted from the live table, transcribed faithfully rather than padded.
+Verified: npm run lint clean; npm run test:e2e green (78 skipped, 48 phase-1 passed); ttm-theme confirmed still active theme after the run; wp-env stopped.
