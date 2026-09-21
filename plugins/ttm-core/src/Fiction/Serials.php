@@ -172,6 +172,29 @@ class Serials {
 	}
 
 	/**
+	 * Sanitized `ttm_purchase_links` for a series row (already sanitized on save; re-cast here
+	 * for callers that only have the raw row array).
+	 *
+	 * @param array<string, mixed> $row Series index row.
+	 * @return array<int, array{label:string, url:string}>
+	 */
+	public static function purchase_links( array $row ): array {
+		$links = get_term_meta( $row['id'], 'ttm_purchase_links', true );
+
+		return is_array( $links ) ? $links : [];
+	}
+
+	/**
+	 * `ttm_cover_id` attachment id for a series row, or 0 when none is set.
+	 *
+	 * @param array<string, mixed> $row Series index row.
+	 * @return int
+	 */
+	public static function cover_id( array $row ): int {
+		return (int) get_term_meta( $row['id'], 'ttm_cover_id', true );
+	}
+
+	/**
 	 * Series index rows that are fiction (`form !== nonfiction`).
 	 *
 	 * @return array<int, array<string, mixed>>
