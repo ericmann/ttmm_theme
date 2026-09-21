@@ -52,7 +52,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P4-06 Article and journal CSS including classic content
 - [x] P4-07 Push and manual check (Phase 4)
 - [x] P5-01 Archive query, pagination labels, section feeds, journal-in-main-feed
-- [ ] P5-02 archive-by-year and tag-filter blocks
+- [x] P5-02 archive-by-year and tag-filter blocks
 - [ ] P5-03 category-stats and most-read blocks
 - [ ] P5-04 Archive and search patterns, templates and CSS
 - [ ] P5-05 Push and manual check (Phase 5)
@@ -333,3 +333,6 @@ Pushed Phase 4 (build/2026-09-21, d8b9bee..ed80813) to origin. Manual check: NOT
 
 ### P5-01 — b6341fa
 Added Query\Archive: pre_get_posts on the main front-end query only (archive.per_page for category archives, journal.archive_per_page for Journal, ?tag= narrowing via sanitize_title, search/tag/date archives use archive.per_page, main feed excludes Journal via category__not_in when journal_in_main_feed is false); also filters render_block_core/query-pagination-next/-previous to swap the anchor text for the year-range label, only when the pagination's own query inherits the main query. Added Values::pagination_label (older/newer, same-year collapse, empty with no years) and the ttm/pagination-label binding source (no uses_context, reads global $wp_query, delegates to Archive::resolve_label() so the binding and the pagination-block relabeling share one implementation). Added functions.php's print_section_feeds() (wp_head, nav-order category feed links through the ttm_section_feeds filter, get_category_by_slug only per rule 1). Found two WP test-harness quirks while writing ArchiveTest: go_to() clears $_GET and only repopulates it from the target URL's own query string (so simulating ?tag= requires add_query_arg() on the URL, not setting $_GET beforehand); and go_to(home_url('/feed/')) doesn't produce a real is_feed() query in this environment, requiring the plain '/?feed=rss2' form instead. Full integration suite: 208 tests, 2 pre-existing/expected skips, 0 failures.
+
+### P5-02 — 685a15d
+Added ttm/archive-by-year (InnerBlocks container for one core/query) and ttm/tag-filter. Query\Archive gained render_block_data (increments Helpers::$archive_scope on seeing ttm/archive-by-year, before its inner blocks render) and render_block_core/post-template (while scope > 0, splits the rendered <li> rows by post-{id} class, groups by get_post_time('Y', false, $id), emits one ttm-archive-year div per year in encounter order — F15 keeps single-post years as their own group); archive-by-year's own render.php only decrements the scope and wraps the already-grouped $content, since WP renders a block's InnerBlocks before invoking its own render_callback. ttm/tag-filter reads Query\Stats::top_tags() on a category archive, links each to ?tag={slug} via add_query_arg, marks the active one (from get_query_var('tag'), already set by Archive::shape()) with tag-accent, and returns '' outside a category archive or with zero tags (F16). Full integration suite: 216 tests, 2 pre-existing/expected skips, 0 failures.
