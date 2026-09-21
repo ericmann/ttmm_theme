@@ -186,4 +186,33 @@ class SeederTest extends TTM_IntegrationTestCase {
 			$this->assertStringNotContainsStringIgnoringCase( 'lorem', $paragraph );
 		}
 	}
+
+	public function test_seeded_strip_series_are_in_progress_with_totals(): void {
+		( new Seeder() )->run( 'normal' );
+
+		$expected = [
+			'hardening-wordpress'    => [ 3, 6 ],
+			'the-consultants-ledger' => [ 5, 8 ],
+			'ordinary-time'          => [ 9, 12 ],
+		];
+
+		foreach ( $expected as $slug => [ $published, $total ] ) {
+			$row = \TTM\Core\Query\SeriesIndex::by_slug( $slug );
+			$this->assertNotNull( $row, "Missing series index row for {$slug}" );
+			$this->assertSame( 'in-progress', $row['status'], "{$slug} should be in-progress" );
+			$this->assertSame( $published, $row['published'], "{$slug} published count" );
+			$this->assertSame( $total, $row['total'], "{$slug} total parts" );
+		}
+
+		$term = get_term_by( 'slug', 'ordinary-time', 'series' );
+		$this->assertSame( 'Sundays', get_term_meta( $term->term_id, 'ttm_cadence', true ) );
+	}
+
+	public function test_seeded_quiet_ledger_latest_chapter_is_reconciliation(): void {
+		( new Seeder() )->run( 'normal' );
+
+		$chapter_12 = get_page_by_path( 'quiet-ledger-ch-12', OBJECT, 'post' );
+		$this->assertNotNull( $chapter_12 );
+		$this->assertSame( 'Reconciliation', get_post_meta( $chapter_12->ID, 'ttm_part_title', true ) );
+	}
 }

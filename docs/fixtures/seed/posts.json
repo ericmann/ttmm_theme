@@ -465,150 +465,163 @@
 		"tags": []
 	},
 	{
+		"tags": [],
+		"slug": "hardening-part-1",
+		"title": "Hardening WordPress, part 1: the config file nobody re-reads",
+		"categories": [
+			"security"
+		],
+		"days_ago": 20,
+		"excerpt": "Most `wp-config.php` files are written once, at launch, and never audited again.",
+		"paragraphs": 12,
+		"part_title": "Part 1"
+	},
+	{
+		"tags": [],
 		"slug": "quiet-ledger-ch-1",
 		"title": "The Quiet Ledger, Chapter 1",
 		"categories": [
 			"writing"
 		],
-		"days_ago": 380,
+		"days_ago": 331,
 		"excerpt": "Chapter 1 of The Quiet Ledger.",
-		"tags": [],
 		"part_title": "Chapter 1",
 		"paragraphs": 6
 	},
 	{
+		"tags": [],
 		"slug": "quiet-ledger-ch-2",
 		"title": "The Quiet Ledger, Chapter 2",
 		"categories": [
 			"writing"
 		],
-		"days_ago": 360,
+		"days_ago": 301,
 		"excerpt": "Chapter 2 of The Quiet Ledger.",
-		"tags": [],
 		"part_title": "Chapter 2",
 		"paragraphs": 6
 	},
 	{
+		"tags": [],
 		"slug": "quiet-ledger-ch-3",
 		"title": "The Quiet Ledger, Chapter 3",
 		"categories": [
 			"writing"
 		],
-		"days_ago": 340,
+		"days_ago": 271,
 		"excerpt": "Chapter 3 of The Quiet Ledger.",
-		"tags": [],
 		"part_title": "Chapter 3",
 		"paragraphs": 6
 	},
 	{
+		"tags": [],
 		"slug": "quiet-ledger-ch-4",
 		"title": "The Quiet Ledger, Chapter 4",
 		"categories": [
 			"writing"
 		],
-		"days_ago": 320,
+		"days_ago": 241,
 		"excerpt": "Chapter 4 of The Quiet Ledger.",
-		"tags": [],
 		"part_title": "Chapter 4",
 		"paragraphs": 6
 	},
 	{
+		"tags": [],
 		"slug": "quiet-ledger-ch-5",
 		"title": "The Quiet Ledger, Chapter 5",
 		"categories": [
 			"writing"
 		],
-		"days_ago": 300,
+		"days_ago": 211,
 		"excerpt": "Chapter 5 of The Quiet Ledger.",
-		"tags": [],
 		"part_title": "Chapter 5",
 		"paragraphs": 6
 	},
 	{
+		"tags": [],
 		"slug": "quiet-ledger-ch-6",
 		"title": "The Quiet Ledger, Chapter 6",
 		"categories": [
 			"writing"
 		],
-		"days_ago": 280,
+		"days_ago": 181,
 		"excerpt": "Chapter 6 of The Quiet Ledger.",
-		"tags": [],
 		"part_title": "Chapter 6",
 		"paragraphs": 6
 	},
 	{
+		"tags": [],
 		"slug": "quiet-ledger-ch-7",
-		"title": "The Quiet Ledger, Chapter 7",
+		"title": "The Quiet Ledger, Chapter 7: Going Concern",
 		"categories": [
 			"writing"
 		],
-		"days_ago": 260,
-		"excerpt": "Chapter 7 of The Quiet Ledger.",
-		"tags": [],
-		"part_title": "Chapter 7",
+		"days_ago": 151,
+		"excerpt": "The founder asks a question he already knows the answer to.",
+		"part_title": "Going Concern",
 		"paragraphs": 6
 	},
 	{
+		"tags": [],
 		"slug": "quiet-ledger-ch-8",
-		"title": "The Quiet Ledger, Chapter 8",
+		"title": "The Quiet Ledger, Chapter 8: Material Weakness",
 		"categories": [
 			"writing"
 		],
-		"days_ago": 240,
-		"excerpt": "Chapter 8 of The Quiet Ledger.",
-		"tags": [],
-		"part_title": "Chapter 8",
+		"days_ago": 121,
+		"excerpt": "Marta writes the sentence she cannot unwrite.",
+		"part_title": "Material Weakness",
 		"paragraphs": 6
 	},
 	{
+		"tags": [],
 		"slug": "quiet-ledger-ch-9",
-		"title": "The Quiet Ledger, Chapter 9",
+		"title": "The Quiet Ledger, Chapter 9: Depreciation",
 		"categories": [
 			"writing"
 		],
-		"days_ago": 220,
-		"excerpt": "Chapter 9 of The Quiet Ledger.",
-		"tags": [],
-		"part_title": "Chapter 9",
+		"days_ago": 91,
+		"excerpt": "The mill, the town, and a number that only goes down.",
+		"part_title": "Depreciation",
 		"paragraphs": 6
 	},
 	{
+		"tags": [],
 		"slug": "quiet-ledger-ch-10",
-		"title": "The Quiet Ledger, Chapter 10",
+		"title": "The Quiet Ledger, Chapter 10: The Auditor's Lunch",
 		"categories": [
 			"writing"
 		],
-		"days_ago": 200,
-		"excerpt": "Chapter 10 of The Quiet Ledger.",
-		"tags": [],
-		"part_title": "Chapter 10",
+		"days_ago": 61,
+		"excerpt": "Nobody in Harlan eats alone by accident.",
+		"part_title": "The Auditor's Lunch",
 		"paragraphs": 6
 	},
 	{
+		"tags": [],
 		"slug": "quiet-ledger-ch-11",
-		"title": "The Quiet Ledger, Chapter 11",
+		"title": "The Quiet Ledger, Chapter 11: Accruals",
 		"categories": [
 			"writing"
 		],
-		"days_ago": 180,
-		"excerpt": "Chapter 11 of The Quiet Ledger.",
-		"tags": [],
-		"part_title": "Chapter 11",
+		"days_ago": 31,
+		"excerpt": "What gets counted before it happens.",
+		"part_title": "Accruals",
 		"paragraphs": 6
 	},
 	{
+		"tags": [],
 		"slug": "quiet-ledger-ch-12",
-		"title": "The Quiet Ledger, Chapter 12",
+		"title": "The Quiet Ledger, Chapter 12: Reconciliation",
 		"categories": [
 			"writing"
 		],
-		"days_ago": 160,
-		"excerpt": "Chapter 12 of The Quiet Ledger.",
-		"tags": [],
-		"part_title": "Chapter 12",
+		"days_ago": 1,
+		"excerpt": "Marta finds the second set of books. The first set, it turns out, was the lie.",
+		"part_title": "Reconciliation",
 		"paragraphs": 6
 	},
 	{
+		"tags": [],
 		"slug": "quiet-ledger-ch-13",
 		"title": "The Quiet Ledger, Chapter 13",
 		"categories": [
@@ -616,158 +629,445 @@
 		],
 		"days_ago": -6,
 		"excerpt": "Chapter 13 of The Quiet Ledger.",
-		"tags": [],
 		"part_title": "Chapter 13",
 		"future": true,
 		"paragraphs": 6
 	},
 	{
-		"slug": "salt-iron-ch-1",
-		"title": "Salt and Iron, Chapter 1",
+		"tags": [],
+		"slug": "failover-ch-1",
+		"title": "Failover, Chapter 1",
 		"categories": [
 			"writing"
 		],
-		"days_ago": 585,
-		"excerpt": "Chapter 1 of Salt and Iron.",
-		"tags": [],
+		"days_ago": 370,
+		"excerpt": "Chapter 1 of Failover.",
 		"part_title": "Chapter 1",
 		"paragraphs": 5
 	},
 	{
-		"slug": "salt-iron-ch-2",
-		"title": "Salt and Iron, Chapter 2",
+		"tags": [],
+		"slug": "failover-ch-2",
+		"title": "Failover, Chapter 2",
 		"categories": [
 			"writing"
 		],
-		"days_ago": 570,
-		"excerpt": "Chapter 2 of Salt and Iron.",
-		"tags": [],
+		"days_ago": 355,
+		"excerpt": "Chapter 2 of Failover.",
 		"part_title": "Chapter 2",
 		"paragraphs": 5
 	},
 	{
-		"slug": "salt-iron-ch-3",
-		"title": "Salt and Iron, Chapter 3",
+		"tags": [],
+		"slug": "failover-ch-3",
+		"title": "Failover, Chapter 3",
 		"categories": [
 			"writing"
 		],
-		"days_ago": 555,
-		"excerpt": "Chapter 3 of Salt and Iron.",
-		"tags": [],
+		"days_ago": 340,
+		"excerpt": "Chapter 3 of Failover.",
 		"part_title": "Chapter 3",
 		"paragraphs": 5
 	},
 	{
-		"slug": "salt-iron-ch-4",
-		"title": "Salt and Iron, Chapter 4",
+		"tags": [],
+		"slug": "failover-ch-4",
+		"title": "Failover, Chapter 4",
 		"categories": [
 			"writing"
 		],
-		"days_ago": 540,
-		"excerpt": "Chapter 4 of Salt and Iron.",
-		"tags": [],
+		"days_ago": 325,
+		"excerpt": "Chapter 4 of Failover.",
 		"part_title": "Chapter 4",
 		"paragraphs": 5
 	},
 	{
-		"slug": "salt-iron-ch-5",
-		"title": "Salt and Iron, Chapter 5",
+		"tags": [],
+		"slug": "failover-ch-5",
+		"title": "Failover, Chapter 5",
 		"categories": [
 			"writing"
 		],
-		"days_ago": 525,
-		"excerpt": "Chapter 5 of Salt and Iron.",
-		"tags": [],
+		"days_ago": 310,
+		"excerpt": "Chapter 5 of Failover.",
 		"part_title": "Chapter 5",
 		"paragraphs": 5
 	},
 	{
-		"slug": "salt-iron-ch-6",
-		"title": "Salt and Iron, Chapter 6",
+		"tags": [],
+		"slug": "failover-ch-6",
+		"title": "Failover, Chapter 6",
 		"categories": [
 			"writing"
 		],
-		"days_ago": 510,
-		"excerpt": "Chapter 6 of Salt and Iron.",
-		"tags": [],
+		"days_ago": 295,
+		"excerpt": "Chapter 6 of Failover.",
 		"part_title": "Chapter 6",
 		"paragraphs": 5
 	},
 	{
-		"slug": "salt-iron-ch-7",
-		"title": "Salt and Iron, Chapter 7",
+		"tags": [],
+		"slug": "failover-ch-7",
+		"title": "Failover, Chapter 7",
 		"categories": [
 			"writing"
 		],
-		"days_ago": 495,
-		"excerpt": "Chapter 7 of Salt and Iron.",
-		"tags": [],
+		"days_ago": 280,
+		"excerpt": "Chapter 7 of Failover.",
 		"part_title": "Chapter 7",
 		"paragraphs": 5
 	},
 	{
-		"slug": "salt-iron-ch-8",
-		"title": "Salt and Iron, Chapter 8",
+		"tags": [],
+		"slug": "failover-ch-8",
+		"title": "Failover, Chapter 8",
 		"categories": [
 			"writing"
 		],
-		"days_ago": 480,
-		"excerpt": "Chapter 8 of Salt and Iron.",
-		"tags": [],
+		"days_ago": 265,
+		"excerpt": "Chapter 8 of Failover.",
 		"part_title": "Chapter 8",
 		"paragraphs": 5
 	},
 	{
-		"slug": "salt-iron-ch-9",
-		"title": "Salt and Iron, Chapter 9",
+		"tags": [],
+		"slug": "failover-ch-9",
+		"title": "Failover, Chapter 9",
 		"categories": [
 			"writing"
 		],
-		"days_ago": 465,
-		"excerpt": "Chapter 9 of Salt and Iron.",
-		"tags": [],
+		"days_ago": 250,
+		"excerpt": "Chapter 9 of Failover.",
 		"part_title": "Chapter 9",
 		"paragraphs": 5
 	},
 	{
-		"slug": "story-the-long-commute",
-		"title": "The Long Commute",
+		"tags": [],
+		"slug": "salt-water-wires-ch-1",
+		"title": "Salt Water Wires, Chapter 1",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 745,
+		"excerpt": "Chapter 1 of Salt Water Wires.",
+		"part_title": "Chapter 1",
+		"paragraphs": 3
+	},
+	{
+		"tags": [],
+		"slug": "salt-water-wires-ch-2",
+		"title": "Salt Water Wires, Chapter 2",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 730,
+		"excerpt": "Chapter 2 of Salt Water Wires.",
+		"part_title": "Chapter 2",
+		"paragraphs": 3
+	},
+	{
+		"tags": [],
+		"slug": "salt-water-wires-ch-3",
+		"title": "Salt Water Wires, Chapter 3",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 715,
+		"excerpt": "Chapter 3 of Salt Water Wires.",
+		"part_title": "Chapter 3",
+		"paragraphs": 3
+	},
+	{
+		"tags": [],
+		"slug": "salt-water-wires-ch-4",
+		"title": "Salt Water Wires, Chapter 4",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 700,
+		"excerpt": "Chapter 4 of Salt Water Wires.",
+		"part_title": "Chapter 4",
+		"paragraphs": 3
+	},
+	{
+		"tags": [],
+		"slug": "salt-water-wires-ch-5",
+		"title": "Salt Water Wires, Chapter 5",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 685,
+		"excerpt": "Chapter 5 of Salt Water Wires.",
+		"part_title": "Chapter 5",
+		"paragraphs": 3
+	},
+	{
+		"tags": [],
+		"slug": "salt-water-wires-ch-6",
+		"title": "Salt Water Wires, Chapter 6",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 670,
+		"excerpt": "Chapter 6 of Salt Water Wires.",
+		"part_title": "Chapter 6",
+		"paragraphs": 3
+	},
+	{
+		"tags": [],
+		"slug": "salt-water-wires-ch-7",
+		"title": "Salt Water Wires, Chapter 7",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 655,
+		"excerpt": "Chapter 7 of Salt Water Wires.",
+		"part_title": "Chapter 7",
+		"paragraphs": 3
+	},
+	{
+		"tags": [],
+		"slug": "salt-water-wires-ch-8",
+		"title": "Salt Water Wires, Chapter 8",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 640,
+		"excerpt": "Chapter 8 of Salt Water Wires.",
+		"part_title": "Chapter 8",
+		"paragraphs": 3
+	},
+	{
+		"tags": [],
+		"slug": "salt-water-wires-ch-9",
+		"title": "Salt Water Wires, Chapter 9",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 625,
+		"excerpt": "Chapter 9 of Salt Water Wires.",
+		"part_title": "Chapter 9",
+		"paragraphs": 3
+	},
+	{
+		"tags": [],
+		"slug": "salt-water-wires-ch-10",
+		"title": "Salt Water Wires, Chapter 10",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 610,
+		"excerpt": "Chapter 10 of Salt Water Wires.",
+		"part_title": "Chapter 10",
+		"paragraphs": 3
+	},
+	{
+		"tags": [],
+		"slug": "salt-water-wires-ch-11",
+		"title": "Salt Water Wires, Chapter 11",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 595,
+		"excerpt": "Chapter 11 of Salt Water Wires.",
+		"part_title": "Chapter 11",
+		"paragraphs": 3
+	},
+	{
+		"tags": [],
+		"slug": "salt-water-wires-ch-12",
+		"title": "Salt Water Wires, Chapter 12",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 580,
+		"excerpt": "Chapter 12 of Salt Water Wires.",
+		"part_title": "Chapter 12",
+		"paragraphs": 3
+	},
+	{
+		"tags": [],
+		"slug": "salt-water-wires-ch-13",
+		"title": "Salt Water Wires, Chapter 13",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 565,
+		"excerpt": "Chapter 13 of Salt Water Wires.",
+		"part_title": "Chapter 13",
+		"paragraphs": 3
+	},
+	{
+		"tags": [],
+		"slug": "salt-water-wires-ch-14",
+		"title": "Salt Water Wires, Chapter 14",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 550,
+		"excerpt": "Chapter 14 of Salt Water Wires.",
+		"part_title": "Chapter 14",
+		"paragraphs": 3
+	},
+	{
+		"tags": [],
+		"slug": "salt-water-wires-ch-15",
+		"title": "Salt Water Wires, Chapter 15",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 535,
+		"excerpt": "Chapter 15 of Salt Water Wires.",
+		"part_title": "Chapter 15",
+		"paragraphs": 3
+	},
+	{
+		"tags": [],
+		"slug": "salt-water-wires-ch-16",
+		"title": "Salt Water Wires, Chapter 16",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 520,
+		"excerpt": "Chapter 16 of Salt Water Wires.",
+		"part_title": "Chapter 16",
+		"paragraphs": 3
+	},
+	{
+		"tags": [],
+		"slug": "salt-water-wires-ch-17",
+		"title": "Salt Water Wires, Chapter 17",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 505,
+		"excerpt": "Chapter 17 of Salt Water Wires.",
+		"part_title": "Chapter 17",
+		"paragraphs": 3
+	},
+	{
+		"tags": [],
+		"slug": "salt-water-wires-ch-18",
+		"title": "Salt Water Wires, Chapter 18",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 490,
+		"excerpt": "Chapter 18 of Salt Water Wires.",
+		"part_title": "Chapter 18",
+		"paragraphs": 3
+	},
+	{
+		"tags": [],
+		"slug": "salt-water-wires-ch-19",
+		"title": "Salt Water Wires, Chapter 19",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 475,
+		"excerpt": "Chapter 19 of Salt Water Wires.",
+		"part_title": "Chapter 19",
+		"paragraphs": 3
+	},
+	{
+		"tags": [],
+		"slug": "salt-water-wires-ch-20",
+		"title": "Salt Water Wires, Chapter 20",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 460,
+		"excerpt": "Chapter 20 of Salt Water Wires.",
+		"part_title": "Chapter 20",
+		"paragraphs": 3
+	},
+	{
+		"tags": [],
+		"slug": "salt-water-wires-ch-21",
+		"title": "Salt Water Wires, Chapter 21",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 445,
+		"excerpt": "Chapter 21 of Salt Water Wires.",
+		"part_title": "Chapter 21",
+		"paragraphs": 3
+	},
+	{
+		"tags": [],
+		"slug": "salt-water-wires-ch-22",
+		"title": "Salt Water Wires, Chapter 22",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 430,
+		"excerpt": "Chapter 22 of Salt Water Wires.",
+		"part_title": "Chapter 22",
+		"paragraphs": 3
+	},
+	{
+		"tags": [],
+		"slug": "salt-water-wires-ch-23",
+		"title": "Salt Water Wires, Chapter 23",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 415,
+		"excerpt": "Chapter 23 of Salt Water Wires.",
+		"part_title": "Chapter 23",
+		"paragraphs": 3
+	},
+	{
+		"tags": [],
+		"slug": "salt-water-wires-ch-24",
+		"title": "Salt Water Wires, Chapter 24",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 400,
+		"excerpt": "Chapter 24 of Salt Water Wires.",
+		"part_title": "Chapter 24",
+		"paragraphs": 3
+	},
+	{
+		"tags": [
+			"fiction"
+		],
+		"slug": "story-the-last-cron-job",
+		"title": "The Last Cron Job",
 		"categories": [
 			"writing"
 		],
 		"days_ago": 40,
-		"excerpt": "A short story: The Long Commute.",
+		"excerpt": "A short story: The Last Cron Job.",
+		"paragraphs": 50
+	},
+	{
 		"tags": [
 			"fiction"
 		],
-		"paragraphs": 8
-	},
-	{
-		"slug": "story-a-quiet-frequency",
-		"title": "A Quiet Frequency",
+		"slug": "story-a-field-guide-to-empty-offices",
+		"title": "A Field Guide to Empty Offices",
 		"categories": [
 			"writing"
 		],
 		"days_ago": 90,
-		"excerpt": "A short story: A Quiet Frequency.",
+		"excerpt": "A short story: A Field Guide to Empty Offices.",
+		"paragraphs": 30
+	},
+	{
 		"tags": [
 			"fiction"
 		],
-		"paragraphs": 8
-	},
-	{
-		"slug": "story-the-last-migration",
-		"title": "The Last Migration",
+		"slug": "story-uptime",
+		"title": "Uptime",
 		"categories": [
 			"writing"
 		],
-		"days_ago": 200,
-		"excerpt": "A short story: The Last Migration.",
-		"tags": [
-			"fiction"
-		],
+		"days_ago": 150,
+		"excerpt": "A short story: Uptime.",
 		"featured_image": true,
-		"alt": "The Last Migration cover",
-		"paragraphs": 8
+		"alt": "Uptime cover",
+		"paragraphs": 15
 	}
 ]
