@@ -173,6 +173,10 @@ class Sources {
 			}
 		}
 
+		if ( self::in_politics( $post_id ) ) {
+			$ctx['politics'] = true;
+		}
+
 		return self::finalize( Values::meta_line( $parts, $ctx ), $block_instance, $attribute_name, true );
 	}
 
@@ -269,6 +273,24 @@ class Sources {
 		$post_id = (int) ( $block_instance->context['postId'] ?? 0 );
 
 		return $post_id ? get_post( $post_id ) : null;
+	}
+
+	/**
+	 * Whether a post carries the "politics" category (Opinion's child, 03 §1), in any position
+	 * — not just primary.
+	 *
+	 * @param int $post_id Post id.
+	 * @return bool
+	 */
+	private static function in_politics( int $post_id ): bool {
+		foreach ( wp_get_post_categories( $post_id ) as $category_id ) {
+			$category = get_term( $category_id, 'category' );
+			if ( $category && ! is_wp_error( $category ) && 'politics' === $category->slug ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

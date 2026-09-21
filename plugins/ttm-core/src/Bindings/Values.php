@@ -64,10 +64,12 @@ class Values {
 
 	/**
 	 * Join the requested parts (`date`, `reading`, `prev-part`) with " · "; `prev-part` renders
-	 * as a link "Part 2: {title}" (the only meta-line part that may carry HTML).
+	 * as a link "Part 2: {title}" (the only meta-line part that may carry HTML). When
+	 * `$ctx['politics']` is set, "Politics" is always appended last (03 §1: an Opinion post
+	 * also filed under the Politics child category), independent of `$parts`.
 	 *
-	 * @param string[]                                                                                      $parts Requested parts, in order.
-	 * @param array{date?: string, reading?: string, prev_part?: array{part:int, title:string, url:string}} $ctx Context.
+	 * @param string[]                                                                                                       $parts Requested parts, in order.
+	 * @param array{date?: string, reading?: string, prev_part?: array{part:int, title:string, url:string}, politics?: bool} $ctx Context.
 	 * @return string
 	 */
 	public static function meta_line( array $parts, array $ctx ): string {
@@ -99,6 +101,10 @@ class Values {
 					break;
 			}//end switch
 		}//end foreach
+
+		if ( ! empty( $ctx['politics'] ) ) {
+			$pieces[] = __( 'Politics', 'ttm-core' );
+		}
 
 		return implode( ' · ', $pieces );
 	}
