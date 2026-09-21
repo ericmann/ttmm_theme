@@ -1,0 +1,64 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "ttm/series-list",
+	"title": "Series List",
+	"category": "ttm",
+	"description": "Series rows from the series index (01 §4.17), with the F4 in-progress fallback.",
+	"textdomain": "ttm-core",
+	"attributes": {
+		"status": {
+			"type": "string",
+			"enum": [ "any", "in-progress", "complete", "hiatus" ],
+			"default": "in-progress"
+		},
+		"form": {
+			"type": "string",
+			"enum": [ "any", "nonfiction", "fiction" ],
+			"default": "any"
+		},
+		"inCategory": {
+			"type": "boolean",
+			"default": false
+		},
+		"limit": {
+			"type": "number",
+			"default": 0
+		},
+		"layout": {
+			"type": "string",
+			"enum": [ "rows", "grid-2", "grid-3" ],
+			"default": "rows"
+		},
+		"orderby": {
+			"type": "string",
+			"enum": [ "updated", "title", "started" ],
+			"default": "updated"
+		},
+		"showDek": {
+			"type": "boolean",
+			"default": true
+		},
+		"showCategories": {
+			"type": "boolean",
+			"default": true
+		},
+		"showCount": {
+			"type": "boolean",
+			"default": true
+		},
+		"previewState": {
+			"type": "string",
+			"default": "normal"
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": false,
+		"color": false,
+		"typography": false,
+		"spacing": false
+	},
+	"render": "file:./render.php",
+	"editorScript": "file:./index.js"
+}
