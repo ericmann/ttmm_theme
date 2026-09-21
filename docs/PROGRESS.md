@@ -61,7 +61,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P6-03 serial-hero block
 - [x] P6-04 story-tiles and book-grid blocks
 - [x] P6-05 Hub and Writing templates and CSS
-- [ ] P6-06 Push and manual check (Phase 6)
+- [x] P6-06 Push and manual check (Phase 6)
 - [ ] P7-01 Cache headers and Batcache
 - [ ] P7-02 Purge and Cloudflare adapter
 - [ ] P7-03 Newsletter handler, custom-url provider, settings
@@ -371,3 +371,7 @@ Added ttm/story-tiles (typographic tiles from Serials::stories(); F19 cover tile
 Added page-series.html (hub head + series-stats, series-featured, "All series" grid, newsletter-box), taxonomy-series.html (full-width series-featured with partsLimit:0 = no cap via $block->parsed_block['attrs'] to distinguish explicit-0 from defaulted-0, "Other series" via series-list excludeCurrent), page-writing.html (serial-hero, series-list form=fiction, series-toc variant=chapters reusing its own heading attr for "Recent chapters", story-tiles/book-grid in an aside with F20 :has() empty-state CSS). Added excludeCurrent bool to ttm/series-list. series-featured now also resolves the queried series term (before ttm_featured/auto-pick) so taxonomy-series.html shows the viewed series. newsletter-box pattern's Group got anchor:"newsletter". One of the 2 pre-existing skips (HierarchyTest's page-writing.html check) now resolves to a real pass.
 Measurement: ttm.css 27358 -> 32025 bytes; bumped scripts/check-budget.mjs cssBudgetBytes 28000 -> 33000 with a documenting comment.
 6 acceptance tests added. Full verify green: composer lint 0 errors, 97/97 unit, npm lint/build green, forbidden-patterns clean, 259 integration tests OK (1 pre-existing skip).
+
+### P6-06 — 29a4769
+Pushed build/2026-09-21 through P6-05 (c8f053a) to origin.
+Manual check: NOT VERIFIED (human) — /series/ vs badge 1f: header stats, featured series 5/7 with part list and dates, All series 2-col grid with status squares; /series/the-quiet-ledger/ renders the full part list and Other series; /writing/ vs 2d: cover with shadow (the only shadow on the site), 64px title, three buttons, stat row; tiles 2-col with one cover tile in colour; In print grid without shadows; /category/writing/ shows the same layout.
