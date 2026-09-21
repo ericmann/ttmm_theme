@@ -92,13 +92,9 @@ out=$(g 'echo|printf' plugins/ttm-core/src | grep -E "TTM_(NEWSLETTER_API_KEY|CL
 [ -n "$out" ] && { echo "$out"; hit "secret constant name outside a quoted string on an echo/printf line (SPEC rule 17)"; }
 
 # Rule 24: every tunable is a Config key -- bare numeric literals >= 2 outside Config.php fail
-# the build. Two allow-lists:
-#   - HTTP status codes ('status' => 404): not a tunable, it's the meaning of the response.
-#   - Cells.php / writing-cell/render.php: R1-02 is scoped to every *other* file; the Cells/
-#     writing-cell literals are a separate, already-queued R-task's job (R1-0x, "Cells/
-#     writing-cell literals") -- left as a deliberate, documented exception rather than
-#     silently widening this task.
-out=$( { grep -rnE "=>\s*[2-9][0-9]*\b|=>\s*[0-9]{2,}\b" plugins/ttm-core/src --include='*.php' 2>/dev/null | grep -v 'Config.php'; grep -rnE "=>\s*[2-9][0-9]*\b|=>\s*[0-9]{2,}\b" plugins/ttm-core/blocks --include='render.php' 2>/dev/null; } | grep -vE "'status'\s*=>\s*[0-9]{3}\b" | grep -v 'Query/Cells.php' | grep -v 'blocks/writing-cell/render.php' || true)
+# the build. One allow-list: HTTP status codes ('status' => 404), not a tunable -- it's the
+# meaning of the response.
+out=$( { grep -rnE "=>\s*[2-9][0-9]*\b|=>\s*[0-9]{2,}\b" plugins/ttm-core/src --include='*.php' 2>/dev/null | grep -v 'Config.php'; grep -rnE "=>\s*[2-9][0-9]*\b|=>\s*[0-9]{2,}\b" plugins/ttm-core/blocks --include='render.php' 2>/dev/null; } | grep -vE "'status'\s*=>\s*[0-9]{3}\b" || true)
 [ -n "$out" ] && { echo "$out"; hit "hard-coded tunable outside Config.php (SPEC rule 24)"; }
 
 # Rule 32: i18n -- bare strings echoed directly in render.php (excludes internal string

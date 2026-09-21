@@ -63,6 +63,7 @@ class Config {
 				'opinion'    => 2,
 			],
 			'cells.stale_year_days'            => 365,
+			'cells.stale_count'                => 2,
 			'journal.rail_count'               => 3,
 			'journal.rail_window_days'         => 30,
 			'journal.excerpt_words'            => 40,

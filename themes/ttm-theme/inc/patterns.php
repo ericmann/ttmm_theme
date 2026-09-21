@@ -32,7 +32,11 @@ add_action( 'init', __NAMESPACE__ . '\\register_pattern_categories' );
  * right below) so it must live outside that scanned directory entirely.
  *
  * Reads `cells.counts` through the plugin's Config when active (guarded: the theme must render
- * without erroring when ttm-core is inactive, SPEC §9), else falls back to 3.
+ * without erroring when ttm-core is inactive, SPEC §9), else falls back to 3. F9's stale-year
+ * handling (dropping the count to `cells.stale_count` and suppressing the dek) is entirely
+ * plugin-side (`Query\Cells`): this function never calls `Query\Cells` and its output does not
+ * vary per request (SPEC §3.1 rule 1 — the theme reads plugin data only via `ttm/*` bindings and
+ * blocks; the only plugin symbol it may touch directly is the guarded `Config`).
  */
 function register_section_cells(): void {
 	$sections = [
@@ -45,18 +49,10 @@ function register_section_cells(): void {
 	$counts = class_exists( '\TTM\Core\Config' ) ? (array) \TTM\Core\Config::get( 'cells.counts', [] ) : [];
 
 	foreach ( $sections as $ttm_slug => $ttm_name ) {
-		// F9: a section whose newest post is over cells.stale_year_days old shows its 2 most
-		// recent posts (Query\Cells::filter_query_vars() enforces the count at render time
-		// regardless of per_page below) with no dek at all -- omitted here, server-side,
-		// rather than only hidden by CSS, since it's a genuine "this content doesn't apply"
-		// state (SPEC §9: theme reads plugin data via a guarded call, doesn't query itself).
-		$ttm_is_stale = class_exists( '\TTM\Core\Query\Cells' ) && \TTM\Core\Query\Cells::is_stale_year( $ttm_slug );
-
 		$ttm_section = [
 			'slug'     => $ttm_slug,
 			'name'     => $ttm_name,
-			'per_page' => $ttm_is_stale ? 2 : ( $counts[ $ttm_slug ] ?? 3 ),
-			'show_dek' => ! $ttm_is_stale,
+			'per_page' => $counts[ $ttm_slug ] ?? 3,
 		];
 
 		ob_start();

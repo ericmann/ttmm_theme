@@ -165,6 +165,95 @@ class CellsTest extends TTM_IntegrationTestCase {
 		$this->assertSame( 2, $query['posts_per_page'] );
 	}
 
+	public function test_stale_year_reads_cached_stats_and_runs_no_query_when_warm(): void {
+		global $wpdb;
+
+		$this->set_now( '2026-09-20 12:00:00' );
+		$security = $this->category_id( 'security', 'Security' );
+
+		self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $security ],
+				'post_date'     => '2024-01-01 09:00:00',
+			]
+		);
+
+		$this->assertTrue( \TTM\Core\Query\Cells::is_stale_year( 'security' ) );
+
+		$queries_before = $wpdb->num_queries;
+		$this->assertTrue( \TTM\Core\Query\Cells::is_stale_year( 'security' ) );
+		$this->assertSame( $queries_before, $wpdb->num_queries );
+
+		// A publish transition flushes Query\Stats' transient, so the cached result changes.
+		self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $security ],
+				'post_date'     => '2026-09-19 09:00:00',
+			]
+		);
+
+		$this->assertFalse( \TTM\Core\Query\Cells::is_stale_year( 'security' ) );
+	}
+
+	public function test_stale_section_count_comes_from_config(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$security = $this->category_id( 'security', 'Security' );
+
+		self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $security ],
+				'post_date'     => '2024-01-01 09:00:00',
+			]
+		);
+
+		add_filter(
+			'ttm_config',
+			static function ( array $config ): array {
+				$config['cells.stale_count'] = 1;
+				return $config;
+			}
+		);
+		\TTM\Core\Config::reset();
+
+		$block = $this->make_block( [ 'ttmSection' => 'security' ] );
+		$query = apply_filters( 'query_loop_block_query_vars', [], $block, 1 );
+
+		$this->assertSame( 1, $query['posts_per_page'] );
+	}
+
+	public function test_stale_section_query_renders_no_excerpt_block_and_is_stale_class(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$security = $this->category_id( 'security', 'Security' );
+
+		self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $security ],
+				'post_title'    => 'Old Security Post',
+				'post_excerpt'  => 'A real excerpt that must not appear.',
+				'post_date'     => '2024-01-01 09:00:00',
+			]
+		);
+
+		$html = (string) do_blocks(
+			'<!-- wp:query {"queryId":0,"query":{"perPage":2,"postType":"post","inherit":false,"ttmSection":"security"}} -->' .
+			'<div class="wp-block-query">' .
+			'<!-- wp:post-template -->' .
+			'<!-- wp:post-title {"isLink":true} /-->' .
+			'<!-- wp:post-excerpt {"className":"ttm-item__dek"} /-->' .
+			'<!-- /wp:post-template -->' .
+			'</div>' .
+			'<!-- /wp:query -->'
+		);
+
+		$this->assertStringContainsString( 'is-stale', $html );
+		$this->assertStringNotContainsString( 'ttm-item__dek', $html );
+		$this->assertStringNotContainsString( 'A real excerpt', $html );
+	}
+
 	public function test_journal_rail_posts_per_page_comes_from_config(): void {
 		$this->category_id( 'journal', 'Journal' );
 

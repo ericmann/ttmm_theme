@@ -51,6 +51,64 @@ class BoundariesTest extends TestCase {
 	 */
 	private const NEVER_IMPORTS_BLOCKS = [ 'Cache', 'Verse', 'Newsletter' ];
 
+	/**
+	 * The only plugin classes theme PHP may reference directly (SPEC §3.1 rule 1): `Config`
+	 * itself, and the `Compat\Theme` notice class (the plugin-side half of the API-version
+	 * contract). Everything else must be reached through `ttm/*` blocks or bindings.
+	 *
+	 * @var string[]
+	 */
+	private const THEME_ALLOWED_PLUGIN_REFS = [ 'Config', 'Compat\Theme' ];
+
+	public function test_theme_php_references_only_config_from_the_plugin(): void {
+		$theme      = rtrim( TTM_THEME_DIR, '/' );
+		$violations = [];
+
+		foreach ( $this->php_files_recursive( $theme ) as $file ) {
+			$contents = (string) file_get_contents( $file );
+
+			if ( ! preg_match_all( '/\\\\?TTM\\\\Core\\\\([A-Za-z0-9_]+(?:\\\\[A-Za-z0-9_]+)*)/', $contents, $matches ) ) {
+				continue;
+			}
+
+			foreach ( $matches[1] as $reference ) {
+				$allowed = false;
+
+				foreach ( self::THEME_ALLOWED_PLUGIN_REFS as $ref ) {
+					if ( $reference === $ref || 0 === strpos( $reference, $ref . '\\' ) || 0 === strpos( $reference, $ref . '::' ) ) {
+						$allowed = true;
+						break;
+					}
+				}
+
+				if ( ! $allowed ) {
+					$violations[] = sprintf( '%s references TTM\\Core\\%s', $file, $reference );
+				}
+			}
+		}
+
+		$this->assertSame( [], $violations, "Theme PHP referencing plugin symbols other than Config/Compat\\Theme:\n" . implode( "\n", $violations ) );
+	}
+
+	/**
+	 * Every `.php` file anywhere under $dir.
+	 *
+	 * @param string $dir Absolute directory path.
+	 * @return string[]
+	 */
+	private function php_files_recursive( string $dir ): array {
+		$files    = [];
+		$iterator = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $dir, \FilesystemIterator::SKIP_DOTS ) );
+
+		foreach ( $iterator as $file ) {
+			if ( 'php' === strtolower( $file->getExtension() ) ) {
+				$files[] = $file->getPathname();
+			}
+		}
+
+		return $files;
+	}
+
 	public function test_no_directory_imports_a_later_row_of_the_spec_table(): void {
 		$src        = rtrim( TTM_CORE_DIR, '/' ) . '/src';
 		$violations = [];

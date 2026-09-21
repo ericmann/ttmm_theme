@@ -44,10 +44,14 @@ class Stats {
 	}
 
 	/**
-	 * `{count, first_year, last_year, series_count}` for a category, cached.
+	 * `{count, first_year, last_year, series_count, newest_date}` for a category, cached.
+	 *
+	 * `newest_date` (the newest publish-status post's `post_date`, or null with zero posts) is
+	 * what `Query\Cells::is_stale_year()` reads (F9) so no request-time `WP_Query` runs there --
+	 * this transient, flushed on the same `transition_post_status` hook, is the single source.
 	 *
 	 * @param int $term_id Category term id.
-	 * @return array{count:int, first_year:int, last_year:int, series_count:int}
+	 * @return array{count:int, first_year:int, last_year:int, series_count:int, newest_date:?string}
 	 */
 	public static function category( int $term_id ): array {
 		$key    = "ttm_category_stats_{$term_id}";
@@ -83,8 +87,11 @@ class Stats {
 			]
 		);
 
-		$first_year = ! empty( $first ) ? (int) Clock::at( get_post( $first[0] )->post_date )->format( 'Y' ) : 0;
-		$last_year  = ! empty( $last ) ? (int) Clock::at( get_post( $last[0] )->post_date )->format( 'Y' ) : 0;
+		$last_post = ! empty( $last ) ? get_post( $last[0] ) : null;
+
+		$first_year  = ! empty( $first ) ? (int) Clock::at( get_post( $first[0] )->post_date )->format( 'Y' ) : 0;
+		$last_year   = $last_post ? (int) Clock::at( $last_post->post_date )->format( 'Y' ) : 0;
+		$newest_date = $last_post ? $last_post->post_date : null;
 
 		$series_count = 0;
 		foreach ( SeriesIndex::all() as $row ) {
@@ -98,6 +105,7 @@ class Stats {
 			'first_year'   => $first_year,
 			'last_year'    => $last_year,
 			'series_count' => $series_count,
+			'newest_date'  => $newest_date,
 		];
 
 		set_transient( $key, $stats, (int) Config::get( 'stats.cache_seconds', 3600 ) );

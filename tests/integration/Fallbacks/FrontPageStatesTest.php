@@ -121,12 +121,9 @@ class FrontPageStatesTest extends TTM_IntegrationTestCase {
 			update_post_meta( $post_id, 'ttm_primary_category', $security->term_id );
 		}
 
-		// Re-fire 'init' so themes/ttm-theme/inc/patterns.php's per-request pattern
-		// registration re-evaluates Query\Cells::is_stale_year( 'security' ) now that Security
-		// actually has (old) posts -- it already ran once, with an empty category, during
-		// set_up().
-		do_action( 'init' );
-
+		// No do_action( 'init' ) re-fire needed: the pattern itself no longer varies by
+		// staleness (patterns.php never calls Query\Cells) -- the dek suppression and the
+		// posts_per_page drop both happen plugin-side, per request, in Query\Cells.
 		$html = (string) do_blocks( '<!-- wp:pattern {"slug":"ttm/section-cell-security"} /-->' );
 
 		$this->assertSame( 2, substr_count( $html, 'wp-block-post ' ) );

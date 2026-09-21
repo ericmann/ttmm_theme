@@ -15,20 +15,32 @@ use TTM\Core\Support\Clock;
 use TTM\Core\Support\Dates;
 use WP_Block;
 use WP_HTML_Tag_Processor;
-use WP_Query;
 
 /**
- * Filters `core/query` Query Loop blocks carrying a `ttmSection` context, and marks an
- * empty rendered section with `is-empty` (F17).
+ * Filters `core/query` Query Loop blocks carrying a `ttmSection` context, marks an empty
+ * rendered section with `is-empty` (F17), and suppresses the dek in a stale-year section (F9).
  */
 class Cells {
+
+	/**
+	 * Depth counter for "currently inside a stale-year section's `core/query` render" --
+	 * entered in `track_stale_scope()` (`render_block_data`, before the query's children
+	 * render), left in `mark_empty()` (`render_block_core/query`, after they have). Mirrors
+	 * `Blocks\Helpers::$archive_scope` (SPEC §4.2: purely block-render-scope state, no query
+	 * dependency, so it lives on the filter pair rather than in `Query\Archive`).
+	 *
+	 * @var int
+	 */
+	private static int $stale_scope = 0;
 
 	/**
 	 * Hook registration.
 	 */
 	public static function register(): void {
 		add_filter( 'query_loop_block_query_vars', [ self::class, 'filter_query_vars' ], 10, 3 );
+		add_filter( 'render_block_data', [ self::class, 'track_stale_scope' ] );
 		add_filter( 'render_block_core/query', [ self::class, 'mark_empty' ], 10, 3 );
+		add_filter( 'render_block_core/post-excerpt', [ self::class, 'suppress_stale_dek' ] );
 	}
 
 	/**
@@ -56,10 +68,11 @@ class Cells {
 
 			if ( self::is_stale_year( $section ) ) {
 				// F9: the section's newest post is over a year old -- still show what exists,
-				// but only the 2 most recent (regardless of age; dates get their year via
-				// ttm/short-date), and CSS drops the dek via the `is-stale` class mark_empty()
-				// adds once the query has actually rendered these 2 rows.
-				$query['posts_per_page'] = 2;
+				// but only the cells.stale_count most recent (regardless of age; dates get
+				// their year via ttm/short-date). The dek itself is dropped by
+				// suppress_stale_dek() while $stale_scope is entered, and mark_empty() adds
+				// the `is-stale` class once the query has actually rendered these rows.
+				$query['posts_per_page'] = (int) Config::get( 'cells.stale_count', 2 );
 			} else {
 				$counts = (array) Config::get( 'cells.counts', [] );
 				if ( isset( $counts[ $section ] ) ) {
@@ -136,7 +149,43 @@ class Cells {
 	}
 
 	/**
-	 * F17: add `is-empty` to a section cell's wrapper when it rendered no posts.
+	 * `render_block_data`: enter stale-section scope before a stale `core/query`'s children
+	 * render, so `suppress_stale_dek()` can drop their `post-excerpt` output. Mirrors
+	 * `Blocks\Helpers::track_archive_scope()`.
+	 *
+	 * @param array<string, mixed> $parsed_block Parsed block.
+	 * @return array<string, mixed>
+	 */
+	public static function track_stale_scope( array $parsed_block ): array {
+		if ( 'core/query' !== ( $parsed_block['blockName'] ?? '' ) ) {
+			return $parsed_block;
+		}
+
+		$section = (string) ( $parsed_block['attrs']['query']['ttmSection'] ?? '' );
+
+		if ( '' !== $section && self::is_stale_year( $section ) ) {
+			++self::$stale_scope;
+		}
+
+		return $parsed_block;
+	}
+
+	/**
+	 * `render_block_core/post-excerpt`: suppress the dek entirely while inside a stale-year
+	 * section's query (F9) -- the theme's pattern always includes the block; the plugin decides
+	 * whether it renders (SPEC §3.1 rule 1: the theme reads plugin data, it doesn't vary itself).
+	 *
+	 * @param string $content Rendered excerpt HTML.
+	 * @return string
+	 */
+	public static function suppress_stale_dek( string $content ): string {
+		return self::$stale_scope > 0 ? '' : $content;
+	}
+
+	/**
+	 * F17/F9: add `is-empty` to a section cell's wrapper when it rendered no posts, and
+	 * `is-stale` when its section is a stale year (F9) -- also leaves the scope
+	 * `track_stale_scope()` entered, once this query's children have fully rendered.
 	 *
 	 * The Query block itself only provides `query` as context to its children (it does not
 	 * use it), so the section slug is read from the block's own `query` attribute rather than
@@ -158,7 +207,15 @@ class Cells {
 			return $content;
 		}
 
-		if ( false !== strpos( $content, 'class="wp-block-post ' ) ) {
+		$is_stale = '' !== $section && self::is_stale_year( $section );
+
+		if ( $is_stale ) {
+			self::$stale_scope = max( 0, self::$stale_scope - 1 );
+		}
+
+		$is_empty = false === strpos( $content, 'class="wp-block-post ' );
+
+		if ( ! $is_empty && ! $is_stale ) {
 			return $content;
 		}
 
@@ -167,43 +224,44 @@ class Cells {
 			return $content;
 		}
 
-		$processor->add_class( 'is-empty' );
+		if ( $is_empty ) {
+			$processor->add_class( 'is-empty' );
+		}
+
+		if ( $is_stale ) {
+			$processor->add_class( 'is-stale' );
+		}
 
 		return $processor->get_updated_html();
 	}
 
 	/**
 	 * F9: whether a category's newest post is older than `cells.stale_year_days` (365 by
-	 * default) -- "if < 1 post in a year, drop the dek and show the 2 most recent regardless
-	 * of age". A category with no posts at all is not "stale" (F17's `is-empty` covers that).
+	 * default) -- "if < 1 post in a year, drop the dek and show the cells.stale_count most
+	 * recent regardless of age". A category with no posts at all is not "stale" (F17's
+	 * `is-empty` covers that).
 	 *
-	 * Public: `themes/ttm-theme/inc/patterns.php` calls this (guarded by `class_exists()`,
-	 * SPEC §9) to decide, per request, whether to compile the `post-excerpt` block into that
-	 * section's `ttm/section-cell-{slug}` pattern at all -- the theme reads plugin data, it
-	 * doesn't query for it itself (rule 1).
+	 * Reads `Query\Stats::category()`'s cached `newest_date` -- maintained by `Query\Stats` and
+	 * flushed on `transition_post_status` -- rather than running its own `WP_Query` (SPEC §3.2
+	 * rule 13: derived data lives in a transient, recomputed only on write hooks).
 	 *
 	 * @param string $section Category slug.
 	 * @return bool
 	 */
 	public static function is_stale_year( string $section ): bool {
-		$query = new WP_Query(
-			[
-				'category_name'       => $section,
-				'posts_per_page'      => 1,
-				'orderby'             => 'date',
-				'order'               => 'DESC',
-				'fields'              => 'ids',
-				'no_found_rows'       => true,
-				'ignore_sticky_posts' => 1,
-			]
-		);
+		$term = get_term_by( 'slug', $section, 'category' );
 
-		if ( empty( $query->posts ) ) {
+		if ( ! $term || is_wp_error( $term ) ) {
 			return false;
 		}
 
-		$newest = get_post( (int) $query->posts[0] );
-		$date   = $newest ? Clock::at( $newest->post_date ) : null;
+		$newest_date = Stats::category( (int) $term->term_id )['newest_date'] ?? null;
+
+		if ( null === $newest_date ) {
+			return false;
+		}
+
+		$date = Clock::at( (string) $newest_date );
 
 		if ( ! $date ) {
 			return false;

@@ -32,6 +32,7 @@ class ConfigTest extends TestCase {
 			'lead.cache_seconds',
 			'cells.counts',
 			'cells.stale_year_days',
+			'cells.stale_count',
 			'journal.rail_count',
 			'journal.rail_window_days',
 			'journal.excerpt_words',
