@@ -39,6 +39,8 @@ class Plugin {
 			Query\Stats::class,
 			Query\Lead::class,
 			Query\Cells::class,
+			Query\JournalExcerpt::class,
+			Bindings\Sources::class,
 			Editor\Sidebar::class,
 			Editor\Columns::class,
 			Admin\Page::class,
