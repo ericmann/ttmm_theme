@@ -80,6 +80,7 @@ class Config {
 			'writing.shelf_limit'          => 4,
 			'books.max'                    => 12,
 			'cli.batch'                    => 200,
+			'cli.series_tag_min'           => 3,
 
 			'archive.per_page'             => 12,
 			'archive.tag_filter_limit'     => 5,

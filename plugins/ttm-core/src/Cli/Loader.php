@@ -46,6 +46,12 @@ class Loader {
 				self::output( ( new ConvertCommand() )->revert( $args, $assoc ) );
 			}
 		);
+		\WP_CLI::add_command(
+			'ttm audit',
+			static function ( array $args, array $assoc ): void {
+				self::output_audit( ( new AuditCommand() )->run( $args, $assoc ), $assoc );
+			}
+		);
 	}
 
 	/**
@@ -90,6 +96,43 @@ class Loader {
 			);
 
 			\WP_CLI\Utils\format_items( 'table', $rows, $fields );
+		}//end if
+
+		if ( ! $result['ok'] ) {
+			\WP_CLI::halt( 1 );
+		}
+	}
+
+	/**
+	 * `ttm audit`'s own formatter: its rows carry a `flags` array and a `detail` array, which
+	 * `--format=table|csv` render as a joined string / JSON string, and `--format=json` keeps as-is.
+	 *
+	 * @param array{ok: bool, rows: array<int, array<string, mixed>>, messages: string[]} $result Command result.
+	 * @param array<string, mixed>                                                        $assoc  --format=table|csv|json.
+	 */
+	private static function output_audit( array $result, array $assoc ): void {
+		foreach ( $result['messages'] as $message ) {
+			\WP_CLI::log( $message );
+		}
+
+		$format = (string) ( $assoc['format'] ?? 'table' );
+
+		if ( 'json' === $format ) {
+			\WP_CLI::log( (string) wp_json_encode( $result['rows'] ) );
+		} elseif ( ! empty( $result['rows'] ) ) {
+			$rows = array_map(
+				static function ( array $row ): array {
+					return [
+						'id'     => $row['id'],
+						'slug'   => $row['slug'],
+						'flags'  => implode( ',', $row['flags'] ),
+						'detail' => (string) wp_json_encode( $row['detail'] ),
+					];
+				},
+				$result['rows']
+			);
+
+			\WP_CLI\Utils\format_items( 'csv' === $format ? 'csv' : 'table', $rows, [ 'id', 'slug', 'flags', 'detail' ] );
 		}
 
 		if ( ! $result['ok'] ) {
