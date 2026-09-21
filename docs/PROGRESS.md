@@ -65,7 +65,7 @@ Started: 2026-09-21T05:15:08.115Z
 - [x] P7-01 Cache headers and Batcache
 - [x] P7-02 Purge and Cloudflare adapter
 - [x] P7-03 Newsletter handler, custom-url provider, settings
-- [ ] P7-04 Jetpack unconnected-render check (assumption) and seed provider
+- [x] P7-04 Jetpack unconnected-render check (assumption) and seed provider
 - [ ] P7-05 Cache tuning: verse_boundary_hour, max_age_cap, min_age
 - [ ] P7-06 Newsletter tuning: token_ttl, rate limits
 - [ ] P7-07 Static audit: extend forbidden-patterns, run, fix
@@ -387,3 +387,8 @@ Added Cache\Purge (transition_post_status, publish<->other only, fires ttm_purge
 ### P7-03 — f18da2d
 Added Newsletter\Handler (admin_post(_nopriv)_ttm_subscribe: rate limit -> honeypot -> HMAC token current/previous window -> email validity, all failures return the same success redirect; forward via injectable set_forwarder() static for unit testability) and Newsletter\Provider\CustomUrl (Provider interface render() emits the token/honeypot form, no wp_create_nonce; subscribe() forwards via wp_safe_remote_post only when endpoint is https + wp_http_validate_url-valid). Registered custom-url in Providers::default_registry(). Added Newsletter\Settings tab (provider/endpoint/fallback email/list id; API key always masked as ••••). Added newsletter.api_key to Config::defaults(). Also fixed 3 pre-existing lint issues from P7-01/P7-02 surfaced by this run's full phpcs pass (Headers.php docblock alignment, undocumented high-timeout warnings on the two wp_safe_remote_post calls).
 10 acceptance tests added. Full verify green: composer lint 0 errors, 109/109 unit, npm lint/build green, forbidden-patterns clean, 277 integration tests OK (1 pre-existing skip).
+
+### P7-04 — f770f36
+Measurement: Jetpack unconnected renders form: NO. Live-verified in the wp-env container: `wp jetpack module activate subscriptions` fails ("Newsletter could not be activated") without a WordPress.com connection, so jetpack/subscriptions never registers at all (confirmed via WP_Block_Type_Registry and an empty do_blocks() output) — Outcome B, not the optimistic Outcome A.
+Added Seeder::seed_jetpack() (WP_CLI-guarded, network-failure-tolerant install/activate attempt, then live re-check of block registration rather than hardcoding the result) which sets ttm_settings.newsletter={provider:mailto, fallback_email:hello@example.com} when unregistered, else clears any provider override. Verified `npm run env:seed -- --reset` completes and produces the expected mailto fallback option.
+Full verify green: composer lint 0 errors, 109/109 unit, npm lint/build green, forbidden-patterns clean, 277 integration tests OK (1 pre-existing skip, WP_CLI never defined in PHPUnit so seed_jetpack() is a no-op there).
