@@ -1,0 +1,45 @@
+# These Things Matter — phase 2 (front-page fidelity) build progress
+Branch: (set by implement)
+Started: (set by implement)
+
+## Tasks
+- [ ] P0-01 CSS coverage lint script and allow-list
+- [ ] P0-02 Config keys for phase 2 and the fallback-literal test
+- [ ] P0-03 Boundaries table, CSS budget and SETUP note
+- [ ] P0-04 Fidelity and editors Playwright skeletons (all rows fixme)
+- [ ] P0-05 Screenshot script and phase-2 feedback folder
+- [ ] P0-06 Seeder prose library and tagline
+- [ ] P0-07 Seed rewrite — sections, journal and pages
+- [ ] P0-08 Seed rewrite — series and fiction
+- [ ] P0-09 Phase 0 push — baseline screenshots
+- [ ] P1-01 Full-width rules and unconstrained grids (rules 35/36)
+- [ ] P1-02 Front masthead per §6.1.1 (pattern, CSS, nav hub class)
+- [ ] P1-03 Front-page current section and nav label fill (`Nav\CurrentSection`)
+- [ ] P1-04 Verse copyright placement and `ttm/verse-copyright` binding
+- [ ] P1-05 Footer per §6.1.8
+- [ ] P1-06 Newsletter form contract — shared markup, provider chain, custom-url dev-accept, seed
+- [ ] P1-07 Spike — Jetpack Subscriptions widget POST contract
+- [ ] P1-08 Jetpack provider on the shared form
+- [ ] P1-09 Editor registration in every context (§6.7)
+- [ ] P1-10 Newsletter poster per §6.1.8
+- [ ] P1-11 Phase 1 push — chrome screenshots
+- [ ] P2-01 Lead story CSS and markup per §6.1.3
+- [ ] P2-02 Verse box per §6.1.4
+- [ ] P2-03 Journal excerpt hard cap and `ttm/category-count` entries format
+- [ ] P2-04 Journal rail per §6.1.5
+- [ ] P2-05 Tuning — `journal.excerpt_max_words`
+- [ ] P2-06 Phase 2 push — lead row screenshots
+- [ ] P3-01 Section rows, cells, cell headings and headline items per §6.1.6
+- [ ] P3-02 Technology cell — inner grid and featured item with image
+- [ ] P3-03 Writing cell per §6.1.6
+- [ ] P3-04 Series strip per §6.1.7 (`layout=strip`)
+- [ ] P3-05 Tuning — `cssBudgetBytes`
+- [ ] P3-06 Phase 3 push — section rows screenshots and allow-list under 10
+- [ ] P4-01 Full `3a` phone pass and ≤ 1024 pass
+- [ ] P4-02 a11y and network rows, zero-fixme guard
+- [ ] P4-03 Inner templates smoke and CI seeding
+- [ ] P4-04 Handoff, SETUP and final budget measurement
+- [ ] P4-05 Phase 4 push — final screenshots
+
+## Log
+(one entry per task, appended by implement)
