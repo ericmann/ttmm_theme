@@ -2684,25 +2684,6 @@ main.is-style-grid-8-4 h1 {
 	margin: 0;
 }
 
-@media (max-width: 720px) {
-
-	.ttm-hub-head {
-		grid-template-columns: 1fr;
-	}
-
-	.ttm-hub-head.is-style-grid-8-4 h1 {
-		font-size: 44px;
-	}
-
-	.ttm-series-featured__part {
-		grid-template-columns: 28px 1fr;
-	}
-
-	.ttm-series-featured__date {
-		grid-column: 2;
-	}
-}
-
 /* 4.19 series progress */
 .ttm-series-progress {
 	display: block;
@@ -3048,6 +3029,25 @@ main.is-style-grid-8-4 h1 {
 .ttm-series-featured__date {
 	font-size: 12px;
 	color: var(--wp--preset--color--neutral-700);
+}
+
+@media (max-width: 720px) {
+
+	.ttm-hub-head {
+		grid-template-columns: 1fr;
+	}
+
+	.ttm-hub-head.is-style-grid-8-4 h1 {
+		font-size: 44px;
+	}
+
+	.ttm-series-featured__part {
+		grid-template-columns: 28px 1fr;
+	}
+
+	.ttm-series-featured__date {
+		grid-column: 2;
+	}
 }
 
 .ttm-series-featured__all {

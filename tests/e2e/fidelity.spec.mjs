@@ -2766,6 +2766,12 @@ test.describe( 'hub', () => {
 		expect( t.length ).toBe( 1 );
 		const h1 = page.locator( '.ttm-hub-head h1' );
 		expect( await computed( h1, 'font-size' ) ).toBe( px( 44 ) );
+		// SPEC §6.7 ≤720: part rows are 28px 1fr with the date on a second line.
+		const part = page.locator( '.ttm-series-featured__part' ).first();
+		const partTracks = await tracks( part );
+		expect( partTracks.length ).toBe( 2 );
+		const date = page.locator( '.ttm-series-featured__date' ).first();
+		expect( await computed( date, 'grid-column-start' ) ).toBe( '2' );
 	} );
 
 	test( 'hub-head-layout: .ttm-hub-head descendants @1280 (rule 36)', async ( {
@@ -2843,6 +2849,22 @@ test.describe( 'single series', () => {
 			'.ttm-series-single .ttm-series-featured__part-dek'
 		);
 		expect( await deks.count() ).toBeGreaterThan( 0 );
+	} );
+
+	test( 'single-parts-phone: .ttm-series-single .ttm-series-featured__part @390', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.seriesHardening, 390 );
+		// SPEC §6.7 ≤720: part rows are 28px 1fr with the date on a second line.
+		const part = page
+			.locator( '.ttm-series-single .ttm-series-featured__part' )
+			.first();
+		const partTracks = await tracks( part );
+		expect( partTracks.length ).toBe( 2 );
+		const date = page
+			.locator( '.ttm-series-single .ttm-series-featured__date' )
+			.first();
+		expect( await computed( date, 'grid-column-start' ) ).toBe( '2' );
 	} );
 
 	test( 'single-other: .ttm-series-single__other .ttm-series-row @1280', async ( {
