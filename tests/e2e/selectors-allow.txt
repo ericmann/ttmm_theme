@@ -25,18 +25,18 @@ blockquote.is-style-pull cite # editor block style (04 §3)
 .wp-block-quote.is-style-pull cite # editor block style (04 §3)
 .entry-content blockquote:not(.is-style-pull) # editor block style (04 §3)
 .ttm-item h4 # P3-04 pending
-.ttm-newsletter-form__statement # P1-06 pending
-.ttm-footer__copyright:empty # P0-11 pending
-.ttm-lead__media.is-ratio-4-3 # P1-02 pending
+.ttm-newsletter-form__statement # state: only the None provider renders the statement; the seeded site never does
+.ttm-footer__copyright:empty # state: the copyright paragraph is empty until a verse is stored with footer placement
+.ttm-lead__media.is-ratio-4-3 # state: lead-story imageRatio 4-3; the front page uses 16-9
 .ttm-verse__copyright # editor block style (04 §3)
 .ttm-cell .wp-block-post-excerpt:empty # P3-04 pending
 .ttm-cell .wp-block-post:not(:first-child) .wp-block-post-featured-image # P3-04 pending
 .ttm-cell.is-style-span-2 .wp-block-post:first-child:not(:has(.ttm-item-featured__media img)) # P3-04 pending
 .ttm-writing-cell__footnote # P4-06 pending
 .ttm-series-mark.is-hiatus # P4-02 pending
-.ttm-series-strip:not(:has(.ttm-series-list)) # P0-08 pending
-.ttm-series-strip:has(.ttm-series-list.is-complete) .ttm-series-strip__heading # P0-08 pending
-.ttm-series-strip:has(.ttm-series-list.is-complete) .ttm-series-strip__heading-fallback # P0-08 pending
+.ttm-series-strip:not(:has(.ttm-series-list)) # state: strip with no series list rendered
+.ttm-series-strip:has(.ttm-series-list.is-complete) .ttm-series-strip__heading # state: strip heading when the listed series are all complete
+.ttm-series-strip:has(.ttm-series-list.is-complete) .ttm-series-strip__heading-fallback # state: fallback heading when the listed series are all complete
 .ttm-series-list.is-grid-3 # editor block style (04 §3)
 .ttm-series-row__dek # P4-02 pending
 .ttm-syndication # P2-01 pending
