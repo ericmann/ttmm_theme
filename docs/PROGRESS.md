@@ -43,7 +43,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P5-02 a11y, network, selectors and seed-hero-color rows; guards back to strict
 - [x] P5-03 Tuning — `cssBudgetBytes`
 - [x] P5-04 Handoff, SETUP/README notes and CI check
-- [ ] P5-05 Phase 5 push — final screenshots
+- [x] P5-05 Phase 5 push — final screenshots
 
 ## Log
 (one entry per task, appended by implement)
@@ -332,3 +332,20 @@ row marked complete. No CI change needed -- every new Playwright test
 this flight added lives in files npm run test:e2e already runs.
 Manual check: none (this task's own verification is reading
 HANDOFF.md once end to end, done above).
+
+### P5-05 — ebf010f
+Fresh wp-env stop/start/reseed, then full verify green (composer
+lint, unit 166; npm lint: budget 61439/61440, 0 pending coverage, 0
+tagged fixme; test:unit 40; build; forbidden-patterns);
+test:integration 480/480; test:e2e 432 passed / 0 skipped (every
+row is now a real test, guards permanently strict). Regenerated all
+14 phase-3 screenshots; confirmed via a direct Playwright check that
+front-1920.png and article-1920.png's .wp-site-blocks is a centred
+1280px column (clientWidth 1280, left 320) at a 1920px viewport on
+both / and the article. Pushed to origin.
+Manual check: NOT VERIFIED (human) -- open the article, journal
+post, Writing page and Security archive at 390 in a real phone
+browser against mock 3b/02 Responsive; confirm CI green on the
+branch including the e2e job; compare all 14 docs/feedback/phase-3
+PNGs against design_article/journal/serial.png and mocks 1e/1f end
+to end.
