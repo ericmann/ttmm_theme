@@ -41,7 +41,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P4-07 Phase 4 push — hub and Writing screenshots
 - [x] P5-01 390 and 1920 sweep of every screen
 - [x] P5-02 a11y, network, selectors and seed-hero-color rows; guards back to strict
-- [ ] P5-03 Tuning — `cssBudgetBytes`
+- [x] P5-03 Tuning — `cssBudgetBytes`
 - [ ] P5-04 Handoff, SETUP/README notes and CI check
 - [ ] P5-05 Phase 5 push — final screenshots
 
@@ -294,4 +294,20 @@ SerialHeroTest's regex-tolerant assertion (added in P4-04 to paper
 over this exact bug) to an exact match + &lt;p&gt; absence check; new
 SeriesFeaturedTest covers the dek the same way.
 CSS budget 61410/61440 (30 free).
+Manual check: none.
+
+### P5-03 — 1eaa04a
+Scanned whole file for exact duplicate declarations/rules: none found
+(same-selector hits like .is-style-grid-4 are legit base+override
+pairs). One real safe win: merged two directly-adjacent @media
+(max-width:720px) blocks with nothing between them; suppressed the
+resulting no-descending-specificity warning with the existing
+stylelint-disable idiom rather than reordering unrelated rules.
+Measurement: before 61410 bytes / budget 61440 -> after 61439 bytes
+/ budget 61440 (unchanged) -- 61440 is already the smallest 1024
+multiple >= the real size, so "round up" leaves it where it started.
+The flight's recurring single-digit-byte-headroom pattern since P3-05
+reflects a tight-but-correct budget, not a wrong number. No change
+to check-budget.mjs or CLAUDE.md. Full lint + test:e2e (432 passed)
+green, no regression from the merge.
 Manual check: none.
