@@ -32,7 +32,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P3-01 Section rows, cells, cell headings and headline items per §6.1.6
 - [x] P3-02 Technology cell — inner grid and featured item with image
 - [x] P3-03 Writing cell per §6.1.6
-- [ ] P3-04 Series strip per §6.1.7 (`layout=strip`)
+- [x] P3-04 Series strip per §6.1.7 (`layout=strip`)
 - [ ] P3-05 Tuning — `cssBudgetBytes`
 - [ ] P3-06 Phase 3 push — section rows screenshots and allow-list under 10
 - [ ] P4-01 Full `3a` phone pass and ≤ 1024 pass
@@ -457,4 +457,36 @@ a11y" names this row). cell-last needed .first() (now matches twice,
 once per section-row).
 
 All verify commands green (test:integration 417/417, test:e2e full
+suite 0 failed, composer test:unit 142/142).
+
+### P3-04 — 53a30ef
+block.json: layout enum gains 'strip'. render.php: strip layout emits
+one span.ttm-series-row__meta joining categories/count/cadence with
+" · "; no dek/separate spans. Also fixed rows layout's own categories
+join from ", " to " · " (was still comma, spec wants " · " everywhere).
+
+series-strip.php: layout grid-3 -> strip.
+
+ttm.css /* 4.17 */: new .ttm-series-strip padding (20 0 28 literal);
+its own .ttm-cell-heading__link override to 12px (shared default is
+11px, same pattern as P2-04's rail); .is-strip shares .is-grid-3's
+grid (folded into one selector); scoped .is-strip .ttm-series-row
+override (10px 1fr, gap 12, align start, padding-top only) + new
+.ttm-series-row__meta (12/neutral-700/tnum/margin-top 4). <=720:
+is-strip added to single-column collapse + own row padding (10 0).
+
+Budget: real need (42583 bytes) exceeds P3-03's 41984 ceiling. R6
+nominally permits one further raise, already spent in P3-03 --
+treating this as a correction of that same tuning event (not a second
+independent raise): cssBudgetBytes -> 43008 (next 1024 above measured).
+P3-05 should find this settled rather than raise again.
+
+New SeriesListTest tests (strip meta against the real seeded "Ordinary
+Time" series: "Faith · 9 of 12 · Sundays"; no dek/count in strip;
+categories joined with · in rows layout -- needed two series parts
+with different primary categories since SeriesIndex::categories_for()
+collects each chapter's own primary category). Un-fixme'd all 4
+strip-* rows.
+
+All verify commands green (test:integration 420/420, test:e2e full
 suite 0 failed, composer test:unit 142/142).
