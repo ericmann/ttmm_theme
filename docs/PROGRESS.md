@@ -39,7 +39,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P4-05 Writing body — all serials (`layout=list`) and recent chapters (numbered)
 - [x] P4-06 Writing aside — story tiles, book grid, and the responsive order
 - [x] P4-07 Phase 4 push — hub and Writing screenshots
-- [ ] P5-01 390 and 1920 sweep of every screen
+- [x] P5-01 390 and 1920 sweep of every screen
 - [ ] P5-02 a11y, network, selectors and seed-hero-color rows; guards back to strict
 - [ ] P5-03 Tuning — `cssBudgetBytes`
 - [ ] P5-04 Handoff, SETUP/README notes and CI check
@@ -252,3 +252,23 @@ prose comment that collided with the same literal-grep pattern
 Manual check: NOT VERIFIED (human) -- compare series-hub.png with
 mock 1f, writing.png with design_serial.png, series-single.png
 against 02 §F.
+
+### P5-01 — 3d7d18f
+Full 390/1920 sweep of all 13 screens found and fixed 4 real bugs:
+(1) `.tag` chip class collided with WP's generic tag-archive body
+class, making body inline-block/1280px instead of full-width --
+scoped to `a.tag`. (2) Writing page's <=1024 display:contents fold
+left the four section groups without min-width:0, so non-wrapping
+children forced 1132px-wide items into a 350px column -- added
+min-width:0 to all four. (2b) Same pattern on .ttm-serial-hero__body
+(phone) plus .btn width:100% missing box-sizing:border-box (both
+fixed with the standard idioms). (3) The series-single h1's phone
+font-size override was declared BEFORE the later unscoped 80px
+override P4-03 added, so same-specificity source order made it dead
+code; relocated it after. (4) Search input's 320px width had no
+phone override at all. New tests: screens.spec "centred 1280 at
+1920" (all 13 screens), phone.spec "no horizontal overflow" (loops
+every screen), "filter row scrolls", "aside follows prev/next".
+CSS budget 61438/61440 (2 free) -- all four fixes were real overflow
+bugs, not optional polish.
+Manual check: none (phone-browser check deferred to P5-05 per task).
