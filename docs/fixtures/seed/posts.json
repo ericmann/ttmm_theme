@@ -493,14 +493,14 @@
 			"wordpress"
 		],
 		"slug": "hardening-part-1",
-		"title": "Hardening WordPress, part 1: the config file nobody re-reads",
+		"title": "Hardening WordPress, part 1: what a scanner sees \u2014 and what it can\u2019t",
 		"categories": [
 			"security"
 		],
 		"days_ago": 20,
 		"excerpt": "Most `wp-config.php` files are written once, at launch, and never audited again.",
 		"paragraphs": 12,
-		"part_title": "Part 1"
+		"part_title": "What a scanner sees \u2014 and what it can\u2019t"
 	},
 	{
 		"tags": [

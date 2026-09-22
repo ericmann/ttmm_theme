@@ -1,6 +1,6 @@
 .is-style-rule-1 # editor block style (04 §3)
 .is-style-grid-5-7 # P3-04 pending
-.is-style-grid-3 # P2-01 pending
+.is-style-grid-3 # editor block style (04 §3)
 .is-style-grid-2 # P4-01 pending
 .is-style-zone # editor block style (04 §3)
 .is-style-tile # editor block style (04 §3)
