@@ -46,7 +46,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P5-05 Phase 5 push — final screenshots
 - [x] R1-01 Search result rows must be whole-row links
 - [x] R1-02 Rule 36: remove `layout: constrained` from inside grid groups
-- [ ] R1-03 Fix the dead ≤720 override on the series featured part rows
+- [x] R1-03 Fix the dead ≤720 override on the series featured part rows
 - [ ] R1-04 Archive row dates and the serial meta line must match SPEC's literal text
 - [ ] R1-05 Close the test gaps on the flight's own late fixes
 - [ ] R1-06 Raise cssBudgetBytes and restore the declarations dropped under it
@@ -373,3 +373,9 @@ Verified nesting sweep: grep -rl constrained across themes/ttm-theme/{templates,
 Tests added (fidelity.spec.mjs): wr-body-layout (.ttm-writing-body descendants @1280), ar-body-layout (.ttm-archive-body), jr-head-layout (.ttm-journal-head), hub-head-layout (.ttm-hub-head), hub-featured-layout (.ttm-series-featured) — each asserts no descendant class matches /is-layout-constrained/, covering every is-style-grid-* screen per the task.
 Verified: full foundry_verify green (composer lint, unit x2, npm lint/build, forbidden-patterns, integration 480/480, e2e 438/438 incl. 5 new rows).
 Nothing further needed by later tasks.
+
+### R1-03 — 0bd17fa
+Root cause: @media(max-width:720px) block at ttm.css:2687 for .ttm-series-featured__part/__date came BEFORE their unscoped base rules (now ~3012/3048), so source order made the base rule win at every viewport despite equal specificity (media adds none). Moved the whole media block (also carrying .ttm-hub-head and .ttm-hub-head.is-style-grid-8-4 h1, which were already safe) to sit after .ttm-series-featured__date's base rule. Byte-neutral move: budget still 61439/61440.
+Re-scanned the whole file programmatically (every @media selector vs. any later unscoped same-specificity selector) after the fix — zero further hits.
+Tests: hub-phone extended with `.ttm-series-featured__part` track-count===2 and `.ttm-series-featured__date` grid-column-start:2 @390 on the hub; new single-parts-phone mirrors both assertions on /series/hardening-wordpress/. Both would have failed pre-fix (3 tracks).
+Verified: full foundry_verify green (integration 480/480, e2e 439/439). Manually confirmed via npm run screenshots that series-hub.png/series-single.png are unchanged at 1280 (desktop untouched); reverted the incidental search.png diff (from R1-01, out of this task's file scope).
