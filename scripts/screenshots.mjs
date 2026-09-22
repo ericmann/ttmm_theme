@@ -1,57 +1,106 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
 /**
- * `npm run screenshots` (SPEC §6.6, P0-05): writes the seven-PNG comparison set into
- * `docs/feedback/phase-2/` from the running, seeded site so the owner can compare against
- * `docs/feedback/design_*.png`. Requires `wp-env start` + `npm run env:seed` first.
+ * `npm run screenshots` (SPEC §6.11, P0-12): writes the fourteen-PNG phase-3 comparison set into
+ * `docs/feedback/phase-3/` from the running, seeded site so the owner can compare each inner
+ * page against its mock (see `docs/feedback/phase-3/README.md`). Requires `wp-env start` +
+ * `wp ttm seed --reset` first. The phase-2 set in `docs/feedback/phase-2/` is history and is
+ * left as it was.
  */
 import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 /**
- * The seven files this script writes, in write order. `viewport` is set before navigating;
- * `fullPage` shots capture the whole scrollable page; `selector` clips to one element;
- * `range` is `[fromSelector, toSelector]` -- top of the first to bottom of the second, full
- * content width (see `unionClip`).
+ * The fourteen files this script writes, in write order. `path` is the seeded URL (SPEC §1
+ * "Done"); `viewport` is set before navigating; every phase-3 shot is `fullPage`. The
+ * `selector`/`range` forms (one element, or top of the first to bottom of the second at full
+ * content width -- see `unionClip`) are kept for ad-hoc crops.
  *
- * @type {Array<{file: string, viewport: {width: number, height: number}, fullPage?: boolean, selector?: string, range?: [string, string], rangeEdge?: ['first' | 'last', 'first' | 'last']}>}
+ * @type {Array<{file: string, path: string, viewport: {width: number, height: number}, fullPage?: boolean, selector?: string, range?: [string, string], rangeEdge?: ['first' | 'last', 'first' | 'last']}>}
  */
+const DESKTOP = { width: 1280, height: 900 };
+const PHONE = { width: 390, height: 844 };
+const WIDE = { width: 1920, height: 900 };
+
 export const ZONES = [
 	{
-		file: 'front-1280.png',
-		viewport: { width: 1280, height: 900 },
+		file: 'article.png',
+		path: '/signing-your-options-table/',
+		viewport: DESKTOP,
 		fullPage: true,
 	},
 	{
-		file: 'front-390.png',
-		viewport: { width: 390, height: 844 },
+		file: 'journal.png',
+		path: '/journal-post-1/',
+		viewport: DESKTOP,
 		fullPage: true,
 	},
 	{
-		file: 'masthead.png',
-		viewport: { width: 1280, height: 900 },
-		selector: '.ttm-masthead-front',
+		file: 'writing.png',
+		path: '/writing/',
+		viewport: DESKTOP,
+		fullPage: true,
 	},
 	{
-		file: 'lead-row.png',
-		viewport: { width: 1280, height: 900 },
-		selector: '.ttm-lead-row',
+		file: 'archive-security.png',
+		path: '/category/security/',
+		viewport: DESKTOP,
+		fullPage: true,
 	},
 	{
-		file: 'section-rows.png',
-		viewport: { width: 1280, height: 900 },
-		range: [ '.ttm-section-row', '.ttm-section-row' ],
-		rangeEdge: [ 'first', 'last' ],
+		file: 'series-hub.png',
+		path: '/series/',
+		viewport: DESKTOP,
+		fullPage: true,
 	},
 	{
-		file: 'series-strip.png',
-		viewport: { width: 1280, height: 900 },
-		selector: '.ttm-series-strip',
+		file: 'series-single.png',
+		path: '/series/hardening-wordpress/',
+		viewport: DESKTOP,
+		fullPage: true,
 	},
 	{
-		file: 'poster-footer.png',
-		viewport: { width: 1280, height: 900 },
-		range: [ '.ttm-poster', '.ttm-footer' ],
+		file: 'search.png',
+		path: '/?s=ledger',
+		viewport: DESKTOP,
+		fullPage: true,
+	},
+	{
+		file: '404.png',
+		path: '/this-page-does-not-exist/',
+		viewport: DESKTOP,
+		fullPage: true,
+	},
+	{
+		file: 'article-390.png',
+		path: '/signing-your-options-table/',
+		viewport: PHONE,
+		fullPage: true,
+	},
+	{
+		file: 'journal-390.png',
+		path: '/journal-post-1/',
+		viewport: PHONE,
+		fullPage: true,
+	},
+	{
+		file: 'writing-390.png',
+		path: '/writing/',
+		viewport: PHONE,
+		fullPage: true,
+	},
+	{
+		file: 'archive-390.png',
+		path: '/category/security/',
+		viewport: PHONE,
+		fullPage: true,
+	},
+	{ file: 'front-1920.png', path: '/', viewport: WIDE, fullPage: true },
+	{
+		file: 'article-1920.png',
+		path: '/signing-your-options-table/',
+		viewport: WIDE,
+		fullPage: true,
 	},
 ];
 
@@ -87,7 +136,7 @@ export function unionClip( a, b ) {
 	return { x: left, y: top, width: right - left, height: bottom - top };
 }
 
-const OUT_DIR = join( 'docs', 'feedback', 'phase-2' );
+const OUT_DIR = join( 'docs', 'feedback', 'phase-3' );
 const BASE_URL = process.env.WP_BASE_URL || 'http://localhost:8888';
 
 /**
@@ -108,7 +157,7 @@ async function run() {
 
 	for ( const zone of ZONES ) {
 		await page.setViewportSize( zone.viewport );
-		await page.goto( BASE_URL + '/', { waitUntil: 'networkidle' } );
+		await page.goto( BASE_URL + zone.path, { waitUntil: 'networkidle' } );
 		await page.evaluate( () => document.fonts.ready );
 
 		// Scroll the full document height in viewport steps so every lazy-loaded image (below

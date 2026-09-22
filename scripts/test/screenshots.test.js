@@ -1,5 +1,5 @@
 /**
- * Tests for the P0-05 screenshot script's pure helpers (scripts/screenshots.mjs). Importing
+ * Tests for the screenshot script's pure helpers (scripts/screenshots.mjs; P0-05, extended in P0-12). Importing
  * the module does not launch Playwright -- the capture only runs when the file is executed
  * directly (see its own `import.meta.url` guard), so this is a safe, plain import here.
  */
@@ -16,18 +16,37 @@ beforeAll( async () => {
 } );
 
 describe( 'ZONES', () => {
-	it( 'zone list names the seven files from SPEC 6.6', () => {
-		const files = ZONES.map( ( zone ) => zone.file );
-
-		expect( files ).toEqual( [
-			'front-1280.png',
-			'front-390.png',
-			'masthead.png',
-			'lead-row.png',
-			'section-rows.png',
-			'series-strip.png',
-			'poster-footer.png',
+	it( 'ZONES lists the fourteen phase-3 files with paths', () => {
+		expect( ZONES.map( ( zone ) => [ zone.file, zone.path ] ) ).toEqual( [
+			[ 'article.png', '/signing-your-options-table/' ],
+			[ 'journal.png', '/journal-post-1/' ],
+			[ 'writing.png', '/writing/' ],
+			[ 'archive-security.png', '/category/security/' ],
+			[ 'series-hub.png', '/series/' ],
+			[ 'series-single.png', '/series/hardening-wordpress/' ],
+			[ 'search.png', '/?s=ledger' ],
+			[ '404.png', '/this-page-does-not-exist/' ],
+			[ 'article-390.png', '/signing-your-options-table/' ],
+			[ 'journal-390.png', '/journal-post-1/' ],
+			[ 'writing-390.png', '/writing/' ],
+			[ 'archive-390.png', '/category/security/' ],
+			[ 'front-1920.png', '/' ],
+			[ 'article-1920.png', '/signing-your-options-table/' ],
 		] );
+
+		const viewports = ZONES.map(
+			( zone ) => `${ zone.viewport.width }x${ zone.viewport.height }`
+		);
+		expect( viewports.slice( 0, 8 ) ).toEqual(
+			Array( 8 ).fill( '1280x900' )
+		);
+		expect( viewports.slice( 8, 12 ) ).toEqual(
+			Array( 4 ).fill( '390x844' )
+		);
+		expect( viewports.slice( 12 ) ).toEqual( [ '1920x900', '1920x900' ] );
+		expect( ZONES.every( ( zone ) => true === zone.fullPage ) ).toBe(
+			true
+		);
 	} );
 } );
 
