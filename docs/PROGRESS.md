@@ -47,7 +47,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] R1-01 Search result rows must be whole-row links
 - [x] R1-02 Rule 36: remove `layout: constrained` from inside grid groups
 - [x] R1-03 Fix the dead ≤720 override on the series featured part rows
-- [ ] R1-04 Archive row dates and the serial meta line must match SPEC's literal text
+- [x] R1-04 Archive row dates and the serial meta line must match SPEC's literal text
 - [ ] R1-05 Close the test gaps on the flight's own late fixes
 - [ ] R1-06 Raise cssBudgetBytes and restore the declarations dropped under it
 - [ ] R1-07 Seed fixture drift: the third book, and a tautological Sunday test
@@ -379,3 +379,9 @@ Root cause: @media(max-width:720px) block at ttm.css:2687 for .ttm-series-featur
 Re-scanned the whole file programmatically (every @media selector vs. any later unscoped same-specificity selector) after the fix — zero further hits.
 Tests: hub-phone extended with `.ttm-series-featured__part` track-count===2 and `.ttm-series-featured__date` grid-column-start:2 @390 on the hub; new single-parts-phone mirrors both assertions on /series/hardening-wordpress/. Both would have failed pre-fix (3 tracks).
 Verified: full foundry_verify green (integration 480/480, e2e 439/439). Manually confirmed via npm run screenshots that series-hub.png/series-single.png are unchanged at 1280 (desktop untouched); reverted the incidental search.png diff (from R1-01, out of this task's file scope).
+
+### R1-04 — 62fb550
+Root cause 1: ttm/short-date always appended the year when it differed from now (Dates::short()), so archive-by-year rows in the 2025 group (or any prior year) read "Nov 26, 2025" in a 72px column and wrapped, duplicating the year already shown as the 120px group label. Added source arg {"noYear":true} to Sources::short_date, backed by new pure formatter Values::short_date_no_year() (short_month + day, never a year); applied it only to category.html:19 and archive.html:17. Dates::short() itself and every other short-date caller (journal stream, search rows, hub part dates) untouched.
+Root cause 2: series-list/render.php's list/grid-3 meta line ucfirst'd the stored cadence; SPEC §6.5 wants it lowercase ("monthly"). Removed the mb_strtoupper/mb_substr capitalisation there only; serial-hero's stat value (ttm-stats__value) capitalisation is a separate code path, untouched.
+Tests: unit test_short_date_no_year_never_includes_a_year; integration test_archive_row_date_omits_year_but_journal_stream_keeps_it (same prior-year post/date: category.html drops the year, category-journal.html keeps "Nov 26, 2022"); SeriesListTest asserts lowercase "monthly"/"weekly" + assertStringNotContainsString('· Monthly<'); e2e ar-row-date-no-year on the second year group.
+Verified: full foundry_verify green after a phpcbf pass fixed 3 docblock spacing errors (composer lint, unit 168, npm lint/build, forbidden-patterns, integration 481/481). Manually confirmed via npm run screenshots (not committed, out of file scope): archive-security.png's 2025 rows no longer wrap; writing.png's list meta line is lowercase while the hero stat stays "Monthly".
