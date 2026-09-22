@@ -31,7 +31,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P2-06 Phase 2 push — lead row screenshots
 - [x] P3-01 Section rows, cells, cell headings and headline items per §6.1.6
 - [x] P3-02 Technology cell — inner grid and featured item with image
-- [ ] P3-03 Writing cell per §6.1.6
+- [x] P3-03 Writing cell per §6.1.6
 - [ ] P3-04 Series strip per §6.1.7 (`layout=strip`)
 - [ ] P3-05 Tuning — `cssBudgetBytes`
 - [ ] P3-06 Phase 3 push — section rows screenshots and allow-list under 10
@@ -416,4 +416,45 @@ tech-featured's own expectation needed fixing (Chrome's computed
 grid-column for bare `span 2` is "span 2", not "span 2 / span 2").
 
 All verify commands green (test:integration 414/414, test:e2e full
+suite 0 failed, composer test:unit 142/142).
+
+### P3-03 — 82d711e
+Real bug fixed (flight controller's relayed item 2 from P1-02):
+Seeder::seed_series() attaches each chapter's series term via
+wp_set_object_terms() AFTER seed_posts() already re-derived ttm_form
+once; since that doesn't refire save_post, every chapter was stuck
+ttm_form=story forever (no series yet -> in Writing -> "story" per
+Meta\Form::derive()) -- confirmed live via "Also running" showing the
+active serial's own latest chapter labelled "Story". Fixed by
+re-deriving ttm_form again right after the series term attaches.
+
+render.php: heading now h2.ttm-cell-heading__label + a.ttm-cell-heading__link
+("All serials & stories →" active/shelf; F2 gets its own "N →" count
+link, previously missing). New div.ttm-writing-cell__body wrapper.
+Kicker: dedicated class, "Serial" alone when cadence empty. Headline:
+reads ttm_part_title directly, omits ": title" when unset (was falling
+back to post_title via SeriesIndex). Dek omitted when chapter has no
+excerpt. Story rows: "Short story · {N} words" replaces bare "Story".
+
+section-row-2.php: Writing cell's span-2 wrapper gains is-style-cell +
+ttm-cell (layout default) for shared :last-child zeroing.
+
+ttm.css /* 4.15 */: __body is the 1fr 1fr grid (gap 0 28 literal);
+kicker/headline/dek literal values; __also padding-left literal 28px
+(was wrong 32px token); new also-label class (11/600/uppercase/neutral-700,
+distinct from shared kicker); also-row bottom rule omitted on last
+(was top rule on every row); also-title 15/800/1.3; actions gap literal
+10px; <=720 forces .btn-primary full width via CSS not markup.
+
+Budget: real need (41845 bytes) exceeds 40960 -- raised cssBudgetBytes
+to 41984 (next 1024) per rule 30's "raise at most once more" amendment,
+in check-budget.mjs + CLAUDE.md. P3-05 still re-measures after series
+strip per its own scope.
+
+New WritingCellTest tests; un-fixme'd all 6 writing-* rows (writing-btn
+color fixed SPEC's literal accent -> accent-700, Decision "Colour vs
+a11y" names this row). cell-last needed .first() (now matches twice,
+once per section-row).
+
+All verify commands green (test:integration 417/417, test:e2e full
 suite 0 failed, composer test:unit 142/142).
