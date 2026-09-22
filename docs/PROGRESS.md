@@ -44,6 +44,16 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P5-03 Tuning — `cssBudgetBytes`
 - [x] P5-04 Handoff, SETUP/README notes and CI check
 - [x] P5-05 Phase 5 push — final screenshots
+- [ ] R1-01 Search result rows must be whole-row links
+- [ ] R1-02 Rule 36: remove `layout: constrained` from inside grid groups
+- [ ] R1-03 Fix the dead ≤720 override on the series featured part rows
+- [ ] R1-04 Archive row dates and the serial meta line must match SPEC's literal text
+- [ ] R1-05 Close the test gaps on the flight's own late fixes
+- [ ] R1-06 Raise cssBudgetBytes and restore the declarations dropped under it
+- [ ] R1-07 Seed fixture drift: the third book, and a tautological Sunday test
+- [ ] R1-08 Scope the global post-excerpt filter; newsletter box copy is 13px
+- [ ] R1-09 Tighten the fidelity rows that assert less than their §6.9 row
+- [ ] R1-10 Prefix, stale lint entries, no-op CSS and the undocumented dd4dfbe commit
 
 ## Log
 (one entry per task, appended by implement)
