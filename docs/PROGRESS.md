@@ -56,6 +56,9 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] R1-10 Prefix, stale lint entries, no-op CSS and the undocumented dd4dfbe commit
 - [x] R2-01 Scope R1-06's series-row margins to the list layout; restore strip, rail and grid-2 values
 - [x] R2-02 Regenerate and commit the phase-3 screenshots after the round-1 fixes
+- [ ] R3-01 Restore the SPEC §6.2/§6.4/§6.5/§6.7 values no fidelity row asserted
+- [ ] R3-02 Writing 'recent chapters' lists published chapters only
+- [ ] R3-03 Seed: Short fiction shows SPEC §6.10's four stories in mock order; no literal backticks; regenerate screenshots
 
 ## Log
 (one entry per task, appended by implement)

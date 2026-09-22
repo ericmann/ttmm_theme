@@ -568,3 +568,90 @@ Derived from docs/SPEC.md v3.0 (commit 13686f3) on 2026-09-21. SPEC.md wins over
 **Out of scope:** Any visual fix found while looking at the PNGs. Record it in HANDOFF as a manual-check note for the owner, not a code change. The phase-2 screenshot directory.
 **Verification:** The git ancestry check above exits 0. `git show --stat HEAD` lists the 14 PNGs and HANDOFF.md only. Full foundry_verify.
 **Depends on:** R2-01
+
+## Review fixes (round 3)
+
+### R3-01: Restore the SPEC §6.2/§6.4/§6.5/§6.7 values no fidelity row asserted
+**Goal:** Make twelve computed values on the article, journal, hub and Writing screens match SPEC prose and the mock cards. They drifted because no §6.9 row read them (REVIEW round 2, finding 3). The most visible one: the paragraph after the article's code block sits flush against it.
+**Files touched:** themes/ttm-theme/assets/css/ttm.css, tests/e2e/fidelity.spec.mjs, scripts/check-budget.mjs, CLAUDE.md
+**Design constraints:** All edits are CSS in themes/ttm-theme/assets/css/ttm.css, under the existing 01 §4 component headers. Presets via var(--wp--preset--…), no hex (rule 44).
+
+(a) `.entry-content pre`: margin-bottom 22px (mock 2b `<pre style="margin:0 0 22px">`). Keep the ≤720 full-bleed negative inline margins at ~:2316; set margin-bottom only, not the `margin` shorthand.
+(b) `.wp-block-quote.is-style-pull, blockquote.is-style-pull` (~:611): margin 36px 0 (SPEC §6.2 'margins 36'; spacing--60 is 32px) and letter-spacing -0.015em.
+(c) `.ttm-journal-stream .ttm-cell-heading__link` and `.ttm-hub-all .ttm-cell-heading__link`: font-size var(--wp--preset--font-size--caption) (12px), color neutral-700 (SPEC §6.4, §6.7). Do NOT change the base `.ttm-cell-heading__link` (~:926). Its 11px is phase 2's front-page value, and SPEC §2 forbids moving any front-page row.
+(d) `.ttm-series-progress__meta` (~:2716): margin 0 0 18px (SPEC §6.7).
+(e) `.ttm-series-featured__buttons` (~:2996): gap 10px (SPEC §6.7, mock 1f `gap:10px`). Keep its other margins unless SPEC says otherwise.
+(f) `.ttm-stats__label` (~:2939): 13px (SPEC §6.5 stat row '13px neutral-700', mock 2d `font-size:13px`). No front-page element carries .ttm-stats.
+(g) `.ttm-story-tiles` and `.ttm-book-grid`: padding-top 16px (SPEC §6.5).
+(h) `.ttm-book__meta`: margin-top 2px (SPEC §6.5; currently 12px, core p margin).
+(i) `.ttm-series-toc.is-chapters .ttm-numbered__dek, .ttm-series-toc.is-chapters .ttm-numbered__date`: font-weight 400 (mock 2d rows set no weight). Scope to `.is-chapters`: `.ttm-numbered__date` is shared with the 404 Latest list and most-read.
+
+Place every override after the base rule it must beat, in source order and outside any media query that would shadow it (the P5-01/R1-03 hazard).
+
+Rule 41: every new selector must match on the seeded screen set.
+
+Rule 30 (budget): ttm.css is 62428/62464. First shorten comments losslessly. If the additions still do not fit, raise cssBudgetBytes to the next 1024 multiple (63488) in scripts/check-budget.mjs (with its comment) and in CLAUDE.md's Constraints line, and add a Measurement: line with before/after bytes. Never drop a declaration to fit.
+**Acceptance tests:** Each extended assertion must fail against the current CSS before the fix and pass after it. Record the failures in the commit body. In tests/e2e/fidelity.spec.mjs:
+- `art-pre`: margin-bottom px(22).
+- `art-pull`: margin-top and margin-bottom px(36); letter-spacing ≈ −0.42px (toBeCloseTo on parseFloat).
+- `js-link`: font-size px(12), color neutral-700.
+- `hub-all-head`: font-size px(12).
+- `hub-meta`: margin-top px(0), margin-bottom px(18).
+- `hub-buttons`: `.ttm-series-featured__buttons` column-gap px(10).
+- `wr-stats`: first `.ttm-stats__label` font-size px(13).
+- `wr-tiles`: padding-top px(16).
+- `wr-books`: padding-top px(16).
+- `wr-book-title`: add the first `.ttm-book__meta` margin-top px(2).
+- New `wr-chapter-dek` (/writing/, 1280): first `.ttm-series-toc.is-chapters .ttm-numbered__dek` is 13px, neutral-800, margin-top 3px, font-weight 400; first `__date` is font-weight 400.
+
+All phase-2 front-page rows, `404-latest` and `ar-mostread` stay green unchanged.
+**Out of scope:** Any change to markup, render.php or templates. The base .ttm-cell-heading__link, the front page, and the 404 Latest list. The chapters row content (a separate task). Screenshots (the seed task regenerates them).
+**Verification:** A Playwright computed-style probe at 1280 on the seeded site shows every value listed. The /signing-your-options-table/ gap between the first `pre` and the next paragraph is 22px. `npm run lint` passes (budget, coverage, stylelint). `npm run test:e2e` is green, including every phase-2 front-page row and selectors.spec. Full foundry_verify.
+**Depends on:** none
+
+### R3-02: Writing 'recent chapters' lists published chapters only
+**Goal:** The `ttm/series-toc` chapters variant must list the newest published chapters, per mock 2d (12, 11, 10, 09) and 02 §D ('recent chapters … newest first, 4 items'). Today the scheduled Chapter 13 sits first on /writing/, beside a heading link that says 'All 12' (REVIEW round 2, finding 1).
+**Files touched:** plugins/ttm-core/blocks/series-toc/render.php, tests/integration/Blocks/SeriesTocTest.php, tests/e2e/fidelity.spec.mjs
+**Design constraints:** In render.php, when `$ttm_is_chapters`, filter `$ttm_rows` to parts whose status is 'publish' before the usort and array_slice (~:50-60). The `series` variant (the article TOC) keeps its scheduled rows and F24 behaviour unchanged. `$ttm_published` ('All N') is unchanged.
+
+If no published chapter remains, the list is empty: the block returns '' and never renders an empty wrapper or placeholder (06 governing rule, rules 25 and 46).
+
+Keep block wrapper shape and classes (rule 46). No nonces or per-visitor calls in render.php. No bare numeric literals beyond structural ones (rule 24).
+**Acceptance tests:** Would have caught it:
+- New `SeriesTocTest::test_chapters_variant_excludes_scheduled_parts`: a closed series (total > parts) with parts 1–3 published and part 4 `future`; variant chapters, order desc, limit 2. Assert the output contains '>03<' and '>02<', and does not contain '>04<' or part 4's title.
+- Extend `test_chapters_variant_newest_first_limited_with_dek` or add a sibling that asserts the series variant still renders the scheduled part as is-scheduled.
+- New fidelity row `wr-chapter-first` (/writing/, 1280): the first `.ttm-series-toc.is-chapters .ttm-numbered__title` is an `a` element with text 'Reconciliation', and the first `.ttm-numbered__num` text is '12'.
+
+Confirm the integration test and the fidelity row fail before the render change.
+**Out of scope:** The series (article TOC) variant, hub featured parts, series-single parts, seed dates, CSS.
+**Verification:** curl /writing/ shows rows 12, 11, 10, 09 under 'The Quiet Ledger — recent chapters' with 'All 12'. The article TOC on /signing-your-options-table/ still shows parts 5 and 6 as scheduled (toc-scheduled row green). `npm run test:integration` and `npm run test:e2e` green. Full foundry_verify.
+**Depends on:** none
+
+### R3-03: Seed: Short fiction shows SPEC §6.10's four stories in mock order; no literal backticks; regenerate screenshots
+**Goal:** Make /writing/'s Short fiction tiles show the four stories SPEC §6.10 and mock 2d name, in the mock's order. Today two non-fiction Writing essays are classed as stories and displace A Field Guide to Empty Offices and What the River Audits. Remove the markdown backticks that render literally in a seeded excerpt. Then regenerate the phase-3 PNGs so they reflect this round's code (REVIEW round 2, finding 2).
+**Files touched:** docs/fixtures/seed/posts.json, plugins/ttm-core/src/Cli/Seeder.php, tests/integration/Cli/SeederTest.php, tests/unit/Cli/SeederTest.php, tests/e2e/fidelity.spec.mjs, docs/feedback/phase-3/writing.png, docs/feedback/phase-3/writing-390.png, docs/feedback/phase-3/article.png, docs/feedback/phase-3/article-390.png, docs/feedback/phase-3/article-1920.png, docs/feedback/phase-3/journal.png, docs/feedback/phase-3/journal-390.png, docs/feedback/phase-3/series-hub.png, docs/feedback/phase-3/series-single.png, docs/feedback/phase-3/archive-security.png, docs/feedback/phase-3/archive-390.png, docs/HANDOFF.md
+**Design constraints:** Seed and Seeder only. The content model (Meta\Form::derive, Fiction\Serials::stories) is a SPEC §2 non-goal: do not change it.
+
+(a) The two essays 'finishing-a-draft-you-no-longer-believe-in' and 'outlining-for-people-who-hate-outlines' (posts.json ~:459-479) must not have ttm_form 'story' after seeding. Add a documented posts.json fixture field (e.g. "form": "article") that the Seeder writes as ttm_form plus ttm_form_locked=1 after its existing re-derive passes. Validate the value against the allowed forms.
+(b) Set `days_ago` for story-uptime and story-what-the-river-audits so Serials::stories(4) returns, newest first: The Last Cron Job (2026), A Field Guide to Empty Offices (2025), Uptime (2024), What the River Audits (2023). These are mock 2d lines 1157–1161.
+(c) posts.json ~:501, Hardening WordPress part 1's excerpt: remove the markdown backticks (plain 'wp-config.php').
+
+Requirements:
+- No lorem (rule 39).
+- Seed images per rule 45: Uptime keeps its featured image (F19 tile).
+- The front page must not change: its 'Also running' story stays The Last Cron Job, and every phase-2 row stays green.
+- Update the phase-2 test `test_seeded_writing_essays_derive_as_story_but_stay_older_than_the_last_cron_job` to the new truth: essays are not 'story', and stories(1) is still The Last Cron Job. Do not delete it.
+
+After the fix tasks this depends on have landed, run `npm run env:cli -- ttm seed --reset` and `npm run screenshots`, then commit every changed PNG under docs/feedback/phase-3/. Update docs/HANDOFF.md: a Round 3 section plus the Field Guide days_ago noted in Measurements.
+
+Never stage FOUNDRY_FEEDBACK.md. Restore ttm-theme if any test switches themes.
+**Acceptance tests:** Would have caught it:
+- New integration `SeederTest::test_writing_short_fiction_is_the_four_spec_stories_in_mock_order`: after seeding 'normal', map Serials::stories(4) to titles and assertSame ['The Last Cron Job', 'A Field Guide to Empty Offices', 'Uptime', 'What the River Audits'].
+- New `SeederTest::test_no_seeded_excerpt_contains_a_backtick`: every seeded post's post_excerpt lacks '`'.
+- If the Seeder's field parsing is pure, add a unit test for the new `form` field (valid value written and locked; invalid value ignored).
+- New fidelity row `wr-tile-titles` (/writing/, 1280): the text tiles' `.ttm-tile__title` texts, together with the image tile's aria-label, equal the four titles in order.
+
+Confirm the integration test and the fidelity row fail before the seed change.
+**Out of scope:** Meta\Form, Fiction\Serials, story-tiles render.php, CSS, the phase-2 screenshot directory, any visual fix spotted in the PNGs (record it in HANDOFF instead).
+**Verification:** curl /writing/ shows the four tiles in mock order. / still shows The Last Cron Job under Also running. `grep -n '`' docs/fixtures/seed/posts.json` finds nothing in excerpts. `grep -ri lorem docs/fixtures/seed/` is empty. `git merge-base --is-ancestor $(git log -1 --format=%H -- themes/ttm-theme plugins/ttm-core docs/fixtures/seed) $(git log -1 --format=%H -- docs/feedback/phase-3)` exits 0. `npm run test:integration` and `npm run test:e2e` green. Full foundry_verify.
+**Depends on:** R3-01, R3-02
