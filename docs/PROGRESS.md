@@ -35,7 +35,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P4-01 Series hub header and featured block (01 §4.38, §6.7)
 - [x] P4-02 All-series grid (`layout=grid-2`) and hub clean-up
 - [x] P4-03 Single series template (`taxonomy-series.html`) and `series.related_limit`
-- [ ] P4-04 Writing hero (01 §4.36–4.37, §6.5)
+- [x] P4-04 Writing hero (01 §4.36–4.37, §6.5)
 - [ ] P4-05 Writing body — all serials (`layout=list`) and recent chapters (numbered)
 - [ ] P4-06 Writing aside — story tiles, book grid, and the responsive order
 - [ ] P4-07 Phase 4 push — hub and Writing screenshots
@@ -183,4 +183,17 @@ Manual check: none.
 ### P4-03 — c9c1d1b
 Tests: single-head, single-kicker, single-parts, single-other, single-nav un-fixme'd (fidelity + selectors + all axe screens green). SeriesListTest +test_exclude_current_without_limit_uses_related_limit; SeriesFeaturedTest's h1 assertion updated; HubWritingTemplatesTest's single-series test extended (h1, dek count = published parts, <= 4 other rows). foundry_verify fully green: unit 166, integration 477/477, e2e 323 passed / 79 skipped, lints clean, budget 61438/61440, 13 pending coverage, 34 tagged fixme.
 Interpretation: series-list's limit fallback branches on excludeCurrent (series.related_limit default 4, else series.strip_limit default 3); taxonomy-series.html drops its explicit limit:4. ttm/series-featured only adds is-style-grid-5-7 when NOT is_tax('series') (single page falls back to plain block flow = full-width single column); the h1 case adds is-style-display-xl but the base title rule's cascade position still wins at equal specificity, so .ttm-series-single .ttm-series-featured__title redeclares font-size/line-height/letter-spacing anyway. The title's class attribute stays literal (class="ttm-series-featured__title<?php ?>") rather than built in a PHP variable, since check-css-coverage.mjs's regex scan needs to see the literal class name in a class="..." attribute. single-kicker/single-head use the established textContent/ch-probe idioms. CSS budget stayed at 2-10 bytes headroom via more comment condensing -- fourth Phase 4 task in a row needing this, underscoring the P5-03 flag.
+Manual check: none.
+
+### P4-04 — 605c131
+Cadence display: mb_strtoupper/mb_substr capitalise first letter only
+of stored value ("monthly" -> "Monthly"); rest untouched. Synopsis
+wired from series term description (get_term_field). Nine fidelity
+rows un-fixme'd: wr-hero/cover/kicker/title/synopsis/buttons/stats/
+stat-value/stat-cadence, all green. Test asserts synopsis via regex
+since wp_update_term wraps description in wpautop <p>.
+CSS budget 61433/61440 (7 free) -- 4th Phase 4 task ending at
+single-digit headroom; kicker/title/synopsis margin+line-height
+left undeclared (no fidelity coverage) as disclosed trade-off.
+Flagging again for P5-03.
 Manual check: none.
