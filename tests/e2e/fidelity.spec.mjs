@@ -2436,18 +2436,16 @@ test.describe( 'page', () => {
 } );
 
 test.describe( 'hub', () => {
-	test.fixme( // P4-01
-	'hub-head: .ttm-hub-head @1280', async ( { page } ) => {
+	test( 'hub-head: .ttm-hub-head @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
 		const el = page.locator( '.ttm-hub-head' );
 		const t = await tracks( el );
 		expect( t.length ).toBe( 2 );
 		expect( await computed( el, 'padding' ) ).toBe( '40px 0px 28px' );
 		expect( await computed( el, 'align-items' ) ).toBe( 'end' );
-	} ); // P4-01
+	} );
 
-	test.fixme( // P4-01
-	'hub-h1: .ttm-hub-head h1 @1280', async ( { page } ) => {
+	test( 'hub-h1: .ttm-hub-head h1 @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
 		const el = page.locator( '.ttm-hub-head h1' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 80 ) );
@@ -2455,18 +2453,30 @@ test.describe( 'hub', () => {
 			-4.64,
 			0
 		);
-	} ); // P4-01
+	} );
 
-	test.fixme( // P4-01
-	'hub-desc: .ttm-hub-head .is-style-dek @1280', async ( { page } ) => {
+	test( 'hub-desc: .ttm-hub-head .is-style-dek @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
 		const el = page.locator( '.ttm-hub-head .is-style-dek' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 17 ) );
-		expect( await computed( el, 'max-width' ) ).toBe( '52ch' );
-	} ); // P4-01
+		// getComputedStyle resolves ch to px: measure one "0" in the paragraph's font.
+		const chs = await el.evaluate( ( node ) => {
+			const cs = window.getComputedStyle( node );
+			const probe = document.createElement( 'span' );
+			probe.textContent = '0';
+			probe.style.font = cs.font;
+			probe.style.letterSpacing = '0';
+			probe.style.position = 'absolute';
+			probe.style.visibility = 'hidden';
+			document.body.appendChild( probe );
+			const ch = probe.getBoundingClientRect().width;
+			probe.remove();
+			return parseFloat( cs.maxWidth ) / ch;
+		} );
+		expect( chs ).toBeCloseTo( 52, 0 );
+	} );
 
-	test.fixme( // P4-01
-	'hub-stats: .ttm-series-stats @1280', async ( { page } ) => {
+	test( 'hub-stats: .ttm-series-stats @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
 		const el = page.locator( '.ttm-series-stats' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 13 ) );
@@ -2474,54 +2484,56 @@ test.describe( 'hub', () => {
 		const t = await text( el );
 		expect( t ).toMatch( /^\d+ series · \d+ in progress/ );
 		expect( t ).toContain( 'Spanning' );
-	} ); // P4-01
+	} );
 
-	test.fixme( // P4-01
-	'hub-featured: .ttm-series-featured @1280', async ( { page } ) => {
+	test( 'hub-featured: .ttm-series-featured @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
 		const el = page.locator( '.ttm-series-featured' );
 		const t = await tracks( el );
 		expect( t.length ).toBe( 2 );
 		expect( await computed( el, 'column-gap' ) ).toBe( px( 64 ) );
 		expect( await computed( el, 'padding' ) ).toBe( '28px 0px 36px' );
-	} ); // P4-01
+	} );
 
-	test.fixme( // P4-01
-	'hub-kicker: .ttm-series-featured__kicker @1280', async ( { page } ) => {
+	test( 'hub-kicker: .ttm-series-featured__kicker @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
 		const el = page.locator( '.ttm-series-featured__kicker' );
-		expect( await text( el ) ).toMatch( /^In progress · / );
+		// innerText reflects the kicker's text-transform; assert the source text.
+		const source = await el.evaluate( ( node ) => node.textContent );
+		expect( source ).toMatch( /^In progress · / );
 		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
-	} ); // P4-01
+	} );
 
-	test.fixme( // P4-01
-	'hub-title: .ttm-series-featured__title @1280', async ( { page } ) => {
+	test( 'hub-title: .ttm-series-featured__title @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
 		const el = page.locator( '.ttm-series-featured__title' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 40 ) );
 		expect( await computed( el, 'line-height' ) ).toBe( px( 40.8 ) );
-	} ); // P4-01
+	} );
 
-	test.fixme( // P4-01
-	'hub-dek: .ttm-series-featured__dek @1280', async ( { page } ) => {
+	test( 'hub-dek: .ttm-series-featured__dek @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
 		const el = page.locator( '.ttm-series-featured__dek' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 16 ) );
 		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-800' ) );
-	} ); // P4-01
+	} );
 
-	test.fixme( // P4-01
-	'hub-progress: .ttm-series-progress__seg @1280', async ( { page } ) => {
+	test( 'hub-progress: .ttm-series-progress__seg @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
 		const els = page.locator( '.ttm-series-progress__seg' );
 		const count = await els.count();
 		expect( count ).toBeGreaterThan( 0 );
 		expect( await computed( els.first(), 'height' ) ).toBe( px( 6 ) );
 		expect( await computed( els.first(), 'flex-grow' ) ).toBe( '1' );
-	} ); // P4-01
+	} );
 
-	test.fixme( // P4-01
-	'hub-progress-color: .ttm-series-progress__seg (1st, last) @1280', async ( {
+	test( 'hub-progress-color: .ttm-series-progress__seg (1st, last) @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
@@ -2532,20 +2544,18 @@ test.describe( 'hub', () => {
 		expect( await computed( els.last(), 'background-color' ) ).toBe(
 			color( 'neutral-300' )
 		);
-	} ); // P4-01
+	} );
 
-	test.fixme( // P4-01
-	'hub-meta: .ttm-series-progress__meta @1280', async ( { page } ) => {
+	test( 'hub-meta: .ttm-series-progress__meta @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
 		const el = page.locator( '.ttm-series-progress__meta' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
 		expect( await text( el ) ).toMatch(
 			/^\d+ of \d+ published( · next part .+)?$/
 		);
-	} ); // P4-01
+	} );
 
-	test.fixme( // P4-01
-	'hub-buttons: .ttm-series-featured__buttons .btn @1280', async ( {
+	test( 'hub-buttons: .ttm-series-featured__buttons .btn @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
@@ -2553,18 +2563,18 @@ test.describe( 'hub', () => {
 		expect( await btns.count() ).toBe( 2 );
 		expect( await text( btns.first() ) ).toBe( 'Start at part 1' );
 		expect( await text( btns.last() ) ).toBe( 'Follow this series' );
-	} ); // P4-01
+	} );
 
-	test.fixme( // P4-01
-	'hub-parts: .ttm-series-featured__parts @1280', async ( { page } ) => {
+	test( 'hub-parts: .ttm-series-featured__parts @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
 		const el = page.locator( '.ttm-series-featured__parts' );
 		expect( await el.evaluate( ( node ) => node.tagName ) ).toBe( 'OL' );
 		expect( await computed( el, 'border-top-width' ) ).toBe( px( 2 ) );
-	} ); // P4-01
+	} );
 
-	test.fixme( // P4-01
-	'hub-part: .ttm-series-featured__part (first) @1280', async ( {
+	test( 'hub-part: .ttm-series-featured__part (first) @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
@@ -2574,10 +2584,9 @@ test.describe( 'hub', () => {
 		expect( await computed( el, 'padding' ) ).toBe( '12px 0px' );
 		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 1 ) );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 16 ) );
-	} ); // P4-01
+	} );
 
-	test.fixme( // P4-01
-	'hub-part-num: .ttm-series-featured__num (first) @1280', async ( {
+	test( 'hub-part-num: .ttm-series-featured__num (first) @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
@@ -2585,10 +2594,9 @@ test.describe( 'hub', () => {
 		// Colour vs a11y: neutral-700, not SPEC's literal neutral-500.
 		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
 		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
-	} ); // P4-01
+	} );
 
-	test.fixme( // P4-01
-	'hub-part-scheduled: .ttm-series-featured__part.is-scheduled (first) @1280', async ( {
+	test( 'hub-part-scheduled: .ttm-series-featured__part.is-scheduled (first) @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
@@ -2604,7 +2612,7 @@ test.describe( 'hub', () => {
 		expect( await text( date ) ).toMatch(
 			/^Sept? \d+|^[A-Z][a-z]{2,3} \d+/
 		);
-	} ); // P4-01
+	} );
 
 	test.fixme( // P4-02
 	'hub-all-head: .ttm-hub-all .ttm-cell-heading__link @1280', async ( {

@@ -42,7 +42,8 @@ blockquote.is-style-pull cite # editor block style (04 §3)
 .ttm-journal-head__count # state: F14 word count only when the journal post has no syndication URL; the seeded journal post is syndicated
 .ttm-journal-stream:not(:has(.wp-block-post)) # state: the stream hides itself when no other journal entry exists; the seed has nine
 .ttm-item h3 # state: writing-cell's "also running" list (plain h3, no class); the seeded front page currently shows none, and index.html (its other consumer) is not a fidelity screen
-.is-style-grid-5-7 # P4-01 pending
 .ttm-cell .wp-block-post-excerpt:empty # state: only when a non-lead section-row post has no excerpt; the seed always sets one
 .ttm-cell .wp-block-post:not(:first-child) .wp-block-post-featured-image # state: only when a non-lead section-row post also has a featured image; the seed's non-lead posts have none
 .ttm-cell.is-style-span-2 .wp-block-post:first-child:not(:has(.ttm-item-featured__media img)) # state: fallback when the featured post has no image; the seed always sets one
+.ttm-series-featured__part-dek # state: only when the block's showDek attribute is true; the hub template leaves it at its false default
+.ttm-series-featured__all # state: only when the featured series has more parts than series.hub_featured_parts; the auto-picked seeded series does not

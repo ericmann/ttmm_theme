@@ -1,4 +1,4 @@
-/* These Things Matter — component classes from docs/01-design-language.md §4. Budget: 25 KB (scripts/check-budget.mjs). */
+/* Component classes (01 §4); budget: scripts/check-budget.mjs. */
 
 /* 0 base */
 :root {
@@ -43,10 +43,7 @@
 
 /* 0.2 page container */
 
-/* Rule 42: one centred 1280px column whose gutter is its own inline padding. Core's per-group
- * global padding is zeroed inside it so nothing double-gutters; full-bleed children still
- * break out through core's `.has-global-padding > .alignfull` negative margins (the poster),
- * which now land exactly on the column's edge. */
+/* Rule 42: centred 1280 column; gutter is its own padding, zeroed inside (no double-gutter). */
 .wp-site-blocks {
 	max-width: 1280px;
 	margin-inline: auto;
@@ -141,8 +138,7 @@
 	align-self: start;
 }
 
-/* Article body row (SPEC §6.2 "Body row"): the 8/4 grid with unconstrained columns; its
- * aside stacks its zones and sticks at >= 1025 (single column, static, at <= 1024 below). */
+/* Article body: 8/4 grid, unconstrained; aside sticks >= 1025, static below. */
 .ttm-article {
 	column-gap: 64px;
 	row-gap: 0;
@@ -494,7 +490,7 @@ p.is-style-poster {
 	border-radius: 0;
 }
 
-/* Honeypot: visually hidden, still tab/DOM-reachable so bots trip it; visitors never reach it. */
+/* Honeypot: hidden but tab/DOM-reachable so bots trip it; visitors never reach it. */
 .ttm-hp {
 	position: absolute;
 	width: 1px;
@@ -505,15 +501,13 @@ p.is-style-poster {
 
 /* 4.23 figure */
 
-/* The article hero: colour (no grayscale on singles), 16:9 owned here rather than by the block
- * attribute, with the attachment caption the plugin appends as a figcaption. */
+/* Article hero: colour (no grayscale), 16:9 owned here not the block attribute. */
 .ttm-article .wp-block-post-featured-image {
 	margin-top: 28px;
 	aspect-ratio: 16 / 9;
 }
 
-/* `:where()` keeps this at the specificity of the other `… img` rules (stylelint's
- * no-descending-specificity); source order still makes it win over core's `height: auto`. */
+/* :where() keeps this at the other img rules' specificity; source order still wins. */
 .ttm-article :where(.wp-block-post-featured-image) img {
 	width: 100%;
 	height: 100%;
@@ -537,7 +531,7 @@ p.is-style-poster {
 	margin: 0 0 22px;
 }
 
-/* F12: with no hero the byline runs straight into the body with this gap (SPEC §6.2). */
+/* F12: no hero -> byline runs into the body with this gap (SPEC §6.2). */
 .ttm-entry {
 	padding-top: 28px;
 }
@@ -604,8 +598,7 @@ p.is-style-poster {
 	overflow-x: auto;
 }
 
-/* A code block's inner <code> keeps the block's dark field: the inline-code surface rule
- * above would otherwise paint it light under the light text (axe: 1.11:1). */
+/* pre>code keeps the dark field: the inline-code rule would paint it light (axe). */
 .entry-content :where(pre) code {
 	background: none;
 	color: inherit;
@@ -731,8 +724,7 @@ blockquote.is-style-pull cite,
 	gap: 28px;
 }
 
-/* "Colour vs a11y": accent-700 replaces the literal "accent"; !important beats core's
- * repeated-class `...__content.wp-block-navigation-item__content`. */
+/* Colour vs a11y: accent-700; !important beats core's repeated-class selector. */
 .ttm-nav .current-menu-item > a {
 	color: var(--wp--preset--color--accent-700) !important;
 }
@@ -818,9 +810,7 @@ blockquote.is-style-pull cite,
 	column-gap: 22px;
 }
 
-/* The hub item reads lighter. The extra class outranks core's repeated-class
- * `.wp-block-navigation-item__content` colour reset; the shared `.ttm-nav .current-menu-item > a`
- * (4.1) still wins when it is current, because that rule is !important and this one is not. */
+/* Hub item reads lighter; current-menu-item (!important) still wins when current. */
 .ttm-masthead-inner__nav .ttm-nav__hub > a.wp-block-navigation-item__content {
 	font-weight: 400;
 	color: var(--wp--preset--color--neutral-700);
@@ -938,7 +928,7 @@ blockquote.is-style-pull cite,
 	border-bottom: var(--ttm-rule-2);
 }
 
-/* §6.1.5's rail link is 12px, unlike the shared 11px default -- scoped to `.is-rail`. */
+/* §6.1.5 rail link is 12px, not the shared 11px -- scoped to .is-rail. */
 .ttm-cell-heading.is-rail .ttm-cell-heading__link {
 	font-size: var(--wp--preset--font-size--caption);
 }
@@ -998,7 +988,7 @@ blockquote.is-style-pull cite,
 	color: var(--wp--preset--color--neutral-800);
 }
 
-/* The box placement's form is tighter than the shared 8px row (SPEC §6.2 "Newsletter box"). */
+/* Box placement's form is tighter than the shared 8px row (SPEC §6.2). */
 .ttm-newsletter-box form {
 	display: flex;
 	gap: 6px;
@@ -1053,7 +1043,7 @@ blockquote.is-style-pull cite,
 	gap: var(--wp--preset--spacing--60);
 }
 
-/* Bumps .is-style-poster's pull(28px) to featured(40px); phone query below reverts to 28px. */
+/* Bumps poster pull(28px) to featured(40px); phone query below reverts to 28px. */
 /* stylelint-disable-next-line no-descending-specificity */
 .ttm-poster h3.is-style-poster {
 	margin: 0;
@@ -1063,7 +1053,7 @@ blockquote.is-style-pull cite,
 	font-size: var(--wp--preset--font-size--featured);
 }
 
-/* 01 §2.1's exception: bg-on-accent is 3.77:1, under AA; the a11y row excludes this from axe. */
+/* §2.1 exception: bg-on-accent is 3.77:1, under AA; a11y row excludes this from axe. */
 .ttm-poster .btn-ghost {
 	background: transparent;
 	color: var(--wp--preset--color--bg);
@@ -1095,8 +1085,7 @@ blockquote.is-style-pull cite,
 
 /* 4.34 footer */
 
-/* §6.1.0/§6.1.2: full-bleed to the page column by negative gutter margins, then the gutter as
- * its own padding, so the footer text lines up with the masthead title at x = gutter. */
+/* Full-bleed via negative gutter margins, padding reapplied to align the masthead. */
 .ttm-footer {
 	display: flex;
 	justify-content: space-between;
@@ -1107,8 +1096,7 @@ blockquote.is-style-pull cite,
 	border-top: var(--ttm-rule-2);
 }
 
-/* `wp:template-part`'s own `className` lands on its wrapper div, not the `<footer>` itself.
- * Front page: the poster sits directly above, so no rule and 16px. */
+/* template-part's className lands on the wrapper div, not <footer>. */
 .is-after-poster .ttm-footer {
 	padding: 16px var(--wp--custom--gutter--desktop);
 	border-top: 0;
@@ -1174,7 +1162,7 @@ blockquote.is-style-pull cite,
 	display: block;
 }
 
-/* `.ttm-lead__inner` is a plain `<article>`; block, not flex/grid (Decision "Lead media"). */
+/* .ttm-lead__inner is a plain article; block, not flex/grid (Decision "Lead media"). */
 .ttm-lead__inner {
 	display: block;
 }
@@ -1331,7 +1319,7 @@ blockquote.is-style-pull cite,
 	color: var(--wp--preset--color--neutral-700);
 }
 
-/* P8-07: underline for WCAG 1.4.1 -- color alone no longer distinguishes the link (axe). */
+/* WCAG 1.4.1: underline -- color alone no longer distinguishes the link (axe). */
 /* stylelint-disable-next-line no-descending-specificity */
 .ttm-verse__attribution a {
 	color: var(--wp--preset--color--accent-700);
@@ -1931,8 +1919,7 @@ blockquote.is-style-pull cite,
 	margin-top: 40px;
 }
 
-/* Two ruled cells with one vertical rule between (on the left cell's right edge); a missing
- * side keeps its cell and the rules. */
+/* Two ruled cells, one rule between; a missing side keeps its cell and rules. */
 .ttm-prevnext__prev {
 	padding: 20px 24px 20px 0;
 	border-right: var(--ttm-rule-1);
@@ -1964,7 +1951,7 @@ blockquote.is-style-pull cite,
 	text-decoration: none;
 }
 
-/* 4.5 headline item, scoped: "More in {Category}" rows (SPEC §6.2) + journal head/row */
+/* 4.5 headline item, scoped: "More in {Category}" rows (SPEC §6.2) */
 .ttm-more-in .wp-block-query .ttm-item {
 	padding: 10px 0;
 	border-top: 0;
@@ -1983,8 +1970,7 @@ blockquote.is-style-pull cite,
 	display: none;
 }
 
-/* 4.11 journal stream row (SPEC §6.4 "stream"): each row is one anchor (link_rows()). The
- * journal archive (`main.ttm-journal-archive`, SPEC §6.6) reuses the rows full width. */
+/* 4.11 journal stream row: one anchor per row (link_rows()); the journal archive reuses it. */
 .ttm-journal-stream {
 	padding: 24px 0 40px;
 }
@@ -2146,7 +2132,7 @@ blockquote.is-style-pull cite,
 	display: inline;
 }
 
-/* Underlined so the accent link is distinguishable from the grey sentence (axe link-in-text-block). */
+/* Underlined: distinguishable from the grey sentence (axe link-in-text-block). */
 /* stylelint-disable-next-line no-descending-specificity */
 .ttm-syndication a {
 	color: var(--wp--preset--color--accent-700);
@@ -2352,7 +2338,7 @@ ul.modern-footnotes-list,
 	}
 }
 
-/* 4.26 filter row (SPEC §6.6 "Filter row"): the block sits directly under the header. */
+/* 4.26 filter row: the block sits directly under the header (SPEC §6.6). */
 .ttm-filter-row {
 	display: flex;
 	align-items: center;
@@ -2369,8 +2355,7 @@ ul.modern-footnotes-list,
 	border-top: var(--ttm-rule-2);
 }
 
-/* Decision S6: the filter row owns the 2px rule below it too, so the body group that
- * follows -- .ttm-archive-body, added in P3-03 -- needs none of its own. */
+/* S6: filter row owns the 2px rule below too; .ttm-archive-body needs none. */
 .ttm-filter-row + .ttm-archive-body {
 	border-top: 0;
 }
@@ -2436,7 +2421,7 @@ ul.modern-footnotes-list,
 	text-decoration: none;
 }
 
-/* Search rows: a category kicker above the title. */
+/* Search rows: kicker above the title. */
 .ttm-archive-row .is-style-kicker {
 	grid-column: 2;
 	grid-row: 1;
@@ -2536,13 +2521,14 @@ ul.modern-footnotes-list,
 	line-height: 1.35;
 }
 
-.ttm-numbered__num {
+.ttm-numbered__num,
+.ttm-series-featured__num {
 	font-weight: 800;
 	color: var(--wp--preset--color--neutral-700);
 	font-feature-settings: "tnum";
 }
 
-/* 4.29 404 "Latest": the number column is a CSS counter (Decision "404 Latest numbers"). */
+/* 404 "Latest": number column is a CSS counter (Decision "404 Latest numbers"). */
 .ttm-latest .wp-block-query .wp-block-post-template {
 	list-style: none;
 	margin: 0;
@@ -2618,6 +2604,55 @@ main.is-style-grid-8-4 h1 {
 	font-size: 56px;
 }
 
+/* 4.38 series hub header (SPEC §6.7 "Header") */
+.ttm-hub-head {
+	column-gap: 64px;
+	padding: 40px 0 28px;
+	align-items: end;
+}
+
+.ttm-hub-head.is-style-grid-8-4 h1 {
+	margin: 0 0 14px -0.058em;
+	font-size: var(--wp--preset--font-size--display-xl);
+}
+
+.ttm-hub-head .is-style-dek {
+	margin: 0;
+	font-size: 17px;
+	max-width: 52ch;
+}
+
+.ttm-series-stats {
+	font-size: 13px;
+	line-height: 1.6;
+	color: var(--wp--preset--color--neutral-700);
+	font-feature-settings: "tnum";
+}
+
+/* stylelint-disable-next-line no-descending-specificity */
+.ttm-series-stats p {
+	margin: 0;
+}
+
+@media (max-width: 720px) {
+
+	.ttm-hub-head {
+		grid-template-columns: 1fr;
+	}
+
+	.ttm-hub-head h1 {
+		font-size: 44px;
+	}
+
+	.ttm-series-featured__part {
+		grid-template-columns: 28px 1fr;
+	}
+
+	.ttm-series-featured__date {
+		grid-column: 2;
+	}
+}
+
 /* 4.19 series progress */
 .ttm-series-progress__segments {
 	display: flex;
@@ -2643,10 +2678,7 @@ main.is-style-grid-8-4 h1 {
 	color: var(--wp--preset--color--neutral-700);
 }
 
-/* 4.20 series toc */
-
-/* "In this series" (SPEC §6.2): rail heading, then 28px 1fr rows in current / published /
- * scheduled states. Numbers and the series name read neutral-700 (Colour vs a11y). */
+/* 4.20 series toc: rail heading, 28px 1fr rows, current/published/scheduled states. */
 .ttm-series-toc__list {
 	list-style: none;
 	margin: 0;
@@ -2721,28 +2753,6 @@ main.is-style-grid-8-4 h1 {
 	.ttm-series-toc__hub {
 		display: inline;
 	}
-}
-
-/* 4.29 numbered part lists (series featured; the shared .ttm-numbered rows are above) */
-.ttm-series-featured__part {
-	display: grid;
-	grid-template-columns: 28px 1fr auto;
-	gap: var(--wp--preset--spacing--20);
-	padding: 10px 0;
-	border-top: var(--ttm-rule-1);
-	font-size: 14px;
-	line-height: 1.35;
-}
-
-.ttm-series-featured__part.is-scheduled span:nth-child(2) {
-	color: var(--wp--preset--color--neutral-700);
-}
-
-.ttm-series-featured__date {
-	grid-column: 3;
-	text-align: right;
-	font-size: 12px;
-	color: var(--wp--preset--color--neutral-700);
 }
 
 /* 4.35 story tile */
@@ -2844,15 +2854,82 @@ main.is-style-grid-8-4 h1 {
 
 /* 4.38 series featured / hub / writing hero */
 .ttm-series-featured {
-	display: grid;
-	grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-	gap: var(--wp--preset--spacing--90);
+	padding: 28px 0 36px;
+}
+
+.ttm-series-featured__main {
+	display: block;
+}
+
+.ttm-series-featured__kicker {
+	margin: 0 0 10px;
+}
+
+.ttm-series-featured__title {
+	margin: 0 0 12px;
+	font-size: 40px;
+	font-weight: 800;
+	line-height: 1.02;
+	letter-spacing: -0.02em;
+}
+
+.ttm-series-featured__dek {
+	margin: 0 0 16px;
+	font-size: 16px;
+	line-height: 1.5;
+	color: var(--wp--preset--color--neutral-800);
 }
 
 .ttm-series-featured__buttons {
 	display: flex;
 	gap: var(--wp--preset--spacing--30);
 	margin: var(--wp--preset--spacing--30) 0;
+}
+
+.ttm-series-featured__parts {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	border-top: var(--ttm-rule-2);
+}
+
+.ttm-series-featured__part {
+	display: grid;
+	grid-template-columns: 40px 1fr auto;
+	gap: 16px;
+	align-items: baseline;
+	padding: 12px 0;
+	border-bottom: var(--ttm-rule-1);
+	font-size: 16px;
+	line-height: 1.3;
+}
+
+.is-published .ttm-series-featured__part-title {
+	font-weight: 800;
+	color: var(--wp--preset--color--text);
+}
+
+.is-scheduled .ttm-series-featured__part-title {
+	font-weight: 400;
+	color: var(--wp--preset--color--neutral-700);
+}
+
+.ttm-series-featured__part-dek {
+	grid-column: 2;
+	margin: 4px 0 0;
+	font-size: 13px;
+	color: var(--wp--preset--color--neutral-800);
+}
+
+.ttm-series-featured__date {
+	font-size: 12px;
+	color: var(--wp--preset--color--neutral-700);
+}
+
+.ttm-series-featured__all {
+	margin: 12px 0 0;
+	font-size: 13px;
+	color: var(--wp--preset--color--accent-700);
 }
 
 .ttm-hub-all.ttm-hub-all .ttm-series-list.is-grid-2 {
@@ -2897,10 +2974,6 @@ main.is-style-grid-8-4 h1 {
 }
 
 @media (max-width: 1024px) {
-
-	.ttm-series-featured {
-		grid-template-columns: 1fr;
-	}
 
 	.ttm-serial-hero {
 		grid-template-columns: 200px 1fr;
