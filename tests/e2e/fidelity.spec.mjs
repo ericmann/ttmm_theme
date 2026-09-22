@@ -1082,6 +1082,7 @@ test.describe( 'article', () => {
 		const el = page.locator( '.ttm-article' );
 		const t = await tracks( el );
 		expect( t.length ).toBe( 2 );
+		expect( t[ 0 ] / t[ 1 ] ).toBeCloseTo( 2, 1 );
 		expect( await computed( el, 'column-gap' ) ).toBe( px( 64 ) );
 		expect( await computed( el, 'padding' ) ).toBe( '40px 0px 48px' );
 	} );
@@ -1178,6 +1179,7 @@ test.describe( 'article', () => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-byline .wp-block-post-author-name a' );
 		expect( await computed( el, 'font-weight' ) ).toBe( '600' );
+		expect( await computed( el, 'color' ) ).toBe( color( 'text' ) );
 	} );
 
 	test( 'art-byline-tags: .ttm-byline .tag (first) @1280', async ( {
@@ -1189,6 +1191,12 @@ test.describe( 'article', () => {
 		expect( await computed( el, 'background-color' ) ).toBe(
 			color( 'surface' )
 		);
+		const readTime = page.locator( '.ttm-byline p.wp-block-paragraph' );
+		const tagBox = await el.boundingBox();
+		const readTimeBox = await readTime.boundingBox();
+		expect( tagBox.x ).toBeGreaterThanOrEqual(
+			readTimeBox.x + readTimeBox.width
+		);
 	} );
 
 	test( 'art-hero: .ttm-article .wp-block-post-featured-image @1280', async ( {
@@ -1198,7 +1206,11 @@ test.describe( 'article', () => {
 		const el = page.locator( '.ttm-article .wp-block-post-featured-image' );
 		expect( await computed( el, 'margin-top' ) ).toBe( px( 28 ) );
 		expect( await computed( el, 'aspect-ratio' ) ).toBe( '16 / 9' );
-		expect( await computed( el, 'filter' ) ).toBe( 'none' );
+		// Every grayscale rule in ttm.css targets `img`, not the figure; assert there.
+		const img = page.locator(
+			'.ttm-article .wp-block-post-featured-image img'
+		);
+		expect( await computed( img, 'filter' ) ).toBe( 'none' );
 	} );
 
 	test( 'art-hero-phone: .ttm-article .wp-block-post-featured-image @390', async ( {
@@ -1333,6 +1345,7 @@ test.describe( 'aside', () => {
 		const el = page.locator( '.ttm-series-toc__item' ).first();
 		const t = await tracks( el );
 		expect( t.length ).toBe( 2 );
+		expect( t[ 0 ] ).toBeCloseTo( 28, 0 );
 		expect( await computed( el, 'padding' ) ).toBe( '10px 0px' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 14 ) );
 		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 1 ) );
@@ -1460,9 +1473,9 @@ test.describe( 'aside', () => {
 		] ) {
 			boxes.push( await page.locator( selector ).boundingBox() );
 		}
-		let lastY = prevnext.y;
+		let lastY = prevnext.y + prevnext.height;
 		for ( const box of boxes ) {
-			expect( box.y ).toBeGreaterThan( lastY );
+			expect( box.y ).toBeGreaterThanOrEqual( lastY );
 			lastY = box.y;
 		}
 	} );
@@ -2274,6 +2287,7 @@ test.describe( 'archive', () => {
 		const el = page.locator( '.ttm-archive-year' ).first();
 		const t = await tracks( el );
 		expect( t.length ).toBe( 2 );
+		expect( t[ 0 ] ).toBeCloseTo( 120, 0 );
 		expect( await computed( el, 'border-top-width' ) ).toBe( px( 2 ) );
 		expect( await computed( el, 'padding' ) ).toBe( '24px 0px 8px' );
 	} );
@@ -2293,6 +2307,7 @@ test.describe( 'archive', () => {
 		const el = page.locator( '.ttm-archive-row' ).first();
 		const t = await tracks( el );
 		expect( t.length ).toBe( 2 );
+		expect( t[ 0 ] ).toBeCloseTo( 72, 0 );
 		expect( await computed( el, 'padding' ) ).toBe( '14px 0px' );
 		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 1 ) );
 		expect( await el.evaluate( ( node ) => node.tagName ) ).toBe( 'A' );
@@ -2416,6 +2431,7 @@ test.describe( 'archive', () => {
 			.first();
 		const t = await tracks( el );
 		expect( t.length ).toBe( 2 );
+		expect( t[ 0 ] ).toBeCloseTo( 10, 0 );
 		expect( await computed( el, 'padding' ) ).toBe( '12px 0px' );
 		const title = el.locator( '.ttm-series-row__title' );
 		expect( await computed( title, 'font-size' ) ).toBe( px( 15 ) );
@@ -2428,6 +2444,7 @@ test.describe( 'archive', () => {
 		const el = page.locator( '.ttm-most-read .ttm-numbered__row' ).first();
 		const t = await tracks( el );
 		expect( t.length ).toBe( 2 );
+		expect( t[ 0 ] ).toBeCloseTo( 24, 0 );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 14 ) );
 		expect( await computed( el, 'font-weight' ) ).toBe( '600' );
 	} );
@@ -2915,6 +2932,16 @@ test.describe( 'single series', () => {
 			return parseFloat( cs.maxWidth ) / ch;
 		} );
 		expect( chs ).toBeCloseTo( 16, 0 );
+	} );
+
+	// R1-09: the only thing P5-01's media-query-order fix was missing direct coverage
+	// for -- previously only exercised indirectly via the overflow loop.
+	test( 'single-head-phone: .ttm-series-single h1 @390', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.seriesHardening, 390 );
+		const el = page.locator( '.ttm-series-single h1' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 44 ) );
 	} );
 
 	test( 'single-kicker: .ttm-series-single .ttm-series-featured__kicker @1280', async ( {
