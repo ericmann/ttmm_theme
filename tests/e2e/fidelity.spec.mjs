@@ -2014,6 +2014,21 @@ test.describe( 'writing', () => {
 		expect( source ).toBe( 'The Quiet Ledger — recent chapters' );
 	} );
 
+	test( 'wr-chapter-first: .ttm-series-toc.is-chapters (first row) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const title = page
+			.locator( '.ttm-series-toc.is-chapters .ttm-numbered__title' )
+			.first();
+		expect( await title.evaluate( ( node ) => node.tagName ) ).toBe( 'A' );
+		expect( await text( title ) ).toBe( 'Reconciliation' );
+		const num = page
+			.locator( '.ttm-series-toc.is-chapters .ttm-numbered__num' )
+			.first();
+		expect( await text( num ) ).toBe( '12' );
+	} );
+
 	test( 'wr-chapter-row: .ttm-series-toc.is-chapters .ttm-numbered__row (first) @1280', async ( {
 		page,
 	} ) => {

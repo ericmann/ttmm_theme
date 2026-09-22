@@ -4,7 +4,8 @@
  * Series variant: rail heading with the series name (>= 721) and "Hub →" (<= 720), then
  * `li.ttm-series-toc__item.is-current|is-published|is-scheduled` rows. Chapters variant: the
  * shared numbered list (`ol.ttm-numbered`) under "{Series} — recent chapters" + "All {n}".
- * F11 no series -> ''; F23 open-ended lists published parts only; F24 scheduled parts unlinked.
+ * F11 no series -> ''; F23 open-ended series and the chapters variant list published parts only
+ * (chapters -> '' if none are published); F24 scheduled parts unlinked (series variant only).
  *
  * @package TTM\Core\Blocks
  *
@@ -45,10 +46,11 @@ $ttm_limit    = (int) ( $attributes['limit'] ?? 0 );
 $ttm_show_dek = ! empty( $attributes['showDek'] );
 $ttm_heading  = '' !== ( $attributes['heading'] ?? '' ) ? (string) $attributes['heading'] : __( 'In this series', 'ttm-core' );
 
-$ttm_open_ended = (int) get_term_meta( $ttm_row['id'], 'ttm_total_parts', true ) <= 0;
+$ttm_open_ended  = (int) get_term_meta( $ttm_row['id'], 'ttm_total_parts', true ) <= 0;
+$ttm_is_chapters = 'chapters' === $ttm_variant;
 
 $ttm_rows = $ttm_row['parts'];
-if ( $ttm_open_ended ) {
+if ( $ttm_open_ended || $ttm_is_chapters ) {
 	$ttm_rows = array_values( array_filter( $ttm_rows, static fn ( array $part ): bool => 'publish' === $part['status'] ) );
 }
 
@@ -61,12 +63,15 @@ if ( $ttm_limit > 0 ) {
 	$ttm_rows = array_slice( $ttm_rows, 0, $ttm_limit );
 }
 
+if ( $ttm_is_chapters && ! $ttm_rows ) {
+	return '';
+}
+
 $ttm_term      = get_term( $ttm_row['id'], 'series' );
 $ttm_term_link = $ttm_term && ! is_wp_error( $ttm_term ) ? get_term_link( $ttm_term ) : '';
 $ttm_term_link = is_string( $ttm_term_link ) ? $ttm_term_link : '';
 
-$ttm_is_chapters = 'chapters' === $ttm_variant;
-$ttm_published   = count( array_filter( $ttm_row['parts'], static fn ( array $part ): bool => 'publish' === $part['status'] ) );
+$ttm_published = count( array_filter( $ttm_row['parts'], static fn ( array $part ): bool => 'publish' === $part['status'] ) );
 
 if ( $ttm_is_chapters && '' === ( $attributes['heading'] ?? '' ) ) {
 	$ttm_heading = sprintf(

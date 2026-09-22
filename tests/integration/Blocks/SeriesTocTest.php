@@ -184,6 +184,44 @@ class SeriesTocTest extends TTM_IntegrationTestCase {
 		$this->assertLessThan( $pos_2, $pos_3 );
 	}
 
+	/**
+	 * REVIEW round 2, finding 1: the chapters variant must list published chapters only, even
+	 * on a closed series (total_parts > 0) where the series variant still shows scheduled rows.
+	 */
+	public function test_chapters_variant_excludes_scheduled_parts(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$series = $this->make_series(
+			'hardening-wp',
+			'Hardening WordPress',
+			4,
+			[
+				[ 'part' => 1 ],
+				[ 'part' => 2 ],
+				[ 'part' => 3 ],
+				[
+					'part'   => 4,
+					'status' => 'future',
+					'date'   => '2026-09-26 09:00:00',
+					'title'  => 'Chapter Four',
+				],
+			]
+		);
+
+		$html = $this->render(
+			$series['post_ids'][1],
+			[
+				'variant' => 'chapters',
+				'order'   => 'desc',
+				'limit'   => 2,
+			]
+		);
+
+		$this->assertStringContainsString( '>03<', $html );
+		$this->assertStringContainsString( '>02<', $html );
+		$this->assertStringNotContainsString( '>04<', $html );
+		$this->assertStringNotContainsString( 'Chapter Four', $html );
+	}
+
 	public function test_series_id_attribute_overrides_context(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
 		$series = $this->make_series( 'hardening-wp', 'Hardening WordPress', 2, [ [ 'part' => 1 ], [ 'part' => 2 ] ] );
