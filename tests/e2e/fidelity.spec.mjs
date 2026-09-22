@@ -1592,6 +1592,19 @@ test.describe( 'journal', () => {
 		expect( await computed( el, 'height' ) ).toBe( px( 2 ) );
 		expect( await computed( el, 'width' ) ).toBe( px( 1184 ) );
 	} );
+
+	test( 'jr-head-layout: .ttm-journal-head descendants @1280 (rule 36)', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const descendants = page.locator( '.ttm-journal-head *' );
+		const count = await descendants.count();
+		for ( let i = 0; i < count; i++ ) {
+			const cls =
+				( await descendants.nth( i ).getAttribute( 'class' ) ) || '';
+			expect( cls ).not.toMatch( /is-layout-constrained/ );
+		}
+	} );
 } );
 
 test.describe( 'journal stream', () => {
@@ -2042,6 +2055,19 @@ test.describe( 'writing', () => {
 		const title = page.locator( '.ttm-serial-hero__title' );
 		expect( await computed( title, 'font-size' ) ).toBe( px( 40 ) );
 	} );
+
+	test( 'wr-body-layout: .ttm-writing-body descendants @1280 (rule 36)', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const descendants = page.locator( '.ttm-writing-body *' );
+		const count = await descendants.count();
+		for ( let i = 0; i < count; i++ ) {
+			const cls =
+				( await descendants.nth( i ).getAttribute( 'class' ) ) || '';
+			expect( cls ).not.toMatch( /is-layout-constrained/ );
+		}
+	} );
 } );
 
 test.describe( 'archive', () => {
@@ -2345,6 +2371,19 @@ test.describe( 'archive', () => {
 		const t = await tracks( el );
 		expect( t.length ).toBe( 2 );
 		expect( t[ 0 ] ).toBeCloseTo( t[ 1 ], 0 );
+	} );
+
+	test( 'ar-body-layout: .ttm-archive-body descendants @1280 (rule 36)', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const descendants = page.locator( '.ttm-archive-body *' );
+		const count = await descendants.count();
+		for ( let i = 0; i < count; i++ ) {
+			const cls =
+				( await descendants.nth( i ).getAttribute( 'class' ) ) || '';
+			expect( cls ).not.toMatch( /is-layout-constrained/ );
+		}
 	} );
 } );
 
@@ -2727,6 +2766,32 @@ test.describe( 'hub', () => {
 		expect( t.length ).toBe( 1 );
 		const h1 = page.locator( '.ttm-hub-head h1' );
 		expect( await computed( h1, 'font-size' ) ).toBe( px( 44 ) );
+	} );
+
+	test( 'hub-head-layout: .ttm-hub-head descendants @1280 (rule 36)', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const descendants = page.locator( '.ttm-hub-head *' );
+		const count = await descendants.count();
+		for ( let i = 0; i < count; i++ ) {
+			const cls =
+				( await descendants.nth( i ).getAttribute( 'class' ) ) || '';
+			expect( cls ).not.toMatch( /is-layout-constrained/ );
+		}
+	} );
+
+	test( 'hub-featured-layout: .ttm-series-featured descendants @1280 (rule 36)', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const descendants = page.locator( '.ttm-series-featured *' );
+		const count = await descendants.count();
+		for ( let i = 0; i < count; i++ ) {
+			const cls =
+				( await descendants.nth( i ).getAttribute( 'class' ) ) || '';
+			expect( cls ).not.toMatch( /is-layout-constrained/ );
+		}
 	} );
 } );
 

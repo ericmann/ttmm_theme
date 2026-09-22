@@ -13,7 +13,7 @@ declare( strict_types=1 );
 ?>
 <!-- wp:group {"className":"ttm-stats","layout":{"type":"grid","columns":3}} -->
 <div class="wp-block-group ttm-stats">
-	<!-- wp:group {"layout":{"type":"constrained"}} -->
+	<!-- wp:group {"layout":{"type":"default"}} -->
 	<div class="wp-block-group">
 		<!-- wp:paragraph -->
 		<p>12 / 31</p>
@@ -24,7 +24,7 @@ declare( strict_types=1 );
 	</div>
 	<!-- /wp:group -->
 
-	<!-- wp:group {"layout":{"type":"constrained"}} -->
+	<!-- wp:group {"layout":{"type":"default"}} -->
 	<div class="wp-block-group">
 		<!-- wp:paragraph -->
 		<p>Monthly</p>
@@ -35,7 +35,7 @@ declare( strict_types=1 );
 	</div>
 	<!-- /wp:group -->
 
-	<!-- wp:group {"layout":{"type":"constrained"}} -->
+	<!-- wp:group {"layout":{"type":"default"}} -->
 	<div class="wp-block-group">
 		<!-- wp:paragraph -->
 		<p>~14 min</p>
