@@ -47,6 +47,7 @@ class WritingCellTest extends TTM_IntegrationTestCase {
 			update_post_meta( $post_id, 'ttm_series_part', $i );
 			update_post_meta( $post_id, 'ttm_primary_category', $writing_id );
 			update_post_meta( $post_id, 'ttm_form', 'chapter' );
+			update_post_meta( $post_id, 'ttm_part_title', "Part {$i} Subtitle" );
 			wp_set_object_terms( $post_id, [ $series_id ], 'series' );
 		}
 
@@ -82,10 +83,49 @@ class WritingCellTest extends TTM_IntegrationTestCase {
 		$html = $this->render();
 
 		$this->assertStringContainsString( 'Active Novel', $html );
-		$this->assertStringContainsString( 'Ch. 2: Chapter 2 Title', $html );
+		$this->assertStringContainsString( 'Ch. 2: Part 2 Subtitle', $html );
 		$this->assertStringContainsString( 'Read chapter 2', $html );
 		$this->assertStringContainsString( 'From chapter 1', $html );
 		$this->assertStringContainsString( 'btn-primary', $html );
+		$this->assertStringContainsString( 'All serials &amp; stories', $html );
+		$this->assertStringContainsString( 'ttm-cell-heading__label', $html );
+		$this->assertStringContainsString( 'ttm-writing-cell__body', $html );
+	}
+
+	public function test_kicker_is_serial_alone_without_cadence(): void {
+		$writing   = $this->category_id( 'writing', 'Writing' );
+		$series_id = $this->make_serial( 'active-novel', 'Active Novel', 'novel', 'in-progress', $writing, 1 );
+		update_term_meta( $series_id, 'ttm_cadence', '' );
+
+		$html = $this->render();
+
+		$this->assertMatchesRegularExpression( '/ttm-writing-cell__kicker">\s*Serial\s*</', $html );
+		$this->assertStringNotContainsString( 'new chapter', $html );
+	}
+
+	public function test_headline_uses_part_title_when_set(): void {
+		$writing   = $this->category_id( 'writing', 'Writing' );
+		$series_id = $this->make_serial( 'active-novel', 'Active Novel', 'novel', 'in-progress', $writing, 1 );
+		$row       = SeriesIndex::get( $series_id );
+		$post_id   = $row['parts'][0]['post_id'];
+
+		delete_post_meta( $post_id, 'ttm_part_title' );
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'Active Novel — Ch. 1', $html );
+		$this->assertStringNotContainsString( 'Ch. 1:', $html );
+	}
+
+	public function test_story_row_meta_is_short_story_with_word_count(): void {
+		$writing = $this->category_id( 'writing', 'Writing' );
+		$this->make_serial( 'active-novel', 'Active Novel', 'novel', 'in-progress', $writing, 1 );
+		$story_id = $this->make_story( $writing, 'A Standalone Story' );
+		update_post_meta( $story_id, 'ttm_word_count', 3100 );
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'Short story · 3,100 words', $html );
 	}
 
 	public function test_also_running_lists_other_serials_and_stories_limited(): void {

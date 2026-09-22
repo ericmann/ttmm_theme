@@ -14,10 +14,10 @@ use TTM\Core\Support\Dates;
 
 class SeedStatesTest extends TTM_IntegrationTestCase {
 
-	public function test_normal_state_has_series_index_with_four_rows(): void {
+	public function test_normal_state_has_series_index_with_six_rows(): void {
 		( new Seeder() )->run( 'normal' );
 
-		$this->assertCount( 4, SeriesIndex::all() );
+		$this->assertCount( 6, SeriesIndex::all() );
 	}
 
 	public function test_normal_state_has_active_serial_with_cover(): void {
@@ -60,6 +60,15 @@ class SeedStatesTest extends TTM_IntegrationTestCase {
 		if ( $security ) {
 			$this->assertSame( 0, (int) $security->count );
 		}
+	}
+
+	public function test_seed_configures_custom_url_dev_accept(): void {
+		( new Seeder() )->run( 'normal' );
+
+		$html = (string) do_blocks( '<!-- wp:ttm/newsletter-form /-->' );
+
+		$this->assertStringContainsString( 'data-provider="custom-url"', $html );
+		$this->assertStringContainsString( '<form', $html );
 	}
 
 	public function test_seed_refuses_on_production(): void {

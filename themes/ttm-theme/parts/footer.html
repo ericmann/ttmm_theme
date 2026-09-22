@@ -1,22 +1,18 @@
-<!-- wp:group {"tagName":"footer","templateLock":"contentOnly","className":"ttm-footer","layout":{"type":"flex","justifyContent":"space-between"}} -->
+<!-- wp:group {"tagName":"footer","templateLock":"contentOnly","className":"ttm-footer","layout":{"type":"default"}} -->
 <footer class="wp-block-group ttm-footer">
-	<!-- wp:group {"layout":{"type":"flex"}} -->
-	<div class="wp-block-group">
-		<!-- wp:paragraph -->
-		<p>These Things Matter · ©</p>
+	<!-- wp:group {"className":"ttm-footer__left","layout":{"type":"default"}} -->
+	<div class="wp-block-group ttm-footer__left">
+		<!-- wp:paragraph {"className":"ttm-footer__meta","metadata":{"bindings":{"content":{"source":"ttm/today","args":{"format":"footer"}}}}} -->
+		<p class="ttm-footer__meta"></p>
 		<!-- /wp:paragraph -->
 
-		<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"ttm/today","args":{"format":"year"}}}}} -->
-		<p></p>
-		<!-- /wp:paragraph -->
-
-		<!-- wp:paragraph -->
-		<p>Eric Mann · Built on WordPress</p>
+		<!-- wp:paragraph {"className":"ttm-footer__copyright","metadata":{"bindings":{"content":{"source":"ttm/verse-copyright"}}}} -->
+		<p class="ttm-footer__copyright"></p>
 		<!-- /wp:paragraph -->
 	</div>
 	<!-- /wp:group -->
 
-	<!-- wp:navigation {"overlayMenu":"never","layout":{"type":"flex"}} -->
+	<!-- wp:navigation {"className":"ttm-footer__nav","overlayMenu":"never"} -->
 	<!-- wp:navigation-link {"label":"Technology","url":"/category/technology/","kind":"custom"} /-->
 	<!-- wp:navigation-link {"label":"Business","url":"/category/business/","kind":"custom"} /-->
 	<!-- wp:navigation-link {"label":"Faith","url":"/category/faith/","kind":"custom"} /-->

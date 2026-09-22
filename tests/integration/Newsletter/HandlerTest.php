@@ -127,6 +127,8 @@ class HandlerTest extends TTM_IntegrationTestCase {
 		$html = (string) do_blocks( '<!-- wp:ttm/newsletter-form /-->' );
 
 		$this->assertStringContainsString( 'data-provider="custom-url"', $html );
+		$this->assertStringContainsString( 'class="ttm-newsletter-form__form"', $html );
+		$this->assertStringContainsString( 'id="ttm-nl-email-', $html );
 		$this->assertStringContainsString( 'name="ttm_token"', $html );
 		$this->assertStringContainsString( 'class="ttm-hp"', $html );
 		$this->assertStringContainsString( 'tabindex="-1"', $html );

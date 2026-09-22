@@ -18,9 +18,10 @@ use PHPUnit\Framework\TestCase;
 class BoundariesTest extends TestCase {
 
 	/**
-	 * SPEC §4.2 table order, top to bottom. A directory may import its own directory or any
+	 * SPEC §4 table order, top to bottom. A directory may import its own directory or any
 	 * directory earlier in this list. Top-level files (`Config.php`, `Plugin.php`) are grouped
-	 * with `.` (the src root) since they have no directory of their own.
+	 * with `.` (the src root) since they have no directory of their own. `Cli/` is exempt (may
+	 * import anything) and deliberately absent from this list.
 	 *
 	 * @var string[]
 	 */
@@ -31,17 +32,45 @@ class BoundariesTest extends TestCase {
 		'Meta',
 		'Query',
 		'Fiction',
+		'Cache',
 		'Verse',
+		'Newsletter',
 		'Bindings',
 		'Blocks',
 		'Editor',
 		'Templates',
 		'Nav',
-		'Newsletter',
-		'Cache',
 		'Rest',
-		'Cli',
 		'Compat',
+		'Admin',
+	];
+
+	/**
+	 * SPEC §4's "May import" column, exactly: the directories each row may reference (its own
+	 * directory is always implicitly allowed and not repeated here). `Blocks/` and the final
+	 * tier (`Editor`, `Templates`, `Nav`, `Rest`, `Compat`, `Admin`) may import everything
+	 * above them, spelled out rather than left to rank order alone.
+	 *
+	 * @var array<string, string[]>
+	 */
+	private const MAY_IMPORT = [
+		'.'          => [],
+		'Support'    => [ '.' ],
+		'Taxonomy'   => [ 'Support', '.' ],
+		'Meta'       => [ 'Support', '.', 'Taxonomy' ],
+		'Query'      => [ 'Support', '.', 'Meta', 'Taxonomy' ],
+		'Fiction'    => [ 'Query', 'Taxonomy', 'Support', '.' ],
+		'Cache'      => [ '.', 'Support' ],
+		'Verse'      => [ 'Support', '.', 'Cache' ],
+		'Newsletter' => [ '.', 'Support' ],
+		'Bindings'   => [ 'Query', 'Support', 'Meta', '.', 'Verse' ],
+		'Blocks'     => [ '.', 'Support', 'Taxonomy', 'Meta', 'Query', 'Fiction', 'Cache', 'Verse', 'Newsletter', 'Bindings' ],
+		'Editor'     => [ '.', 'Support', 'Taxonomy', 'Meta', 'Query', 'Fiction', 'Cache', 'Verse', 'Newsletter', 'Bindings', 'Blocks' ],
+		'Templates'  => [ '.', 'Support', 'Taxonomy', 'Meta', 'Query', 'Fiction', 'Cache', 'Verse', 'Newsletter', 'Bindings', 'Blocks' ],
+		'Nav'        => [ '.', 'Support', 'Taxonomy', 'Meta', 'Query', 'Fiction', 'Cache', 'Verse', 'Newsletter', 'Bindings', 'Blocks' ],
+		'Rest'       => [ '.', 'Support', 'Taxonomy', 'Meta', 'Query', 'Fiction', 'Cache', 'Verse', 'Newsletter', 'Bindings', 'Blocks' ],
+		'Compat'     => [ '.', 'Support', 'Taxonomy', 'Meta', 'Query', 'Fiction', 'Cache', 'Verse', 'Newsletter', 'Bindings', 'Blocks' ],
+		'Admin'      => [ '.', 'Support', 'Taxonomy', 'Meta', 'Query', 'Fiction', 'Cache', 'Verse', 'Newsletter', 'Bindings', 'Blocks' ],
 	];
 
 	/**
@@ -50,6 +79,29 @@ class BoundariesTest extends TestCase {
 	 * @var string[]
 	 */
 	private const NEVER_IMPORTS_BLOCKS = [ 'Cache', 'Verse', 'Newsletter' ];
+
+	/**
+	 * Upward imports the stricter `MAY_IMPORT` map would otherwise flag, kept as-is because
+	 * refactoring `Cache/Verse/Newsletter` internals is out of scope this flight (non-goal).
+	 * `[source directory] => [target directory => reason]`.
+	 *
+	 * @var array<string, array<string, string>>
+	 */
+	private const KNOWN_EXCEPTIONS = [
+		'Cache'      => [
+			'Meta'  => 'Cache\\Headers reads PrimaryCategory for the category-scoped cache key (phase 1 shipped behaviour).',
+			'Query' => 'Cache\\Purge reads Query\\SeriesIndex to invalidate series pages (phase 1 shipped behaviour).',
+		],
+		'Verse'      => [
+			'Admin' => 'Verse\\Admin extends the shared Admin\\Page settings screen (phase 1 shipped behaviour).',
+		],
+		'Newsletter' => [
+			'Admin' => 'Newsletter\\Settings extends the shared Admin\\Page settings screen (phase 1 shipped behaviour).',
+		],
+		'Fiction'    => [
+			'Admin' => 'Fiction\\Books extends the shared Admin\\Page settings screen (phase 1 shipped behaviour).',
+		],
+	];
 
 	/**
 	 * The only plugin classes theme PHP may reference directly (SPEC §3.1 rule 1): `Config`
@@ -110,6 +162,73 @@ class BoundariesTest extends TestCase {
 	}
 
 	/**
+	 * Whether `$source` importing `$target` is a documented, out-of-scope exception (§4.2).
+	 *
+	 * @param string $source Importing directory.
+	 * @param string $target Imported directory.
+	 * @return bool
+	 */
+	private function is_known_exception( string $source, string $target ): bool {
+		return isset( self::KNOWN_EXCEPTIONS[ $source ][ $target ] );
+	}
+
+	/**
+	 * SPEC §4's "May import" column, enforced exactly (not just "any earlier row" -- a
+	 * directory may only import the specific directories its row lists, plus itself and any
+	 * `KNOWN_EXCEPTIONS`). A synthetic violation fixture (a `Support/` file that `use`s
+	 * `Query\Lead`, which is not in `Support`'s allowed list) fails; the real tree passes.
+	 */
+	public function test_may_import_column_is_enforced_per_directory(): void {
+		$src = rtrim( TTM_CORE_DIR, '/' ) . '/src';
+
+		$real_tree = [];
+		foreach ( $this->php_files( $src ) as $file ) {
+			$dir               = $this->top_level_dir( $src, $file );
+			$real_tree[ $file ] = [ $dir, $this->use_targets( $file ) ];
+		}
+
+		$this->assertSame( [], $this->may_import_violations( $real_tree ), 'The real tree violates the SPEC §4 May-import column.' );
+
+		// Synthetic fixture: Support/ may only import Config, so a Query\Lead use is a violation.
+		$fixture = [
+			'fixture/Support/Broken.php' => [ 'Support', [ 'Query' ] ],
+		];
+		$this->assertNotSame( [], $this->may_import_violations( $fixture ), 'The synthetic Support/ -> Query/ fixture should have been flagged.' );
+	}
+
+	/**
+	 * SPEC §4 May-import-column violations across `$tree`.
+	 *
+	 * @param array<string, array{0: string, 1: string[]}> $tree file => [ directory, imported directories ].
+	 * @return string[]
+	 */
+	private function may_import_violations( array $tree ): array {
+		$violations = [];
+
+		foreach ( $tree as $file => [ $dir, $used_dirs ] ) {
+			if ( 'Cli' === $dir || ! array_key_exists( $dir, self::MAY_IMPORT ) ) {
+				continue; // Cli/ is exempt (may import anything); unmapped dirs are out of scope.
+			}
+
+			$allowed = self::MAY_IMPORT[ $dir ];
+
+			foreach ( $used_dirs as $used_dir ) {
+				if ( $used_dir === $dir || in_array( $used_dir, $allowed, true ) || $this->is_known_exception( $dir, $used_dir ) ) {
+					continue;
+				}
+
+				if ( ! array_key_exists( $used_dir, self::MAY_IMPORT ) ) {
+					continue; // Unmapped target (e.g. Cli/): not part of the §4 table.
+				}
+
+				$violations[] = sprintf( '%s (%s/) imports %s/, which is not in its May-import list', $file, $dir, $used_dir );
+			}
+		}
+
+		return $violations;
+	}
+
+	/**
 	 * The `use` scan above misses an upward dependency spelled out inline (`\TTM\Core\Blocks\
 	 * Helpers::wrapper(...)`) instead of imported at the top of the file -- this walks every
 	 * `plugins/ttm-core/src/**\/*.php` file's body (docblocks, `//` comments and `use` lines
@@ -136,6 +255,10 @@ class BoundariesTest extends TestCase {
 				}
 
 				if ( ! in_array( $used_dir, self::ROW_ORDER, true ) ) {
+					continue;
+				}
+
+				if ( $this->is_known_exception( $dir, $used_dir ) ) {
 					continue;
 				}
 
@@ -237,6 +360,10 @@ class BoundariesTest extends TestCase {
 
 				if ( ! in_array( $used_dir, self::ROW_ORDER, true ) ) {
 					continue; // Unmapped target directory: not part of the §4.2 table.
+				}
+
+				if ( $this->is_known_exception( $dir, $used_dir ) ) {
+					continue;
 				}
 
 				$used_rank = array_search( $used_dir, self::ROW_ORDER, true );

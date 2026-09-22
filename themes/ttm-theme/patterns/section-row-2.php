@@ -11,14 +11,14 @@
 declare( strict_types=1 );
 
 ?>
-<!-- wp:group {"className":"is-style-grid-4 ttm-section-row","layout":{"type":"constrained"}} -->
+<!-- wp:group {"className":"is-style-grid-4 ttm-section-row","layout":{"type":"default"}} -->
 <div class="wp-block-group is-style-grid-4 ttm-section-row">
 	<!-- wp:pattern {"slug":"ttm/section-cell-faith"} /-->
 
 	<!-- wp:pattern {"slug":"ttm/section-cell-opinion"} /-->
 
-	<!-- wp:group {"className":"is-style-span-2"} -->
-	<div class="wp-block-group is-style-span-2">
+	<!-- wp:group {"className":"is-style-cell is-style-span-2 ttm-cell","layout":{"type":"default"}} -->
+	<div class="wp-block-group is-style-cell is-style-span-2 ttm-cell">
 		<!-- wp:ttm/writing-cell /-->
 	</div>
 	<!-- /wp:group -->

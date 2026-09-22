@@ -11,27 +11,102 @@
 		"cover": false,
 		"purchase_links": [],
 		"parts": [
-			{ "post_slug": "security-post-1", "part": 1 },
-			{ "post_slug": "technology-post-2", "part": 2 },
-			{ "post_slug": "security-post-2", "part": 3 }
+			{
+				"post_slug": "hardening-part-1",
+				"part": 1
+			},
+			{
+				"post_slug": "hardening-part-2-salts-and-keys",
+				"part": 2
+			},
+			{
+				"post_slug": "signing-your-options-table",
+				"part": 3
+			}
 		]
 	},
 	{
-		"slug": "reading-cves",
-		"name": "Reading CVEs",
+		"slug": "the-consultants-ledger",
+		"name": "The Consultant's Ledger",
 		"form": "nonfiction",
-		"status": "complete",
-		"total_parts": 4,
+		"status": "in-progress",
+		"total_parts": 8,
 		"genre": "",
-		"cadence": "",
-		"next_date_days_ahead": 0,
+		"cadence": "Monthly",
+		"next_date_days_ahead": 14,
 		"cover": false,
 		"purchase_links": [],
 		"parts": [
-			{ "post_slug": "security-post-3", "part": 1 },
-			{ "post_slug": "business-post-3", "part": 2 },
-			{ "post_slug": "security-post-4", "part": 3 },
-			{ "post_slug": "business-post-4", "part": 4 }
+			{
+				"post_slug": "what-a-cto-actually-does-all-day",
+				"part": 1
+			},
+			{
+				"post_slug": "retainers-are-a-promise-about-attention",
+				"part": 2
+			},
+			{
+				"post_slug": "fire-the-client-who-pays-late-twice",
+				"part": 3
+			},
+			{
+				"post_slug": "one-page-operating-agreement",
+				"part": 4
+			},
+			{
+				"post_slug": "charge-for-outcome-bill-for-hour",
+				"part": 5
+			}
+		]
+	},
+	{
+		"slug": "ordinary-time",
+		"name": "Ordinary Time",
+		"form": "nonfiction",
+		"status": "in-progress",
+		"total_parts": 12,
+		"genre": "",
+		"cadence": "Sundays",
+		"next_date_days_ahead": 7,
+		"cover": false,
+		"purchase_links": [],
+		"parts": [
+			{
+				"post_slug": "ordinary-time-week-1",
+				"part": 1
+			},
+			{
+				"post_slug": "ordinary-time-week-2",
+				"part": 2
+			},
+			{
+				"post_slug": "ordinary-time-week-3",
+				"part": 3
+			},
+			{
+				"post_slug": "ordinary-time-week-4",
+				"part": 4
+			},
+			{
+				"post_slug": "ordinary-time-week-5",
+				"part": 5
+			},
+			{
+				"post_slug": "ordinary-time-week-6",
+				"part": 6
+			},
+			{
+				"post_slug": "ordinary-time-week-7",
+				"part": 7
+			},
+			{
+				"post_slug": "ordinary-time-week-8",
+				"part": 8
+			},
+			{
+				"post_slug": "ordinary-time-week-9",
+				"part": 9
+			}
 		]
 	},
 	{
@@ -41,50 +116,238 @@
 		"status": "in-progress",
 		"total_parts": 31,
 		"genre": "literary thriller",
-		"cadence": "Monthly",
+		"cadence": "monthly",
 		"next_date_days_ahead": 27,
 		"cover": true,
 		"purchase_links": [
-			{ "label": "Amazon", "url": "https://amazon.com/the-quiet-ledger" },
-			{ "label": "Kobo", "url": "https://kobo.com/the-quiet-ledger" }
+			{
+				"label": "Amazon",
+				"url": "https://amazon.com/the-quiet-ledger"
+			},
+			{
+				"label": "Kobo",
+				"url": "https://kobo.com/the-quiet-ledger"
+			}
 		],
 		"parts": [
-			{ "post_slug": "quiet-ledger-ch-1", "part": 1 },
-			{ "post_slug": "quiet-ledger-ch-2", "part": 2 },
-			{ "post_slug": "quiet-ledger-ch-3", "part": 3 },
-			{ "post_slug": "quiet-ledger-ch-4", "part": 4 },
-			{ "post_slug": "quiet-ledger-ch-5", "part": 5 },
-			{ "post_slug": "quiet-ledger-ch-6", "part": 6 },
-			{ "post_slug": "quiet-ledger-ch-7", "part": 7 },
-			{ "post_slug": "quiet-ledger-ch-8", "part": 8 },
-			{ "post_slug": "quiet-ledger-ch-9", "part": 9 },
-			{ "post_slug": "quiet-ledger-ch-10", "part": 10 },
-			{ "post_slug": "quiet-ledger-ch-11", "part": 11 },
-			{ "post_slug": "quiet-ledger-ch-12", "part": 12 },
-			{ "post_slug": "quiet-ledger-ch-13", "part": 13, "future": true }
+			{
+				"post_slug": "quiet-ledger-ch-1",
+				"part": 1
+			},
+			{
+				"post_slug": "quiet-ledger-ch-2",
+				"part": 2
+			},
+			{
+				"post_slug": "quiet-ledger-ch-3",
+				"part": 3
+			},
+			{
+				"post_slug": "quiet-ledger-ch-4",
+				"part": 4
+			},
+			{
+				"post_slug": "quiet-ledger-ch-5",
+				"part": 5
+			},
+			{
+				"post_slug": "quiet-ledger-ch-6",
+				"part": 6
+			},
+			{
+				"post_slug": "quiet-ledger-ch-7",
+				"part": 7
+			},
+			{
+				"post_slug": "quiet-ledger-ch-8",
+				"part": 8
+			},
+			{
+				"post_slug": "quiet-ledger-ch-9",
+				"part": 9
+			},
+			{
+				"post_slug": "quiet-ledger-ch-10",
+				"part": 10
+			},
+			{
+				"post_slug": "quiet-ledger-ch-11",
+				"part": 11
+			},
+			{
+				"post_slug": "quiet-ledger-ch-12",
+				"part": 12
+			},
+			{
+				"post_slug": "quiet-ledger-ch-13",
+				"part": 13,
+				"future": true
+			}
 		]
 	},
 	{
-		"slug": "salt-and-iron",
-		"name": "Salt and Iron",
+		"slug": "failover",
+		"name": "Failover",
 		"form": "novella",
 		"status": "complete",
 		"total_parts": 9,
-		"genre": "fantasy",
+		"genre": "",
 		"cadence": "",
 		"next_date_days_ahead": 0,
 		"cover": false,
 		"purchase_links": [],
 		"parts": [
-			{ "post_slug": "salt-iron-ch-1", "part": 1 },
-			{ "post_slug": "salt-iron-ch-2", "part": 2 },
-			{ "post_slug": "salt-iron-ch-3", "part": 3 },
-			{ "post_slug": "salt-iron-ch-4", "part": 4 },
-			{ "post_slug": "salt-iron-ch-5", "part": 5 },
-			{ "post_slug": "salt-iron-ch-6", "part": 6 },
-			{ "post_slug": "salt-iron-ch-7", "part": 7 },
-			{ "post_slug": "salt-iron-ch-8", "part": 8 },
-			{ "post_slug": "salt-iron-ch-9", "part": 9 }
+			{
+				"post_slug": "failover-ch-1",
+				"part": 1
+			},
+			{
+				"post_slug": "failover-ch-2",
+				"part": 2
+			},
+			{
+				"post_slug": "failover-ch-3",
+				"part": 3
+			},
+			{
+				"post_slug": "failover-ch-4",
+				"part": 4
+			},
+			{
+				"post_slug": "failover-ch-5",
+				"part": 5
+			},
+			{
+				"post_slug": "failover-ch-6",
+				"part": 6
+			},
+			{
+				"post_slug": "failover-ch-7",
+				"part": 7
+			},
+			{
+				"post_slug": "failover-ch-8",
+				"part": 8
+			},
+			{
+				"post_slug": "failover-ch-9",
+				"part": 9
+			}
+		]
+	},
+	{
+		"slug": "salt-water-wires",
+		"name": "Salt Water Wires",
+		"form": "novel",
+		"status": "complete",
+		"total_parts": 24,
+		"genre": "",
+		"cadence": "",
+		"next_date_days_ahead": 0,
+		"cover": true,
+		"purchase_links": [
+			{
+				"label": "Amazon",
+				"url": "https://amazon.com/salt-water-wires"
+			}
+		],
+		"parts": [
+			{
+				"post_slug": "salt-water-wires-ch-1",
+				"part": 1
+			},
+			{
+				"post_slug": "salt-water-wires-ch-2",
+				"part": 2
+			},
+			{
+				"post_slug": "salt-water-wires-ch-3",
+				"part": 3
+			},
+			{
+				"post_slug": "salt-water-wires-ch-4",
+				"part": 4
+			},
+			{
+				"post_slug": "salt-water-wires-ch-5",
+				"part": 5
+			},
+			{
+				"post_slug": "salt-water-wires-ch-6",
+				"part": 6
+			},
+			{
+				"post_slug": "salt-water-wires-ch-7",
+				"part": 7
+			},
+			{
+				"post_slug": "salt-water-wires-ch-8",
+				"part": 8
+			},
+			{
+				"post_slug": "salt-water-wires-ch-9",
+				"part": 9
+			},
+			{
+				"post_slug": "salt-water-wires-ch-10",
+				"part": 10
+			},
+			{
+				"post_slug": "salt-water-wires-ch-11",
+				"part": 11
+			},
+			{
+				"post_slug": "salt-water-wires-ch-12",
+				"part": 12
+			},
+			{
+				"post_slug": "salt-water-wires-ch-13",
+				"part": 13
+			},
+			{
+				"post_slug": "salt-water-wires-ch-14",
+				"part": 14
+			},
+			{
+				"post_slug": "salt-water-wires-ch-15",
+				"part": 15
+			},
+			{
+				"post_slug": "salt-water-wires-ch-16",
+				"part": 16
+			},
+			{
+				"post_slug": "salt-water-wires-ch-17",
+				"part": 17
+			},
+			{
+				"post_slug": "salt-water-wires-ch-18",
+				"part": 18
+			},
+			{
+				"post_slug": "salt-water-wires-ch-19",
+				"part": 19
+			},
+			{
+				"post_slug": "salt-water-wires-ch-20",
+				"part": 20
+			},
+			{
+				"post_slug": "salt-water-wires-ch-21",
+				"part": 21
+			},
+			{
+				"post_slug": "salt-water-wires-ch-22",
+				"part": 22
+			},
+			{
+				"post_slug": "salt-water-wires-ch-23",
+				"part": 23
+			},
+			{
+				"post_slug": "salt-water-wires-ch-24",
+				"part": 24
+			}
 		]
 	}
 ]

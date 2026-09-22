@@ -11,8 +11,8 @@
 declare( strict_types=1 );
 
 ?>
-<!-- wp:group {"className":"is-style-grid-4 ttm-section-row","layout":{"type":"constrained"}} -->
-<div class="wp-block-group is-style-grid-4 ttm-section-row">
+<!-- wp:group {"className":"is-style-grid-4 ttm-section-row is-row-1","layout":{"type":"default"}} -->
+<div class="wp-block-group is-style-grid-4 ttm-section-row is-row-1">
 	<!-- wp:pattern {"slug":"ttm/section-cell-large"} /-->
 
 	<!-- wp:pattern {"slug":"ttm/section-cell-business"} /-->

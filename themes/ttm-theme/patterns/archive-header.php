@@ -11,7 +11,7 @@
 declare( strict_types=1 );
 
 ?>
-<!-- wp:group {"className":"is-style-grid-8-4 ttm-archive-head","layout":{"type":"constrained"}} -->
+<!-- wp:group {"className":"is-style-grid-8-4 ttm-archive-head","layout":{"type":"default"}} -->
 <div class="wp-block-group is-style-grid-8-4 ttm-archive-head">
 	<!-- wp:group {"layout":{"type":"constrained"}} -->
 	<div class="wp-block-group">

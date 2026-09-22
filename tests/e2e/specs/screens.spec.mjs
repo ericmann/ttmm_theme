@@ -1,7 +1,7 @@
 /**
- * Seven seeded screens x two viewports: exactly one <main>, zero serious/critical axe
- * violations, and a single high-priority hero image on the front page and an article
- * (SPEC §3.4 rule 33, Phase 8).
+ * Eight seeded screens (P4-03 added `about`) x two viewports: exactly one <main>, zero
+ * serious/critical axe violations, and a single high-priority hero image on the front page and
+ * an article (SPEC §3.4 rule 33, Phase 8).
  */
 
 import { test, expect } from '@playwright/test';
@@ -22,7 +22,12 @@ for ( const [ name, path ] of Object.entries( SCREENS ) ) {
 		} ) => {
 			await page.goto( path );
 
-			const results = await new AxeBuilder( { page } ).analyze();
+			// 01 §2.1's one permitted exception (SPEC §6.1.8, Decision "Colour vs a11y"): the
+			// poster's ghost button keeps its literal bg-colour-on-accent look, 3.75:1, under
+			// WCAG AA -- the fidelity `a11y` row already excludes it for the same reason.
+			const results = await new AxeBuilder( { page } )
+				.exclude( '.ttm-poster .btn-ghost' )
+				.analyze();
 			const blocking = results.violations.filter( ( violation ) =>
 				SERIOUS_IMPACTS.includes( violation.impact )
 			);

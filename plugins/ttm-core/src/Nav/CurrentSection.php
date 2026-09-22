@@ -11,6 +11,7 @@ namespace TTM\Core\Nav;
 
 use TTM\Core\Config;
 use TTM\Core\Meta\PrimaryCategory;
+use TTM\Core\Query\Lead;
 use TTM\Core\Query\SeriesIndex;
 use WP_Block;
 
@@ -50,10 +51,44 @@ class CurrentSection {
 		}
 
 		if ( self::is_current_section( $path ) ) {
-			$block_content = self::add_class( $block_content, 'current-section' );
+			$block_content = self::add_class( $block_content, 'current-section current-menu-item' );
 		}
 
-		return $block_content;
+		return self::fill_label( $block_content, $path );
+	}
+
+	/**
+	 * Replace a section link's anchor text with its category term's own (possibly
+	 * owner-renamed) name, when the link is one of `sections.order`'s `/category/<slug>/`
+	 * links (SPEC §6.1.8).
+	 *
+	 * @param string $html Block HTML.
+	 * @param string $path Trailing-slashed URL path.
+	 * @return string
+	 */
+	private static function fill_label( string $html, string $path ): string {
+		if ( ! preg_match( '#^/category/([a-z0-9-]+)/$#', $path, $m ) ) {
+			return $html;
+		}
+
+		$slug = $m[1];
+		if ( ! in_array( $slug, (array) Config::get( 'sections.order', [] ), true ) ) {
+			return $html;
+		}
+
+		$category = get_category_by_slug( $slug );
+		if ( ! $category ) {
+			return $html;
+		}
+
+		return (string) preg_replace_callback(
+			'/(<a\b[^>]*>)(.*?)(<\/a>)/s',
+			static function ( array $m ) use ( $category ): string {
+				return $m[1] . esc_html( $category->name ) . $m[3];
+			},
+			$html,
+			1
+		);
 	}
 
 	/**
@@ -63,6 +98,17 @@ class CurrentSection {
 	 * @return bool
 	 */
 	private static function is_current_section( string $path ): bool {
+		if ( is_front_page() && 'lead' === Config::get( 'nav.front_current', 'lead' ) ) {
+			$lead_id = Lead::id();
+			if ( $lead_id ) {
+				$category_id   = PrimaryCategory::id( $lead_id );
+				$category_link = $category_id ? wp_parse_url( get_category_link( $category_id ), PHP_URL_PATH ) : false;
+				if ( $category_link && trailingslashit( $category_link ) === $path ) {
+					return true;
+				}
+			}
+		}
+
 		if ( is_singular( 'post' ) ) {
 			$slug = PrimaryCategory::slug( get_the_ID() );
 			if ( $slug ) {

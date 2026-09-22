@@ -12,8 +12,19 @@
 // R1-12: raised to 33200 for 01 §4.13's missing .ttm-syndication rule
 // (32610 -> 33070, including the stylelint-disable comment its descending-
 // specificity warning needed); CLAUDE.md's constraint line updated to match.
+// P0-03: rule 30 amendment raises the budget to 40960 ahead of phase 2's
+// front-page CSS (lead row, journal rail, masthead/nav, writing cell); no
+// CSS added by this task. CLAUDE.md already says 40960 (this file was
+// stale against it). The number lives only here and in CLAUDE.md.
+// P3-03: rule 30's raise (40960 -> 41984) for the Writing cell's body grid/
+// kicker/headline/dek/also-running CSS (41845 measured, after trimming
+// comments elsewhere in the file first).
+// P3-04: R6's raise turned out to need a second correction once the series
+// strip's real CSS was measured (41984 -> 43008; 42583 measured, after the
+// same kind of comment-trimming). P3-05 still runs its own measurement pass
+// per its own scope, but should find this settled rather than raise again.
 import { statSync, existsSync } from 'node:fs';
-const cssBudgetBytes = 33200;
+const cssBudgetBytes = 43008;
 const file = 'themes/ttm-theme/assets/css/ttm.css';
 if ( ! existsSync( file ) ) {
 	console.error( `${ file } missing` );

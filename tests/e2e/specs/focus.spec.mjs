@@ -8,7 +8,11 @@
 
 import { test, expect } from '@playwright/test';
 
-const MAX_TABS = 40;
+// P2-03 turned every `ttm/category-count` binding in `core/paragraph.content` into a real link
+// (SPEC Decision "ttm/category-count") -- each section-row cell's "N articles →" heading link and
+// the journal rail's/stream's own now add a tab stop before the newsletter poster's button, so
+// the budget needs more headroom than the original 40.
+const MAX_TABS = 70;
 
 const TARGETS = {
 	'skip link': '.ttm-skip',

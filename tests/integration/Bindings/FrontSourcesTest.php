@@ -125,6 +125,27 @@ class FrontSourcesTest extends TTM_IntegrationTestCase {
 		$this->assertSame( '', $this->source_value( 'ttm/relative-date', [], $missing_post_block, 'content' ) );
 	}
 
+	public function test_meta_line_reading_format_short_omits_read(): void {
+		$post = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		update_post_meta( $post, 'ttm_word_count', 2000 );
+
+		$block = $this->make_block( 'core/paragraph', $post );
+
+		$long = $this->source_value( 'ttm/meta-line', [ 'parts' => [ 'reading' ] ], $block, 'content' );
+		$this->assertSame( '9 min read', $long );
+
+		$short = $this->source_value(
+			'ttm/meta-line',
+			[
+				'parts'         => [ 'reading' ],
+				'readingFormat' => 'short',
+			],
+			$block,
+			'content'
+		);
+		$this->assertSame( '9 min', $short );
+	}
+
 	public function test_meta_line_html_is_stripped_outside_paragraph_content(): void {
 		$post = self::factory()->post->create( [ 'post_status' => 'publish' ] );
 
@@ -145,10 +166,11 @@ class FrontSourcesTest extends TTM_IntegrationTestCase {
 			[
 				'post_status'   => 'publish',
 				'post_category' => [ $tech ],
-			] 
+			]
 		);
 
-		$block = $this->make_block( 'core/paragraph', 0 );
+		// A block other than core/paragraph: plain text, like ttm/meta-line.
+		$block = $this->make_block( 'core/heading', 0 );
 		$value = $this->source_value(
 			'ttm/category-count',
 			[
@@ -160,5 +182,94 @@ class FrontSourcesTest extends TTM_IntegrationTestCase {
 		);
 
 		$this->assertSame( '3 →', $value );
+	}
+
+	public function test_category_count_is_a_link_in_paragraph_content_and_text_elsewhere(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+		self::factory()->post->create_many(
+			3,
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+			]
+		);
+
+		$args = [
+			'category' => 'technology',
+			'format'   => 'entries',
+		];
+
+		$paragraph_value = $this->source_value(
+			'ttm/category-count',
+			$args,
+			$this->make_block( 'core/paragraph', 0 ),
+			'content'
+		);
+		$this->assertSame(
+			'<a href="' . get_category_link( $tech ) . '">All 3 entries</a>',
+			$paragraph_value
+		);
+
+		$heading_value = $this->source_value(
+			'ttm/category-count',
+			$args,
+			$this->make_block( 'core/heading', 0 ),
+			'content'
+		);
+		$this->assertSame( 'All 3 entries', $heading_value );
+	}
+
+	public function tear_down(): void {
+		delete_option( 'ttm_verse' );
+		\TTM\Core\Config::reset();
+		parent::tear_down();
+	}
+
+	public function test_verse_copyright_returns_notice_when_placement_is_footer(): void {
+		update_option( 'ttm_verse', [ 'copyright' => 'Copyright notice.' ] );
+
+		$block = $this->make_block( 'core/paragraph', 0 );
+		$value = $this->source_value( 'ttm/verse-copyright', [], $block, 'content' );
+
+		$this->assertSame( 'Copyright notice.', $value );
+	}
+
+	public function test_verse_copyright_is_empty_without_verse_or_when_placement_is_box_or_none(): void {
+		$block = $this->make_block( 'core/paragraph', 0 );
+
+		// No verse stored at all.
+		delete_option( 'ttm_verse' );
+		$this->assertSame( '', $this->source_value( 'ttm/verse-copyright', [], $block, 'content' ) );
+
+		// A verse stored, but placement isn't 'footer'.
+		update_option( 'ttm_verse', [ 'copyright' => 'Copyright notice.' ] );
+
+		foreach ( [ 'box', 'none' ] as $placement ) {
+			add_filter(
+				'ttm_config',
+				static function ( array $config ) use ( $placement ): array {
+					$config['verse.copyright_placement'] = $placement;
+					return $config;
+				}
+			);
+			\TTM\Core\Config::reset();
+
+			$this->assertSame( '', $this->source_value( 'ttm/verse-copyright', [], $block, 'content' ) );
+
+			remove_all_filters( 'ttm_config' );
+			\TTM\Core\Config::reset();
+		}
+	}
+
+	public function test_today_footer_format_uses_blogname(): void {
+		update_option( 'blogname', 'These Things Matter' );
+
+		$block = $this->make_block( 'core/paragraph', 0 );
+		$value = $this->source_value( 'ttm/today', [ 'format' => 'footer' ], $block, 'content' );
+
+		$this->assertMatchesRegularExpression(
+			'/^These Things Matter · © \d{4} Eric Mann · Built on WordPress$/',
+			$value
+		);
 	}
 }

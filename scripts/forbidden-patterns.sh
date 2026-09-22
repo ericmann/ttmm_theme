@@ -40,7 +40,7 @@ PYEOF
 # default_ping_status (both named explicitly in the migrate:close-comments task text),
 # timezone_string, blogname (as scoped in the task text), plus sticky_posts (found live in
 # Query/Lead.php, reading WP's native "Stick this post" feature).
-allowed_core_options="default_comment_status|default_ping_status|timezone_string|blogname|sticky_posts"
+allowed_core_options="default_comment_status|default_ping_status|timezone_string|blogname|blogdescription|sticky_posts"
 out=$(grep -rnE "\b(add_option|update_option|get_option|set_transient|get_transient|register_post_meta|register_term_meta)\(\s*'[a-zA-Z_]+'" plugins/ttm-core/src --include='*.php' 2>/dev/null | grep -vE "\(\s*'(ttm_[a-zA-Z_]*|${allowed_core_options})'" || true)
 [ -n "$out" ] && { echo "$out"; hit "non-ttm_ option/meta/transient name (SPEC rule 5)"; }
 

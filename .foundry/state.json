@@ -1,8 +1,8 @@
 {
-  "round": 0,
-  "implemented": false,
-  "reviewed": false,
-  "verdict": null,
-  "summarized": false,
+  "round": 1,
+  "implemented": true,
+  "reviewed": true,
+  "verdict": "APPROVED",
+  "summarized": true,
   "halted": null
 }

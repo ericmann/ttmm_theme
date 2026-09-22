@@ -141,7 +141,7 @@ class Fetcher {
 		$user_agent = str_replace(
 			'{version}',
 			defined( 'TTM_CORE_VERSION' ) ? TTM_CORE_VERSION : '0.0.0',
-			(string) Config::get( 'verse.user_agent', 'TTM-Core/{version}' )
+			(string) Config::get( 'verse.user_agent', 'TTM-Core/{version} (+https://eric.mann.blog)' )
 		);
 
 		return wp_safe_remote_get(

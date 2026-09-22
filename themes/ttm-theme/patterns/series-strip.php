@@ -11,9 +11,9 @@
 declare( strict_types=1 );
 
 ?>
-<!-- wp:group {"className":"ttm-series-strip","layout":{"type":"constrained"}} -->
+<!-- wp:group {"className":"ttm-series-strip","layout":{"type":"default"}} -->
 <div class="wp-block-group ttm-series-strip">
-	<!-- wp:group {"className":"ttm-cell-heading","layout":{"type":"flex","justifyContent":"space-between"}} -->
+	<!-- wp:group {"className":"ttm-cell-heading","layout":{"type":"default"}} -->
 	<div class="wp-block-group ttm-cell-heading">
 		<!-- wp:heading {"level":3,"className":"ttm-cell-heading__label ttm-series-strip__heading"} -->
 		<h3 class="ttm-cell-heading__label ttm-series-strip__heading"><?php esc_html_e( 'Series in progress', 'ttm-theme' ); ?></h3>
@@ -29,6 +29,6 @@ declare( strict_types=1 );
 	</div>
 	<!-- /wp:group -->
 
-	<!-- wp:ttm/series-list {"status":"in-progress","limit":3,"layout":"grid-3"} /-->
+	<!-- wp:ttm/series-list {"status":"in-progress","limit":3,"layout":"strip","form":"nonfiction"} /-->
 </div>
 <!-- /wp:group -->

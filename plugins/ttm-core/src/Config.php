@@ -49,6 +49,11 @@ class Config {
 			'sections.journal_slug'            => 'journal',
 			'sections.writing_slug'            => 'writing',
 			'sections.politics_slug'           => 'politics',
+			// Which section the front-page nav marks current: 'lead' (the lead post's
+			// primary section) or 'none' (§6.1.1 step 4).
+			'nav.front_current'                => 'lead',
+			// The section whose lead marks the front-page nav current when nav.front_current
+			// = 'lead' and F9's stale-year fallback needs a home section.
 			'sections.technology_slug'         => 'technology',
 
 			'lead.sticky_days'                 => 30,
@@ -63,10 +68,14 @@ class Config {
 				'opinion'    => 2,
 			],
 			'cells.stale_year_days'            => 365,
+			// Section cells: minimum posts before a section is "thin" (F9 stale-year end).
 			'cells.stale_count'                => 2,
 			'journal.rail_count'               => 3,
 			'journal.rail_window_days'         => 30,
 			'journal.excerpt_words'            => 40,
+			// Hard cap when no sentence ends between excerpt_words and this; coupled to
+			// core `post-excerpt`'s default `excerptLength` (55) — §5 ⚠️ ASSUMPTION.
+			'journal.excerpt_max_words'        => 55,
 			'journal.stream_count'             => 4,
 			'journal.archive_per_page'         => 20,
 			'journal.relative_day_window'      => 6,
@@ -78,6 +87,7 @@ class Config {
 			'writing.also_running_limit'       => 3,
 			'writing.chapters_recent'          => 4,
 			'writing.story_tiles'              => 4,
+			// Story-tile grid column count on the Writing page.
 			'writing.tile_columns'             => 2,
 			'writing.shelf_limit'              => 4,
 			'writing.plain_count'              => 3,
@@ -102,6 +112,8 @@ class Config {
 			'verse.user_agent'                 => 'TTM-Core/{version} (+https://eric.mann.blog)',
 			'verse.history_size'               => 30,
 			'verse.log_size'                   => 20,
+			// Where the NIV copyright notice appears: 'footer' | 'box' | 'none' (§6.4).
+			'verse.copyright_placement'        => 'footer',
 
 			'cache.verse_boundary_hour'        => 6,
 			'cache.max_age_cap_seconds'        => 86400,
@@ -122,6 +134,9 @@ class Config {
 			'newsletter.honeypot_field'        => 'ttm_website',
 			'newsletter.api_key'               => defined( 'TTM_NEWSLETTER_API_KEY' ) ? TTM_NEWSLETTER_API_KEY : '',
 			'newsletter.timeout_seconds'       => 10,
+			// custom-url with an empty endpoint accepts locally when
+			// wp_get_environment_type() !== 'production' (§6.3).
+			'newsletter.dev_accept'            => true,
 
 			'images.sizes'                     => [
 				'ttm-lead'  => [ 1600, 900, true ],

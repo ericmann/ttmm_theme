@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 use TTM\Core\Query\SeriesIndex;
 use TTM\Core\Templates\Hierarchy;
+use TTM\Core\Meta\PrimaryCategory;
 
 class CurrentSectionTest extends TTM_IntegrationTestCase {
 
@@ -93,5 +94,77 @@ class CurrentSectionTest extends TTM_IntegrationTestCase {
 
 		$this->assertContains( 'ttm-in-series', $classes );
 		$this->assertContains( 'ttm-form-chapter', $classes );
+	}
+
+	public function tear_down(): void {
+		delete_transient( 'ttm_lead_id' );
+		\TTM\Core\Config::reset();
+		parent::tear_down();
+	}
+
+	public function test_front_page_marks_lead_primary_section_current_when_config_is_lead(): void {
+		$tech    = $this->category_id( 'technology', 'Technology' );
+		$post_id = self::factory()->post->create( [ 'post_category' => [ $tech ] ] );
+		PrimaryCategory::on_save( $post_id, get_post( $post_id ) );
+		delete_transient( 'ttm_lead_id' );
+
+		$this->go_to( '/' );
+
+		$html = $this->render_nav_link( get_category_link( $tech ) );
+
+		$this->assertStringContainsString( 'current-section', $html );
+	}
+
+	public function test_front_page_marks_nothing_when_config_is_none(): void {
+		$tech    = $this->category_id( 'technology', 'Technology' );
+		$post_id = self::factory()->post->create( [ 'post_category' => [ $tech ] ] );
+		PrimaryCategory::on_save( $post_id, get_post( $post_id ) );
+		delete_transient( 'ttm_lead_id' );
+
+		add_filter(
+			'ttm_config',
+			static function ( array $config ): array {
+				$config['nav.front_current'] = 'none';
+				return $config;
+			}
+		);
+		\TTM\Core\Config::reset();
+
+		$this->go_to( '/' );
+
+		$html = $this->render_nav_link( get_category_link( $tech ) );
+
+		$this->assertStringNotContainsString( 'current-section', $html );
+	}
+
+	public function test_current_link_carries_core_current_menu_item_class(): void {
+		$tech    = $this->category_id( 'technology', 'Technology' );
+		$post_id = self::factory()->post->create( [ 'post_category' => [ $tech ] ] );
+		$this->go_to( get_permalink( $post_id ) );
+
+		$html = $this->render_nav_link( get_category_link( $tech ) );
+
+		$this->assertStringContainsString( 'current-menu-item', $html );
+	}
+
+	public function test_section_link_label_is_filled_from_term_name(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+		wp_update_term( $tech, 'category', [ 'name' => 'Technology Renamed' ] );
+
+		add_filter(
+			'ttm_config',
+			static function ( array $config ): array {
+				$config['sections.order'] = [ 'technology' ];
+				return $config;
+			}
+		);
+
+		// A literal `/category/<slug>/` URL, matching the pretty-permalink shape production and
+		// wp-env always use (masthead-front.php's own `home_url()` fallback branch) -- this
+		// PHPUnit environment's default plain permalink structure would otherwise make
+		// get_category_link() return a `?cat=` query string that fill_label() never matches.
+		$html = $this->render_nav_link( home_url( '/category/technology/' ) );
+
+		$this->assertStringContainsString( 'Technology Renamed', $html );
 	}
 }

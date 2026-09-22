@@ -1,0 +1,4 @@
+ttm-{series-bar,series-toc,numbered,entry,syndication__words}* # 2b/2c article + journal chrome: later flight
+ttm-{archive,archive-year__rows,filter-row,most-read,category-stats,journal-stream} # 1e archives: later flight
+ttm-{series-featured,series-progress,series-stats,series-single,hub-head}* # 1f series hub: later flight
+ttm-{serial-hero,book}* # 2d Writing page: later flight

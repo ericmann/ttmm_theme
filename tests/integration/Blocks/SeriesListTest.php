@@ -122,6 +122,76 @@ class SeriesListTest extends TTM_IntegrationTestCase {
 		$this->assertSame( '', trim( $html ) );
 	}
 
+	public function test_strip_layout_renders_single_meta_line_with_categories_count_and_cadence(): void {
+		$this->seed( 'normal' );
+
+		$html = $this->render(
+			[
+				'status' => 'in-progress',
+				'limit'  => 10,
+				'layout' => 'strip',
+			]
+		);
+
+		$row_start = strpos( $html, 'Ordinary Time' );
+		$this->assertIsInt( $row_start );
+		$row_html = substr( $html, $row_start, 400 );
+
+		$this->assertStringContainsString( 'Faith · 9 of 12 · Sundays', $row_html );
+	}
+
+	public function test_strip_layout_has_no_dek_or_count_column(): void {
+		$tech      = $this->category_id( 'technology', 'Technology' );
+		$series_id = $this->make_series( 'strip-series', 'Strip Series', 'in-progress', 'nonfiction', $tech );
+		wp_update_term( $series_id, 'series', [ 'description' => 'A dek that must not appear.' ] );
+
+		$html = $this->render( [ 'layout' => 'strip' ] );
+
+		$this->assertStringNotContainsString( 'ttm-series-row__dek', $html );
+		$this->assertStringNotContainsString( 'ttm-series-row__count', $html );
+		$this->assertStringNotContainsString( 'A dek that must not appear.', $html );
+		$this->assertStringContainsString( 'ttm-series-row__meta', $html );
+	}
+
+	public function test_categories_are_joined_with_middle_dots_in_rows_layout(): void {
+		// SeriesIndex::categories_for() collects each *chapter's* primary category, not a
+		// single post's multiple categories, so two categories on one series needs two parts
+		// with different primary categories.
+		$tech     = $this->category_id( 'technology', 'Technology' );
+		$business = $this->category_id( 'business', 'Business' );
+
+		$term      = wp_insert_term( 'Two Category Series', 'series' );
+		$series_id = (int) $term['term_id'];
+		update_term_meta( $series_id, 'ttm_status', 'in-progress' );
+		update_term_meta( $series_id, 'ttm_form', 'nonfiction' );
+
+		$part1 = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+			]
+		);
+		update_post_meta( $part1, 'ttm_series_part', 1 );
+		update_post_meta( $part1, 'ttm_primary_category', $tech );
+		wp_set_object_terms( $part1, [ $series_id ], 'series' );
+
+		$part2 = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $business ],
+			]
+		);
+		update_post_meta( $part2, 'ttm_series_part', 2 );
+		update_post_meta( $part2, 'ttm_primary_category', $business );
+		wp_set_object_terms( $part2, [ $series_id ], 'series' );
+
+		SeriesIndex::rebuild();
+
+		$html = $this->render();
+
+		$this->assertMatchesRegularExpression( '/Technology\s*·\s*Business/', $html );
+	}
+
 	public function test_row_is_single_anchor_with_title_as_name(): void {
 		$tech = $this->category_id( 'technology', 'Technology' );
 		$this->make_series( 'solo-series', 'Solo Series', 'in-progress', 'nonfiction', $tech );

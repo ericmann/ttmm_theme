@@ -47,6 +47,7 @@ class Plugin {
 			Editor\SeriesPartList::class,
 			Admin\Page::class,
 			Admin\General::class,
+			Admin\BuildNotice::class,
 			Fiction\Books::class,
 			Rest\SeriesController::class,
 			Rest\LeadController::class,

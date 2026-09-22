@@ -11,8 +11,7 @@ declare( strict_types=1 );
 namespace TTM\Core\Newsletter\Provider;
 
 use TTM\Core\Config;
-use TTM\Core\Newsletter\Handler;
-use TTM\Core\Support\Clock;
+use TTM\Core\Newsletter\Form;
 
 /**
  * The only file allowed to call `wp_safe_remote_post` for the configured newsletter endpoint
@@ -31,7 +30,7 @@ class CustomUrl implements Provider {
 	 * {@inheritDoc}
 	 */
 	public function available(): bool {
-		return self::endpoint_is_valid();
+		return self::endpoint_is_valid() || self::dev_accept_applies();
 	}
 
 	/**
@@ -50,29 +49,31 @@ class CustomUrl implements Provider {
 	}
 
 	/**
+	 * Whether an empty `newsletter.endpoint` should still accept submissions locally: no
+	 * outbound forward, no log, a plain success redirect (SPEC §6.3 "New", §5
+	 * `newsletter.dev_accept`). Never true in production, regardless of config.
+	 *
+	 * @return bool
+	 */
+	public static function dev_accept_applies(): bool {
+		return '' === (string) Config::get( 'newsletter.endpoint', '' )
+			&& (bool) Config::get( 'newsletter.dev_accept', true )
+			&& 'production' !== wp_get_environment_type();
+	}
+
+	/**
 	 * {@inheritDoc}
 	 *
-	 * @param string $placement Unused: the form looks the same everywhere.
+	 * @param string $placement `poster` or `box`.
 	 */
 	public function render( string $placement ): string {
-		unset( $placement );
+		$current_url = home_url( add_query_arg( null, null ) );
 
-		$honeypot_field = (string) Config::get( 'newsletter.honeypot_field', 'ttm_website' );
-		$token          = Handler::token( intdiv( Clock::now()->getTimestamp(), (int) Config::get( 'newsletter.token_ttl', 86400 ) ) );
-		$current_url    = home_url( add_query_arg( null, null ) );
-
-		ob_start();
-		?>
-		<form class="ttm-newsletter-custom-url" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-			<input type="hidden" name="action" value="ttm_subscribe">
-			<input type="hidden" name="ttm_token" value="<?php echo esc_attr( $token ); ?>">
-			<input type="hidden" name="redirect_to" value="<?php echo esc_url( $current_url ); ?>">
-			<input class="ttm-hp" type="text" name="<?php echo esc_attr( $honeypot_field ); ?>" value="" tabindex="-1" autocomplete="off" aria-hidden="true">
-			<input type="email" name="email" placeholder="<?php esc_attr_e( 'you@example.com', 'ttm-core' ); ?>" required>
-			<button class="btn btn-primary" type="submit"><?php esc_html_e( 'Subscribe', 'ttm-core' ); ?></button>
-		</form>
-		<?php
-		return (string) ob_get_clean();
+		return Form::render(
+			admin_url( 'admin-post.php' ),
+			Form::handler_fields( $current_url ),
+			$placement
+		);
 	}
 
 	/**

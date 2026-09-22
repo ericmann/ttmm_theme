@@ -3,20 +3,31 @@
 		"title": "The Quiet Ledger",
 		"form": "novel",
 		"year": 2026,
-		"formats": [ "ebook", "paperback" ],
+		"formats": [
+			"ebook",
+			"paperback"
+		],
 		"links": [
-			{ "label": "Amazon", "url": "https://amazon.com/the-quiet-ledger" }
+			{
+				"label": "Amazon",
+				"url": "https://amazon.com/the-quiet-ledger"
+			}
 		],
 		"series_slug": "the-quiet-ledger"
 	},
 	{
-		"title": "Salt and Iron",
+		"title": "Salt Water Wires",
 		"form": "novella",
 		"year": 2025,
-		"formats": [ "ebook" ],
-		"links": [
-			{ "label": "Amazon", "url": "https://amazon.com/salt-and-iron" }
+		"formats": [
+			"ebook"
 		],
-		"series_slug": "salt-and-iron"
+		"links": [
+			{
+				"label": "Amazon",
+				"url": "https://amazon.com/salt-water-wires"
+			}
+		],
+		"series_slug": "salt-water-wires"
 	}
 ]

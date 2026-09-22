@@ -8,6 +8,7 @@
 declare( strict_types=1 );
 
 use TTM\Core\Cli\Seeder;
+use TTM\Core\Query\Lead;
 
 class SeederTest extends TTM_IntegrationTestCase {
 
@@ -84,5 +85,161 @@ class SeederTest extends TTM_IntegrationTestCase {
 		$this->assertGreaterThan( 0, $attachment_id );
 		$this->assertSame( 'attachment', get_post_type( $attachment_id ) );
 		$this->assertSame( 'Test Image', get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) );
+	}
+
+	/**
+	 * Invoke Seeder's private `prose()` (SPEC §6.5: deterministic-by-index paragraph draw).
+	 *
+	 * @param Seeder $seeder    Instance.
+	 * @param int    $row_index Row index.
+	 * @param int    $count     Paragraph count.
+	 * @return string
+	 */
+	private function prose( Seeder $seeder, int $row_index, int $count ): string {
+		$method = new ReflectionMethod( Seeder::class, 'prose' );
+		$method->setAccessible( true );
+
+		return $method->invoke( $seeder, $row_index, $count );
+	}
+
+	public function test_prose_paragraphs_are_drawn_deterministically_by_index(): void {
+		$seeder = new Seeder();
+
+		$first  = $this->prose( $seeder, 3, 2 );
+		$second = $this->prose( $seeder, 3, 2 );
+		$this->assertSame( $first, $second, 'Same row index should draw the same paragraphs every time.' );
+
+		$other = $this->prose( $seeder, 9, 2 );
+		$this->assertNotSame( $first, $other, 'A different row index should draw a different first paragraph.' );
+
+		$this->assertSame( '', $this->prose( $seeder, 0, 0 ), 'A zero count should draw nothing.' );
+	}
+
+	public function test_seed_sets_the_mock_tagline(): void {
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$this->assertSame(
+			'Technology, business, faith and the occasional story. One writer, several desks.',
+			get_option( 'blogdescription' )
+		);
+	}
+
+	public function test_seeded_lead_is_signing_your_options_table(): void {
+		$this->set_now();
+
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$lead = get_post( Lead::id() );
+		$this->assertNotNull( $lead );
+		$this->assertSame( 'signing-your-options-table', $lead->post_name );
+		$this->assertTrue( has_post_thumbnail( $lead ) );
+	}
+
+	public function test_seeded_journal_excerpts_are_38_to_48_words(): void {
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$journal = get_term_by( 'slug', 'journal', 'category' );
+		$posts   = get_posts(
+			[
+				'category'       => $journal->term_id,
+				'posts_per_page' => 20,
+				'post_status'    => 'publish',
+			]
+		);
+
+		$this->assertNotEmpty( $posts );
+
+		foreach ( $posts as $post ) {
+			if ( 'classic-post' === $post->post_name ) {
+				continue; // Kept verbatim per the task text; not one of the excerpt rows.
+			}
+
+			$word_count = count( preg_split( '/\s+/', trim( wp_strip_all_tags( get_the_excerpt( $post ) ) ) ) );
+			$this->assertGreaterThanOrEqual( 38, $word_count, "{$post->post_name} excerpt is too short" );
+			$this->assertLessThanOrEqual( 48, $word_count, "{$post->post_name} excerpt is too long" );
+		}
+	}
+
+	public function test_no_seed_row_contains_lorem(): void {
+		$fixtures = [ 'posts.json', 'pages.json' ];
+
+		foreach ( $fixtures as $fixture ) {
+			$path = Seeder::fixtures_dir() . '/' . $fixture;
+			$this->assertFileExists( $path );
+			$this->assertStringNotContainsStringIgnoringCase( 'lorem', (string) file_get_contents( $path ) );
+		}
+	}
+
+	public function test_prose_fixture_has_at_least_forty_paragraphs_without_lorem(): void {
+		$path = Seeder::fixtures_dir() . '/prose.json';
+		$this->assertFileExists( $path );
+
+		$paragraphs = json_decode( (string) file_get_contents( $path ), true );
+
+		$this->assertIsArray( $paragraphs );
+		$this->assertGreaterThanOrEqual( 40, count( $paragraphs ) );
+
+		foreach ( $paragraphs as $paragraph ) {
+			$this->assertStringNotContainsStringIgnoringCase( 'lorem', $paragraph );
+		}
+	}
+
+	public function test_seeded_strip_series_are_in_progress_with_totals(): void {
+		( new Seeder() )->run( 'normal' );
+
+		$expected = [
+			'hardening-wordpress'    => [ 3, 6 ],
+			'the-consultants-ledger' => [ 5, 8 ],
+			'ordinary-time'          => [ 9, 12 ],
+		];
+
+		foreach ( $expected as $slug => [ $published, $total ] ) {
+			$row = \TTM\Core\Query\SeriesIndex::by_slug( $slug );
+			$this->assertNotNull( $row, "Missing series index row for {$slug}" );
+			$this->assertSame( 'in-progress', $row['status'], "{$slug} should be in-progress" );
+			$this->assertSame( $published, $row['published'], "{$slug} published count" );
+			$this->assertSame( $total, $row['total'], "{$slug} total parts" );
+		}
+
+		$term = get_term_by( 'slug', 'ordinary-time', 'series' );
+		$this->assertSame( 'Sundays', get_term_meta( $term->term_id, 'ttm_cadence', true ) );
+	}
+
+	public function test_seeded_quiet_ledger_latest_chapter_is_reconciliation(): void {
+		( new Seeder() )->run( 'normal' );
+
+		$chapter_12 = get_page_by_path( 'quiet-ledger-ch-12', OBJECT, 'post' );
+		$this->assertNotNull( $chapter_12 );
+		$this->assertSame( 'Reconciliation', get_post_meta( $chapter_12->ID, 'ttm_part_title', true ) );
+	}
+
+	/**
+	 * F2 (REVIEW.md, R1-02): the two seriesless Writing essays derive `ttm_form=story` like the
+	 * short story does, but their `days_ago` (60, 75) must stay older than
+	 * `story-the-last-cron-job`'s (40) so `Fiction\Serials::stories()` -- ordered newest first --
+	 * ranks the story ahead of them, matching the front page's "Also running" list.
+	 */
+	public function test_seeded_writing_essays_derive_as_story_but_stay_older_than_the_last_cron_job(): void {
+		( new Seeder() )->run( 'normal' );
+
+		$essay_1 = get_page_by_path( 'finishing-a-draft-you-no-longer-believe-in', OBJECT, 'post' );
+		$essay_2 = get_page_by_path( 'outlining-for-people-who-hate-outlines', OBJECT, 'post' );
+		$story   = get_page_by_path( 'story-the-last-cron-job', OBJECT, 'post' );
+
+		$this->assertNotNull( $essay_1 );
+		$this->assertNotNull( $essay_2 );
+		$this->assertNotNull( $story );
+
+		$this->assertSame( 'story', get_post_meta( $essay_1->ID, 'ttm_form', true ) );
+		$this->assertSame( 'story', get_post_meta( $essay_2->ID, 'ttm_form', true ) );
+
+		$this->assertGreaterThan( strtotime( $essay_1->post_date_gmt ), strtotime( $story->post_date_gmt ) );
+		$this->assertGreaterThan( strtotime( $essay_2->post_date_gmt ), strtotime( $story->post_date_gmt ) );
+
+		$stories = \TTM\Core\Fiction\Serials::stories( 1 );
+		$this->assertSame( [ $story->ID ], $stories );
 	}
 }

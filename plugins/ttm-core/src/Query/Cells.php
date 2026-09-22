@@ -172,14 +172,46 @@ class Cells {
 
 	/**
 	 * `render_block_core/post-excerpt`: suppress the dek entirely while inside a stale-year
-	 * section's query (F9) -- the theme's pattern always includes the block; the plugin decides
-	 * whether it renders (SPEC §3.1 rule 1: the theme reads plugin data, it doesn't vary itself).
+	 * section's query (F9), or when the current post has no manual excerpt of its own (F10) --
+	 * the theme's pattern always includes the block; the plugin decides whether it renders
+	 * (SPEC §3.1 rule 1: the theme reads plugin data, it doesn't vary itself). Checks the raw
+	 * `post_excerpt` field, not `get_the_excerpt()`, so a Journal post's derived excerpt (filled
+	 * in by `Query\JournalExcerpt` on the `get_the_excerpt` filter, never on `post_excerpt`
+	 * itself) still renders -- only a genuinely dek-less post (no manual excerpt, not Journal)
+	 * is suppressed, matching the mock's own "no dek" cells.
 	 *
 	 * @param string $content Rendered excerpt HTML.
 	 * @return string
 	 */
 	public static function suppress_stale_dek( string $content ): string {
-		return self::$stale_scope > 0 ? '' : $content;
+		if ( self::$stale_scope > 0 ) {
+			return '';
+		}
+
+		$post = get_post();
+		if ( $post instanceof \WP_Post && '' === $post->post_excerpt && ! self::is_journal( $post ) ) {
+			return '';
+		}
+
+		return $content;
+	}
+
+	/**
+	 * Whether a post's primary category is Journal -- mirrors `Query\JournalExcerpt`'s own
+	 * private check (no shared public helper exists for it yet).
+	 *
+	 * @param \WP_Post $post Post object.
+	 * @return bool
+	 */
+	private static function is_journal( \WP_Post $post ): bool {
+		$category_id = PrimaryCategory::id( $post->ID );
+		if ( ! $category_id ) {
+			return false;
+		}
+
+		$category = get_term( $category_id, 'category' );
+
+		return $category && ! is_wp_error( $category ) && (string) Config::get( 'sections.journal_slug', 'journal' ) === $category->slug;
 	}
 
 	/**

@@ -48,6 +48,13 @@ npm run env:destroy        # wipe containers and database
 
 `WP_DEBUG_LOG` is on, so PHP notices land in `wp-content/debug.log` inside the container: `npx wp-env run cli tail -f /var/www/html/wp-content/debug.log`.
 
+`npm run build` must run before opening any `ttm/*` block in an editor (post editor, Site
+Editor, or Customizer) in wp-env — `npm run env:seed` runs it for you (SPEC §6.7). Without a
+build, `Blocks\Registrar` swaps each block's `editorScript` for a committed fallback
+(`plugins/ttm-core/assets/editor-fallback.js`, plain, no build step) instead of dropping it, so
+the block still shows up (server-side rendered) rather than "doesn't include support for the
+… block" — and an admin notice on every `wp-admin` screen tells you to build.
+
 ## Tests and checks
 
 These are the commands the Foundry pipeline runs after every task (`docs/foundry.json`) and CI runs on every push. All of them exit non-zero on failure.
@@ -60,14 +67,17 @@ These are the commands the Foundry pipeline runs after every task (`docs/foundry
 | `npm run test:unit` | Jest via `wp-scripts` | no |
 | `npm run build` | `wp-scripts build` for the plugin | no |
 | `npm run test:integration` | starts wp-env if needed, then PHPUnit with the WordPress test suite inside the `tests-cli` container (`tests/integration`) | yes |
-| `npm run test:e2e` | starts wp-env, reseeds it (`wp ttm seed --reset`), then Playwright + axe against the seven seeded screens at 1280×900 and 390×844 (`tests/e2e`) | yes |
+| `npm run test:e2e` | starts wp-env, reseeds it (`wp ttm seed --reset`), then Playwright + axe against the eight seeded screens at 1280×900 and 390×844, plus the `fidelity`/`editors`/`phone` projects (`tests/e2e`) | yes |
+| `npm run screenshots` | against a running, seeded wp-env, writes the seven `docs/feedback/phase-2/*.png` zone crops (`scripts/screenshots.mjs`); does not reseed | yes |
 | `bash scripts/forbidden-patterns.sh` | greps for the mechanical rules in `SPEC.md §3` | no |
 
 Fix formatting automatically with `composer lint:fix` (phpcbf) and `npx wp-scripts format`.
 
 ### How the e2e suite works
 
-`npm run test:e2e` runs against the wp-env **dev** site (`http://localhost:8888`), not the tests instance on `8889` - it reseeds the dev site itself (`wp-env run cli wp ttm seed --reset`) first, and `tests/e2e/playwright.config.mjs` sets `WP_BASE_URL` explicitly for the same reason: `wp-scripts test-playwright` otherwise defaults it to the *tests* environment's port when `@wordpress/env` is installed, which would run the suite against an empty, unseeded site. `tests/e2e/lib/urls.mjs` hard-codes the seven screens' paths from the seed fixtures (`docs/fixtures/seed/{posts,series}.json`); `screens.spec.mjs` checks one `<main>` landmark, zero `serious`/`critical` axe violations, and a single `img[fetchpriority="high"]` hero image on the front page and one article; `network.spec.mjs` asserts every request is same-origin, `data:`/`blob:`, or (only when Jetpack happens to be active) one of its own stats/subscribe hosts, and never hits `/wp-json/` or `admin-ajax.php`; `focus.spec.mjs` tabs through the front page and checks the skip link, first nav link, first `.ttm-item`, and first `.btn` all keep a visible focus outline. The HTML report lands at `playwright-report/` (`--open=never`); open it with `npx playwright show-report`.
+`npm run test:e2e` runs against the wp-env **dev** site (`http://localhost:8888`), not the tests instance on `8889` - it reseeds the dev site itself (`wp-env run cli wp ttm seed --reset`) first, and `tests/e2e/playwright.config.mjs` sets `WP_BASE_URL` explicitly for the same reason: `wp-scripts test-playwright` otherwise defaults it to the *tests* environment's port when `@wordpress/env` is installed, which would run the suite against an empty, unseeded site. `tests/e2e/lib/urls.mjs` hard-codes the eight screens' paths from the seed fixtures (`docs/fixtures/seed/{posts,series,pages}.json`); `screens.spec.mjs` checks one `<main>` landmark, zero `serious`/`critical` axe violations, and a single `img[fetchpriority="high"]` hero image on the front page and one article; `network.spec.mjs` asserts every request is same-origin, `data:`/`blob:`, or (only when Jetpack happens to be active) one of its own stats/subscribe hosts, and never hits `/wp-json/` or `admin-ajax.php`; `focus.spec.mjs` tabs through the front page and checks the skip link, first nav link, first `.ttm-item`, and first `.btn` all keep a visible focus outline. The HTML report lands at `playwright-report/` (`--open=never`); open it with `npx playwright show-report`.
+
+The `fidelity` Playwright project (also driven by `npm run test:e2e`, `--config tests/e2e/playwright.config.mjs`) runs `tests/e2e/fidelity.spec.mjs` and `tests/e2e/editors.spec.mjs` — one `test()` per `docs/SPEC.md §6.2` table row, transcribed verbatim, each checking a single computed-style/text/count assertion against the seeded front page at the mock's viewport (`tests/e2e/lib/presets.mjs` reads colours/sizes from `theme.json` rather than hard-coding hex; `tests/e2e/lib/style.mjs` wraps `getComputedStyle()`), plus the `a11y`/`network` rows and the two editor-registration checks. Every fidelity/editors row is a real, passing test now (`scripts/check-fixme.mjs`, wired into `npm run lint`, fails the build if `test.fixme(` ever reappears in either file). `desktop`/`phone` (the phase 1 projects) ignore these two files; `fidelity` ignores everything else. The `phone` project additionally runs `tests/e2e/specs/phone.spec.mjs`, 390px-only layout facts (no horizontal overflow, the section nav actually scrolls, the Writing cell and poster stack) that don't fit the fidelity table's one-row-per-property shape; `desktop` ignores that file.
 
 ### How the integration harness works
 
@@ -123,3 +133,4 @@ The planner reads `docs/SPEC.md`, writes `docs/PLAN.md`, `docs/PROGRESS.md`, `do
 | PHPCS says a prefix is too short | The `ttm` prefix is intentional; the sniff is excluded in `phpcs.xml.dist`. Any other prefix is a real error. |
 | Fonts render as Helvetica | Confirm the Archivo woff2 files are present in `themes/ttm-theme/assets/fonts/` (shipped since Phase 0) and that the browser cache isn't serving a stale `style.css`. |
 | Front page shows the default index | Run `npm run env:seed` — `front-page.html` and the rest of `themes/ttm-theme/templates/` render only once there is content to query. |
+| Theme "disappears" (blank admin, `ttm-theme` not listed) after a branch switch | The switch recreated `themes/`/`plugins/` directories under wp-env's stale bind mount. Run `npx wp-env stop && npx wp-env start` (§7). |

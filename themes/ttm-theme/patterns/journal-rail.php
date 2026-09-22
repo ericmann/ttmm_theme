@@ -11,15 +11,15 @@
 declare( strict_types=1 );
 
 ?>
-<!-- wp:group {"className":"ttm-journal-rail","layout":{"type":"constrained"}} -->
+<!-- wp:group {"className":"ttm-journal-rail","layout":{"type":"default"}} -->
 <div class="wp-block-group ttm-journal-rail">
-	<!-- wp:group {"className":"ttm-cell-heading is-rail","layout":{"type":"flex","justifyContent":"space-between"}} -->
+	<!-- wp:group {"className":"ttm-cell-heading is-rail","layout":{"type":"default"}} -->
 	<div class="wp-block-group ttm-cell-heading is-rail">
-		<!-- wp:heading {"level":3,"className":"ttm-cell-heading__label"} -->
-		<h3 class="ttm-cell-heading__label"><?php esc_html_e( 'Journal', 'ttm-theme' ); ?></h3>
+		<!-- wp:heading {"level":2,"className":"ttm-cell-heading__label"} -->
+		<h2 class="ttm-cell-heading__label"><?php esc_html_e( 'Journal', 'ttm-theme' ); ?></h2>
 		<!-- /wp:heading -->
 
-		<!-- wp:paragraph {"className":"ttm-cell-heading__link","metadata":{"bindings":{"content":{"source":"ttm/category-count","args":{"category":"journal","format":"short"}}}}} -->
+		<!-- wp:paragraph {"className":"ttm-cell-heading__link","metadata":{"bindings":{"content":{"source":"ttm/category-count","args":{"category":"journal","format":"entries"}}}}} -->
 		<p class="ttm-cell-heading__link"></p>
 		<!-- /wp:paragraph -->
 	</div>
@@ -34,7 +34,7 @@ declare( strict_types=1 );
 
 			<!-- wp:post-title {"level":4,"isLink":true} /-->
 
-			<!-- wp:post-excerpt {"excerptLength":40,"moreText":"","className":"ttm-item__dek"} /-->
+			<!-- wp:post-excerpt {"moreText":"","className":"ttm-item__dek"} /-->
 
 			<!-- wp:read-more {"content":"<?php echo esc_attr__( 'Continue →', 'ttm-theme' ); ?>"} /-->
 		<!-- /wp:post-template -->

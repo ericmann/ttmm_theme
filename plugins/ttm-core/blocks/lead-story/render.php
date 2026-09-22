@@ -80,8 +80,8 @@ $ttm_meta_line = Values::meta_line( [ 'date', 'reading', 'prev-part' ], $ttm_met
 $ttm_thumbnail_id = get_post_thumbnail_id( $ttm_post->ID );
 $ttm_text_only    = ! $ttm_thumbnail_id || 'thin' === Helpers::preview_state( $attributes );
 
-$ttm_excerpt = trim( wp_strip_all_tags( get_the_excerpt( $ttm_post ) ) );
-$ttm_ratio   = '4-3' === ( $attributes['imageRatio'] ?? '16-9' ) ? '4/3' : '16/9';
+$ttm_excerpt = wp_kses( get_the_excerpt( $ttm_post ), [ 'code' => [] ] );
+$ttm_is_4x3  = '4-3' === ( $attributes['imageRatio'] ?? '16-9' );
 
 $ttm_classes = [];
 if ( $ttm_text_only ) {
@@ -91,14 +91,14 @@ if ( $ttm_text_only ) {
 <div <?php echo Helpers::wrapper( 'lead', $ttm_classes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() output is already escaped. ?>>
 	<article class="ttm-lead__inner">
 		<?php if ( ! $ttm_text_only ) : ?>
-		<figure class="ttm-lead__media is-style-grayscale" style="aspect-ratio:<?php echo esc_attr( $ttm_ratio ); ?>">
+		<figure class="ttm-lead__media is-style-grayscale<?php echo $ttm_is_4x3 ? ' is-ratio-4-3' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixed literal string, not user input. ?>">
 			<?php echo Helpers::image( $ttm_thumbnail_id, 'ttm-lead', [ 'fetchpriority' => 'high' ] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_get_attachment_image() output is already escaped. ?>
 		</figure>
 		<?php endif; ?>
 		<p class="ttm-lead__kicker"><?php echo esc_html( $ttm_kicker ); ?></p>
 		<h2 class="ttm-lead__title"><a href="<?php echo esc_url( (string) get_permalink( $ttm_post ) ); ?>"><?php echo esc_html( get_the_title( $ttm_post ) ); ?></a></h2>
-		<?php if ( '' !== $ttm_excerpt ) : ?>
-		<p class="ttm-lead__dek"><?php echo esc_html( $ttm_excerpt ); ?></p>
+		<?php if ( '' !== trim( wp_strip_all_tags( $ttm_excerpt ) ) ) : ?>
+		<p class="ttm-lead__dek"><?php echo $ttm_excerpt; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_kses()'d above. ?></p>
 		<?php endif; ?>
 		<p class="ttm-lead__meta"><?php echo wp_kses( $ttm_meta_line, [ 'a' => [ 'href' => true ] ] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_kses()'d above. ?></p>
 	</article>

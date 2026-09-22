@@ -10,6 +10,7 @@
 declare( strict_types=1 );
 
 use TTM\Core\Blocks\Helpers;
+use TTM\Core\Config;
 use TTM\Core\Support\Clock;
 use TTM\Core\Support\Dates;
 use TTM\Core\Support\Text;
@@ -71,7 +72,7 @@ if ( ! empty( $attributes['compact'] ) ) {
 		);
 		?>
 	</p>
-	<?php if ( ! empty( $ttm_verse['copyright'] ) ) : ?>
+	<?php if ( ! empty( $ttm_verse['copyright'] ) && 'box' === Config::get( 'verse.copyright_placement', 'footer' ) ) : ?>
 		<small class="ttm-verse__copyright"><?php echo esc_html( $ttm_verse['copyright'] ); ?></small>
 	<?php endif; ?>
 </div>

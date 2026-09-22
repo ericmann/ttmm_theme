@@ -73,6 +73,35 @@ class Seeder {
 	}
 
 	/**
+	 * `$count` `core/paragraph` blocks drawn deterministically from `prose.json`, cycling by
+	 * `$row_index` so the same row always gets the same paragraphs (SPEC §6.5).
+	 *
+	 * @param int $row_index Stable index of the row this prose is for (its position in the
+	 *                        source fixture, not a database id).
+	 * @param int $count     Number of paragraphs to draw; 0 or a missing/empty fixture returns ''.
+	 * @return string
+	 */
+	private function prose( int $row_index, int $count ): string {
+		if ( $count <= 0 ) {
+			return '';
+		}
+
+		$paragraphs = $this->load( 'prose.json' );
+		$total      = count( $paragraphs );
+		if ( 0 === $total ) {
+			return '';
+		}
+
+		$blocks = '';
+		for ( $offset = 0; $offset < $count; $offset++ ) {
+			$paragraph = (string) $paragraphs[ ( $row_index + $offset ) % $total ];
+			$blocks   .= "\n\n<!-- wp:paragraph -->\n<p>" . esc_html( $paragraph ) . "</p>\n<!-- /wp:paragraph -->\n";
+		}
+
+		return $blocks;
+	}
+
+	/**
 	 * Run the full seed for a given state.
 	 *
 	 * "quiet": every post's days_ago + `seed.quiet_offset_days` (nothing recent; statuses stay
@@ -93,7 +122,11 @@ class Seeder {
 		$series     = 'empty' === $state ? [] : $this->seed_series();
 		$books      = 'empty' === $state ? [] : $this->seed_books();
 		$this->seed_verse();
-		$this->seed_jetpack();
+		$this->seed_newsletter();
+
+		// SPEC §6.5: the mock's tagline. A translatable literal here is fine -- seed content
+		// only, never read at request time.
+		update_option( 'blogdescription', __( 'Technology, business, faith and the occasional story. One writer, several desks.', 'ttm-core' ) );
 
 		return [
 			'categories' => count( $categories ),
@@ -274,7 +307,7 @@ class Seeder {
 		$ids      = [];
 		$excluded = 'empty' === $this->state ? $this->empty_state_excluded_slugs() : [];
 
-		foreach ( $rows as $row ) {
+		foreach ( $rows as $index => $row ) {
 			if ( 'empty' === $this->state ) {
 				$in_excluded_categories = array_intersect( $row['categories'], [ 'security', 'opinion' ] );
 				$is_chapter_or_story    = in_array( $row['slug'], $excluded, true ) || str_starts_with( $row['slug'], 'story-' );
@@ -307,7 +340,7 @@ class Seeder {
 					'post_status'   => $is_future ? 'future' : 'publish',
 					'post_name'     => $row['slug'],
 					'post_title'    => $row['title'],
-					'post_content'  => $row['content'],
+					'post_content'  => ( $row['content'] ?? '' ) . $this->prose( $index, (int) ( $row['paragraphs'] ?? 0 ) ),
 					'post_excerpt'  => $row['excerpt'] ?? '',
 					'post_date'     => $date,
 					'post_date_gmt' => get_gmt_from_date( $date ),
@@ -417,6 +450,15 @@ class Seeder {
 				}
 				wp_set_object_terms( $post->ID, [ $term_id ], 'series' );
 				update_post_meta( $post->ID, 'ttm_series_part', (int) $part['part'] );
+
+				// seed_posts() already re-derived ttm_form once (see its own comment), but that
+				// ran before this series term existed, so every chapter was still classified
+				// "story" (no series -> in Writing -> Form::derive() returns 'story') and stuck
+				// that way forever (wp_set_object_terms() doesn't refire save_post). Found live:
+				// the Writing cell's "Also running" list showed the featured serial's own latest
+				// chapter a second time, labelled "Story", because Serials::stories() matches
+				// ttm_form=story. Re-derive now that the real series membership is in place.
+				\TTM\Core\Meta\Form::on_save( $post->ID, get_post( $post->ID ) );
 			}
 
 			$ids[] = $term_id;
@@ -488,55 +530,20 @@ class Seeder {
 	}
 
 	/**
-	 * ⚠️ ASSUMPTION verification (SPEC §8 Phase 7): install/activate Jetpack (best-effort, WP-CLI
-	 * only, network failures tolerated) and check whether `jetpack/subscriptions` actually
-	 * registers without a WordPress.com connection. It does not (the block's registration is
-	 * gated behind the `subscriptions` module, which itself refuses to activate unconnected —
-	 * confirmed live: `wp jetpack module activate subscriptions` returns "Newsletter could not
-	 * be activated" and the block stays unregistered), so the seed falls back the
-	 * `newsletter.provider` setting to `mailto` whenever the block isn't registered.
+	 * SPEC §6.3: `wp ttm seed` configures `custom-url` with an empty endpoint so
+	 * `newsletter.dev_accept` applies outside production and the dev poster shows and submits
+	 * a real, locally-accepted form. No Jetpack install (P1-06 dropped it; never seeded).
 	 */
-	private function seed_jetpack(): void {
-		if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
-			return;
-		}
-
-		try {
-			\WP_CLI::runcommand(
-				'plugin install jetpack --activate',
-				[
-					'launch'     => false,
-					'exit_error' => false,
-				]
-			);
-		} catch ( \Throwable $e ) {
-			// Network failures tolerated (e.g. no internet in this environment).
-			unset( $e );
-		}
-
-		$connected = class_exists( '\WP_Block_Type_Registry' )
-			&& \WP_Block_Type_Registry::get_instance()->is_registered( 'jetpack/subscriptions' );
-
+	private function seed_newsletter(): void {
 		$settings = get_option( 'ttm_settings', [] );
 		if ( ! is_array( $settings ) ) {
 			$settings = [];
 		}
 
-		if ( ! isset( $settings['newsletter'] ) || ! is_array( $settings['newsletter'] ) ) {
-			$settings['newsletter'] = [];
-		}
-
-		if ( $connected ) {
-			// Default (jetpack) applies.
-			unset( $settings['newsletter']['provider'] );
-		} else {
-			$settings['newsletter']['provider']       = 'mailto';
-			$settings['newsletter']['fallback_email'] = 'hello@example.com';
-		}
-
-		if ( empty( $settings['newsletter'] ) ) {
-			unset( $settings['newsletter'] );
-		}
+		$settings['newsletter'] = [
+			'provider' => 'custom-url',
+			'endpoint' => '',
+		];
 
 		update_option( 'ttm_settings', $settings );
 		Config::reset();

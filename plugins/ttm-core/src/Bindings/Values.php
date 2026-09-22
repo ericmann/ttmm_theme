@@ -152,15 +152,20 @@ class Values {
 	}
 
 	/**
-	 * "431 articles →" / "431 →"; 0 → "All →" (F25).
+	 * "431 articles →" / "431 →" / "All 431 entries"; 0 → "All →" for every format (F25).
 	 *
 	 * @param int    $count  Post count.
-	 * @param string $format `articles` or `short`.
+	 * @param string $format `articles`, `short` or `entries`.
 	 * @return string
 	 */
 	public static function category_count( int $count, string $format ): string {
 		if ( 0 === $count ) {
 			return __( 'All →', 'ttm-core' );
+		}
+
+		if ( 'entries' === $format ) {
+			/* translators: %d: post count. */
+			return sprintf( __( 'All %d entries', 'ttm-core' ), $count );
 		}
 
 		if ( 'short' === $format ) {
@@ -192,6 +197,19 @@ class Values {
 			default:
 				return Dates::masthead( $now );
 		}
+	}
+
+	/**
+	 * "These Things Matter · © 2026 Eric Mann · Built on WordPress" (SPEC §6.1.8): the
+	 * footer's single meta line, bound via `ttm/today format=footer`.
+	 *
+	 * @param string $site_name Site name (`get_bloginfo('name')`).
+	 * @param string $year      Four-digit year.
+	 * @return string
+	 */
+	public static function footer_line( string $site_name, string $year ): string {
+		/* translators: 1: site name, 2: four-digit year. */
+		return sprintf( __( '%1$s · © %2$s Eric Mann · Built on WordPress', 'ttm-core' ), $site_name, $year );
 	}
 
 	/**

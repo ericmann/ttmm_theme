@@ -19,8 +19,10 @@ if ( 'empty' === Helpers::preview_state( $attributes ) ) {
 $ttm_placement = 'box' === ( $attributes['placement'] ?? 'poster' ) ? 'box' : 'poster';
 $ttm_provider  = Providers::current();
 
-// Read-only display flag; no value is reflected, only its presence (SPEC §6.1/F26).
-$ttm_subscribed = isset( $_GET['subscribed'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only, no nonce on cacheable output (rule 7).
+// Read-only display flag; no value is reflected, only its presence (SPEC §6.1/§6.3/F26).
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only, no nonce on cacheable output (rule 7).
+$ttm_subscribe_query = isset( $_GET['subscribe'] ) ? sanitize_text_field( wp_unslash( $_GET['subscribe'] ) ) : '';
+$ttm_subscribed      = isset( $_GET['subscribed'] ) || 'success' === $ttm_subscribe_query; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only, no nonce on cacheable output (rule 7).
 
 $ttm_extra = [ 'data-provider' => $ttm_provider->slug() ];
 if ( $ttm_subscribed ) {

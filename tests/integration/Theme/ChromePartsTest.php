@@ -53,6 +53,22 @@ class ChromePartsTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'is-after-poster', $html );
 	}
 
+	public function test_footer_has_one_meta_line_a_copyright_slot_and_nine_nav_items(): void {
+		// F18: the Series link is dropped when the series index is empty, so a non-empty
+		// index is needed to see all nine items (seven sections + Series + RSS).
+		$term_id = self::factory()->term->create( [ 'taxonomy' => 'series' ] );
+		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		update_post_meta( $post_id, 'ttm_series_part', 1 );
+		wp_set_object_terms( $post_id, [ $term_id ], 'series' );
+		\TTM\Core\Query\SeriesIndex::rebuild();
+
+		$html = (string) do_blocks( '<!-- wp:template-part {"slug":"footer","theme":"ttm-theme"} /-->' );
+
+		$this->assertSame( 1, substr_count( $html, 'ttm-footer__meta' ) );
+		$this->assertSame( 1, substr_count( $html, 'ttm-footer__copyright' ) );
+		$this->assertSame( 9, substr_count( $html, '<li class="wp-block-navigation-item' ) );
+	}
+
 	public function test_patterns_are_registered_in_ttm_categories(): void {
 		$registry = \WP_Block_Patterns_Registry::get_instance();
 
@@ -68,6 +84,43 @@ class ChromePartsTest extends TTM_IntegrationTestCase {
 
 		foreach ( $slugs as $slug ) {
 			$this->assertTrue( $registry->is_registered( $slug ), "Pattern {$slug} is not registered" );
+		}
+	}
+
+	public function test_front_masthead_meta_links_are_plain_anchors_not_a_navigation_block(): void {
+		ob_start();
+		require get_template_directory() . '/patterns/masthead-front.php';
+		$raw = (string) ob_get_clean();
+
+		$html = (string) do_blocks( $raw );
+
+		// `do_blocks()` strips the `<!-- wp:… -->` comment delimiters, so the meta group's
+		// content runs from its own opening tag to the next sibling group's opening tag
+		// (`ttm-masthead-front__title`, always immediately after it in the pattern).
+		$start = strpos( $html, 'ttm-masthead-front__meta' );
+		$end   = strpos( $html, 'ttm-masthead-front__title', $start );
+		$this->assertNotFalse( $start, 'Could not locate .ttm-masthead-front__meta markup' );
+		$this->assertNotFalse( $end, 'Could not locate .ttm-masthead-front__title markup' );
+
+		$meta_html = substr( $html, $start, $end - $start );
+
+		$this->assertSame( 3, substr_count( $meta_html, '<a ' ), 'Expected exactly three <a> links in the meta row' );
+		$this->assertStringNotContainsString( 'wp-block-navigation', $meta_html );
+	}
+
+	public function test_both_mastheads_emit_ttm_nav_hub_class(): void {
+		// Checks the pattern's own source markup (pre-`do_blocks()`), not the fully server-side
+		// rendered nav -- core's Navigation block keeps request-scoped static caches that get
+		// confused when the same pattern is rendered many times across a PHPUnit run (observed:
+		// the last inner block silently disappears on a later render), unrelated to this
+		// pattern's own correctness, which `wp eval` on a fresh request confirms is fine.
+		foreach ( [ 'masthead-front', 'masthead-inner' ] as $slug ) {
+			ob_start();
+			require get_template_directory() . "/patterns/{$slug}.php";
+			$raw = (string) ob_get_clean();
+
+			$this->assertStringContainsString( 'ttm-nav__hub', $raw, "{$slug} should emit ttm-nav__hub" );
+			$this->assertStringNotContainsString( 'ttm-nav-series', $raw, "{$slug} should not emit the old ttm-nav-series class" );
 		}
 	}
 

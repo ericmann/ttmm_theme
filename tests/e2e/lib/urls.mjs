@@ -7,10 +7,12 @@
  * so every post/page URL below is just `/<slug>/`.
  *
  * - `front`: the front page (`front-page.html`, the lead story + section cells).
- * - `article`: part 2 of the seeded "Hardening WordPress" series (`docs/fixtures/seed/series.json`
- *   maps series part 2 to post slug `technology-post-2`, not the literal string
- *   "hardening-wordpress-part-3" a slug pattern might suggest). Chosen over part 1/3 because it's
- *   one of the few seeded posts with a real featured image (`docs/fixtures/seed/posts.json`'s
+ * - `article`: an ordinary seeded Technology post, slug `technology-post-2`
+ *   (`docs/fixtures/seed/posts.json`). It used to double as the Hardening WordPress series'
+ *   part 2 (a seed-data mismatch: the mock's own part 2 is "Salts, keys and the rotation you
+ *   skipped") -- P3-06 gave the series a dedicated post for that instead
+ *   (`hardening-part-2-salts-and-keys`) and left this one an ordinary article. Chosen for this
+ *   screen because it's one of the few seeded posts with a real featured image (`posts.json`'s
  *   `featured_image` field) - needed for the `img[fetchpriority="high"]` assertion below, since
  *   WordPress core only adds that attribute to a real attached image, and most seeded posts have
  *   none.
@@ -19,6 +21,7 @@
  * - `securityArchive`: the Security category archive (`category.html`).
  * - `seriesHub`: the Series index page (`page-series.html`).
  * - `seriesEntry`: the seeded fiction serial "The Quiet Ledger" (`taxonomy-series.html`).
+ * - `about`: the seeded "About" page (`page.html`), the eighth screen (P4-03, SPEC §8 Phase 4).
  */
 export const SCREENS = {
 	front: '/',
@@ -28,6 +31,13 @@ export const SCREENS = {
 	securityArchive: '/category/security/',
 	seriesHub: '/series/',
 	seriesEntry: '/series/the-quiet-ledger/',
+	about: '/about/',
 };
 
 export const SCREEN_URLS = Object.values( SCREENS );
+
+/**
+ * wp-env's fixed admin credentials (`.wp-env.json` default), used by `editors.spec.mjs` to log
+ * into `/wp-login.php` before opening the Site Editor / Customizer.
+ */
+export const ADMIN = { user: 'admin', pass: 'password' };

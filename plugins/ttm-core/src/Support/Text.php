@@ -35,13 +35,15 @@ class Text {
 	}
 
 	/**
-	 * Sentence-aware excerpt of roughly $words words.
+	 * Sentence-aware excerpt of roughly $words words, never exceeding $max_words.
 	 *
-	 * @param string $text  Raw content (may include tags).
-	 * @param int    $words Target word count.
+	 * @param string $text      Raw content (may include tags).
+	 * @param int    $words     Target word count.
+	 * @param int    $max_words Hard cap: the caller's `journal.excerpt_max_words` (rule 24 -- no
+	 *                          literal here, every caller passes the config value).
 	 * @return string
 	 */
-	public static function sentence_excerpt( string $text, int $words ): string {
+	public static function sentence_excerpt( string $text, int $words, int $max_words ): string {
 		$plain = trim( html_entity_decode( wp_strip_all_tags( $text ), ENT_QUOTES, 'UTF-8' ) );
 
 		preg_match_all( '/\S+/u', $plain, $matches, PREG_OFFSET_CAPTURE );
@@ -59,8 +61,8 @@ class Text {
 			return $slice;
 		}
 
-		// 2. Extend up to $words + 15 to find the next terminator.
-		$max_extend = min( count( $tokens ), $words + 15 );
+		// 2. Extend up to $max_words to find the next terminator.
+		$max_extend = min( count( $tokens ), $max_words );
 		for ( $i = $words; $i < $max_extend; $i++ ) {
 			$candidate = self::join_tokens( $tokens, 0, $i + 1 );
 			if ( preg_match( $terminator, $candidate ) ) {
@@ -68,7 +70,7 @@ class Text {
 			}
 		}
 
-		// 3. Cut back to an earlier terminator, as long as at least half the words remain.
+		// 3. Cut back to an earlier terminator, as long as at least half the target words remain.
 		$min_words = intdiv( $words, 2 );
 		for ( $i = $words - 1; $i >= $min_words; $i-- ) {
 			$candidate = self::join_tokens( $tokens, 0, $i );
@@ -77,8 +79,8 @@ class Text {
 			}
 		}
 
-		// 4. No boundary found: hard cut with an ellipsis.
-		return self::join_tokens( $tokens, 0, $words ) . '…';
+		// 4. No boundary found: hard cut at $max_words with an ellipsis.
+		return self::join_tokens( $tokens, 0, $max_words ) . '…';
 	}
 
 	/**

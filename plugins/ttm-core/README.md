@@ -15,12 +15,33 @@ for how it was built; this file documents the plugin as it actually ships.
   `ttm_cover_id`); the `ttm_series_index`, `ttm_verse*`, `ttm_books`, `ttm_settings`, and
   `ttm_redirects` options.
 - **Blocks:** every `ttm/*` block under `blocks/` (server-rendered, no front-end JS beyond the
-  editor bundle) and their block-binding sources.
+  editor bundle) and their block-binding sources: `ttm/kicker`, `ttm/meta-line`,
+  `ttm/short-date`, `ttm/relative-date`, `ttm/category-count`, `ttm/today`, `ttm/reading-time`,
+  `ttm/word-count`, `ttm/journal-subline`, `ttm/series-name`, `ttm/series-part`,
+  `ttm/pagination-label`, and `ttm/verse-copyright` (the footer's NIV notice, plain text, empty
+  unless `verse.copyright_placement === 'footer'` and a verse is stored). `ttm/series-list`'s
+  `layout` attribute gains `strip` (SPEC §6.1.7): one `ttm-series-row__meta` line per row
+  ("{Category} · {Category} · {N} of {M}", plus " · {cadence}" when set) instead of the
+  `rows`/`grid-2`/`grid-3` layouts' separate dek/categories/count spans.
 - **Cache:** `Cache/Headers.php` (computed `Cache-Control`), `Cache/Batcache.php`,
   `Cache/Purge.php`/`Cache/Cloudflare.php` (the `ttm_purge_urls` action and its Cloudflare
   adapter).
-- **Newsletter:** the stateless-token form handler and pluggable providers (Jetpack, MailPoet,
-  custom URL).
+- **Newsletter:** the stateless-token form handler and pluggable providers (Jetpack, mailto,
+  custom URL). Every provider except `none` renders through `Newsletter\Form::render()`, the
+  one `.ttm-newsletter-form__form` markup shape (SPEC §6.3). `custom-url` accepts submissions
+  locally (no forward, no log) whenever `newsletter.endpoint` is empty, `newsletter.dev_accept`
+  is true, and the site isn't in production — this is what `wp ttm seed` configures, so the dev
+  poster shows and submits a real form without a real endpoint configured. `jetpack` is
+  available only when Jetpack is actually connected (`Jetpack::is_connection_ready()`) or, for
+  tests, when `jetpack/subscriptions` is registered; it renders the same shared form posting to
+  the site's own `admin_post_ttm_subscribe` handler that `custom-url` uses (built from the same
+  `Form::handler_fields()` helper), never Jetpack's own widget markup — that widget's POST
+  requires a per-visitor nonce (`docs/spikes/P1-jetpack-form.md`, "Handler (review R1-01)"),
+  which rule 7 forbids on cacheable output. `Handler::handle()` calls
+  `Jetpack_Subscriptions::init()->subscribe()` (the same method the widget's own handler calls)
+  directly once the shared token/honeypot/rate-limit checks pass, guarded by `class_exists()`
+  since Jetpack is never installed in wp-env (non-goal). An installed-but-unconnected Jetpack
+  falls through the chain like any other unavailable provider.
 - **Cron/fetch:** the daily verse fetch (`Verse\Fetcher`), the only scheduled outbound request.
 - **Migration/maintenance:** every `wp ttm …` command below.
 
@@ -103,9 +124,20 @@ add_filter( 'ttm_config', function ( array $config ): array {
 } );
 ```
 
+`nav.front_current` (default `'lead'`) controls which section reads as current in the front-page
+nav: `'lead'` marks the lead post's primary category (`Nav\CurrentSection`, via `Query\Lead` and
+`Meta\PrimaryCategory`); `'none'` marks nothing. It only affects the front page — every other
+template's current-section mark (single post, category archive, series pages) is unconditional.
+
 A narrow subset (`newsletter.*`, `lead.sticky_days`, `lead.stale_days`, `journal_in_main_feed`,
 `comments_enabled`) is also editable from Settings → These Things Matter, stored in the
 `ttm_settings` option, and overlaid on top of the defaults before `ttm_config` runs.
+
+`journal.excerpt_words` (default `40`) is the target length `Query\JournalExcerpt` aims for when
+a Journal post has no manual excerpt (`Support\Text::sentence_excerpt()` extends to the nearest
+sentence end); `journal.excerpt_max_words` (default `55`, coupled to core's own default excerpt
+length so a derived excerpt never reads longer than a manual one would) is the hard cap — past
+it, the excerpt is cut mid-sentence with an ellipsis rather than extended further.
 
 Secrets are constants, never options, never `show_in_rest`, and masked (`••••`) when set in any
 admin screen that reports on them:

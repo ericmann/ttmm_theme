@@ -16,6 +16,7 @@ use TTM\Core\Query\Archive;
 use TTM\Core\Query\SeriesIndex;
 use TTM\Core\Support\Clock;
 use TTM\Core\Support\Dates;
+use TTM\Core\Support\Html;
 use TTM\Core\Support\Text;
 use WP_Block;
 
@@ -155,6 +156,35 @@ class Sources {
 				'get_value_callback' => [ self::class, 'pagination_label' ],
 			]
 		);
+
+		register_block_bindings_source(
+			'ttm/verse-copyright',
+			[
+				'label'              => __( 'TTM: Verse copyright', 'ttm-core' ),
+				'get_value_callback' => [ self::class, 'verse_copyright' ],
+			]
+		);
+	}
+
+	/**
+	 * `ttm/verse-copyright` (SPEC §6.4): the stored verse's NIV copyright notice, plain text,
+	 * only when `verse.copyright_placement` is `'footer'` and a verse is stored.
+	 *
+	 * @param array<string, mixed> $source_args    Unused: no args.
+	 * @param WP_Block             $block_instance Consuming block.
+	 * @param string               $attribute_name Consuming attribute.
+	 * @return string
+	 */
+	public static function verse_copyright( array $source_args, $block_instance, string $attribute_name ): string {
+		unset( $source_args );
+
+		if ( 'footer' !== Config::get( 'verse.copyright_placement', 'footer' ) ) {
+			return '';
+		}
+
+		$verse = get_option( 'ttm_verse' );
+
+		return self::finalize( (string) ( $verse['copyright'] ?? '' ), $block_instance, $attribute_name );
 	}
 
 	/**
@@ -217,11 +247,11 @@ class Sources {
 		}
 
 		if ( in_array( 'reading', $parts, true ) ) {
-			$ctx['reading'] = self::reading_time_string(
-				$post_id,
+			$ctx['reading'] = 'short' === ( $source_args['readingFormat'] ?? 'long' )
 				/* translators: %d: minutes to read. */
-				__( '%d min read', 'ttm-core' )
-			);
+				? self::reading_time_string( $post_id, __( '%d min', 'ttm-core' ) )
+				/* translators: %d: minutes to read. */
+				: self::reading_time_string( $post_id, __( '%d min read', 'ttm-core' ) );
 		}
 
 		if ( in_array( 'prev-part', $parts, true ) ) {
@@ -307,8 +337,14 @@ class Sources {
 
 		$term  = '' !== $slug ? get_term_by( 'slug', $slug, 'category' ) : null;
 		$count = $term && ! is_wp_error( $term ) ? (int) $term->count : 0;
+		$text  = Values::category_count( $count, $format );
 
-		return self::finalize( Values::category_count( $count, $format ), $block_instance, $attribute_name );
+		if ( $term && ! is_wp_error( $term ) ) {
+			$link = (string) get_category_link( $term );
+			return self::finalize( Html::link( $link, $text ), $block_instance, $attribute_name, true );
+		}
+
+		return self::finalize( $text, $block_instance, $attribute_name );
 	}
 
 	/**
@@ -321,6 +357,11 @@ class Sources {
 	 */
 	public static function today( array $source_args, $block_instance, string $attribute_name ): string {
 		$format = (string) ( $source_args['format'] ?? 'masthead' );
+
+		if ( 'footer' === $format ) {
+			$value = Values::footer_line( get_bloginfo( 'name' ), Clock::now()->format( 'Y' ) );
+			return self::finalize( $value, $block_instance, $attribute_name );
+		}
 
 		return self::finalize( Values::today( Clock::now(), $format ), $block_instance, $attribute_name );
 	}

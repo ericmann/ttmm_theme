@@ -11,7 +11,7 @@
 declare( strict_types=1 );
 
 ?>
-<!-- wp:group {"className":"ttm-lead-row__lead","layout":{"type":"constrained"}} -->
+<!-- wp:group {"className":"ttm-lead-row__lead","layout":{"type":"default"}} -->
 <div class="wp-block-group ttm-lead-row__lead">
 	<!-- wp:ttm/lead-story /-->
 </div>
