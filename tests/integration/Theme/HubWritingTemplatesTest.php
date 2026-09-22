@@ -289,7 +289,10 @@ class HubWritingTemplatesTest extends TTM_IntegrationTestCase {
 
 		wp_reset_postdata();
 
-		$this->assertStringNotContainsString( 'ttm-story-tiles', $html );
+		// Not `ttm-story-tiles` alone: the static `.ttm-story-tiles__note` paragraph
+		// (CSS-hidden via `.ttm-writing-body:not(:has(.ttm-story-tiles))`) contains it
+		// as a substring even when the story-tiles block itself renders nothing.
+		$this->assertStringNotContainsString( 'data-ttm-block="story-tiles"', $html );
 		$this->assertStringNotContainsString( 'ttm-book-grid', $html );
 	}
 }

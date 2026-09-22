@@ -70,6 +70,27 @@ test( 'writing cell stacks with a rule above also-running', async ( {
 	expect( borderTop ).not.toBe( '0px' );
 } );
 
+test( 'writing page reorders sections at 1000', async ( { page } ) => {
+	await page.setViewportSize( { width: 1000, height: 900 } );
+	await page.goto( '/writing/' );
+
+	const top = ( locator ) =>
+		locator.evaluate( ( el ) => el.getBoundingClientRect().top );
+
+	const serials = page.locator( '.ttm-writing-body__serials' );
+	const stories = page.locator( '.ttm-writing-body__stories' );
+	const chapters = page.locator( '.ttm-writing-body__chapters' );
+	const books = page.locator( '.ttm-writing-body__books' );
+
+	const [ serialsTop, storiesTop, chaptersTop, booksTop ] = await Promise.all(
+		[ top( serials ), top( stories ), top( chapters ), top( books ) ]
+	);
+
+	expect( serialsTop ).toBeLessThan( storiesTop );
+	expect( storiesTop ).toBeLessThan( chaptersTop );
+	expect( chaptersTop ).toBeLessThan( booksTop );
+} );
+
 test( 'poster stacks its form at 390', async ( { page } ) => {
 	await page.goto( '/' );
 	const poster = page.locator( '.ttm-poster' );

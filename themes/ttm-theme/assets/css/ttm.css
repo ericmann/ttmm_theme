@@ -43,7 +43,7 @@
 
 /* 0.2 page container */
 
-/* Rule 42: centred 1280 col; gutter zeroed. */
+/* Rule 42: centred 1280, gutter 0 */
 .wp-site-blocks {
 	max-width: 1280px;
 	margin-inline: auto;
@@ -69,7 +69,7 @@
 	border: 0;
 	opacity: 1;
 
-	/* Rule 35: full width; !important > core. */
+	/* Rule 35: full width; !important */
 	width: 100% !important;
 	max-width: none !important;
 	margin-left: 0 !important;
@@ -138,7 +138,7 @@
 	align-self: start;
 }
 
-/* Article: 8/4 grid; aside sticks >=1025. */
+/* Article: 8/4 grid; aside >=1025. */
 .ttm-article {
 	column-gap: 64px;
 	row-gap: 0;
@@ -198,12 +198,12 @@
 		grid-template-columns: 1fr;
 	}
 
-	/* §6.1.9: 2/row (grid-4's only user). */
+	/* §6.1.9: 2/row (grid-4 only). */
 	.ttm-section-row.is-style-grid-4 {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
-	/* Right rules only on left cell of each pair. */
+	/* Right rules on left cell/pair */
 	.ttm-section-row .ttm-cell:nth-child(even) {
 		padding-right: 0;
 		border-right: 0;
@@ -402,7 +402,7 @@ p.is-style-poster {
 	color: var(--wp--preset--color--text);
 }
 
-/* Tag chips: byline's right group (§6.2). */
+/* Tag chips: byline's right group */
 .is-style-tags {
 	display: flex;
 	gap: 6px;
@@ -431,7 +431,7 @@ p.is-style-poster {
 	cursor: pointer;
 }
 
-/* accent-on-bg fails AA; accent-700 clears it. */
+/* accent-on-bg fails AA; 700 clears */
 .btn-primary,
 .wp-block-button__link {
 	background: var(--wp--preset--color--accent-700);
@@ -490,7 +490,7 @@ p.is-style-poster {
 	border-radius: 0;
 }
 
-/* Honeypot: tab-reachable so bots trip it. */
+/* Honeypot: tab-focusable trap. */
 .ttm-hp {
 	position: absolute;
 	width: 1px;
@@ -501,13 +501,13 @@ p.is-style-poster {
 
 /* 4.23 figure */
 
-/* Article hero: colour, 16:9 owned here. */
+/* Article hero: colour, 16:9 */
 .ttm-article .wp-block-post-featured-image {
 	margin-top: 28px;
 	aspect-ratio: 16 / 9;
 }
 
-/* :where() matches img rules; order wins. */
+/* :where() matches img; order wins */
 .ttm-article :where(.wp-block-post-featured-image) img {
 	width: 100%;
 	height: 100%;
@@ -531,7 +531,7 @@ p.is-style-poster {
 	margin: 0 0 22px;
 }
 
-/* F12: no hero -> byline meets body, this gap. */
+/* F12: no hero, byline meets body */
 .ttm-entry {
 	padding-top: 28px;
 }
@@ -598,7 +598,7 @@ p.is-style-poster {
 	overflow-x: auto;
 }
 
-/* pre>code stays dark, unlike inline-code. */
+/* pre>code stays dark, not inline */
 .entry-content :where(pre) code {
 	background: none;
 	color: inherit;
@@ -724,7 +724,7 @@ blockquote.is-style-pull cite,
 	gap: 28px;
 }
 
-/* Colour vs a11y: accent-700 over core. */
+/* Colour vs a11y: 700 over core. */
 .ttm-nav .current-menu-item > a {
 	color: var(--wp--preset--color--accent-700) !important;
 }
@@ -762,7 +762,7 @@ blockquote.is-style-pull cite,
 		display: none;
 	}
 
-	/* nav's flex item (ul) needs flex-shrink:0. */
+	/* nav's ul needs flex-shrink:0. */
 	.ttm-masthead-front__nav ul {
 		flex-wrap: nowrap;
 		flex-shrink: 0;
@@ -804,13 +804,13 @@ blockquote.is-style-pull cite,
 	font-size: var(--wp--preset--font-size--ui);
 }
 
-/* Rule 43 (>=721): flex gap replaced. */
+/* Rule 43 (>=721): gap replaced. */
 .ttm-masthead-inner__nav ul {
 	display: flex;
 	column-gap: 22px;
 }
 
-/* Hub item lighter; current-menu-item wins. */
+/* Hub item lighter; current wins. */
 .ttm-masthead-inner__nav .ttm-nav__hub > a.wp-block-navigation-item__content {
 	font-weight: 400;
 	color: var(--wp--preset--color--neutral-700);
@@ -823,7 +823,7 @@ blockquote.is-style-pull cite,
 
 @media (min-width: 721px) {
 
-	/* Rule 43: no chrome; just the list. */
+	/* Rule 43: no chrome, just list. */
 	.ttm-masthead-inner .wp-block-navigation__responsive-container-open,
 	.ttm-masthead-inner .wp-block-navigation__responsive-container-close {
 		display: none;
@@ -932,7 +932,7 @@ blockquote.is-style-pull cite,
 	border-bottom: var(--ttm-rule-2);
 }
 
-/* §6.1.5 rail link is 12px, not 11. */
+/* §6.1.5 rail link is 12, not 11. */
 .ttm-cell-heading.is-rail .ttm-cell-heading__link {
 	font-size: var(--wp--preset--font-size--caption);
 }
@@ -956,7 +956,7 @@ blockquote.is-style-pull cite,
 	color: var(--wp--preset--color--accent);
 }
 
-/* 03 §9: clamp 3 lines; prose can't leak past. */
+/* 03 §9: clamp 3 lines to dek. */
 .ttm-item__dek {
 	display: -webkit-box;
 	overflow: hidden;
@@ -992,13 +992,13 @@ blockquote.is-style-pull cite,
 	color: var(--wp--preset--color--neutral-800);
 }
 
-/* Box form is tighter than the shared row. */
+/* Box form tighter than shared row */
 .ttm-newsletter-box form {
 	display: flex;
 	gap: 6px;
 }
 
-/* .input/.btn* style selves; row layout here. */
+/* .input/.btn* style selves */
 .ttm-newsletter-form__form {
 	display: flex;
 	align-items: center;
@@ -1047,7 +1047,7 @@ blockquote.is-style-pull cite,
 	gap: var(--wp--preset--spacing--60);
 }
 
-/* Poster pull 28 bumped to 40; phone reverts. */
+/* Poster pull 28->40, reverts */
 /* stylelint-disable-next-line no-descending-specificity */
 .ttm-poster h3.is-style-poster {
 	margin: 0;
@@ -1057,7 +1057,7 @@ blockquote.is-style-pull cite,
 	font-size: var(--wp--preset--font-size--featured);
 }
 
-/* §2.1: bg-on-accent under AA; axe-excluded. */
+/* §2.1: bg-on-accent<AA, axe-excl. */
 .ttm-poster .btn-ghost {
 	background: transparent;
 	color: var(--wp--preset--color--bg);
@@ -1089,7 +1089,7 @@ blockquote.is-style-pull cite,
 
 /* 4.34 footer */
 
-/* Full-bleed via neg margins; padding aligns. */
+/* Full-bleed via neg margin */
 .ttm-footer {
 	display: flex;
 	justify-content: space-between;
@@ -1100,7 +1100,7 @@ blockquote.is-style-pull cite,
 	border-top: var(--ttm-rule-2);
 }
 
-/* template-part className -> div, not footer. */
+/* template-part className -> div */
 .is-after-poster .ttm-footer {
 	padding: 16px var(--wp--custom--gutter--desktop);
 	border-top: 0;
@@ -1282,7 +1282,7 @@ blockquote.is-style-pull cite,
 	gap: var(--wp--preset--spacing--60);
 }
 
-/* 02 §A: 8/4 to 900px, below 1024 collapse. */
+/* 02 §A: 8/4 to 900, then 1024. */
 @media (max-width: 1024px) and (min-width: 901px) {
 
 	.ttm-lead-row {
@@ -1323,7 +1323,7 @@ blockquote.is-style-pull cite,
 	color: var(--wp--preset--color--neutral-700);
 }
 
-/* WCAG 1.4.1: not colour alone; underline too. */
+/* WCAG 1.4.1: not colour alone. */
 /* stylelint-disable-next-line no-descending-specificity */
 .ttm-verse__attribution a {
 	color: var(--wp--preset--color--accent-700);
@@ -1414,7 +1414,7 @@ blockquote.is-style-pull cite,
 	display: none;
 }
 
-/* .ttm-item rule/padding (w/ more-in) -> li. */
+/* .ttm-item rule/padding -> li. */
 .ttm-cell .ttm-item {
 	border-top: 0;
 	padding: 0;
@@ -1456,7 +1456,7 @@ blockquote.is-style-pull cite,
 	gap: 20px 28px;
 }
 
-/* Children are the post-template grid's items. */
+/* Children are the grid's items. */
 .ttm-cell.is-style-span-2 .ttm-item {
 	display: contents;
 }
@@ -1775,7 +1775,7 @@ blockquote.is-style-pull cite,
 	}
 }
 
-/* Right aside: shared across archive kinds. */
+/* Right aside: shared across kinds */
 .ttm-archive-body aside {
 	padding-top: 24px;
 	display: flex;
@@ -1890,7 +1890,7 @@ blockquote.is-style-pull cite,
 
 @media (max-width: 720px) {
 
-	/* 3b: bar -> mark · name · part + segments. */
+	/* 3b: bar -> mark, name, part, seg */
 	.ttm-series-bar {
 		font-size: var(--wp--preset--font-size--caption);
 	}
@@ -1961,7 +1961,7 @@ blockquote.is-style-pull cite,
 	margin-top: 40px;
 }
 
-/* Two ruled cells; missing side keeps its rule */
+/* Missing side keeps its rule */
 .ttm-prevnext__prev {
 	padding: 20px 24px 20px 0;
 	border-right: var(--ttm-rule-1);
@@ -1993,7 +1993,7 @@ blockquote.is-style-pull cite,
 	text-decoration: none;
 }
 
-/* 4.5 headline item: "More in {Category}". */
+/* 4.5 headline: "More in {Category}" */
 .ttm-more-in .wp-block-query .ttm-item {
 	padding: 10px 0;
 	border-top: 0;
@@ -2093,7 +2093,7 @@ blockquote.is-style-pull cite,
 	font-feature-settings: "tnum";
 }
 
-/* 4.12 journal post header (SPEC §6.4) */
+/* 4.12 journal post header (§6.4) */
 .ttm-journal-head {
 	gap: 0 48px;
 	padding: 40px 0 48px;
@@ -2174,7 +2174,7 @@ blockquote.is-style-pull cite,
 	display: inline;
 }
 
-/* Underlined: distinct from grey sentence. */
+/* Underlined: not grey text alone. */
 /* stylelint-disable-next-line no-descending-specificity */
 .ttm-syndication a {
 	color: var(--wp--preset--color--accent-700);
@@ -2187,7 +2187,7 @@ blockquote.is-style-pull cite,
 	font-feature-settings: "tnum";
 }
 
-/* Q-M1/Q-M2 classic content: footnotes */
+/* Q-M1/Q-M2 classic footnotes */
 /* stylelint-disable-next-line no-descending-specificity */
 .entry-content sup.modern-footnotes-footnote a {
 	text-decoration: none;
@@ -2221,7 +2221,7 @@ ul.modern-footnotes-list,
 		grid-template-columns: 1fr;
 	}
 
-	/* §6.4: note becomes a 1px footnote. */
+	/* §6.4: note -> 1px footnote. */
 	.ttm-journal-head__aside {
 		margin-top: 28px;
 		padding-top: 14px;
@@ -2256,7 +2256,7 @@ ul.modern-footnotes-list,
 		line-height: 1.6;
 	}
 
-	/* 3b: cells stack; rule turns horizontal. */
+	/* 3b: cells stack, rule goes flat. */
 	.ttm-prevnext {
 		grid-template-columns: 1fr;
 	}
@@ -2278,7 +2278,7 @@ ul.modern-footnotes-list,
 
 @media (max-width: 720px) {
 
-	/* 3b: kicker 11, H1 34, dek 17, byline 12px. */
+	/* 3b: kicker11,H1 34,dek17,b12. */
 	.ttm-article-head .is-style-kicker {
 		font-size: var(--wp--preset--font-size--micro);
 	}
@@ -2297,7 +2297,7 @@ ul.modern-footnotes-list,
 		font-size: var(--wp--preset--font-size--caption);
 	}
 
-	/* 3b: hero/code full-bleed via rule 42. */
+	/* 3b: hero/code bleed, rule 42. */
 	.ttm-article .wp-block-post-featured-image {
 		margin: 20px -20px 0;
 		width: calc(100% + 40px);
@@ -2380,7 +2380,7 @@ ul.modern-footnotes-list,
 	}
 }
 
-/* 4.26 filter row sits under the header. */
+/* 4.26 filter row under header. */
 .ttm-filter-row {
 	display: flex;
 	align-items: center;
@@ -2397,7 +2397,7 @@ ul.modern-footnotes-list,
 	border-top: var(--ttm-rule-2);
 }
 
-/* S6: filter row owns the rule; body doesn't. */
+/* S6: filter owns this rule */
 .ttm-filter-row + .ttm-archive-body {
 	border-top: 0;
 }
@@ -2451,7 +2451,7 @@ ul.modern-footnotes-list,
 	padding: 0;
 }
 
-/* Rows are anchors ("Whole-row links"). */
+/* Rows are anchors (link_rows). */
 .ttm-archive-row {
 	display: grid;
 	grid-template-columns: 72px 1fr;
@@ -2463,7 +2463,7 @@ ul.modern-footnotes-list,
 	text-decoration: none;
 }
 
-/* Search rows: kicker above the title. */
+/* Search rows: kicker over title. */
 .ttm-archive-row .is-style-kicker {
 	grid-column: 2;
 	grid-row: 1;
@@ -2570,7 +2570,7 @@ ul.modern-footnotes-list,
 	font-feature-settings: "tnum";
 }
 
-/* 404 "Latest" number is a CSS counter. */
+/* 404 "Latest" is a CSS counter. */
 .ttm-latest .wp-block-query .wp-block-post-template {
 	list-style: none;
 	margin: 0;
@@ -2720,7 +2720,7 @@ main.is-style-grid-8-4 h1 {
 	color: var(--wp--preset--color--neutral-700);
 }
 
-/* 4.20 series toc: rail heading, 28px 1fr. */
+/* 4.20 series toc: rail, 28/1fr. */
 .ttm-series-toc__list {
 	list-style: none;
 	margin: 0;
@@ -2780,7 +2780,7 @@ main.is-style-grid-8-4 h1 {
 	color: var(--wp--preset--color--neutral-700);
 }
 
-/* Chapters reuse .ttm-numbered (02 §D). */
+/* Chapters reuse .ttm-numbered. */
 .ttm-series-toc.is-chapters .ttm-numbered__row {
 	grid-template-columns: 44px 1fr auto;
 	gap: 0 16px;
@@ -2807,7 +2807,7 @@ main.is-style-grid-8-4 h1 {
 
 @media (max-width: 720px) {
 
-	/* 3b: TOC -> 2px zone; yields to "Hub →". */
+	/* 3b: TOC -> 2px zone, "Hub →". */
 	.ttm-series-toc {
 		border-top: var(--ttm-rule-2);
 		padding: 18px 0 20px;
@@ -2863,6 +2863,12 @@ main.is-style-grid-8-4 h1 {
 	color: var(--wp--preset--color--accent-700);
 }
 
+.ttm-story-tiles__note {
+	margin: 10px 0 0;
+	font-size: 12px;
+	color: var(--wp--preset--color--neutral-700);
+}
+
 /* 4.36 book cover */
 .ttm-cover {
 	aspect-ratio: 2 / 3;
@@ -2881,7 +2887,11 @@ main.is-style-grid-8-4 h1 {
 .ttm-book-grid {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: var(--wp--preset--spacing--50);
+	gap: 20px;
+}
+
+.ttm-book {
+	min-width: 0;
 }
 
 .ttm-book__title {
@@ -2894,6 +2904,10 @@ main.is-style-grid-8-4 h1 {
 .ttm-book__meta {
 	font-size: 12px;
 	color: var(--wp--preset--color--neutral-700);
+}
+
+.ttm-book__links {
+	margin-top: 8px;
 }
 
 /* 4.37 stat row */
@@ -2919,7 +2933,7 @@ main.is-style-grid-8-4 h1 {
 	color: var(--wp--preset--color--neutral-700);
 }
 
-/* 4.38 series featured / hub / writing hero */
+/* 4.38 series featured/hub/hero */
 .ttm-series-featured {
 	padding: 28px 0 36px;
 }
@@ -3095,6 +3109,28 @@ main.is-style-grid-8-4 h1 {
 	.ttm-serial-hero {
 		grid-template-columns: 200px 1fr;
 	}
+
+	/* Writing <=1024: fold into grid. */
+	.ttm-writing-body > main,
+	.ttm-writing-body > aside {
+		display: contents;
+	}
+
+	.ttm-writing-body__serials {
+		order: 1;
+	}
+
+	.ttm-writing-body__stories {
+		order: 2;
+	}
+
+	.ttm-writing-body__chapters {
+		order: 3;
+	}
+
+	.ttm-writing-body__books {
+		order: 4;
+	}
 }
 
 @media (max-width: 720px) {
@@ -3107,6 +3143,10 @@ main.is-style-grid-8-4 h1 {
 		width: 160px;
 	}
 
+	.ttm-serial-hero__title {
+		font-size: 40px;
+	}
+
 	.ttm-serial-hero__buttons {
 		flex-direction: column;
 	}
@@ -3116,8 +3156,7 @@ main.is-style-grid-8-4 h1 {
 		justify-content: center;
 	}
 
-	.ttm-story-tiles,
-	.ttm-book-grid {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
+	.ttm-story-tiles {
+		grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
 	}
 }

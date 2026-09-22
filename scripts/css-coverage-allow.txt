@@ -1,6 +1,4 @@
-ttm-book # P4-06 pending
 ttm-book-row # P4-06 pending
-ttm-book__links # P4-06 pending
 ttm-serial-hero__body # P4-04 pending
 ttm-serial-hero__kicker # P4-04 pending
 ttm-series-progress # P4-03 pending

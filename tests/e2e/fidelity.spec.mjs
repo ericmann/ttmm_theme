@@ -1975,7 +1975,7 @@ test.describe( 'writing', () => {
 		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
 	} ); // P4-05
 
-	test.fixme( // P4-06
+	test( // P4-06
 	'wr-tiles: .ttm-story-tiles @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.writing, 1280 );
 		const el = page.locator( '.ttm-story-tiles' );
@@ -1984,7 +1984,7 @@ test.describe( 'writing', () => {
 		expect( await computed( el, 'gap' ) ).toBe( px( 16 ) );
 	} ); // P4-06
 
-	test.fixme( // P4-06
+	test( // P4-06
 	'wr-tile: .ttm-tile (first) @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.writing, 1280 );
 		const el = page.locator( '.ttm-tile' ).first();
@@ -1998,7 +1998,7 @@ test.describe( 'writing', () => {
 		);
 	} ); // P4-06
 
-	test.fixme( // P4-06
+	test( // P4-06
 	'wr-tile-title: .ttm-tile__title (first) @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.writing, 1280 );
 		const el = page.locator( '.ttm-tile__title' ).first();
@@ -2006,14 +2006,14 @@ test.describe( 'writing', () => {
 		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
 	} ); // P4-06
 
-	test.fixme( // P4-06
+	test( // P4-06
 	'wr-tile-meta: .ttm-tile__meta (first) @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.writing, 1280 );
 		const el = page.locator( '.ttm-tile__meta' ).first();
 		expect( await text( el ) ).toMatch( /^[\d,]+ words · \d{4}$/ );
 	} ); // P4-06
 
-	test.fixme( // P4-06
+	test( // P4-06
 	'wr-tiles-note: .ttm-story-tiles__note @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.writing, 1280 );
 		const el = page.locator( '.ttm-story-tiles__note' );
@@ -2021,7 +2021,7 @@ test.describe( 'writing', () => {
 		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
 	} ); // P4-06
 
-	test.fixme( // P4-06
+	test( // P4-06
 	'wr-books: .ttm-book-grid @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.writing, 1280 );
 		const el = page.locator( '.ttm-book-grid' );
@@ -2030,7 +2030,7 @@ test.describe( 'writing', () => {
 		expect( await computed( el, 'gap' ) ).toBe( px( 20 ) );
 	} ); // P4-06
 
-	test.fixme( // P4-06
+	test( // P4-06
 	'wr-book-cover: .ttm-book .ttm-cover (first) @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.writing, 1280 );
 		const el = page.locator( '.ttm-book .ttm-cover' ).first();
@@ -2038,7 +2038,7 @@ test.describe( 'writing', () => {
 		expect( await computed( el, 'box-shadow' ) ).toBe( 'none' );
 	} ); // P4-06
 
-	test.fixme( // P4-06
+	test( // P4-06
 	'wr-book-title: .ttm-book__title (first) @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.writing, 1280 );
 		const el = page.locator( '.ttm-book__title' ).first();
@@ -2046,7 +2046,7 @@ test.describe( 'writing', () => {
 		expect( await computed( el, 'margin-top' ) ).toBe( px( 10 ) );
 	} ); // P4-06
 
-	test.fixme( // P4-06
+	test( // P4-06
 	'wr-phone: .ttm-serial-hero / .ttm-serial-hero__title @390', async ( {
 		page,
 	} ) => {

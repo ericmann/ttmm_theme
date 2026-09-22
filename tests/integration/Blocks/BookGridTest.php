@@ -78,14 +78,18 @@ class BookGridTest extends TTM_IntegrationTestCase {
 		$this->assertStringNotContainsString( '<figure', $html );
 	}
 
+	/**
+	 * Decision "Book form label": `collection` renders as "Stories" (the mock's
+	 * "Stories · 2019 · paperback"), not the literal "Collection".
+	 */
 	public function test_form_caption_is_translatable(): void {
 		update_option(
 			'ttm_books',
 			[
 				[
-					'title'   => 'Salt and Iron',
-					'form'    => 'novel',
-					'year'    => 2022,
+					'title'   => 'Eleven Small Doors',
+					'form'    => 'collection',
+					'year'    => 2019,
 					'formats' => [],
 					'links'   => [],
 				],
@@ -95,8 +99,8 @@ class BookGridTest extends TTM_IntegrationTestCase {
 		add_filter(
 			'gettext',
 			static function ( string $translation, string $text, string $domain ) {
-				if ( 'ttm-core' === $domain && 'Novel' === $text ) {
-					return 'Roman';
+				if ( 'ttm-core' === $domain && 'Stories' === $text ) {
+					return 'Contes';
 				}
 				return $translation;
 			},
@@ -108,8 +112,8 @@ class BookGridTest extends TTM_IntegrationTestCase {
 
 		remove_all_filters( 'gettext' );
 
-		$this->assertStringContainsString( 'Roman', $html );
-		$this->assertStringNotContainsString( 'Novel', $html );
+		$this->assertStringContainsString( 'Contes', $html );
+		$this->assertStringNotContainsString( 'Collection', $html );
 	}
 
 	public function test_zero_books_renders_nothing(): void {

@@ -10,21 +10,29 @@
 <div class="wp-block-group is-style-grid-7-5 ttm-writing-body">
 	<!-- wp:group {"tagName":"main","layout":{"type":"flex","orientation":"vertical"}} -->
 	<main class="wp-block-group" id="main">
-		<!-- wp:group {"className":"ttm-cell-heading is-rail","layout":{"type":"default"}} -->
-		<div class="wp-block-group ttm-cell-heading is-rail">
-			<!-- wp:heading {"level":3,"className":"ttm-cell-heading__label"} -->
-			<h3 class="ttm-cell-heading__label">All serials</h3>
-			<!-- /wp:heading -->
+		<!-- wp:group {"className":"ttm-writing-body__serials","layout":{"type":"default"}} -->
+		<div class="wp-block-group ttm-writing-body__serials">
+			<!-- wp:group {"className":"ttm-cell-heading is-rail","layout":{"type":"default"}} -->
+			<div class="wp-block-group ttm-cell-heading is-rail">
+				<!-- wp:heading {"level":3,"className":"ttm-cell-heading__label"} -->
+				<h3 class="ttm-cell-heading__label">All serials</h3>
+				<!-- /wp:heading -->
 
-			<!-- wp:paragraph {"className":"ttm-cell-heading__link"} -->
-			<p class="ttm-cell-heading__link">Newest activity first</p>
-			<!-- /wp:paragraph -->
+				<!-- wp:paragraph {"className":"ttm-cell-heading__link"} -->
+				<p class="ttm-cell-heading__link">Newest activity first</p>
+				<!-- /wp:paragraph -->
+			</div>
+			<!-- /wp:group -->
+
+			<!-- wp:ttm/series-list {"form":"fiction","status":"any","limit":10,"layout":"list"} /-->
 		</div>
 		<!-- /wp:group -->
 
-		<!-- wp:ttm/series-list {"form":"fiction","status":"any","limit":10,"layout":"list"} /-->
-
-		<!-- wp:ttm/series-toc {"variant":"chapters","order":"desc","limit":4,"showDek":true} /-->
+		<!-- wp:group {"className":"ttm-writing-body__chapters","layout":{"type":"default"}} -->
+		<div class="wp-block-group ttm-writing-body__chapters">
+			<!-- wp:ttm/series-toc {"variant":"chapters","order":"desc","limit":4,"showDek":true} /-->
+		</div>
+		<!-- /wp:group -->
 	</main>
 	<!-- /wp:group -->
 
@@ -32,19 +40,31 @@
 	<aside class="wp-block-group" aria-label="Fiction extras">
 		<!-- wp:group {"className":"ttm-writing-body__stories","layout":{"type":"constrained"}} -->
 		<div class="wp-block-group ttm-writing-body__stories">
-			<!-- wp:heading {"level":3,"className":"ttm-cell-heading__label"} -->
-			<h3 class="ttm-cell-heading__label">Short fiction</h3>
-			<!-- /wp:heading -->
+			<!-- wp:group {"className":"ttm-cell-heading is-rail","layout":{"type":"default"}} -->
+			<div class="wp-block-group ttm-cell-heading is-rail">
+				<!-- wp:heading {"level":3,"className":"ttm-cell-heading__label"} -->
+				<h3 class="ttm-cell-heading__label">Short fiction</h3>
+				<!-- /wp:heading -->
+			</div>
+			<!-- /wp:group -->
 
 			<!-- wp:ttm/story-tiles /-->
+
+			<!-- wp:paragraph {"className":"ttm-story-tiles__note"} -->
+			<p class="ttm-story-tiles__note">Stories without artwork get a typographic tile; a cover, when one exists, replaces it in the same box.</p>
+			<!-- /wp:paragraph -->
 		</div>
 		<!-- /wp:group -->
 
 		<!-- wp:group {"className":"ttm-writing-body__books","layout":{"type":"constrained"}} -->
 		<div class="wp-block-group ttm-writing-body__books">
-			<!-- wp:heading {"level":3,"className":"ttm-cell-heading__label"} -->
-			<h3 class="ttm-cell-heading__label">In print</h3>
-			<!-- /wp:heading -->
+			<!-- wp:group {"className":"ttm-cell-heading is-rail","layout":{"type":"default"}} -->
+			<div class="wp-block-group ttm-cell-heading is-rail">
+				<!-- wp:heading {"level":3,"className":"ttm-cell-heading__label"} -->
+				<h3 class="ttm-cell-heading__label">In print</h3>
+				<!-- /wp:heading -->
+			</div>
+			<!-- /wp:group -->
 
 			<!-- wp:ttm/book-grid /-->
 		</div>
