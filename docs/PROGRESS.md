@@ -50,7 +50,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] R1-04 Archive row dates and the serial meta line must match SPEC's literal text
 - [x] R1-05 Close the test gaps on the flight's own late fixes
 - [x] R1-06 Raise cssBudgetBytes and restore the declarations dropped under it
-- [ ] R1-07 Seed fixture drift: the third book, and a tautological Sunday test
+- [~] R1-07 Seed fixture drift: the third book, and a tautological Sunday test
 - [ ] R1-08 Scope the global post-excerpt filter; newsletter box copy is 13px
 - [ ] R1-09 Tighten the fidelity rows that assert less than their §6.9 row
 - [ ] R1-10 Prefix, stale lint entries, no-op CSS and the undocumented dd4dfbe commit
