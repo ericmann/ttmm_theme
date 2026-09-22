@@ -25,7 +25,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P1-11 Phase 1 push — chrome screenshots
 - [x] P2-01 Lead story CSS and markup per §6.1.3
 - [x] P2-02 Verse box per §6.1.4
-- [ ] P2-03 Journal excerpt hard cap and `ttm/category-count` entries format
+- [x] P2-03 Journal excerpt hard cap and `ttm/category-count` entries format
 - [ ] P2-04 Journal rail per §6.1.5
 - [ ] P2-05 Tuning — `journal.excerpt_max_words`
 - [ ] P2-06 Phase 2 push — lead row screenshots
@@ -269,3 +269,27 @@ text-underline-offset:3px. <=720: padding 16 18, text drops to body(18px).
 Un-fixme'd verse-box/kicker/text/ref/attr; verse-nocopy already passing.
 VerseOfTheDayTest untouched, still green. All verify commands green
 (budget 40616/40960 — tight but under).
+
+### P2-03 — 27a032a
+Text::sentence_excerpt() gains required $max_words: step 2's forward
+extend now stops at $max_words (was hardcoded $words+15); step 4's hard
+cut now lands at $max_words, not $words (hard cap = extend all the way
+to the cap before giving up). JournalExcerpt passes
+Config::get('journal.excerpt_max_words',55). Values::category_count()
+gains 'entries' format. Sources::category_count() now builds
+Html::link(get_category_link($term),$text) through finalize(...,true) --
+same mechanism as ttm/meta-line -- so existing core/paragraph.content
+callers (journal-rail, journal-stream, section-cell-large, section-cell)
+now render real links; P2-04 still owns switching journal-rail's format
+from 'short' to 'entries'.
+
+That link addition pushed tests/e2e/specs/focus.spec.mjs's 40-tab budget
+too low (several new focusable links before the poster button) -- bumped
+MAX_TABS to 70, more real interactive content, not a bug.
+
+New TextTest hard-cap/extend-limit tests (existing 4 calls updated to
+the new required arg); ValuesTest entries+zero-format tests;
+FrontSourcesTest link-vs-text test; JournalExcerptTest max-words-cap
+test. README documents both journal.excerpt_* keys. All verify commands
+green (composer lint, test:unit 142/142, npm lint, forbidden-patterns,
+test:integration 409/409, test:e2e full suite 0 failed).
