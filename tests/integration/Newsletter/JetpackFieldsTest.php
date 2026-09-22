@@ -1,7 +1,8 @@
 <?php
 /**
  * Integration test for TTM\Core\Newsletter\Provider\Jetpack against the captured widget form
- * (docs/spikes/P1-jetpack-form.md, docs/fixtures/jetpack-subscriptions.html).
+ * (docs/spikes/P1-jetpack-form.md, docs/fixtures/jetpack-subscriptions.html): the widget's own
+ * markup requires a nonce (R1-01), so the provider deliberately does not reproduce it.
  *
  * @package TTM\Tests\Integration\Newsletter
  */
@@ -37,29 +38,23 @@ class JetpackFieldsTest extends TTM_IntegrationTestCase {
 		return array_values( array_unique( $matches[1] ) );
 	}
 
-	public function test_provider_fields_match_captured_widget_form(): void {
-		// docs/spikes/P1-jetpack-form.md recorded Outcome B (Jetpack was reachable in wp-env),
-		// so this always runs; an Outcome C spike would have hand-authored the fixture from
-		// SPEC §6.3 and this test would still hold against that fallback fixture.
+	public function test_widget_contract_requires_a_nonce_so_the_provider_does_not_emulate_the_widget_post(): void {
+		// docs/spikes/P1-jetpack-form.md ("Handler (review R1-01)"): the captured widget form
+		// *does* require a `_wpnonce` (Jetpack_Subscriptions::widget_submit() validates it), which
+		// rule 7 forbids on cacheable output. The provider therefore never reproduces that
+		// widget's markup; it posts through the site's own admin-post.php handler instead.
 		$fixture_fields = $this->fixture_field_names();
+
+		$this->assertContains(
+			'_wpnonce',
+			$fixture_fields,
+			'The captured widget form fixture should require a nonce -- this is the whole reason the provider does not emulate it.'
+		);
 
 		$provider = new Jetpack();
 		$html     = $provider->render( 'poster' );
 
-		if ( ! preg_match_all( '/name="([^"]+)"/', $html, $matches ) ) {
-			$this->fail( 'Jetpack provider rendered no named fields.' );
-		}
-
-		foreach ( $matches[1] as $emitted_name ) {
-			if ( 'email' === $emitted_name ) {
-				continue; // Present in both; not a "hidden field" per se.
-			}
-
-			$this->assertContains(
-				$emitted_name,
-				$fixture_fields,
-				"Provider emits field '{$emitted_name}', which is not in the captured widget form."
-			);
-		}
+		$this->assertStringNotContainsString( '_wpnonce', $html );
+		$this->assertStringNotContainsString( 'name="jetpack_subscriptions_widget"', $html );
 	}
 }

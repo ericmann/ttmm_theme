@@ -41,16 +41,21 @@ class NewsletterFormTest extends TTM_IntegrationTestCase {
 		return (string) do_blocks( '<!-- wp:ttm/newsletter-form' . $json . ' /-->' );
 	}
 
-	public function test_jetpack_provider_renders_shared_form_with_widget_fields(): void {
+	public function test_jetpack_provider_renders_shared_form_posting_to_admin_post(): void {
 		register_block_type( 'jetpack/subscriptions', [] );
 
 		$html = $this->render();
 
 		$this->assertStringContainsString( 'data-provider="jetpack"', $html );
 		$this->assertStringContainsString( 'class="ttm-newsletter-form__form"', $html );
-		$this->assertStringContainsString( 'name="action" value="subscribe"', $html );
-		$this->assertStringContainsString( 'name="sub-type" value="widget"', $html );
-		$this->assertStringContainsString( 'name="jetpack_subscriptions_widget"', $html );
+		$this->assertMatchesRegularExpression( '#<form[^>]+action="[^"]*admin-post\.php"#', $html );
+		$this->assertStringContainsString( 'name="action" value="ttm_subscribe"', $html );
+		$this->assertMatchesRegularExpression( '/name="ttm_token" value="[^"]+"/', $html );
+		$this->assertMatchesRegularExpression( '/name="redirect_to" value="[^"]*"/', $html );
+		$this->assertStringContainsString( 'class="ttm-hp"', $html );
+		$this->assertSame( 1, preg_match_all( '/id="ttm-nl-email-\d+"/', $html ), 'Exactly one Form::next_id() per render.' );
+		$this->assertStringNotContainsString( '_wpnonce', $html );
+		$this->assertStringNotContainsString( 'jetpack_subscriptions_widget', $html );
 		$this->assertStringNotContainsString( 'mailto:', $html );
 	}
 

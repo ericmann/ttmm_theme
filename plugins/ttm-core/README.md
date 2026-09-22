@@ -33,10 +33,15 @@ for how it was built; this file documents the plugin as it actually ships.
   is true, and the site isn't in production — this is what `wp ttm seed` configures, so the dev
   poster shows and submits a real form without a real endpoint configured. `jetpack` is
   available only when Jetpack is actually connected (`Jetpack::is_connection_ready()`) or, for
-  tests, when `jetpack/subscriptions` is registered; it renders the shared form with the
-  widget's own hidden fields (`docs/spikes/P1-jetpack-form.md`) rather than the
-  `jetpack/subscriptions` block, and an installed-but-unconnected Jetpack falls through the
-  chain like any other unavailable provider.
+  tests, when `jetpack/subscriptions` is registered; it renders the same shared form posting to
+  the site's own `admin_post_ttm_subscribe` handler that `custom-url` uses (built from the same
+  `Form::handler_fields()` helper), never Jetpack's own widget markup — that widget's POST
+  requires a per-visitor nonce (`docs/spikes/P1-jetpack-form.md`, "Handler (review R1-01)"),
+  which rule 7 forbids on cacheable output. `Handler::handle()` calls
+  `Jetpack_Subscriptions::init()->subscribe()` (the same method the widget's own handler calls)
+  directly once the shared token/honeypot/rate-limit checks pass, guarded by `class_exists()`
+  since Jetpack is never installed in wp-env (non-goal). An installed-but-unconnected Jetpack
+  falls through the chain like any other unavailable provider.
 - **Cron/fetch:** the daily verse fetch (`Verse\Fetcher`), the only scheduled outbound request.
 - **Migration/maintenance:** every `wp ttm …` command below.
 

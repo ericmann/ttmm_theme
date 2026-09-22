@@ -11,6 +11,7 @@ declare( strict_types=1 );
 namespace TTM\Core\Newsletter;
 
 use TTM\Core\Config;
+use TTM\Core\Support\Clock;
 
 /**
  * `<form class="ttm-newsletter-form__form">`: a screen-reader label, the email input, each
@@ -40,6 +41,27 @@ class Form {
 	 */
 	public static function next_id(): int {
 		return ++self::$counter;
+	}
+
+	/**
+	 * The shared `admin-post.php` handler fields every provider that submits through
+	 * `Handler::handle()` (`custom-url` and `jetpack`) posts: the same HMAC token, redirect
+	 * target and honeypot field, built once so both providers' forms are identical apart from
+	 * the wrapper's `data-provider` (R1-01).
+	 *
+	 * @param string $current_url The page the form is rendered on, used as the redirect target.
+	 * @return array<string, string>
+	 */
+	public static function handler_fields( string $current_url ): array {
+		$honeypot_field = (string) Config::get( 'newsletter.honeypot_field', 'ttm_website' );
+		$token          = Handler::token( intdiv( Clock::now()->getTimestamp(), (int) Config::get( 'newsletter.token_ttl', 86400 ) ) );
+
+		return [
+			'action'        => 'ttm_subscribe',
+			'ttm_token'     => $token,
+			'redirect_to'   => $current_url,
+			$honeypot_field => '',
+		];
 	}
 
 	/**

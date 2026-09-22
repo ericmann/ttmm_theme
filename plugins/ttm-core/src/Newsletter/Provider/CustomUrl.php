@@ -12,8 +12,6 @@ namespace TTM\Core\Newsletter\Provider;
 
 use TTM\Core\Config;
 use TTM\Core\Newsletter\Form;
-use TTM\Core\Newsletter\Handler;
-use TTM\Core\Support\Clock;
 
 /**
  * The only file allowed to call `wp_safe_remote_post` for the configured newsletter endpoint
@@ -69,18 +67,11 @@ class CustomUrl implements Provider {
 	 * @param string $placement `poster` or `box`.
 	 */
 	public function render( string $placement ): string {
-		$honeypot_field = (string) Config::get( 'newsletter.honeypot_field', 'ttm_website' );
-		$token          = Handler::token( intdiv( Clock::now()->getTimestamp(), (int) Config::get( 'newsletter.token_ttl', 86400 ) ) );
-		$current_url    = home_url( add_query_arg( null, null ) );
+		$current_url = home_url( add_query_arg( null, null ) );
 
 		return Form::render(
 			admin_url( 'admin-post.php' ),
-			[
-				'action'        => 'ttm_subscribe',
-				'ttm_token'     => $token,
-				'redirect_to'   => $current_url,
-				$honeypot_field => '',
-			],
+			Form::handler_fields( $current_url ),
 			$placement
 		);
 	}

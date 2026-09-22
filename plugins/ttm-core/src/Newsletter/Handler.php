@@ -1,6 +1,9 @@
 <?php
 /**
- * `custom-url` newsletter provider's unauthenticated submission handler (SPEC §6.1/§6.9).
+ * The shared unauthenticated submission handler behind both `custom-url` and `jetpack` (SPEC
+ * §6.1/§6.9, amended by R1-01): both providers post to `admin_post(_nopriv)_ttm_subscribe`
+ * through identical `Form::handler_fields()`, and `handle()` dispatches to the configured
+ * provider's own subscribe call only after the shared token/honeypot/rate-limit checks pass.
  *
  * @package TTM\Core\Newsletter
  */
@@ -104,6 +107,10 @@ class Handler {
 			return self::success_url( $target );
 		}
 
+		if ( 'jetpack' === Providers::current()->slug() ) {
+			return self::handle_jetpack( $email, $target );
+		}
+
 		// SPEC §6.3 "New": an empty endpoint with dev_accept applying accepts locally -- no
 		// forward, no log, just the same success redirect (this is what `wp ttm seed` configures
 		// so the dev poster submits a real form outside production).
@@ -112,6 +119,34 @@ class Handler {
 
 			do_action( 'ttm_newsletter_subscribed', hash( 'sha256', strtolower( $email ) ), 'custom-url' );
 		}
+
+		return self::success_url( $target );
+	}
+
+	/**
+	 * Subscribes `$email` through Jetpack's own API -- the same method its widget POST handler
+	 * calls (`Jetpack_Subscriptions::widget_submit()`, `modules/subscriptions.php:636-640`) --
+	 * rather than emulating that widget's nonce-carrying POST, which rule 7 forbids on cacheable
+	 * output (docs/spikes/P1-jetpack-form.md, "Handler (review R1-01)"). Guarded by
+	 * `class_exists()`: `\Jetpack_Subscriptions` is never loaded in wp-env (non-goal: no Jetpack
+	 * connection this flight), so this branch is only reachable where Jetpack actually ships.
+	 *
+	 * @param string $email  Validated email address.
+	 * @param string $target Validated local redirect target.
+	 * @return string
+	 */
+	private static function handle_jetpack( string $email, string $target ): string {
+		if ( ! class_exists( '\Jetpack_Subscriptions' ) ) {
+			return self::success_url( $target );
+		}
+
+		$result = \Jetpack_Subscriptions::init()->subscribe( $email, 0, false );
+
+		if ( false === $result || is_wp_error( $result ) ) {
+			return self::success_url( $target );
+		}
+
+		do_action( 'ttm_newsletter_subscribed', hash( 'sha256', strtolower( $email ) ), 'jetpack' );
 
 		return self::success_url( $target );
 	}

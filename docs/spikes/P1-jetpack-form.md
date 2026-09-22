@@ -70,3 +70,24 @@ Cleanup (per task instructions, so seed/e2e stay Jetpack-free):
 npx wp-env run cli wp plugin deactivate jetpack
 npx wp-env run cli wp plugin delete jetpack
 ```
+
+## Handler (review R1-01)
+
+The nonce finding above (`wp_nonce_field( 'blogsub_subscribe_' . \Jetpack_Options::get_option( 'id' )
+)`, `modules/subscriptions/views.php:562`) means the widget's own POST handler,
+`Jetpack_Subscriptions::widget_submit()` (`modules/subscriptions.php:636-640`, hooked on
+`template_redirect`), returns `false` unless `_wpnonce` verifies against
+`blogsub_subscribe_{Jetpack blog id}` -- a value this theme's cache-safe, nonce-less form
+markup can never carry (rule 7). Reproducing the widget's field shape (as the original P1-08
+provider did) therefore never actually subscribes anyone: the request reaches Jetpack's handler,
+fails nonce verification, and `widget_submit()` returns `false` with no visible error, giving a
+false impression of success.
+
+The fix (R1-01) drops the widget-emulation approach entirely: `Provider\Jetpack::render()` now
+posts through the site's own `admin_post_ttm_subscribe` handler -- the same one `custom-url`
+uses, built from the same `Form::handler_fields()` helper (HMAC token, redirect target,
+honeypot) -- and `Handler::handle()` calls the exact method `widget_submit()` itself calls,
+`Jetpack_Subscriptions::init()->subscribe( $email, 0, false )` (`modules/subscriptions.php:551`),
+directly, after the shared token/honeypot/rate-limit checks pass. This keeps rule 7 (no nonce on
+cacheable output) while still driving Jetpack's real subscribe path, guarded by
+`class_exists( '\Jetpack_Subscriptions' )` since Jetpack is never installed in wp-env (non-goal).
