@@ -55,7 +55,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] R1-09 Tighten the fidelity rows that assert less than their §6.9 row
 - [x] R1-10 Prefix, stale lint entries, no-op CSS and the undocumented dd4dfbe commit
 - [x] R2-01 Scope R1-06's series-row margins to the list layout; restore strip, rail and grid-2 values
-- [ ] R2-02 Regenerate and commit the phase-3 screenshots after the round-1 fixes
+- [x] R2-02 Regenerate and commit the phase-3 screenshots after the round-1 fixes
 
 ## Log
 (one entry per task, appended by implement)
@@ -439,3 +439,11 @@ Tests: extended strip-mark/strip-meta/ar-aside-row with margin-top assertions; a
 Full npm run test:e2e (449 tests), composer test:unit, npm run test:unit, npm run test:integration (481 tests), composer lint, npm run lint, forbidden-patterns all green via foundry_verify.
 CSS budget: 62428/62464 bytes (was 62368 before this task's edits net +60 bytes).
 No other files touched; no config keys introduced.
+
+### R2-02 — 39c96df
+Ran `npm run env:cli -- ttm seed --reset` then `npm run screenshots`; regenerated all 14 docs/feedback/phase-3/*.png against current code (post round-1 fixes and R2-01). No code/CSS changed. 4 of 14 PNGs (404, journal, journal-390, front-1920) were byte-identical to the prior committed version so git had nothing to stage for them; the other 10 + docs/HANDOFF.md were committed in 39c96df.
+Ancestry check: git merge-base --is-ancestor $(git log -1 --format=%H -- themes/ttm-theme plugins/ttm-core/blocks docs/fixtures/seed) $(git log -1 --format=%H -- docs/feedback/phase-3) exits 0 as of 39c96df (was 1 before this task).
+Eyeballed acceptance criteria: writing.png "In print" shows exactly 2 books (Salt Water Wires, Eleven Small Doors); archive-security.png 2025 group's Nov 26 row is on one line; search.png kicker column is plain-text (WRITING/JOURNAL, unlinked); front-1920.png section-grid strip unchanged from phase 2 (no front-page code touched).
+Updated docs/HANDOFF.md round-1 item 4 to note screenshots are now current, and added a full "Round 2" section (what each task fixed, interpretation, config keys, what a human should check).
+Confirmed active theme is still ttm-theme after seeding/screenshots.
+Full foundry_verify green (unit 169, lint incl. budget 62428/62464 and coverage 193/193/0-pending, build, forbidden-patterns).
