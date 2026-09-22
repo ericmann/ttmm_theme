@@ -101,21 +101,40 @@ export function globToRegExp( pattern ) {
 	return new RegExp( `^${ out }$` );
 }
 
+// P0-01: during the flight, a strict allow-list line names exactly one class
+// and is tagged with the task that will style it: `ttm-<class> # P<n>-<nn>
+// pending`. A line that does not match this shape is a strict-mode error
+// (rule 34 amendment): the allow-list may no longer carry the phase-2 glob
+// lines that hid whole groups of classes.
+const STRICT_LINE = /^ttm-[a-z0-9_-]+ # P\d-\d\d pending$/;
+
 /**
  * Parse the allow-list file. Blank lines and comment-only lines (starting
  * with `#` once trimmed) are ignored. Each remaining line is
  * `<glob pattern> # <reason>`.
  *
- * @param {string} text Raw allow-list file contents.
- * @return {{pattern: string, regex: RegExp, reason: string}[]} Parsed entries.
+ * In `strict` mode (P0-01), every remaining line must match
+ * `ttm-<class> # P<n>-<nn> pending` exactly; anything else (including the
+ * old glob/brace syntax) throws.
+ *
+ * @param {string}  text             Raw allow-list file contents.
+ * @param {Object}  [options]
+ * @param {boolean} [options.strict] Reject non-tagged-pending lines.
+ * @return {{pattern: string, regex: RegExp, reason: string, pending: boolean}[]} Parsed entries.
  */
-export function parseAllowList( text ) {
+export function parseAllowList( text, { strict = false } = {} ) {
 	const entries = [];
 
 	for ( const rawLine of text.split( '\n' ) ) {
 		const line = rawLine.trim();
 		if ( line === '' || line.startsWith( '#' ) ) {
 			continue;
+		}
+
+		if ( strict && ! STRICT_LINE.test( line ) ) {
+			throw new Error(
+				`css-coverage-allow.txt: invalid line (strict mode requires "ttm-<class> # P<n>-<nn> pending"): "${ line }"`
+			);
 		}
 
 		const hashIndex = line.indexOf( '#' );
@@ -129,7 +148,12 @@ export function parseAllowList( text ) {
 			continue;
 		}
 
-		entries.push( { pattern, regex: globToRegExp( pattern ), reason } );
+		entries.push( {
+			pattern,
+			regex: globToRegExp( pattern ),
+			reason,
+			pending: /^P\d-\d\d pending$/.test( reason ),
+		} );
 	}
 
 	return entries;
@@ -139,8 +163,8 @@ export function parseAllowList( text ) {
  * Compare markup classes against CSS classes, filtering both directions
  * through the allow-list.
  *
- * @param {{markup: Set<string>, css: Set<string>, allow: {pattern: string, regex: RegExp, reason: string}[]}} args Comparison inputs.
- * @return {{missing: string[], dead: string[], allowCount: number}} Gaps found.
+ * @param {{markup: Set<string>, css: Set<string>, allow: {pattern: string, regex: RegExp, reason: string, pending: boolean}[]}} args Comparison inputs.
+ * @return {{missing: string[], dead: string[], allowCount: number, pendingCount: number}} Gaps found.
  */
 export function report( { markup, css, allow } ) {
 	const isAllowed = ( cls ) =>
@@ -153,5 +177,7 @@ export function report( { markup, css, allow } ) {
 		.filter( ( cls ) => ! markup.has( cls ) && ! isAllowed( cls ) )
 		.sort();
 
-	return { missing, dead, allowCount: allow.length };
+	const pendingCount = allow.filter( ( entry ) => entry.pending ).length;
+
+	return { missing, dead, allowCount: allow.length, pendingCount };
 }

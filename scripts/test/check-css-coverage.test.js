@@ -108,7 +108,39 @@ describe( 'parseAllowList', () => {
 	} );
 } );
 
+describe( 'parseAllowList strict mode', () => {
+	it( 'rejects a glob line in strict mode', () => {
+		expect( () =>
+			parseAllowList( 'ttm-{foo,bar}* # phase 2: later flight', {
+				strict: true,
+			} )
+		).toThrow( /invalid line/ );
+	} );
+
+	it( 'accepts a single-class pending line', () => {
+		const entries = parseAllowList( 'ttm-foo # P1-01 pending', {
+			strict: true,
+		} );
+
+		expect( entries ).toHaveLength( 1 );
+		expect( entries[ 0 ].pattern ).toBe( 'ttm-foo' );
+		expect( entries[ 0 ].pending ).toBe( true );
+	} );
+} );
+
 describe( 'report', () => {
+	it( 'counts pending lines', () => {
+		const markup = new Set( [ 'ttm-foo' ] );
+		const css = new Set();
+		const allow = parseAllowList( 'ttm-foo # P1-01 pending', {
+			strict: true,
+		} );
+
+		const result = report( { markup, css, allow } );
+
+		expect( result.pendingCount ).toBe( 1 );
+	} );
+
 	it( 'reports missing and dead classes after the allow-list', () => {
 		const markup = new Set( [ 'ttm-foo', 'ttm-bar', 'ttm-allowed' ] );
 		const css = new Set( [ 'ttm-foo', 'ttm-dead', 'ttm-allowed' ] );

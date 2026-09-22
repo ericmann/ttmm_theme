@@ -26,6 +26,12 @@ const CSS_FILES = [
 
 const ALLOW_PATH = 'scripts/css-coverage-allow.txt';
 
+// P0-01 (rule 34 amendment): during the flight, single-class "pending" lines
+// are tolerated; the allow-list must be empty (ALLOW_PENDING = false) by the
+// time the flight ends. Flip this to false once the last phase's push task
+// has removed every pending line.
+export const ALLOW_PENDING = true;
+
 // Files under plugins/ttm-core/src that are known not to contain markup
 // (e.g. pure data/config classes) never emit a ttm-* class literal, so
 // walking them costs nothing; nothing is skipped today.
@@ -83,9 +89,21 @@ const allMarkupFiles = [ ...markupFiles, ...renderFiles, ...srcFiles ];
 
 const markup = collectMarkupClasses( readAll( allMarkupFiles ) );
 const css = collectCssClasses( readAll( CSS_FILES ).join( '\n' ) );
-const allow = parseAllowList( readFileSync( ALLOW_PATH, 'utf8' ) );
+let allow;
+try {
+	allow = parseAllowList( readFileSync( ALLOW_PATH, 'utf8' ), {
+		strict: true,
+	} );
+} catch ( err ) {
+	console.error( `css-coverage: ${ err.message }` );
+	process.exit( 1 );
+}
 
-const { missing, dead, allowCount } = report( { markup, css, allow } );
+const { missing, dead, allowCount, pendingCount } = report( {
+	markup,
+	css,
+	allow,
+} );
 
 if ( missing.length > 0 ) {
 	console.error(
@@ -101,16 +119,20 @@ if ( dead.length > 0 ) {
 	dead.forEach( ( cls ) => console.error( `  ${ cls }` ) );
 }
 
-if ( allowCount >= 10 ) {
+if ( ! ALLOW_PENDING && allowCount > 0 ) {
 	console.error(
-		`css-coverage: ${ ALLOW_PATH } has ${ allowCount } entries; keep it under 10 (rule 34/37).`
+		`css-coverage: ${ ALLOW_PATH } must be empty at flight end (rule 34); found ${ allowCount } line(s).`
 	);
 }
 
-if ( missing.length > 0 || dead.length > 0 || allowCount >= 10 ) {
+if (
+	missing.length > 0 ||
+	dead.length > 0 ||
+	( ! ALLOW_PENDING && allowCount > 0 )
+) {
 	process.exit( 1 );
 }
 
 console.log(
-	`css-coverage: ${ markup.size } markup classes, ${ css.size } css classes, ${ allowCount } allow-listed`
+	`css-coverage: ${ markup.size } markup classes, ${ css.size } css classes, ${ pendingCount } pending`
 );

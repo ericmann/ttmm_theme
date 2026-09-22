@@ -23,8 +23,12 @@
 // strip's real CSS was measured (41984 -> 43008; 42583 measured, after the
 // same kind of comment-trimming). P3-05 still runs its own measurement pass
 // per its own scope, but should find this settled rather than raise again.
+// P0-01: rule 30 amendment raises the budget to 61440 ahead of this flight's
+// remaining templates (article, journal, archives, series hub, Writing);
+// no CSS added by this task. 61440 is the ⚠️ ASSUMPTION default and lives
+// only here and in CLAUDE.md; a later phase may tune it down in P5-03.
 import { statSync, existsSync } from 'node:fs';
-const cssBudgetBytes = 43008;
+const cssBudgetBytes = 61440;
 const file = 'themes/ttm-theme/assets/css/ttm.css';
 if ( ! existsSync( file ) ) {
 	console.error( `${ file } missing` );
