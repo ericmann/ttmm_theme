@@ -54,7 +54,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] R1-08 Scope the global post-excerpt filter; newsletter box copy is 13px
 - [x] R1-09 Tighten the fidelity rows that assert less than their §6.9 row
 - [x] R1-10 Prefix, stale lint entries, no-op CSS and the undocumented dd4dfbe commit
-- [ ] R2-01 Scope R1-06's series-row margins to the list layout; restore strip, rail and grid-2 values
+- [x] R2-01 Scope R1-06's series-row margins to the list layout; restore strip, rail and grid-2 values
 - [ ] R2-02 Regenerate and commit the phase-3 screenshots after the round-1 fixes
 
 ## Log
@@ -432,3 +432,10 @@ Deleted `.ttm-footer__copyright:empty` + its false selectors-allow.txt reason. T
 Deleted the false `.ttm-series-featured__part-dek` selectors-allow.txt line (live selector, P4-03's taxonomy-series.html sets showDek:true, asserted by single-parts on /series/hardening-wordpress/).
 docs/PROGRESS.md: added a "(standalone, post-P5-05) — dd4dfbe" log entry describing both fixes it made (text-transform:none removal, most-read unpadded numbers); corrected P3-04's entry which still claimed the override ships.
 node scripts/check-css-coverage.mjs: 193/193, 0 pending. Full foundry_verify green: unit 169, integration 481/481, e2e 447 passed, budget 62188/62464. grep confirms book-admin-row gone, ttm-book-row present. No docs/phase-1, docs/phase-2 or FOUNDRY_FEEDBACK.md touched.
+
+### R2-01 — 925322a
+Restored base values in ttm.css: .ttm-series-mark margin-top 6px->5px; .ttm-series-row__meta margin-top 6px->var(--wp--preset--spacing--10) (4px); .ttm-series-row__dek margin-top 4px->5px. Added list-only overrides after base rules: .ttm-series-list.is-list .ttm-series-mark {margin-top:6px}, .ttm-series-list.is-list .ttm-series-row__meta {margin-top:6px}, joined margin-top:4px into existing .ttm-series-list.is-list .ttm-series-row__dek {max-width:46ch}. Added stylelint-disable-next-line no-descending-specificity before .ttm-series-bar .ttm-series-mark (new is-list mark override raised specificity ahead of it in source, same pattern used elsewhere in file).
+Tests: extended strip-mark/strip-meta/ar-aside-row with margin-top assertions; added hub-grid-dek and wr-serial-row-margins rows. Verified 4/5 fail pre-fix (wr-serial-row-margins already matched by coincidence), all 5 pass post-fix.
+Full npm run test:e2e (449 tests), composer test:unit, npm run test:unit, npm run test:integration (481 tests), composer lint, npm run lint, forbidden-patterns all green via foundry_verify.
+CSS budget: 62428/62464 bytes (was 62368 before this task's edits net +60 bytes).
+No other files touched; no config keys introduced.
