@@ -1595,20 +1595,20 @@ test.describe( 'journal', () => {
 } );
 
 test.describe( 'journal stream', () => {
-	test.fixme( // P2-02
-	'js-head: .ttm-journal-stream .ttm-cell-heading__label @1280', async ( {
+	test( 'js-head: .ttm-journal-stream .ttm-cell-heading__label @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.journalPost, 1280 );
 		const el = page.locator(
 			'.ttm-journal-stream .ttm-cell-heading__label'
 		);
-		expect( await text( el ) ).toBe( 'Earlier' );
+		// innerText reflects the label's text-transform; assert the source text.
+		const source = await el.evaluate( ( node ) => node.textContent );
+		expect( source.trim() ).toBe( 'Earlier' );
 		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 0 ) );
-	} ); // P2-02
+	} );
 
-	test.fixme( // P2-02
-	'js-link: .ttm-journal-stream .ttm-cell-heading__link @1280', async ( {
+	test( 'js-link: .ttm-journal-stream .ttm-cell-heading__link @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.journalPost, 1280 );
@@ -1616,74 +1616,72 @@ test.describe( 'journal stream', () => {
 			'.ttm-journal-stream .ttm-cell-heading__link'
 		);
 		expect( await text( el ) ).toMatch( /^Full journal · \d+ entries$/ );
-	} ); // P2-02
+	} );
 
-	test.fixme( // P2-02
-	'js-row: .ttm-journal-row (first) @1280', async ( { page } ) => {
+	test( 'js-row: .ttm-journal-row (first) @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.journalPost, 1280 );
 		const el = page.locator( '.ttm-journal-row' ).first();
 		const t = await tracks( el );
 		expect( t.length ).toBe( 3 );
 		expect( await computed( el, 'padding' ) ).toBe( '18px 0px' );
 		expect( await computed( el, 'border-top-width' ) ).toBe( px( 1 ) );
-	} ); // P2-02
+	} );
 
-	test.fixme( // P2-02
-	'js-date: .ttm-journal-row .is-style-journal-stream-date @1280', async ( {
+	test( 'js-date: .ttm-journal-row .is-style-journal-stream-date @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.journalPost, 1280 );
-		const el = page.locator(
-			'.ttm-journal-row .is-style-journal-stream-date'
-		);
+		const el = page
+			.locator( '.ttm-journal-row .is-style-journal-stream-date' )
+			.first();
 		expect( await computed( el, 'font-size' ) ).toBe( px( 20 ) );
 		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
-	} ); // P2-02
+	} );
 
-	test.fixme( // P2-02
-	'js-title: .ttm-journal-row .wp-block-post-title @1280', async ( {
+	test( 'js-title: .ttm-journal-row .wp-block-post-title @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.journalPost, 1280 );
-		const el = page.locator( '.ttm-journal-row .wp-block-post-title' );
+		const el = page
+			.locator( '.ttm-journal-row .wp-block-post-title' )
+			.first();
 		expect( await computed( el, 'font-size' ) ).toBe( px( 18 ) );
 		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
-	} ); // P2-02
+	} );
 
-	test.fixme( // P2-02
-	'js-excerpt: .ttm-journal-row .wp-block-post-excerpt__excerpt @1280', async ( {
+	test( 'js-excerpt: .ttm-journal-row .wp-block-post-excerpt__excerpt @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.journalPost, 1280 );
-		const el = page.locator(
-			'.ttm-journal-row .wp-block-post-excerpt__excerpt'
-		);
+		const el = page
+			.locator( '.ttm-journal-row .wp-block-post-excerpt__excerpt' )
+			.first();
 		expect( await computed( el, 'font-size' ) ).toBe( px( 15 ) );
 		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-800' ) );
-		expect( await computed( el, 'max-width' ) ).toBe( '40em' );
-	} ); // P2-02
+		// getComputedStyle resolves em to px: 40em at the excerpt's 15px.
+		expect( await computed( el, 'max-width' ) ).toBe( px( 40 * 15 ) );
+	} );
 
-	test.fixme( // P2-02
-	'js-words: .ttm-journal-row .ttm-journal-row__words @1280', async ( {
+	test( 'js-words: .ttm-journal-row .ttm-journal-row__words @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.journalPost, 1280 );
-		const el = page.locator( '.ttm-journal-row .ttm-journal-row__words' );
+		const el = page
+			.locator( '.ttm-journal-row .ttm-journal-row__words' )
+			.first();
 		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
 		// Colour vs a11y: neutral-700, not SPEC's literal neutral-600.
 		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
 		expect( await computed( el, 'justify-self' ) ).toBe( 'end' );
-	} ); // P2-02
+	} );
 
-	test.fixme( // P2-02
-	'js-count: .ttm-journal-row @1280', async ( { page } ) => {
+	test( 'js-count: .ttm-journal-row @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.journalPost, 1280 );
 		const els = page.locator( '.ttm-journal-row' );
 		expect( await els.count() ).toBe( 4 );
-	} ); // P2-02
+	} );
 
-	test.fixme( // P2-02
-	'js-phone: .ttm-journal-row (first) @390', async ( { page } ) => {
+	test( 'js-phone: .ttm-journal-row (first) @390', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.journalPost, 390 );
 		const el = page.locator( '.ttm-journal-row' ).first();
 		const t = await tracks( el );
@@ -1692,7 +1690,7 @@ test.describe( 'journal stream', () => {
 			.locator( '.ttm-journal-row .ttm-journal-row__words' )
 			.first();
 		expect( await words.isVisible() ).toBe( false );
-	} ); // P2-02
+	} );
 } );
 
 test.describe( 'writing', () => {

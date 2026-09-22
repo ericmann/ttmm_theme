@@ -152,15 +152,21 @@ class Values {
 	}
 
 	/**
-	 * "431 articles →" / "431 →" / "All 431 entries"; 0 → "All →" for every format (F25).
+	 * "431 articles →" / "431 →" / "All 431 entries" / "Full journal · 87 entries"; 0 → "All →"
+	 * for every format (F25).
 	 *
 	 * @param int    $count  Post count.
-	 * @param string $format `articles`, `short` or `entries`.
+	 * @param string $format `articles`, `short`, `entries` or `journal-full`.
 	 * @return string
 	 */
 	public static function category_count( int $count, string $format ): string {
 		if ( 0 === $count ) {
 			return __( 'All →', 'ttm-core' );
+		}
+
+		if ( 'journal-full' === $format ) {
+			/* translators: %d: journal entry count. */
+			return sprintf( __( 'Full journal · %d entries', 'ttm-core' ), $count );
 		}
 
 		if ( 'entries' === $format ) {

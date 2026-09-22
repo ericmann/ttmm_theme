@@ -138,10 +138,15 @@ class ValuesTest extends TestCase {
 		$this->assertSame( 'All 87 entries', Values::category_count( 87, 'entries' ) );
 	}
 
+	public function test_category_count_journal_full_format(): void {
+		$this->assertSame( 'Full journal · 87 entries', Values::category_count( 87, 'journal-full' ) );
+	}
+
 	public function test_category_count_zero_reads_all_arrow_for_every_format(): void {
 		$this->assertSame( 'All →', Values::category_count( 0, 'articles' ) );
 		$this->assertSame( 'All →', Values::category_count( 0, 'short' ) );
 		$this->assertSame( 'All →', Values::category_count( 0, 'entries' ) );
+		$this->assertSame( 'All →', Values::category_count( 0, 'journal-full' ) );
 	}
 
 	public function test_today_formats(): void {

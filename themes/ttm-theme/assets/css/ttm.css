@@ -1928,14 +1928,81 @@ blockquote.is-style-pull cite,
 	display: none;
 }
 
+/* 4.11 journal stream row (SPEC §6.4 "stream"): each row is one anchor (link_rows()). */
+.ttm-journal-stream {
+	padding: 24px 0 40px;
+}
+
+.ttm-journal-stream:not(:has(.wp-block-post)) {
+	display: none;
+}
+
+.ttm-journal-stream .ttm-cell-heading {
+	margin-bottom: 8px;
+}
+
+.ttm-journal-stream .wp-block-query .wp-block-post-template {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
 .ttm-journal-row {
+	display: grid;
+	grid-template-columns: minmax(0, 3fr) minmax(0, 7fr) minmax(0, 2fr);
+	grid-template-rows: auto auto;
+	gap: 0 48px;
+	align-items: baseline;
+	padding: 18px 0;
 	border-top: var(--ttm-rule-1);
-	padding: var(--wp--preset--spacing--30) 0;
+	color: inherit;
+	text-decoration: none;
 }
 
 .is-style-journal-stream-date {
+	grid-column: 1;
+	grid-row: 1;
+	margin: 0;
+	font-size: 20px;
+	font-weight: 800;
+	letter-spacing: -0.015em;
+	font-feature-settings: "tnum";
+}
+
+.ttm-journal-stream .wp-block-query .wp-block-post .ttm-journal-row .wp-block-post-title {
+	grid-column: 2;
+	grid-row: 1;
+	margin: 0;
+	font-size: 18px;
+	font-weight: 800;
+	line-height: 1.25;
+}
+
+.ttm-journal-stream .wp-block-query .wp-block-post .ttm-journal-row:hover .wp-block-post-title {
+	color: var(--wp--preset--color--accent);
+}
+
+.ttm-journal-stream .wp-block-post .ttm-journal-row .wp-block-post-excerpt {
+	grid-column: 2;
+	grid-row: 2;
+}
+
+.ttm-journal-row .wp-block-post-excerpt__excerpt {
+	margin: 4px 0 0;
+	font-size: 15px;
+	line-height: 1.5;
+	color: var(--wp--preset--color--neutral-800);
+	max-width: 40em;
+}
+
+.ttm-journal-row__words {
+	grid-column: 3;
+	grid-row: 1;
+	justify-self: end;
+	margin: 0;
 	font-size: 12px;
 	color: var(--wp--preset--color--neutral-700);
+	font-feature-settings: "tnum";
 }
 
 /* 4.12 journal post header (SPEC §6.4) */
@@ -2071,6 +2138,18 @@ ul.modern-footnotes-list,
 		margin-top: 28px;
 		padding-top: 14px;
 		border-top: var(--ttm-rule-1);
+	}
+
+	.ttm-journal-row {
+		grid-template-columns: auto 1fr;
+	}
+
+	.is-style-journal-stream-date {
+		font-size: 16px;
+	}
+
+	.ttm-journal-row__words {
+		display: none;
 	}
 }
 

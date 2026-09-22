@@ -6,7 +6,6 @@ ttm-book__links # P4-06 pending
 ttm-category-stats # P3-04 pending
 ttm-filter-row # P3-02 pending
 ttm-hub-head # P4-01 pending
-ttm-journal-stream # P2-02 pending
 ttm-most-read # P3-04 pending
 ttm-serial-hero__body # P4-04 pending
 ttm-serial-hero__kicker # P4-04 pending

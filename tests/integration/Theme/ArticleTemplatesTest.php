@@ -340,4 +340,61 @@ class ArticleTemplatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringNotContainsString( 'ttm-journal-head__count', $html );
 		$this->assertStringContainsString( '<span class="ttm-syndication__words">', $html );
 	}
+
+	/**
+	 * @return int The current journal post id (five others exist, so the stream shows four).
+	 */
+	private function seed_journal_stream(): int {
+		$journal = $this->category_id( 'journal', 'Journal' );
+		$current = 0;
+		foreach ( range( 1, 6 ) as $i ) {
+			$id = self::factory()->post->create(
+				[
+					'post_status'   => 'publish',
+					'post_category' => [ $journal ],
+					'post_date'     => sprintf( '2026-09-%02d 09:00:00', $i ),
+					'post_excerpt'  => "Entry {$i} dek.",
+				]
+			);
+			update_post_meta( $id, 'ttm_primary_category', $journal );
+			update_post_meta( $id, 'ttm_word_count', 100 + $i );
+			$current = $id;
+		}
+
+		return $current;
+	}
+
+	/**
+	 * Decision "Whole-row links" / rule 33: every stream row is one anchor to its post, the
+	 * title (not a link itself) comes first, and the current post is excluded.
+	 */
+	public function test_journal_stream_rows_are_single_anchors_with_four_entries(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$current = $this->seed_journal_stream();
+
+		$html = $this->render_single( $current, 'single-journal' );
+
+		$this->assertSame( 1, preg_match( '/<div class="[^"]*ttm-journal-stream[^"]*"[^>]*>(.*)<\/div>\s*<div class="wp-block-template-part">/s', $html, $m ) );
+		$stream = $m[1];
+
+		$this->assertSame( 4, preg_match_all( '/<a href="[^"]+" class="wp-block-group ttm-journal-row[^"]*">/', $stream, $rows ) );
+		$this->assertSame( 4, substr_count( $stream, 'class="wp-block-post ' ) );
+		$this->assertStringNotContainsString( 'href="' . get_permalink( $current ) . '"', $stream );
+		// One anchor per row: no nested links in the title.
+		$this->assertStringNotContainsString( '<h3 class="wp-block-post-title"><a', $stream );
+		$this->assertMatchesRegularExpression( '/<a href="[^"]+" class="wp-block-group ttm-journal-row[^"]*">\s*<h3 class="wp-block-post-title">/', $stream );
+		$this->assertStringContainsString( 'ttm-journal-row__words', $stream );
+		$this->assertStringContainsString( '105 words', $stream );
+	}
+
+	public function test_journal_stream_heading_reads_full_journal_count(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$current = $this->seed_journal_stream();
+
+		$html = $this->render_single( $current, 'single-journal' );
+
+		$this->assertSame( 1, preg_match( '/<p class="ttm-cell-heading__link[^"]*">(.*?)<\/p>/s', $html, $m ) );
+		$this->assertStringContainsString( 'Full journal · 6 entries', $m[1] );
+		$this->assertStringContainsString( 'href="' . get_category_link( $this->category_id( 'journal', 'Journal' ) ) . '"', $m[1] );
+	}
 }

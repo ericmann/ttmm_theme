@@ -44,6 +44,56 @@ class Helpers {
 		add_filter( 'render_block_core/post-terms', [ self::class, 'style_tag_terms' ], 10, 2 );
 		add_filter( 'render_block_core/post-excerpt', [ self::class, 'excerpt_markup' ], 10, 3 );
 		add_filter( 'render_block_core/post-author-name', [ self::class, 'author_prefix' ], 10, 2 );
+		add_filter( 'render_block_core/group', [ self::class, 'link_rows' ], 10, 3 );
+	}
+
+	/**
+	 * Decision "Whole-row links": a `core/group` whose className contains `ttm-journal-row` or
+	 * `ttm-archive-row`, rendered for a post, becomes that post's single anchor -- the outer
+	 * `<div` opens as `<a href="{permalink}"` and the closing `</div>` becomes `</a>` (rule 33:
+	 * one anchor per row; the inner `core/post-title` is `isLink: false`).
+	 *
+	 * @param string               $block_content Rendered group HTML.
+	 * @param array<string, mixed> $block         Parsed block.
+	 * @param WP_Block|null        $instance      Block instance (postId context when available).
+	 * @return string
+	 */
+	public static function link_rows( string $block_content, array $block = [], $instance = null ): string {
+		$class = (string) ( $block['attrs']['className'] ?? '' );
+		if ( ! preg_match( '/(^|\s)ttm-(journal|archive)-row(\s|$)/', $class ) ) {
+			return $block_content;
+		}
+
+		// core/group declares no postId context; inside a post-template loop the queried post
+		// is the current one.
+		$post_id = (int) ( $instance->context['postId'] ?? 0 );
+		if ( ! $post_id ) {
+			$post_id = (int) get_the_ID();
+		}
+		if ( ! $post_id ) {
+			return $block_content;
+		}
+
+		// Rule 33: one anchor per row. A row that still carries its own link (a template not yet
+		// switched to `isLink: false`) is left alone rather than nested inside a second anchor.
+		if ( false !== stripos( $block_content, '<a ' ) ) {
+			return $block_content;
+		}
+
+		$permalink = (string) get_permalink( $post_id );
+		if ( '' === $permalink ) {
+			return $block_content;
+		}
+
+		$open  = strpos( $block_content, '<div' );
+		$close = strrpos( $block_content, '</div>' );
+		if ( false === $open || false === $close || $close <= $open ) {
+			return $block_content;
+		}
+
+		$html = substr_replace( $block_content, '</a>', $close, strlen( '</div>' ) );
+
+		return substr_replace( $html, '<a href="' . esc_url( $permalink ) . '"', $open, strlen( '<div' ) );
 	}
 
 	/**

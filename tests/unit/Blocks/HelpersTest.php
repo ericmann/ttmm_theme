@@ -113,4 +113,41 @@ class HelpersTest extends TestCase {
 		);
 		$this->assertSame( $rendered, Helpers::author_prefix( $rendered, [ 'attrs' => [] ] ) );
 	}
+
+	public function test_link_rows_turns_row_group_into_anchor(): void {
+		Functions\when( 'get_the_ID' )->justReturn( 12 );
+		Functions\when( 'get_permalink' )->justReturn( 'https://example.test/journal-post-1/' );
+
+		$html  = '<div class="wp-block-group ttm-journal-row is-layout-flow"><h3 class="wp-block-post-title">Title</h3><div class="wp-block-post-excerpt"><p>Dek</p></div></div>';
+		$block = [ 'attrs' => [ 'className' => 'ttm-journal-row' ] ];
+
+		$this->assertSame(
+			'<a href="https://example.test/journal-post-1/" class="wp-block-group ttm-journal-row is-layout-flow"><h3 class="wp-block-post-title">Title</h3><div class="wp-block-post-excerpt"><p>Dek</p></div></a>',
+			Helpers::link_rows( $html, $block )
+		);
+
+		// The archive row class is covered too (P3-03 relies on it).
+		$archive = '<div class="wp-block-group ttm-archive-row"><h3>Title</h3></div>';
+		$this->assertSame(
+			'<a href="https://example.test/journal-post-1/" class="wp-block-group ttm-archive-row"><h3>Title</h3></a>',
+			Helpers::link_rows( $archive, [ 'attrs' => [ 'className' => 'ttm-archive-row' ] ] )
+		);
+	}
+
+	public function test_link_rows_ignores_other_groups(): void {
+		Functions\when( 'get_the_ID' )->justReturn( 12 );
+		Functions\when( 'get_permalink' )->justReturn( 'https://example.test/journal-post-1/' );
+
+		$plain = '<div class="wp-block-group ttm-item"><h4>Title</h4></div>';
+		$this->assertSame( $plain, Helpers::link_rows( $plain, [ 'attrs' => [ 'className' => 'ttm-item' ] ] ) );
+		$this->assertSame( $plain, Helpers::link_rows( $plain, [] ) );
+
+		// A row whose title still links (isLink: true) is left alone: no nested anchors.
+		$linked = '<div class="wp-block-group ttm-archive-row"><h3><a href="/x/">Title</a></h3></div>';
+		$this->assertSame( $linked, Helpers::link_rows( $linked, [ 'attrs' => [ 'className' => 'ttm-archive-row' ] ] ) );
+
+		// A look-alike class ("ttm-journal-rows") is not a row.
+		$lookalike = '<div class="wp-block-group ttm-journal-rows"><h4>Title</h4></div>';
+		$this->assertSame( $lookalike, Helpers::link_rows( $lookalike, [ 'attrs' => [ 'className' => 'ttm-journal-rows' ] ] ) );
+	}
 }
