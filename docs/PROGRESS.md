@@ -42,7 +42,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P5-01 390 and 1920 sweep of every screen
 - [x] P5-02 a11y, network, selectors and seed-hero-color rows; guards back to strict
 - [x] P5-03 Tuning — `cssBudgetBytes`
-- [ ] P5-04 Handoff, SETUP/README notes and CI check
+- [x] P5-04 Handoff, SETUP/README notes and CI check
 - [ ] P5-05 Phase 5 push — final screenshots
 
 ## Log
@@ -311,3 +311,24 @@ reflects a tight-but-correct budget, not a wrong number. No change
 to check-budget.mjs or CLAUDE.md. Full lint + test:e2e (432 passed)
 green, no regression from the merge.
 Manual check: none.
+
+### P5-04 — f0573a8
+Wrote docs/HANDOFF.md: what changed per phase, every Manual check
+line verbatim plus the two still open (P5-01 deferred, P5-05 owed),
+seed.image_band_angle/cssBudgetBytes measurements, seeded word
+counts, interpretation choices a reviewer needs context for, four
+real spec issues found during the build (.tag/body-class collision,
+display:contents+min-width:auto, media-query source-order vs
+cascade, the archive-aside label/numbering bug), and reviewer notes
+(CSS-budget pattern, disclosed-undeclared properties, the two
+flight-controller standalone fixes, early concurrent-agent
+artifacts). docs/SETUP.md refreshed throughout (13 screens not 8,
+fixme guard past-tense/permanent, selectors-allow.txt's two
+permanent reason categories, corrected seed counts, corrected
+poc->refine/<date> git workflow section). plugins/ttm-core/README.md
+binding-source list extended with this flight's four new sources and
+series-list's final layout enum. docs/feedback/README.md's phase-3
+row marked complete. No CI change needed -- every new Playwright test
+this flight added lives in files npm run test:e2e already runs.
+Manual check: none (this task's own verification is reading
+HANDOFF.md once end to end, done above).
