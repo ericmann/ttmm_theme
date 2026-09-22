@@ -40,7 +40,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P4-03 Inner templates smoke and CI seeding
 - [x] P4-04 Handoff, SETUP and final budget measurement
 - [x] P4-05 Phase 4 push — final screenshots
-- [ ] R1-01 Jetpack provider subscribes server-side through the ttm handler (no page nonce)
+- [x] R1-01 Jetpack provider subscribes server-side through the ttm handler (no page nonce)
 - [ ] R1-02 Seeded front page matches the mock: series strip is non-fiction, Also running ends with The Last Cron Job
 - [ ] R1-03 Screenshots wait for every image; tech-img asserts a loaded image; regenerate the phase-2 PNGs
 
@@ -663,3 +663,26 @@ Manual check: NOT VERIFIED (human) — open http://localhost:8888/ at
 green on the branch including the e2e job and its playwright-report
 artifact; compare docs/feedback/phase-2/front-1280.png with
 docs/feedback/design_*.png end to end.
+
+### R1-01 — 9285ee0
+Fixed F1: Jetpack::render() now posts through admin_post_ttm_subscribe (Form::handler_fields()
+shared helper: token/redirect_to/honeypot, same as custom-url), never the widget's own
+nonce-carrying markup. Handler::handle() calls Jetpack_Subscriptions::init()->subscribe() (the
+method widget_submit() itself calls) when Providers::current()->slug()==='jetpack', guarded by
+class_exists('\Jetpack_Subscriptions'); WP_Error/false -> same success_url (no oracle, matches
+honeypot/rate-limit/invalid-email pattern).
+Tests: HandlerTest::test_jetpack_provider_subscribes_through_jetpack_api_not_forward,
+::test_jetpack_subscribe_failure_redirects_with_error (both new; needed global class_alias()'d
+stubs for \Jetpack, \Jetpack_Subscriptions, \WP_Error, \WP_Block_Type_Registry since this suite
+never loads WordPress -- \Jetpack::$ready is a mutable toggle reset in tearDown() so it never
+leaks into unrelated tests in the same PHPUnit process). NewsletterFormTest::
+test_jetpack_provider_renders_shared_form_posting_to_admin_post replaces the old widget-fields
+test. JetpackFieldsTest::test_widget_contract_requires_a_nonce_so_the_provider_does_not_emulate_
+the_widget_post replaces test_provider_fields_match_captured_widget_form (asserts the fixture
+DOES require _wpnonce, and the provider emits neither _wpnonce nor jetpack_subscriptions_widget).
+docs/spikes/P1-jetpack-form.md got a "Handler (review R1-01)" section; README's Newsletter
+paragraph updated to match.
+Note: `grep _wpnonce plugins/ttm-core/src` still hits Taxonomy/SeriesAdmin.php -- pre-existing,
+unrelated admin-nonce checks, not newsletter/cacheable output; out of scope for this task.
+All verify commands green (composer lint/test:unit, npm lint/test:unit/build,
+forbidden-patterns.sh, npm test:integration -- 422/422).
