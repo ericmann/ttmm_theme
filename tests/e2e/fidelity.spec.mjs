@@ -885,26 +885,25 @@ test.describe( 'container', () => {
 } );
 
 test.describe( 'nav', () => {
-	test.fixme( // P0-10
-	'nav-inline: .ttm-masthead-inner__nav ul @1280', async ( { page } ) => {
+	test( 'nav-inline: .ttm-masthead-inner__nav ul @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-masthead-inner__nav ul' );
 		expect( await computed( el, 'display' ) ).toBe( 'flex' );
 		expect( await computed( el, 'column-gap' ) ).toBe( px( 22 ) );
-	} ); // P0-10
+	} );
 
-	test.fixme( // P0-10
-	'nav-item: .ttm-masthead-inner__nav a (first) @1280', async ( {
+	test( 'nav-item: .ttm-masthead-inner__nav a (first) @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-masthead-inner__nav a' ).first();
 		expect( await computed( el, 'font-size' ) ).toBe( px( 13 ) );
 		expect( await computed( el, 'font-weight' ) ).toBe( '600' );
-	} ); // P0-10
+	} );
 
-	test.fixme( // P0-10
-	'nav-nochrome: .wp-block-navigation__responsive-container-open, .wp-block-navigation__responsive-container-close @1280', async ( {
+	test( 'nav-nochrome: .wp-block-navigation__responsive-container-open, .wp-block-navigation__responsive-container-close @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
@@ -912,10 +911,9 @@ test.describe( 'nav', () => {
 			'.wp-block-navigation__responsive-container-open, .wp-block-navigation__responsive-container-close'
 		);
 		expect( await visibleCount( els ) ).toBe( 0 );
-	} ); // P0-10
+	} );
 
-	test.fixme( // P0-10
-	'nav-current: .ttm-masthead-inner__nav .current-menu-item > a @1280', async ( {
+	test( 'nav-current: .ttm-masthead-inner__nav .current-menu-item > a @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
@@ -925,30 +923,27 @@ test.describe( 'nav', () => {
 		// Colour vs a11y: accent-700, not SPEC's literal accent (contrast).
 		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
 		expect( await text( el ) ).toBe( 'Technology' );
-	} ); // P0-10
+	} );
 
-	test.fixme( // P0-10
-	'nav-hub: .ttm-masthead-inner__nav .ttm-nav__hub > a @1280', async ( {
+	test( 'nav-hub: .ttm-masthead-inner__nav .ttm-nav__hub > a @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-masthead-inner__nav .ttm-nav__hub > a' );
 		expect( await computed( el, 'font-weight' ) ).toBe( '400' );
 		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
-	} ); // P0-10
+	} );
 
-	test.fixme( // P0-10
-	'nav-hub-current: .ttm-masthead-inner__nav .ttm-nav__hub > a @1280', async ( {
+	test( 'nav-hub-current: .ttm-masthead-inner__nav .ttm-nav__hub > a @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
 		const el = page.locator( '.ttm-masthead-inner__nav .ttm-nav__hub > a' );
 		// Colour vs a11y: accent-700, not SPEC's literal accent.
 		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
-	} ); // P0-10
+	} );
 
-	test.fixme( // P0-10
-	'nav-phone-menu: .wp-block-navigation__responsive-container-open @390', async ( {
+	test( 'nav-phone-menu: .wp-block-navigation__responsive-container-open @390', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.article, 390 );
@@ -957,55 +952,52 @@ test.describe( 'nav', () => {
 		);
 		expect( await el.isVisible() ).toBe( true );
 		expect( await text( el ) ).toBe( 'Menu' );
-	} ); // P0-10
+	} );
 
-	test.fixme( // P0-10
-	'nav-phone-hidden: .ttm-masthead-inner__nav ul @390', async ( {
+	test( 'nav-phone-hidden: .ttm-masthead-inner__nav ul @390', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.article, 390 );
 		const el = page.locator( '.ttm-masthead-inner__nav ul' );
 		expect( await el.isVisible() ).toBe( false );
-	} ); // P0-10
+	} );
 } );
 
 test.describe( 'masthead inner', () => {
-	test.fixme( // P0-10
-	'mast-inner: .ttm-masthead-inner @1280', async ( { page } ) => {
+	test( 'mast-inner: .ttm-masthead-inner @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-masthead-inner' );
 		const t = await tracks( el );
 		expect( t.length ).toBe( 3 );
 		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 2 ) );
 		expect( await computed( el, 'padding' ) ).toBe( '14px 0px 12px' );
-	} ); // P0-10
+	} );
 
-	test.fixme( // P0-10
-	'mast-inner-title: .ttm-masthead-inner .wp-block-site-title @1280', async ( {
+	test( 'mast-inner-title: .ttm-masthead-inner .wp-block-site-title @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-masthead-inner .wp-block-site-title' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 22 ) );
 		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
-	} ); // P0-10
+	} );
 
-	test.fixme( // P0-10
-	'mast-inner-by: .ttm-masthead-inner__by @1280', async ( { page } ) => {
+	test( 'mast-inner-by: .ttm-masthead-inner__by @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-masthead-inner__by' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
 		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
-	} ); // P0-10
+	} );
 
-	test.fixme( // P0-10
-	'mast-inner-phone: .ttm-masthead-inner .wp-block-site-title @390', async ( {
+	test( 'mast-inner-phone: .ttm-masthead-inner .wp-block-site-title @390', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.article, 390 );
 		const el = page.locator( '.ttm-masthead-inner .wp-block-site-title' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 18 ) );
-	} ); // P0-10
+	} );
 } );
 
 test.describe( 'footer inner', () => {

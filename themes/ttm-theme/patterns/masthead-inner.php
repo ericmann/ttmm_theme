@@ -40,19 +40,19 @@ $ttm_nav_links .= sprintf(
 	esc_url( home_url( '/series/' ) )
 );
 ?>
-<!-- wp:group {"className":"ttm-masthead-inner","layout":{"type":"grid","columns":3}} -->
+<!-- wp:group {"className":"ttm-masthead-inner","layout":{"type":"default"}} -->
 <div class="wp-block-group ttm-masthead-inner">
 
-	<!-- wp:group {"className":"ttm-masthead-inner__title","layout":{"type":"flex"}} -->
+	<!-- wp:group {"className":"ttm-masthead-inner__title","layout":{"type":"default"}} -->
 	<div class="wp-block-group ttm-masthead-inner__title">
-		<!-- wp:site-title {"level":2} /-->
+		<!-- wp:site-title {"level":0} /-->
 		<!-- wp:paragraph {"className":"ttm-masthead-inner__by"} -->
 		<p class="ttm-masthead-inner__by"><?php esc_html_e( 'by Eric Mann', 'ttm-theme' ); ?></p>
 		<!-- /wp:paragraph -->
 	</div>
 	<!-- /wp:group -->
 
-	<!-- wp:navigation {"className":"ttm-nav ttm-masthead-inner__nav","overlayMenu":"always","hasIcon":false,"ariaLabel":"<?php echo esc_attr__( 'Sections', 'ttm-theme' ); ?>"} -->
+	<!-- wp:navigation {"className":"ttm-nav ttm-masthead-inner__nav","overlayMenu":"mobile","hasIcon":false,"ariaLabel":"<?php echo esc_attr__( 'Sections', 'ttm-theme' ); ?>"} -->
 	<?php echo $ttm_nav_links; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from esc_attr()/esc_url()-escaped pieces above. ?>
 	<!-- /wp:navigation -->
 

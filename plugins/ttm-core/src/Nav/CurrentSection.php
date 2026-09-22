@@ -119,9 +119,8 @@ class CurrentSection {
 					return true;
 				}
 			}
-			if ( SeriesIndex::for_post( (int) get_the_ID() ) && '/series/' === $path ) {
-				return true;
-			}
+			// SPEC §6.1.1: a single post marks its primary category only, never "Series" --
+			// even when it belongs to a series (Decision "Nav current section").
 		}
 
 		if ( is_category() ) {

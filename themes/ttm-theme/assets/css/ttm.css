@@ -719,24 +719,44 @@ blockquote.is-style-pull cite,
 	grid-template-columns: auto 1fr auto;
 	align-items: center;
 	gap: var(--wp--preset--spacing--60);
-	padding: var(--wp--preset--spacing--30) 0 var(--wp--preset--spacing--20);
-	border-top: var(--ttm-rule-2);
+	padding: 14px 0 12px;
+	border-bottom: var(--ttm-rule-2);
 }
 
 .ttm-masthead-inner__title {
+	display: flex;
+	align-items: baseline;
+}
+
+.ttm-masthead-inner .wp-block-site-title {
 	font-size: 22px;
 	font-weight: 800;
 	letter-spacing: -0.02em;
+	line-height: 1.1;
 }
 
 .ttm-masthead-inner__by {
 	font-size: var(--wp--preset--font-size--caption);
 	color: var(--wp--preset--color--neutral-700);
-	margin-left: var(--wp--preset--spacing--20);
+	margin-left: 10px;
 }
 
 .ttm-masthead-inner__nav {
 	font-size: var(--wp--preset--font-size--ui);
+}
+
+/* Rule 43 (>= 721): the list is inline; core's own flex gap on the ul is replaced. */
+.ttm-masthead-inner__nav ul {
+	display: flex;
+	column-gap: 22px;
+}
+
+/* The hub item reads lighter. The extra class outranks core's repeated-class
+ * `.wp-block-navigation-item__content` colour reset; the shared `.ttm-nav .current-menu-item > a`
+ * (4.1) still wins when it is current, because that rule is !important and this one is not. */
+.ttm-masthead-inner__nav .ttm-nav__hub > a.wp-block-navigation-item__content {
+	font-weight: 400;
+	color: var(--wp--preset--color--neutral-700);
 }
 
 .ttm-masthead-inner__aside {
@@ -746,7 +766,9 @@ blockquote.is-style-pull cite,
 
 @media (min-width: 721px) {
 
-	.ttm-masthead-inner .wp-block-navigation__responsive-container-open {
+	/* Rule 43: no open/close chrome at all; the responsive container is just the list. */
+	.ttm-masthead-inner .wp-block-navigation__responsive-container-open,
+	.ttm-masthead-inner .wp-block-navigation__responsive-container-close {
 		display: none;
 	}
 
@@ -759,12 +781,39 @@ blockquote.is-style-pull cite,
 
 @media (max-width: 720px) {
 
-	.ttm-masthead-inner__title {
+	.ttm-masthead-inner {
+		grid-template-columns: 1fr auto;
+		padding: 12px 0 10px;
+	}
+
+	.ttm-masthead-inner .wp-block-site-title {
 		font-size: 18px;
 	}
 
-	.ttm-masthead-inner__nav {
+	.ttm-masthead-inner__by,
+	.ttm-masthead-inner__aside {
 		display: none;
+	}
+
+	/* S2: core shows the list inline from 600px; the theme's breakpoint is 720, so between
+	 * 600 and 720 the closed list is re-hidden and the "Menu" button re-shown. The repeated
+	 * classes match core's own repeated-class button rule so the theme's values win. */
+	.ttm-masthead-inner .ttm-masthead-inner__nav .wp-block-navigation__responsive-container:not(.is-menu-open) {
+		display: none;
+	}
+
+	.ttm-masthead-inner .wp-block-navigation__responsive-container-open.wp-block-navigation__responsive-container-open.wp-block-navigation__responsive-container-open {
+		display: flex;
+		font-size: var(--wp--preset--font-size--micro);
+		color: var(--wp--preset--color--neutral-700);
+		border: 0;
+		background: none;
+		padding: 0;
+	}
+
+	.ttm-masthead-inner .wp-block-navigation__responsive-container-close.wp-block-navigation__responsive-container-close.wp-block-navigation__responsive-container-close {
+		font-size: 24px;
+		font-weight: 800;
 	}
 }
 
