@@ -2687,29 +2687,40 @@ test.describe( 'hub', () => {
 } );
 
 test.describe( 'single series', () => {
-	test.fixme( // P4-03
-	'single-head: .ttm-series-single h1 @1280', async ( { page } ) => {
+	test( 'single-head: .ttm-series-single h1 @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.seriesHardening, 1280 );
 		const el = page.locator( '.ttm-series-single h1' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 80 ) );
-		expect( await computed( el, 'max-width' ) ).toBe( '16ch' );
-	} ); // P4-03
+		// getComputedStyle resolves ch to px: measure one "0" in the heading's font.
+		const chs = await el.evaluate( ( node ) => {
+			const cs = window.getComputedStyle( node );
+			const probe = document.createElement( 'span' );
+			probe.textContent = '0';
+			probe.style.font = cs.font;
+			probe.style.letterSpacing = '0';
+			probe.style.position = 'absolute';
+			probe.style.visibility = 'hidden';
+			document.body.appendChild( probe );
+			const ch = probe.getBoundingClientRect().width;
+			probe.remove();
+			return parseFloat( cs.maxWidth ) / ch;
+		} );
+		expect( chs ).toBeCloseTo( 16, 0 );
+	} );
 
-	test.fixme( // P4-03
-	'single-kicker: .ttm-series-single .ttm-series-featured__kicker @1280', async ( {
+	test( 'single-kicker: .ttm-series-single .ttm-series-featured__kicker @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.seriesHardening, 1280 );
 		const el = page.locator(
 			'.ttm-series-single .ttm-series-featured__kicker'
 		);
-		expect( await text( el ) ).toMatch(
-			/^In progress · Technology · Security$/
-		);
-	} ); // P4-03
+		// innerText reflects the kicker's text-transform; assert the source text.
+		const source = await el.evaluate( ( node ) => node.textContent );
+		expect( source ).toMatch( /^In progress · Technology · Security$/ );
+	} );
 
-	test.fixme( // P4-03
-	'single-parts: .ttm-series-single .ttm-series-featured__part @1280', async ( {
+	test( 'single-parts: .ttm-series-single .ttm-series-featured__part @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.seriesHardening, 1280 );
@@ -2723,10 +2734,9 @@ test.describe( 'single series', () => {
 			'.ttm-series-single .ttm-series-featured__part-dek'
 		);
 		expect( await deks.count() ).toBeGreaterThan( 0 );
-	} ); // P4-03
+	} );
 
-	test.fixme( // P4-03
-	'single-other: .ttm-series-single__other .ttm-series-row @1280', async ( {
+	test( 'single-other: .ttm-series-single__other .ttm-series-row @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.seriesHardening, 1280 );
@@ -2734,10 +2744,9 @@ test.describe( 'single series', () => {
 		const count = await els.count();
 		expect( count ).toBeLessThanOrEqual( 4 );
 		expect( count ).toBeGreaterThanOrEqual( 1 );
-	} ); // P4-03
+	} );
 
-	test.fixme( // P4-03
-	'single-nav: .ttm-masthead-inner__nav .current-menu-item > a @1280', async ( {
+	test( 'single-nav: .ttm-masthead-inner__nav .current-menu-item > a @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.seriesHardening, 1280 );
@@ -2745,7 +2754,7 @@ test.describe( 'single series', () => {
 			'.ttm-masthead-inner__nav .current-menu-item > a'
 		);
 		expect( await text( el ) ).toBe( 'Series' );
-	} ); // P4-03
+	} );
 } );
 
 test.describe( 'seed', () => {

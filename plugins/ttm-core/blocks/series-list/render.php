@@ -36,7 +36,11 @@ $ttm_show_count      = ! isset( $attributes['showCount'] ) || $attributes['showC
 
 $ttm_limit = (int) ( $attributes['limit'] ?? 0 );
 if ( $ttm_limit <= 0 ) {
-	$ttm_limit = (int) Config::get( 'series.strip_limit', 3 );
+	// SPEC §5: "Other series" (excludeCurrent, no explicit limit) falls back to
+	// series.related_limit rather than the strip's own default.
+	$ttm_limit = $ttm_exclude_current
+		? (int) Config::get( 'series.related_limit', 4 )
+		: (int) Config::get( 'series.strip_limit', 3 );
 }
 
 $ttm_queried_category_id = 0;

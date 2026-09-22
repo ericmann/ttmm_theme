@@ -243,7 +243,7 @@ class SeriesFeaturedTest extends TTM_IntegrationTestCase {
 		$this->go_to( (string) get_term_link( $term ) );
 
 		$html = $this->render();
-		$this->assertStringContainsString( '<h1 class="ttm-series-featured__title">Hardening WordPress</h1>', $html );
+		$this->assertStringContainsString( '<h1 class="ttm-series-featured__title is-style-display-xl">Hardening WordPress</h1>', $html );
 	}
 
 	public function test_show_dek_renders_part_excerpts_for_published_parts_only(): void {

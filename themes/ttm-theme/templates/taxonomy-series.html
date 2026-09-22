@@ -1,24 +1,24 @@
 <!-- wp:template-part {"slug":"header-inner"} /-->
 
-<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
-<main class="wp-block-group" id="main">
-	<!-- wp:group {"className":"ttm-series-single","layout":{"type":"constrained"}} -->
-	<div class="wp-block-group ttm-series-single">
-		<!-- wp:ttm/series-featured {"partsLimit":0} /-->
-	</div>
-	<!-- /wp:group -->
+<!-- wp:group {"tagName":"main","className":"ttm-series-single","layout":{"type":"default"}} -->
+<main class="wp-block-group ttm-series-single" id="main">
+	<!-- wp:ttm/series-featured {"partsLimit":0,"showDek":true} /-->
 
 	<!-- wp:separator {"className":"is-style-rule-2","lock":{"move":false,"remove":false}} -->
 	<hr class="wp-block-separator has-alpha-channel-opacity is-style-rule-2"/>
 	<!-- /wp:separator -->
 
-	<!-- wp:group {"layout":{"type":"constrained"}} -->
-	<div class="wp-block-group">
-		<!-- wp:heading {"level":3,"className":"ttm-cell-heading__label"} -->
-		<h3 class="ttm-cell-heading__label">Other series</h3>
-		<!-- /wp:heading -->
+	<!-- wp:group {"className":"ttm-series-single__other","layout":{"type":"default"}} -->
+	<div class="wp-block-group ttm-series-single__other">
+		<!-- wp:group {"className":"ttm-cell-heading is-rail","layout":{"type":"default"}} -->
+		<div class="wp-block-group ttm-cell-heading is-rail">
+			<!-- wp:heading {"level":3,"className":"ttm-cell-heading__label"} -->
+			<h3 class="wp-block-heading ttm-cell-heading__label">Other series</h3>
+			<!-- /wp:heading -->
+		</div>
+		<!-- /wp:group -->
 
-		<!-- wp:ttm/series-list {"status":"any","limit":4,"layout":"list","excludeCurrent":true} /-->
+		<!-- wp:ttm/series-list {"status":"any","layout":"list","excludeCurrent":true} /-->
 	</div>
 	<!-- /wp:group -->
 </main>

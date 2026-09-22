@@ -102,6 +102,11 @@ class HubWritingTemplatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringNotContainsString( 'ttm-newsletter-box', $html );
 	}
 
+	/**
+	 * SPEC §6.7 "Single series": the featured block's title is an h1 with `showDek: true`
+	 * (a dek per published part), the full uncapped part list, and "Other series" falls back
+	 * to `series.related_limit` (4) with no explicit `limit` on the block.
+	 */
 	public function test_single_series_renders_full_part_list_and_other_series_excluding_itself(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
 		$featured = $this->make_series(
@@ -110,19 +115,23 @@ class HubWritingTemplatesTest extends TTM_IntegrationTestCase {
 			3,
 			[ [ 'part' => 1 ], [ 'part' => 2 ], [ 'part' => 3 ] ]
 		);
-		$this->make_series( 'reading-cves', 'Reading CVEs', 4, [ [ 'part' => 4 ] ], [ 'ttm_status' => 'complete' ] );
+		foreach ( range( 1, 5 ) as $i ) {
+			$this->make_series( "other-series-{$i}", "Other Series {$i}", 1, [ [ 'part' => 1 ] ] );
+		}
 
 		$term = get_term( $featured['series_id'], 'series' );
 		$this->go_to( (string) get_term_link( $term ) );
 
 		$html = $this->render_template( 'taxonomy-series' );
 
-		$this->assertStringContainsString( 'Hardening WordPress', $html );
+		$this->assertStringContainsString( '<h1 class="ttm-series-featured__title is-style-display-xl">Hardening WordPress</h1>', $html );
 		$this->assertSame( 3, substr_count( $html, 'ttm-series-featured__part ' ) );
+		$this->assertSame( 3, substr_count( $html, 'ttm-series-featured__part-dek' ) );
 		$this->assertStringNotContainsString( 'All 3 →', $html );
 		$this->assertStringContainsString( 'Other series', $html );
-		$this->assertStringContainsString( 'Reading CVEs', $html );
-		$this->assertSame( 1, substr_count( $html, 'class="ttm-series-row"' ) );
+		$other_count = substr_count( $html, 'class="ttm-series-row"' );
+		$this->assertGreaterThanOrEqual( 1, $other_count );
+		$this->assertLessThanOrEqual( 4, $other_count );
 	}
 
 	public function test_writing_page_renders_hero_serials_chapters_tiles_and_books(): void {

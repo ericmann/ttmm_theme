@@ -7,9 +7,16 @@
 
 declare( strict_types=1 );
 
+use TTM\Core\Config;
 use TTM\Core\Query\SeriesIndex;
 
 class SeriesListTest extends TTM_IntegrationTestCase {
+
+	public function tear_down(): void {
+		update_option( 'ttm_settings', [] );
+		Config::reset();
+		parent::tear_down();
+	}
 
 	private function category_id( string $slug, string $name ): int {
 		$term = term_exists( $slug, 'category' );
@@ -260,5 +267,53 @@ class SeriesListTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'ttm-series-row__count', $html );
 		$this->assertStringContainsString( 'ttm-series-row__parts">1 part<', $html );
 		$this->assertStringContainsString( 'ttm-series-row__status">In progress<', $html );
+	}
+
+	/**
+	 * SPEC §5: `excludeCurrent` with no explicit `limit` reads `series.related_limit`
+	 * (default 4), not the strip's own default of 3.
+	 */
+	public function test_exclude_current_without_limit_uses_related_limit(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+
+		$current = $this->make_series( 'current-series', 'Current Series', 'in-progress', 'nonfiction', $tech );
+		foreach ( range( 1, 5 ) as $i ) {
+			$this->make_series( "other-series-{$i}", "Other Series {$i}", 'in-progress', 'nonfiction', $tech );
+		}
+
+		$term = get_term( $current, 'series' );
+		global $wp_query;
+		$wp_query->queried_object         = $term;
+		$wp_query->queried_object_id      = $current;
+		$wp_query->query_vars['taxonomy'] = 'series';
+		set_query_var( 'series', get_term_field( 'slug', $current, 'series' ) );
+
+		$html = $this->render(
+			[
+				'status'         => 'any',
+				'excludeCurrent' => true,
+			] 
+		);
+
+		$this->assertStringNotContainsString( 'Current Series', $html );
+		$this->assertSame( 4, substr_count( $html, 'class="ttm-series-row"' ) );
+
+		add_filter(
+			'ttm_config',
+			static function ( array $config ): array {
+				$config['series.related_limit'] = 2;
+				return $config;
+			}
+		);
+		Config::reset();
+
+		$html = $this->render(
+			[
+				'status'         => 'any',
+				'excludeCurrent' => true,
+			] 
+		);
+
+		$this->assertSame( 2, substr_count( $html, 'class="ttm-series-row"' ) );
 	}
 }
