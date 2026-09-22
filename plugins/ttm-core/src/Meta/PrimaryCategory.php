@@ -22,6 +22,72 @@ class PrimaryCategory {
 	 */
 	public static function register(): void {
 		add_action( 'save_post_post', [ self::class, 'on_save' ], 20, 2 );
+		add_filter( 'get_the_terms', [ self::class, 'order_terms' ], 10, 3 );
+	}
+
+	/**
+	 * `get_the_terms` (front end, taxonomy `category` only): order a post's categories
+	 * primary first, then by the `sections.order` index of each term's top-level ancestor,
+	 * then by name -- so `core/post-terms` reads "Technology · Security" rather than
+	 * alphabetically (Decision "Kicker term order").
+	 *
+	 * @param array<int, object>|\WP_Error $terms    Terms as core resolved them.
+	 * @param int                          $post_id  Post ID.
+	 * @param string                       $taxonomy Taxonomy.
+	 * @return array<int, object>|\WP_Error
+	 */
+	public static function order_terms( $terms, $post_id, $taxonomy ) {
+		if ( 'category' !== $taxonomy || ! is_array( $terms ) || count( $terms ) < 2 || is_admin() ) {
+			return $terms;
+		}
+
+		$primary = self::id( (int) $post_id );
+		$order   = array_values( (array) Config::get( 'sections.order', [] ) );
+
+		$keyed = [];
+		foreach ( $terms as $index => $term ) {
+			if ( ! is_object( $term ) ) {
+				return $terms;
+			}
+			$position = array_search( self::top_level_slug( $term ), $order, true );
+			$keyed[]  = [
+				'primary' => (int) $term->term_id === $primary ? 0 : 1,
+				'order'   => false === $position ? PHP_INT_MAX : (int) $position,
+				'name'    => (string) $term->name,
+				'index'   => $index,
+				'term'    => $term,
+			];
+		}
+
+		usort(
+			$keyed,
+			static function ( array $a, array $b ): int {
+				return [ $a['primary'], $a['order'], $a['name'], $a['index'] ] <=> [ $b['primary'], $b['order'], $b['name'], $b['index'] ];
+			}
+		);
+
+		return array_map( static fn ( array $row ) => $row['term'], $keyed );
+	}
+
+	/**
+	 * The slug of a term's top-level ancestor (the term itself when it has no parent).
+	 *
+	 * @param object $term Term object with `term_id`, `slug`, `parent`.
+	 * @return string
+	 */
+	private static function top_level_slug( object $term ): string {
+		$current = $term;
+		$guard   = 0;
+		while ( ! empty( $current->parent ) && $guard < 10 ) {
+			$parent = get_term( (int) $current->parent, 'category' );
+			if ( ! $parent || is_wp_error( $parent ) ) {
+				break;
+			}
+			$current = $parent;
+			++$guard;
+		}
+
+		return (string) $current->slug;
 	}
 
 	/**

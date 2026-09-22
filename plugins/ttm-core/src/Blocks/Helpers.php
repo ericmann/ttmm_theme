@@ -41,6 +41,108 @@ class Helpers {
 		add_filter( 'render_block_data', [ self::class, 'track_archive_scope' ] );
 		add_filter( 'render_block_core/post-template', [ self::class, 'group_by_year' ], 10, 1 );
 		add_filter( 'render_block_core/post-featured-image', [ self::class, 'featured_caption' ], 10, 3 );
+		add_filter( 'render_block_core/post-terms', [ self::class, 'style_tag_terms' ], 10, 2 );
+		add_filter( 'render_block_core/post-excerpt', [ self::class, 'excerpt_markup' ], 10, 3 );
+		add_filter( 'render_block_core/post-author-name', [ self::class, 'author_prefix' ], 10, 2 );
+	}
+
+	/**
+	 * `render_block_core/post-excerpt`: core runs every excerpt through `wp_trim_words()`, which
+	 * strips tags, so a manual excerpt's inline `<code>`/`<em>`/`<strong>` never reaches the
+	 * page. When the post has a manual excerpt, put its (kses-limited) markup back into the
+	 * rendered paragraph (SPEC §6.2 "Article header": dek inline code).
+	 *
+	 * @param string               $block_content Rendered block HTML.
+	 * @param array<string, mixed> $block         Parsed block.
+	 * @param \WP_Block|null       $instance      Block instance (postId context), when given.
+	 * @return string
+	 */
+	public static function excerpt_markup( string $block_content, array $block = [], $instance = null ): string {
+		unset( $block );
+
+		$post_id = 0;
+		if ( is_object( $instance ) && isset( $instance->context['postId'] ) ) {
+			$post_id = (int) $instance->context['postId'];
+		}
+		if ( ! $post_id ) {
+			$post_id = (int) get_the_ID();
+		}
+		if ( ! $post_id || '' === $block_content ) {
+			return $block_content;
+		}
+
+		$manual = trim( (string) get_post_field( 'post_excerpt', $post_id ) );
+		if ( '' === $manual || false === strpos( $manual, '<' ) ) {
+			return $block_content;
+		}
+
+		$allowed = [
+			'code'   => [],
+			'em'     => [],
+			'strong' => [],
+		];
+		$markup  = wp_kses( $manual, $allowed );
+
+		return (string) preg_replace(
+			'#(<p class="wp-block-post-excerpt__excerpt">).*?(</p>)#s',
+			'$1' . str_replace( [ '\\', '$' ], [ '\\\\', '\\$' ], $markup ) . '$2',
+			$block_content,
+			1
+		);
+	}
+
+	/**
+	 * `render_block_core/post-author-name`: core has no prefix attribute, so the pattern's
+	 * declared `prefix` ("By ") is prepended to the name inside the wrapper (SPEC §6.2
+	 * byline "By Eric Mann"; the string stays in the pattern, translatable there).
+	 *
+	 * @param string               $block_content Rendered block HTML.
+	 * @param array<string, mixed> $block         Parsed block.
+	 * @return string
+	 */
+	public static function author_prefix( string $block_content, array $block = [] ): string {
+		$prefix = (string) ( $block['attrs']['prefix'] ?? '' );
+		if ( '' === $prefix || '' === $block_content ) {
+			return $block_content;
+		}
+
+		return (string) preg_replace(
+			'/(<div class="[^"]*wp-block-post-author-name[^"]*"[^>]*>)/',
+			'$1' . esc_html( $prefix ),
+			$block_content,
+			1
+		);
+	}
+
+	/**
+	 * `render_block_core/post-terms`: when the block carries `is-style-tags`, every `<a>`
+	 * becomes a `.tag.tag-neutral` chip and core's separator spans are dropped (SPEC §6.2
+	 * "Article header", Decision "Byline tags").
+	 *
+	 * @param string               $block_content Rendered block HTML.
+	 * @param array<string, mixed> $block         Parsed block.
+	 * @return string
+	 */
+	public static function style_tag_terms( string $block_content, array $block = [] ): string {
+		$class_name = (string) ( $block['attrs']['className'] ?? '' );
+		if ( '' === $block_content || ! preg_match( '/(^|\s)is-style-tags(\s|$)/', $class_name ) ) {
+			return $block_content;
+		}
+
+		$block_content = (string) preg_replace( '#<span class="wp-block-post-terms__separator">.*?</span>#s', '', $block_content );
+
+		return (string) preg_replace_callback(
+			'/<a\b([^>]*)>/i',
+			static function ( array $m ): string {
+				$attrs = $m[1];
+				if ( preg_match( '/\sclass="([^"]*)"/', $attrs, $c ) ) {
+					return '<a' . str_replace( $c[0], ' class="' . trim( $c[1] . ' tag tag-neutral' ) . '"', $attrs ) . '>';
+				}
+
+				return '<a class="tag tag-neutral"' . $attrs . '>';
+			},
+			$block_content
+		);
 	}
 
 	/**

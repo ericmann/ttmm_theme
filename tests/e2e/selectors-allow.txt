@@ -1,4 +1,4 @@
-.is-style-rule-1 # P1-03 pending
+.is-style-rule-1 # editor block style (04 §3)
 .is-style-grid-5-7 # P3-04 pending
 .is-style-grid-3 # P2-01 pending
 .is-style-grid-2 # P4-01 pending
@@ -15,7 +15,6 @@ p.is-style-poster # editor block style (04 §3)
 .is-style-numbered-rows # editor block style (04 §3)
 .is-style-numbered-rows li # editor block style (04 §3)
 .is-style-numbered-rows li::marker # editor block style (04 §3)
-.is-style-tags .tag # P1-03 pending
 .wp-block-button.is-style-secondary .wp-block-button__link # editor block style (04 §3)
 .wp-block-button.is-style-ghost .wp-block-button__link # editor block style (04 §3)
 .wp-block-button.is-style-ghost-on-poster .wp-block-button__link # editor block style (04 §3)

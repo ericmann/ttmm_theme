@@ -374,6 +374,7 @@ class Seeder {
 			$post_id = wp_insert_post(
 				[
 					'post_type'     => 'post',
+					'post_author'   => 1,
 					'post_status'   => $is_future ? 'future' : 'publish',
 					'post_name'     => $row['slug'],
 					'post_title'    => $row['title'],

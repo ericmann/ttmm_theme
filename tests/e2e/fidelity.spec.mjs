@@ -1097,8 +1097,7 @@ test.describe( 'article', () => {
 		}
 	} );
 
-	test.fixme( // P1-03
-	'art-kicker: .ttm-article-head .is-style-kicker @1280', async ( {
+	test( 'art-kicker: .ttm-article-head .is-style-kicker @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
@@ -1106,36 +1105,53 @@ test.describe( 'article', () => {
 		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
 		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
 		expect( await computed( el, 'text-transform' ) ).toBe( 'uppercase' );
-		expect( await text( el ) ).toBe( 'Technology · Security' );
-	} ); // P1-03
+		// innerText reflects text-transform; the source text is what the row specifies.
+		const source = await el.evaluate( ( node ) => node.textContent );
+		expect( source.replace( /\s+/g, ' ' ).trim() ).toBe(
+			'Technology · Security'
+		);
+	} );
 
-	test.fixme( // P1-03
-	'art-h1: .ttm-article-head h1 @1280', async ( { page } ) => {
+	test( 'art-h1: .ttm-article-head h1 @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-article-head h1' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 56 ) );
 		expect( await computed( el, 'line-height' ) ).toBe( px( 57.12 ) );
-		expect( await computed( el, 'max-width' ) ).toBe( '18ch' );
-	} ); // P1-03
+		// getComputedStyle resolves ch: measure one "0" in the heading's font.
+		const chs = await el.evaluate( ( node ) => {
+			const cs = window.getComputedStyle( node );
+			const probe = document.createElement( 'span' );
+			probe.textContent = '0';
+			probe.style.font = cs.font;
+			probe.style.letterSpacing = '0';
+			probe.style.position = 'absolute';
+			probe.style.visibility = 'hidden';
+			document.body.appendChild( probe );
+			const ch = probe.getBoundingClientRect().width;
+			probe.remove();
+			return parseFloat( cs.maxWidth ) / ch;
+		} );
+		expect( chs ).toBeCloseTo( 18, 0 );
+	} );
 
-	test.fixme( // P1-03
-	'art-h1-phone: .ttm-article-head h1 @390', async ( { page } ) => {
+	test( 'art-h1-phone: .ttm-article-head h1 @390', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 390 );
 		const el = page.locator( '.ttm-article-head h1' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 34 ) );
-	} ); // P1-03
+	} );
 
-	test.fixme( // P1-03
-	'art-dek: .ttm-article-head .is-style-dek-l @1280', async ( { page } ) => {
+	test( 'art-dek: .ttm-article-head .is-style-dek-l @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-article-head .is-style-dek-l' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 21 ) );
 		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-800' ) );
-		expect( await computed( el, 'max-width' ) ).toBe( '32em' );
-	} ); // P1-03
+		// getComputedStyle resolves em lengths: 32em at the dek's 21px.
+		expect( await computed( el, 'max-width' ) ).toBe( px( 32 * 21 ) );
+	} );
 
-	test.fixme( // P1-03
-	'art-dek-code: .ttm-article-head .is-style-dek-l code @1280', async ( {
+	test( 'art-dek-code: .ttm-article-head .is-style-dek-l code @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
@@ -1144,10 +1160,9 @@ test.describe( 'article', () => {
 		expect( await computed( el, 'background-color' ) ).toBe(
 			color( 'surface' )
 		);
-	} ); // P1-03
+	} );
 
-	test.fixme( // P1-03
-	'art-byline: .ttm-byline @1280', async ( { page } ) => {
+	test( 'art-byline: .ttm-byline @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-byline' );
 		expect( await computed( el, 'border-top-width' ) ).toBe( px( 2 ) );
@@ -1155,26 +1170,26 @@ test.describe( 'article', () => {
 		expect( await computed( el, 'padding' ) ).toBe( '14px 0px' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 13 ) );
 		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
-	} ); // P1-03
+	} );
 
-	test.fixme( // P1-03
-	'art-byline-author: .ttm-byline .wp-block-post-author-name a @1280', async ( {
+	test( 'art-byline-author: .ttm-byline .wp-block-post-author-name a @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-byline .wp-block-post-author-name a' );
 		expect( await computed( el, 'font-weight' ) ).toBe( '600' );
-	} ); // P1-03
+	} );
 
-	test.fixme( // P1-03
-	'art-byline-tags: .ttm-byline .tag (first) @1280', async ( { page } ) => {
+	test( 'art-byline-tags: .ttm-byline .tag (first) @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-byline .tag' ).first();
 		expect( await computed( el, 'font-size' ) ).toBe( px( 11 ) );
 		expect( await computed( el, 'background-color' ) ).toBe(
 			color( 'surface' )
 		);
-	} ); // P1-03
+	} );
 
 	test( 'art-hero: .ttm-article .wp-block-post-featured-image @1280', async ( {
 		page,

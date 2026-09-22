@@ -178,6 +178,48 @@ class ArticleTemplatesTest extends TTM_IntegrationTestCase {
 		);
 	}
 
+	/**
+	 * Decision "Kicker term order": the seeded article (Technology primary, Security second)
+	 * reads "Technology · Security", not the alphabetical "Security, Technology".
+	 */
+	public function test_article_kicker_reads_primary_then_secondary_category(): void {
+		( new \TTM\Core\Cli\Seeder() )->run( 'normal' );
+		$post = get_page_by_path( 'signing-your-options-table', OBJECT, 'post' );
+		$this->assertNotNull( $post );
+
+		$html = $this->render_single( $post->ID );
+
+		$this->assertSame( 1, preg_match( '/<div class="[^"]*is-style-kicker[^"]*wp-block-post-terms">(.*?)<\/div>/s', $html, $m ) );
+		$this->assertSame( 'Technology · Security', trim( html_entity_decode( wp_strip_all_tags( $m[1] ), ENT_QUOTES, 'UTF-8' ) ) );
+
+		// The dek keeps the manual excerpt's inline code (core's wp_trim_words would strip it).
+		$this->assertMatchesRegularExpression( '/<p class="wp-block-post-excerpt__excerpt">[^<]*<code>wp_options<\/code>/', $html );
+	}
+
+	/**
+	 * Decision "Byline tags": the byline's post_tag terms render as `.tag.tag-neutral` chips
+	 * with no separator spans, and the author renders as a linked "By …".
+	 */
+	public function test_byline_tags_are_tag_chips(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+		$post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_author'   => 1,
+				'post_category' => [ $tech ],
+				'tags_input'    => [ 'wordpress', 'php' ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $tech );
+
+		$html = $this->render_single( $post );
+
+		$this->assertSame( 1, preg_match( '/<div class="[^"]*is-style-tags[^"]*wp-block-post-terms">(.*?)<\/div>/s', $html, $m ) );
+		$this->assertSame( 2, substr_count( $m[1], '<a class="tag tag-neutral"' ) );
+		$this->assertStringNotContainsString( 'wp-block-post-terms__separator', $m[1] );
+		$this->assertMatchesRegularExpression( '/<div class="wp-block-post-author-name">By <a[^>]*>[^<]+<\/a><\/div>/', $html );
+	}
+
 	public function test_f13_more_in_section_marks_empty_when_no_other_posts(): void {
 		$tech = $this->category_id( 'technology', 'Technology' );
 		$post = self::factory()->post->create(

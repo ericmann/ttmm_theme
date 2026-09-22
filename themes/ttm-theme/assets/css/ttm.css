@@ -289,6 +289,12 @@ p.is-style-poster {
 	max-width: 32em;
 }
 
+.is-style-dek-l code {
+	font-size: 18px;
+	background: var(--wp--preset--color--surface);
+	padding: 1px 6px;
+}
+
 .is-style-meta {
 	font-size: var(--wp--preset--font-size--caption);
 	color: var(--wp--preset--color--neutral-700);
@@ -396,8 +402,11 @@ p.is-style-poster {
 	color: var(--wp--preset--color--text);
 }
 
-.is-style-tags .tag {
-	margin-right: var(--wp--preset--spacing--20);
+/* Tag chips as a byline's right-hand group (SPEC §6.2 "Article header"). */
+.is-style-tags {
+	display: flex;
+	gap: 6px;
+	margin-left: auto;
 }
 
 @media (max-width: 720px) {
@@ -1800,7 +1809,29 @@ blockquote.is-style-pull cite,
 
 /* 4.22 article head + byline */
 .ttm-article-head {
-	margin-bottom: var(--wp--preset--spacing--60);
+	margin-bottom: 0;
+}
+
+.ttm-article-head .is-style-kicker {
+	margin: 0 0 14px;
+}
+
+.ttm-article-head .is-style-kicker a[rel] {
+	color: inherit;
+	text-decoration: none;
+}
+
+.ttm-article-head h1 {
+	font-size: var(--wp--preset--font-size--h-1);
+	font-weight: 800;
+	line-height: 1.02;
+	letter-spacing: -0.025em;
+	margin: 0 0 18px -0.03em;
+	max-width: 18ch;
+}
+
+.ttm-article-head .is-style-dek-l {
+	margin: 0 0 22px;
 }
 
 .ttm-byline {
@@ -1813,6 +1844,11 @@ blockquote.is-style-pull cite,
 	font-size: 13px;
 	color: var(--wp--preset--color--neutral-700);
 	font-feature-settings: "tnum";
+}
+
+.ttm-byline .wp-block-post-author-name a.wp-block-post-author-name__link {
+	font-weight: 600;
+	color: var(--wp--preset--color--text);
 }
 
 /* 4.21 prev/next */
@@ -1935,6 +1971,25 @@ ul.modern-footnotes-list,
 }
 
 @media (max-width: 720px) {
+
+	/* 3b: kicker 11, H1 34, dek 17; the byline wraps at 12px. */
+	.ttm-article-head .is-style-kicker {
+		font-size: var(--wp--preset--font-size--micro);
+	}
+
+	.ttm-article-head h1 {
+		font-size: 34px;
+	}
+
+	.ttm-article-head .is-style-dek-l {
+		font-size: 17px;
+	}
+
+	.ttm-byline {
+		flex-wrap: wrap;
+		gap: 6px 14px;
+		font-size: var(--wp--preset--font-size--caption);
+	}
 
 	/* 3b: the hero and code blocks go full-bleed by the phone gutter (rule 42). */
 	.ttm-article .wp-block-post-featured-image {
