@@ -300,6 +300,68 @@ class CellsTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'A fresh excerpt that must appear.', $fresh_html );
 	}
 
+	/**
+	 * F10 (flight controller note after P3-06's screenshot): a cell post with no manual excerpt
+	 * shows no dek at all, rather than core's own auto-derived-from-content excerpt leaking body
+	 * prose into the mock's dek-less cells.
+	 */
+	public function test_no_manual_excerpt_renders_no_dek(): void {
+		$technology = $this->category_id( 'technology', 'Technology' );
+
+		self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $technology ],
+				'post_title'    => 'No Excerpt Post',
+				'post_excerpt'  => '',
+				'post_content'  => str_repeat( 'Body prose that must never leak into the dek. ', 20 ),
+			]
+		);
+
+		$html = (string) do_blocks(
+			'<!-- wp:query {"queryId":0,"query":{"perPage":2,"postType":"post","inherit":false,"ttmSection":"technology"}} -->' .
+			'<div class="wp-block-query">' .
+			'<!-- wp:post-template -->' .
+			'<!-- wp:post-title {"isLink":true} /-->' .
+			'<!-- wp:post-excerpt {"className":"ttm-item__dek"} /-->' .
+			'<!-- /wp:post-template -->' .
+			'</div>' .
+			'<!-- /wp:query -->'
+		);
+
+		$this->assertStringNotContainsString( 'ttm-item__dek', $html );
+		$this->assertStringNotContainsString( 'Body prose', $html );
+	}
+
+	public function test_journal_post_with_no_manual_excerpt_still_shows_its_derived_dek(): void {
+		$journal = $this->category_id( 'journal', 'Journal' );
+
+		$post_id = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $journal ],
+				'post_title'    => 'A Journal Entry',
+				'post_excerpt'  => '',
+				'post_content'  => 'A short journal entry with its own sentence. It has two sentences total.',
+			]
+		);
+		update_post_meta( $post_id, 'ttm_primary_category', $journal );
+
+		$html = (string) do_blocks(
+			'<!-- wp:query {"queryId":0,"query":{"perPage":2,"postType":"post","inherit":false,"ttmSection":"journal"}} -->' .
+			'<div class="wp-block-query">' .
+			'<!-- wp:post-template -->' .
+			'<!-- wp:post-title {"isLink":true} /-->' .
+			'<!-- wp:post-excerpt {"className":"ttm-item__dek"} /-->' .
+			'<!-- /wp:post-template -->' .
+			'</div>' .
+			'<!-- /wp:query -->'
+		);
+
+		$this->assertStringContainsString( 'ttm-item__dek', $html );
+		$this->assertStringContainsString( 'A short journal entry', $html );
+	}
+
 	public function test_journal_rail_posts_per_page_comes_from_config(): void {
 		$this->category_id( 'journal', 'Journal' );
 

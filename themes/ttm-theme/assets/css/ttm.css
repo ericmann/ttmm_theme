@@ -48,8 +48,7 @@
 	border: 0;
 	opacity: 1;
 
-	/* Rule 35: full width. `!important` beats core's inline width:100px separator rule and
-	 * the constrained-layout centering rule's `margin-left/right: auto !important`. */
+	/* Rule 35: full width; !important beats core's inline width/margin rules. */
 	width: 100% !important;
 	max-width: none !important;
 	margin-left: 0 !important;
@@ -641,8 +640,8 @@ blockquote.is-style-pull cite,
 	gap: 28px;
 }
 
-/* "Colour vs a11y": accent-700 replaces the SPEC table's literal "accent" (contrast).
- * `!important` beats core's repeated-class `...__content.wp-block-navigation-item__content`. */
+/* "Colour vs a11y": accent-700 replaces the literal "accent"; !important beats core's
+ * repeated-class `...__content.wp-block-navigation-item__content`. */
 .ttm-nav .current-menu-item > a {
 	color: var(--wp--preset--color--accent-700) !important;
 }
@@ -823,11 +822,16 @@ blockquote.is-style-pull cite,
 	color: var(--wp--preset--color--accent);
 }
 
+/* 03 §9: clamp to 3 lines so body prose can't leak past the mock's dek length. */
 .ttm-item__dek {
+	display: -webkit-box;
+	overflow: hidden;
 	margin: 0;
 	font-size: 13px;
 	line-height: 1.45;
 	color: var(--wp--preset--color--neutral-800);
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
 }
 
 .ttm-item__meta {
@@ -892,8 +896,7 @@ blockquote.is-style-pull cite,
 	gap: var(--wp--preset--spacing--60);
 }
 
-/* `.is-style-poster` already sets 800/1.05/-0.02em/pull(28px); this bumps font-size to
- * featured(40px), then the phone query below drops it back to the same 28px. */
+/* Bumps .is-style-poster's pull(28px) to featured(40px); phone query below reverts to 28px. */
 /* stylelint-disable-next-line no-descending-specificity */
 .ttm-poster h3.is-style-poster {
 	margin: 0;

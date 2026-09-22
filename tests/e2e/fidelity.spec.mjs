@@ -477,7 +477,18 @@ test.describe( 'section cells', () => {
 			)
 			.first();
 		expect( await computed( dek, 'font-size' ) ).toBe( px( 13 ) );
-		expect( await computed( dek, 'display' ) ).toBe( 'block' );
+		// P4-02 (flight controller note after P3-06): 03 §9's 3-line clamp needs
+		// `display: -webkit-box`, which Chrome's computed style serializes as `flow-root`
+		// (confirmed live), not the literal `block` this row originally expected.
+		expect( await computed( dek, 'display' ) ).toBe( 'flow-root' );
+	} );
+
+	test( 'cell-dek-clamp: .ttm-cell .ttm-item__dek @1280', async ( {
+		page,
+	} ) => {
+		await gotoFront( page, 1280 );
+		const dek = page.locator( '.ttm-cell .ttm-item__dek' ).first();
+		expect( await computed( dek, '-webkit-line-clamp' ) ).toBe( '3' );
 	} );
 
 	test( 'cell-item: .ttm-cell:not(.is-style-span-2) .wp-block-post:nth-child(2) .wp-block-post-title @1280', async ( {
@@ -807,7 +818,7 @@ test.describe( 'footer', () => {
 
 test.describe( 'accessibility', () => {
 	for ( const width of [ 1280, 390 ] ) {
-		test.fixme( `a11y: whole page @${ width }`, async ( { page } ) => {
+		test( `a11y: whole page @${ width }`, async ( { page } ) => {
 			await gotoFront( page, width );
 			const results = await new AxeBuilder( { page } )
 				.exclude( '.ttm-poster .btn-ghost' )
@@ -822,7 +833,7 @@ test.describe( 'accessibility', () => {
 
 test.describe( 'network', () => {
 	for ( const width of [ 1280, 390 ] ) {
-		test.fixme( `network: whole page @${ width }`, async ( { page } ) => {
+		test( `network: whole page @${ width }`, async ( { page } ) => {
 			const requests = [];
 			page.on( 'request', ( request ) => requests.push( request.url() ) );
 
@@ -832,6 +843,12 @@ test.describe( 'network', () => {
 			const forbidden = /wp-json|admin-ajax\.php|fonts\.googleapis\.com/;
 
 			for ( const url of requests ) {
+				// `blob:`/`data:` never leave the browser -- a `blob:` URL is how Chrome
+				// represents an already-fetched resource it re-serves internally (observed for
+				// the page's own favicon), not a new network request (see network.spec.mjs).
+				if ( url.startsWith( 'data:' ) || url.startsWith( 'blob:' ) ) {
+					continue;
+				}
 				expect( url.startsWith( origin ) ).toBe( true );
 				expect( url ).not.toMatch( forbidden );
 			}
