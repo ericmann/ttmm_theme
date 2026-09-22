@@ -30,6 +30,22 @@ class TemplatesShellTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'wp-block-search', $html );
 	}
 
+	/**
+	 * Rule 42: the page container is `.wp-site-blocks`, the wrapper core's template loader
+	 * emits around every block template -- so it must be there for `page`, `404` and `index`
+	 * (resolved the way the loader does, not via a bare do_blocks() which never wraps).
+	 */
+	public function test_site_blocks_wrapper_is_present_on_every_template(): void {
+		foreach ( [ 'page', '404', 'index' ] as $slug ) {
+			$canvas = locate_block_template( '', $slug, [ $slug ] );
+			$this->assertNotSame( '', $canvas, "Block template {$slug} did not resolve" );
+
+			$html = get_the_block_template_html();
+
+			$this->assertStringContainsString( 'class="wp-site-blocks"', $html, "{$slug} lacks the site-blocks wrapper" );
+		}
+	}
+
 	public function test_index_template_renders_posts(): void {
 		self::factory()->post->create( [ 'post_title' => 'Hello Index' ] );
 		$this->go_to( '/' );

@@ -41,6 +41,30 @@
 	outline: 2px solid var(--wp--preset--color--accent);
 }
 
+/* 0.2 page container */
+
+/* Rule 42: one centred 1280px column whose gutter is its own inline padding. Core's per-group
+ * global padding is zeroed inside it so nothing double-gutters; full-bleed children still
+ * break out through core's `.has-global-padding > .alignfull` negative margins (the poster),
+ * which now land exactly on the column's edge. */
+.wp-site-blocks {
+	max-width: 1280px;
+	margin-inline: auto;
+	padding-inline: var(--wp--custom--gutter--desktop);
+	box-sizing: border-box;
+}
+
+.wp-site-blocks .has-global-padding {
+	padding-inline: 0;
+}
+
+@media (max-width: 720px) {
+
+	.wp-site-blocks {
+		padding-inline: var(--wp--custom--gutter--phone);
+	}
+}
+
 /* 2.6 rules */
 .is-style-rule-1,
 .is-style-rule-2 {

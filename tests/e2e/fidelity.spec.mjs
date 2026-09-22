@@ -48,7 +48,7 @@ test.describe( 'rule', () => {
 	} ) => {
 		await gotoFront( page, 1280 );
 		const rule = page.locator( 'main > hr.is-style-rule-2' ).first();
-		const container = page.locator( 'main' ).first();
+		const container = page.locator( '.wp-site-blocks' ).first();
 		const containerWidth = await container.evaluate(
 			( el ) => el.getBoundingClientRect().width
 		);
@@ -850,16 +850,14 @@ test.describe( 'footer', () => {
 // Each phase task un-fixmes the rows it owns (Conventions "Row-to-task map").
 
 test.describe( 'container', () => {
-	test.fixme( // P0-09
-	'container-width: .wp-site-blocks @1920', async ( { page } ) => {
+	test( 'container-width: .wp-site-blocks @1920', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1920 );
 		const el = page.locator( '.wp-site-blocks' );
 		expect( await computed( el, 'width' ) ).toBe( px( 1280 ) );
 		expect( await computed( el, 'margin-left' ) ).toBe( px( 320 ) );
-	} ); // P0-09
+	} );
 
-	test.fixme( // P0-09
-	'container-gutter: .wp-site-blocks @1280', async ( { page } ) => {
+	test( 'container-gutter: .wp-site-blocks @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.wp-site-blocks' );
 		expect( await computed( el, 'padding-left' ) ).toBe( px( 48 ) );
@@ -871,21 +869,19 @@ test.describe( 'container', () => {
 			await computed( el, 'padding-right' )
 		);
 		expect( box - paddingLeft - paddingRight ).toBeCloseTo( 1184, 0 );
-	} ); // P0-09
+	} );
 
-	test.fixme( // P0-09
-	'container-phone: .wp-site-blocks @390', async ( { page } ) => {
+	test( 'container-phone: .wp-site-blocks @390', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 390 );
 		const el = page.locator( '.wp-site-blocks' );
 		expect( await computed( el, 'padding-left' ) ).toBe( px( 20 ) );
-	} ); // P0-09
+	} );
 
-	test.fixme( // P0-09
-	'container-front: .ttm-lead-row @1920', async ( { page } ) => {
+	test( 'container-front: .ttm-lead-row @1920', async ( { page } ) => {
 		await gotoScreen( page, '/', 1920 );
 		const el = page.locator( '.ttm-lead-row' );
 		expect( await computed( el, 'width' ) ).toBe( px( 1184 ) );
-	} ); // P0-09
+	} );
 } );
 
 test.describe( 'nav', () => {
