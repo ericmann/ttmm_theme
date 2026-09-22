@@ -21,7 +21,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P1-04 Prev/next (01 §4.21)
 - [x] P1-05 Series TOC (01 §4.20)
 - [x] P1-06 More in section, newsletter box copy, aside order on the phone
-- [ ] P1-07 Phase 1 push — article screenshots
+- [x] P1-07 Phase 1 push — article screenshots
 - [ ] P2-01 Journal post header, body column, note column and syndication line (§6.4)
 - [ ] P2-02 Journal stream (01 §4.11) with whole-row links and "Full journal · N entries"
 - [ ] P2-03 Journal archive (`category-journal.html`)
@@ -112,3 +112,8 @@ Manual check: none. test:e2e red remains only journalPost axe (syndication links
 Tests: un-fixme'd more-head, more-row, more-count, box, box-title, box-form, box-btn, box-phone, aside-phone-order (fidelity + selectors green). ValuesTest +test_newsletter_title_by_context, +test_section_label_more_in_and_empty; ArticleSourcesTest +test_newsletter_copy_binding_reads_series_context, +test_section_label_binding_reads_primary_category; ArticleTemplatesTest +test_more_in_heading_is_one_label_with_category_name; f13 test green. Unit 156; integration 456/456; lints clean; budget 52436/61440; 126 tagged fixme rows.
 Interpretation: `ttm/newsletter-copy` = is_tax('series') or (is_singular('post') and SeriesIndex::for_post(context postId)); pure Values::newsletter_title(bool). `ttm/section-label` implements both "New bindings" formats now (`more-in` from the primary category; `series-in` from the queried category on is_category()) so P3-04 reuses it; '' for an empty name or unknown format. Rows are div.ttm-item > h4.wp-block-post-title > a, styled via same-specificity scoped selectors (.ttm-more-in .wp-block-query .ttm-item, .ttm-more-in .ttm-item .wp-block-post-title a) to satisfy no-descending-specificity; the right-hand post-terms label and `.ttm-more-in { margin-top }` are removed. Phone `.btn-block`: Form::render() is out of scope, so `.ttm-newsletter-box .btn-primary` gets width 100% under 720 instead of a markup class. more-head asserts textContent (uppercase transform). Newsletter box group now `layout: default`.
 Manual check: none. test:e2e red remains only journalPost axe (syndication links), owned by P2-01/P5-02.
+
+### P1-07 — c02d335
+Tests: grep 'P1-' in scripts/css-coverage-allow.txt and tests/e2e/selectors-allow.txt -> 0 each; grep '// P1-' in fidelity.spec.mjs -> 0. Full verify green (composer lint, unit 156, npm lint: budget 52436/61440, 31 pending coverage, 126 tagged fixme; test:unit; build; forbidden-patterns); test:e2e 228 passed / 171 skipped with only the known journalPost axe red (syndication links, P2-01/P5-02); test:integration 456/456 on the P1-06 tree (no PHP changed since). Pushed refine/2026-09-22 (c02d335).
+Interpretation: the two P1 pending selector lines (`.ttm-newsletter-form__statement`, `.ttm-lead__media.is-ratio-4-3`) are state selectors, re-tagged with state reasons instead of deleted; four stale P0 pending lines (`.ttm-footer__copyright:empty`, three `.ttm-series-strip` variants) that P0-12 missed are re-tagged the same way. 11 of 14 PNGs changed; search, series-single, front-1920 identical.
+Manual check: NOT VERIFIED (human) — compare docs/feedback/phase-3/article.png with docs/feedback/design_article.png and article-390.png with mock 3b (docs/Eric Mann Newspaper.dc.html lines 118–163).
