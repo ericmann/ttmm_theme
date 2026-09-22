@@ -1694,8 +1694,7 @@ test.describe( 'journal stream', () => {
 } );
 
 test.describe( 'writing', () => {
-	test.fixme( // P4-04
-	'wr-hero: .ttm-serial-hero @1280', async ( { page } ) => {
+	test( 'wr-hero: .ttm-serial-hero @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.writing, 1280 );
 		const el = page.locator( '.ttm-serial-hero' );
 		const t = await tracks( el );
@@ -1703,46 +1702,75 @@ test.describe( 'writing', () => {
 		expect( await computed( el, 'column-gap' ) ).toBe( px( 64 ) );
 		expect( await computed( el, 'align-items' ) ).toBe( 'end' );
 		expect( await computed( el, 'padding' ) ).toBe( '40px 0px' );
-	} ); // P4-04
+	} );
 
-	test.fixme( // P4-04
-	'wr-cover: .ttm-serial-hero .ttm-cover @1280', async ( { page } ) => {
+	test( 'wr-cover: .ttm-serial-hero .ttm-cover @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.writing, 1280 );
 		const el = page.locator( '.ttm-serial-hero .ttm-cover' );
 		expect( await computed( el, 'aspect-ratio' ) ).toBe( '2 / 3' );
 		expect( await computed( el, 'box-shadow' ) ).not.toBe( 'none' );
 		expect( await computed( el, 'filter' ) ).toBe( 'none' );
-	} ); // P4-04
+	} );
 
-	test.fixme( // P4-04
-	'wr-kicker: .ttm-serial-hero__kicker @1280', async ( { page } ) => {
+	test( 'wr-kicker: .ttm-serial-hero__kicker @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.writing, 1280 );
 		const el = page.locator( '.ttm-serial-hero__kicker' );
-		expect( await text( el ) ).toBe( 'Writing · Serial in progress' );
+		// innerText reflects the kicker's text-transform; assert the source text.
+		const source = await el.evaluate( ( node ) => node.textContent );
+		expect( source ).toBe( 'Writing · Serial in progress' );
 		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
-	} ); // P4-04
+	} );
 
-	test.fixme( // P4-04
-	'wr-title: .ttm-serial-hero__title @1280', async ( { page } ) => {
+	test( 'wr-title: .ttm-serial-hero__title @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.writing, 1280 );
 		const el = page.locator( '.ttm-serial-hero__title' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 64 ) );
 		expect( await computed( el, 'line-height' ) ).toBe( px( 62.72 ) );
-		expect( await computed( el, 'max-width' ) ).toBe( '14ch' );
-	} ); // P4-04
+		// getComputedStyle resolves ch to px: measure one "0" in the title's font.
+		const chs = await el.evaluate( ( node ) => {
+			const cs = window.getComputedStyle( node );
+			const probe = document.createElement( 'span' );
+			probe.textContent = '0';
+			probe.style.font = cs.font;
+			probe.style.letterSpacing = '0';
+			probe.style.position = 'absolute';
+			probe.style.visibility = 'hidden';
+			document.body.appendChild( probe );
+			const ch = probe.getBoundingClientRect().width;
+			probe.remove();
+			return parseFloat( cs.maxWidth ) / ch;
+		} );
+		expect( chs ).toBeCloseTo( 14, 0 );
+	} );
 
-	test.fixme( // P4-04
-	'wr-synopsis: .ttm-serial-hero__synopsis @1280', async ( { page } ) => {
+	test( 'wr-synopsis: .ttm-serial-hero__synopsis @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.writing, 1280 );
 		const el = page.locator( '.ttm-serial-hero__synopsis' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 19 ) );
 		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-800' ) );
-		expect( await computed( el, 'max-width' ) ).toBe( '48ch' );
+		// getComputedStyle resolves ch to px: measure one "0" in the paragraph's font.
+		const chs = await el.evaluate( ( node ) => {
+			const cs = window.getComputedStyle( node );
+			const probe = document.createElement( 'span' );
+			probe.textContent = '0';
+			probe.style.font = cs.font;
+			probe.style.letterSpacing = '0';
+			probe.style.position = 'absolute';
+			probe.style.visibility = 'hidden';
+			document.body.appendChild( probe );
+			const ch = probe.getBoundingClientRect().width;
+			probe.remove();
+			return parseFloat( cs.maxWidth ) / ch;
+		} );
+		expect( chs ).toBeCloseTo( 48, 0 );
 		expect( await el.count() ).toBe( 1 );
-	} ); // P4-04
+	} );
 
-	test.fixme( // P4-04
-	'wr-buttons: .ttm-serial-hero__buttons .btn @1280', async ( { page } ) => {
+	test( 'wr-buttons: .ttm-serial-hero__buttons .btn @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.writing, 1280 );
 		const btns = page.locator( '.ttm-serial-hero__buttons .btn' );
 		expect( await btns.count() ).toBe( 3 );
@@ -1755,33 +1783,34 @@ test.describe( 'writing', () => {
 		expect( await btns.nth( 2 ).getAttribute( 'class' ) ).toMatch(
 			/btn-ghost/
 		);
-	} ); // P4-04
+	} );
 
-	test.fixme( // P4-04
-	'wr-stats: .ttm-serial-hero .ttm-stats @1280', async ( { page } ) => {
+	test( 'wr-stats: .ttm-serial-hero .ttm-stats @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.writing, 1280 );
 		const el = page.locator( '.ttm-serial-hero .ttm-stats' );
 		const t = await tracks( el );
 		expect( t.length ).toBe( 3 );
 		expect( await computed( el, 'border-top-width' ) ).toBe( px( 2 ) );
 		expect( await computed( el, 'padding-top' ) ).toBe( px( 14 ) );
-	} ); // P4-04
+	} );
 
-	test.fixme( // P4-04
-	'wr-stat-value: .ttm-stats__value (first) @1280', async ( { page } ) => {
+	test( 'wr-stat-value: .ttm-stats__value (first) @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.writing, 1280 );
 		const el = page.locator( '.ttm-stats__value' ).first();
 		expect( await computed( el, 'font-size' ) ).toBe( px( 20 ) );
 		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
 		expect( await text( el ) ).toMatch( /^\d+ \/ \d+$/ );
-	} ); // P4-04
+	} );
 
-	test.fixme( // P4-04
-	'wr-stat-cadence: .ttm-stats__value (2nd) @1280', async ( { page } ) => {
+	test( 'wr-stat-cadence: .ttm-stats__value (2nd) @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.writing, 1280 );
 		const el = page.locator( '.ttm-stats__value' ).nth( 1 );
 		expect( await text( el ) ).toBe( 'Monthly' );
-	} ); // P4-04
+	} );
 
 	test.fixme( // P4-05
 	'wr-body: .ttm-writing-body @1280', async ( { page } ) => {

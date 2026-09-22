@@ -107,8 +107,13 @@ $ttm_latest = Serials::latest_chapter( $ttm_row );
 				<span class="ttm-stats__label"><?php esc_html_e( 'chapters published', 'ttm-core' ); ?></span>
 			</p>
 				<?php if ( '' !== $ttm_stats['cadence'] ) : ?>
+					<?php
+					// Rule 32: first letter capitalised, the rest untouched -- the stored value
+					// ("monthly") is a plain adjective, not a title.
+					$ttm_cadence = mb_strtoupper( mb_substr( $ttm_stats['cadence'], 0, 1 ) ) . mb_substr( $ttm_stats['cadence'], 1 );
+					?>
 			<p>
-				<span class="ttm-stats__value"><?php echo esc_html( $ttm_stats['cadence'] ); ?></span>
+				<span class="ttm-stats__value"><?php echo esc_html( $ttm_cadence ); ?></span>
 					<?php if ( '' !== $ttm_stats['next_date'] ) : ?>
 				<span class="ttm-stats__label">
 						<?php
