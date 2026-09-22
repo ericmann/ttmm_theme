@@ -57,7 +57,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] R2-01 Scope R1-06's series-row margins to the list layout; restore strip, rail and grid-2 values
 - [x] R2-02 Regenerate and commit the phase-3 screenshots after the round-1 fixes
 - [x] R3-01 Restore the SPEC §6.2/§6.4/§6.5/§6.7 values no fidelity row asserted
-- [ ] R3-02 Writing 'recent chapters' lists published chapters only
+- [x] R3-02 Writing 'recent chapters' lists published chapters only
 - [ ] R3-03 Seed: Short fiction shows SPEC §6.10's four stories in mock order; no literal backticks; regenerate screenshots
 
 ## Log
@@ -456,3 +456,9 @@ Added the 9 missing CSS declarations (entry-content pre margin-bottom 22px; .is-
 Extended fidelity.spec.mjs rows: art-pre, art-pull, js-link, hub-all-head, hub-meta, hub-buttons, wr-stats, wr-tiles, wr-books, wr-book-title, wr-chapter-dek, wr-chapter-date. Confirmed each failed before the CSS fix, passed after.
 Budget: additions pushed ttm.css to 62795/62464; shortened 9 long comments losslessly (no info dropped) to land at 62463/62464 - did not need to raise cssBudgetBytes/CLAUDE.md's constraint line.
 Full fidelity project (fidelity+editors+selectors specs, 330 tests) green. Full foundry_verify green: composer lint/test:unit, npm lint/test:unit/build, forbidden-patterns, test:integration, test:e2e all passed. wp-env theme confirmed still ttm-theme after integration run.
+
+### R3-02 — dc29ced
+render.php: moved $ttm_is_chapters definition earlier and extended the publish-only filter (previously open-ended-only) to also apply when $ttm_is_chapters, before usort/limit. Added `if ($ttm_is_chapters && !$ttm_rows) return '';` guard (rules 25/46, no empty wrapper) - not previously reachable. Series (article TOC) variant, F24 scheduled behaviour, hub/single-series parts unchanged.
+New SeriesTocTest::test_chapters_variant_excludes_scheduled_parts: closed series (total_parts=4), parts 1-3 published + part 4 future, chapters/desc/limit=2 -> asserts >03</>02< present, >04</title absent. Verified it fails pre-fix (scheduled ch. 4 rendered first) via git stash, passes post-fix. Confirmed test_f24_scheduled_part_unlinked_with_title_date (closed series) already covers the series variant still showing scheduled rows - no new sibling needed.
+New fidelity row wr-chapter-first (/writing/, 1280): first .ttm-numbered__title is <a> "Reconciliation" (ch.12 from seed), first .ttm-numbered__num is "12".
+Full SeriesTocTest (9 tests) and full fidelity project (450 tests) green; full foundry_verify green (composer lint/unit, npm lint/unit/build, forbidden-patterns, test:integration 482 tests, test:e2e 450 tests). wp-env theme confirmed ttm-theme after all runs.
