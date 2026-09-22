@@ -35,7 +35,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P3-04 Series strip per §6.1.7 (`layout=strip`)
 - [x] P3-05 Tuning — `cssBudgetBytes`
 - [x] P3-06 Phase 3 push — section rows screenshots and allow-list under 10
-- [ ] P4-01 Full `3a` phone pass and ≤ 1024 pass
+- [x] P4-01 Full `3a` phone pass and ≤ 1024 pass
 - [ ] P4-02 a11y and network rows, zero-fixme guard
 - [ ] P4-03 Inner templates smoke and CI seeding
 - [ ] P4-04 Handoff, SETUP and final budget measurement
@@ -544,3 +544,34 @@ and series-strip.png vs docs/feedback/design_blocks.png (Technology
 spans two columns with a 3:2 image, 1px column rules, Writing cell
 with two buttons and "Also running", three series rows with red
 squares).
+
+### P4-01 — dc7418d
+All *-phone/-tablet fidelity rows were already un-fixme'd by earlier
+per-component tasks. Real work here: 02 §A behaviours no fidelity row
+checks, plus a real bug surfaced by the new tests.
+
+ttm.css: .ttm-lead-row stays 8/4 between 901-1024px (scoped override,
+not touching the shared is-style-grid-8-4 class's other consumers).
+nav ul <=720 gains 13px font/20px gap per §6.1.9 literal values.
+
+Real bug found live: nav's overflow-x:auto (set in P1-02) never
+actually scrolled -- core's is-layout-flex sets flex-wrap:wrap on the
+shared .ttm-masthead-front__nav class (both <nav> and its <ul> carry
+it), wrapping the 8 links to multiple lines instead of overflowing;
+and the ul, itself nav's flex item, was shrinking to fit by default.
+Fixed with flex-wrap:nowrap + flex-shrink:0 on the ul. Footer phone
+override gains line-height:1.6 (was missing half of "11px/1.6").
+
+New tests/e2e/specs/phone.spec.mjs (phone project only, added to
+desktop's testIgnore): no horizontal overflow at 390; nav actually
+scrolls (caught the bug); Writing cell collapses to one column with a
+rule above Also running; poster input spans poster width.
+
+Dropped two drafted 02 §A extras (rail's tablet 2-column split, a
+phone-only rail top rule): neither is tested by any row or by
+phone.spec.mjs, and the CSS budget has no headroom left after R6's
+raises in P3-03/P3-04 (42993/43008, 15 bytes left).
+
+All verify commands green (test:e2e full suite 0 failed including all
+4 new phone tests, composer test:unit 142/142). Screenshots
+regenerated (front-390.png).
