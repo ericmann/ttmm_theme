@@ -27,7 +27,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P2-02 Verse box per §6.1.4
 - [x] P2-03 Journal excerpt hard cap and `ttm/category-count` entries format
 - [x] P2-04 Journal rail per §6.1.5
-- [ ] P2-05 Tuning — `journal.excerpt_max_words`
+- [x] P2-05 Tuning — `journal.excerpt_max_words`
 - [ ] P2-06 Phase 2 push — lead row screenshots
 - [ ] P3-01 Section rows, cells, cell headings and headline items per §6.1.6
 - [ ] P3-02 Technology cell — inner grid and featured item with image
@@ -320,3 +320,22 @@ evaluate()); rail-count-phone needed :visible (markup can't vary per
 viewport, phone hides entry 3 via CSS, plain .count() ignores
 display:none). All verify commands green (test:integration 411/411,
 test:e2e full suite 0 failed).
+
+### P2-05 — d40a886
+Measured on the seeded normal state (9 journal posts, 8 with manual
+excerpts) via Text::sentence_excerpt() at journal.excerpt_words=40:
+
+cap=45 entries=9 hardcut=0 longest=36 shortest=19
+cap=55 entries=9 hardcut=0 longest=51 shortest=19
+cap=65 entries=9 hardcut=0 longest=63 shortest=19
+
+Rail's actual latest-3 entries: 0/3 hard-cut at every cap tested.
+
+Decision: keep 55 (no Config.php change) -- 0 of 3 rail entries are
+hard-cut even at the tightest tested cap (45), well short of the
+"raise if >= 2 of 3 hard-cut" threshold. journal-rail's pattern
+correctly still omits an explicit excerptLength since the cap isn't
+being raised (Decision "Journal rail excerpt").
+
+composer test:unit 142/142, npm run test:integration 411/411, both
+green (no source files changed).
