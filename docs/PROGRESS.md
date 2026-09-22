@@ -34,7 +34,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P3-06 Phase 3 push — archive screenshots
 - [x] P4-01 Series hub header and featured block (01 §4.38, §6.7)
 - [x] P4-02 All-series grid (`layout=grid-2`) and hub clean-up
-- [ ] P4-03 Single series template (`taxonomy-series.html`) and `series.related_limit`
+- [x] P4-03 Single series template (`taxonomy-series.html`) and `series.related_limit`
 - [ ] P4-04 Writing hero (01 §4.36–4.37, §6.5)
 - [ ] P4-05 Writing body — all serials (`layout=list`) and recent chapters (numbered)
 - [ ] P4-06 Writing aside — story tiles, book grid, and the responsive order
@@ -178,4 +178,9 @@ Manual check: none.
 ### P4-02 — 9d7f693
 Tests: hub-all-head, hub-grid, hub-grid-row, hub-grid-title, hub-grid-cats, hub-nobox, hub-phone un-fixme'd (fidelity + selectors + all axe screens green). SeriesListTest +test_grid_2_layout_renders_dek_categories_and_count; HubWritingTemplatesTest +test_series_index_has_no_newsletter_box. foundry_verify fully green: unit 166, integration 476/476, e2e 318 passed / 84 skipped, lints clean, budget 61430/61440, 13 pending coverage, 39 tagged fixme.
 Interpretation: series-list/render.php needed no code change (its shared else-branch already emits dek/categories/count/parts/status when the block's show* attrs are true, which page-series.html already passes); CSS-only task. Removed the dead .ttm-hub-all.ttm-hub-all double-class hack (no-op duplicate of the base is-grid-2 rule). Rather than deleting the shared unscoped __title/__dek/__categories/__count/__status rules as literally instructed, folded the new sizing into those same rules and kept title's grid-2 override scoped, since strip still relies on the shared 16px title and the task's own out-of-scope note says to keep phase 2 strip rows green. In-progress status colour uses :has(.is-in-progress) since the row anchor carries no per-row status class. The rename-test instruction referred to a test already renamed in P3-04 (list is the default layout, not rows); left as-is, added the new grid-2 test. Fixed a P4-01 specificity slip: the phone hub-head h1 override needed the same .is-style-grid-8-4 compound as its base rule.
+Manual check: none.
+
+### P4-03 — c9c1d1b
+Tests: single-head, single-kicker, single-parts, single-other, single-nav un-fixme'd (fidelity + selectors + all axe screens green). SeriesListTest +test_exclude_current_without_limit_uses_related_limit; SeriesFeaturedTest's h1 assertion updated; HubWritingTemplatesTest's single-series test extended (h1, dek count = published parts, <= 4 other rows). foundry_verify fully green: unit 166, integration 477/477, e2e 323 passed / 79 skipped, lints clean, budget 61438/61440, 13 pending coverage, 34 tagged fixme.
+Interpretation: series-list's limit fallback branches on excludeCurrent (series.related_limit default 4, else series.strip_limit default 3); taxonomy-series.html drops its explicit limit:4. ttm/series-featured only adds is-style-grid-5-7 when NOT is_tax('series') (single page falls back to plain block flow = full-width single column); the h1 case adds is-style-display-xl but the base title rule's cascade position still wins at equal specificity, so .ttm-series-single .ttm-series-featured__title redeclares font-size/line-height/letter-spacing anyway. The title's class attribute stays literal (class="ttm-series-featured__title<?php ?>") rather than built in a PHP variable, since check-css-coverage.mjs's regex scan needs to see the literal class name in a class="..." attribute. single-kicker/single-head use the established textContent/ch-probe idioms. CSS budget stayed at 2-10 bytes headroom via more comment condensing -- fourth Phase 4 task in a row needing this, underscoring the P5-03 flag.
 Manual check: none.
