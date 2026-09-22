@@ -26,3 +26,4 @@ ttm-numbered__num # P4-05 pending
 ttm-numbered__title # P4-05 pending
 ttm-numbered__dek # P4-05 pending
 ttm-numbered__date # P4-05 pending
+ttm-archive-body # P3-03 pending

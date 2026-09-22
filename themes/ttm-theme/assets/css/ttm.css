@@ -2297,21 +2297,41 @@ ul.modern-footnotes-list,
 	}
 }
 
-/* 4.26 filter row */
-.ttm-filter-row-wrap {
+/* 4.26 filter row (SPEC §6.6 "Filter row"): the block sits directly under the header. */
+.ttm-filter-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 12px 0;
 	border-top: var(--ttm-rule-2);
-	padding: var(--wp--preset--spacing--30) 0;
+	border-bottom: var(--ttm-rule-1);
+	font-size: 12px;
+}
+
+/* Decision S6: the filter row owns the 2px rule below it too, so the body group that
+ * follows -- .ttm-archive-body, added in P3-03 -- needs none of its own. */
+.ttm-filter-row + .ttm-archive-body {
+	border-top: 0;
 }
 
 .ttm-filter-row__label {
-	font-weight: 800;
-	margin-right: var(--wp--preset--spacing--20);
+	margin-right: 8px;
+	color: var(--wp--preset--color--neutral-700);
 }
 
 .ttm-filter-row__sort {
-	float: right;
+	margin-left: auto;
 	color: var(--wp--preset--color--neutral-700);
 	font-size: var(--wp--preset--font-size--caption);
+}
+
+@media (max-width: 720px) {
+
+	.ttm-filter-row {
+		overflow-x: auto;
+		white-space: nowrap;
+		scrollbar-width: none;
+	}
 }
 
 /* 4.27 year group */
@@ -2376,11 +2396,6 @@ ul.modern-footnotes-list,
 }
 
 @media (max-width: 720px) {
-
-	.ttm-filter-row-wrap {
-		overflow-x: auto;
-		white-space: nowrap;
-	}
 
 	.ttm-archive-year__label {
 		border-bottom: var(--ttm-rule-2);

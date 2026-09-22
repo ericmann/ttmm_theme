@@ -58,6 +58,8 @@ class ArchiveTemplatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'ttm-archive-head', $html );
 		$this->assertStringContainsString( 'ttm-category-stats', $html );
 		$this->assertStringContainsString( 'ttm-filter-row', $html );
+		$this->assertStringNotContainsString( 'ttm-filter-row-wrap', $html );
+		$this->assertMatchesRegularExpression( '/<a class="tag tag-accent" href="[^"]*">All<\/a>/', $html );
 		$this->assertStringContainsString( 'ttm-archive-year', $html );
 		$this->assertStringContainsString( '2022', $html );
 		$this->assertStringContainsString( '2026', $html );

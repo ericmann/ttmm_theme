@@ -2100,40 +2100,43 @@ test.describe( 'archive', () => {
 		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
 	} );
 
-	test.fixme( // P3-02
-	'ar-filter: .ttm-filter-row @1280', async ( { page } ) => {
+	test( 'ar-filter: .ttm-filter-row @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.securityArchive, 1280 );
 		const el = page.locator( '.ttm-filter-row' );
 		expect( await computed( el, 'border-top-width' ) ).toBe( px( 2 ) );
 		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 1 ) );
 		expect( await computed( el, 'padding' ) ).toBe( '12px 0px' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
-	} ); // P3-02
+	} );
 
-	test.fixme( // P3-02
-	'ar-filter-all: .ttm-filter-row .tag (first) @1280', async ( { page } ) => {
+	test( 'ar-filter-all: .ttm-filter-row .tag (first) @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.securityArchive, 1280 );
 		const el = page.locator( '.ttm-filter-row .tag' ).first();
 		expect( await el.getAttribute( 'class' ) ).toMatch( /tag-accent/ );
 		expect( await text( el ) ).toBe( 'All' );
-	} ); // P3-02
+	} );
 
-	test.fixme( // P3-02
-	'ar-filter-active: .ttm-filter-row .tag-accent @1280', async ( {
+	test( 'ar-filter-active: .ttm-filter-row .tag-accent @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, securityFiltered, 1280 );
 		const el = page.locator( '.ttm-filter-row .tag-accent' );
 		expect( await text( el ) ).toBe( 'wordpress' );
-	} ); // P3-02
+	} );
 
-	test.fixme( // P3-02
-	'ar-filter-sort: .ttm-filter-row__sort @1280', async ( { page } ) => {
+	test( 'ar-filter-sort: .ttm-filter-row__sort @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.securityArchive, 1280 );
 		const el = page.locator( '.ttm-filter-row__sort' );
 		expect( await text( el ) ).toBe( 'Newest first' );
-		expect( await computed( el, 'margin-left' ) ).toBe( 'auto' );
-	} ); // P3-02
+		// margin-left: auto resolves to a used px value; assert its effect instead: flush right.
+		const row = await page.locator( '.ttm-filter-row' ).boundingBox();
+		const sort = await el.boundingBox();
+		expect(
+			Math.abs( sort.x + sort.width - ( row.x + row.width ) )
+		).toBeLessThan( 1 );
+	} );
 
 	test.fixme( // P3-03
 	'ar-body: .ttm-archive-body @1280', async ( { page } ) => {
