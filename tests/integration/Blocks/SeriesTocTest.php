@@ -120,7 +120,8 @@ class SeriesTocTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'is-scheduled', $html );
 		$this->assertStringContainsString( 'title="Scheduled Sept 26"', $html );
 
-		preg_match( '/<li class="ttm-series-toc__item is-scheduled">(.*?)<\/li>/s', $html, $m );
+		// F24: the scheduled `title` sits on the <li> itself (SPEC §6.9 toc-scheduled).
+		preg_match( '/<li class="ttm-series-toc__item is-scheduled"[^>]*>(.*?)<\/li>/s', $html, $m );
 		$this->assertNotEmpty( $m );
 		$this->assertStringNotContainsString( '<a ', $m[1] );
 	}
@@ -171,7 +172,8 @@ class SeriesTocTest extends TTM_IntegrationTestCase {
 			]
 		);
 
-		$this->assertSame( 2, substr_count( $html, 'ttm-series-toc__item' ) );
+		$this->assertSame( 2, substr_count( $html, 'ttm-numbered__row' ) );
+		$this->assertStringNotContainsString( 'ttm-series-toc__item', $html );
 		$this->assertStringContainsString( 'Dek for chapter 3.', $html );
 		$this->assertStringNotContainsString( 'Dek for chapter 1.', $html );
 
@@ -192,6 +194,66 @@ class SeriesTocTest extends TTM_IntegrationTestCase {
 
 		$this->assertStringContainsString( 'Hardening WordPress', $html );
 		$this->assertSame( 2, substr_count( $html, 'ttm-series-toc__item' ) );
+	}
+
+	/**
+	 * Decision "ttm/series-toc": the rail heading carries the series name (desktop) and
+	 * "Hub →" (phone), both linking to the series page; numbers and titles carry classes.
+	 */
+	public function test_heading_has_series_link_and_hub_link(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$series = $this->make_series( 'hardening-wp', 'Hardening WordPress', 2, [ [ 'part' => 1 ], [ 'part' => 2 ] ] );
+		$link   = get_term_link( get_term( $series['series_id'], 'series' ) );
+		if ( is_wp_error( $link ) ) {
+			$this->fail( 'Series term link could not be resolved.' );
+		}
+
+		$html = $this->render( $series['post_ids'][2] );
+
+		$this->assertStringContainsString( '<div class="ttm-cell-heading is-rail">', $html );
+		$this->assertStringContainsString( '<span class="ttm-cell-heading__label">In this series</span>', $html );
+		$this->assertStringContainsString( '<a class="ttm-series-toc__series" href="' . esc_url( $link ) . '">Hardening WordPress</a>', $html );
+		$this->assertStringContainsString( '<a class="ttm-series-toc__hub" href="' . esc_url( $link ) . '">Hub →</a>', $html );
+		$this->assertStringContainsString( '<span class="ttm-series-toc__num tnum">01</span>', $html );
+		$this->assertStringContainsString( 'class="ttm-series-toc__title"', $html );
+	}
+
+	/**
+	 * Chapters variant: "{Series name} — recent chapters" label, "All {published}" link to the
+	 * series, and the shared numbered rows (styled in P4-05).
+	 */
+	public function test_chapters_variant_composes_heading_and_all_link(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$series = $this->make_series(
+			'quiet-ledger',
+			'The Quiet Ledger',
+			0,
+			[
+				[ 'part' => 1 ],
+				[ 'part' => 2 ],
+				[
+					'part'   => 3,
+					'status' => 'future',
+					'date'   => '2026-10-01 09:00:00',
+				],
+			]
+		);
+
+		$html = $this->render(
+			$series['post_ids'][2],
+			[
+				'variant' => 'chapters',
+				'order'   => 'desc',
+			] 
+		);
+
+		$this->assertStringContainsString( '<span class="ttm-cell-heading__label">The Quiet Ledger — recent chapters</span>', $html );
+		$this->assertMatchesRegularExpression( '/<a class="ttm-cell-heading__link" href="[^"]+">\s*All 2\s*<\/a>/', $html );
+		$this->assertStringContainsString( '<ol class="ttm-numbered">', $html );
+		$this->assertSame( 2, substr_count( $html, '<li class="ttm-numbered__row">' ) );
+		$this->assertStringContainsString( '<span class="ttm-numbered__num tnum">02</span>', $html );
+		$this->assertStringContainsString( 'class="ttm-numbered__title"', $html );
+		$this->assertStringContainsString( 'class="ttm-numbered__date"', $html );
 	}
 
 	public function test_no_series_renders_nothing(): void {

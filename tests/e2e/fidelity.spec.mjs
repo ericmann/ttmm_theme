@@ -1317,16 +1317,18 @@ test.describe( 'aside', () => {
 		expect( await computed( el, 'row-gap' ) ).toBe( px( 28 ) );
 	} );
 
-	test.fixme( // P1-05
-	'toc-head: .ttm-series-toc .ttm-cell-heading @1280', async ( { page } ) => {
+	test( 'toc-head: .ttm-series-toc .ttm-cell-heading @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-series-toc .ttm-cell-heading' );
 		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 2 ) );
 		expect( await computed( el, 'padding-bottom' ) ).toBe( px( 8 ) );
-	} ); // P1-05
+	} );
 
-	test.fixme( // P1-05
-	'toc-item: .ttm-series-toc__item (first) @1280', async ( { page } ) => {
+	test( 'toc-item: .ttm-series-toc__item (first) @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-series-toc__item' ).first();
 		const t = await tracks( el );
@@ -1334,10 +1336,9 @@ test.describe( 'aside', () => {
 		expect( await computed( el, 'padding' ) ).toBe( '10px 0px' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 14 ) );
 		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 1 ) );
-	} ); // P1-05
+	} );
 
-	test.fixme( // P1-05
-	'toc-current: .ttm-series-toc__item.is-current .ttm-series-toc__title @1280', async ( {
+	test( 'toc-current: .ttm-series-toc__item.is-current .ttm-series-toc__title @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
@@ -1346,27 +1347,26 @@ test.describe( 'aside', () => {
 		);
 		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
 		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
-	} ); // P1-05
+	} );
 
-	test.fixme( // P1-05
-	'toc-scheduled: .ttm-series-toc__item.is-scheduled @1280', async ( {
+	test( 'toc-scheduled: .ttm-series-toc__item.is-scheduled @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
-		const el = page.locator( '.ttm-series-toc__item.is-scheduled' );
+		// The seeded series has two scheduled parts; the row's contract holds for each.
+		const el = page.locator( '.ttm-series-toc__item.is-scheduled' ).first();
 		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
 		expect( await el.locator( 'a' ).count() ).toBe( 0 );
 		const title = await el.getAttribute( 'title' );
 		expect( title ).toMatch( /^Scheduled/ );
-	} ); // P1-05
+	} );
 
-	test.fixme( // P1-05
-	'toc-phone-hub: .ttm-series-toc__hub @390', async ( { page } ) => {
+	test( 'toc-phone-hub: .ttm-series-toc__hub @390', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 390 );
 		const el = page.locator( '.ttm-series-toc__hub' );
 		expect( await el.isVisible() ).toBe( true );
 		expect( await text( el ) ).toBe( 'Hub →' );
-	} ); // P1-05
+	} );
 
 	test.fixme( // P1-06
 	'more-head: .ttm-more-in .ttm-cell-heading__label @1280', async ( {

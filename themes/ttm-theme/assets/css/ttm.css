@@ -2160,8 +2160,87 @@ ul.modern-footnotes-list,
 	color: var(--wp--preset--color--neutral-700);
 }
 
-/* 4.20 / 4.29 series toc, numbered part lists */
-.ttm-series-toc__item,
+/* 4.20 series toc */
+
+/* "In this series" (SPEC §6.2): rail heading, then 28px 1fr rows in current / published /
+ * scheduled states. Numbers and the series name read neutral-700 (Colour vs a11y). */
+.ttm-series-toc__list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.ttm-series-toc__item {
+	display: grid;
+	grid-template-columns: 28px 1fr;
+	gap: 10px;
+	padding: 10px 0;
+	border-bottom: var(--ttm-rule-1);
+	font-size: 14px;
+	line-height: 1.35;
+}
+
+.ttm-series-toc__num {
+	font-weight: 800;
+	color: var(--wp--preset--color--neutral-700);
+}
+
+.ttm-series-toc__title {
+	color: var(--wp--preset--color--text);
+	text-decoration: none;
+}
+
+.ttm-series-toc__item.is-published .ttm-series-toc__title {
+	font-weight: 400;
+}
+
+.ttm-series-toc__item.is-current .ttm-series-toc__title {
+	font-weight: 800;
+	color: var(--wp--preset--color--accent-700);
+}
+
+.ttm-series-toc__item.is-scheduled,
+.ttm-series-toc__item.is-scheduled .ttm-series-toc__title {
+	color: var(--wp--preset--color--neutral-700);
+}
+
+.ttm-series-toc__series {
+	font-size: var(--wp--preset--font-size--micro);
+	color: var(--wp--preset--color--neutral-700);
+	text-decoration: none;
+}
+
+.ttm-series-toc__hub {
+	display: none;
+	font-size: var(--wp--preset--font-size--micro);
+	color: var(--wp--preset--color--accent-700);
+	text-decoration: none;
+}
+
+.ttm-series-toc__dek {
+	grid-column: 2;
+	font-size: 12px;
+	color: var(--wp--preset--color--neutral-700);
+}
+
+@media (max-width: 720px) {
+
+	/* 3b: the TOC becomes a 2px-ruled zone; the series name gives way to "Hub →". */
+	.ttm-series-toc {
+		border-top: var(--ttm-rule-2);
+		padding: 18px 0 20px;
+	}
+
+	.ttm-series-toc__series {
+		display: none;
+	}
+
+	.ttm-series-toc__hub {
+		display: inline;
+	}
+}
+
+/* 4.29 numbered part lists (series featured; the shared `ttm-numbered` rows land in P4-05) */
 .ttm-series-featured__part {
 	display: grid;
 	grid-template-columns: 28px 1fr auto;
@@ -2172,27 +2251,15 @@ ul.modern-footnotes-list,
 	line-height: 1.35;
 }
 
-.ttm-series-toc__item.is-current .tnum,
-.ttm-series-toc__item.is-current span:nth-child(2) {
-	color: var(--wp--preset--color--accent-700);
-	font-weight: 800;
-}
-
-.ttm-series-toc__item.is-scheduled span:nth-child(2),
 .ttm-series-featured__part.is-scheduled span:nth-child(2) {
-	color: var(--wp--preset--color--neutral-700);
-}
-
-.ttm-series-toc__dek,
-.ttm-series-featured__date {
-	grid-column: 2;
-	font-size: 12px;
 	color: var(--wp--preset--color--neutral-700);
 }
 
 .ttm-series-featured__date {
 	grid-column: 3;
 	text-align: right;
+	font-size: 12px;
+	color: var(--wp--preset--color--neutral-700);
 }
 
 /* 4.35 story tile */

@@ -51,3 +51,4 @@ blockquote.is-style-pull cite # editor block style (04 §3)
 .ttm-writing-body:not(:has(.ttm-story-tiles)) .ttm-writing-body__stories # P4-06 pending
 .ttm-writing-body:not(:has(.ttm-book-grid)) .ttm-writing-body__books # P4-06 pending
 .ttm-writing-body:not(:has(.ttm-story-tiles, .ttm-book-grid)) # P4-06 pending
+.ttm-series-toc__dek # optional dek (showDek): no seeded ttm/series-toc sets it
