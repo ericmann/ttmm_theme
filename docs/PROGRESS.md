@@ -36,7 +36,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P3-05 Tuning — `cssBudgetBytes`
 - [x] P3-06 Phase 3 push — section rows screenshots and allow-list under 10
 - [x] P4-01 Full `3a` phone pass and ≤ 1024 pass
-- [ ] P4-02 a11y and network rows, zero-fixme guard
+- [x] P4-02 a11y and network rows, zero-fixme guard
 - [ ] P4-03 Inner templates smoke and CI seeding
 - [ ] P4-04 Handoff, SETUP and final budget measurement
 - [ ] P4-05 Phase 4 push — final screenshots
@@ -575,3 +575,29 @@ raises in P3-03/P3-04 (42993/43008, 15 bytes left).
 All verify commands green (test:e2e full suite 0 failed including all
 4 new phone tests, composer test:unit 142/142). Screenshots
 regenerated (front-390.png).
+
+### P4-02 — 64488ba
+a11y row passed immediately. network row needed network.spec.mjs's own
+established blob:/data: exception added (Chrome's favicon re-serve
+shows as a blob: URL, not same-origin by the literal test). New
+scripts/check-fixme.mjs wired into npm run lint as check:fixme.
+screens.spec.mjs's axe exclusion was already added in P1-10.
+
+FLIGHT CONTROLLER NOTE actioned (Opinion cell's 9-line dek): (1)
+.ttm-item__dek gets a 3-line -webkit-line-clamp per 03 §9; new
+cell-dek-clamp fidelity row; had to fix cell-lead-dek's own display
+expectation too (Chrome serializes -webkit-box+line-clamp as
+flow-root, not block). (2) Query\Cells::suppress_stale_dek() now also
+suppresses post-excerpt output when raw post_excerpt is empty and the
+post isn't Journal (F10) -- Journal's derived excerpt lives only in
+the get_the_excerpt filter chain (Query\JournalExcerpt), never written
+to post_excerpt, so checking the raw field distinguishes the two
+cases cleanly. No seed change needed: the Opinion post's post_excerpt
+was already "" in the fixture; nothing previously suppressed core's
+own auto-derivation for a dek-less cell post.
+
+New CellsTest tests for both the suppression and the Journal carve-out.
+
+All verify commands green (test:integration 422/422, test:e2e 132
+passed/0 failed/0 skipped -- zero fixme rows remain, composer test:unit
+142/142, budget 42980/43008).
