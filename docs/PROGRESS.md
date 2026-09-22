@@ -51,7 +51,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] R1-05 Close the test gaps on the flight's own late fixes
 - [x] R1-06 Raise cssBudgetBytes and restore the declarations dropped under it
 - [x] R1-07 Seed fixture drift: the third book, and a tautological Sunday test
-- [ ] R1-08 Scope the global post-excerpt filter; newsletter box copy is 13px
+- [x] R1-08 Scope the global post-excerpt filter; newsletter box copy is 13px
 - [ ] R1-09 Tighten the fidelity rows that assert less than their §6.9 row
 - [ ] R1-10 Prefix, stale lint entries, no-op CSS and the undocumented dd4dfbe commit
 
@@ -405,3 +405,9 @@ SeederTest.php: test_books_are_salt_water_wires_and_eleven_small_doors now asser
 test_journal_post_one_is_on_a_sunday_with_location_and_syndication: set_now moved from 2026-09-20 (a Sunday, making the test tautological given journal-post-1's days_ago=0) to 2026-09-23 (Wednesday); added assertion that the post date is exactly 2026-09-20, proving the weekday walk-back loop at Seeder.php:366-369 actually runs. Verified by reading the loop logic: 3-day walk-back from Wednesday lands on Sunday, matching the new assertion.
 grep -ri lorem docs/fixtures/seed/ clean. Full foundry_verify green (lint, unit, npm lint, npm test:unit, build, forbidden-patterns, test:integration -- 481 tests OK).
 Did not run test:e2e or screenshots (time/Docker contention with other rounds); left for reviewer/manual check per task's own verification list.
+
+### R1-08 — 492a74f
+Helpers::excerpt_markup() now scoped to $block['attrs']['className'] containing is-style-dek-l (article-header.php is the only pattern using it on wp:post-excerpt); all other usages return $block_content unchanged. Verified via curl on the running seeded site: front-page deks are core wp_trim_words()-trimmed, no injected markup.
+CSS: .ttm-newsletter-box__copy font-size changed from --wp--preset--font-size--body-s (14px) to --wp--preset--font-size--ui (13px), matching SPEC §6.2/PLAN P1-06.
+Tests: HelpersTest.php - new test_excerpt_markup_is_a_no_op_outside_the_article_header_dek (manual excerpt with markup, className without is-style-dek-l -> unchanged); the two existing excerpt_markup tests updated to pass $block with is-style-dek-l className (they implicitly relied on the old unscoped filter). New fidelity.spec.mjs row "box-copy" (not an existing SPEC §6.9 row, called out in commit body) asserts .ttm-newsletter-box__copy is px(13)/neutral-800 at SCREENS.article @1280.
+Full foundry_verify green including npm run test:e2e (446 passed) and npm run test:integration (481 passed).
