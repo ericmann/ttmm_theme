@@ -250,3 +250,107 @@ page with no story tiles) — both categories are permitted to remain indefinite
 (default 30, ⚠️ ASSUMPTION, tuned and kept — see Measurements), plus the already-existing
 `series.hub_featured_parts`, `series.strip_limit`, `writing.story_tiles`, `writing.tile_columns`
 config keys this flight's blocks read but did not introduce. No other new `Config` keys.
+
+## Round 1 (review-fix)
+
+Branch `refine/2026-09-22`, base `main` (`8c2b228`), head `2f6e224`. All 10 review-fix tasks
+(`R1-01`..`R1-10`) queued by the round-1 review are `[x]`; none blocked or skipped. Task counts:
+51 total, 51 done, 0 open. This round was implemented across two sessions (paused mid `R1-07`,
+resumed per the operator's exact recipe with the uncommitted `books.json`/`SeederTest.php` edits
+inspected and kept).
+
+### What each task fixed
+
+- **R1-01** (`32a9d67`): the search-row whole-row link nested an anchor inside an anchor
+  (`core/post-terms` rendered a linked term) tripping `link_rows()`'s guard. New
+  `ttm/section-label` `search-row` format (plain, unlinked primary-category name) replaces the
+  linked kicker; the row's anchor text is now headline-first.
+- **R1-02** (`bc58144`): five `layout: constrained` groups nested inside `is-style-grid-*` groups
+  (rule 36 extended) switched to `layout: default`; five new fidelity rows assert no descendant
+  carries `is-layout-constrained`.
+- **R1-03** (`0bd17fa`): a `<=720px` media-query override for `.ttm-series-featured__part`/`__date`
+  sat *before* a later same-specificity base rule in source order, so the phone override was dead
+  at every viewport (the general "cascade resolves ties by source order, not media-query nesting"
+  hazard also found in phase 5). Moved the whole media block after the base rule it needed to beat.
+- **R1-04** (`62fb550`): two real display bugs — archive rows in a prior year duplicated the year
+  in a 72px column and wrapped (new `ttm/short-date` `noYear` arg, applied only to the two archive
+  templates); the Writing page's series meta line was capitalising a cadence SPEC wants lowercase.
+- **R1-05** (`0da5e51`): no production changes — added assertions (and proved each by reverting the
+  underlying fix, confirming failure, then restoring) for four fixes phase 5 shipped without their
+  own dedicated coverage: the `wpautop`-leak fix, the archive-aside `text-transform` revert, the
+  most-read unpadded-number fix, and `series-list`'s grid-2 category join.
+- **R1-06** (`339b0d7`): `cssBudgetBytes` raised 61440→62464 (rule 30) and every declaration named
+  by SPEC/PLAN but dropped earlier under budget pressure was restored, each proven against a
+  pre-restoration failure first.
+- **R1-07** (`d2bf38b`): `docs/fixtures/seed/books.json` restored to SPEC §6.10's two books (a
+  third, `The Quiet Ledger`, had crept in); the journal-Sunday test's `set_now()` moved off a date
+  that was already a Sunday (making it tautological given `days_ago: 0`) so it actually exercises
+  the weekday walk-back loop.
+- **R1-08** (`492a74f`): `Helpers::excerpt_markup()` was rewriting every excerpt site-wide (no
+  guard at all) instead of just the article header's dek; scoped to `is-style-dek-l`. Newsletter
+  box copy corrected from 14px (`body-s`) to SPEC's 13px (`ui`).
+- **R1-09** (`fbbdb13`): nine existing fidelity rows asserted less than their SPEC §6.9 row said
+  (track *count* instead of track *size*, a figure's `filter` instead of the styled `img`'s, a
+  dropped `color` half, a missing bounding-box check, a boundary condition that tolerated overlap)
+  plus one new row (`single-head-phone`) for a P5-01 fix that only had indirect coverage. Every
+  tightened assertion was proven to bite with a real temporary local break, then reverted.
+- **R1-10** (`b32878c`): hygiene debt the coverage/selector lints were satisfied *around* rather
+  than *by* — a class renamed off the mandated `ttm-` prefix purely to dodge the coverage scanner
+  (restored, wp-admin file added to `SRC_SKIP` instead), a self-admitted no-op CSS rule (deleted,
+  replaced with a documented in-code scanner exemption), two false `selectors-allow.txt` reasons
+  (deleted — one uncovered a second, real, previously-masked coverage gap, fixed with a genuine
+  rule rather than another no-op), and a `docs/PROGRESS.md` entry documenting the out-of-sequence
+  `dd4dfbe` commit plus a correction to the P3-04 log entry it made stale.
+
+### Interpretation choices this round
+
+- **R1-02**: no interpretation call — a mechanical, verified sweep (`grep -rl constrained` across
+  every template/part/pattern) confirmed no other nested `constrained` group existed beyond the
+  five fixed.
+- **R1-08**: `excerpt_markup()` scoped by `className` containing `is-style-dek-l` rather than
+  `is_singular()` (the task offered either) — `article-header.php` is the only pattern using that
+  className on `wp:post-excerpt`, so it is the narrower, more precise guard.
+- **R1-09**: `aside-phone-order`'s tightened boundary uses `toBeGreaterThanOrEqual`, not
+  `toBeGreaterThan`, against the corrected reference point (`prevnext.y + prevnext.height`) —
+  `.ttm-series-toc` sits flush (0px gap) against `.ttm-prevnext`'s bottom edge by design, so a
+  strict `>` false-failed on genuinely correct markup. `>=` still catches any real overlap
+  regression (verified: forcing `.ttm-series-toc` up by 300px via a temporary `position:
+  relative; top: -300px` failed the assertion as expected).
+- **R1-10**: the `.ttm-archive`/`.ttm-most-read` wrapper-class coverage gap (after deleting the
+  no-op rule) is resolved with a new, permanent, documented `UNSTYLED_WRAPPERS` constant inside
+  `scripts/check-css-coverage.mjs` — the same *kind* of mechanism as the pre-existing `SRC_SKIP`
+  list (a narrow, justified, code-level exemption, not the transient `css-coverage-allow.txt`)
+  rather than inventing a new architecture. Deleting `.ttm-footer__copyright:empty` uncovered that
+  the base (non-`:empty`) class had never had a real rule of its own — it was only "covered"
+  because the coverage scanner's class-name regex matches substrings, so it matched
+  `.ttm-footer__copyright` inside `.ttm-footer__copyright:empty`'s own selector text. Fixed with a
+  genuine `margin: 0` reset (grouped with the identical, pre-existing `.ttm-footer__meta` rule)
+  rather than a second no-op.
+
+### Config keys touched this round
+
+No new `Config` keys were introduced or tuned this round. `cssBudgetBytes` (⚠️ ASSUMPTION,
+`scripts/check-budget.mjs`) was raised 61440 → 62464 in R1-06 per rule 30 (restoring
+previously-dropped SPEC/PLAN-named declarations); current file size is 62188/62464 bytes as of
+R1-10's commit, ~276 bytes of headroom.
+
+### What a human should check by hand
+
+Every task this round was either test-only or a narrowly-scoped code fix verified by
+`foundry_verify` (unit, integration, and e2e suites all green at the end of every task, final
+counts: unit 169, integration 481/481, e2e 447/447, css-coverage 193/193 markup/css classes with
+0 pending, budget 62188/62464). Still, a human should:
+
+1. Compare the search results page, archive pages (especially a prior-year row), and the Writing
+   page's series meta line against their mocks after R1-01/R1-04 — these are real rendering fixes
+   with no prior screenshot re-check.
+2. Confirm `docs/feedback/phase-3/writing.png`'s "In print" book grid now shows exactly the two
+   SPEC-named books (R1-07 removed a third, unauthorized one from the seed fixture).
+3. Confirm the newsletter box's body copy reads visibly smaller (13px vs the previous 14px) on the
+   article page (R1-08).
+4. `npm run screenshots` was not re-run as part of this round (each task that touched visual CSS
+   verified with a temporary, reverted screenshot or targeted Playwright check instead, noted in
+   its own log entry) — a fresh full screenshot pass against all 14 phase-3 PNGs is worth doing
+   before this branch is considered final.
+5. `git stash list` — noted as worth a glance in the phase-3 handoff above; unrelated to this
+   round but still unresolved as of this writing.
