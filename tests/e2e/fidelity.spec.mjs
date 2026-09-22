@@ -656,9 +656,7 @@ test.describe( 'series strip', () => {
 		expect( await computed( grid, 'column-gap' ) ).toBe( px( 24 ) );
 	} );
 
-	test( 'strip-row: .ttm-series-row (first) @1280', async ( {
-		page,
-	} ) => {
+	test( 'strip-row: .ttm-series-row (first) @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const row = page.locator( '.ttm-series-row' ).first();
 		expect( await computed( row, 'border-top-width' ) ).toBe( px( 1 ) );
@@ -676,9 +674,7 @@ test.describe( 'series strip', () => {
 		);
 	} );
 
-	test( 'strip-meta: .ttm-series-row__meta @1280', async ( {
-		page,
-	} ) => {
+	test( 'strip-meta: .ttm-series-row__meta @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const meta = page.locator( '.ttm-series-row__meta' ).first();
 		expect( await computed( meta, 'font-size' ) ).toBe( px( 12 ) );
