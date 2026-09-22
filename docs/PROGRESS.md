@@ -41,7 +41,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P4-04 Handoff, SETUP and final budget measurement
 - [x] P4-05 Phase 4 push — final screenshots
 - [x] R1-01 Jetpack provider subscribes server-side through the ttm handler (no page nonce)
-- [ ] R1-02 Seeded front page matches the mock: series strip is non-fiction, Also running ends with The Last Cron Job
+- [x] R1-02 Seeded front page matches the mock: series strip is non-fiction, Also running ends with The Last Cron Job
 - [ ] R1-03 Screenshots wait for every image; tech-img asserts a loaded image; regenerate the phase-2 PNGs
 
 ## Log
@@ -686,3 +686,24 @@ Note: `grep _wpnonce plugins/ttm-core/src` still hits Taxonomy/SeriesAdmin.php -
 unrelated admin-nonce checks, not newsletter/cacheable output; out of scope for this task.
 All verify commands green (composer lint/test:unit, npm lint/test:unit/build,
 forbidden-patterns.sh, npm test:integration -- 422/422).
+
+### R1-02 — 072f83b
+Fixed F2: series-strip.php's ttm/series-list now passes form:nonfiction (Hardening WordPress,
+The Consultant's Ledger, Ordinary Time replace The Quiet Ledger, which stays in the Writing
+cell only). Pushed docs/fixtures/seed/posts.json days_ago for
+finishing-a-draft-you-no-longer-believe-in (14->60) and
+outlining-for-people-who-hate-outlines (39->75), both still older than
+story-the-last-cron-job's 40, so Fiction\Serials::stories() (newest-first) ranks the story
+ahead of the two seriesless essays -- Also running now ends with The Last Cron Job again.
+Tests: FrontPageTest::test_series_strip_lists_the_three_nonfiction_series_newest_first,
+::test_writing_cell_also_running_lists_failover_salt_water_wires_and_the_last_cron_job (new);
+SeederTest::test_seeded_writing_essays_derive_as_story_but_stay_older_than_the_last_cron_job
+(new, guards the days_ago ordering + ttm_form=story derivation at the seed layer).
+Note: an escaped apostrophe (&#039;) appears in "The Consultant's Ledger" rendered output --
+expected esc_html behavior, asserted literally in the test.
+Manual verification: curl http://localhost:8888/ after `wp ttm seed --reset` prints exactly
+the three nonfiction titles and ends with The Last Cron Job, matching the task's Verification
+section. npm run test:integration (425/425) and npm run test:e2e (138/138) both green
+(earlier failures during this task were from my own overlapping concurrent test:integration
+invocations racing on the shared wp-env DB -- not real regressions; a clean single run is
+green).
