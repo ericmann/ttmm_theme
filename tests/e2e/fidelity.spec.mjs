@@ -713,6 +713,7 @@ test.describe( 'series strip', () => {
 		expect( await computed( mark, 'background-color' ) ).toBe(
 			color( 'accent' )
 		);
+		expect( await computed( mark, 'margin-top' ) ).toBe( px( 5 ) );
 	} );
 
 	test( 'strip-meta: .ttm-series-row__meta @1280', async ( { page } ) => {
@@ -722,6 +723,7 @@ test.describe( 'series strip', () => {
 		expect( await computed( meta, 'color' ) ).toBe(
 			color( 'neutral-700' )
 		);
+		expect( await computed( meta, 'margin-top' ) ).toBe( px( 4 ) );
 		const metaText = await meta.innerText();
 		expect( metaText ).toContain( ' · ' );
 		expect( metaText ).toMatch( /\d+ of \d+/ );
@@ -1977,6 +1979,19 @@ test.describe( 'writing', () => {
 		expect( await text( el ) ).toBe( 'In progress' );
 	} );
 
+	test( 'wr-serial-row-margins: .ttm-series-list.is-list mark/dek/meta @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const list = page.locator( '.ttm-series-list.is-list' ).first();
+		const mark = list.locator( '.ttm-series-mark' ).first();
+		const dek = list.locator( '.ttm-series-row__dek' ).first();
+		const meta = list.locator( '.ttm-series-row__meta' ).first();
+		expect( await computed( mark, 'margin-top' ) ).toBe( px( 6 ) );
+		expect( await computed( dek, 'margin-top' ) ).toBe( px( 4 ) );
+		expect( await computed( meta, 'margin-top' ) ).toBe( px( 6 ) );
+	} );
+
 	test( 'wr-chapters-head: .ttm-series-toc.is-chapters .ttm-cell-heading__label @1280', async ( {
 		page,
 	} ) => {
@@ -2435,6 +2450,8 @@ test.describe( 'archive', () => {
 		expect( await computed( el, 'padding' ) ).toBe( '12px 0px' );
 		const title = el.locator( '.ttm-series-row__title' );
 		expect( await computed( title, 'font-size' ) ).toBe( px( 15 ) );
+		const mark = el.locator( '.ttm-series-mark' );
+		expect( await computed( mark, 'margin-top' ) ).toBe( px( 5 ) );
 	} );
 
 	test( 'ar-mostread: .ttm-most-read .ttm-numbered__row (first) @1280', async ( {
@@ -2860,6 +2877,16 @@ test.describe( 'hub', () => {
 		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
 		const t = await text( el );
 		expect( t ).toContain( ' · ' );
+	} );
+
+	test( 'hub-grid-dek: .ttm-series-list.is-grid-2 .ttm-series-row__dek (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const el = page
+			.locator( '.ttm-series-list.is-grid-2 .ttm-series-row__dek' )
+			.first();
+		expect( await computed( el, 'margin-top' ) ).toBe( px( 5 ) );
 	} );
 
 	test( 'hub-nobox: .ttm-newsletter-box @1280', async ( { page } ) => {

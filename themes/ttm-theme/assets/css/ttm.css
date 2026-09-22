@@ -1612,7 +1612,7 @@ blockquote.is-style-pull cite,
 	display: inline-block;
 	width: 10px;
 	height: 10px;
-	margin-top: 6px;
+	margin-top: 5px;
 }
 
 .ttm-series-mark.is-in-progress {
@@ -1681,7 +1681,7 @@ blockquote.is-style-pull cite,
 
 .ttm-series-row__meta {
 	grid-column: 2;
-	margin-top: 6px;
+	margin-top: var(--wp--preset--spacing--10);
 	font-size: var(--wp--preset--font-size--caption);
 	color: var(--wp--preset--color--neutral-700);
 	font-feature-settings: "tnum";
@@ -1714,7 +1714,7 @@ blockquote.is-style-pull cite,
 
 .ttm-series-row__dek {
 	grid-column: 2;
-	margin-top: 4px;
+	margin-top: 5px;
 	font-size: 14px;
 	line-height: 1.45;
 	color: var(--wp--preset--color--neutral-800);
@@ -1729,7 +1729,16 @@ blockquote.is-style-pull cite,
 	border-bottom: var(--ttm-rule-1);
 }
 
+.ttm-series-list.is-list .ttm-series-mark {
+	margin-top: 6px;
+}
+
+.ttm-series-list.is-list .ttm-series-row__meta {
+	margin-top: 6px;
+}
+
 .ttm-series-list.is-list .ttm-series-row__dek {
+	margin-top: 4px;
 	max-width: 46ch;
 }
 
@@ -1833,6 +1842,7 @@ blockquote.is-style-pull cite,
 	font-size: var(--wp--preset--font-size--ui);
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 .ttm-series-bar .ttm-series-mark {
 	margin-top: 0;
 }
