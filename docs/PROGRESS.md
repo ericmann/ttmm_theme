@@ -33,7 +33,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P3-02 Technology cell — inner grid and featured item with image
 - [x] P3-03 Writing cell per §6.1.6
 - [x] P3-04 Series strip per §6.1.7 (`layout=strip`)
-- [ ] P3-05 Tuning — `cssBudgetBytes`
+- [x] P3-05 Tuning — `cssBudgetBytes`
 - [ ] P3-06 Phase 3 push — section rows screenshots and allow-list under 10
 - [ ] P4-01 Full `3a` phone pass and ≤ 1024 pass
 - [ ] P4-02 a11y and network rows, zero-fixme guard
@@ -490,3 +490,26 @@ strip-* rows.
 
 All verify commands green (test:integration 420/420, test:e2e full
 suite 0 failed, composer test:unit 142/142).
+
+### P3-05 — 8b5c345
+Measurement: before 42583 bytes / budget 43008 (P3-04's already-settled
+value) -> after 42583 bytes / budget 43008 (unchanged).
+
+Checked every dedup target: .ttm-lead-row__lead still real (markup +
+CSS both present); .is-style-poster duplicate already removed in
+P1-10; .ttm-newsletter-form .wp-block-jetpack-subscriptions already
+removed in P1-06. Emptied css-coverage-allow.txt locally and re-ran
+the coverage script: zero dead CSS selectors, only the 4 allow-listed
+later-flight groups show as "missing markup". Nothing left to dedup --
+P3-01 through P3-04 already cleaned up their own superseded rules as
+they went.
+
+No change to check-budget.mjs/CLAUDE.md. R6's "raise at most once
+more" was already used incrementally across P3-03 and P3-04 (each
+would otherwise have shipped with failing lint) rather than saved for
+this task; this run confirms that settled state rather than raising
+again. Also fixed two pre-existing prettier violations in
+fidelity.spec.mjs left over from a prior un-fixme edit.
+
+Verified: npm run lint clean (budget 42583/43008), npm run test:e2e
+full suite green (0 failed).
