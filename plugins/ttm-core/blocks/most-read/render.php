@@ -72,7 +72,7 @@ if ( empty( $ttm_query->posts ) ) {
 	<ol class="ttm-numbered">
 		<?php foreach ( $ttm_query->posts as $ttm_index => $ttm_post ) : ?>
 		<li class="ttm-numbered__row">
-			<span class="ttm-numbered__num tnum"><?php echo esc_html( sprintf( '%02d', $ttm_index + 1 ) ); ?></span>
+			<span class="ttm-numbered__num tnum"><?php echo esc_html( (string) ( $ttm_index + 1 ) ); ?></span>
 			<a href="<?php echo esc_url( (string) get_permalink( $ttm_post ) ); ?>"><?php echo esc_html( get_the_title( $ttm_post ) ); ?></a>
 		</li>
 		<?php endforeach; ?>

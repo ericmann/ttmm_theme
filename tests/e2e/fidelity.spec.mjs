@@ -2256,7 +2256,9 @@ test.describe( 'archive', () => {
 		const el = page
 			.locator( '.ttm-archive-body aside .ttm-cell-heading__label' )
 			.first();
-		expect( await text( el ) ).toBe( 'Series in Security' );
+		// innerText reflects the label's text-transform; assert the source text.
+		const source = await el.evaluate( ( node ) => node.textContent );
+		expect( source.trim() ).toBe( 'Series in Security' );
 	} );
 
 	test( 'ar-aside-row: .ttm-series-list.is-rail .ttm-series-row (first) @1280', async ( {

@@ -1739,12 +1739,6 @@ blockquote.is-style-pull cite,
 	gap: 28px;
 }
 
-/* "Series in Security" reads as a sentence here, not the shared kicker's small caps. */
-.ttm-archive-body aside .ttm-cell-heading__label {
-	text-transform: none;
-	letter-spacing: normal;
-}
-
 .ttm-series-list.is-rail .ttm-series-row {
 	grid-template-columns: 10px 1fr;
 	gap: 12px;
