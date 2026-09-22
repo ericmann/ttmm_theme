@@ -160,6 +160,20 @@ export function parseAllowList( text, { strict = false } = {} ) {
 }
 
 /**
+ * Filter a list of `plugins/ttm-core/src` file paths, dropping any listed in
+ * `skip` (R1-10): files known not to contain front-end markup (e.g. a
+ * wp-admin-only repeater UI) are never walked for `ttm-*` classes, so a
+ * class used only in wp-admin markup does not force a coverage-driven rename.
+ *
+ * @param {string[]} files List of file paths.
+ * @param {string[]} skip  Paths to exclude, exactly as they appear in `files`.
+ * @return {string[]} `files` with every `skip` entry removed.
+ */
+export function filterSrcFiles( files, skip ) {
+	return files.filter( ( p ) => ! skip.includes( p ) );
+}
+
+/**
  * Compare markup classes against CSS classes, filtering both directions
  * through the allow-list.
  *

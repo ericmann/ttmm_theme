@@ -53,7 +53,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] R1-07 Seed fixture drift: the third book, and a tautological Sunday test
 - [x] R1-08 Scope the global post-excerpt filter; newsletter box copy is 13px
 - [x] R1-09 Tighten the fidelity rows that assert less than their §6.9 row
-- [ ] R1-10 Prefix, stale lint entries, no-op CSS and the undocumented dd4dfbe commit
+- [~] R1-10 Prefix, stale lint entries, no-op CSS and the undocumented dd4dfbe commit
 
 ## Log
 (one entry per task, appended by implement)
@@ -165,7 +165,7 @@ Manual check: none.
 
 ### P3-04 — 13af2ab
 Tests: ar-aside-series, ar-aside-row, ar-mostread, ar-mostread-num, ar-tablet-aside un-fixme'd (fidelity + selectors + all axe screens green). ValuesTest +test_section_label_series_in; SeriesListTest +test_rail_layout_renders_title_and_meta_only, +test_layout_rows_is_no_longer_accepted, "rows layout" test renamed to "list layout"; MostReadTest updated to ttm-numbered__row; ArchiveTemplatesTest +test_category_aside_reads_series_in_section_and_numbered_most_read. foundry_verify fully green: unit 164, integration 470/470, e2e 287 passed / 115 skipped, lints clean, budget 59830/61440, 25 pending coverage, 70 tagged fixme. `grep -rn '"layout":"rows"' themes plugins tests` returns nothing.
-Interpretation: series-list's layout enum drops "rows" for "list" (same markup) and adds "rail" (mark+title+one meta line, reusing strip's assembly); category.html's aside uses layout:"rail". most-read now emits the shared ttm-cell-heading.is-rail / ttm-numbered/__row/__num markup (replacing __list/__item/__num); three of the six P1-05 ttm-numbered* pending lines are now real, satisfied by new base CSS. ttm/section-label{format:series-in} (already built in P1-06/P3-01) is now wired into category.html's aside heading. .ttm-archive-body aside owns the shared padding-top/flex/gap-28 layout and the <=1024 two-column grid for every archive kind. The aside's "Series in Security" heading gets a scoped text-transform:none override (reads as a sentence per the mock and the row's own textContent assertion), unlike sibling kicker-style cell-heading labels which stay uppercase.
+Interpretation: series-list's layout enum drops "rows" for "list" (same markup) and adds "rail" (mark+title+one meta line, reusing strip's assembly); category.html's aside uses layout:"rail". most-read now emits the shared ttm-cell-heading.is-rail / ttm-numbered/__row/__num markup (replacing __list/__item/__num); three of the six P1-05 ttm-numbered* pending lines are now real, satisfied by new base CSS. ttm/section-label{format:series-in} (already built in P1-06/P3-01) is now wired into category.html's aside heading. .ttm-archive-body aside owns the shared padding-top/flex/gap-28 layout and the <=1024 two-column grid for every archive kind. The aside's "Series in Security" heading originally got a scoped text-transform:none override (reads as a sentence per the mock and the row's own textContent assertion), unlike sibling kicker-style cell-heading labels which stay uppercase; dd4dfbe (standalone flight-controller fix, logged separately below) later removed this override after a visual review found the mock actually wants the same uppercase treatment as every other is-rail label.
 Manual check: none.
 
 ### P3-05 — 4fd5157
@@ -359,6 +359,10 @@ browser against mock 3b/02 Responsive; confirm CI green on the
 branch including the e2e job; compare all 14 docs/feedback/phase-3
 PNGs against design_article/journal/serial.png and mocks 1e/1f end
 to end.
+
+### (standalone, post-P5-05) — dd4dfbe
+Not a numbered task: a flight-controller review found two visual defects in the already-shipped P3-01/P3-04 category archive aside (comparing docs/feedback/phase-3/archive-security.png against mock 1e), landed directly rather than folded into an unrelated task. (1) P3-04's scoped `.ttm-archive-body aside .ttm-cell-heading__label { text-transform: none }` override (see the P3-04 log entry above, which still describes it as shipped) is removed: the mock shows "Series in Security"/"Most read" as the same uppercase 12px/800/.08em is-rail label as every other `.ttm-cell-heading__label`, not a sentence-case exception. `ar-aside-series` now asserts `textContent` instead of the rendered (uppercase-transformed) `text()`, matching the idiom already used elsewhere. (2) `ttm/most-read`'s numbers were zero-padded ("01","02") via the same `sprintf('%02d', …)` as the article TOC/chapter lists; changed to a plain cast for unpadded "1"/"2"/"3" per the mock, most-read only -- the TOC/chapters keep their own zero-padding and shared `.ttm-numbered__num` styling is untouched. Tests: `ar-aside-series` updated; foundry_verify green (unit 166, integration 474/474, e2e 311 passed / 91 skipped, budget 60931/61440).
+Manual check: NOT VERIFIED (human) -- compare the corrected category archive aside against mock 1e (uppercase "Series in Security"/"Most read" labels, unpadded "1"/"2"/"3").
 
 ### R1-01 — 32a9d67
 Root cause: core/post-terms rendered a linked term, tripping link_rows()'s nested-anchor guard. Fixed by extending ttm/section-label (Sources.php, Values.php) with a `search-row` format returning the plain primary-category name (empty '' when none), and swapping search.html's post-terms kicker for a bound paragraph placed AFTER post-title so the row's whole-row anchor text is headline-first.

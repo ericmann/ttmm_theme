@@ -125,7 +125,7 @@ class Books {
 	private static function render_row( int $index, array $book ): void {
 		$name = "ttm_books[{$index}]";
 
-		echo '<fieldset class="book-admin-row"><legend>' . esc_html(
+		echo '<fieldset class="ttm-book-row"><legend>' . esc_html(
 			sprintf(
 				/* translators: %d: repeater row number (1-based). */
 				__( 'Book %d', 'ttm-core' ),

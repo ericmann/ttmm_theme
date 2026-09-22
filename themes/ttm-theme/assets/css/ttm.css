@@ -1112,12 +1112,9 @@ blockquote.is-style-pull cite,
 	display: block;
 }
 
-.ttm-footer__meta {
+.ttm-footer__meta,
+.ttm-footer__copyright {
 	margin: 0;
-}
-
-.ttm-footer__copyright:empty {
-	display: none;
 }
 
 .ttm-footer__nav ul {
@@ -2426,11 +2423,6 @@ ul.modern-footnotes-list,
 }
 
 /* 4.27 year group (§6.6) */
-.ttm-archive,
-.ttm-most-read {
-	display: block;
-}
-
 .ttm-archive-year {
 	display: grid;
 	grid-template-columns: 120px 1fr;

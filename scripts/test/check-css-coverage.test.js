@@ -10,6 +10,7 @@ let collectMarkupClasses;
 let collectCssClasses;
 let globToRegExp;
 let parseAllowList;
+let filterSrcFiles;
 let report;
 
 beforeAll( async () => {
@@ -21,6 +22,7 @@ beforeAll( async () => {
 		collectCssClasses,
 		globToRegExp,
 		parseAllowList,
+		filterSrcFiles,
 		report,
 	} = mod );
 } );
@@ -68,6 +70,44 @@ describe( 'collectCssClasses', () => {
 		expect( classes.has( 'ttm-lead__inner' ) ).toBe( true );
 		expect( classes.has( 'wp-block-group' ) ).toBe( false );
 		expect( classes.size ).toBe( 1 );
+	} );
+} );
+
+describe( 'filterSrcFiles (R1-10)', () => {
+	it( 'drops SRC_SKIP-listed files so their classes are never collected, and keeps others', () => {
+		const files = [
+			'plugins/ttm-core/src/Fiction/Books.php',
+			'plugins/ttm-core/src/Blocks/Helpers.php',
+		];
+		const contents = {
+			'plugins/ttm-core/src/Fiction/Books.php':
+				'echo \'<fieldset class="ttm-book-row">\';',
+			'plugins/ttm-core/src/Blocks/Helpers.php':
+				'echo \'<div class="ttm-wrapper">\';',
+		};
+
+		const kept = filterSrcFiles( files, [
+			'plugins/ttm-core/src/Fiction/Books.php',
+		] );
+
+		expect( kept ).toEqual( [ 'plugins/ttm-core/src/Blocks/Helpers.php' ] );
+
+		// A class emitted only from the skipped file never reaches the
+		// markup set collected for the coverage report.
+		const markup = collectMarkupClasses(
+			kept.map( ( p ) => contents[ p ] )
+		);
+		expect( markup.has( 'ttm-book-row' ) ).toBe( false );
+		expect( markup.has( 'ttm-wrapper' ) ).toBe( true );
+
+		// A class from a skipped file is not "missing" (no ttm.css rule
+		// needed for wp-admin-only markup); a class from a kept file with no
+		// css counterpart still is.
+		const css = new Set();
+		const allow = [];
+		const result = report( { markup, css, allow } );
+		expect( result.missing ).toEqual( [ 'ttm-wrapper' ] );
+		expect( result.missing ).not.toContain( 'ttm-book-row' );
 	} );
 } );
 
