@@ -190,3 +190,62 @@ ttm-{archive,archive-year__rows,filter-row,most-read,category-stats,journal-stre
 ttm-{series-featured,series-progress,series-stats,series-single,hub-head}* # 1f series hub: later flight
 ttm-{serial-hero,book}* # 2d Writing page: later flight
 ```
+
+## Round 1
+
+Review-fix round for `docs/REVIEW.md`'s three findings (F1/F2/F3). Branch `refine/2026-09-21`,
+base commit `73cb239` (chore: start review-fix round 1), head `8ee9b61`. All three `R1-*` tasks
+done, zero blocked/skipped.
+
+**R1-01** (`9285ee0`) — F1: `Provider\Jetpack::render()` reproduced Jetpack's own widget markup,
+but that widget's real handler (`Jetpack_Subscriptions::widget_submit()`,
+`modules/subscriptions.php:636-640`) requires a per-visitor `_wpnonce` the cache-safe form can
+never carry (rule 7), so the form silently never subscribed anyone. Fixed by routing Jetpack
+through the same `admin_post_ttm_subscribe` handler `custom-url` uses (`Form::handler_fields()`
+shared helper), with `Handler::handle()` calling `Jetpack_Subscriptions::init()->subscribe()`
+directly — the same method the widget itself calls — once the shared token/honeypot/rate-limit
+checks pass, guarded by `class_exists()`.
+- Interpretation: unit-testing `Providers::current()` resolving to `jetpack` without WordPress
+  required adding global, `class_alias()`'d stub classes (`\Jetpack`, `\Jetpack_Subscriptions`,
+  `\WP_Error`, `\WP_Block_Type_Registry`) in `HandlerTest.php`, since this suite never loads
+  WordPress. `\Jetpack::$ready` is a mutable toggle reset in `tearDown()` so it never leaks
+  availability into unrelated tests sharing the same PHPUnit process.
+- `grep _wpnonce plugins/ttm-core/src` still matches `Taxonomy/SeriesAdmin.php` — a pre-existing,
+  unrelated admin-nonce check (legitimate authenticated admin action, not cacheable front-end
+  output), not a newsletter/rule-7 violation.
+
+**R1-02** (`072f83b`) — F2: the series strip showed the fiction serial "The Quiet Ledger" instead
+of the three nonfiction series, and the Writing cell's "Also running" list showed a seriesless
+essay instead of the short story. Fixed by adding `"form":"nonfiction"` to the strip's
+`ttm/series-list` block attributes (no plugin change — the attribute already existed), and by
+raising two seeded essays' `days_ago` (`docs/fixtures/seed/posts.json`:
+`finishing-a-draft-you-no-longer-believe-in` 14→60, `outlining-for-people-who-hate-outlines`
+39→75) so both stay older than `story-the-last-cron-job`'s 40, restoring the short story's rank
+in `Fiction\Serials::stories()`'s newest-first order.
+- Interpretation: both essays remain in the fixture (still exercise the `ttm_form=story`
+  derivation) — only their dates moved.
+
+**R1-03** (`262a7c9`) — F3: `docs/feedback/phase-2/front-1280.png` showed an empty column where
+the Technology featured image belongs, because `scripts/screenshots.mjs` captured `fullPage`
+before a lazy image below the fold had loaded, and the `tech-img` fidelity row couldn't have
+caught it (it only checked the wrapper's computed style, never whether an `<img>` existed or had
+loaded). Fixed by scrolling the full document height in viewport steps before every capture
+(triggers lazy loads), awaiting every `document.images` entry's load/error event, and exiting 1
+naming any image whose `naturalWidth` is still 0 (new pure `pendingImages()` helper next to
+`ZONES`/`unionClip`). Extended the `tech-img` row to assert exactly one `<img>`, `complete`, and
+`naturalWidth > 0`. Regenerated all seven phase-2 PNGs.
+- Verified by hand: `wp post meta delete <post-id> _thumbnail_id` on the Technology post made the
+  extended `tech-img` row fail (30s timeout — core's `post-featured-image` block renders nothing
+  without a thumbnail); `wp ttm seed --reset` restored it and the row passed again.
+
+### What a human still owes (Round 1)
+
+- Everything under "Manual checks owed" above, still open.
+- NOT VERIFIED (human): compare the regenerated `docs/feedback/phase-2/*.png` (all seven,
+  four of which actually changed pixels: `front-1280.png`, `front-390.png`, `section-rows.png`,
+  `series-strip.png`) against `docs/feedback/design_*.png`. `front-1280.png` should now show the
+  grey 3:2 Technology image, the series strip reading "Hardening WordPress / The Consultant's
+  Ledger / Ordinary Time", and the Writing cell's "Also running" ending with "The Last Cron Job".
+- No config keys were introduced or tuned this round; no ⚠️ ASSUMPTION values changed.
+- `npm run test:integration` (425/425) and `npm run test:e2e` (138/138) both green on a clean,
+  non-overlapping run as of the round-1 head commit.
