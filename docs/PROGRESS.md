@@ -8,7 +8,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P0-03 Runtime selector coverage spec (rule 41) and the e2e screen set
 - [x] P0-04 Fidelity rows for every §6.9 row as tagged fixme
 - [x] P0-05 Seed images per rule 45, author display name, book and About covers
-- [ ] P0-06 Tuning — `seed.image_band_angle`
+- [x] P0-06 Tuning — `seed.image_band_angle`
 - [ ] P0-07 Seed — the `2b` article and the Hardening WordPress series
 - [ ] P0-08 Seed — journal, Writing, Security archive and series hub copy
 - [ ] P0-09 Page container (rule 42) and the `container-*` rows
@@ -68,3 +68,6 @@ Note for reviewer: this task's files showed signs of a second concurrent process
 
 ### P0-05 — ff42173
 image()/cover() rewritten: FIELD/BAND/BORDER/COVER/COVER_TEXT const [r,g,b] arrays (neutral-400/500/300/700/100). draw_band() draws a rotated filled polygon (imagefilledpolygon 3-arg PHP8 form) whose centre-x is crc32($label)%$width; band width ~22% of shorter side; angle from Config::get('seed.image_band_angle',30). cover($title) is ttm-cover sized, COVER fill, title wordwrap(18) + imagestring(5) centred, BORDER rect. Shared upload_png() helper. seed_pages() calls image($title,'ttm-thumb') for featured_image:true rows (about page now has one, 800x533). seed_series()/seed_books() call cover() for cover:true rows (both books.json rows flagged). run() adds wp_update_user(ID=1, display_name='Eric Mann'). Fixtures: books.json +cover:true x2, pages.json about +featured_image:true (already present from concurrent work). Tests: 5 new SeederTest methods. Full test:integration: 430/430 green. Measurement in commit body (before rgb(210,48,19) -> after rgb(155,151,151) centre / rgb(186,182,182) corner, sampled from the actual seeded PNG). Note: hit a stray leftover phpunit process from an earlier foundry_verify call colliding with a manual filtered run, causing DB deadlock warnings (no real failures, both runs completed OK) -- waited for it to exit before re-running; worth noting for reviewer that this repo saw concurrent-agent activity during the flight (see other tasks' logs).
+
+### P0-06 — dde1fca
+Measured seed.image_band_angle at 15/30/45 via a temporary wp-content/mu-plugins/ttm-band-angle.php (ttm_config filter reading an env var), reseeding between each and sampling the generated ttm-thumb PNG (About page thumbnail, 800x533) on a 10px grid for BAND-colour pixels: 15deg->22.2%, 30deg->24.3%, 45deg->20.1% of ~4320 sample points. Band stays clearly visible at all angles; kept default 30, Config.php unchanged. Note: cover() (from P0-05) never draws a band, only image() does, so the task's "ttm-cover 2:3 crop" band check doesn't apply to the actual implementation -- confirmed by a full-image scan of the-quiet-ledger-cover.png (0% band pixels at every angle, as expected since cover() has no band by design). mu-plugin and temp measurement scripts removed from the container afterward; git status clean (nothing container-only was ever in the working tree). Empty commit (no Config.php change) with Measurement in the body.
