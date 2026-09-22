@@ -42,7 +42,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P4-05 Phase 4 push — final screenshots
 - [x] R1-01 Jetpack provider subscribes server-side through the ttm handler (no page nonce)
 - [x] R1-02 Seeded front page matches the mock: series strip is non-fiction, Also running ends with The Last Cron Job
-- [ ] R1-03 Screenshots wait for every image; tech-img asserts a loaded image; regenerate the phase-2 PNGs
+- [x] R1-03 Screenshots wait for every image; tech-img asserts a loaded image; regenerate the phase-2 PNGs
 
 ## Log
 (one entry per task, appended by implement)
@@ -707,3 +707,28 @@ section. npm run test:integration (425/425) and npm run test:e2e (138/138) both 
 (earlier failures during this task were from my own overlapping concurrent test:integration
 invocations racing on the shared wp-env DB -- not real regressions; a clean single run is
 green).
+
+### R1-03 — 262a7c9
+Fixed F3: scripts/screenshots.mjs now scrolls the full document height in viewport steps
+before every capture (triggers lazy image loads), awaits each document.images entry's
+load/error event, then exits 1 naming any image whose naturalWidth is still 0 via new pure
+helper pendingImages(list) (exported next to ZONES/unionClip). Extended fidelity.spec.mjs's
+tech-img row: locates the media wrapper's <img>, scrollIntoViewIfNeeded, asserts count()===1
+and complete && naturalWidth>0 (kept existing aspect-ratio/filter expects).
+Tests: scripts/test/screenshots.test.js "pendingImages lists the sources whose naturalWidth is
+0" + an all-loaded case (both new, Jest, pure).
+Verified the acceptance check by hand: `wp post meta delete 8835 _thumbnail_id` (Technology
+post 2, "Why I moved my build pipeline...") then ran the tech-img row alone via
+`WP_BASE_URL=http://localhost:8888 npx playwright test --config tests/e2e/playwright.config.mjs
+-g tech-img` -- it failed (30s timeout waiting for the media wrapper, since core's
+post-featured-image block renders nothing without a thumbnail). `wp ttm seed --reset` restored
+it and the same run passed (621ms). This confirms the original bug (empty featured-image slot)
+would now be caught.
+Regenerated all seven PNGs via `npm run screenshots` (all "wrote" lines, exit 0); visually
+confirmed front-1280.png: the grey 3:2 Technology image is present, series strip reads
+Hardening WordPress / The Consultant's Ledger / Ordinary Time, Also running ends with The Last
+Cron Job. masthead.png/lead-row.png/poster-footer.png came out byte-identical (unrelated zones)
+so only 4 of the 7 PNGs actually changed in the diff.
+npm run test:e2e: 138/138 green (fidelity project, tech-img included).
+Manual check: NOT VERIFIED (human) -- compare docs/feedback/phase-2/*.png against
+docs/feedback/design_*.png.
