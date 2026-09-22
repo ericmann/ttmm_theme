@@ -13,10 +13,6 @@ ttm-serial-hero__body # P4-04 pending
 ttm-serial-hero__kicker # P4-04 pending
 ttm-serial-hero__synopsis # P4-04 pending
 ttm-serial-hero__title # P4-04 pending
-ttm-series-bar # P1-01 pending
-ttm-series-bar__name # P1-01 pending
-ttm-series-bar__part # P1-01 pending
-ttm-series-bar__segments # P1-01 pending
 ttm-series-featured__all # P4-01 pending
 ttm-series-featured__dek # P4-01 pending
 ttm-series-featured__kicker # P4-01 pending

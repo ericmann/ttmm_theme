@@ -1010,8 +1010,7 @@ test.describe( 'footer inner', () => {
 } );
 
 test.describe( 'series bar', () => {
-	test.fixme( // P1-01
-	'bar: .ttm-series-bar @1280', async ( { page } ) => {
+	test( 'bar: .ttm-series-bar @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-series-bar' );
 		const t = await tracks( el );
@@ -1019,28 +1018,27 @@ test.describe( 'series bar', () => {
 		expect( t[ 0 ] ).toBeCloseTo( 10, 0 );
 		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 1 ) );
 		expect( await computed( el, 'padding' ) ).toBe( '12px 0px' );
-	} ); // P1-01
+	} );
 
-	test.fixme( // P1-01
-	'bar-mark: .ttm-series-bar .ttm-series-mark @1280', async ( { page } ) => {
+	test( 'bar-mark: .ttm-series-bar .ttm-series-mark @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-series-bar .ttm-series-mark' );
 		expect( await computed( el, 'width' ) ).toBe( px( 10 ) );
 		expect( await computed( el, 'background-color' ) ).toBe(
 			color( 'accent' )
 		);
-	} ); // P1-01
+	} );
 
-	test.fixme( // P1-01
-	'bar-name: .ttm-series-bar__name @1280', async ( { page } ) => {
+	test( 'bar-name: .ttm-series-bar__name @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-series-bar__name' );
 		expect( await computed( el, 'font-weight' ) ).toBe( '600' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 13 ) );
-	} ); // P1-01
+	} );
 
-	test.fixme( // P1-01
-	'bar-seg: .ttm-series-bar__seg (3rd) @1280', async ( { page } ) => {
+	test( 'bar-seg: .ttm-series-bar__seg (3rd) @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-series-bar__seg' ).nth( 2 );
 		expect( await computed( el, 'width' ) ).toBe( px( 22 ) );
@@ -1048,36 +1046,34 @@ test.describe( 'series bar', () => {
 		expect( await computed( el, 'background-color' ) ).toBe(
 			color( 'accent' )
 		);
-	} ); // P1-01
+	} );
 
-	test.fixme( // P1-01
-	'bar-seg-1: .ttm-series-bar__seg (1st) @1280', async ( { page } ) => {
+	test( 'bar-seg-1: .ttm-series-bar__seg (1st) @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-series-bar__seg' ).first();
 		expect( await computed( el, 'background-color' ) ).toBe(
 			color( 'neutral-900' )
 		);
-	} ); // P1-01
+	} );
 
-	test.fixme( // P1-01
-	'bar-view: .ttm-series-bar__view @1280', async ( { page } ) => {
+	test( 'bar-view: .ttm-series-bar__view @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-series-bar__view' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
 		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
 		expect( await computed( el, 'margin-left' ) ).toBe( px( 14 ) );
-	} ); // P1-01
+	} );
 
-	test.fixme( // P1-01
-	'bar-phone: .ttm-series-bar__seg (1st) / .ttm-series-bar__view @390', async ( {
+	test( 'bar-phone: .ttm-series-bar__seg (1st) / .ttm-series-bar__view @390', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.article, 390 );
 		const seg = page.locator( '.ttm-series-bar__seg' ).first();
 		expect( await computed( seg, 'width' ) ).toBe( px( 12 ) );
+		// Markup never varies per viewport (SPEC §3.2): "View series" is hidden by CSS at 390.
 		const view = page.locator( '.ttm-series-bar__view' );
-		expect( await view.count() ).toBe( 0 );
-	} ); // P1-01
+		expect( await visibleCount( view ) ).toBe( 0 );
+	} );
 } );
 
 test.describe( 'article', () => {
