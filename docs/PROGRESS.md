@@ -50,7 +50,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] R1-04 Archive row dates and the serial meta line must match SPEC's literal text
 - [x] R1-05 Close the test gaps on the flight's own late fixes
 - [x] R1-06 Raise cssBudgetBytes and restore the declarations dropped under it
-- [~] R1-07 Seed fixture drift: the third book, and a tautological Sunday test
+- [x] R1-07 Seed fixture drift: the third book, and a tautological Sunday test
 - [ ] R1-08 Scope the global post-excerpt filter; newsletter box copy is 13px
 - [ ] R1-09 Tighten the fidelity rows that assert less than their §6.9 row
 - [ ] R1-10 Prefix, stale lint entries, no-op CSS and the undocumented dd4dfbe commit
@@ -398,3 +398,10 @@ Verified: full foundry_verify green (integration 481/481, e2e 441/441); git stat
 cssBudgetBytes raised 61440->62464 (scripts/check-budget.mjs, CLAUDE.md only, per rule 30). Restored declarations SPEC/PLAN named that were dropped to fit: .ttm-serial-hero grid-template-columns -> 280px minmax(0, 1fr) (kept existing ≤720 __body min-width:0 band-aid); __kicker margin 0 0 12px; __title margin 0 0 16px -0.04em; __synopsis line-height 1.45 + margin 0 0 20px; __buttons gap 10px + margin 0 0 22px; .ttm-stats__value font-size 16px added to the existing ≤720 writing block; chapters (.ttm-series-toc.is-chapters) row align-items:baseline, __dek (13px/neutral-800/margin-top 3px, new rule -- element existed in markup unstyled), __date (12px/neutral-700/tnum), __title line-height 1.2; list-row .ttm-series-mark/__dek/__meta margin-top -> 6/4/6px; .ttm-series-row__count colour neutral-700 + tnum (children's own explicit colours still win via specificity). Un-condensed 5 comments into full sentences (rule 42 container, :where() img note, §6.1.5 12px note, poster h3 override, 02 §A breakpoint, mock 3b phone sizes).
 Tests: 8 fidelity rows extended/added (wr-hero, wr-kicker, wr-title-margin new, wr-synopsis, wr-buttons, wr-stat-value-phone new, wr-chapter-title/dek new/date new, wr-serial-count) -- manually confirmed each failed against pre-restoration CSS before adding the declaration, then passed after.
 Verified: full foundry_verify green (budget 62269/62464, 195 bytes headroom; e2e 445/445 incl. all wr-*/hub-*/a11y rows; integration 481/481; css-coverage 0 pending; stylelint clean). Screenshots checked visually (writing/hub/single-series/archive-security unchanged beyond a few px of spacing) then reverted, not committed (out of file scope).
+
+### R1-07 — d2bf38b
+books.json restored to SPEC §6.10's two books (Salt Water Wires, Eleven Small Doors); The Quiet Ledger row removed. Confirmed no Seeder.php change needed: seed_books() (line 531-561) replaces the whole ttm_books option each run via update_option, so --reset never leaves a stale third book.
+SeederTest.php: test_books_are_salt_water_wires_and_eleven_small_doors now asserts exact sorted title set instead of assertContains pairs (catches a stray third row).
+test_journal_post_one_is_on_a_sunday_with_location_and_syndication: set_now moved from 2026-09-20 (a Sunday, making the test tautological given journal-post-1's days_ago=0) to 2026-09-23 (Wednesday); added assertion that the post date is exactly 2026-09-20, proving the weekday walk-back loop at Seeder.php:366-369 actually runs. Verified by reading the loop logic: 3-day walk-back from Wednesday lands on Sunday, matching the new assertion.
+grep -ri lorem docs/fixtures/seed/ clean. Full foundry_verify green (lint, unit, npm lint, npm test:unit, build, forbidden-patterns, test:integration -- 481 tests OK).
+Did not run test:e2e or screenshots (time/Docker contention with other rounds); left for reviewer/manual check per task's own verification list.
