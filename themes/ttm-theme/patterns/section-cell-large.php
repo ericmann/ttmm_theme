@@ -30,13 +30,13 @@ declare( strict_types=1 );
 		<!-- wp:post-template -->
 			<!-- wp:group {"className":"ttm-item"} -->
 			<div class="wp-block-group ttm-item">
-				<!-- wp:post-featured-image {"isLink":true,"className":"is-style-grayscale","sizeSlug":"ttm-thumb"} /-->
+				<!-- wp:post-featured-image {"isLink":true,"className":"ttm-item-featured__media","sizeSlug":"ttm-thumb"} /-->
 
 				<!-- wp:post-title {"isLink":true,"className":"is-style-cell-lead-l"} /-->
 
 				<!-- wp:post-excerpt {"className":"ttm-item__dek"} /-->
 
-				<!-- wp:paragraph {"className":"ttm-item__meta","metadata":{"bindings":{"content":{"source":"ttm/meta-line","args":{"parts":["date","reading"]}}}}} -->
+				<!-- wp:paragraph {"className":"ttm-item__meta","metadata":{"bindings":{"content":{"source":"ttm/meta-line","args":{"parts":["date","reading"],"readingFormat":"short"}}}}} -->
 				<p class="ttm-item__meta"></p>
 				<!-- /wp:paragraph -->
 			</div>

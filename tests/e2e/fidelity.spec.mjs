@@ -517,7 +517,7 @@ test.describe( 'section cells', () => {
 } );
 
 test.describe( 'technology featured cell', () => {
-	test.fixme( 'tech-grid: .ttm-cell.is-style-span-2 .wp-block-post-template @1280', async ( {
+	test( 'tech-grid: .ttm-cell.is-style-span-2 .wp-block-post-template @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -529,19 +529,19 @@ test.describe( 'technology featured cell', () => {
 		expect( Math.round( cols[ 0 ] ) ).toBe( Math.round( cols[ 1 ] ) );
 	} );
 
-	test.fixme( 'tech-featured: .ttm-cell.is-style-span-2 .wp-block-post:first-child @1280', async ( {
+	test( 'tech-featured: .ttm-cell.is-style-span-2 .wp-block-post:first-child @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
 		const featured = page.locator(
 			'.ttm-cell.is-style-span-2 .wp-block-post:first-child'
 		);
-		expect( await computed( featured, 'grid-column' ) ).toBe(
-			'span 2 / span 2'
-		);
+		// Chrome's computed `grid-column` for a `span 2` shorthand with no explicit end line is
+		// the single value `span 2`, not a two-part `span 2 / span 2` shorthand.
+		expect( await computed( featured, 'grid-column' ) ).toBe( 'span 2' );
 	} );
 
-	test.fixme( 'tech-img: .ttm-cell.is-style-span-2 .ttm-item-featured__media @1280', async ( {
+	test( 'tech-img: .ttm-cell.is-style-span-2 .ttm-item-featured__media @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -552,7 +552,7 @@ test.describe( 'technology featured cell', () => {
 		expect( await computed( media, 'filter' ) ).toContain( 'grayscale(1)' );
 	} );
 
-	test.fixme( 'tech-title: .ttm-cell.is-style-span-2 .wp-block-post:first-child .wp-block-post-title @1280', async ( {
+	test( 'tech-title: .ttm-cell.is-style-span-2 .wp-block-post:first-child .wp-block-post-title @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -562,7 +562,7 @@ test.describe( 'technology featured cell', () => {
 		expect( await computed( title, 'font-size' ) ).toBe( px( 24 ) );
 	} );
 
-	test.fixme( 'tech-item: .ttm-cell.is-style-span-2 .wp-block-post:nth-child(2) .wp-block-post-title @1280', async ( {
+	test( 'tech-item: .ttm-cell.is-style-span-2 .wp-block-post:nth-child(2) .wp-block-post-title @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );

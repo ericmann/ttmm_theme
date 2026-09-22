@@ -107,6 +107,55 @@ class FrontPageTest extends TTM_IntegrationTestCase {
 		$this->assertSame( 1, substr_count( $html, 'Lead Post Title' ) );
 	}
 
+	private function attachment(): int {
+		return self::factory()->attachment->create_object(
+			[
+				'file'           => 'test.jpg',
+				'post_parent'    => 0,
+				'post_mime_type' => 'image/jpeg',
+			]
+		);
+	}
+
+	public function test_technology_cell_featured_item_has_media_class_and_short_reading_time(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$tech = $this->category_id( 'technology', 'Technology' );
+
+		// Newer than the technology posts below, so Lead::compute() picks it instead and the
+		// technology posts aren't excluded from their own cell.
+		$lead = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+				'post_date'     => '2026-09-20 09:00:00',
+			]
+		);
+		update_post_meta( $lead, 'ttm_primary_category', $tech );
+
+		$featured = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+				'post_date'     => '2026-09-19 09:00:00',
+			]
+		);
+		update_post_meta( $featured, 'ttm_primary_category', $tech );
+		update_post_meta( $featured, 'ttm_word_count', 2000 );
+		set_post_thumbnail( $featured, $this->attachment() );
+
+		$this->go_to( '/' );
+		$html = $this->render_template( 'front-page' );
+
+		$this->assertStringContainsString( 'ttm-item-featured__media', $html );
+
+		$title_pos = strpos( $html, get_the_title( $featured ) );
+		$this->assertIsInt( $title_pos );
+		$after_title = substr( $html, $title_pos, 600 );
+
+		$this->assertStringContainsString( '9 min', $after_title );
+		$this->assertStringNotContainsString( '9 min read', $after_title );
+	}
+
 	public function test_opinion_cell_meta_shows_politics_suffix(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
 		$opinion  = $this->category_id( 'opinion', 'Opinion' );

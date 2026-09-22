@@ -48,9 +48,8 @@
 	border: 0;
 	opacity: 1;
 
-	/* Rule 35: full width regardless of layout. `!important` beats core's inline
-	 * `.wp-block-separator:not(.is-style-wide):not(.is-style-dots){width:100px}` and the
-	 * constrained-layout centering rule's `margin-left/right: auto !important`. */
+	/* Rule 35: full width. `!important` beats core's inline width:100px separator rule and
+	 * the constrained-layout centering rule's `margin-left/right: auto !important`. */
 	width: 100% !important;
 	max-width: none !important;
 	margin-left: 0 !important;
@@ -643,9 +642,8 @@ blockquote.is-style-pull cite,
 	gap: 28px;
 }
 
-/* Decision "Colour vs a11y": accent fails WCAG AA at this weight/size, so accent-700 replaces
- * the SPEC table's literal "accent". `!important` beats core's own repeated-class
- * `.wp-block-navigation-item__content.wp-block-navigation-item__content{color:inherit}`. */
+/* "Colour vs a11y": accent-700 replaces the SPEC table's literal "accent" (contrast).
+ * `!important` beats core's repeated-class `...__content.wp-block-navigation-item__content`. */
 .ttm-nav .current-menu-item > a {
 	color: var(--wp--preset--color--accent-700) !important;
 }
@@ -830,20 +828,6 @@ blockquote.is-style-pull cite,
 	color: var(--wp--preset--color--neutral-700);
 }
 
-/* 4.6 featured item */
-.ttm-item-featured {
-	display: grid;
-	grid-template-columns: 200px 1fr;
-	gap: var(--wp--preset--spacing--40);
-	align-items: start;
-}
-
-.ttm-item-featured img {
-	aspect-ratio: 3 / 2;
-	object-fit: cover;
-	filter: grayscale(1) contrast(1.08);
-}
-
 /* 4.32/4.33 newsletter box + poster */
 .ttm-newsletter-box {
 	background: var(--wp--preset--color--surface);
@@ -911,8 +895,7 @@ blockquote.is-style-pull cite,
 	font-size: var(--wp--preset--font-size--featured);
 }
 
-/* 01 §2.1's one permitted exception: literal bg-on-accent is 3.77:1, under AA, but the a11y
- * fidelity row excludes `.ttm-poster .btn-ghost` from axe for exactly this reason. */
+/* 01 §2.1's exception: bg-on-accent is 3.77:1, under AA; the a11y row excludes this from axe. */
 .ttm-poster .btn-ghost {
 	background: transparent;
 	color: var(--wp--preset--color--bg);
@@ -1115,8 +1098,7 @@ blockquote.is-style-pull cite,
 
 	.ttm-lead__title {
 
-		/* "h2" slug becomes --font-size--h-2 (WP hyphenates letter/digit boundaries); other
-		 * rules wrongly use --h2 (pre-existing, out of scope here). */
+		/* "h2" slug becomes --font-size--h-2 (WP hyphenates letter/digit boundaries). */
 		font-size: var(--wp--preset--font-size--h-2);
 	}
 
@@ -1289,6 +1271,60 @@ blockquote.is-style-pull cite,
 		border-right: 0;
 		border-top: var(--ttm-rule-2);
 	}
+}
+
+/* 4.6 featured item */
+.ttm-cell.is-style-span-2 .wp-block-post-template {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 20px 28px;
+}
+
+/* Its children become direct grid items of the post-template grid above. */
+.ttm-cell.is-style-span-2 .ttm-item {
+	display: contents;
+}
+
+.ttm-cell.is-style-span-2 .wp-block-post:first-child {
+	grid-column: span 2;
+	display: grid;
+	grid-template-columns: 200px 1fr;
+	gap: 20px;
+	align-items: start;
+}
+
+.ttm-cell.is-style-span-2 .wp-block-post:first-child:not(:has(.ttm-item-featured__media img)) {
+	grid-template-columns: 1fr;
+}
+
+.ttm-item-featured__media {
+	grid-row: 1 / span 3;
+	aspect-ratio: 3 / 2;
+	filter: grayscale(1) contrast(1.08);
+}
+
+.ttm-item-featured__media img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.ttm-cell.is-style-span-2 .ttm-item__dek {
+	font-size: var(--wp--preset--font-size--body-s);
+}
+
+.ttm-cell.is-style-span-2 .ttm-item__meta {
+	margin-top: var(--wp--preset--spacing--20);
+}
+
+/* stylelint-disable-next-line no-descending-specificity */
+.ttm-cell.is-style-span-2 .wp-block-post:not(:first-child) {
+	padding-top: 14px;
+}
+
+.ttm-cell.is-style-span-2 .wp-block-post:not(:first-child) .wp-block-post-title {
+	font-size: 17px;
+	line-height: 1.25;
 }
 
 /* 4.15 writing cell */

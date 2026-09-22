@@ -247,11 +247,11 @@ class Sources {
 		}
 
 		if ( in_array( 'reading', $parts, true ) ) {
-			$ctx['reading'] = self::reading_time_string(
-				$post_id,
+			$ctx['reading'] = 'short' === ( $source_args['readingFormat'] ?? 'long' )
 				/* translators: %d: minutes to read. */
-				__( '%d min read', 'ttm-core' )
-			);
+				? self::reading_time_string( $post_id, __( '%d min', 'ttm-core' ) )
+				/* translators: %d: minutes to read. */
+				: self::reading_time_string( $post_id, __( '%d min read', 'ttm-core' ) );
 		}
 
 		if ( in_array( 'prev-part', $parts, true ) ) {

@@ -125,6 +125,27 @@ class FrontSourcesTest extends TTM_IntegrationTestCase {
 		$this->assertSame( '', $this->source_value( 'ttm/relative-date', [], $missing_post_block, 'content' ) );
 	}
 
+	public function test_meta_line_reading_format_short_omits_read(): void {
+		$post = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		update_post_meta( $post, 'ttm_word_count', 2000 );
+
+		$block = $this->make_block( 'core/paragraph', $post );
+
+		$long = $this->source_value( 'ttm/meta-line', [ 'parts' => [ 'reading' ] ], $block, 'content' );
+		$this->assertSame( '9 min read', $long );
+
+		$short = $this->source_value(
+			'ttm/meta-line',
+			[
+				'parts'         => [ 'reading' ],
+				'readingFormat' => 'short',
+			],
+			$block,
+			'content'
+		);
+		$this->assertSame( '9 min', $short );
+	}
+
 	public function test_meta_line_html_is_stripped_outside_paragraph_content(): void {
 		$post = self::factory()->post->create( [ 'post_status' => 'publish' ] );
 
