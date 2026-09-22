@@ -2616,27 +2616,24 @@ test.describe( 'hub', () => {
 		);
 	} );
 
-	test.fixme( // P4-02
-	'hub-all-head: .ttm-hub-all .ttm-cell-heading__link @1280', async ( {
+	test( 'hub-all-head: .ttm-hub-all .ttm-cell-heading__link @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
 		const el = page.locator( '.ttm-hub-all .ttm-cell-heading__link' );
 		expect( await text( el ) ).toBe( 'Sorted by last update' );
-	} ); // P4-02
+	} );
 
-	test.fixme( // P4-02
-	'hub-grid: .ttm-series-list.is-grid-2 @1280', async ( { page } ) => {
+	test( 'hub-grid: .ttm-series-list.is-grid-2 @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
 		const el = page.locator( '.ttm-series-list.is-grid-2' );
 		const t = await tracks( el );
 		expect( t.length ).toBe( 2 );
 		expect( t[ 0 ] ).toBeCloseTo( t[ 1 ], 0 );
 		expect( await computed( el, 'column-gap' ) ).toBe( px( 48 ) );
-	} ); // P4-02
+	} );
 
-	test.fixme( // P4-02
-	'hub-grid-row: .ttm-series-list.is-grid-2 .ttm-series-row (first) @1280', async ( {
+	test( 'hub-grid-row: .ttm-series-list.is-grid-2 .ttm-series-row (first) @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
@@ -2647,10 +2644,9 @@ test.describe( 'hub', () => {
 		expect( t.length ).toBe( 3 );
 		expect( await computed( el, 'padding' ) ).toBe( '18px 0px' );
 		expect( await computed( el, 'border-top-width' ) ).toBe( px( 1 ) );
-	} ); // P4-02
+	} );
 
-	test.fixme( // P4-02
-	'hub-grid-title: .ttm-series-list.is-grid-2 .ttm-series-row__title (first) @1280', async ( {
+	test( 'hub-grid-title: .ttm-series-list.is-grid-2 .ttm-series-row__title (first) @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
@@ -2658,10 +2654,9 @@ test.describe( 'hub', () => {
 			.locator( '.ttm-series-list.is-grid-2 .ttm-series-row__title' )
 			.first();
 		expect( await computed( el, 'font-size' ) ).toBe( px( 20 ) );
-	} ); // P4-02
+	} );
 
-	test.fixme( // P4-02
-	'hub-grid-cats: .ttm-series-list.is-grid-2 .ttm-series-row__categories (first) @1280', async ( {
+	test( 'hub-grid-cats: .ttm-series-list.is-grid-2 .ttm-series-row__categories (first) @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
@@ -2671,17 +2666,15 @@ test.describe( 'hub', () => {
 		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
 		const t = await text( el );
 		expect( t.includes( ' · ' ) || t.length > 0 ).toBe( true );
-	} ); // P4-02
+	} );
 
-	test.fixme( // P4-02
-	'hub-nobox: .ttm-newsletter-box @1280', async ( { page } ) => {
+	test( 'hub-nobox: .ttm-newsletter-box @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
 		const els = page.locator( '.ttm-newsletter-box' );
 		expect( await els.count() ).toBe( 0 );
-	} ); // P4-02
+	} );
 
-	test.fixme( // P4-02
-	'hub-phone: .ttm-series-featured / .ttm-hub-head h1 @390', async ( {
+	test( 'hub-phone: .ttm-series-featured / .ttm-hub-head h1 @390', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.seriesHub, 390 );
@@ -2690,7 +2683,7 @@ test.describe( 'hub', () => {
 		expect( t.length ).toBe( 1 );
 		const h1 = page.locator( '.ttm-hub-head h1' );
 		expect( await computed( h1, 'font-size' ) ).toBe( px( 44 ) );
-	} ); // P4-02
+	} );
 } );
 
 test.describe( 'single series', () => {

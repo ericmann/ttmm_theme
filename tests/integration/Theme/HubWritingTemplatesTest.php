@@ -89,6 +89,19 @@ class HubWritingTemplatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'ttm-series-row', $html );
 	}
 
+	/**
+	 * Decision "ttm/series-featured" / SPEC §6.7 "All series": the hub carries no newsletter
+	 * box (removed alongside P4-02's grid-2 styling).
+	 */
+	public function test_series_index_has_no_newsletter_box(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$this->make_series( 'hardening-wp', 'Hardening WordPress', 6, [ [ 'part' => 1 ] ] );
+
+		$html = $this->render_template( 'page-series' );
+
+		$this->assertStringNotContainsString( 'ttm-newsletter-box', $html );
+	}
+
 	public function test_single_series_renders_full_part_list_and_other_series_excluding_itself(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
 		$featured = $this->make_series(

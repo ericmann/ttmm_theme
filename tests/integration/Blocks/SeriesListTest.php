@@ -238,4 +238,27 @@ class SeriesListTest extends TTM_IntegrationTestCase {
 		$this->assertContains( 'rail', $enum );
 		$this->assertSame( 'list', $schema['attributes']['layout']['default'] );
 	}
+
+	/**
+	 * SPEC §6.7 "All series": grid-2 rows are mark, title, dek, categories and count
+	 * (`__parts` over `__status`), the same markup `list` uses -- only the CSS differs.
+	 */
+	public function test_grid_2_layout_renders_dek_categories_and_count(): void {
+		$tech      = $this->category_id( 'technology', 'Technology' );
+		$series_id = $this->make_series( 'hardening-wp', 'Hardening WordPress', 'in-progress', 'nonfiction', $tech );
+		wp_update_term( $series_id, 'series', [ 'description' => 'Six parts on hardening a WordPress install.' ] );
+
+		$html = $this->render(
+			[
+				'status' => 'any',
+				'layout' => 'grid-2',
+			] 
+		);
+
+		$this->assertStringContainsString( 'ttm-series-row__dek">Six parts on hardening a WordPress install.<', $html );
+		$this->assertStringContainsString( 'ttm-series-row__categories">Technology<', $html );
+		$this->assertStringContainsString( 'ttm-series-row__count', $html );
+		$this->assertStringContainsString( 'ttm-series-row__parts">1 part<', $html );
+		$this->assertStringContainsString( 'ttm-series-row__status">In progress<', $html );
+	}
 }

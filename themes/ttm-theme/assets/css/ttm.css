@@ -43,7 +43,7 @@
 
 /* 0.2 page container */
 
-/* Rule 42: centred 1280 column; gutter is its own padding, zeroed inside (no double-gutter). */
+/* Rule 42: centred 1280 column; gutter is padding, zeroed inside. */
 .wp-site-blocks {
 	max-width: 1280px;
 	margin-inline: auto;
@@ -490,7 +490,7 @@ p.is-style-poster {
 	border-radius: 0;
 }
 
-/* Honeypot: hidden but tab/DOM-reachable so bots trip it; visitors never reach it. */
+/* Honeypot: hidden but tab-reachable to trip bots; visitors never reach it. */
 .ttm-hp {
 	position: absolute;
 	width: 1px;
@@ -507,7 +507,7 @@ p.is-style-poster {
 	aspect-ratio: 16 / 9;
 }
 
-/* :where() keeps this at the other img rules' specificity; source order still wins. */
+/* :where() matches the other img rules' specificity; source order still wins. */
 .ttm-article :where(.wp-block-post-featured-image) img {
 	width: 100%;
 	height: 100%;
@@ -804,13 +804,13 @@ blockquote.is-style-pull cite,
 	font-size: var(--wp--preset--font-size--ui);
 }
 
-/* Rule 43 (>= 721): the list is inline; core's own flex gap on the ul is replaced. */
+/* Rule 43 (>= 721): list is inline; core's flex gap on the ul is replaced. */
 .ttm-masthead-inner__nav ul {
 	display: flex;
 	column-gap: 22px;
 }
 
-/* Hub item reads lighter; current-menu-item (!important) still wins when current. */
+/* Hub item lighter; current-menu-item (!important) still wins when current. */
 .ttm-masthead-inner__nav .ttm-nav__hub > a.wp-block-navigation-item__content {
 	font-weight: 400;
 	color: var(--wp--preset--color--neutral-700);
@@ -907,6 +907,10 @@ blockquote.is-style-pull cite,
 	justify-content: space-between;
 	align-items: baseline;
 	margin-bottom: var(--wp--preset--spacing--40);
+}
+
+.ttm-hub-all .ttm-cell-heading {
+	margin-bottom: 12px;
 }
 
 .ttm-cell-heading__label {
@@ -1053,7 +1057,7 @@ blockquote.is-style-pull cite,
 	font-size: var(--wp--preset--font-size--featured);
 }
 
-/* §2.1 exception: bg-on-accent is 3.77:1, under AA; a11y row excludes this from axe. */
+/* §2.1 exception: bg-on-accent 3.77:1, under AA; a11y row excludes from axe. */
 .ttm-poster .btn-ghost {
 	background: transparent;
 	color: var(--wp--preset--color--bg);
@@ -1085,7 +1089,7 @@ blockquote.is-style-pull cite,
 
 /* 4.34 footer */
 
-/* Full-bleed via negative gutter margins, padding reapplied to align the masthead. */
+/* Full-bleed via negative gutter margins, padding reapplied to align masthead. */
 .ttm-footer {
 	display: flex;
 	justify-content: space-between;
@@ -1162,7 +1166,7 @@ blockquote.is-style-pull cite,
 	display: block;
 }
 
-/* .ttm-lead__inner is a plain article; block, not flex/grid (Decision "Lead media"). */
+/* .ttm-lead__inner: plain article; block, not flex/grid (Decision "Lead media"). */
 .ttm-lead__inner {
 	display: block;
 }
@@ -1652,7 +1656,13 @@ blockquote.is-style-pull cite,
 .ttm-series-list.is-grid-2 {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
-	gap: 0 var(--wp--preset--spacing--60);
+	column-gap: var(--wp--preset--spacing--80);
+}
+
+.ttm-series-list.is-grid-2 .ttm-series-row {
+	gap: 0 14px;
+	padding: 18px 0;
+	align-items: start;
 }
 
 .ttm-series-list.is-grid-3,
@@ -1695,9 +1705,24 @@ blockquote.is-style-pull cite,
 	font-weight: 800;
 }
 
-.ttm-series-row__dek,
+.ttm-series-list.is-grid-2 .ttm-series-row__title {
+	font-size: 20px;
+	line-height: 1.15;
+	letter-spacing: -0.01em;
+}
+
+.ttm-series-row__dek {
+	grid-column: 2;
+	margin-top: 5px;
+	font-size: 14px;
+	line-height: 1.45;
+	color: var(--wp--preset--color--neutral-800);
+	max-width: 44ch;
+}
+
 .ttm-series-row__categories {
 	grid-column: 2;
+	margin-top: 8px;
 	font-size: var(--wp--preset--font-size--caption);
 	color: var(--wp--preset--color--neutral-700);
 }
@@ -1706,6 +1731,7 @@ blockquote.is-style-pull cite,
 	grid-column: 3;
 	text-align: right;
 	font-size: var(--wp--preset--font-size--caption);
+	line-height: 1.5;
 }
 
 .ttm-series-row__parts {
@@ -1716,6 +1742,11 @@ blockquote.is-style-pull cite,
 .ttm-series-row__status {
 	display: block;
 	color: var(--wp--preset--color--neutral-700);
+}
+
+.ttm-series-row:has(.is-in-progress) .ttm-series-row__status {
+	font-weight: 600;
+	color: var(--wp--preset--color--accent-700);
 }
 
 @media (max-width: 720px) {
@@ -1789,6 +1820,10 @@ blockquote.is-style-pull cite,
 
 .ttm-series-bar .ttm-series-mark {
 	margin-top: 0;
+}
+
+.ttm-series-list.is-grid-2 .ttm-series-mark {
+	margin-top: 6px;
 }
 
 .ttm-series-bar__text {
@@ -1964,7 +1999,7 @@ blockquote.is-style-pull cite,
 	display: none;
 }
 
-/* 4.11 journal stream row: one anchor per row (link_rows()); the journal archive reuses it. */
+/* 4.11 journal stream row: one anchor per row (link_rows()); archive reuses it. */
 .ttm-journal-stream {
 	padding: 24px 0 40px;
 }
@@ -2634,7 +2669,7 @@ main.is-style-grid-8-4 h1 {
 		grid-template-columns: 1fr;
 	}
 
-	.ttm-hub-head h1 {
+	.ttm-hub-head.is-style-grid-8-4 h1 {
 		font-size: 44px;
 	}
 
@@ -2672,7 +2707,7 @@ main.is-style-grid-8-4 h1 {
 	color: var(--wp--preset--color--neutral-700);
 }
 
-/* 4.20 series toc: rail heading, 28px 1fr rows, current/published/scheduled states. */
+/* 4.20 series toc: rail heading, 28px 1fr rows, current/published/scheduled. */
 .ttm-series-toc__list {
 	list-style: none;
 	margin: 0;
@@ -2924,10 +2959,6 @@ main.is-style-grid-8-4 h1 {
 	margin: 12px 0 0;
 	font-size: 13px;
 	color: var(--wp--preset--color--accent-700);
-}
-
-.ttm-hub-all.ttm-hub-all .ttm-series-list.is-grid-2 {
-	grid-template-columns: 1fr 1fr;
 }
 
 .ttm-serial-hero {
