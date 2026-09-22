@@ -1,0 +1,54 @@
+.is-style-rule-1 # P1-03 pending
+.is-style-grid-5-7 # P3-04 pending
+.is-style-grid-3 # P2-01 pending
+.is-style-grid-2 # P4-01 pending
+.is-style-zone # editor block style (04 §3)
+.is-style-tile # editor block style (04 §3)
+.is-style-lead # editor block style (04 §3)
+p.is-style-poster # editor block style (04 §3)
+.is-style-headline-s # editor block style (04 §3)
+.is-style-short # editor block style (04 §3)
+.is-style-cover img # editor block style (04 §3)
+.is-style-cover # editor block style (04 §3)
+.is-style-cover-shadow img # editor block style (04 §3)
+.is-style-cover-shadow # editor block style (04 §3)
+.is-style-numbered-rows # editor block style (04 §3)
+.is-style-numbered-rows li # editor block style (04 §3)
+.is-style-numbered-rows li::marker # editor block style (04 §3)
+.is-style-tags .tag # P1-03 pending
+.wp-block-button.is-style-secondary .wp-block-button__link # editor block style (04 §3)
+.wp-block-button.is-style-ghost .wp-block-button__link # editor block style (04 §3)
+.wp-block-button.is-style-ghost-on-poster .wp-block-button__link # editor block style (04 §3)
+.wp-block-button.is-style-block .wp-block-button__link # editor block style (04 §3)
+.wp-block-quote.is-style-pull # editor block style (04 §3)
+blockquote.is-style-pull # editor block style (04 §3)
+blockquote.is-style-pull cite # editor block style (04 §3)
+.wp-block-quote.is-style-pull cite # editor block style (04 §3)
+.entry-content blockquote:not(.is-style-pull) # editor block style (04 §3)
+.ttm-item h4 # P3-04 pending
+.ttm-newsletter-form__statement # P1-06 pending
+.ttm-footer__copyright:empty # P0-11 pending
+.ttm-lead__media.is-ratio-4-3 # P1-02 pending
+.ttm-verse__copyright # editor block style (04 §3)
+.ttm-cell .wp-block-post-excerpt:empty # P3-04 pending
+.ttm-cell .wp-block-post:not(:first-child) .wp-block-post-featured-image # P3-04 pending
+.ttm-cell.is-style-span-2 .wp-block-post:first-child:not(:has(.ttm-item-featured__media img)) # P3-04 pending
+.ttm-writing-cell__footnote # P4-06 pending
+.ttm-series-mark.is-hiatus # P4-02 pending
+.ttm-series-strip:not(:has(.ttm-series-list)) # P0-08 pending
+.ttm-series-strip:has(.ttm-series-list.is-complete) .ttm-series-strip__heading # P0-08 pending
+.ttm-series-strip:has(.ttm-series-list.is-complete) .ttm-series-strip__heading-fallback # P0-08 pending
+.ttm-series-list.is-grid-3 # editor block style (04 §3)
+.ttm-series-row__dek # P4-02 pending
+.ttm-syndication # P2-01 pending
+.ttm-syndication a # P2-01 pending
+.ttm-journal-head:has(.ttm-syndication) .ttm-journal-head__count # P2-01 pending
+.ttm-filter-row__label # P3-02 pending
+.ttm-filter-row__sort # P3-02 pending
+.ttm-most-read__list # P3-04 pending
+.ttm-most-read__item # P3-04 pending
+.ttm-most-read__num # P3-04 pending
+.ttm-tile img # P4-06 pending
+.ttm-writing-body:not(:has(.ttm-story-tiles)) .ttm-writing-body__stories # P4-06 pending
+.ttm-writing-body:not(:has(.ttm-book-grid)) .ttm-writing-body__books # P4-06 pending
+.ttm-writing-body:not(:has(.ttm-story-tiles, .ttm-book-grid)) # P4-06 pending
