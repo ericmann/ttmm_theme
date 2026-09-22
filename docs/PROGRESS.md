@@ -19,7 +19,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P1-02 Article body row, hero, body typography and sticky aside
 - [x] P1-03 Article header — kicker, H1, dek, byline (01 §4.22)
 - [x] P1-04 Prev/next (01 §4.21)
-- [ ] P1-05 Series TOC (01 §4.20)
+- [x] P1-05 Series TOC (01 §4.20)
 - [ ] P1-06 More in section, newsletter box copy, aside order on the phone
 - [ ] P1-07 Phase 1 push — article screenshots
 - [ ] P2-01 Journal post header, body column, note column and syndication line (§6.4)
@@ -102,3 +102,8 @@ Pattern: head/byline groups layout:default, category post-terms separator " · "
 
 ### P1-04 — d4dfee8
 CSS 4.21: `__prev` padding 20px 24px 20px 0 + border-right rule-1; `__next` padding 20px 0 20px 24px, no left border; label/title/link rules unchanged. The old <=1024 stacking of .ttm-prevnext (and its __next border-top) is gone -- cells stay side by side at 1024; new <=720 block stacks to 1 track, __prev border-right 0 / border-bottom rule-1, both cells padding 20px 0, titles 16px. render.php unchanged (all classes already emitted). Un-fixme'd the 5 prevnext rows (prevnext-label reads textContent -- innerText reflects text-transform). SeriesPrevNextTest +test_missing_side_keeps_empty_cell (first part). fidelity 128/185 skipped; integration 451/451; budget 50485; check-fixme 140. Remaining e2e red: journalPost axe (syndication links) -> P2-01/P5-02.
+
+### P1-05 — a2d3ddf
+Tests: un-fixme'd toc-head, toc-item, toc-current, toc-scheduled, toc-phone-hub (fidelity + selectors green); SeriesTocTest 15/15 incl. new test_heading_has_series_link_and_hub_link and test_chapters_variant_composes_heading_and_all_link; test:integration 453/453; lints clean; budget 51921/61440.
+Interpretation: render.php per Decision "ttm/series-toc" (cell heading with __series name + "Hub →", rows li.__item.is-current|is-published|is-scheduled > __num.tnum + __title [+ __dek]); the F24 `title="Scheduled Sept 26"` sits on the <li> because that is what the §6.9 toc-scheduled row reads. Chapters variant emits ol.ttm-numbered > li.ttm-numbered__row under "{Series} — recent chapters"; its six ttm-numbered* classes stay `# P4-05 pending` in css-coverage-allow.txt (task text says keep pending). Old shared rules for .ttm-series-featured__part split into a /* 4.29 */ block, unchanged. selectors-allow.txt: `.ttm-series-toc__dek` (optional showDek state; no seeded TOC sets it). toc-scheduled uses .first(): the seeded series has two scheduled parts.
+Manual check: none. test:e2e red remains only journalPost axe (syndication links), owned by P2-01/P5-02.
