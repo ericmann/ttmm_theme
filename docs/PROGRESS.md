@@ -29,7 +29,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P2-04 Journal rail per §6.1.5
 - [x] P2-05 Tuning — `journal.excerpt_max_words`
 - [x] P2-06 Phase 2 push — lead row screenshots
-- [ ] P3-01 Section rows, cells, cell headings and headline items per §6.1.6
+- [x] P3-01 Section rows, cells, cell headings and headline items per §6.1.6
 - [ ] P3-02 Technology cell — inner grid and featured item with image
 - [ ] P3-03 Writing cell per §6.1.6
 - [ ] P3-04 Series strip per §6.1.7 (`layout=strip`)
@@ -347,3 +347,43 @@ docs/feedback/phase-2/. Pushed to refine/2026-09-21 (4de9351..d649863).
 Manual check: NOT VERIFIED (human) — docs/feedback/phase-2/lead-row.png
 vs the lower half of docs/feedback/design_top.png (lead image 16:9
 grayscale, red kicker, 44px headline, verse box, "All N entries").
+
+### P3-01 — c25c203
+section-cell.php (Business/Security/Faith/Opinion, the only consumers):
+meta-line parts date-only. section-row-1.php: new is-row-1 class.
+
+ttm.css: .is-style-cell padding-top literal 20px; :last-child zeroes
+padding-right too. .is-style-grid-4 gains a <=1024 2-column override
+scoped to .ttm-section-row, right cell of each pair loses its rule.
+New /* 4.14 cell */ rules: is-row-1 padding 0 0 8px; .ttm-item's
+border-top/padding-top moves to the `<li>` (.wp-block-post) for cells,
+since that's what the fidelity row measuring "the following item"
+targets; wp-block-post-title 21px lead by default, 15px for
+:not(:first-child); <=720 each cell its own zone (18/0/20, 2px
+border-top, no border-right). item__dek/item__meta get their literal
+values; cell-heading__link gains tnum.
+
+Trimmed the "-- unrelated component (...)" trailing text off every
+no-descending-specificity disable comment plus a few other verbose
+ones to stay under budget (707 bytes headroom after).
+
+cell-head-link's fidelity color assertion: neutral-600 (SPEC table) ->
+neutral-700, Decision "Colour vs a11y" names this exact row (CSS
+already had neutral-700; only the test needed fixing), same pattern as
+mast-current.
+
+New FrontPageTest::test_small_cells_meta_line_is_date_only (needed a
+second, newer lead-candidate post so the post under test isn't itself
+picked as lead and excluded from its own cell). Un-fixme'd all 13
+row-*/cell-* rows.
+
+FLIGHT CONTROLLER NOTE (relayed, not actioned here): lead-row.png's
+meta line still reads "Part 2: Why I moved my build pipeline off
+GitHub Actions" but the mock's part 2 is "Salts, keys and the rotation
+you skipped" -- fold into P3-06 (Phase 3 push) or the next
+seed-touching task: add that post as hardening-wordpress part 2,
+remove technology-post-2 from the series' parts list, re-seed before
+screenshots.
+
+All verify commands green (test:integration 412/412, test:e2e full
+suite 0 failed, composer test:unit 142/142).
