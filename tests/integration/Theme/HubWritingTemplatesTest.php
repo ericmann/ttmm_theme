@@ -185,7 +185,7 @@ class HubWritingTemplatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'ttm-serial-hero', $html );
 		$this->assertStringContainsString( 'The Quiet Ledger', $html );
 		$this->assertStringContainsString( 'All serials', $html );
-		$this->assertStringContainsString( 'Recent chapters', $html );
+		$this->assertStringContainsString( 'The Quiet Ledger — recent chapters', $html );
 		$this->assertStringContainsString( 'ttm-story-tiles', $html );
 		$this->assertStringContainsString( 'A Quiet Field', $html );
 		$this->assertStringContainsString( 'ttm-book-grid', $html );

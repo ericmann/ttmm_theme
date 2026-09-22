@@ -165,9 +165,35 @@ $ttm_extra = $ttm_is_fallback ? [ 'data-ttm-empty-heading' => __( 'Series', 'ttm
 				<?php if ( $ttm_show_dek && '' !== $ttm_dek ) : ?>
 			<span class="ttm-series-row__dek"><?php echo esc_html( $ttm_dek ); ?></span>
 			<?php endif; ?>
-				<?php if ( $ttm_show_cats && ! empty( $ttm_category_names ) ) : ?>
+				<?php if ( 'grid-2' === $ttm_layout ) : ?>
+					<?php if ( $ttm_show_cats && ! empty( $ttm_category_names ) ) : ?>
 			<span class="ttm-series-row__categories"><?php echo esc_html( implode( ' · ', $ttm_category_names ) ); ?></span>
-			<?php endif; ?>
+					<?php endif; ?>
+				<?php else : ?>
+					<?php
+					// list/grid-3 meta line: fiction "{Form} · {genre} · {cadence}"; nonfiction
+					// categories joined " · " then cadence; empties omitted.
+					$ttm_cadence_raw = (string) get_term_meta( $ttm_row['id'], 'ttm_cadence', true );
+					$ttm_cadence     = '' !== $ttm_cadence_raw
+						? mb_strtoupper( mb_substr( $ttm_cadence_raw, 0, 1 ) ) . mb_substr( $ttm_cadence_raw, 1 )
+						: '';
+					if ( 'nonfiction' === $ttm_row['form'] ) {
+						$ttm_meta_line_parts = [ implode( ' · ', $ttm_category_names ), $ttm_cadence ];
+					} else {
+						$ttm_form_labels     = [
+							'novel'       => __( 'Novel', 'ttm-core' ),
+							'novella'     => __( 'Novella', 'ttm-core' ),
+							'story-cycle' => __( 'Story cycle', 'ttm-core' ),
+						];
+						$ttm_genre           = (string) get_term_meta( $ttm_row['id'], 'ttm_genre', true );
+						$ttm_meta_line_parts = [ $ttm_form_labels[ $ttm_row['form'] ] ?? '', $ttm_genre, $ttm_cadence ];
+					}
+					$ttm_meta_line = implode( ' · ', array_filter( $ttm_meta_line_parts, static fn ( string $ttm_part ): bool => '' !== $ttm_part ) );
+					?>
+					<?php if ( $ttm_show_cats && '' !== $ttm_meta_line ) : ?>
+			<span class="ttm-series-row__meta"><?php echo esc_html( $ttm_meta_line ); ?></span>
+					<?php endif; ?>
+				<?php endif; ?>
 				<?php if ( $ttm_show_count ) : ?>
 			<span class="ttm-series-row__count">
 				<span class="ttm-series-row__parts"><?php echo esc_html( $ttm_count_word ); ?></span>

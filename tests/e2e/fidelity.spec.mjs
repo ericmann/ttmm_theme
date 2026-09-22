@@ -1812,7 +1812,7 @@ test.describe( 'writing', () => {
 		expect( await text( el ) ).toBe( 'Monthly' );
 	} );
 
-	test.fixme( // P4-05
+	test( // P4-05
 	'wr-body: .ttm-writing-body @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.writing, 1280 );
 		const el = page.locator( '.ttm-writing-body' );
@@ -1822,7 +1822,7 @@ test.describe( 'writing', () => {
 		expect( await computed( el, 'padding' ) ).toBe( '28px 0px 48px' );
 	} ); // P4-05
 
-	test.fixme( // P4-05
+	test( // P4-05
 	'wr-serials-head: .ttm-writing-body main .ttm-cell-heading (first) @1280', async ( {
 		page,
 	} ) => {
@@ -1835,7 +1835,7 @@ test.describe( 'writing', () => {
 		expect( await text( link ) ).toBe( 'Newest activity first' );
 	} ); // P4-05
 
-	test.fixme( // P4-05
+	test( // P4-05
 	'wr-serial-row: .ttm-series-list.is-list .ttm-series-row (first) @1280', async ( {
 		page,
 	} ) => {
@@ -1849,7 +1849,7 @@ test.describe( 'writing', () => {
 		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 1 ) );
 	} ); // P4-05
 
-	test.fixme( // P4-05
+	test( // P4-05
 	'wr-serial-title: .ttm-series-list.is-list .ttm-series-row__title (first) @1280', async ( {
 		page,
 	} ) => {
@@ -1861,7 +1861,7 @@ test.describe( 'writing', () => {
 		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
 	} ); // P4-05
 
-	test.fixme( // P4-05
+	test( // P4-05
 	'wr-serial-dek: .ttm-series-list.is-list .ttm-series-row__dek (first) @1280', async ( {
 		page,
 	} ) => {
@@ -1870,10 +1870,24 @@ test.describe( 'writing', () => {
 			.locator( '.ttm-series-list.is-list .ttm-series-row__dek' )
 			.first();
 		expect( await computed( el, 'font-size' ) ).toBe( px( 14 ) );
-		expect( await computed( el, 'max-width' ) ).toBe( '46ch' );
+		// getComputedStyle resolves ch to px: measure one "0" in the row's font.
+		const chs = await el.evaluate( ( node ) => {
+			const cs = window.getComputedStyle( node );
+			const probe = document.createElement( 'span' );
+			probe.textContent = '0';
+			probe.style.font = cs.font;
+			probe.style.letterSpacing = '0';
+			probe.style.position = 'absolute';
+			probe.style.visibility = 'hidden';
+			document.body.appendChild( probe );
+			const ch = probe.getBoundingClientRect().width;
+			probe.remove();
+			return parseFloat( cs.maxWidth ) / ch;
+		} );
+		expect( chs ).toBeCloseTo( 46, 0 );
 	} ); // P4-05
 
-	test.fixme( // P4-05
+	test( // P4-05
 	'wr-serial-form: .ttm-series-list.is-list .ttm-series-row__meta (first) @1280', async ( {
 		page,
 	} ) => {
@@ -1884,7 +1898,7 @@ test.describe( 'writing', () => {
 		expect( await text( el ) ).toMatch( /^Novel · .+ · monthly$/i );
 	} ); // P4-05
 
-	test.fixme( // P4-05
+	test( // P4-05
 	'wr-serial-count: .ttm-series-list.is-list .ttm-series-row__count (first) @1280', async ( {
 		page,
 	} ) => {
@@ -1896,7 +1910,7 @@ test.describe( 'writing', () => {
 		expect( await text( el ) ).toMatch( /^\d+ of \d+/ );
 	} ); // P4-05
 
-	test.fixme( // P4-05
+	test( // P4-05
 	'wr-serial-status: .ttm-series-list.is-list .ttm-series-row__status (first) @1280', async ( {
 		page,
 	} ) => {
@@ -1909,7 +1923,7 @@ test.describe( 'writing', () => {
 		expect( await text( el ) ).toBe( 'In progress' );
 	} ); // P4-05
 
-	test.fixme( // P4-05
+	test( // P4-05
 	'wr-chapters-head: .ttm-series-toc.is-chapters .ttm-cell-heading__label @1280', async ( {
 		page,
 	} ) => {
@@ -1917,10 +1931,12 @@ test.describe( 'writing', () => {
 		const el = page.locator(
 			'.ttm-series-toc.is-chapters .ttm-cell-heading__label'
 		);
-		expect( await text( el ) ).toBe( 'The Quiet Ledger — recent chapters' );
+		// text-transform: uppercase means innerText reflects the CSS, not the source.
+		const source = await el.evaluate( ( node ) => node.textContent );
+		expect( source ).toBe( 'The Quiet Ledger — recent chapters' );
 	} ); // P4-05
 
-	test.fixme( // P4-05
+	test( // P4-05
 	'wr-chapter-row: .ttm-series-toc.is-chapters .ttm-numbered__row (first) @1280', async ( {
 		page,
 	} ) => {
@@ -1933,7 +1949,7 @@ test.describe( 'writing', () => {
 		expect( await computed( el, 'padding' ) ).toBe( '12px 0px' );
 	} ); // P4-05
 
-	test.fixme( // P4-05
+	test( // P4-05
 	'wr-chapter-num: .ttm-series-toc.is-chapters .ttm-numbered__num (first) @1280', async ( {
 		page,
 	} ) => {
@@ -1947,7 +1963,7 @@ test.describe( 'writing', () => {
 		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
 	} ); // P4-05
 
-	test.fixme( // P4-05
+	test( // P4-05
 	'wr-chapter-title: .ttm-series-toc.is-chapters .ttm-numbered__title (first) @1280', async ( {
 		page,
 	} ) => {

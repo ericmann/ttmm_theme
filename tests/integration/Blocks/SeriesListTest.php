@@ -270,6 +270,27 @@ class SeriesListTest extends TTM_IntegrationTestCase {
 	}
 
 	/**
+	 * SPEC §6.5 "Body": `list` layout's meta line is "{Form} · {genre} · {cadence}" for
+	 * fiction (form labels Novel/Novella/Story cycle) and "{categories} · {cadence}" for
+	 * nonfiction, empties omitted; the stored cadence is capitalised on its first letter only.
+	 */
+	public function test_list_layout_form_line_for_fiction_and_nonfiction(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+
+		$fiction_id = $this->make_series( 'quiet-ledger', 'The Quiet Ledger', 'in-progress', 'novel', $tech );
+		update_term_meta( $fiction_id, 'ttm_genre', 'literary thriller' );
+		update_term_meta( $fiction_id, 'ttm_cadence', 'monthly' );
+
+		$nonfiction_id = $this->make_series( 'hardening-wp', 'Hardening WordPress', 'in-progress', 'nonfiction', $tech );
+		update_term_meta( $nonfiction_id, 'ttm_cadence', 'weekly' );
+
+		$html = $this->render( [ 'status' => 'any' ] );
+
+		$this->assertStringContainsString( 'ttm-series-row__meta">Novel · literary thriller · Monthly<', $html );
+		$this->assertStringContainsString( 'ttm-series-row__meta">Technology · Weekly<', $html );
+	}
+
+	/**
 	 * SPEC §5: `excludeCurrent` with no explicit `limit` reads `series.related_limit`
 	 * (default 4), not the strip's own default of 3.
 	 */

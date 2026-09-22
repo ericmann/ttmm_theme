@@ -1,4 +1,4 @@
-/* Component classes (01 §4); budget: check-budget.mjs. */
+/* Component classes (01 §4). */
 
 /* 0 base */
 :root {
@@ -43,7 +43,7 @@
 
 /* 0.2 page container */
 
-/* Rule 42: centred 1280 column; gutter is padding, zeroed. */
+/* Rule 42: centred 1280 col; gutter zeroed. */
 .wp-site-blocks {
 	max-width: 1280px;
 	margin-inline: auto;
@@ -69,7 +69,7 @@
 	border: 0;
 	opacity: 1;
 
-	/* Rule 35: full width; !important beats core's inline width/margin rules. */
+	/* Rule 35: full width; !important > core. */
 	width: 100% !important;
 	max-width: none !important;
 	margin-left: 0 !important;
@@ -138,7 +138,7 @@
 	align-self: start;
 }
 
-/* Article: 8/4 grid; aside sticks >=1025, static below. */
+/* Article: 8/4 grid; aside sticks >=1025. */
 .ttm-article {
 	column-gap: 64px;
 	row-gap: 0;
@@ -198,12 +198,12 @@
 		grid-template-columns: 1fr;
 	}
 
-	/* §6.1.9: 2 cells per row (.ttm-section-row is the only is-style-grid-4 consumer). */
+	/* §6.1.9: 2/row (grid-4's only user). */
 	.ttm-section-row.is-style-grid-4 {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
-	/* Right rules only on the left cell of each pair. */
+	/* Right rules only on left cell of each pair. */
 	.ttm-section-row .ttm-cell:nth-child(even) {
 		padding-right: 0;
 		border-right: 0;
@@ -402,7 +402,7 @@ p.is-style-poster {
 	color: var(--wp--preset--color--text);
 }
 
-/* Tag chips: byline's right group (§6.2 "Article header"). */
+/* Tag chips: byline's right group (§6.2). */
 .is-style-tags {
 	display: flex;
 	gap: 6px;
@@ -431,7 +431,7 @@ p.is-style-poster {
 	cursor: pointer;
 }
 
-/* accent-on-bg fails AA (3.76:1); accent-700 clears 6.4:1. */
+/* accent-on-bg fails AA; accent-700 clears it. */
 .btn-primary,
 .wp-block-button__link {
 	background: var(--wp--preset--color--accent-700);
@@ -490,7 +490,7 @@ p.is-style-poster {
 	border-radius: 0;
 }
 
-/* Honeypot: hidden, tab-reachable so bots trip it, not people. */
+/* Honeypot: tab-reachable so bots trip it. */
 .ttm-hp {
 	position: absolute;
 	width: 1px;
@@ -501,13 +501,13 @@ p.is-style-poster {
 
 /* 4.23 figure */
 
-/* Article hero: colour, 16:9 owned here, not block attr. */
+/* Article hero: colour, 16:9 owned here. */
 .ttm-article .wp-block-post-featured-image {
 	margin-top: 28px;
 	aspect-ratio: 16 / 9;
 }
 
-/* :where() matches the other img rules; order still wins. */
+/* :where() matches img rules; order wins. */
 .ttm-article :where(.wp-block-post-featured-image) img {
 	width: 100%;
 	height: 100%;
@@ -531,7 +531,7 @@ p.is-style-poster {
 	margin: 0 0 22px;
 }
 
-/* F12: no hero -> byline meets body with this gap (§6.2). */
+/* F12: no hero -> byline meets body, this gap. */
 .ttm-entry {
 	padding-top: 28px;
 }
@@ -598,7 +598,7 @@ p.is-style-poster {
 	overflow-x: auto;
 }
 
-/* pre>code stays dark, not inline-code's light (axe). */
+/* pre>code stays dark, unlike inline-code. */
 .entry-content :where(pre) code {
 	background: none;
 	color: inherit;
@@ -659,7 +659,7 @@ blockquote.is-style-pull cite,
 	padding-top: var(--wp--preset--spacing--40);
 }
 
-/* Shared by both mastheads' nav block (front + inner). */
+/* Shared by both mastheads' nav. */
 .ttm-nav {
 	box-sizing: border-box;
 }
@@ -724,7 +724,7 @@ blockquote.is-style-pull cite,
 	gap: 28px;
 }
 
-/* Colour vs a11y: accent-700, !important beats core's rule. */
+/* Colour vs a11y: accent-700 over core. */
 .ttm-nav .current-menu-item > a {
 	color: var(--wp--preset--color--accent-700) !important;
 }
@@ -762,7 +762,7 @@ blockquote.is-style-pull cite,
 		display: none;
 	}
 
-	/* Core sets flex-wrap: wrap; the ul, itself nav's flex item, also needs flex-shrink: 0. */
+	/* nav's flex item (ul) needs flex-shrink:0. */
 	.ttm-masthead-front__nav ul {
 		flex-wrap: nowrap;
 		flex-shrink: 0;
@@ -804,13 +804,13 @@ blockquote.is-style-pull cite,
 	font-size: var(--wp--preset--font-size--ui);
 }
 
-/* Rule 43 (>=721): list inline; core's flex gap replaced. */
+/* Rule 43 (>=721): flex gap replaced. */
 .ttm-masthead-inner__nav ul {
 	display: flex;
 	column-gap: 22px;
 }
 
-/* Hub item lighter; current-menu-item wins if current. */
+/* Hub item lighter; current-menu-item wins. */
 .ttm-masthead-inner__nav .ttm-nav__hub > a.wp-block-navigation-item__content {
 	font-weight: 400;
 	color: var(--wp--preset--color--neutral-700);
@@ -823,7 +823,7 @@ blockquote.is-style-pull cite,
 
 @media (min-width: 721px) {
 
-	/* Rule 43: no open/close chrome at all; the responsive container is just the list. */
+	/* Rule 43: no chrome; just the list. */
 	.ttm-masthead-inner .wp-block-navigation__responsive-container-open,
 	.ttm-masthead-inner .wp-block-navigation__responsive-container-close {
 		display: none;
@@ -932,7 +932,7 @@ blockquote.is-style-pull cite,
 	border-bottom: var(--ttm-rule-2);
 }
 
-/* §6.1.5 rail link is 12px, not shared 11px; scoped here. */
+/* §6.1.5 rail link is 12px, not 11. */
 .ttm-cell-heading.is-rail .ttm-cell-heading__link {
 	font-size: var(--wp--preset--font-size--caption);
 }
@@ -956,7 +956,7 @@ blockquote.is-style-pull cite,
 	color: var(--wp--preset--color--accent);
 }
 
-/* 03 §9: clamp 3 lines so prose can't leak past dek. */
+/* 03 §9: clamp 3 lines; prose can't leak past. */
 .ttm-item__dek {
 	display: -webkit-box;
 	overflow: hidden;
@@ -992,13 +992,13 @@ blockquote.is-style-pull cite,
 	color: var(--wp--preset--color--neutral-800);
 }
 
-/* Box form is tighter than the shared row (SPEC §6.2). */
+/* Box form is tighter than the shared row. */
 .ttm-newsletter-box form {
 	display: flex;
 	gap: 6px;
 }
 
-/* .input/.btn* style themselves; this owns the row layout. */
+/* .input/.btn* style selves; row layout here. */
 .ttm-newsletter-form__form {
 	display: flex;
 	align-items: center;
@@ -1047,7 +1047,7 @@ blockquote.is-style-pull cite,
 	gap: var(--wp--preset--spacing--60);
 }
 
-/* Bumps poster pull 28 to featured 40; phone reverts to 28. */
+/* Poster pull 28 bumped to 40; phone reverts. */
 /* stylelint-disable-next-line no-descending-specificity */
 .ttm-poster h3.is-style-poster {
 	margin: 0;
@@ -1057,7 +1057,7 @@ blockquote.is-style-pull cite,
 	font-size: var(--wp--preset--font-size--featured);
 }
 
-/* §2.1: bg-on-accent 3.77:1, under AA; excluded from axe. */
+/* §2.1: bg-on-accent under AA; axe-excluded. */
 .ttm-poster .btn-ghost {
 	background: transparent;
 	color: var(--wp--preset--color--bg);
@@ -1089,7 +1089,7 @@ blockquote.is-style-pull cite,
 
 /* 4.34 footer */
 
-/* Full-bleed via negative margins, padding aligns it. */
+/* Full-bleed via neg margins; padding aligns. */
 .ttm-footer {
 	display: flex;
 	justify-content: space-between;
@@ -1100,7 +1100,7 @@ blockquote.is-style-pull cite,
 	border-top: var(--ttm-rule-2);
 }
 
-/* template-part className lands on wrapper div, not footer. */
+/* template-part className -> div, not footer. */
 .is-after-poster .ttm-footer {
 	padding: 16px var(--wp--custom--gutter--desktop);
 	border-top: 0;
@@ -1166,7 +1166,7 @@ blockquote.is-style-pull cite,
 	display: block;
 }
 
-/* .ttm-lead__inner: plain article (Decision "Lead media"). */
+/* .ttm-lead__inner: plain article. */
 .ttm-lead__inner {
 	display: block;
 }
@@ -1282,7 +1282,7 @@ blockquote.is-style-pull cite,
 	gap: var(--wp--preset--spacing--60);
 }
 
-/* 02 §A: 8/4 down to 900px, below the shared 1024 collapse. */
+/* 02 §A: 8/4 to 900px, below 1024 collapse. */
 @media (max-width: 1024px) and (min-width: 901px) {
 
 	.ttm-lead-row {
@@ -1323,7 +1323,7 @@ blockquote.is-style-pull cite,
 	color: var(--wp--preset--color--neutral-700);
 }
 
-/* WCAG 1.4.1: underline; colour alone isn't enough (axe). */
+/* WCAG 1.4.1: not colour alone; underline too. */
 /* stylelint-disable-next-line no-descending-specificity */
 .ttm-verse__attribution a {
 	color: var(--wp--preset--color--accent-700);
@@ -1414,7 +1414,7 @@ blockquote.is-style-pull cite,
 	display: none;
 }
 
-/* .ttm-item's rule/padding (shared w/ more-in) moves to li. */
+/* .ttm-item rule/padding (w/ more-in) -> li. */
 .ttm-cell .ttm-item {
 	border-top: 0;
 	padding: 0;
@@ -1456,7 +1456,7 @@ blockquote.is-style-pull cite,
 	gap: 20px 28px;
 }
 
-/* Children become direct items of the post-template grid. */
+/* Children are the post-template grid's items. */
 .ttm-cell.is-style-span-2 .ttm-item {
 	display: contents;
 }
@@ -1705,6 +1705,7 @@ blockquote.is-style-pull cite,
 	font-weight: 800;
 }
 
+.ttm-series-list.is-list .ttm-series-row__title,
 .ttm-series-list.is-grid-2 .ttm-series-row__title {
 	font-size: 20px;
 	line-height: 1.15;
@@ -1718,6 +1719,18 @@ blockquote.is-style-pull cite,
 	line-height: 1.45;
 	color: var(--wp--preset--color--neutral-800);
 	max-width: 44ch;
+}
+
+.ttm-series-list.is-list .ttm-series-row {
+	gap: 0 14px;
+	padding: 16px 0;
+	align-items: start;
+	border-top: 0;
+	border-bottom: var(--ttm-rule-1);
+}
+
+.ttm-series-list.is-list .ttm-series-row__dek {
+	max-width: 46ch;
 }
 
 .ttm-series-row__categories {
@@ -1741,11 +1754,11 @@ blockquote.is-style-pull cite,
 
 .ttm-series-row__status {
 	display: block;
+	font-weight: 600;
 	color: var(--wp--preset--color--neutral-700);
 }
 
 .ttm-series-row:has(.is-in-progress) .ttm-series-row__status {
-	font-weight: 600;
 	color: var(--wp--preset--color--accent-700);
 }
 
@@ -1762,7 +1775,7 @@ blockquote.is-style-pull cite,
 	}
 }
 
-/* Right aside: shared by every archive kind's aside (§6.6). */
+/* Right aside: shared across archive kinds. */
 .ttm-archive-body aside {
 	padding-top: 24px;
 	display: flex;
@@ -1877,7 +1890,7 @@ blockquote.is-style-pull cite,
 
 @media (max-width: 720px) {
 
-	/* 3b: the bar collapses to mark · name · part and the segments alone. */
+	/* 3b: bar -> mark · name · part + segments. */
 	.ttm-series-bar {
 		font-size: var(--wp--preset--font-size--caption);
 	}
@@ -1948,7 +1961,7 @@ blockquote.is-style-pull cite,
 	margin-top: 40px;
 }
 
-/* Two ruled cells; missing side keeps its cell and rules. */
+/* Two ruled cells; missing side keeps its rule */
 .ttm-prevnext__prev {
 	padding: 20px 24px 20px 0;
 	border-right: var(--ttm-rule-1);
@@ -1980,7 +1993,7 @@ blockquote.is-style-pull cite,
 	text-decoration: none;
 }
 
-/* 4.5 headline item, scoped: "More in {Category}" rows. */
+/* 4.5 headline item: "More in {Category}". */
 .ttm-more-in .wp-block-query .ttm-item {
 	padding: 10px 0;
 	border-top: 0;
@@ -1999,7 +2012,7 @@ blockquote.is-style-pull cite,
 	display: none;
 }
 
-/* 4.11 journal row: one anchor (link_rows), reused by archive. */
+/* 4.11 journal row (link_rows). */
 .ttm-journal-stream {
 	padding: 24px 0 40px;
 }
@@ -2161,7 +2174,7 @@ blockquote.is-style-pull cite,
 	display: inline;
 }
 
-/* Underlined: distinct from the grey sentence (axe). */
+/* Underlined: distinct from grey sentence. */
 /* stylelint-disable-next-line no-descending-specificity */
 .ttm-syndication a {
 	color: var(--wp--preset--color--accent-700);
@@ -2208,7 +2221,7 @@ ul.modern-footnotes-list,
 		grid-template-columns: 1fr;
 	}
 
-	/* §6.4: the standing note becomes a 1px-ruled footnote under the body. */
+	/* §6.4: note becomes a 1px footnote. */
 	.ttm-journal-head__aside {
 		margin-top: 28px;
 		padding-top: 14px;
@@ -2243,7 +2256,7 @@ ul.modern-footnotes-list,
 		line-height: 1.6;
 	}
 
-	/* 3b: the two cells stack with the rule between them turned horizontal. */
+	/* 3b: cells stack; rule turns horizontal. */
 	.ttm-prevnext {
 		grid-template-columns: 1fr;
 	}
@@ -2265,7 +2278,7 @@ ul.modern-footnotes-list,
 
 @media (max-width: 720px) {
 
-	/* 3b: kicker 11, H1 34, dek 17; the byline wraps at 12px. */
+	/* 3b: kicker 11, H1 34, dek 17, byline 12px. */
 	.ttm-article-head .is-style-kicker {
 		font-size: var(--wp--preset--font-size--micro);
 	}
@@ -2284,7 +2297,7 @@ ul.modern-footnotes-list,
 		font-size: var(--wp--preset--font-size--caption);
 	}
 
-	/* 3b: the hero and code blocks go full-bleed by the phone gutter (rule 42). */
+	/* 3b: hero/code full-bleed via rule 42. */
 	.ttm-article .wp-block-post-featured-image {
 		margin: 20px -20px 0;
 		width: calc(100% + 40px);
@@ -2314,7 +2327,7 @@ ul.modern-footnotes-list,
 	}
 }
 
-/* 4.25 archive head (SPEC §6.6 "Archive header") */
+/* 4.25 archive head (§6.6) */
 .ttm-archive-head {
 	column-gap: 64px;
 	padding: 40px 0 28px;
@@ -2367,7 +2380,7 @@ ul.modern-footnotes-list,
 	}
 }
 
-/* 4.26 filter row sits directly under the header (§6.6). */
+/* 4.26 filter row sits under the header. */
 .ttm-filter-row {
 	display: flex;
 	align-items: center;
@@ -2384,7 +2397,7 @@ ul.modern-footnotes-list,
 	border-top: var(--ttm-rule-2);
 }
 
-/* S6: filter row owns the rule below; body needs none. */
+/* S6: filter row owns the rule; body doesn't. */
 .ttm-filter-row + .ttm-archive-body {
 	border-top: 0;
 }
@@ -2438,7 +2451,7 @@ ul.modern-footnotes-list,
 	padding: 0;
 }
 
-/* Rows are anchors (Decision "Whole-row links"). */
+/* Rows are anchors ("Whole-row links"). */
 .ttm-archive-row {
 	display: grid;
 	grid-template-columns: 72px 1fr;
@@ -2557,7 +2570,7 @@ ul.modern-footnotes-list,
 	font-feature-settings: "tnum";
 }
 
-/* 404 "Latest" number is a CSS counter (Decision "404"). */
+/* 404 "Latest" number is a CSS counter. */
 .ttm-latest .wp-block-query .wp-block-post-template {
 	list-style: none;
 	margin: 0;
@@ -2633,7 +2646,7 @@ main.is-style-grid-8-4 h1 {
 	font-size: 56px;
 }
 
-/* 4.38 series hub header (SPEC §6.7 "Header") */
+/* 4.38 series hub header (§6.7) */
 .ttm-hub-head {
 	column-gap: 64px;
 	padding: 40px 0 28px;
@@ -2707,7 +2720,7 @@ main.is-style-grid-8-4 h1 {
 	color: var(--wp--preset--color--neutral-700);
 }
 
-/* 4.20 series toc: rail heading, 28px 1fr rows, per state. */
+/* 4.20 series toc: rail heading, 28px 1fr. */
 .ttm-series-toc__list {
 	list-style: none;
 	margin: 0;
@@ -2767,9 +2780,34 @@ main.is-style-grid-8-4 h1 {
 	color: var(--wp--preset--color--neutral-700);
 }
 
+/* Chapters reuse .ttm-numbered (02 §D). */
+.ttm-series-toc.is-chapters .ttm-numbered__row {
+	grid-template-columns: 44px 1fr auto;
+	gap: 0 16px;
+	padding: 12px 0;
+}
+
+.ttm-series-toc.is-chapters .ttm-numbered__num {
+	font-size: 15px;
+}
+
+.ttm-series-toc.is-chapters .ttm-numbered__title,
+.ttm-series-toc.is-chapters .ttm-numbered__dek {
+	grid-column: 2;
+}
+
+.ttm-series-toc.is-chapters .ttm-numbered__title {
+	font-size: 17px;
+	font-weight: 800;
+}
+
+.ttm-series-toc.is-chapters .ttm-numbered__date {
+	grid-column: 3;
+}
+
 @media (max-width: 720px) {
 
-	/* 3b: the TOC becomes a 2px-ruled zone; the series name gives way to "Hub →". */
+	/* 3b: TOC -> 2px zone; yields to "Hub →". */
 	.ttm-series-toc {
 		border-top: var(--ttm-rule-2);
 		padding: 18px 0 20px;
@@ -3025,6 +3063,19 @@ main.is-style-grid-8-4 h1 {
 	.ttm-serial-hero:not(.is-nocover) {
 		grid-template-columns: 320px 1fr;
 	}
+}
+
+/* 02 §D writing body */
+.ttm-writing-body {
+	padding: 28px 0 48px;
+}
+
+.ttm-writing-body > main {
+	gap: 36px;
+}
+
+.ttm-writing-body > aside {
+	gap: 32px;
 }
 
 .ttm-writing-body:not(:has(.ttm-story-tiles)) .ttm-writing-body__stories {
