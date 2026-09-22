@@ -6,7 +6,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P0-01 Allow-list to pending lines, budget 61440, tagged fixme guard
 - [x] P0-02 Config keys, `article-h2` slug and the theme.json variable check
 - [x] P0-03 Runtime selector coverage spec (rule 41) and the e2e screen set
-- [ ] P0-04 Fidelity rows for every §6.9 row as tagged fixme
+- [x] P0-04 Fidelity rows for every §6.9 row as tagged fixme
 - [ ] P0-05 Seed images per rule 45, author display name, book and About covers
 - [ ] P0-06 Tuning — `seed.image_band_angle`
 - [ ] P0-07 Seed — the `2b` article and the Hardening WordPress series
@@ -60,3 +60,8 @@ wc -l tests/e2e/selectors-allow.txt: 54.
 Interpretation: tests/e2e/lib/urls.mjs (13-screen SCREEN_URLS incl. securityFiltered export) and screens.spec.mjs (fetchpriority front/article-only) already matched the Decision's required shape from prior work; only playwright.config.mjs's fidelity testMatch/desktop+phone testIgnore needed "selectors" added.
 Allow-list mapping (54 lines): component selectors -> owning phase task, e.g. ttm-syndication(+a)/is-style-grid-3/ttm-journal-head:has(...) -> P2-01; ttm-filter-row__label/__sort -> P3-02; ttm-item h4/ttm-cell empty variants/is-style-grid-5-7/ttm-most-read__* -> P3-04; is-style-grid-2/ttm-series-row__dek/ttm-series-mark.is-hiatus -> P4-02; ttm-tile img/ttm-writing-cell__footnote/ttm-writing-body:not(...) -> P4-06; ttm-newsletter-form__statement -> P1-06; ttm-footer__copyright:empty -> P0-11; ttm-lead__media.is-ratio-4-3 -> P1-02; is-style-rule-1/.is-style-tags .tag -> P1-03; ttm-series-strip state variants -> P0-08. Remaining .is-style-* editor-only styles (zone/tile/lead/poster/headline-s/short/cover/cover-shadow/numbered-rows, button/quote styles) tagged "# editor block style (04 §3)" per the task's list — may remain past the flight.
 Note: an unrelated themes/ttm-theme/templates/404.html change (adding className "ttm-search" to core/search, matching P3-05's decision) appeared mid-task from what looked like a second concurrent process on this repo; git-stashed (not discarded) so it isn't lost — whoever runs P3-05 should check `git stash list`.
+
+### P0-04 — 2611387
+187 test.fixme( rows added transcribing every §6.9 row not already in phase 2, grouped by describe block matching the task's list; each tagged `// P<n>-<nn>` per the Row-to-task map. Colour vs a11y overrides applied verbatim (nav-current/nav-hub-current/box-btn -> accent-700; js-words/wr-chapter-num/ar-mostread-num/hub-part-num -> neutral-700; wr-serial-status kept accent-700 for "In progress" per the row asserted). gotoScreen(page, path, width) added; style.mjs gained text()/visibleCount(). playwright --list: 313 total (310 fidelity + 2 editors + 1 selectors). check-fixme: 187 tagged, 0 untagged. npm run test:e2e: 169 passed, 232 skipped, 0 failed.
+Also fixed templates/404.html's wp:search missing className "ttm-search" (AA contrast axe failure on tagArchive/notFound screens, same finding surfaced during P0-03) — required for this task's own test:e2e-green verification bar.
+Note for reviewer: this task's files showed signs of a second concurrent process editing the same working tree mid-task (see P0-03's log and FOUNDRY_FEEDBACK if present); final committed content was verified green via foundry_verify before commit regardless of provenance of individual lines.
