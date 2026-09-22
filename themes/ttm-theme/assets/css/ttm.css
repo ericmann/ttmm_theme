@@ -443,8 +443,7 @@ p.is-style-poster {
 	border-radius: 0;
 }
 
-/* Newsletter honeypot (Provider/CustomUrl.php): visually hidden, still tab/DOM-reachable so a
-   bot filling every field trips it; real visitors never see or reach it. */
+/* Honeypot: visually hidden, still tab/DOM-reachable so bots trip it; visitors never reach it. */
 .ttm-hp {
 	position: absolute;
 	width: 1px;
@@ -679,6 +678,15 @@ blockquote.is-style-pull cite,
 
 	.ttm-masthead-front__nav::-webkit-scrollbar {
 		display: none;
+	}
+
+	/* Core sets flex-wrap: wrap; the ul, itself nav's flex item, also needs flex-shrink: 0. */
+	.ttm-masthead-front__nav ul {
+		flex-wrap: nowrap;
+		flex-shrink: 0;
+		gap: 20px;
+		font-size: var(--wp--preset--font-size--ui);
+		white-space: nowrap;
 	}
 }
 
@@ -979,6 +987,7 @@ blockquote.is-style-pull cite,
 		flex-direction: column;
 		gap: var(--wp--preset--spacing--20);
 		font-size: 11px;
+		line-height: 1.6;
 	}
 }
 
@@ -1112,6 +1121,14 @@ blockquote.is-style-pull cite,
 	display: flex;
 	flex-direction: column;
 	gap: var(--wp--preset--spacing--60);
+}
+
+/* 02 §A: 8/4 down to 900px, below the shared 1024px single-column collapse. */
+@media (max-width: 1024px) and (min-width: 901px) {
+
+	.ttm-lead-row {
+		grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+	}
 }
 
 /* 4.9 verse */

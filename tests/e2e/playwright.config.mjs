@@ -24,13 +24,16 @@ export default defineConfig( {
 	projects: [
 		{
 			name: 'desktop',
-			testIgnore: /(fidelity|editors)\.spec\.mjs$/,
+			testIgnore: /(fidelity|editors|phone)\.spec\.mjs$/,
 			use: {
 				...devices[ 'Desktop Chrome' ],
 				viewport: { width: 1280, height: 900 },
 			},
 		},
 		{
+			// P4-01: phone.spec.mjs is phone-only (390px-specific layout assertions -- no
+			// horizontal overflow, nav scroll, stacked poster/writing cell), so `desktop`
+			// excludes it above rather than running it twice at the wrong viewport.
 			name: 'phone',
 			testIgnore: /(fidelity|editors)\.spec\.mjs$/,
 			use: {
