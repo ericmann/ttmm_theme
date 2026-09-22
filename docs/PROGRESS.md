@@ -52,7 +52,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] R1-06 Raise cssBudgetBytes and restore the declarations dropped under it
 - [x] R1-07 Seed fixture drift: the third book, and a tautological Sunday test
 - [x] R1-08 Scope the global post-excerpt filter; newsletter box copy is 13px
-- [ ] R1-09 Tighten the fidelity rows that assert less than their §6.9 row
+- [x] R1-09 Tighten the fidelity rows that assert less than their §6.9 row
 - [ ] R1-10 Prefix, stale lint entries, no-op CSS and the undocumented dd4dfbe commit
 
 ## Log
@@ -411,3 +411,10 @@ Helpers::excerpt_markup() now scoped to $block['attrs']['className'] containing 
 CSS: .ttm-newsletter-box__copy font-size changed from --wp--preset--font-size--body-s (14px) to --wp--preset--font-size--ui (13px), matching SPEC §6.2/PLAN P1-06.
 Tests: HelpersTest.php - new test_excerpt_markup_is_a_no_op_outside_the_article_header_dek (manual excerpt with markup, className without is-style-dek-l -> unchanged); the two existing excerpt_markup tests updated to pass $block with is-style-dek-l className (they implicitly relied on the old unscoped filter). New fidelity.spec.mjs row "box-copy" (not an existing SPEC §6.9 row, called out in commit body) asserts .ttm-newsletter-box__copy is px(13)/neutral-800 at SCREENS.article @1280.
 Full foundry_verify green including npm run test:e2e (446 passed) and npm run test:integration (481 passed).
+
+### R1-09 — fbbdb13
+Tightened all 9 rows + added single-head-phone (P5-01 direct coverage gap). Each tightened assertion added:
+art-row: t[0]/t[1] ~= 2 (2:1 ratio). art-hero: filter checked on the img descendant, not the figure. art-byline-author: color === text preset. art-byline-tags: tag chip boundingBox().x >= read-time paragraph's right edge (selector: .ttm-byline p.wp-block-paragraph, the bound reading-time paragraph has no dedicated class). toc-item: t[0] ~= 28. aside-phone-order: lastY starts at prevnext.y + prevnext.height (was prevnext.y, the top); had to use toBeGreaterThanOrEqual not toBeGreaterThan since .ttm-series-toc sits flush against prevnext's bottom by design (0px gap) -- toBeGreaterThan false-failed on correct markup. ar-year/ar-row/ar-mostread/ar-aside-row: t[0] ~= 120/72/24/10 respectively. single-head-phone (new): .ttm-series-single h1 === 44px @390.
+Proved every row bites via a real temporary local CSS break + targeted `-g` Playwright run, then git checkout -- to restore (see commit body for exact breaks used per row). All reverts verified clean (git status showed only the intended test file diff).
+Lint required prettier --fix on two new multi-line expect() calls (readTimeBox arithmetic, single-head-phone args) -- purely formatting, no logic change.
+Full foundry_verify green including npm run test:e2e (447 passed) on the restored/committed code.
