@@ -38,7 +38,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P4-01 Full `3a` phone pass and ≤ 1024 pass
 - [x] P4-02 a11y and network rows, zero-fixme guard
 - [x] P4-03 Inner templates smoke and CI seeding
-- [ ] P4-04 Handoff, SETUP and final budget measurement
+- [x] P4-04 Handoff, SETUP and final budget measurement
 - [ ] P4-05 Phase 4 push — final screenshots
 
 ## Log
@@ -617,3 +617,25 @@ All verify commands green: test:e2e full suite 138 passed/0 failed
 (about renders one <main>, zero serious/critical axe violations at
 both viewports), composer test:unit 142/142, composer lint 0 errors,
 forbidden-patterns clean. grep -n 'refine' ci.yml shows both triggers.
+
+### P4-04 — acc73bf
+docs/HANDOFF.md (new): What changed per phase; every Manual check: line
+from PROGRESS.md verbatim in order (4 already logged + P4-05's own
+prescribed check listed as still owed, its text fixed by the plan
+regardless of P4-05's findings — 5 total); Measurements
+(journal.excerpt_max_words kept at 55 per P2-05; cssBudgetBytes's two
+corrections 40960->41984->43008 across P3-03/P3-04, confirmed settled
+by P3-05/P4-01/P4-02); P1-07 spike outcome; P1-09 editor-registration
+diagnosis; every SPEC issue logged (rule 34 allow-list shape, three
+Colour-vs-a11y overrides, poster-btn exception, rail-count-phone
+visible-count, h2 slug bug, four getComputedStyle() literal-keyword
+surprises, two real data/registration bugs); final allow-list contents
+verbatim.
+
+SETUP.md: added the missing npm run screenshots row (never documented).
+
+No budget/CLAUDE.md change: P4-01/P4-02 both landed within P3-04's
+already-settled 43008 ceiling.
+
+Verified: npm run lint green (budget 42980/43008, check:fixme clean);
+test -s docs/HANDOFF.md; grep -c 'NOT VERIFIED' docs/HANDOFF.md -> 5.
