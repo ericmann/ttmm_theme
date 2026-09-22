@@ -1779,6 +1779,10 @@ test.describe( 'writing', () => {
 		} );
 		expect( chs ).toBeCloseTo( 48, 0 );
 		expect( await el.count() ).toBe( 1 );
+		// wpautop's <p> must not leak into the raw, single-line synopsis text.
+		const html = await el.innerHTML();
+		expect( html ).not.toContain( '<p>' );
+		expect( html ).not.toContain( '&lt;p&gt;' );
 	} );
 
 	test( 'wr-buttons: .ttm-serial-hero__buttons .btn @1280', async ( {
@@ -2327,6 +2331,18 @@ test.describe( 'archive', () => {
 		// innerText reflects the label's text-transform; assert the source text.
 		const source = await el.evaluate( ( node ) => node.textContent );
 		expect( source.trim() ).toBe( 'Series in Security' );
+		expect( await computed( el, 'text-transform' ) ).toBe( 'uppercase' );
+	} );
+
+	test( 'ar-mostread-head: .ttm-most-read .ttm-cell-heading__label @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page.locator( '.ttm-most-read .ttm-cell-heading__label' );
+		// innerText reflects the label's text-transform; assert the source text.
+		const source = await el.evaluate( ( node ) => node.textContent );
+		expect( source.trim() ).toBe( 'Most read' );
+		expect( await computed( el, 'text-transform' ) ).toBe( 'uppercase' );
 	} );
 
 	test( 'ar-aside-row: .ttm-series-list.is-rail .ttm-series-row (first) @1280', async ( {
@@ -2617,6 +2633,10 @@ test.describe( 'hub', () => {
 		const el = page.locator( '.ttm-series-featured__dek' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 16 ) );
 		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-800' ) );
+		// wpautop's <p> must not leak into the raw dek text.
+		const html = await el.innerHTML();
+		expect( html ).not.toContain( '<p>' );
+		expect( html ).not.toContain( '&lt;p&gt;' );
 	} );
 
 	test( 'hub-progress: .ttm-series-progress__seg @1280', async ( {
@@ -2760,7 +2780,7 @@ test.describe( 'hub', () => {
 			.first();
 		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
 		const t = await text( el );
-		expect( t.includes( ' · ' ) || t.length > 0 ).toBe( true );
+		expect( t ).toContain( ' · ' );
 	} );
 
 	test( 'hub-nobox: .ttm-newsletter-box @1280', async ( { page } ) => {

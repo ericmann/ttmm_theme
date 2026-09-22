@@ -59,6 +59,10 @@ class MostReadTest extends TTM_IntegrationTestCase {
 		$pos_newest = strpos( $html, 'Newest' );
 		$pos_middle = strpos( $html, 'Middle' );
 		$this->assertLessThan( $pos_middle, $pos_newest );
+
+		// R1-05: the numbering is a literal 1/2/3 (mock 1e), not zero-padded.
+		$this->assertStringContainsString( '<span class="ttm-numbered__num tnum">1</span>', $html );
+		$this->assertStringNotContainsString( '>01<', $html );
 	}
 
 	public function test_fewer_than_limit_shows_what_exists(): void {

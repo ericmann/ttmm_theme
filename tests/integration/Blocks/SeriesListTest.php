@@ -252,20 +252,36 @@ class SeriesListTest extends TTM_IntegrationTestCase {
 	 */
 	public function test_grid_2_layout_renders_dek_categories_and_count(): void {
 		$tech      = $this->category_id( 'technology', 'Technology' );
+		$security  = $this->category_id( 'security', 'Security' );
 		$series_id = $this->make_series( 'hardening-wp', 'Hardening WordPress', 'in-progress', 'nonfiction', $tech );
 		wp_update_term( $series_id, 'series', [ 'description' => 'Six parts on hardening a WordPress install.' ] );
+
+		// R1-05: `categories_for()` collects one (primary) category per part, so a second
+		// category on the row needs a second part in a different section -- and joins with
+		// " · ", not just renders.
+		$second_part = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $security ],
+				'post_date'     => '2026-02-01 09:00:00',
+			]
+		);
+		update_post_meta( $second_part, 'ttm_series_part', 2 );
+		update_post_meta( $second_part, 'ttm_primary_category', $security );
+		wp_set_object_terms( $second_part, [ $series_id ], 'series' );
+		SeriesIndex::rebuild();
 
 		$html = $this->render(
 			[
 				'status' => 'any',
 				'layout' => 'grid-2',
-			] 
+			]
 		);
 
 		$this->assertStringContainsString( 'ttm-series-row__dek">Six parts on hardening a WordPress install.<', $html );
-		$this->assertStringContainsString( 'ttm-series-row__categories">Technology<', $html );
+		$this->assertStringContainsString( 'ttm-series-row__categories">Technology · Security<', $html );
 		$this->assertStringContainsString( 'ttm-series-row__count', $html );
-		$this->assertStringContainsString( 'ttm-series-row__parts">1 part<', $html );
+		$this->assertStringContainsString( 'ttm-series-row__parts">2 parts<', $html );
 		$this->assertStringContainsString( 'ttm-series-row__status">In progress<', $html );
 	}
 
