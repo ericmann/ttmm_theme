@@ -23,7 +23,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P1-06 More in section, newsletter box copy, aside order on the phone
 - [x] P1-07 Phase 1 push — article screenshots
 - [x] P2-01 Journal post header, body column, note column and syndication line (§6.4)
-- [ ] P2-02 Journal stream (01 §4.11) with whole-row links and "Full journal · N entries"
+- [x] P2-02 Journal stream (01 §4.11) with whole-row links and "Full journal · N entries"
 - [ ] P2-03 Journal archive (`category-journal.html`)
 - [ ] P2-04 Phase 2 push — journal screenshots
 - [ ] P3-01 Archive header (01 §4.25) and the `ttm/archive-kind` kicker
@@ -121,4 +121,9 @@ Manual check: NOT VERIFIED (human) — compare docs/feedback/phase-3/article.png
 ### P2-01 — 6eb4350
 Tests: fifteen jr-* rows un-fixme'd (fidelity + selectors green; journalPost axe screens green for the first time). ArticleValuesTest +test_word_count_when_unsyndicated_flag (unit 157); ArticleSourcesTest +test_word_count_binding_is_empty_when_post_is_syndicated, +test_empty_bound_paragraph_renders_nothing; SyndicatedToTest asserts two spans, no <p>; ArticleTemplatesTest +test_journal_head_columns_are_not_constrained_and_note_has_mock_copy, f14 green; ChromePartsTest footer test updated (empty bound copyright paragraph renders nothing). test:integration 459/459 after that update; test:e2e 245 passed / 156 skipped, zero failures; lints clean; budget 54161/61440; 30 pending coverage; 111 tagged fixme.
 Interpretation: drop_empty_bound() (render_block_core/paragraph + /heading, priority 20) applies to every ttm/*-bound block, so the footer's ttm/verse-copyright paragraph also vanishes with no stored verse (ChromePartsTest updated; `.ttm-footer__copyright:empty` CSS left as-is, footer out of scope). Values::word_count(int, bool $suppressed=false) carries the whenUnsyndicated flag; only non-blank URLs count as syndication. Note column group carries `ttm-journal-head__aside` for the <= 1024 footnote rule (PLAN named no class). `.ttm-syndication a` underlined: grey sentence + accent link failed axe link-in-text-block, which the a11y row forbids. jr-body asserts px(36*18); jr-synd-words asserts margin-left:auto by bounding boxes (flex auto margins resolve to px). `.ttm-journal-head__count` allow-listed as a state selector (seeded journal post is syndicated).
+Manual check: none.
+
+### P2-02 — 5f2bce4
+Tests: nine js-* rows un-fixme'd (fidelity + selectors green; all 26 axe screens green). HelpersTest +test_link_rows_turns_row_group_into_anchor, +test_link_rows_ignores_other_groups; ValuesTest +test_category_count_journal_full_format (+ zero case); ArticleTemplatesTest +test_journal_stream_rows_are_single_anchors_with_four_entries, +test_journal_stream_heading_reads_full_journal_count. Unit 160; test:integration 461/461; lints clean; budget 55758/61440; 29 pending coverage; 102 tagged fixme.
+Interpretation: core/group has no postId context, so link_rows() reads $instance->context['postId'] when present, else get_the_ID() (post-template loop). Rule-33 guard: a row whose content already contains an anchor (archive templates' isLink:true titles until P3-03) is left untouched; without it the archive/search screens produced nested anchors + empty focusable links (axe focusable-no-name). Stylelint no-descending-specificity forced heavier selectors for the title/excerpt rules instead of suppressions. js-head asserts textContent; js-excerpt asserts px(40*15); per-row rows use .first(). `.ttm-journal-stream:not(:has(.wp-block-post))` allow-listed as a state selector. Word-count paragraph is p.ttm-journal-row__words (was is-style-micro).
 Manual check: none.
