@@ -53,7 +53,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] R1-07 Seed fixture drift: the third book, and a tautological Sunday test
 - [x] R1-08 Scope the global post-excerpt filter; newsletter box copy is 13px
 - [x] R1-09 Tighten the fidelity rows that assert less than their §6.9 row
-- [~] R1-10 Prefix, stale lint entries, no-op CSS and the undocumented dd4dfbe commit
+- [x] R1-10 Prefix, stale lint entries, no-op CSS and the undocumented dd4dfbe commit
 
 ## Log
 (one entry per task, appended by implement)
@@ -422,3 +422,11 @@ art-row: t[0]/t[1] ~= 2 (2:1 ratio). art-hero: filter checked on the img descend
 Proved every row bites via a real temporary local CSS break + targeted `-g` Playwright run, then git checkout -- to restore (see commit body for exact breaks used per row). All reverts verified clean (git status showed only the intended test file diff).
 Lint required prettier --fix on two new multi-line expect() calls (readTimeBox arithmetic, single-head-phone args) -- purely formatting, no logic change.
 Full foundry_verify green including npm run test:e2e (447 passed) on the restored/committed code.
+
+### R1-10 — b32878c
+Books.php fieldset class restored to ttm-book-row; Fiction/Books.php added to check-css-coverage.mjs's SRC_SKIP (wp-admin-only markup). Extracted file filtering into new pure filterSrcFiles() in scripts/lib/css-coverage.mjs, unit-tested (class from skipped file never collected/never "missing"; class from kept file still enforced).
+Deleted the no-op `.ttm-archive, .ttm-most-read { display: block }` rule; added a small documented in-code UNSTYLED_WRAPPERS exemption in check-css-coverage.mjs (same SRC_SKIP-style mechanism, not a decorative CSS rule or the transient allow-list) since both are pure block wrappers styled entirely by descendant selectors.
+Deleted `.ttm-footer__copyright:empty` + its false selectors-allow.txt reason. This uncovered that base `.ttm-footer__copyright` had never had its own rule (only "covered" by the scanner's substring match against the `:empty` selector text) -- added a real `margin: 0` reset grouped with sibling `.ttm-footer__meta`, matching the existing paragraph-reset pattern, rather than reintroducing a no-op.
+Deleted the false `.ttm-series-featured__part-dek` selectors-allow.txt line (live selector, P4-03's taxonomy-series.html sets showDek:true, asserted by single-parts on /series/hardening-wordpress/).
+docs/PROGRESS.md: added a "(standalone, post-P5-05) — dd4dfbe" log entry describing both fixes it made (text-transform:none removal, most-read unpadded numbers); corrected P3-04's entry which still claimed the override ships.
+node scripts/check-css-coverage.mjs: 193/193, 0 pending. Full foundry_verify green: unit 169, integration 481/481, e2e 447 passed, budget 62188/62464. grep confirms book-admin-row gone, ttm-book-row present. No docs/phase-1, docs/phase-2 or FOUNDRY_FEEDBACK.md touched.
