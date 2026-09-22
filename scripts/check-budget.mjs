@@ -16,8 +16,12 @@
 // front-page CSS (lead row, journal rail, masthead/nav, writing cell); no
 // CSS added by this task. CLAUDE.md already says 40960 (this file was
 // stale against it). The number lives only here and in CLAUDE.md.
+// P3-03: rule 30's second and final raise (40960 -> 41984) for the Writing
+// cell's body grid/kicker/headline/dek/also-running CSS (41845 measured
+// after trimming comments elsewhere in the file first; P3-05 re-measures
+// after the series strip task and records whether this holds).
 import { statSync, existsSync } from 'node:fs';
-const cssBudgetBytes = 40960;
+const cssBudgetBytes = 41984;
 const file = 'themes/ttm-theme/assets/css/ttm.css';
 if ( ! existsSync( file ) ) {
 	console.error( `${ file } missing` );

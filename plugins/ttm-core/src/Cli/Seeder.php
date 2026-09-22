@@ -450,6 +450,15 @@ class Seeder {
 				}
 				wp_set_object_terms( $post->ID, [ $term_id ], 'series' );
 				update_post_meta( $post->ID, 'ttm_series_part', (int) $part['part'] );
+
+				// seed_posts() already re-derived ttm_form once (see its own comment), but that
+				// ran before this series term existed, so every chapter was still classified
+				// "story" (no series -> in Writing -> Form::derive() returns 'story') and stuck
+				// that way forever (wp_set_object_terms() doesn't refire save_post). Found live:
+				// the Writing cell's "Also running" list showed the featured serial's own latest
+				// chapter a second time, labelled "Story", because Serials::stories() matches
+				// ttm_form=story. Re-derive now that the real series membership is in place.
+				\TTM\Core\Meta\Form::on_save( $post->ID, get_post( $post->ID ) );
 			}
 
 			$ids[] = $term_id;

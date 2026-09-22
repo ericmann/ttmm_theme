@@ -418,7 +418,11 @@ test.describe( 'section cells', () => {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
-		const cell = page.locator( '.ttm-section-row .ttm-cell:last-child' );
+		// P3-03 gave section-row-2's own Writing cell a `.ttm-cell` last-child too, so this
+		// selector now matches once per row; `.first()` targets the same row-1 cell as before.
+		const cell = page
+			.locator( '.ttm-section-row .ttm-cell:last-child' )
+			.first();
 		expect( await computed( cell, 'border-right-width' ) ).toBe( px( 0 ) );
 	} );
 
@@ -574,7 +578,7 @@ test.describe( 'technology featured cell', () => {
 } );
 
 test.describe( 'writing cell', () => {
-	test.fixme( 'writing-head: .ttm-writing-cell .ttm-cell-heading__label @1280', async ( {
+	test( 'writing-head: .ttm-writing-cell .ttm-cell-heading__label @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -585,9 +589,7 @@ test.describe( 'writing cell', () => {
 		expect( await computed( label, 'font-size' ) ).toBe( px( 12 ) );
 	} );
 
-	test.fixme( 'writing-grid: .ttm-writing-cell__body @1280', async ( {
-		page,
-	} ) => {
+	test( 'writing-grid: .ttm-writing-cell__body @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const body = page.locator( '.ttm-writing-cell__body' );
 		const cols = await tracks( body );
@@ -596,7 +598,7 @@ test.describe( 'writing cell', () => {
 		expect( await computed( body, 'column-gap' ) ).toBe( px( 28 ) );
 	} );
 
-	test.fixme( 'writing-kicker: .ttm-writing-cell__kicker @1280', async ( {
+	test( 'writing-kicker: .ttm-writing-cell__kicker @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -609,7 +611,7 @@ test.describe( 'writing cell', () => {
 		);
 	} );
 
-	test.fixme( 'writing-headline: .ttm-writing-cell__headline @1280', async ( {
+	test( 'writing-headline: .ttm-writing-cell__headline @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -618,22 +620,22 @@ test.describe( 'writing cell', () => {
 		expect( await computed( headline, 'line-height' ) ).toBe( px( 28.6 ) );
 	} );
 
-	test.fixme( 'writing-also: .ttm-writing-cell__also @1280', async ( {
-		page,
-	} ) => {
+	test( 'writing-also: .ttm-writing-cell__also @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const also = page.locator( '.ttm-writing-cell__also' );
 		expect( await computed( also, 'border-left-width' ) ).toBe( px( 1 ) );
 		expect( await computed( also, 'padding-left' ) ).toBe( px( 28 ) );
 	} );
 
-	test.fixme( 'writing-btn: .ttm-writing-cell .btn-primary @1280', async ( {
+	test( 'writing-btn: .ttm-writing-cell .btn-primary @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
 		const btn = page.locator( '.ttm-writing-cell .btn-primary' );
+		// Decision "Colour vs a11y" names this exact row: accent-700 replaces the SPEC table's
+		// literal accent (phase 1's P8-07 already renders every .btn-primary this way).
 		expect( await computed( btn, 'background-color' ) ).toBe(
-			color( 'accent' )
+			color( 'accent-700' )
 		);
 		expect( await computed( btn, 'color' ) ).toBe( color( 'bg' ) );
 	} );

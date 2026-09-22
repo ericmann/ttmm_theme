@@ -32,7 +32,8 @@ if ( $ttm_active && ! $ttm_chapter ) {
 }
 
 /**
- * "Novella · complete · 9 chapters" (a serial row), or "Story" (a standalone story post).
+ * "Novella · complete · 9 chapters" (a serial row); standalone story rows build their own
+ * "Short story · {N} words" meta separately, below.
  *
  * @param array<string, mixed> $row Series index row.
  * @return string
@@ -83,44 +84,78 @@ if ( 'active' === $ttm_mode || 'shelf' === $ttm_mode ) {
 		$ttm_also_rows[] = [
 			'title' => get_the_title( $ttm_story_id ),
 			'url'   => (string) get_permalink( $ttm_story_id ),
-			'meta'  => __( 'Story', 'ttm-core' ),
+			'meta'  => sprintf(
+				/* translators: %s: word count (e.g. "3,100"). */
+				__( 'Short story · %s words', 'ttm-core' ),
+				number_format_i18n( (int) get_post_meta( $ttm_story_id, 'ttm_word_count', true ) )
+			),
 		];
 	}
 
 	$ttm_also_rows = array_slice( $ttm_also_rows, 0, $ttm_rows_limit );
 }//end if
+
+$ttm_writing_term = get_term_by( 'slug', (string) Config::get( 'sections.writing_slug', 'writing' ), 'category' );
+$ttm_writing_id   = $ttm_writing_term && ! is_wp_error( $ttm_writing_term ) ? $ttm_writing_term->term_id : 0;
+
+if ( 'active' === $ttm_mode ) {
+	$ttm_part_title = get_post_meta( $ttm_chapter['post_id'], 'ttm_part_title', true );
+	$ttm_headline   = '' !== $ttm_part_title
+		? sprintf(
+			/* translators: 1: serial name, 2: chapter number, 3: chapter title. */
+			__( '%1$s — Ch. %2$d: %3$s', 'ttm-core' ),
+			$ttm_active['name'],
+			(int) $ttm_chapter['part'],
+			$ttm_part_title
+		)
+		: sprintf(
+			/* translators: 1: serial name, 2: chapter number. */
+			__( '%1$s — Ch. %2$d', 'ttm-core' ),
+			$ttm_active['name'],
+			(int) $ttm_chapter['part']
+		);
+	$ttm_dek = wp_strip_all_tags( get_the_excerpt( $ttm_chapter['post_id'] ) );
+}
 ?>
 <div <?php echo Helpers::wrapper( 'writing-cell', [ 'is-' . $ttm_mode ] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() output is already escaped. ?>>
 	<div class="ttm-cell-heading">
-		<h2><?php esc_html_e( 'Writing', 'ttm-core' ); ?></h2>
+		<h2 class="ttm-cell-heading__label"><?php esc_html_e( 'Writing', 'ttm-core' ); ?></h2>
 		<?php if ( 'plain' !== $ttm_mode ) : ?>
-		<a href="<?php echo esc_url( home_url( '/writing/' ) ); ?>"><?php esc_html_e( 'All serials →', 'ttm-core' ); ?></a>
+		<a class="ttm-cell-heading__link" href="<?php echo esc_url( home_url( '/writing/' ) ); ?>"><?php esc_html_e( 'All serials & stories →', 'ttm-core' ); ?></a>
+		<?php else : ?>
+		<a class="ttm-cell-heading__link" href="<?php echo esc_url( (string) get_category_link( $ttm_writing_id ) ); ?>">
+			<?php
+			printf(
+				/* translators: %d: post count. */
+				esc_html__( '%d →', 'ttm-core' ),
+				$ttm_writing_term && ! is_wp_error( $ttm_writing_term ) ? (int) $ttm_writing_term->count : 0
+			);
+			?>
+		</a>
 		<?php endif; ?>
 	</div>
 
 	<?php if ( 'active' === $ttm_mode ) : ?>
+	<div class="ttm-writing-cell__body">
 		<div class="ttm-writing-cell__featured">
-			<p class="is-style-kicker">
+			<p class="ttm-writing-cell__kicker">
 				<?php
-				printf(
-					/* translators: %s: cadence (e.g. "monthly"). */
-					esc_html__( 'Serial · new chapter %s', 'ttm-core' ),
-					esc_html( Serials::stats( $ttm_active )['cadence'] )
-				);
+				$ttm_cadence = Serials::stats( $ttm_active )['cadence'];
+				echo '' !== $ttm_cadence
+					? esc_html(
+						sprintf(
+							/* translators: %s: cadence (e.g. "monthly"). */
+							__( 'Serial · new chapter %s', 'ttm-core' ),
+							$ttm_cadence
+						)
+					)
+					: esc_html__( 'Serial', 'ttm-core' );
 				?>
 			</p>
-			<h3 class="ttm-writing-cell__headline">
-				<?php
-				printf(
-					/* translators: 1: serial name, 2: chapter number, 3: chapter title. */
-					esc_html__( '%1$s — Ch. %2$d: %3$s', 'ttm-core' ),
-					esc_html( $ttm_active['name'] ),
-					(int) $ttm_chapter['part'],
-					esc_html( $ttm_chapter['title'] )
-				);
-				?>
-			</h3>
-			<p class="ttm-writing-cell__dek"><?php echo esc_html( wp_strip_all_tags( get_the_excerpt( $ttm_chapter['post_id'] ) ) ); ?></p>
+			<h3 class="ttm-writing-cell__headline"><?php echo esc_html( $ttm_headline ); ?></h3>
+			<?php if ( '' !== $ttm_dek ) : ?>
+			<p class="ttm-writing-cell__dek"><?php echo esc_html( $ttm_dek ); ?></p>
+			<?php endif; ?>
 			<p class="ttm-writing-cell__actions">
 				<a class="btn btn-primary" href="<?php echo esc_url( (string) get_permalink( $ttm_chapter['post_id'] ) ); ?>">
 					<?php
@@ -135,7 +170,7 @@ if ( 'active' === $ttm_mode || 'shelf' === $ttm_mode ) {
 			</p>
 		</div>
 		<div class="ttm-writing-cell__also">
-			<p class="is-style-kicker"><?php esc_html_e( 'Also running', 'ttm-core' ); ?></p>
+			<p class="ttm-writing-cell__also-label"><?php esc_html_e( 'Also running', 'ttm-core' ); ?></p>
 			<?php foreach ( $ttm_also_rows as $ttm_also ) : ?>
 				<a class="ttm-writing-cell__also-row" href="<?php echo esc_url( $ttm_also['url'] ); ?>">
 					<span class="ttm-writing-cell__also-title"><?php echo esc_html( $ttm_also['title'] ); ?></span>
@@ -143,7 +178,9 @@ if ( 'active' === $ttm_mode || 'shelf' === $ttm_mode ) {
 				</a>
 			<?php endforeach; ?>
 		</div>
+	</div>
 	<?php elseif ( 'shelf' === $ttm_mode ) : ?>
+	<div class="ttm-writing-cell__body">
 		<p class="is-style-kicker"><?php esc_html_e( 'From the shelf', 'ttm-core' ); ?></p>
 		<?php foreach ( $ttm_also_rows as $ttm_also ) : ?>
 			<a class="ttm-writing-cell__also-row" href="<?php echo esc_url( $ttm_also['url'] ); ?>">
@@ -152,11 +189,10 @@ if ( 'active' === $ttm_mode || 'shelf' === $ttm_mode ) {
 			</a>
 		<?php endforeach; ?>
 		<p class="ttm-writing-cell__footnote"><?php esc_html_e( 'Short fiction and the full index live on the Writing page.', 'ttm-core' ); ?></p>
+	</div>
 	<?php else : ?>
 		<?php
-		$ttm_writing    = get_term_by( 'slug', (string) Config::get( 'sections.writing_slug', 'writing' ), 'category' );
-		$ttm_writing_id = $ttm_writing && ! is_wp_error( $ttm_writing ) ? $ttm_writing->term_id : 0;
-		$ttm_lead_id    = Lead::id();
+		$ttm_lead_id = Lead::id();
 
 		// F2: an ordinary section cell -- same ttm_primary_category-only and lead-exclusion
 		// rules as every other front-page cell (Query\Cells::filter_query_vars()), just built

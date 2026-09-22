@@ -17,8 +17,8 @@ declare( strict_types=1 );
 
 	<!-- wp:pattern {"slug":"ttm/section-cell-opinion"} /-->
 
-	<!-- wp:group {"className":"is-style-span-2"} -->
-	<div class="wp-block-group is-style-span-2">
+	<!-- wp:group {"className":"is-style-cell is-style-span-2 ttm-cell","layout":{"type":"default"}} -->
+	<div class="wp-block-group is-style-cell is-style-span-2 ttm-cell">
 		<!-- wp:ttm/writing-cell /-->
 	</div>
 	<!-- /wp:group -->
