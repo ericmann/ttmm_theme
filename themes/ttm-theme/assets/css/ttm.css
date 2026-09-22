@@ -2276,11 +2276,8 @@ ul.modern-footnotes-list,
 	.ttm-prevnext__title {
 		font-size: 16px;
 	}
-}
 
-@media (max-width: 720px) {
-
-	/* 3b: k11,H1 34,dek17,b12. */
+	/* 3b: k11,H1 34,dek17,b12 */
 	.ttm-article-head .is-style-kicker {
 		font-size: var(--wp--preset--font-size--micro);
 	}
@@ -2314,6 +2311,7 @@ ul.modern-footnotes-list,
 		padding-right: 20px;
 	}
 
+	/* stylelint-disable-next-line no-descending-specificity */
 	.entry-content {
 		font-size: 17px;
 		line-height: 1.6;
