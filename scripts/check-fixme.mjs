@@ -9,9 +9,8 @@ import { taggedFixmeHits } from './lib/fixme.mjs';
 
 const FILES = [ 'tests/e2e/fidelity.spec.mjs', 'tests/e2e/editors.spec.mjs' ];
 
-// ⚠️ ASSUMPTION (P0-01): true while the flight's phases are landing; P5-02
-// sets this to false so a tagged-but-unfinished row fails the guard too.
-export const ALLOW_TAGGED = true;
+// P5-02: the flight has landed; no fixme, tagged or not, survives.
+export const ALLOW_TAGGED = false;
 
 let hits = 0;
 let tagged = 0;

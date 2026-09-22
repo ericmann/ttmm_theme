@@ -42,7 +42,9 @@ if ( ! $ttm_row ) {
 $ttm_is_complete = $ttm_fallback || 'complete' === $ttm_row['status'];
 $ttm_stats       = Serials::stats( $ttm_row );
 $ttm_cover_id    = Serials::cover_id( $ttm_row );
-$ttm_synopsis    = (string) get_term_field( 'description', (int) $ttm_row['id'], 'series' );
+// 'raw' context: the 'display' context runs descriptions through wpautop, wrapping
+// them in a <p> that esc_html() would then render as literal text.
+$ttm_synopsis = (string) get_term_field( 'description', (int) $ttm_row['id'], 'series', 'raw' );
 
 $ttm_kicker = $ttm_is_complete
 	? sprintf(

@@ -26,11 +26,9 @@ const CSS_FILES = [
 
 const ALLOW_PATH = 'scripts/css-coverage-allow.txt';
 
-// P0-01 (rule 34 amendment): during the flight, single-class "pending" lines
-// are tolerated; the allow-list must be empty (ALLOW_PENDING = false) by the
-// time the flight ends. Flip this to false once the last phase's push task
-// has removed every pending line.
-export const ALLOW_PENDING = true;
+// P5-02 (rule 34 amendment): the flight has landed; the allow-list is empty
+// and no new pending lines are tolerated.
+export const ALLOW_PENDING = false;
 
 // Files under plugins/ttm-core/src that are known not to contain markup
 // (e.g. pure data/config classes) never emit a ttm-* class literal, so

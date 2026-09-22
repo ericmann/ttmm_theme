@@ -250,6 +250,7 @@ class SerialHeroTest extends TTM_IntegrationTestCase {
 
 		$this->assertStringContainsString( '<span class="ttm-stats__value">Monthly</span>', $html );
 		$this->assertStringNotContainsString( 'MONTHLY', $html );
-		$this->assertMatchesRegularExpression( '/ttm-serial-hero__synopsis">.*Synopsis for The Quiet Ledger\./s', $html );
+		$this->assertStringContainsString( '<p class="ttm-serial-hero__synopsis">Synopsis for The Quiet Ledger.</p>', $html );
+		$this->assertStringNotContainsString( '&lt;p&gt;', $html );
 	}
 }

@@ -129,7 +129,9 @@ $ttm_grid_class        = $ttm_is_single ? [] : [ 'is-style-grid-5-7' ];
 		<p class="ttm-series-featured__kicker is-style-kicker"><?php echo esc_html( $ttm_kicker ); ?></p>
 		<<?php echo esc_html( $ttm_title_tag ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_html()'d and, either way, one of two literal tag names. ?> class="ttm-series-featured__title<?php echo esc_attr( $ttm_title_extra_class ); ?>"><?php echo esc_html( $ttm_row['name'] ); ?></<?php echo esc_html( $ttm_title_tag ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_html()'d and, either way, one of two literal tag names. ?>>
 		<?php
-		$ttm_dek = (string) get_term_field( 'description', (int) $ttm_row['id'], 'series' );
+		// 'raw' context: the 'display' context runs descriptions through wpautop, wrapping
+		// them in a <p> that esc_html() would then render as literal text.
+		$ttm_dek = (string) get_term_field( 'description', (int) $ttm_row['id'], 'series', 'raw' );
 		if ( '' !== $ttm_dek ) :
 			?>
 		<p class="ttm-series-featured__dek"><?php echo esc_html( $ttm_dek ); ?></p>

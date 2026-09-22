@@ -73,6 +73,21 @@ class SeriesFeaturedTest extends TTM_IntegrationTestCase {
 		return (string) do_blocks( '<!-- wp:ttm/series-featured' . $json . ' /-->' );
 	}
 
+	/**
+	 * get_term_field()'s default 'display' context runs descriptions through wpautop,
+	 * wrapping them in a <p> that esc_html() would then render as literal text.
+	 */
+	public function test_dek_is_plain_text_not_wpautop_wrapped(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$made = $this->make_series( 'hardening-wp', 'Hardening WordPress', 1, [ [ 'part' => 1 ] ] );
+		wp_update_term( $made['series_id'], 'series', [ 'description' => 'Six parts on hardening a WordPress install.' ] );
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( '<p class="ttm-series-featured__dek">Six parts on hardening a WordPress install.</p>', $html );
+		$this->assertStringNotContainsString( '&lt;p&gt;', $html );
+	}
+
 	public function test_features_ttm_featured_term_over_auto_pick(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
 		$this->make_series(

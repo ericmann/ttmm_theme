@@ -846,7 +846,7 @@ test.describe( 'footer', () => {
 	} );
 } );
 
-// P0-04: every remaining SPEC §6.9 row, transcribed in table order as tagged `test.fixme(`.
+// P0-04: every remaining SPEC §6.9 row, transcribed in table order, tagged as a fixme test.
 // Each phase task un-fixmes the rows it owns (Conventions "Row-to-task map").
 
 test.describe( 'container', () => {
@@ -2788,8 +2788,7 @@ test.describe( 'single series', () => {
 } );
 
 test.describe( 'seed', () => {
-	test.fixme( // P5-02
-	'seed-hero-color: .wp-block-post-featured-image img @1280', async ( {
+	test( 'seed-hero-color: .wp-block-post-featured-image img @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
@@ -2812,7 +2811,7 @@ test.describe( 'seed', () => {
 			return Math.sqrt( dr * dr + dg * dg + db * db );
 		} );
 		expect( distance ).toBeGreaterThanOrEqual( 40 );
-	} ); // P5-02
+	} );
 } );
 
 test.describe( 'accessibility', () => {
@@ -2829,14 +2828,13 @@ test.describe( 'accessibility', () => {
 		} );
 	}
 
-	// P0-04: every other seeded screen, same check, tagged for P5-02 (rule 33).
+	// P0-04: every other seeded screen, same check (rule 33).
 	for ( const path of SCREEN_URLS ) {
 		if ( path === '/' ) {
 			continue;
 		}
 		for ( const width of [ 1280, 390 ] ) {
-			test.fixme( // P5-02
-			`a11y: ${ path } @${ width }`, async ( { page } ) => {
+			test( `a11y: ${ path } @${ width }`, async ( { page } ) => {
 				await gotoScreen( page, path, width );
 				const results = await new AxeBuilder( { page } )
 					.exclude( '.ttm-poster .btn-ghost' )
@@ -2845,7 +2843,7 @@ test.describe( 'accessibility', () => {
 					[ 'serious', 'critical' ].includes( v.impact )
 				);
 				expect( serious ).toEqual( [] );
-			} ); // P5-02
+			} );
 		}
 	}
 } );
@@ -2874,14 +2872,13 @@ test.describe( 'network', () => {
 		} );
 	}
 
-	// P0-04: every other seeded screen, same check, tagged for P5-02 (rule 6).
+	// P0-04: every other seeded screen, same check (rule 6).
 	for ( const path of SCREEN_URLS ) {
 		if ( path === '/' ) {
 			continue;
 		}
 		for ( const width of [ 1280, 390 ] ) {
-			test.fixme( // P5-02
-			`network: ${ path } @${ width }`, async ( { page } ) => {
+			test( `network: ${ path } @${ width }`, async ( { page } ) => {
 				const requests = [];
 				page.on( 'request', ( request ) =>
 					requests.push( request.url() )
@@ -2903,7 +2900,7 @@ test.describe( 'network', () => {
 					expect( url.startsWith( origin ) ).toBe( true );
 					expect( url ).not.toMatch( forbidden );
 				}
-			} ); // P5-02
+			} );
 		}
 	}
 } );

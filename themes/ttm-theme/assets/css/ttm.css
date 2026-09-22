@@ -1,4 +1,4 @@
-/* Component classes (01 §4). */
+/* Component classes. */
 
 /* 0 base */
 :root {
@@ -138,7 +138,7 @@
 	align-self: start;
 }
 
-/* Article: 8/4; aside >=1025. */
+/* Article: 8/4; >=1025. */
 .ttm-article {
 	column-gap: 64px;
 	row-gap: 0;
@@ -379,7 +379,7 @@ p.is-style-poster {
 	content: "";
 }
 
-/* a-scoped: WP body class also "tag" */
+/* a-scoped: WP body class is "tag" */
 a.tag {
 	display: inline-block;
 	font-size: var(--wp--preset--font-size--micro);
@@ -433,7 +433,7 @@ a.tag {
 	cursor: pointer;
 }
 
-/* accent-on-bg fails AA; 700 clear */
+/* accent-on-bg fails AA; clear */
 .btn-primary,
 .wp-block-button__link {
 	background: var(--wp--preset--color--accent-700);
@@ -503,13 +503,13 @@ a.tag {
 
 /* 4.23 figure */
 
-/* Article hero: colour, 16:9 */
+/* Hero colour, 16:9 */
 .ttm-article .wp-block-post-featured-image {
 	margin-top: 28px;
 	aspect-ratio: 16 / 9;
 }
 
-/* :where() matches img; wins */
+/* :where() img; wins */
 .ttm-article :where(.wp-block-post-featured-image) img {
 	width: 100%;
 	height: 100%;
@@ -600,7 +600,7 @@ a.tag {
 	overflow-x: auto;
 }
 
-/* pre>code dark, not inline */
+/* pre>code, not inline */
 .entry-content :where(pre) code {
 	background: none;
 	color: inherit;
@@ -825,7 +825,7 @@ blockquote.is-style-pull cite,
 
 @media (min-width: 721px) {
 
-	/* Rule 43: no chrome, list. */
+	/* Rule 43: no chrome. */
 	.ttm-masthead-inner .wp-block-navigation__responsive-container-open,
 	.ttm-masthead-inner .wp-block-navigation__responsive-container-close {
 		display: none;
@@ -934,7 +934,7 @@ blockquote.is-style-pull cite,
 	border-bottom: var(--ttm-rule-2);
 }
 
-/* §6.1.5 rail link 12,not11. */
+/* §6.1.5: 12,not11. */
 .ttm-cell-heading.is-rail .ttm-cell-heading__link {
 	font-size: var(--wp--preset--font-size--caption);
 }
@@ -976,7 +976,7 @@ blockquote.is-style-pull cite,
 	color: var(--wp--preset--color--neutral-700);
 }
 
-/* 4.32/4.33 newsletter+poster */
+/* 4.32/33: news+poster */
 .ttm-newsletter-box {
 	background: var(--wp--preset--color--surface);
 	padding: 16px 18px;
@@ -994,7 +994,7 @@ blockquote.is-style-pull cite,
 	color: var(--wp--preset--color--neutral-800);
 }
 
-/* Box form tighter than row */
+/* Box: tighter row */
 .ttm-newsletter-box form {
 	display: flex;
 	gap: 6px;
@@ -1049,7 +1049,7 @@ blockquote.is-style-pull cite,
 	gap: var(--wp--preset--spacing--60);
 }
 
-/* Poster pull 28->40, reverts */
+/* Poster 28->40, revert */
 /* stylelint-disable-next-line no-descending-specificity */
 .ttm-poster h3.is-style-poster {
 	margin: 0;
@@ -1777,7 +1777,7 @@ blockquote.is-style-pull cite,
 	}
 }
 
-/* Right aside: shared, kinds */
+/* Aside: shared kinds */
 .ttm-archive-body aside {
 	padding-top: 24px;
 	display: flex;
@@ -1892,7 +1892,7 @@ blockquote.is-style-pull cite,
 
 @media (max-width: 720px) {
 
-	/* 3b: bar->mark,name,part,seg */
+	/* 3b: bar->mark,name,seg */
 	.ttm-series-bar {
 		font-size: var(--wp--preset--font-size--caption);
 	}
@@ -1963,7 +1963,7 @@ blockquote.is-style-pull cite,
 	margin-top: 40px;
 }
 
-/* Missing side keeps its rule */
+/* Missing side: its rule */
 .ttm-prevnext__prev {
 	padding: 20px 24px 20px 0;
 	border-right: var(--ttm-rule-1);
@@ -2176,7 +2176,7 @@ blockquote.is-style-pull cite,
 	display: inline;
 }
 
-/* Underlined: not grey alone. */
+/* Underlined: not grey. */
 /* stylelint-disable-next-line no-descending-specificity */
 .ttm-syndication a {
 	color: var(--wp--preset--color--accent-700);
@@ -2572,7 +2572,7 @@ ul.modern-footnotes-list,
 	font-feature-settings: "tnum";
 }
 
-/* 404 "Latest": CSS counter. */
+/* 404: CSS counter. */
 .ttm-latest .wp-block-query .wp-block-post-template {
 	list-style: none;
 	margin: 0;
@@ -2706,6 +2706,10 @@ main.is-style-grid-8-4 h1 {
 }
 
 /* 4.19 series progress */
+.ttm-series-progress {
+	display: block;
+}
+
 .ttm-series-progress__segments {
 	display: flex;
 	gap: 4px;
@@ -2790,7 +2794,7 @@ main.is-style-grid-8-4 h1 {
 	color: var(--wp--preset--color--neutral-700);
 }
 
-/* Chapters use .ttm-numbered. */
+/* Chapters: .ttm-numbered. */
 .ttm-series-toc.is-chapters .ttm-numbered__row {
 	grid-template-columns: 44px 1fr auto;
 	gap: 0 16px;
@@ -3062,6 +3066,10 @@ main.is-style-grid-8-4 h1 {
 	padding: 40px 0;
 }
 
+.ttm-serial-hero__kicker {
+	margin-bottom: 10px;
+}
+
 .ttm-serial-hero__title {
 	max-width: 14ch;
 }
@@ -3120,7 +3128,7 @@ main.is-style-grid-8-4 h1 {
 		grid-template-columns: 200px 1fr;
 	}
 
-	/* Writing <=1024: fold grid. */
+	/* <=1024: fold grid. */
 	.ttm-writing-body > main,
 	.ttm-writing-body > aside {
 		display: contents;

@@ -1,5 +1,0 @@
-ttm-serial-hero__body # P5-03 pending
-ttm-serial-hero__kicker # P5-03 pending
-ttm-series-progress # P5-03 pending
-ttm-series-single # P5-03 pending
-ttm-series-stats # P5-03 pending
