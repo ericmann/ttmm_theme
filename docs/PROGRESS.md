@@ -39,7 +39,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P4-02 a11y and network rows, zero-fixme guard
 - [x] P4-03 Inner templates smoke and CI seeding
 - [x] P4-04 Handoff, SETUP and final budget measurement
-- [ ] P4-05 Phase 4 push — final screenshots
+- [x] P4-05 Phase 4 push — final screenshots
 
 ## Log
 (one entry per task, appended by implement)
@@ -639,3 +639,24 @@ already-settled 43008 ceiling.
 
 Verified: npm run lint green (budget 42980/43008, check:fixme clean);
 test -s docs/HANDOFF.md; grep -c 'NOT VERIFIED' docs/HANDOFF.md -> 5.
+
+### P4-05 — c644e7f
+Full verification sequence run as prescribed: wp-env stop/start, fresh
+seed (--reset), npm run test:e2e (138 passed/0 failed/0 skipped),
+composer lint, composer test:unit (142/142), npm run lint (budget
+42980/43008, check:fixme clean), npm run test:unit, npm run build,
+forbidden-patterns.sh, npm run test:integration (422/422), node
+scripts/check-fixme.mjs (0 hits) -- all green. Re-seeded once more and
+regenerated all seven docs/feedback/phase-2/*.png zone crops. Pushed
+to refine/2026-09-21 (73ede08..c644e7f).
+
+This is the flight's last task; docs/HANDOFF.md (P4-04) already
+records every phase summary, all five manual checks, both
+budget/tuning measurements, the P1-07 spike outcome, the P1-09
+diagnosis, every SPEC issue found, and the final allow-list.
+
+Manual check: NOT VERIFIED (human) — open http://localhost:8888/ at
+390 in a real phone browser and compare with mock 3a; confirm CI is
+green on the branch including the e2e job and its playwright-report
+artifact; compare docs/feedback/phase-2/front-1280.png with
+docs/feedback/design_*.png end to end.
