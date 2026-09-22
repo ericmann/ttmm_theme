@@ -15,7 +15,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P0-10 Inner masthead and phone-only overlay nav (rule 43, §6.1.1)
 - [x] P0-11 Inner footer variant (§6.1.2)
 - [x] P0-12 Phase 0 push — screenshot script extension and baseline PNGs
-- [ ] P1-01 Series bar (§6.2, 01 §4.18)
+- [x] P1-01 Series bar (§6.2, 01 §4.18)
 - [ ] P1-02 Article body row, hero, body typography and sticky aside
 - [ ] P1-03 Article header — kicker, H1, dek, byline (01 §4.22)
 - [ ] P1-04 Prev/next (01 §4.21)
@@ -90,3 +90,6 @@ ttm.css 4.34: `.ttm-footer` breaks out of the page column via `margin-inline: ca
 
 ### P0-12 — 5edc863
 scripts/screenshots.mjs: ZONES = the 14 phase-3 files, each with a seeded `path` (8 at 1280x900, 4 at 390x844, 2 at 1920x900, all fullPage); OUT_DIR docs/feedback/phase-3; goto(BASE_URL + zone.path); image scroll/wait logic unchanged; selector/range crop forms kept (unionClip still exported/tested). Test: `ZONES lists the fourteen phase-3 files with paths` + existing unionClip/pendingImages green. docs/feedback/phase-3/README.md pairs each PNG with its mock (2b/2c/2d/1e/1f/3b/02 §H); docs/feedback/README.md +1 phase-3 row; phase-2 PNGs untouched. Wrote the 14 baseline PNGs from a fresh `wp ttm seed --reset` (no image-load failures). foundry_verify green. Push: pushed refine/2026-09-22 to origin (`git push -u origin HEAD`, new branch, tracking set). Manual check: NOT VERIFIED (human) — compare docs/feedback/phase-3/article.png's masthead against the top of docs/feedback/design_article.png; every inner page should be a centred 1280 column with an inline nav and no "Close" button. Known state carried into phase 1: two out-of-scope screens.spec.mjs axe items (article `.entry-content code`/`pre` contrast -> P1-02; journalPost `.ttm-syndication a` no underline/1.09:1 vs neutral-700 -> P2-01/P5-02).
+
+### P1-01 — 21982fa
+render.php restructured to three grid children (Decision "Series bar"): span.ttm-series-mark.is-{status}, span.ttm-series-bar__text (__label "Series · " + a.__name + " · " + span.__part.tnum), span.ttm-series-bar__right (__segments of __seg.is-done|is-current|is-todo + a.__view "View series"); wrapper via Helpers::wrapper() and F11/F23 unchanged. New `/* 4.18 series bar */` CSS: grid 10px 1fr auto, gap 14, align center, padding 12px 0, rule-1 below, 13px; label neutral-700; name 600; right flex; segments flex gap 4; seg 22x4 (done neutral-900 / current accent / todo neutral-300); view 12px accent-700 margin-left 14; mark margin-top 0 inside the bar; __text min-width 0; __part nowrap. <=720: label/view hidden, seg 12x4 gap 3, 12px (the stray phone rules in the prev/next media block moved here). Un-fixme'd the 7 bar-* rows -- bar-phone now asserts visibleCount()===0 for __view (DOM count 0 would need viewport-varying markup, which SPEC §3.2 forbids). SeriesBarTest: +test_bar_has_text_and_right_groups_with_view_link (get_term_link guarded with is_wp_error for the VIP sniff). Removed the 4 ttm-series-bar* pending lines (28 left); selectors-allow.txt had none. fidelity 105/208 skipped; test:integration 446/446; budget 47170. Known out-of-scope e2e reds unchanged (article code/pre -> P1-02; journalPost syndication -> P2-01/P5-02).
