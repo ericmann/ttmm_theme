@@ -36,7 +36,8 @@
 				"part": 6
 			}
 		],
-		"featured": true
+		"featured": true,
+		"description": "Six parts on defending the parts of a WordPress install that scanners ignore: configuration, keys, the database, and the people with logins."
 	},
 	{
 		"slug": "the-consultants-ledger",
@@ -196,7 +197,8 @@
 				"part": 13,
 				"future": true
 			}
-		]
+		],
+		"description": "A forensic accountant in a company town discovers that the books she was hired to audit are the honest ones. Literary thriller, serialized here first, one chapter a month."
 	},
 	{
 		"slug": "failover",
@@ -246,7 +248,8 @@
 				"post_slug": "failover-ch-9",
 				"part": 9
 			}
-		]
+		],
+		"description": "Three engineers, one data center, and the night the generators did not start."
 	},
 	{
 		"slug": "salt-water-wires",
@@ -361,6 +364,7 @@
 				"post_slug": "salt-water-wires-ch-24",
 				"part": 24
 			}
-		]
+		],
+		"description": "A cable-landing station on the Oregon coast, and the family that has kept it running for sixty years."
 	}
 ]

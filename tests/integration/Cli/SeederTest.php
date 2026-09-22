@@ -405,4 +405,146 @@ class SeederTest extends TTM_IntegrationTestCase {
 			$attachment->post_excerpt
 		);
 	}
+
+	public function test_journal_post_one_is_on_a_sunday_with_location_and_syndication(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$post = get_page_by_path( 'journal-post-1', OBJECT, 'post' );
+		$this->assertNotNull( $post );
+		$this->assertSame( 'Sunday', gmdate( 'l', strtotime( $post->post_date_gmt ) ) );
+		$this->assertSame( 'Portland', get_post_meta( $post->ID, 'ttm_location', true ) );
+
+		$syndication = get_post_meta( $post->ID, 'ttm_syndication', true );
+		$this->assertNotEmpty( $syndication['x'] ?? '' );
+		$this->assertNotEmpty( $syndication['mastodon'] ?? '' );
+	}
+
+	public function test_journal_word_counts_near_the_mock(): void {
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$post_2 = get_page_by_path( 'journal-post-2', OBJECT, 'post' );
+		$post_3 = get_page_by_path( 'journal-post-3', OBJECT, 'post' );
+
+		$words_2 = (int) get_post_meta( $post_2->ID, 'ttm_word_count', true );
+		$words_3 = (int) get_post_meta( $post_3->ID, 'ttm_word_count', true );
+
+		$this->assertGreaterThanOrEqual( 160, $words_2 );
+		$this->assertLessThanOrEqual( 210, $words_2 );
+		$this->assertGreaterThanOrEqual( 80, $words_3 );
+		$this->assertLessThanOrEqual( 115, $words_3 );
+	}
+
+	public function test_quiet_ledger_has_synopsis_genre_cadence_and_titled_chapters(): void {
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$term = get_term_by( 'slug', 'the-quiet-ledger', 'series' );
+		$this->assertNotEmpty( $term->description );
+		$this->assertSame( 'literary thriller', get_term_meta( $term->term_id, 'ttm_genre', true ) );
+		$this->assertSame( 'monthly', get_term_meta( $term->term_id, 'ttm_cadence', true ) );
+
+		for ( $chapter = 1; $chapter <= 12; $chapter++ ) {
+			$post = get_page_by_path( "quiet-ledger-ch-{$chapter}", OBJECT, 'post' );
+			$this->assertNotNull( $post, "missing chapter {$chapter}" );
+			$part_title = get_post_meta( $post->ID, 'ttm_part_title', true );
+			$this->assertNotEmpty( $part_title, "chapter {$chapter} has no part_title" );
+			$this->assertNotEmpty( $post->post_excerpt, "chapter {$chapter} has no excerpt" );
+		}
+
+		$row   = \TTM\Core\Query\SeriesIndex::by_slug( 'the-quiet-ledger' );
+		$stats = \TTM\Core\Fiction\Serials::stats( $row );
+		$this->assertGreaterThanOrEqual( 10, $stats['avg_minutes'] );
+		$this->assertLessThanOrEqual( 16, $stats['avg_minutes'] );
+	}
+
+	public function test_security_has_two_year_groups_on_page_one_and_a_second_page(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$term = get_term_by( 'slug', 'security', 'category' );
+		$query = new WP_Query(
+			[
+				'cat'            => $term->term_id,
+				'posts_per_page' => 12,
+				'paged'          => 1,
+				'orderby'        => 'date',
+				'order'          => 'DESC',
+			]
+		);
+
+		$this->assertGreaterThan( 12, $query->found_posts, 'expected a second page' );
+
+		$years = [];
+		foreach ( $query->posts as $post ) {
+			$years[ gmdate( 'Y', strtotime( $post->post_date_gmt ) ) ] = true;
+		}
+		$this->assertGreaterThanOrEqual( 2, count( $years ), 'page one should span two year groups' );
+	}
+
+	public function test_security_top_tags_are_the_mock_five(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$term = get_term_by( 'slug', 'security', 'category' );
+		$tags = \TTM\Core\Query\Stats::top_tags( $term->term_id );
+		$slugs = array_column( $tags, 'slug' );
+
+		sort( $slugs );
+		$expected = [ 'cryptography', 'disclosure', 'passwords', 'threat-modeling', 'wordpress' ];
+		$this->assertSame( $expected, $slugs );
+	}
+
+	public function test_three_security_posts_are_most_read(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$term  = get_term_by( 'slug', 'security', 'category' );
+		$query = new WP_Query(
+			[
+				'cat'            => $term->term_id,
+				'posts_per_page' => 50,
+				'meta_key'       => 'ttm_featured_in_section',
+				'meta_value'     => '1',
+			]
+		);
+
+		$this->assertCount( 3, $query->posts );
+
+		$slugs = wp_list_pluck( $query->posts, 'post_name' );
+		sort( $slugs );
+		$this->assertSame(
+			[ 'hardware-keys-for-my-parents', 'nonces-are-not-csrf-tokens', 'reading-a-cve-like-an-engineer' ],
+			$slugs
+		);
+	}
+
+	public function test_books_are_salt_water_wires_and_eleven_small_doors(): void {
+		$seeder = new Seeder();
+		$books  = $seeder->seed_books();
+
+		$titles = array_column( $books, 'title' );
+		$this->assertContains( 'Salt Water Wires', $titles );
+		$this->assertContains( 'Eleven Small Doors', $titles );
+
+		foreach ( $books as $book ) {
+			if ( 'Salt Water Wires' === $book['title'] ) {
+				$this->assertSame( 'novel', $book['form'] );
+				$this->assertSame( 2022, $book['year'] );
+			}
+			if ( 'Eleven Small Doors' === $book['title'] ) {
+				$this->assertSame( 'collection', $book['form'] );
+				$this->assertSame( 2019, $book['year'] );
+			}
+		}
+	}
 }

@@ -359,7 +359,17 @@ class Seeder {
 
 			$is_future = ! empty( $row['future'] );
 			$days_ago  = $is_future ? (int) $row['days_ago'] : (int) $row['days_ago'] + $this->days_offset;
-			$date      = Clock::now()->modify( ( $days_ago >= 0 ? '-' : '+' ) . abs( $days_ago ) . ' days' )->format( 'Y-m-d H:i:s' );
+			$moment    = Clock::now()->modify( ( $days_ago >= 0 ? '-' : '+' ) . abs( $days_ago ) . ' days' );
+
+			// P0-08: pin a post to a specific weekday (e.g. the Journal's Sunday post),
+			// walking back at most a week -- never forward, so a "future" post stays future.
+			if ( ! empty( $row['weekday'] ) ) {
+				for ( $shift = 0; $shift < 7 && $moment->format( 'l' ) !== $row['weekday']; $shift++ ) {
+					$moment = $moment->modify( '-1 day' );
+				}
+			}
+
+			$date = $moment->format( 'Y-m-d H:i:s' );
 
 			$post_id = wp_insert_post(
 				[
@@ -455,6 +465,10 @@ class Seeder {
 				update_term_meta( $term->term_id, self::SEED_META, 1 );
 			}
 			$term_id = (int) $term->term_id;
+
+			if ( isset( $row['description'] ) && $row['description'] !== $term->description ) {
+				wp_update_term( $term_id, 'series', [ 'description' => $row['description'] ] );
+			}
 
 			update_term_meta( $term_id, 'ttm_status', $row['status'] );
 			update_term_meta( $term_id, 'ttm_form', $row['form'] );
