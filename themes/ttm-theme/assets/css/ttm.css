@@ -2396,6 +2396,11 @@ ul.modern-footnotes-list,
 }
 
 /* 4.27 year group (SPEC §6.6 "Body") */
+.ttm-archive,
+.ttm-most-read {
+	display: block;
+}
+
 .ttm-archive-year {
 	display: grid;
 	grid-template-columns: 120px 1fr;
@@ -2431,7 +2436,7 @@ ul.modern-footnotes-list,
 	text-decoration: none;
 }
 
-/* Search rows only (P3-05): a category kicker above the title. */
+/* Search rows: a category kicker above the title. */
 .ttm-archive-row .is-style-kicker {
 	grid-column: 2;
 	grid-row: 1;
@@ -2537,9 +2542,7 @@ ul.modern-footnotes-list,
 	font-feature-settings: "tnum";
 }
 
-/* 4.29 404 "Latest": the number column is a CSS counter, not markup (Decision "404 Latest
- * numbers") -- the row is the shared .ttm-numbered__row grid, so the counter is its implicit
- * first grid item. */
+/* 4.29 404 "Latest": the number column is a CSS counter (Decision "404 Latest numbers"). */
 .ttm-latest .wp-block-query .wp-block-post-template {
 	list-style: none;
 	margin: 0;

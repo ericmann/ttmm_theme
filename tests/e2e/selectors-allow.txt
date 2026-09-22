@@ -1,5 +1,4 @@
 .is-style-rule-1 # editor block style (04 §3)
-.is-style-grid-5-7 # P3-04 pending
 .is-style-grid-3 # editor block style (04 §3)
 .is-style-grid-2 # P4-01 pending
 .is-style-zone # editor block style (04 §3)
@@ -24,14 +23,10 @@ blockquote.is-style-pull # editor block style (04 §3)
 blockquote.is-style-pull cite # editor block style (04 §3)
 .wp-block-quote.is-style-pull cite # editor block style (04 §3)
 .entry-content blockquote:not(.is-style-pull) # editor block style (04 §3)
-.ttm-item h4 # P3-04 pending
 .ttm-newsletter-form__statement # state: only the None provider renders the statement; the seeded site never does
 .ttm-footer__copyright:empty # state: the copyright paragraph is empty until a verse is stored with footer placement
 .ttm-lead__media.is-ratio-4-3 # state: lead-story imageRatio 4-3; the front page uses 16-9
 .ttm-verse__copyright # editor block style (04 §3)
-.ttm-cell .wp-block-post-excerpt:empty # P3-04 pending
-.ttm-cell .wp-block-post:not(:first-child) .wp-block-post-featured-image # P3-04 pending
-.ttm-cell.is-style-span-2 .wp-block-post:first-child:not(:has(.ttm-item-featured__media img)) # P3-04 pending
 .ttm-writing-cell__footnote # P4-06 pending
 .ttm-series-mark.is-hiatus # P4-02 pending
 .ttm-series-strip:not(:has(.ttm-series-list)) # state: strip with no series list rendered
@@ -39,11 +34,6 @@ blockquote.is-style-pull cite # editor block style (04 §3)
 .ttm-series-strip:has(.ttm-series-list.is-complete) .ttm-series-strip__heading-fallback # state: fallback heading when the listed series are all complete
 .ttm-series-list.is-grid-3 # editor block style (04 §3)
 .ttm-series-row__dek # P4-02 pending
-.ttm-filter-row__label # P3-02 pending
-.ttm-filter-row__sort # P3-02 pending
-.ttm-most-read__list # P3-04 pending
-.ttm-most-read__item # P3-04 pending
-.ttm-most-read__num # P3-04 pending
 .ttm-tile img # P4-06 pending
 .ttm-writing-body:not(:has(.ttm-story-tiles)) .ttm-writing-body__stories # P4-06 pending
 .ttm-writing-body:not(:has(.ttm-book-grid)) .ttm-writing-body__books # P4-06 pending
@@ -52,3 +42,7 @@ blockquote.is-style-pull cite # editor block style (04 §3)
 .ttm-journal-head__count # state: F14 word count only when the journal post has no syndication URL; the seeded journal post is syndicated
 .ttm-journal-stream:not(:has(.wp-block-post)) # state: the stream hides itself when no other journal entry exists; the seed has nine
 .ttm-item h3 # state: writing-cell's "also running" list (plain h3, no class); the seeded front page currently shows none, and index.html (its other consumer) is not a fidelity screen
+.is-style-grid-5-7 # P4-01 pending
+.ttm-cell .wp-block-post-excerpt:empty # state: only when a non-lead section-row post has no excerpt; the seed always sets one
+.ttm-cell .wp-block-post:not(:first-child) .wp-block-post-featured-image # state: only when a non-lead section-row post also has a featured image; the seed's non-lead posts have none
+.ttm-cell.is-style-span-2 .wp-block-post:first-child:not(:has(.ttm-item-featured__media img)) # state: fallback when the featured post has no image; the seed always sets one

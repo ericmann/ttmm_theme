@@ -436,8 +436,8 @@ test.describe( 'section cells', () => {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
-		// P3-03 gave section-row-2's own Writing cell a `.ttm-cell` last-child too, so this
-		// selector now matches once per row; `.first()` targets the same row-1 cell as before.
+		// An earlier phase gave section-row-2's own Writing cell a `.ttm-cell` last-child too,
+		// so this selector now matches once per row; `.first()` targets the row-1 cell as before.
 		const cell = page
 			.locator( '.ttm-section-row .ttm-cell:last-child' )
 			.first();
