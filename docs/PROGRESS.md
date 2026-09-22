@@ -40,7 +40,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P4-06 Writing aside — story tiles, book grid, and the responsive order
 - [x] P4-07 Phase 4 push — hub and Writing screenshots
 - [x] P5-01 390 and 1920 sweep of every screen
-- [ ] P5-02 a11y, network, selectors and seed-hero-color rows; guards back to strict
+- [x] P5-02 a11y, network, selectors and seed-hero-color rows; guards back to strict
 - [ ] P5-03 Tuning — `cssBudgetBytes`
 - [ ] P5-04 Handoff, SETUP/README notes and CI check
 - [ ] P5-05 Phase 5 push — final screenshots
@@ -272,3 +272,26 @@ every screen), "filter row scrolls", "aside follows prev/next".
 CSS budget 61438/61440 (2 free) -- all four fixes were real overflow
 bugs, not optional polish.
 Manual check: none (phone-browser check deferred to P5-05 per task).
+
+### P5-02 — 52dcecd
+Un-fixme'd seed-hero-color + every per-screen a11y/network test (48
+rows), all green with zero CSS changes needed. Both guards flipped
+strict: check-css-coverage.mjs ALLOW_PENDING=false, check-fixme.mjs
+ALLOW_TAGGED=false. css-coverage-allow.txt emptied -- 2 of its 5
+remaining entries were real gaps (added .ttm-serial-hero__kicker
+margin-bottom and .ttm-series-progress display:block, the disclosed
+P4-04 omission), 3 were stale (already covered by P5-01's fix or by
+the scanner's substring match on compound selectors). One
+literal-grep collision in a prose comment reworded (mirrors
+P3-06/P4-07).
+Standalone fix (flight-controller finding, not owned by a numbered
+task): .ttm-serial-hero__synopsis and .ttm-series-featured__dek
+rendered literal "<p>...</p>" text -- both used
+get_term_field('description',...) whose default context runs
+wpautop; switched to the 'raw' context (matching series-list's
+already-correct $term->description access). Tightened
+SerialHeroTest's regex-tolerant assertion (added in P4-04 to paper
+over this exact bug) to an exact match + &lt;p&gt; absence check; new
+SeriesFeaturedTest covers the dek the same way.
+CSS budget 61410/61440 (30 free).
+Manual check: none.
