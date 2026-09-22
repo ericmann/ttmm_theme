@@ -24,7 +24,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P1-07 Phase 1 push — article screenshots
 - [x] P2-01 Journal post header, body column, note column and syndication line (§6.4)
 - [x] P2-02 Journal stream (01 §4.11) with whole-row links and "Full journal · N entries"
-- [ ] P2-03 Journal archive (`category-journal.html`)
+- [x] P2-03 Journal archive (`category-journal.html`)
 - [ ] P2-04 Phase 2 push — journal screenshots
 - [ ] P3-01 Archive header (01 §4.25) and the `ttm/archive-kind` kicker
 - [ ] P3-02 Filter row (01 §4.26) placed directly, with "All"
@@ -126,4 +126,9 @@ Manual check: none.
 ### P2-02 — 5f2bce4
 Tests: nine js-* rows un-fixme'd (fidelity + selectors green; all 26 axe screens green). HelpersTest +test_link_rows_turns_row_group_into_anchor, +test_link_rows_ignores_other_groups; ValuesTest +test_category_count_journal_full_format (+ zero case); ArticleTemplatesTest +test_journal_stream_rows_are_single_anchors_with_four_entries, +test_journal_stream_heading_reads_full_journal_count. Unit 160; test:integration 461/461; lints clean; budget 55758/61440; 29 pending coverage; 102 tagged fixme.
 Interpretation: core/group has no postId context, so link_rows() reads $instance->context['postId'] when present, else get_the_ID() (post-template loop). Rule-33 guard: a row whose content already contains an anchor (archive templates' isLink:true titles until P3-03) is left untouched; without it the archive/search screens produced nested anchors + empty focusable links (axe focusable-no-name). Stylelint no-descending-specificity forced heavier selectors for the title/excerpt rules instead of suppressions. js-head asserts textContent; js-excerpt asserts px(40*15); per-row rows use .first(). `.ttm-journal-stream:not(:has(.wp-block-post))` allow-listed as a state selector. Word-count paragraph is p.ttm-journal-row__words (was is-style-micro).
+Manual check: none.
+
+### P2-03 — 81b1b6c
+Tests: aj-rows, aj-no-filter un-fixme'd (fidelity + selectors + all axe screens green). ArchiveTemplatesTest::test_category_journal_renders_stream_rows rewritten (>= 9 anchor rows, title first and unlinked, no filter row, no archive body, no pagination numbers, main.ttm-journal-archive not constrained). phone.spec +"journal post and archive have no horizontal overflow at 390". foundry_verify fully green: unit 160, integration 461/461, e2e 257 passed / 145 skipped, lints clean, budget 56004/61440, 29 pending coverage, 100 tagged fixme.
+Interpretation: the P2-02 row rules scoped under `.ttm-journal-stream` now use `:is(.ttm-journal-stream, .ttm-journal-archive)` so the archive shares them; `main` carries `ttm-journal-archive` (padding 0 0 48px), a class the task did not name. `query-pagination-numbers` removed here (previous/next only); pagination CSS stays P3-03's. The rule-2 hr sits between the archive header and main.
 Manual check: none.
