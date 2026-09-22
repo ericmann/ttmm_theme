@@ -990,7 +990,7 @@ blockquote.is-style-pull cite,
 
 .ttm-newsletter-box__copy {
 	margin: 0 0 12px;
-	font-size: var(--wp--preset--font-size--body-s);
+	font-size: var(--wp--preset--font-size--ui);
 	color: var(--wp--preset--color--neutral-800);
 }
 

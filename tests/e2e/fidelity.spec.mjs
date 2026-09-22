@@ -1415,6 +1415,15 @@ test.describe( 'aside', () => {
 		expect( await text( el ) ).toBe( 'Get the next part' );
 	} );
 
+	// R1-08: SPEC §6.9 has no row for the box copy; added because ttm.css shipped it at
+	// body-s (14px) instead of the 13px `ui` preset SPEC §6.2 and PLAN P1-06 both name.
+	test( 'box-copy: .ttm-newsletter-box__copy @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-newsletter-box__copy' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 13 ) );
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-800' ) );
+	} );
+
 	test( 'box-form: .ttm-newsletter-box form @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-newsletter-box form' );

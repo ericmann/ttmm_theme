@@ -88,10 +88,11 @@ class HelpersTest extends TestCase {
 		);
 
 		$rendered = '<div class="is-style-dek-l wp-block-post-excerpt"><p class="wp-block-post-excerpt__excerpt">Rewrite wp_options quietly. </p></div>';
+		$block    = [ 'attrs' => [ 'className' => 'is-style-dek-l' ] ];
 
 		$this->assertSame(
 			'<div class="is-style-dek-l wp-block-post-excerpt"><p class="wp-block-post-excerpt__excerpt">Rewrite <code>wp_options</code> quietly.</p></div>',
-			Helpers::excerpt_markup( $rendered )
+			Helpers::excerpt_markup( $rendered, $block )
 		);
 	}
 
@@ -99,9 +100,27 @@ class HelpersTest extends TestCase {
 		Functions\when( 'get_the_ID' )->justReturn( 12 );
 		Functions\when( 'get_post_field' )->justReturn( '' );
 
-		$rendered = '<div class="wp-block-post-excerpt"><p class="wp-block-post-excerpt__excerpt">Auto excerpt…</p></div>';
+		$rendered = '<div class="is-style-dek-l wp-block-post-excerpt"><p class="wp-block-post-excerpt__excerpt">Auto excerpt…</p></div>';
+		$block    = [ 'attrs' => [ 'className' => 'is-style-dek-l' ] ];
 
-		$this->assertSame( $rendered, Helpers::excerpt_markup( $rendered ) );
+		$this->assertSame( $rendered, Helpers::excerpt_markup( $rendered, $block ) );
+	}
+
+	/**
+	 * R1-08: unscoped, excerpt_markup() rewrote every excerpt site-wide (front-page lead dek,
+	 * "More in" rows, archive rows, journal stream rows), not just the article header's
+	 * `is-style-dek-l` excerpt it was added for. This is the only test that would have caught
+	 * the missing guard: a post with markup in its manual excerpt, rendered by a post-excerpt
+	 * block that does NOT carry `is-style-dek-l`, must come back unchanged.
+	 */
+	public function test_excerpt_markup_is_a_no_op_outside_the_article_header_dek(): void {
+		Functions\when( 'get_the_ID' )->justReturn( 12 );
+		Functions\when( 'get_post_field' )->justReturn( 'Rewrite <code>wp_options</code> <b>quietly</b>.' );
+
+		$rendered = '<div class="ttm-archive-row__dek wp-block-post-excerpt"><p class="wp-block-post-excerpt__excerpt">Rewrite wp_options quietly&#8230;</p></div>';
+		$block    = [ 'attrs' => [ 'className' => 'ttm-archive-row__dek' ] ];
+
+		$this->assertSame( $rendered, Helpers::excerpt_markup( $rendered, $block ) );
 	}
 
 	public function test_author_prefix_prepends_the_pattern_prefix(): void {

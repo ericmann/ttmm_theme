@@ -103,13 +103,20 @@ class Helpers {
 	 * page. When the post has a manual excerpt, put its (kses-limited) markup back into the
 	 * rendered paragraph (SPEC §6.2 "Article header": dek inline code).
 	 *
+	 * R1-08: scoped to `is-style-dek-l` (the article header's dek only, `article-header.php`)
+	 * -- unscoped, this rewrote every excerpt site-wide (front-page lead dek, "More in" rows,
+	 * archive rows, journal stream rows), not just the article header it was added for.
+	 *
 	 * @param string               $block_content Rendered block HTML.
 	 * @param array<string, mixed> $block         Parsed block.
 	 * @param \WP_Block|null       $instance      Block instance (postId context), when given.
 	 * @return string
 	 */
 	public static function excerpt_markup( string $block_content, array $block = [], $instance = null ): string {
-		unset( $block );
+		$class_name = (string) ( $block['attrs']['className'] ?? '' );
+		if ( ! preg_match( '/(^|\s)is-style-dek-l(\s|$)/', $class_name ) ) {
+			return $block_content;
+		}
 
 		$post_id = 0;
 		if ( is_object( $instance ) && isset( $instance->context['postId'] ) ) {
