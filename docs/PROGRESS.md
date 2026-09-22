@@ -13,7 +13,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P0-08 Seed — journal, Writing, Security archive and series hub copy
 - [x] P0-09 Page container (rule 42) and the `container-*` rows
 - [x] P0-10 Inner masthead and phone-only overlay nav (rule 43, §6.1.1)
-- [ ] P0-11 Inner footer variant (§6.1.2)
+- [x] P0-11 Inner footer variant (§6.1.2)
 - [ ] P0-12 Phase 0 push — screenshot script extension and baseline PNGs
 - [ ] P1-01 Series bar (§6.2, 01 §4.18)
 - [ ] P1-02 Article body row, hero, body typography and sticky aside
@@ -84,3 +84,6 @@ Known out-of-scope screens.spec.mjs axe failures (unchanged by this task, fideli
 
 ### P0-10 — c54c094
 Pattern: outer/title groups layout:default, site-title level 0 (<p class="wp-block-site-title">), overlayMenu "mobile" + hasIcon false (open button = "Menu", close = "Close"); header part group layout:default. CSS 4.2 rewritten: border-bottom rule-2, padding 14px 0 12px, title 22px/800 on `.ttm-masthead-inner .wp-block-site-title` (18px phone), __by 12px neutral-700 margin-left 10px on a flex/baseline title group, ul flex column-gap 22px, hub link 400/neutral-700 via `.ttm-nav__hub > a.wp-block-navigation-item__content` (outranks core's repeated-class colour reset, no !important, so the shared !important accent-700 current rule still wins). >=721: both buttons display:none, container static. <=720 (S2): grid 1fr auto, padding 12px 0 10px, __by/__aside hidden, closed container force-hidden and Menu button force-shown with repeated-class selectors (beats core's 600px rules), Menu 11px neutral-700 unstyled, Close 24px/800. Removed the old phone `__nav { display:none }` (it hid the Menu button). nav.js unchanged. CurrentSection: dropped the single-post-in-series -> /series/ current branch (SPEC §6.1.1). Un-fixme'd the 12 nav-*/mast-inner-* rows (fidelity 97 passed/216 skipped, phase-2 mast-* untouched). ChromePartsTest toggle test rewritten + title-is-a-paragraph test; CurrentSectionTest new single-post test. test:integration 445/445. Behaviour verified via Playwright at 1280/700/390 incl. open on click and close on link click. Remaining test:e2e reds are the two known out-of-scope screens.spec.mjs axe items (article -> P1-02, journalPost -> P2-01/P5-02).
+
+### P0-11 — 0e98115
+ttm.css 4.34: `.ttm-footer` breaks out of the page column via `margin-inline: calc(-1 * var(--wp--custom--gutter--desktop))` and pads `14px var(--wp--custom--gutter--desktop)` with border-top rule-2; `.is-after-poster .ttm-footer` pads 16px gutter with border 0 (front page unchanged: phase-2 `footer` row still reads 16px 48px / 0); the <=720 block mirrors with the 20px phone token. Result: footer text x equals the masthead title x at 1280 (48), 1920 (368) and 390 (20) -- it used to start at 96. Un-fixme'd footer-inner-rule (fidelity 98 passed / 215 skipped; every phase-2 footer-* row green). ChromePartsTest untouched (is-after-poster still lands on the template-part wrapper). test:integration 445/445; budget 45881/61440; check-fixme 170 tagged. Remaining test:e2e reds are the two known out-of-scope screens.spec.mjs axe items (article -> P1-02, journalPost -> P2-01/P5-02).
