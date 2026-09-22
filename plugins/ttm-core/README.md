@@ -16,13 +16,24 @@ for how it was built; this file documents the plugin as it actually ships.
   `ttm_redirects` options.
 - **Blocks:** every `ttm/*` block under `blocks/` (server-rendered, no front-end JS beyond the
   editor bundle) and their block-binding sources: `ttm/kicker`, `ttm/meta-line`,
-  `ttm/short-date`, `ttm/relative-date`, `ttm/category-count`, `ttm/today`, `ttm/reading-time`,
-  `ttm/word-count`, `ttm/journal-subline`, `ttm/series-name`, `ttm/series-part`,
-  `ttm/pagination-label`, and `ttm/verse-copyright` (the footer's NIV notice, plain text, empty
-  unless `verse.copyright_placement === 'footer'` and a verse is stored). `ttm/series-list`'s
-  `layout` attribute gains `strip` (SPEC §6.1.7): one `ttm-series-row__meta` line per row
-  ("{Category} · {Category} · {N} of {M}", plus " · {cadence}" when set) instead of the
-  `rows`/`grid-2`/`grid-3` layouts' separate dek/categories/count spans.
+  `ttm/short-date`, `ttm/relative-date`, `ttm/category-count` (formats include `journal-full`,
+  "Full journal · {N} entries"/"All →" when `N` is 0), `ttm/today`, `ttm/reading-time`,
+  `ttm/word-count` (`whenUnsyndicated` arg: `''` when the post carries any `ttm_syndication`
+  URL), `ttm/journal-subline`, `ttm/series-name`, `ttm/series-part`, `ttm/pagination-label`,
+  `ttm/verse-copyright` (the footer's NIV notice, plain text, empty unless
+  `verse.copyright_placement === 'footer'` and a verse is stored), `ttm/newsletter-copy` ("Get
+  the next part" on a series post/archive, else "The weekly issue."), `ttm/archive-kind`
+  ("Section"/"Tag"/"Month"/"Year"/"Day"/"Author"/"Search", else `''`), `ttm/section-label`
+  (`format: "more-in"` → "More in {primary category}" on a singular post; `format: "series-in"`
+  → "Series in {category}" on a category archive), and `ttm/search-summary` ("Results for
+  “{q}”"/"Nothing matched “{q}”." by `found_posts`, empty off `/?s=`). A block whose bound
+  content resolves to `''` renders nothing at all (`Bindings\Sources::drop_empty_bound()`,
+  `render_block_core/paragraph`+`/heading`, priority 20) — never an empty tag. `ttm/series-list`'s
+  `layout` enum is `list` (default) | `rail` | `grid-2` | `grid-3` | `strip`: `strip`/`rail` share
+  one `__meta` line per row ("{Category} · {Category} · {N} of {M}", plus " · {cadence}" when
+  set); `list`/`grid-2`/`grid-3` show a dek plus, for fiction, "{Form} · {genre} · {cadence}" or,
+  for nonfiction, the same categories-joined meta line (`grid-2` uses a plain `__categories` line
+  instead, since the hub only ever shows categories there).
 - **Cache:** `Cache/Headers.php` (computed `Cache-Control`), `Cache/Batcache.php`,
   `Cache/Purge.php`/`Cache/Cloudflare.php` (the `ttm_purge_urls` action and its Cloudflare
   adapter).
