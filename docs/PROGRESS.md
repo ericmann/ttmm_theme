@@ -27,7 +27,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P2-03 Journal archive (`category-journal.html`)
 - [x] P2-04 Phase 2 push — journal screenshots
 - [x] P3-01 Archive header (01 §4.25) and the `ttm/archive-kind` kicker
-- [ ] P3-02 Filter row (01 §4.26) placed directly, with "All"
+- [x] P3-02 Filter row (01 §4.26) placed directly, with "All"
 - [ ] P3-03 Archive body — year groups, rows, meta line and pagination (01 §4.27–4.28)
 - [ ] P3-04 Archive aside — series rail, most read (01 §4.29) and the tablet grid
 - [ ] P3-05 Search, 404 and static page (02 §H)
@@ -141,4 +141,9 @@ Manual check: NOT VERIFIED (human) — compare docs/feedback/phase-3/journal.png
 ### P3-01 — 2a4e7de
 Tests: ar-head, ar-kicker, ar-h1, ar-h1-phone, ar-desc, ar-stats, ar-stats-text, ar-stats-rss, tag-kicker un-fixme'd (fidelity + selectors + all axe screens green). ValuesTest +test_archive_kind_labels_and_empty; ArticleSourcesTest +test_archive_kind_binding_on_category_tag_and_month; ArchiveTemplatesTest +test_tag_archive_header_reads_tag_kicker_and_no_stats. foundry_verify fully green: unit 161, integration 463/463, e2e 266 passed / 136 skipped, lints clean, budget 56981/61440, 28 pending coverage, 91 tagged fixme.
 Interpretation: archive.html now includes the shared ttm/archive-header pattern (category-journal.html already did, from P2-03), so all three archive templates render identical header markup. Values::archive_kind() checks category/tag/month/year/day/author/search in that order, so a day archive (also month+year) reads "Month" -- the task's listed order implies this precedence; no fixture exercises day/year directly. ar-kicker/tag-kicker assert textContent (uppercase transform); ar-desc measures max-width:52ch with a "0"-glyph probe like the existing art-h1 idiom. New archive-head rules needed heavier selectors (.ttm-archive-head.is-style-grid-8-4 ...) to satisfy no-descending-specificity against existing journal/entry-content/syndication rules.
+Manual check: none.
+
+### P3-02 — a075d8e
+Tests: ar-filter, ar-filter-all, ar-filter-active, ar-filter-sort un-fixme'd (fidelity + selectors + all axe screens green). TagFilterTest +test_all_chip_is_accent_without_tag_and_neutral_with_tag; ArchiveTemplatesTest updated (no wrap group, "All" chip present). foundry_verify fully green: unit 161, integration 464/464, e2e 270 passed / 132 skipped, lints clean, budget 57398/61440, 29 pending coverage, 87 tagged fixme. `grep -rn ttm-filter-row-wrap themes plugins scripts` returns nothing.
+Interpretation: pattern ttm/filter-row deleted; category.html places <!-- wp:ttm/tag-filter /--> directly. render.php's "All" chip links to the bare category URL, accent only when get_query_var('tag') is empty. Decision S6's rule (.ttm-filter-row + .ttm-archive-body { border-top: 0 }) added now per the task text even though .ttm-archive-body doesn't exist until P3-03; both allow-listed as pending/state until then. ar-filter-sort's margin-left:auto asserted by bounding-box effect (resolves to used px).
 Manual check: none.
