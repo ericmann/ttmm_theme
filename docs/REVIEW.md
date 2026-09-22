@@ -98,7 +98,7 @@ running site, not only against the log.
 
 Most severe first.
 
-### 1. [Tests / spec drift] R1-06 moved the front-page strip, the archive rail and the hub grid by editing shared base rules (R1-11, owner R1-06)
+### 1. [Tests / spec drift] R1-06 moved the front-page strip, the archive rail and the hub grid by editing shared base rules (R2-01, owner R1-06)
 
 `themes/ttm-theme/assets/css/ttm.css`:
 
@@ -140,7 +140,7 @@ dek 5px. Then add `.ttm-series-list.is-list .ttm-series-mark { margin-top: 6px }
 after the base rules. Add margin assertions to `strip-mark`, `strip-meta`, `ar-aside-row`,
 `hub-grid-row` or a new `hub-grid-dek`, plus a new `wr-serial-row-margins`.
 
-### 2. [Manual-check integrity] Committed screenshots predate every R1 fix (R1-12, owner R1-01..R1-08)
+### 2. [Manual-check integrity] Committed screenshots predate every R1 fix (R2-02, owner R1-01..R1-08)
 
 `docs/feedback/phase-3/*.png` was last written by `ebf010f` (P5-05). Several round-1 tasks
 changed what those screens render:
@@ -162,7 +162,7 @@ Manual checks 4 to 7 below ask a human to compare exactly these PNGs with the mo
 they would validate superseded output. SPEC §1 "Done" and §8 require the PNGs to be committed
 per phase. After a review round the final set has to reflect the final code.
 
-**Minimal fix:** after R1-11 lands, run `npm run screenshots` and commit all 14 PNGs. The
+**Minimal fix:** after R2-01 lands, run `npm run screenshots` and commit all 14 PNGs. The
 fix task names the check that would have caught this.
 
 ---
@@ -217,7 +217,7 @@ None.
 ## Manual checks still owed
 
 Copied from `docs/HANDOFF.md`, all still `NOT VERIFIED (human)`. Checks 1–7 must wait for
-R1-12's regenerated PNGs.
+R2-02's regenerated PNGs.
 
 1. (P0-12) `docs/feedback/phase-3/article.png` masthead vs the top of
    `docs/feedback/design_article.png`: every inner page a centred 1280 column, inline nav, no
