@@ -172,11 +172,10 @@ $ttm_extra = $ttm_is_fallback ? [ 'data-ttm-empty-heading' => __( 'Series', 'ttm
 				<?php else : ?>
 					<?php
 					// list/grid-3 meta line: fiction "{Form} · {genre} · {cadence}"; nonfiction
-					// categories joined " · " then cadence; empties omitted.
-					$ttm_cadence_raw = (string) get_term_meta( $ttm_row['id'], 'ttm_cadence', true );
-					$ttm_cadence     = '' !== $ttm_cadence_raw
-						? mb_strtoupper( mb_substr( $ttm_cadence_raw, 0, 1 ) ) . mb_substr( $ttm_cadence_raw, 1 )
-						: '';
+					// categories joined " · " then cadence; empties omitted. SPEC §6.5: this line
+					// is all lowercase ("monthly"); capitalisation belongs only to
+					// `ttm/serial-hero`'s stat value (PLAN spec-issue #18).
+					$ttm_cadence = (string) get_term_meta( $ttm_row['id'], 'ttm_cadence', true );
 					if ( 'nonfiction' === $ttm_row['form'] ) {
 						$ttm_meta_line_parts = [ implode( ' · ', $ttm_category_names ), $ttm_cadence ];
 					} else {

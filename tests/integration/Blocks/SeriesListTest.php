@@ -272,7 +272,8 @@ class SeriesListTest extends TTM_IntegrationTestCase {
 	/**
 	 * SPEC §6.5 "Body": `list` layout's meta line is "{Form} · {genre} · {cadence}" for
 	 * fiction (form labels Novel/Novella/Story cycle) and "{categories} · {cadence}" for
-	 * nonfiction, empties omitted; the stored cadence is capitalised on its first letter only.
+	 * nonfiction, empties omitted; the stored cadence stays lowercase (SPEC §6.5, R1-04) --
+	 * capitalisation belongs only to `ttm/serial-hero`'s stat value (PLAN spec-issue #18).
 	 */
 	public function test_list_layout_form_line_for_fiction_and_nonfiction(): void {
 		$tech = $this->category_id( 'technology', 'Technology' );
@@ -286,8 +287,9 @@ class SeriesListTest extends TTM_IntegrationTestCase {
 
 		$html = $this->render( [ 'status' => 'any' ] );
 
-		$this->assertStringContainsString( 'ttm-series-row__meta">Novel · literary thriller · Monthly<', $html );
-		$this->assertStringContainsString( 'ttm-series-row__meta">Technology · Weekly<', $html );
+		$this->assertStringContainsString( 'ttm-series-row__meta">Novel · literary thriller · monthly<', $html );
+		$this->assertStringContainsString( 'ttm-series-row__meta">Technology · weekly<', $html );
+		$this->assertStringNotContainsString( '· Monthly<', $html );
 	}
 
 	/**

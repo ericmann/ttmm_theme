@@ -406,16 +406,16 @@ class Sources {
 	}
 
 	/**
-	 * `ttm/short-date`.
+	 * `ttm/short-date`. `{"noYear":true}` (R1-04) drops the year entirely, for a row already
+	 * grouped under a year label (`ttm-archive-by-year`); the default keeps `Dates::short()`'s
+	 * year-when-different behaviour for the journal stream, search rows and hub part dates.
 	 *
-	 * @param array<string, mixed> $source_args    Unused: no args.
+	 * @param array{noYear?: bool} $source_args    `{noYear: bool}`.
 	 * @param WP_Block             $block_instance Consuming block.
 	 * @param string               $attribute_name Consuming attribute.
 	 * @return string
 	 */
 	public static function short_date( array $source_args, $block_instance, string $attribute_name ): string {
-		unset( $source_args );
-
 		$post = self::context_post( $block_instance );
 		if ( ! $post ) {
 			return '';
@@ -426,7 +426,11 @@ class Sources {
 			return '';
 		}
 
-		return self::finalize( Values::short_date( $date, Clock::now() ), $block_instance, $attribute_name );
+		$value = ! empty( $source_args['noYear'] )
+			? Values::short_date_no_year( $date )
+			: Values::short_date( $date, Clock::now() );
+
+		return self::finalize( $value, $block_instance, $attribute_name );
 	}
 
 	/**

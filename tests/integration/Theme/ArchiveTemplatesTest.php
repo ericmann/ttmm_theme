@@ -68,6 +68,50 @@ class ArchiveTemplatesTest extends TTM_IntegrationTestCase {
 	}
 
 	/**
+	 * R1-04: a year-grouped archive row (category.html) drops the year from its own date --
+	 * the group label already shows it (SPEC §6.6) -- but a journal-stream row
+	 * (category-journal.html, never year-grouped) for the same prior-year post still carries
+	 * it (`Dates::short()` is untouched).
+	 */
+	public function test_archive_row_date_omits_year_but_journal_stream_keeps_it(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$security = $this->category_id( 'security', 'Security' );
+		$journal  = $this->category_id( 'journal', 'Journal' );
+
+		$archive_post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $security ],
+				'post_date'     => '2022-11-26 09:00:00',
+			]
+		);
+		update_post_meta( $archive_post, 'ttm_primary_category', $security );
+
+		$journal_post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $journal ],
+				'post_date'     => '2022-11-26 09:00:00',
+			]
+		);
+		update_post_meta( $journal_post, 'ttm_primary_category', $journal );
+
+		$this->go_to( (string) get_category_link( $security ) );
+		$archive_html = $this->render_template( 'category' );
+		$this->assertMatchesRegularExpression(
+			'/<p class="ttm-archive-row__date[^"]*">Nov 26<\/p>/',
+			$archive_html
+		);
+
+		$this->go_to( (string) get_category_link( $journal ) );
+		$journal_html = $this->render_template( 'category-journal' );
+		$this->assertMatchesRegularExpression(
+			'/<p class="is-style-journal-stream-date[^"]*">Nov 26, 2022<\/p>/',
+			$journal_html
+		);
+	}
+
+	/**
 	 * SPEC §6.6 "Journal archive": the stream rows full width (each one anchor, title first,
 	 * Decision "Whole-row links"), no filter row, no 8/4 body, previous/next pagination only.
 	 */

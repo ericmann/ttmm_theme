@@ -2242,6 +2242,18 @@ test.describe( 'archive', () => {
 		expect( await computed( el, 'padding-top' ) ).toBe( px( 4 ) );
 	} );
 
+	test( 'ar-row-date-no-year: a row in the second year group has no year (R1-04)', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const rows = page.locator(
+			'.ttm-archive-year:nth-of-type(2) .ttm-archive-row__date'
+		);
+		expect( await rows.count() ).toBeGreaterThan( 0 );
+		const txt = await text( rows.first() );
+		expect( txt ).toMatch( /^[A-Z][a-z]{2,4} \d{1,2}$/ );
+	} );
+
 	test( 'ar-row-title: .ttm-archive-row__title (first) @1280', async ( {
 		page,
 	} ) => {

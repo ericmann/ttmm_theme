@@ -97,6 +97,20 @@ class ValuesTest extends TestCase {
 		$this->assertSame( 'Jul 30, 2025', $result );
 	}
 
+	/**
+	 * R1-04: `short_date_no_year()` never includes a year, even for a prior-year date -- the
+	 * archive-by-year rows already show it as the group label (SPEC §6.6). Rule 26: it is a
+	 * total, pure formatter (like `short_date()`/`relative_date()` above), so the genuine
+	 * empty case is `Sources::short_date()` returning '' before ever calling it; what this
+	 * layer guarantees is a normal value, a prior-year value with no year suffix, and no blank
+	 * output for a valid date.
+	 */
+	public function test_short_date_no_year_never_includes_a_year(): void {
+		$this->assertSame( 'Sept 20', Values::short_date_no_year( $this->date( '2026-09-20' ) ) );
+		$this->assertSame( 'Jul 30', Values::short_date_no_year( $this->date( '2025-07-30' ) ) );
+		$this->assertNotSame( '', Values::short_date_no_year( $this->date( '2026-09-20' ) ) );
+	}
+
 	public function test_relative_date_today_yesterday_weekday_short_and_full(): void {
 		$now = $this->date( '2026-09-20 12:00:00' );
 

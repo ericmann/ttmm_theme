@@ -127,6 +127,18 @@ class Values {
 	}
 
 	/**
+	 * "Sept 20" -- never a year, for a row already grouped under a year label (R1-01/R1-04:
+	 * `ttm/short-date` `{"noYear":true}`, `ttm-archive-by-year` rows). `Dates::short()` itself is
+	 * untouched: the journal stream, search rows and hub part dates keep the year when it differs.
+	 *
+	 * @param DateTimeImmutable $d Date.
+	 * @return string
+	 */
+	public static function short_date_no_year( DateTimeImmutable $d ): string {
+		return Dates::short_month( $d ) . ' ' . $d->format( 'j' );
+	}
+
+	/**
 	 * "Today · Sept 20" / "Yesterday · Sept 19" / "Thursday · Sept 17" (within `$window` days) /
 	 * "Sept 3" (within `$rail_window` days) / "Aug 3, 2026" (older — always with year, even the
 	 * current year; Decisions, P3-05).
