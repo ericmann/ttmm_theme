@@ -4,7 +4,7 @@ Started: 2026-09-22T04:48:01.084Z
 
 ## Tasks
 - [x] P0-01 Allow-list to pending lines, budget 61440, tagged fixme guard
-- [ ] P0-02 Config keys, `article-h2` slug and the theme.json variable check
+- [x] P0-02 Config keys, `article-h2` slug and the theme.json variable check
 - [ ] P0-03 Runtime selector coverage spec (rule 41) and the e2e screen set
 - [ ] P0-04 Fidelity rows for every §6.9 row as tagged fixme
 - [ ] P0-05 Seed images per rule 45, author display name, book and About covers
@@ -50,3 +50,6 @@ Started: 2026-09-22T04:48:01.084Z
 
 ### P0-01 — c724cda
 Strict allow-list format enforced: parseAllowList(text, {strict:true}) requires `ttm-<class> # P<n>-<nn> pending`; throws on old glob/brace lines. report() now returns pendingCount. check-css-coverage.mjs exports ALLOW_PENDING=true (flip false at flight end to fail on any remaining line; the old <10 cap is gone). scripts/lib/fixme.mjs new: taggedFixmeHits(lines, allowTagged) — untagged test.fixme( always fails, tagged (`// P<n>-<nn>`) tolerated while ALLOW_TAGGED=true (check-fixme.mjs export, flip false in P5-02). cssBudgetBytes raised 43008->61440 in check-budget.mjs (CLAUDE.md already said 61440). css-coverage-allow.txt now has 32 single-class pending lines mapped to P1-01/02/05, P2-01/02, P3-01..04, P4-01/03/04/06 (see commit body for the mapping rationale — ttm-entry is single.html's post-content wrapper -> P1-02; ttm-archive is the archive-by-year block wrapper -> P3-03). docs/SETUP.md fixme paragraph updated to describe tagged rows. Tests: scripts/test/check-css-coverage.test.js additions, new scripts/test/check-fixme.test.js. All lint/unit/integration-adjacent checks green via foundry_verify.
+
+### P0-02 — 3bf37fd
+Config: added series.related_limit=4, seed.image_band_angle=30 (⚠️ ASSUMPTION, Seeder only per rule 24). theme.json: fontSizes slug h2->article-h2 ("Article heading 2", 30px); h1 element's var fixed --h1->--h-1; h2 element's var ->--article-h-2. ttm.css: 3 refs (.is-style-journal-title, .entry-content h2, .ttm-lead__title phone) -> --article-h-2, dropped stale comment. New scripts/lib/theme-json-vars.mjs: kebabSlug(slug) (both letter->digit and digit->letter boundary regexes, lower-cased), generatedVars(themeJson) (font-size+color preset vars), referencedVars(cssText). check-theme-json.mjs now scans ttm.css, style.css and JSON.stringify(theme.styles) for --wp--preset--(font-size|color)--* refs and fails on any not in generatedVars — this caught two pre-existing bugs I fixed in-commit (see commit body: h1 element ref, .is-style-kicker's nonexistent --font-size--kicker -> --font-size--caption). Budget now 42923/61440. Tests: ConfigTest 2 new methods; theme-json-vars.test.js 3 tests. Full foundry_verify (incl. e2e/integration) green.
