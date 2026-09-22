@@ -285,7 +285,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 		( new Seeder() )->run( 'normal' );
 
 		$expected = [
-			'hardening-wordpress'    => [ 3, 6 ],
+			'hardening-wordpress'    => [ 4, 6 ],
 			'the-consultants-ledger' => [ 5, 8 ],
 			'ordinary-time'          => [ 9, 12 ],
 		];
@@ -335,5 +335,74 @@ class SeederTest extends TTM_IntegrationTestCase {
 
 		$stories = \TTM\Core\Fiction\Serials::stories( 1 );
 		$this->assertSame( [ $story->ID ], $stories );
+	}
+
+	public function test_seeded_article_reads_fourteen_minutes(): void {
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$post  = get_page_by_path( 'signing-your-options-table', OBJECT, 'post' );
+		$words = (int) get_post_meta( $post->ID, 'ttm_word_count', true );
+
+		$this->assertGreaterThanOrEqual( 2991, $words );
+		$this->assertLessThanOrEqual( 3220, $words );
+	}
+
+	public function test_seeded_article_has_two_h2_a_code_block_and_a_pull_quote(): void {
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$post = get_page_by_path( 'signing-your-options-table', OBJECT, 'post' );
+
+		$this->assertSame( 2, substr_count( $post->post_content, '<!-- wp:heading -->' ) );
+		$this->assertStringContainsString( '<!-- wp:code -->', $post->post_content );
+		$this->assertStringContainsString( 'is-style-pull', $post->post_content );
+		$this->assertStringContainsString( 'href="/hardening-part-2-salts-and-keys/"', $post->post_content );
+	}
+
+	public function test_hardening_series_has_four_published_and_two_scheduled_parts(): void {
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$slugs = [
+			'hardening-part-1'                                  => 'publish',
+			'hardening-part-2-salts-and-keys'                   => 'publish',
+			'signing-your-options-table'                        => 'publish',
+			'hardening-part-4-keys-in-the-environment'          => 'publish',
+			'hardening-part-5-the-admin-with-the-weak-password' => 'future',
+			'hardening-part-6-incident-when-the-alarm-fires'    => 'future',
+		];
+
+		foreach ( $slugs as $slug => $status ) {
+			$post = get_page_by_path( $slug, OBJECT, 'post' );
+			$this->assertNotNull( $post, "missing post: {$slug}" );
+			$this->assertSame( $status, $post->post_status, "wrong status for: {$slug}" );
+		}
+	}
+
+	public function test_hardening_is_the_featured_series(): void {
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$term = get_term_by( 'slug', 'hardening-wordpress', 'series' );
+		$this->assertTrue( (bool) get_term_meta( $term->term_id, 'ttm_featured', true ) );
+
+		$other = get_term_by( 'slug', 'the-quiet-ledger', 'series' );
+		$this->assertFalse( (bool) get_term_meta( $other->term_id, 'ttm_featured', true ) );
+	}
+
+	public function test_seeded_article_hero_has_caption(): void {
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$post          = get_page_by_path( 'signing-your-options-table', OBJECT, 'post' );
+		$thumbnail_id  = get_post_thumbnail_id( $post );
+		$this->assertGreaterThan( 0, $thumbnail_id );
+
+		$attachment = get_post( $thumbnail_id );
+		$this->assertSame(
+			"Caption in the theme's meta type. Photographs are grayscale only on the front page and archives.",
+			$attachment->post_excerpt
+		);
 	}
 }

@@ -410,6 +410,14 @@ class Seeder {
 				$attachment_id = $this->image( $row['title'], 'ttm-tile' );
 				if ( $attachment_id ) {
 					set_post_thumbnail( $post_id, $attachment_id );
+					if ( ! empty( $row['caption'] ) ) {
+						wp_update_post(
+							[
+								'ID'           => $attachment_id,
+								'post_excerpt' => $row['caption'],
+							]
+						);
+					}
 				}
 			}
 
@@ -453,6 +461,14 @@ class Seeder {
 			update_term_meta( $term_id, 'ttm_total_parts', (int) $row['total_parts'] );
 			update_term_meta( $term_id, 'ttm_genre', $row['genre'] ?? '' );
 			update_term_meta( $term_id, 'ttm_cadence', $row['cadence'] ?? '' );
+
+			if ( ! empty( $row['featured'] ) ) {
+				update_term_meta( $term_id, 'ttm_featured', 1 );
+			} else {
+				// Idempotent: a reseed after the fixture drops "featured" must not leave a
+				// stale flag behind.
+				delete_term_meta( $term_id, 'ttm_featured' );
+			}
 
 			if ( ! empty( $row['next_date_days_ahead'] ) ) {
 				$next = Clock::now()->modify( '+' . (int) $row['next_date_days_ahead'] . ' days' )->format( 'Y-m-d' );

@@ -1,15 +1,22 @@
 [
 	{
-		"tags": [],
 		"slug": "signing-your-options-table",
 		"title": "Stop trusting the database: signing your options table",
 		"categories": [
-			"technology"
+			"technology",
+			"security"
+		],
+		"tags": [
+			"wordpress",
+			"php",
+			"integrity"
 		],
 		"days_ago": 1,
-		"excerpt": "A compromised admin account can rewrite <code>wp_options</code> without touching a single file. Here is how to detect it — and why file-integrity scanners never will.",
-		"paragraphs": 52,
+		"excerpt": "A compromised admin account can rewrite <code>wp_options</code> without touching a single file. Here is how to detect it — and why your file-integrity scanner never will.",
+		"content": "<!-- wp:paragraph -->\n<p>Every WordPress hardening guide begins the same way: lock down file permissions, disable the theme editor, verify core checksums. Good advice. All of it protects the filesystem — and none of it protects the thing that actually runs your site.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>The options table is executable configuration. <code>active_plugins</code>, <code>siteurl</code>, cron schedules, rewrite rules — a hostile write to any one of these changes what your site does on the next request, and every scanner you own will report green.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading -->\n<h2>What a signature buys you</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>Not prevention. A signature does not stop the write; it makes the write <em>visible</em>. On every load, WordPress recomputes an HMAC over the sensitive keys and compares it to the stored one. Mismatch means someone changed the configuration through a path you did not sign.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:code -->\n<pre class=\"wp-block-code\"><code>add_action( 'init', function () {\n\t$keys = [ 'active_plugins', 'siteurl', 'home', 'template' ];\n\t$blob = wp_json_encode( array_map( 'get_option', $keys ) );\n\t$sig  = hash_hmac( 'sha256', $blob, OPTIONS_SIGNING_KEY );\n\n\tif ( ! hash_equals( get_option( '_options_sig', '' ), $sig ) ) {\n\t\tdo_action( 'options_tampered', $keys );\n\t}\n\n\t// Every other admin-side write is unaffected; this only guards the boot-critical keys.\n}\n);</code></pre>\n<!-- /wp:code -->\n\n<!-- wp:paragraph -->\n<p>Twelve lines. The interesting work is in <code>options_tampered</code>: what you do when the alarm fires is the actual security design, building on the rotation habits from <a href=\"/hardening-part-2-salts-and-keys/\">part 2</a>.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:quote {\"className\":\"is-style-pull\"} -->\n<blockquote class=\"wp-block-quote is-style-pull\"><p>“A file-integrity scanner watches the doors. The options table is a window that was never on the blueprint.”</p></blockquote>\n<!-- /wp:quote -->\n\n<!-- wp:heading -->\n<h2>Where to keep the key</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>Not in the database — obviously — and not in <code>wp-config.php</code> if you can avoid it. Part 2 covered rotation; the same discipline applies here. In part 4 we move the key to the environment and rotate it without downtime.</p>\n<!-- /wp:paragraph -->",
+		"paragraphs": 82,
 		"featured_image": true,
+		"caption": "Caption in the theme's meta type. Photographs are grayscale only on the front page and archives.",
 		"alt": "A padlock icon over a database table illustration",
 		"most_read": true
 	},
@@ -487,6 +494,44 @@
 		"excerpt": "The secret keys in wp-config.php were generated once, at launch, and rotated never.",
 		"paragraphs": 14,
 		"part_title": "Salts, keys and the rotation you skipped"
+	},
+	{
+		"tags": [],
+		"slug": "hardening-part-4-keys-in-the-environment",
+		"title": "Hardening WordPress, part 4: keys in the environment, rotated live",
+		"categories": [
+			"security"
+		],
+		"days_ago": 0,
+		"excerpt": "Rotating a signing key without downtime means the old and new keys both have to verify for one deploy.",
+		"paragraphs": 12,
+		"part_title": "Keys in the environment, rotated live"
+	},
+	{
+		"tags": [],
+		"slug": "hardening-part-5-the-admin-with-the-weak-password",
+		"title": "Hardening WordPress, part 5: the admin with the weak password",
+		"categories": [
+			"security"
+		],
+		"future": true,
+		"days_ago": -5,
+		"excerpt": "Every hardening checklist assumes the attacker has to work for it. Sometimes they do not.",
+		"paragraphs": 12,
+		"part_title": "The admin with the weak password"
+	},
+	{
+		"tags": [],
+		"slug": "hardening-part-6-incident-when-the-alarm-fires",
+		"title": "Hardening WordPress, part 6: incident — what to do when the alarm fires",
+		"categories": [
+			"security"
+		],
+		"future": true,
+		"days_ago": -12,
+		"excerpt": "The signature told you something changed. What you do in the next ten minutes is the part nobody rehearses.",
+		"paragraphs": 12,
+		"part_title": "Incident: what to do when the alarm fires"
 	},
 	{
 		"tags": [],

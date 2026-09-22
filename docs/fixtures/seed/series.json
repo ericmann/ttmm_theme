@@ -7,7 +7,7 @@
 		"total_parts": 6,
 		"genre": "",
 		"cadence": "Weekly",
-		"next_date_days_ahead": 6,
+		"next_date_days_ahead": 5,
 		"cover": false,
 		"purchase_links": [],
 		"parts": [
@@ -22,8 +22,21 @@
 			{
 				"post_slug": "signing-your-options-table",
 				"part": 3
+			},
+			{
+				"post_slug": "hardening-part-4-keys-in-the-environment",
+				"part": 4
+			},
+			{
+				"post_slug": "hardening-part-5-the-admin-with-the-weak-password",
+				"part": 5
+			},
+			{
+				"post_slug": "hardening-part-6-incident-when-the-alarm-fires",
+				"part": 6
 			}
-		]
+		],
+		"featured": true
 	},
 	{
 		"slug": "the-consultants-ledger",
