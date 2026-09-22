@@ -642,7 +642,7 @@ test.describe( 'writing cell', () => {
 } );
 
 test.describe( 'series strip', () => {
-	test.fixme( 'strip-grid: .ttm-series-list.is-strip (or .ttm-series-strip .is-style-grid-3) @1280', async ( {
+	test( 'strip-grid: .ttm-series-list.is-strip (or .ttm-series-strip .is-style-grid-3) @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -656,7 +656,7 @@ test.describe( 'series strip', () => {
 		expect( await computed( grid, 'column-gap' ) ).toBe( px( 24 ) );
 	} );
 
-	test.fixme( 'strip-row: .ttm-series-row (first) @1280', async ( {
+	test( 'strip-row: .ttm-series-row (first) @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -664,7 +664,7 @@ test.describe( 'series strip', () => {
 		expect( await computed( row, 'border-top-width' ) ).toBe( px( 1 ) );
 	} );
 
-	test.fixme( 'strip-mark: .ttm-series-row .ttm-series-mark @1280', async ( {
+	test( 'strip-mark: .ttm-series-row .ttm-series-mark @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -676,7 +676,7 @@ test.describe( 'series strip', () => {
 		);
 	} );
 
-	test.fixme( 'strip-meta: .ttm-series-row__meta @1280', async ( {
+	test( 'strip-meta: .ttm-series-row__meta @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );

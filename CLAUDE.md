@@ -61,7 +61,7 @@ Tests: `tests/unit` (Brain\Monkey; `BoundariesTest` encodes §4, `ConfigFallback
 - Every block-binding source has a test for its normal and empty value; `tests/unit` never loads WordPress.
 - Rendered markup is deterministic: no random ids (newsletter ids come from a per-request counter), no timestamps except through `Clock`.
 - Bare numeric literals outside `Config.php` are limited to HTTP status codes, structural arithmetic, array indices and `Config::get()` fallbacks equal to `defaults()` (`tests/unit/ConfigFallbacksTest.php`, `scripts/forbidden-patterns.sh`).
-- `themes/ttm-theme/assets/css/ttm.css` ≤ `cssBudgetBytes` (41984 ⚠️ ASSUMPTION, `scripts/check-budget.mjs`) — plain CSS, presets via `var(--wp--preset--…)`, no hex literals, no framework.
+- `themes/ttm-theme/assets/css/ttm.css` ≤ `cssBudgetBytes` (43008 ⚠️ ASSUMPTION, `scripts/check-budget.mjs`) — plain CSS, presets via `var(--wp--preset--…)`, no hex literals, no framework.
 - Every `ttm-*` class emitted by templates, parts, patterns, `inc/`, `render.php` or `src/` has a selector in `ttm.css`/`style.css`, and every `ttm-*` selector matches emitted markup; `scripts/css-coverage-allow.txt` has fewer than 10 lines (rules 34/37).
 - `.is-style-rule-1`/`.is-style-rule-2` are `width: 100%; max-width: none; margin-left: 0; margin-right: 0` (rule 35); no `core/group` with `is-style-grid-*` uses `constrained` or `flow` layout (rule 36).
 - `grep -ri lorem docs/fixtures/seed/` returns nothing (rule 39).

@@ -19,7 +19,10 @@ for how it was built; this file documents the plugin as it actually ships.
   `ttm/short-date`, `ttm/relative-date`, `ttm/category-count`, `ttm/today`, `ttm/reading-time`,
   `ttm/word-count`, `ttm/journal-subline`, `ttm/series-name`, `ttm/series-part`,
   `ttm/pagination-label`, and `ttm/verse-copyright` (the footer's NIV notice, plain text, empty
-  unless `verse.copyright_placement === 'footer'` and a verse is stored).
+  unless `verse.copyright_placement === 'footer'` and a verse is stored). `ttm/series-list`'s
+  `layout` attribute gains `strip` (SPEC §6.1.7): one `ttm-series-row__meta` line per row
+  ("{Category} · {Category} · {N} of {M}", plus " · {cadence}" when set) instead of the
+  `rows`/`grid-2`/`grid-3` layouts' separate dek/categories/count spans.
 - **Cache:** `Cache/Headers.php` (computed `Cache-Control`), `Cache/Batcache.php`,
   `Cache/Purge.php`/`Cache/Cloudflare.php` (the `ttm_purge_urls` action and its Cloudflare
   adapter).

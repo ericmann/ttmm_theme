@@ -145,17 +145,29 @@ $ttm_extra = $ttm_is_fallback ? [ 'data-ttm-empty-heading' => __( 'Series', 'ttm
 		<a class="ttm-series-row" href="<?php echo esc_url( home_url( '/series/' . $ttm_row['slug'] . '/' ) ); ?>">
 			<span class="ttm-series-mark is-<?php echo esc_attr( $ttm_row['status'] ); ?>"></span>
 			<span class="ttm-series-row__title"><?php echo esc_html( $ttm_row['name'] ); ?></span>
-			<?php if ( $ttm_show_dek && '' !== $ttm_dek ) : ?>
+			<?php if ( 'strip' === $ttm_layout ) : ?>
+				<?php
+				$ttm_meta_parts   = $ttm_category_names;
+				$ttm_meta_parts[] = $ttm_count_word;
+				$ttm_cadence      = (string) get_term_meta( $ttm_row['id'], 'ttm_cadence', true );
+				if ( '' !== $ttm_cadence ) {
+					$ttm_meta_parts[] = $ttm_cadence;
+				}
+				?>
+			<span class="ttm-series-row__meta"><?php echo esc_html( implode( ' · ', $ttm_meta_parts ) ); ?></span>
+			<?php else : ?>
+				<?php if ( $ttm_show_dek && '' !== $ttm_dek ) : ?>
 			<span class="ttm-series-row__dek"><?php echo esc_html( $ttm_dek ); ?></span>
 			<?php endif; ?>
-			<?php if ( $ttm_show_cats && ! empty( $ttm_category_names ) ) : ?>
-			<span class="ttm-series-row__categories"><?php echo esc_html( implode( ', ', $ttm_category_names ) ); ?></span>
+				<?php if ( $ttm_show_cats && ! empty( $ttm_category_names ) ) : ?>
+			<span class="ttm-series-row__categories"><?php echo esc_html( implode( ' · ', $ttm_category_names ) ); ?></span>
 			<?php endif; ?>
-			<?php if ( $ttm_show_count ) : ?>
+				<?php if ( $ttm_show_count ) : ?>
 			<span class="ttm-series-row__count">
 				<span class="ttm-series-row__parts"><?php echo esc_html( $ttm_count_word ); ?></span>
 				<span class="ttm-series-row__status"><?php echo esc_html( Helpers::status_word( $ttm_row['status'] ) ); ?></span>
 			</span>
+			<?php endif; ?>
 			<?php endif; ?>
 		</a>
 	<?php endforeach; ?>
