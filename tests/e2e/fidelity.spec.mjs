@@ -11,7 +11,8 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { color, px } from './lib/presets.mjs';
-import { computed, tracks, before } from './lib/style.mjs';
+import { computed, tracks, before, text, visibleCount } from './lib/style.mjs';
+import { SCREENS, SCREEN_URLS, securityFiltered } from './lib/urls.mjs';
 
 /**
  * Navigate to `/` at the given viewport and wait for fonts to be ready.
@@ -23,6 +24,21 @@ import { computed, tracks, before } from './lib/style.mjs';
 async function gotoFront( page, width ) {
 	await page.setViewportSize( { width, height: 900 } );
 	await page.goto( '/' );
+	await page.evaluate( () => document.fonts.ready );
+}
+
+/**
+ * Navigate to any seeded screen (P0-04, SPEC §6.9) at the given viewport and wait for web
+ * fonts before measuring. `gotoFront` stays the front-page-specific alias above.
+ *
+ * @param {import('@playwright/test').Page} page  Page.
+ * @param {string}                          path  Path to navigate to (e.g. `SCREENS.article`).
+ * @param {number}                          width Viewport width.
+ * @return {Promise<void>}
+ */
+async function gotoScreen( page, path, width ) {
+	await page.setViewportSize( { width, height: 900 } );
+	await page.goto( path );
 	await page.evaluate( () => document.fonts.ready );
 }
 
@@ -237,9 +253,9 @@ test.describe( 'verse', () => {
 
 	test( 'verse-text: .ttm-verse__text @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
-		const text = page.locator( '.ttm-verse__text' );
-		expect( await computed( text, 'font-size' ) ).toBe( px( 19 ) );
-		expect( await computed( text, 'font-weight' ) ).toBe( '600' );
+		const verseText = page.locator( '.ttm-verse__text' );
+		expect( await computed( verseText, 'font-size' ) ).toBe( px( 19 ) );
+		expect( await computed( verseText, 'font-weight' ) ).toBe( '600' );
 	} );
 
 	test( 'verse-ref: .ttm-verse__reference @1280', async ( { page } ) => {
@@ -336,8 +352,10 @@ test.describe( 'journal rail', () => {
 		expect( await computed( excerpt, 'color' ) ).toBe(
 			color( 'neutral-800' )
 		);
-		const text = await excerpt.innerText();
-		expect( text.trim().split( /\s+/ ).length ).toBeLessThanOrEqual( 55 );
+		const excerptText = await excerpt.innerText();
+		expect( excerptText.trim().split( /\s+/ ).length ).toBeLessThanOrEqual(
+			55
+		);
 	} );
 
 	test( 'rail-more: .ttm-journal-rail .wp-block-read-more @1280', async ( {
@@ -704,9 +722,9 @@ test.describe( 'series strip', () => {
 		expect( await computed( meta, 'color' ) ).toBe(
 			color( 'neutral-700' )
 		);
-		const text = await meta.innerText();
-		expect( text ).toContain( ' · ' );
-		expect( text ).toMatch( /\d+ of \d+/ );
+		const metaText = await meta.innerText();
+		expect( metaText ).toContain( ' · ' );
+		expect( metaText ).toMatch( /\d+ of \d+/ );
 	} );
 } );
 
@@ -828,6 +846,1938 @@ test.describe( 'footer', () => {
 	} );
 } );
 
+// P0-04: every remaining SPEC §6.9 row, transcribed in table order as tagged `test.fixme(`.
+// Each phase task un-fixmes the rows it owns (Conventions "Row-to-task map").
+
+test.describe( 'container', () => {
+	test.fixme( // P0-09
+	'container-width: .wp-site-blocks @1920', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1920 );
+		const el = page.locator( '.wp-site-blocks' );
+		expect( await computed( el, 'width' ) ).toBe( px( 1280 ) );
+		expect( await computed( el, 'margin-left' ) ).toBe( px( 320 ) );
+	} ); // P0-09
+
+	test.fixme( // P0-09
+	'container-gutter: .wp-site-blocks @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.wp-site-blocks' );
+		expect( await computed( el, 'padding-left' ) ).toBe( px( 48 ) );
+		const box = await el.evaluate(
+			( node ) => node.getBoundingClientRect().width
+		);
+		const paddingLeft = parseFloat( await computed( el, 'padding-left' ) );
+		const paddingRight = parseFloat(
+			await computed( el, 'padding-right' )
+		);
+		expect( box - paddingLeft - paddingRight ).toBeCloseTo( 1184, 0 );
+	} ); // P0-09
+
+	test.fixme( // P0-09
+	'container-phone: .wp-site-blocks @390', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 390 );
+		const el = page.locator( '.wp-site-blocks' );
+		expect( await computed( el, 'padding-left' ) ).toBe( px( 20 ) );
+	} ); // P0-09
+
+	test.fixme( // P0-09
+	'container-front: .ttm-lead-row @1920', async ( { page } ) => {
+		await gotoScreen( page, '/', 1920 );
+		const el = page.locator( '.ttm-lead-row' );
+		expect( await computed( el, 'width' ) ).toBe( px( 1184 ) );
+	} ); // P0-09
+} );
+
+test.describe( 'nav', () => {
+	test.fixme( // P0-10
+	'nav-inline: .ttm-masthead-inner__nav ul @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-masthead-inner__nav ul' );
+		expect( await computed( el, 'display' ) ).toBe( 'flex' );
+		expect( await computed( el, 'column-gap' ) ).toBe( px( 22 ) );
+	} ); // P0-10
+
+	test.fixme( // P0-10
+	'nav-item: .ttm-masthead-inner__nav a (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-masthead-inner__nav a' ).first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 13 ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '600' );
+	} ); // P0-10
+
+	test.fixme( // P0-10
+	'nav-nochrome: .wp-block-navigation__responsive-container-open, .wp-block-navigation__responsive-container-close @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const els = page.locator(
+			'.wp-block-navigation__responsive-container-open, .wp-block-navigation__responsive-container-close'
+		);
+		expect( await visibleCount( els ) ).toBe( 0 );
+	} ); // P0-10
+
+	test.fixme( // P0-10
+	'nav-current: .ttm-masthead-inner__nav .current-menu-item > a @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator(
+			'.ttm-masthead-inner__nav .current-menu-item > a'
+		);
+		// Colour vs a11y: accent-700, not SPEC's literal accent (contrast).
+		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
+		expect( await text( el ) ).toBe( 'Technology' );
+	} ); // P0-10
+
+	test.fixme( // P0-10
+	'nav-hub: .ttm-masthead-inner__nav .ttm-nav__hub > a @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-masthead-inner__nav .ttm-nav__hub > a' );
+		expect( await computed( el, 'font-weight' ) ).toBe( '400' );
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
+	} ); // P0-10
+
+	test.fixme( // P0-10
+	'nav-hub-current: .ttm-masthead-inner__nav .ttm-nav__hub > a @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const el = page.locator( '.ttm-masthead-inner__nav .ttm-nav__hub > a' );
+		// Colour vs a11y: accent-700, not SPEC's literal accent.
+		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
+	} ); // P0-10
+
+	test.fixme( // P0-10
+	'nav-phone-menu: .wp-block-navigation__responsive-container-open @390', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 390 );
+		const el = page.locator(
+			'.wp-block-navigation__responsive-container-open'
+		);
+		expect( await el.isVisible() ).toBe( true );
+		expect( await text( el ) ).toBe( 'Menu' );
+	} ); // P0-10
+
+	test.fixme( // P0-10
+	'nav-phone-hidden: .ttm-masthead-inner__nav ul @390', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 390 );
+		const el = page.locator( '.ttm-masthead-inner__nav ul' );
+		expect( await el.isVisible() ).toBe( false );
+	} ); // P0-10
+} );
+
+test.describe( 'masthead inner', () => {
+	test.fixme( // P0-10
+	'mast-inner: .ttm-masthead-inner @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-masthead-inner' );
+		const t = await tracks( el );
+		expect( t.length ).toBe( 3 );
+		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 2 ) );
+		expect( await computed( el, 'padding' ) ).toBe( '14px 0px 12px' );
+	} ); // P0-10
+
+	test.fixme( // P0-10
+	'mast-inner-title: .ttm-masthead-inner .wp-block-site-title @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-masthead-inner .wp-block-site-title' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 22 ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
+	} ); // P0-10
+
+	test.fixme( // P0-10
+	'mast-inner-by: .ttm-masthead-inner__by @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-masthead-inner__by' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
+	} ); // P0-10
+
+	test.fixme( // P0-10
+	'mast-inner-phone: .ttm-masthead-inner .wp-block-site-title @390', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 390 );
+		const el = page.locator( '.ttm-masthead-inner .wp-block-site-title' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 18 ) );
+	} ); // P0-10
+} );
+
+test.describe( 'footer inner', () => {
+	test.fixme( // P0-11
+	'footer-inner-rule: .ttm-footer @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-footer' );
+		expect( await computed( el, 'border-top-width' ) ).toBe( px( 2 ) );
+		expect( await computed( el, 'padding' ) ).toBe( '14px 48px' );
+	} ); // P0-11
+} );
+
+test.describe( 'series bar', () => {
+	test.fixme( // P1-01
+	'bar: .ttm-series-bar @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-series-bar' );
+		const t = await tracks( el );
+		expect( t.length ).toBe( 3 );
+		expect( t[ 0 ] ).toBeCloseTo( 10, 0 );
+		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 1 ) );
+		expect( await computed( el, 'padding' ) ).toBe( '12px 0px' );
+	} ); // P1-01
+
+	test.fixme( // P1-01
+	'bar-mark: .ttm-series-bar .ttm-series-mark @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-series-bar .ttm-series-mark' );
+		expect( await computed( el, 'width' ) ).toBe( px( 10 ) );
+		expect( await computed( el, 'background-color' ) ).toBe(
+			color( 'accent' )
+		);
+	} ); // P1-01
+
+	test.fixme( // P1-01
+	'bar-name: .ttm-series-bar__name @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-series-bar__name' );
+		expect( await computed( el, 'font-weight' ) ).toBe( '600' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 13 ) );
+	} ); // P1-01
+
+	test.fixme( // P1-01
+	'bar-seg: .ttm-series-bar__seg (3rd) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-series-bar__seg' ).nth( 2 );
+		expect( await computed( el, 'width' ) ).toBe( px( 22 ) );
+		expect( await computed( el, 'height' ) ).toBe( px( 4 ) );
+		expect( await computed( el, 'background-color' ) ).toBe(
+			color( 'accent' )
+		);
+	} ); // P1-01
+
+	test.fixme( // P1-01
+	'bar-seg-1: .ttm-series-bar__seg (1st) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-series-bar__seg' ).first();
+		expect( await computed( el, 'background-color' ) ).toBe(
+			color( 'neutral-900' )
+		);
+	} ); // P1-01
+
+	test.fixme( // P1-01
+	'bar-view: .ttm-series-bar__view @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-series-bar__view' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
+		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
+		expect( await computed( el, 'margin-left' ) ).toBe( px( 14 ) );
+	} ); // P1-01
+
+	test.fixme( // P1-01
+	'bar-phone: .ttm-series-bar__seg (1st) / .ttm-series-bar__view @390', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 390 );
+		const seg = page.locator( '.ttm-series-bar__seg' ).first();
+		expect( await computed( seg, 'width' ) ).toBe( px( 12 ) );
+		const view = page.locator( '.ttm-series-bar__view' );
+		expect( await view.count() ).toBe( 0 );
+	} ); // P1-01
+} );
+
+test.describe( 'article', () => {
+	test.fixme( // P1-02
+	'art-row: .ttm-article @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-article' );
+		const t = await tracks( el );
+		expect( t.length ).toBe( 2 );
+		expect( await computed( el, 'column-gap' ) ).toBe( px( 64 ) );
+		expect( await computed( el, 'padding' ) ).toBe( '40px 0px 48px' );
+	} ); // P1-02
+
+	test.fixme( // P1-02
+	'art-row-layout: .ttm-article > * @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const children = page.locator( '.ttm-article > *' );
+		const count = await children.count();
+		for ( let i = 0; i < count; i++ ) {
+			const cls =
+				( await children.nth( i ).getAttribute( 'class' ) ) || '';
+			expect( cls ).not.toMatch( /is-layout-constrained/ );
+		}
+	} ); // P1-02
+
+	test.fixme( // P1-03
+	'art-kicker: .ttm-article-head .is-style-kicker @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-article-head .is-style-kicker' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
+		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
+		expect( await computed( el, 'text-transform' ) ).toBe( 'uppercase' );
+		expect( await text( el ) ).toBe( 'Technology · Security' );
+	} ); // P1-03
+
+	test.fixme( // P1-03
+	'art-h1: .ttm-article-head h1 @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-article-head h1' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 56 ) );
+		expect( await computed( el, 'line-height' ) ).toBe( px( 57.12 ) );
+		expect( await computed( el, 'max-width' ) ).toBe( '18ch' );
+	} ); // P1-03
+
+	test.fixme( // P1-03
+	'art-h1-phone: .ttm-article-head h1 @390', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 390 );
+		const el = page.locator( '.ttm-article-head h1' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 34 ) );
+	} ); // P1-03
+
+	test.fixme( // P1-03
+	'art-dek: .ttm-article-head .is-style-dek-l @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-article-head .is-style-dek-l' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 21 ) );
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-800' ) );
+		expect( await computed( el, 'max-width' ) ).toBe( '32em' );
+	} ); // P1-03
+
+	test.fixme( // P1-03
+	'art-dek-code: .ttm-article-head .is-style-dek-l code @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-article-head .is-style-dek-l code' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 18 ) );
+		expect( await computed( el, 'background-color' ) ).toBe(
+			color( 'surface' )
+		);
+	} ); // P1-03
+
+	test.fixme( // P1-03
+	'art-byline: .ttm-byline @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-byline' );
+		expect( await computed( el, 'border-top-width' ) ).toBe( px( 2 ) );
+		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 1 ) );
+		expect( await computed( el, 'padding' ) ).toBe( '14px 0px' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 13 ) );
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
+	} ); // P1-03
+
+	test.fixme( // P1-03
+	'art-byline-author: .ttm-byline .wp-block-post-author-name a @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-byline .wp-block-post-author-name a' );
+		expect( await computed( el, 'font-weight' ) ).toBe( '600' );
+	} ); // P1-03
+
+	test.fixme( // P1-03
+	'art-byline-tags: .ttm-byline .tag (first) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-byline .tag' ).first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 11 ) );
+		expect( await computed( el, 'background-color' ) ).toBe(
+			color( 'surface' )
+		);
+	} ); // P1-03
+
+	test.fixme( // P1-02
+	'art-hero: .ttm-article .wp-block-post-featured-image @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-article .wp-block-post-featured-image' );
+		expect( await computed( el, 'margin-top' ) ).toBe( px( 28 ) );
+		expect( await computed( el, 'aspect-ratio' ) ).toBe( '16 / 9' );
+		expect( await computed( el, 'filter' ) ).toBe( 'none' );
+	} ); // P1-02
+
+	test.fixme( // P1-02
+	'art-hero-phone: .ttm-article .wp-block-post-featured-image @390', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 390 );
+		const el = page.locator( '.ttm-article .wp-block-post-featured-image' );
+		expect( await computed( el, 'margin-left' ) ).toBe( px( -20 ) );
+		expect( await computed( el, 'width' ) ).toBe( px( 390 ) );
+	} ); // P1-02
+
+	test.fixme( // P1-02
+	'art-body: .ttm-entry p (first) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-entry p' ).first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 18 ) );
+		expect( await computed( el, 'line-height' ) ).toBe( px( 29.7 ) );
+		const parent = page.locator( '.ttm-entry' );
+		expect( await computed( parent, 'max-width' ) ).toBe( '38em' );
+	} ); // P1-02
+
+	test.fixme( // P1-02
+	'art-h2: .ttm-entry h2 (first) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-entry h2' ).first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 30 ) );
+		expect( await computed( el, 'margin-top' ) ).toBe( px( 40 ) );
+	} ); // P1-02
+
+	test.fixme( // P1-02
+	'art-pre: .ttm-entry pre (first) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-entry pre' ).first();
+		expect( await computed( el, 'background-color' ) ).toBe(
+			color( 'neutral-900' )
+		);
+		expect( await computed( el, 'border-left-width' ) ).toBe( px( 4 ) );
+		expect( await computed( el, 'border-left-color' ) ).toBe(
+			color( 'accent' )
+		);
+		expect( await computed( el, 'padding' ) ).toBe( '18px 20px' );
+	} ); // P1-02
+
+	test.fixme( // P1-02
+	'art-pull: .ttm-entry .is-style-pull @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-entry .is-style-pull' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 28 ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
+		expect( parseFloat( await computed( el, 'text-indent' ) ) ).toBeCloseTo(
+			-13.9,
+			0
+		);
+	} ); // P1-02
+
+	test.fixme( // P1-02
+	'art-link: .ttm-entry p a (first) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-entry p a' ).first();
+		expect( await computed( el, 'text-decoration-line' ) ).toBe(
+			'underline'
+		);
+		expect( await computed( el, 'text-underline-offset' ) ).toBe( px( 3 ) );
+	} ); // P1-02
+} );
+
+test.describe( 'prev/next', () => {
+	test.fixme( // P1-04
+	'prevnext: .ttm-prevnext @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-prevnext' );
+		const t = await tracks( el );
+		expect( t.length ).toBe( 2 );
+		expect( t[ 0 ] ).toBeCloseTo( t[ 1 ], 0 );
+		expect( await computed( el, 'border-top-width' ) ).toBe( px( 2 ) );
+		expect( await computed( el, 'margin-top' ) ).toBe( px( 40 ) );
+	} ); // P1-04
+
+	test.fixme( // P1-04
+	'prevnext-prev: .ttm-prevnext__prev @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-prevnext__prev' );
+		expect( await computed( el, 'border-right-width' ) ).toBe( px( 1 ) );
+		expect( await computed( el, 'padding' ) ).toBe( '20px 24px 20px 0px' );
+	} ); // P1-04
+
+	test.fixme( // P1-04
+	'prevnext-label: .ttm-prevnext__label (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-prevnext__label' ).first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 11 ) );
+		expect( await computed( el, 'text-transform' ) ).toBe( 'uppercase' );
+		expect( await text( el ) ).toBe( '← Part 2' );
+	} ); // P1-04
+
+	test.fixme( // P1-04
+	'prevnext-title: .ttm-prevnext__title (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-prevnext__title' ).first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 18 ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
+	} ); // P1-04
+
+	test.fixme( // P1-04
+	'prevnext-phone: .ttm-prevnext @390', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 390 );
+		const el = page.locator( '.ttm-prevnext' );
+		const t = await tracks( el );
+		expect( t.length ).toBe( 1 );
+	} ); // P1-04
+} );
+
+test.describe( 'aside', () => {
+	test.fixme( // P1-02
+	'aside-sticky: .ttm-article aside @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-article aside' );
+		expect( await computed( el, 'position' ) ).toBe( 'sticky' );
+		expect( await computed( el, 'top' ) ).toBe( px( 24 ) );
+		expect( await computed( el, 'row-gap' ) ).toBe( px( 28 ) );
+	} ); // P1-02
+
+	test.fixme( // P1-05
+	'toc-head: .ttm-series-toc .ttm-cell-heading @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-series-toc .ttm-cell-heading' );
+		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 2 ) );
+		expect( await computed( el, 'padding-bottom' ) ).toBe( px( 8 ) );
+	} ); // P1-05
+
+	test.fixme( // P1-05
+	'toc-item: .ttm-series-toc__item (first) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-series-toc__item' ).first();
+		const t = await tracks( el );
+		expect( t.length ).toBe( 2 );
+		expect( await computed( el, 'padding' ) ).toBe( '10px 0px' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 14 ) );
+		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 1 ) );
+	} ); // P1-05
+
+	test.fixme( // P1-05
+	'toc-current: .ttm-series-toc__item.is-current .ttm-series-toc__title @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator(
+			'.ttm-series-toc__item.is-current .ttm-series-toc__title'
+		);
+		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
+		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
+	} ); // P1-05
+
+	test.fixme( // P1-05
+	'toc-scheduled: .ttm-series-toc__item.is-scheduled @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-series-toc__item.is-scheduled' );
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
+		expect( await el.locator( 'a' ).count() ).toBe( 0 );
+		const title = await el.getAttribute( 'title' );
+		expect( title ).toMatch( /^Scheduled/ );
+	} ); // P1-05
+
+	test.fixme( // P1-05
+	'toc-phone-hub: .ttm-series-toc__hub @390', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 390 );
+		const el = page.locator( '.ttm-series-toc__hub' );
+		expect( await el.isVisible() ).toBe( true );
+		expect( await text( el ) ).toBe( 'Hub →' );
+	} ); // P1-05
+
+	test.fixme( // P1-06
+	'more-head: .ttm-more-in .ttm-cell-heading__label @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-more-in .ttm-cell-heading__label' );
+		expect( await text( el ) ).toBe( 'More in Technology' );
+		expect( await el.count() ).toBe( 1 );
+	} ); // P1-06
+
+	test.fixme( // P1-06
+	'more-row: .ttm-more-in .ttm-item a (first) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-more-in .ttm-item a' ).first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 14 ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '600' );
+		const parent = page.locator( '.ttm-more-in .ttm-item' ).first();
+		expect( await computed( parent, 'padding' ) ).toBe( '10px 0px' );
+	} ); // P1-06
+
+	test.fixme( // P1-06
+	'more-count: .ttm-more-in .wp-block-post @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const els = page.locator( '.ttm-more-in .wp-block-post' );
+		expect( await els.count() ).toBe( 3 );
+	} ); // P1-06
+
+	test.fixme( // P1-06
+	'box: .ttm-newsletter-box @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-newsletter-box' );
+		expect( await computed( el, 'background-color' ) ).toBe(
+			color( 'surface' )
+		);
+		expect( await computed( el, 'padding' ) ).toBe( '16px 18px' );
+	} ); // P1-06
+
+	test.fixme( // P1-06
+	'box-title: .ttm-newsletter-box__title @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-newsletter-box__title' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 15 ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
+		expect( await text( el ) ).toBe( 'Get the next part' );
+	} ); // P1-06
+
+	test.fixme( // P1-06
+	'box-form: .ttm-newsletter-box form @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-newsletter-box form' );
+		expect( await computed( el, 'display' ) ).toBe( 'flex' );
+		expect( await computed( el, 'column-gap' ) ).toBe( px( 6 ) );
+	} ); // P1-06
+
+	test.fixme( // P1-06
+	'box-btn: .ttm-newsletter-box button @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-newsletter-box button' );
+		// Colour vs a11y: accent-700, not SPEC's literal accent.
+		expect( await computed( el, 'background-color' ) ).toBe(
+			color( 'accent-700' )
+		);
+		expect( await computed( el, 'color' ) ).toBe( color( 'bg' ) );
+	} ); // P1-06
+
+	test.fixme( // P1-06
+	'box-phone: .ttm-newsletter-box form @390', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 390 );
+		const el = page.locator( '.ttm-newsletter-box form' );
+		expect( await computed( el, 'flex-direction' ) ).toBe( 'column' );
+	} ); // P1-06
+
+	test.fixme( // P1-06
+	'aside-phone-order: .ttm-series-toc, .ttm-more-in, .ttm-newsletter-box @390', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 390 );
+		const prevnext = await page.locator( '.ttm-prevnext' ).boundingBox();
+		const boxes = [];
+		for ( const selector of [
+			'.ttm-series-toc',
+			'.ttm-more-in',
+			'.ttm-newsletter-box',
+		] ) {
+			boxes.push( await page.locator( selector ).boundingBox() );
+		}
+		let lastY = prevnext.y;
+		for ( const box of boxes ) {
+			expect( box.y ).toBeGreaterThan( lastY );
+			lastY = box.y;
+		}
+	} ); // P1-06
+} );
+
+test.describe( 'journal', () => {
+	test.fixme( // P2-01
+	'jr-grid: .ttm-journal-head @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const el = page.locator( '.ttm-journal-head' );
+		const t = await tracks( el );
+		expect( t.length ).toBe( 3 );
+		expect( await computed( el, 'column-gap' ) ).toBe( px( 48 ) );
+		expect( await computed( el, 'padding' ) ).toBe( '40px 0px 48px' );
+	} ); // P2-01
+
+	test.fixme( // P2-01
+	'jr-kicker: .ttm-journal-head .is-style-kicker @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const el = page.locator( '.ttm-journal-head .is-style-kicker' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
+		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
+	} ); // P2-01
+
+	test.fixme( // P2-01
+	'jr-date: .is-style-journal-date @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const el = page.locator( '.is-style-journal-date' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 48 ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
+		expect( await computed( el, 'line-height' ) ).toBe( px( 48 ) );
+	} ); // P2-01
+
+	test.fixme( // P2-01
+	'jr-date-phone: .is-style-journal-date @390', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.journalPost, 390 );
+		const el = page.locator( '.is-style-journal-date' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 36 ) );
+	} ); // P2-01
+
+	test.fixme( // P2-01
+	'jr-sub: .ttm-journal-head__subline @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const el = page.locator( '.ttm-journal-head__subline' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 14 ) );
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
+		expect( await text( el ) ).toMatch( /^[A-Z][a-z]+day( · .+)?$/ );
+	} ); // P2-01
+
+	test.fixme( // P2-01
+	'jr-h1: .ttm-journal-head h1 @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const el = page.locator( '.ttm-journal-head h1' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 30 ) );
+		expect( await computed( el, 'line-height' ) ).toBe( px( 33.6 ) );
+	} ); // P2-01
+
+	test.fixme( // P2-01
+	'jr-body: .ttm-journal-head main @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const el = page.locator( '.ttm-journal-head main' );
+		expect( await computed( el, 'max-width' ) ).toBe( '36em' );
+	} ); // P2-01
+
+	test.fixme( // P2-01
+	'jr-body-p: .ttm-journal-head main .entry-content p (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const el = page
+			.locator( '.ttm-journal-head main .entry-content p' )
+			.first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 18 ) );
+		expect( await computed( el, 'margin-bottom' ) ).toBe( px( 18 ) );
+	} ); // P2-01
+
+	test.fixme( // P2-01
+	'jr-synd: .ttm-syndication @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const el = page.locator( '.ttm-syndication' );
+		expect( await computed( el, 'border-top-width' ) ).toBe( px( 1 ) );
+		expect( await computed( el, 'padding-top' ) ).toBe( px( 14 ) );
+		expect( await computed( el, 'margin-top' ) ).toBe( px( 28 ) );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 13 ) );
+	} ); // P2-01
+
+	test.fixme( // P2-01
+	'jr-synd-link: .ttm-syndication a (first) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const el = page.locator( '.ttm-syndication a' ).first();
+		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
+	} ); // P2-01
+
+	test.fixme( // P2-01
+	'jr-synd-words: .ttm-syndication__words @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const el = page.locator( '.ttm-syndication__words' );
+		expect( await computed( el, 'margin-left' ) ).toBe( 'auto' );
+		expect( await text( el ) ).toMatch( /^\d+ words$/ );
+	} ); // P2-01
+
+	test.fixme( // P2-01
+	'jr-note: .ttm-journal-head__note @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const el = page.locator( '.ttm-journal-head__note' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
+		expect( await computed( el, 'line-height' ) ).toBe( px( 18 ) );
+	} ); // P2-01
+
+	test.fixme( // P2-01
+	'jr-rss: .ttm-journal-head__rss a @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const el = page.locator( '.ttm-journal-head__rss a' );
+		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
+		expect( await text( el ) ).toBe( 'Journal RSS' );
+	} ); // P2-01
+
+	test.fixme( // P2-01
+	'jr-count-hidden: .ttm-journal-head__count @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const el = page.locator( '.ttm-journal-head__count' );
+		expect( await el.count() ).toBe( 0 );
+	} ); // P2-01
+
+	test.fixme( // P2-01
+	'jr-rule: .ttm-journal-head + hr.is-style-rule-2 @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const el = page.locator( '.ttm-journal-head + hr.is-style-rule-2' );
+		expect( await computed( el, 'height' ) ).toBe( px( 2 ) );
+		expect( await computed( el, 'width' ) ).toBe( px( 1184 ) );
+	} ); // P2-01
+} );
+
+test.describe( 'journal stream', () => {
+	test.fixme( // P2-02
+	'js-head: .ttm-journal-stream .ttm-cell-heading__label @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const el = page.locator(
+			'.ttm-journal-stream .ttm-cell-heading__label'
+		);
+		expect( await text( el ) ).toBe( 'Earlier' );
+		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 0 ) );
+	} ); // P2-02
+
+	test.fixme( // P2-02
+	'js-link: .ttm-journal-stream .ttm-cell-heading__link @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const el = page.locator(
+			'.ttm-journal-stream .ttm-cell-heading__link'
+		);
+		expect( await text( el ) ).toMatch( /^Full journal · \d+ entries$/ );
+	} ); // P2-02
+
+	test.fixme( // P2-02
+	'js-row: .ttm-journal-row (first) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const el = page.locator( '.ttm-journal-row' ).first();
+		const t = await tracks( el );
+		expect( t.length ).toBe( 3 );
+		expect( await computed( el, 'padding' ) ).toBe( '18px 0px' );
+		expect( await computed( el, 'border-top-width' ) ).toBe( px( 1 ) );
+	} ); // P2-02
+
+	test.fixme( // P2-02
+	'js-date: .ttm-journal-row .is-style-journal-stream-date @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const el = page.locator(
+			'.ttm-journal-row .is-style-journal-stream-date'
+		);
+		expect( await computed( el, 'font-size' ) ).toBe( px( 20 ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
+	} ); // P2-02
+
+	test.fixme( // P2-02
+	'js-title: .ttm-journal-row .wp-block-post-title @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const el = page.locator( '.ttm-journal-row .wp-block-post-title' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 18 ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
+	} ); // P2-02
+
+	test.fixme( // P2-02
+	'js-excerpt: .ttm-journal-row .wp-block-post-excerpt__excerpt @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const el = page.locator(
+			'.ttm-journal-row .wp-block-post-excerpt__excerpt'
+		);
+		expect( await computed( el, 'font-size' ) ).toBe( px( 15 ) );
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-800' ) );
+		expect( await computed( el, 'max-width' ) ).toBe( '40em' );
+	} ); // P2-02
+
+	test.fixme( // P2-02
+	'js-words: .ttm-journal-row .ttm-journal-row__words @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const el = page.locator( '.ttm-journal-row .ttm-journal-row__words' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
+		// Colour vs a11y: neutral-700, not SPEC's literal neutral-600.
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
+		expect( await computed( el, 'justify-self' ) ).toBe( 'end' );
+	} ); // P2-02
+
+	test.fixme( // P2-02
+	'js-count: .ttm-journal-row @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const els = page.locator( '.ttm-journal-row' );
+		expect( await els.count() ).toBe( 4 );
+	} ); // P2-02
+
+	test.fixme( // P2-02
+	'js-phone: .ttm-journal-row (first) @390', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.journalPost, 390 );
+		const el = page.locator( '.ttm-journal-row' ).first();
+		const t = await tracks( el );
+		expect( t.length ).toBe( 2 );
+		const words = page
+			.locator( '.ttm-journal-row .ttm-journal-row__words' )
+			.first();
+		expect( await words.isVisible() ).toBe( false );
+	} ); // P2-02
+} );
+
+test.describe( 'writing', () => {
+	test.fixme( // P4-04
+	'wr-hero: .ttm-serial-hero @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page.locator( '.ttm-serial-hero' );
+		const t = await tracks( el );
+		expect( t.length ).toBe( 2 );
+		expect( await computed( el, 'column-gap' ) ).toBe( px( 64 ) );
+		expect( await computed( el, 'align-items' ) ).toBe( 'end' );
+		expect( await computed( el, 'padding' ) ).toBe( '40px 0px' );
+	} ); // P4-04
+
+	test.fixme( // P4-04
+	'wr-cover: .ttm-serial-hero .ttm-cover @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page.locator( '.ttm-serial-hero .ttm-cover' );
+		expect( await computed( el, 'aspect-ratio' ) ).toBe( '2 / 3' );
+		expect( await computed( el, 'box-shadow' ) ).not.toBe( 'none' );
+		expect( await computed( el, 'filter' ) ).toBe( 'none' );
+	} ); // P4-04
+
+	test.fixme( // P4-04
+	'wr-kicker: .ttm-serial-hero__kicker @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page.locator( '.ttm-serial-hero__kicker' );
+		expect( await text( el ) ).toBe( 'Writing · Serial in progress' );
+		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
+	} ); // P4-04
+
+	test.fixme( // P4-04
+	'wr-title: .ttm-serial-hero__title @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page.locator( '.ttm-serial-hero__title' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 64 ) );
+		expect( await computed( el, 'line-height' ) ).toBe( px( 62.72 ) );
+		expect( await computed( el, 'max-width' ) ).toBe( '14ch' );
+	} ); // P4-04
+
+	test.fixme( // P4-04
+	'wr-synopsis: .ttm-serial-hero__synopsis @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page.locator( '.ttm-serial-hero__synopsis' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 19 ) );
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-800' ) );
+		expect( await computed( el, 'max-width' ) ).toBe( '48ch' );
+		expect( await el.count() ).toBe( 1 );
+	} ); // P4-04
+
+	test.fixme( // P4-04
+	'wr-buttons: .ttm-serial-hero__buttons .btn @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const btns = page.locator( '.ttm-serial-hero__buttons .btn' );
+		expect( await btns.count() ).toBe( 3 );
+		expect( await btns.nth( 0 ).getAttribute( 'class' ) ).toMatch(
+			/btn-primary/
+		);
+		expect( await btns.nth( 1 ).getAttribute( 'class' ) ).toMatch(
+			/btn-secondary/
+		);
+		expect( await btns.nth( 2 ).getAttribute( 'class' ) ).toMatch(
+			/btn-ghost/
+		);
+	} ); // P4-04
+
+	test.fixme( // P4-04
+	'wr-stats: .ttm-serial-hero .ttm-stats @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page.locator( '.ttm-serial-hero .ttm-stats' );
+		const t = await tracks( el );
+		expect( t.length ).toBe( 3 );
+		expect( await computed( el, 'border-top-width' ) ).toBe( px( 2 ) );
+		expect( await computed( el, 'padding-top' ) ).toBe( px( 14 ) );
+	} ); // P4-04
+
+	test.fixme( // P4-04
+	'wr-stat-value: .ttm-stats__value (first) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page.locator( '.ttm-stats__value' ).first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 20 ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
+		expect( await text( el ) ).toMatch( /^\d+ \/ \d+$/ );
+	} ); // P4-04
+
+	test.fixme( // P4-04
+	'wr-stat-cadence: .ttm-stats__value (2nd) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page.locator( '.ttm-stats__value' ).nth( 1 );
+		expect( await text( el ) ).toBe( 'Monthly' );
+	} ); // P4-04
+
+	test.fixme( // P4-05
+	'wr-body: .ttm-writing-body @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page.locator( '.ttm-writing-body' );
+		const t = await tracks( el );
+		expect( t.length ).toBe( 2 );
+		expect( await computed( el, 'column-gap' ) ).toBe( px( 64 ) );
+		expect( await computed( el, 'padding' ) ).toBe( '28px 0px 48px' );
+	} ); // P4-05
+
+	test.fixme( // P4-05
+	'wr-serials-head: .ttm-writing-body main .ttm-cell-heading (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page
+			.locator( '.ttm-writing-body main .ttm-cell-heading' )
+			.first();
+		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 2 ) );
+		const link = el.locator( '.ttm-cell-heading__link' );
+		expect( await text( link ) ).toBe( 'Newest activity first' );
+	} ); // P4-05
+
+	test.fixme( // P4-05
+	'wr-serial-row: .ttm-series-list.is-list .ttm-series-row (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page
+			.locator( '.ttm-series-list.is-list .ttm-series-row' )
+			.first();
+		const t = await tracks( el );
+		expect( t.length ).toBe( 3 );
+		expect( await computed( el, 'padding' ) ).toBe( '16px 0px' );
+		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 1 ) );
+	} ); // P4-05
+
+	test.fixme( // P4-05
+	'wr-serial-title: .ttm-series-list.is-list .ttm-series-row__title (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page
+			.locator( '.ttm-series-list.is-list .ttm-series-row__title' )
+			.first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 20 ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
+	} ); // P4-05
+
+	test.fixme( // P4-05
+	'wr-serial-dek: .ttm-series-list.is-list .ttm-series-row__dek (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page
+			.locator( '.ttm-series-list.is-list .ttm-series-row__dek' )
+			.first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 14 ) );
+		expect( await computed( el, 'max-width' ) ).toBe( '46ch' );
+	} ); // P4-05
+
+	test.fixme( // P4-05
+	'wr-serial-form: .ttm-series-list.is-list .ttm-series-row__meta (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page
+			.locator( '.ttm-series-list.is-list .ttm-series-row__meta' )
+			.first();
+		expect( await text( el ) ).toMatch( /^Novel · .+ · monthly$/i );
+	} ); // P4-05
+
+	test.fixme( // P4-05
+	'wr-serial-count: .ttm-series-list.is-list .ttm-series-row__count (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page
+			.locator( '.ttm-series-list.is-list .ttm-series-row__count' )
+			.first();
+		expect( await computed( el, 'text-align' ) ).toBe( 'right' );
+		expect( await text( el ) ).toMatch( /^\d+ of \d+/ );
+	} ); // P4-05
+
+	test.fixme( // P4-05
+	'wr-serial-status: .ttm-series-list.is-list .ttm-series-row__status (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page
+			.locator( '.ttm-series-list.is-list .ttm-series-row__status' )
+			.first();
+		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '600' );
+		expect( await text( el ) ).toBe( 'In progress' );
+	} ); // P4-05
+
+	test.fixme( // P4-05
+	'wr-chapters-head: .ttm-series-toc.is-chapters .ttm-cell-heading__label @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page.locator(
+			'.ttm-series-toc.is-chapters .ttm-cell-heading__label'
+		);
+		expect( await text( el ) ).toBe( 'The Quiet Ledger — recent chapters' );
+	} ); // P4-05
+
+	test.fixme( // P4-05
+	'wr-chapter-row: .ttm-series-toc.is-chapters .ttm-numbered__row (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page
+			.locator( '.ttm-series-toc.is-chapters .ttm-numbered__row' )
+			.first();
+		const t = await tracks( el );
+		expect( t.length ).toBe( 3 );
+		expect( await computed( el, 'padding' ) ).toBe( '12px 0px' );
+	} ); // P4-05
+
+	test.fixme( // P4-05
+	'wr-chapter-num: .ttm-series-toc.is-chapters .ttm-numbered__num (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page
+			.locator( '.ttm-series-toc.is-chapters .ttm-numbered__num' )
+			.first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 15 ) );
+		// Colour vs a11y: neutral-700, not SPEC's literal neutral-500.
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
+	} ); // P4-05
+
+	test.fixme( // P4-05
+	'wr-chapter-title: .ttm-series-toc.is-chapters .ttm-numbered__title (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page
+			.locator( '.ttm-series-toc.is-chapters .ttm-numbered__title' )
+			.first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 17 ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
+	} ); // P4-05
+
+	test.fixme( // P4-06
+	'wr-tiles: .ttm-story-tiles @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page.locator( '.ttm-story-tiles' );
+		const t = await tracks( el );
+		expect( t.length ).toBe( 2 );
+		expect( await computed( el, 'gap' ) ).toBe( px( 16 ) );
+	} ); // P4-06
+
+	test.fixme( // P4-06
+	'wr-tile: .ttm-tile (first) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page.locator( '.ttm-tile' ).first();
+		expect( await computed( el, 'aspect-ratio' ) ).toBe( '4 / 3' );
+		expect( await computed( el, 'background-color' ) ).toBe(
+			color( 'surface' )
+		);
+		expect( await computed( el, 'padding' ) ).toBe( px( 16 ) );
+		expect( await computed( el, 'justify-content' ) ).toBe(
+			'space-between'
+		);
+	} ); // P4-06
+
+	test.fixme( // P4-06
+	'wr-tile-title: .ttm-tile__title (first) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page.locator( '.ttm-tile__title' ).first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 19 ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
+	} ); // P4-06
+
+	test.fixme( // P4-06
+	'wr-tile-meta: .ttm-tile__meta (first) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page.locator( '.ttm-tile__meta' ).first();
+		expect( await text( el ) ).toMatch( /^[\d,]+ words · \d{4}$/ );
+	} ); // P4-06
+
+	test.fixme( // P4-06
+	'wr-tiles-note: .ttm-story-tiles__note @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page.locator( '.ttm-story-tiles__note' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
+	} ); // P4-06
+
+	test.fixme( // P4-06
+	'wr-books: .ttm-book-grid @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page.locator( '.ttm-book-grid' );
+		const t = await tracks( el );
+		expect( t.length ).toBe( 2 );
+		expect( await computed( el, 'gap' ) ).toBe( px( 20 ) );
+	} ); // P4-06
+
+	test.fixme( // P4-06
+	'wr-book-cover: .ttm-book .ttm-cover (first) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page.locator( '.ttm-book .ttm-cover' ).first();
+		expect( await computed( el, 'aspect-ratio' ) ).toBe( '2 / 3' );
+		expect( await computed( el, 'box-shadow' ) ).toBe( 'none' );
+	} ); // P4-06
+
+	test.fixme( // P4-06
+	'wr-book-title: .ttm-book__title (first) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page.locator( '.ttm-book__title' ).first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 14 ) );
+		expect( await computed( el, 'margin-top' ) ).toBe( px( 10 ) );
+	} ); // P4-06
+
+	test.fixme( // P4-06
+	'wr-phone: .ttm-serial-hero / .ttm-serial-hero__title @390', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.writing, 390 );
+		const hero = page.locator( '.ttm-serial-hero' );
+		const t = await tracks( hero );
+		expect( t.length ).toBe( 1 );
+		const title = page.locator( '.ttm-serial-hero__title' );
+		expect( await computed( title, 'font-size' ) ).toBe( px( 40 ) );
+	} ); // P4-06
+} );
+
+test.describe( 'archive', () => {
+	test.fixme( // P3-01
+	'ar-head: .ttm-archive-head @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page.locator( '.ttm-archive-head' );
+		const t = await tracks( el );
+		expect( t.length ).toBe( 2 );
+		expect( await computed( el, 'padding' ) ).toBe( '40px 0px 28px' );
+		expect( await computed( el, 'align-items' ) ).toBe( 'end' );
+	} ); // P3-01
+
+	test.fixme( // P3-01
+	'ar-kicker: .ttm-archive-head .is-style-kicker @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page.locator( '.ttm-archive-head .is-style-kicker' );
+		expect( await text( el ) ).toBe( 'Section' );
+		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
+	} ); // P3-01
+
+	test.fixme( // P3-01
+	'ar-h1: .ttm-archive-head h1 @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page.locator( '.ttm-archive-head h1' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 80 ) );
+		expect( await computed( el, 'line-height' ) ).toBe( px( 76 ) );
+		expect( parseFloat( await computed( el, 'margin-left' ) ) ).toBeCloseTo(
+			-4.64,
+			0
+		);
+	} ); // P3-01
+
+	test.fixme( // P3-01
+	'ar-h1-phone: .ttm-archive-head h1 @390', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 390 );
+		const el = page.locator( '.ttm-archive-head h1' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 44 ) );
+	} ); // P3-01
+
+	test.fixme( // P3-01
+	'ar-desc: .ttm-archive-head .wp-block-term-description p @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page.locator(
+			'.ttm-archive-head .wp-block-term-description p'
+		);
+		expect( await computed( el, 'font-size' ) ).toBe( px( 17 ) );
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-800' ) );
+		expect( await computed( el, 'max-width' ) ).toBe( '52ch' );
+	} ); // P3-01
+
+	test.fixme( // P3-01
+	'ar-stats: .ttm-category-stats @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page.locator( '.ttm-category-stats' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 13 ) );
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
+		expect( await computed( el, 'line-height' ) ).toBe( px( 20.8 ) );
+	} ); // P3-01
+
+	test.fixme( // P3-01
+	'ar-stats-text: .ttm-category-stats @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page.locator( '.ttm-category-stats' );
+		const t = await text( el );
+		expect( t ).toMatch( /^\d+ articles · \d{4}(–\d{4})?/ );
+		expect( t ).toContain( 'Security RSS' );
+	} ); // P3-01
+
+	test.fixme( // P3-01
+	'ar-stats-rss: .ttm-category-stats a @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page.locator( '.ttm-category-stats a' );
+		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
+	} ); // P3-01
+
+	test.fixme( // P3-02
+	'ar-filter: .ttm-filter-row @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page.locator( '.ttm-filter-row' );
+		expect( await computed( el, 'border-top-width' ) ).toBe( px( 2 ) );
+		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 1 ) );
+		expect( await computed( el, 'padding' ) ).toBe( '12px 0px' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
+	} ); // P3-02
+
+	test.fixme( // P3-02
+	'ar-filter-all: .ttm-filter-row .tag (first) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page.locator( '.ttm-filter-row .tag' ).first();
+		expect( await el.getAttribute( 'class' ) ).toMatch( /tag-accent/ );
+		expect( await text( el ) ).toBe( 'All' );
+	} ); // P3-02
+
+	test.fixme( // P3-02
+	'ar-filter-active: .ttm-filter-row .tag-accent @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, securityFiltered, 1280 );
+		const el = page.locator( '.ttm-filter-row .tag-accent' );
+		expect( await text( el ) ).toBe( 'wordpress' );
+	} ); // P3-02
+
+	test.fixme( // P3-02
+	'ar-filter-sort: .ttm-filter-row__sort @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page.locator( '.ttm-filter-row__sort' );
+		expect( await text( el ) ).toBe( 'Newest first' );
+		expect( await computed( el, 'margin-left' ) ).toBe( 'auto' );
+	} ); // P3-02
+
+	test.fixme( // P3-03
+	'ar-body: .ttm-archive-body @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page.locator( '.ttm-archive-body' );
+		const t = await tracks( el );
+		expect( t.length ).toBe( 2 );
+		expect( await computed( el, 'column-gap' ) ).toBe( px( 64 ) );
+		expect( await computed( el, 'padding' ) ).toBe( '8px 0px 48px' );
+	} ); // P3-03
+
+	test.fixme( // P3-03
+	'ar-year: .ttm-archive-year (first) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page.locator( '.ttm-archive-year' ).first();
+		const t = await tracks( el );
+		expect( t.length ).toBe( 2 );
+		expect( await computed( el, 'border-top-width' ) ).toBe( px( 2 ) );
+		expect( await computed( el, 'padding' ) ).toBe( '24px 0px 8px' );
+	} ); // P3-03
+
+	test.fixme( // P3-03
+	'ar-year-label: .ttm-archive-year__label (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page.locator( '.ttm-archive-year__label' ).first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 32 ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
+		expect( await computed( el, 'line-height' ) ).toBe( px( 32 ) );
+	} ); // P3-03
+
+	test.fixme( // P3-03
+	'ar-row: .ttm-archive-row (first) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page.locator( '.ttm-archive-row' ).first();
+		const t = await tracks( el );
+		expect( t.length ).toBe( 2 );
+		expect( await computed( el, 'padding' ) ).toBe( '14px 0px' );
+		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 1 ) );
+		expect( await el.evaluate( ( node ) => node.tagName ) ).toBe( 'A' );
+	} ); // P3-03
+
+	test.fixme( // P3-03
+	'ar-row-date: .ttm-archive-row__date (first) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page.locator( '.ttm-archive-row__date' ).first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
+		expect( await computed( el, 'padding-top' ) ).toBe( px( 4 ) );
+	} ); // P3-03
+
+	test.fixme( // P3-03
+	'ar-row-title: .ttm-archive-row__title (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page.locator( '.ttm-archive-row__title' ).first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 20 ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
+	} ); // P3-03
+
+	test.fixme( // P3-03
+	'ar-row-dek: .ttm-archive-row__dek (first) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page.locator( '.ttm-archive-row__dek' ).first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 14 ) );
+		expect( await computed( el, 'max-width' ) ).toBe( '56ch' );
+		expect( await computed( el, 'margin-top' ) ).toBe( px( 5 ) );
+	} ); // P3-03
+
+	test.fixme( // P3-03
+	'ar-row-meta: .ttm-archive-row__meta (first) @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page.locator( '.ttm-archive-row__meta' ).first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
+		expect( await text( el ) ).toMatch( /^\d+ min( · .+)?$/ );
+	} ); // P3-03
+
+	test.fixme( // P3-03
+	'ar-pagination: .wp-block-query-pagination @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page.locator( '.wp-block-query-pagination' );
+		expect( await computed( el, 'display' ) ).toBe( 'flex' );
+		expect( await computed( el, 'justify-content' ) ).toBe(
+			'space-between'
+		);
+		expect( await computed( el, 'padding' ) ).toBe( '20px 0px' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 13 ) );
+	} ); // P3-03
+
+	test.fixme( // P3-03
+	'ar-pagination-numbers: .wp-block-query-pagination-numbers @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const els = page.locator( '.wp-block-query-pagination-numbers' );
+		expect( await els.count() ).toBe( 0 );
+	} ); // P3-03
+
+	test.fixme( // P3-04
+	'ar-aside-series: .ttm-archive-body aside .ttm-cell-heading__label (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page
+			.locator( '.ttm-archive-body aside .ttm-cell-heading__label' )
+			.first();
+		expect( await text( el ) ).toBe( 'Series in Security' );
+	} ); // P3-04
+
+	test.fixme( // P3-04
+	'ar-aside-row: .ttm-series-list.is-rail .ttm-series-row (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page
+			.locator( '.ttm-series-list.is-rail .ttm-series-row' )
+			.first();
+		const t = await tracks( el );
+		expect( t.length ).toBe( 2 );
+		expect( await computed( el, 'padding' ) ).toBe( '12px 0px' );
+		const title = el.locator( '.ttm-series-row__title' );
+		expect( await computed( title, 'font-size' ) ).toBe( px( 15 ) );
+	} ); // P3-04
+
+	test.fixme( // P3-04
+	'ar-mostread: .ttm-most-read .ttm-numbered__row (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page.locator( '.ttm-most-read .ttm-numbered__row' ).first();
+		const t = await tracks( el );
+		expect( t.length ).toBe( 2 );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 14 ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '600' );
+	} ); // P3-04
+
+	test.fixme( // P3-04
+	'ar-mostread-num: .ttm-most-read .ttm-numbered__num (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1280 );
+		const el = page.locator( '.ttm-most-read .ttm-numbered__num' ).first();
+		// Colour vs a11y: neutral-700, not SPEC's literal neutral-500.
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
+	} ); // P3-04
+
+	test.fixme( // P3-03
+	'ar-phone-year: .ttm-archive-year (first) @390', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 390 );
+		const el = page.locator( '.ttm-archive-year' ).first();
+		const t = await tracks( el );
+		expect( t.length ).toBe( 1 );
+		const label = el.locator( '.ttm-archive-year__label' );
+		expect( await computed( label, 'font-size' ) ).toBe( px( 24 ) );
+	} ); // P3-03
+
+	test.fixme( // P3-04
+	'ar-tablet-aside: .ttm-archive-body aside @1000', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.securityArchive, 1000 );
+		const el = page.locator( '.ttm-archive-body aside' );
+		const t = await tracks( el );
+		expect( t.length ).toBe( 2 );
+		expect( t[ 0 ] ).toBeCloseTo( t[ 1 ], 0 );
+	} ); // P3-04
+} );
+
+test.describe( 'journal archive', () => {
+	test.fixme( // P2-03
+	'aj-rows: .ttm-journal-row @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.journalArchive, 1280 );
+		const els = page.locator( '.ttm-journal-row' );
+		const count = await els.count();
+		expect( count ).toBeGreaterThanOrEqual( 9 );
+		const t = await tracks( els.first() );
+		expect( t.length ).toBe( 3 );
+	} ); // P2-03
+
+	test.fixme( // P2-03
+	'aj-no-filter: .ttm-filter-row @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.journalArchive, 1280 );
+		const els = page.locator( '.ttm-filter-row' );
+		expect( await els.count() ).toBe( 0 );
+	} ); // P2-03
+} );
+
+test.describe( 'tag archive', () => {
+	test.fixme( // P3-01
+	'tag-kicker: .ttm-archive-head .is-style-kicker @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.tagArchive, 1280 );
+		const el = page.locator( '.ttm-archive-head .is-style-kicker' );
+		expect( await text( el ) ).toBe( 'Tag' );
+	} ); // P3-01
+
+	test.fixme( // P3-03
+	'tag-aside: .ttm-archive-body aside .ttm-most-read, .ttm-series-list @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.tagArchive, 1280 );
+		const mostRead = page.locator(
+			'.ttm-archive-body aside .ttm-most-read'
+		);
+		expect( await mostRead.count() ).toBe( 1 );
+		const seriesList = page.locator(
+			'.ttm-archive-body aside .ttm-series-list'
+		);
+		expect( await seriesList.count() ).toBe( 0 );
+	} ); // P3-03
+} );
+
+test.describe( 'search', () => {
+	test.fixme( // P3-05
+	'search-h1: .ttm-archive-head h1 @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.search, 1280 );
+		const h1 = page.locator( '.ttm-archive-head h1' );
+		expect( await text( h1 ) ).toBe( 'Search' );
+		const summary = page.locator( '.ttm-archive-head__summary' );
+		expect( await text( summary ) ).toBe( 'Results for “ledger”' );
+	} ); // P3-05
+
+	test.fixme( // P3-05
+	'search-form: .ttm-archive-head .wp-block-search__input, __button @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.search, 1280 );
+		const input = page.locator(
+			'.ttm-archive-head .wp-block-search__input'
+		);
+		expect( await input.getAttribute( 'class' ) ).toMatch( /\binput\b/ );
+		expect( await computed( input, 'width' ) ).toBe( px( 320 ) );
+		const button = page.locator(
+			'.ttm-archive-head .wp-block-search__button'
+		);
+		expect( await button.getAttribute( 'class' ) ).toMatch(
+			/btn-secondary/
+		);
+	} ); // P3-05
+
+	test.fixme( // P3-05
+	'search-row-kicker: .ttm-archive-row .is-style-kicker (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.search, 1280 );
+		const el = page.locator( '.ttm-archive-row .is-style-kicker' ).first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
+		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
+	} ); // P3-05
+} );
+
+test.describe( '404', () => {
+	test.fixme( // P3-05
+	'404-h1: main h1 @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.notFound, 1280 );
+		const el = page.locator( 'main h1' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 80 ) );
+		expect( await text( el ) ).toBe( 'Not here.' );
+	} ); // P3-05
+
+	test.fixme( // P3-05
+	'404-strip: .ttm-series-strip .ttm-series-row @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.notFound, 1280 );
+		const els = page.locator( '.ttm-series-strip .ttm-series-row' );
+		expect( await els.count() ).toBe( 3 );
+	} ); // P3-05
+
+	test.fixme( // P3-05
+	'404-latest: .ttm-latest .ttm-numbered__row @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.notFound, 1280 );
+		const els = page.locator( '.ttm-latest .ttm-numbered__row' );
+		expect( await els.count() ).toBe( 4 );
+	} ); // P3-05
+} );
+
+test.describe( 'page', () => {
+	test.fixme( // P3-05
+	'page-grid: main.is-style-grid-8-4 @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.about, 1280 );
+		const el = page.locator( 'main.is-style-grid-8-4' );
+		const t = await tracks( el );
+		expect( t.length ).toBe( 2 );
+		expect( await computed( el, 'padding' ) ).toBe( '40px 0px 48px' );
+	} ); // P3-05
+
+	test.fixme( // P3-05
+	'page-h1: main h1 @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.about, 1280 );
+		const el = page.locator( 'main h1' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 56 ) );
+	} ); // P3-05
+} );
+
+test.describe( 'hub', () => {
+	test.fixme( // P4-01
+	'hub-head: .ttm-hub-head @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const el = page.locator( '.ttm-hub-head' );
+		const t = await tracks( el );
+		expect( t.length ).toBe( 2 );
+		expect( await computed( el, 'padding' ) ).toBe( '40px 0px 28px' );
+		expect( await computed( el, 'align-items' ) ).toBe( 'end' );
+	} ); // P4-01
+
+	test.fixme( // P4-01
+	'hub-h1: .ttm-hub-head h1 @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const el = page.locator( '.ttm-hub-head h1' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 80 ) );
+		expect( parseFloat( await computed( el, 'margin-left' ) ) ).toBeCloseTo(
+			-4.64,
+			0
+		);
+	} ); // P4-01
+
+	test.fixme( // P4-01
+	'hub-desc: .ttm-hub-head .is-style-dek @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const el = page.locator( '.ttm-hub-head .is-style-dek' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 17 ) );
+		expect( await computed( el, 'max-width' ) ).toBe( '52ch' );
+	} ); // P4-01
+
+	test.fixme( // P4-01
+	'hub-stats: .ttm-series-stats @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const el = page.locator( '.ttm-series-stats' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 13 ) );
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
+		const t = await text( el );
+		expect( t ).toMatch( /^\d+ series · \d+ in progress/ );
+		expect( t ).toContain( 'Spanning' );
+	} ); // P4-01
+
+	test.fixme( // P4-01
+	'hub-featured: .ttm-series-featured @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const el = page.locator( '.ttm-series-featured' );
+		const t = await tracks( el );
+		expect( t.length ).toBe( 2 );
+		expect( await computed( el, 'column-gap' ) ).toBe( px( 64 ) );
+		expect( await computed( el, 'padding' ) ).toBe( '28px 0px 36px' );
+	} ); // P4-01
+
+	test.fixme( // P4-01
+	'hub-kicker: .ttm-series-featured__kicker @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const el = page.locator( '.ttm-series-featured__kicker' );
+		expect( await text( el ) ).toMatch( /^In progress · / );
+		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
+	} ); // P4-01
+
+	test.fixme( // P4-01
+	'hub-title: .ttm-series-featured__title @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const el = page.locator( '.ttm-series-featured__title' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 40 ) );
+		expect( await computed( el, 'line-height' ) ).toBe( px( 40.8 ) );
+	} ); // P4-01
+
+	test.fixme( // P4-01
+	'hub-dek: .ttm-series-featured__dek @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const el = page.locator( '.ttm-series-featured__dek' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 16 ) );
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-800' ) );
+	} ); // P4-01
+
+	test.fixme( // P4-01
+	'hub-progress: .ttm-series-progress__seg @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const els = page.locator( '.ttm-series-progress__seg' );
+		const count = await els.count();
+		expect( count ).toBeGreaterThan( 0 );
+		expect( await computed( els.first(), 'height' ) ).toBe( px( 6 ) );
+		expect( await computed( els.first(), 'flex-grow' ) ).toBe( '1' );
+	} ); // P4-01
+
+	test.fixme( // P4-01
+	'hub-progress-color: .ttm-series-progress__seg (1st, last) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const els = page.locator( '.ttm-series-progress__seg' );
+		expect( await computed( els.first(), 'background-color' ) ).toBe(
+			color( 'neutral-900' )
+		);
+		expect( await computed( els.last(), 'background-color' ) ).toBe(
+			color( 'neutral-300' )
+		);
+	} ); // P4-01
+
+	test.fixme( // P4-01
+	'hub-meta: .ttm-series-progress__meta @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const el = page.locator( '.ttm-series-progress__meta' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
+		expect( await text( el ) ).toMatch(
+			/^\d+ of \d+ published( · next part .+)?$/
+		);
+	} ); // P4-01
+
+	test.fixme( // P4-01
+	'hub-buttons: .ttm-series-featured__buttons .btn @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const btns = page.locator( '.ttm-series-featured__buttons .btn' );
+		expect( await btns.count() ).toBe( 2 );
+		expect( await text( btns.first() ) ).toBe( 'Start at part 1' );
+		expect( await text( btns.last() ) ).toBe( 'Follow this series' );
+	} ); // P4-01
+
+	test.fixme( // P4-01
+	'hub-parts: .ttm-series-featured__parts @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const el = page.locator( '.ttm-series-featured__parts' );
+		expect( await el.evaluate( ( node ) => node.tagName ) ).toBe( 'OL' );
+		expect( await computed( el, 'border-top-width' ) ).toBe( px( 2 ) );
+	} ); // P4-01
+
+	test.fixme( // P4-01
+	'hub-part: .ttm-series-featured__part (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const el = page.locator( '.ttm-series-featured__part' ).first();
+		const t = await tracks( el );
+		expect( t.length ).toBe( 3 );
+		expect( await computed( el, 'padding' ) ).toBe( '12px 0px' );
+		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 1 ) );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 16 ) );
+	} ); // P4-01
+
+	test.fixme( // P4-01
+	'hub-part-num: .ttm-series-featured__num (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const el = page.locator( '.ttm-series-featured__num' ).first();
+		// Colour vs a11y: neutral-700, not SPEC's literal neutral-500.
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
+	} ); // P4-01
+
+	test.fixme( // P4-01
+	'hub-part-scheduled: .ttm-series-featured__part.is-scheduled (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const el = page
+			.locator( '.ttm-series-featured__part.is-scheduled' )
+			.first();
+		const title = el.locator( '.ttm-series-featured__part-title' );
+		expect( await computed( title, 'color' ) ).toBe(
+			color( 'neutral-700' )
+		);
+		expect( await title.locator( 'a' ).count() ).toBe( 0 );
+		const date = el.locator( '.ttm-series-featured__date' );
+		expect( await text( date ) ).toMatch(
+			/^Sept? \d+|^[A-Z][a-z]{2,3} \d+/
+		);
+	} ); // P4-01
+
+	test.fixme( // P4-02
+	'hub-all-head: .ttm-hub-all .ttm-cell-heading__link @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const el = page.locator( '.ttm-hub-all .ttm-cell-heading__link' );
+		expect( await text( el ) ).toBe( 'Sorted by last update' );
+	} ); // P4-02
+
+	test.fixme( // P4-02
+	'hub-grid: .ttm-series-list.is-grid-2 @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const el = page.locator( '.ttm-series-list.is-grid-2' );
+		const t = await tracks( el );
+		expect( t.length ).toBe( 2 );
+		expect( t[ 0 ] ).toBeCloseTo( t[ 1 ], 0 );
+		expect( await computed( el, 'column-gap' ) ).toBe( px( 48 ) );
+	} ); // P4-02
+
+	test.fixme( // P4-02
+	'hub-grid-row: .ttm-series-list.is-grid-2 .ttm-series-row (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const el = page
+			.locator( '.ttm-series-list.is-grid-2 .ttm-series-row' )
+			.first();
+		const t = await tracks( el );
+		expect( t.length ).toBe( 3 );
+		expect( await computed( el, 'padding' ) ).toBe( '18px 0px' );
+		expect( await computed( el, 'border-top-width' ) ).toBe( px( 1 ) );
+	} ); // P4-02
+
+	test.fixme( // P4-02
+	'hub-grid-title: .ttm-series-list.is-grid-2 .ttm-series-row__title (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const el = page
+			.locator( '.ttm-series-list.is-grid-2 .ttm-series-row__title' )
+			.first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 20 ) );
+	} ); // P4-02
+
+	test.fixme( // P4-02
+	'hub-grid-cats: .ttm-series-list.is-grid-2 .ttm-series-row__categories (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const el = page
+			.locator( '.ttm-series-list.is-grid-2 .ttm-series-row__categories' )
+			.first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
+		const t = await text( el );
+		expect( t.includes( ' · ' ) || t.length > 0 ).toBe( true );
+	} ); // P4-02
+
+	test.fixme( // P4-02
+	'hub-nobox: .ttm-newsletter-box @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 1280 );
+		const els = page.locator( '.ttm-newsletter-box' );
+		expect( await els.count() ).toBe( 0 );
+	} ); // P4-02
+
+	test.fixme( // P4-02
+	'hub-phone: .ttm-series-featured / .ttm-hub-head h1 @390', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.seriesHub, 390 );
+		const featured = page.locator( '.ttm-series-featured' );
+		const t = await tracks( featured );
+		expect( t.length ).toBe( 1 );
+		const h1 = page.locator( '.ttm-hub-head h1' );
+		expect( await computed( h1, 'font-size' ) ).toBe( px( 44 ) );
+	} ); // P4-02
+} );
+
+test.describe( 'single series', () => {
+	test.fixme( // P4-03
+	'single-head: .ttm-series-single h1 @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.seriesHardening, 1280 );
+		const el = page.locator( '.ttm-series-single h1' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 80 ) );
+		expect( await computed( el, 'max-width' ) ).toBe( '16ch' );
+	} ); // P4-03
+
+	test.fixme( // P4-03
+	'single-kicker: .ttm-series-single .ttm-series-featured__kicker @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.seriesHardening, 1280 );
+		const el = page.locator(
+			'.ttm-series-single .ttm-series-featured__kicker'
+		);
+		expect( await text( el ) ).toMatch(
+			/^In progress · Technology · Security$/
+		);
+	} ); // P4-03
+
+	test.fixme( // P4-03
+	'single-parts: .ttm-series-single .ttm-series-featured__part @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.seriesHardening, 1280 );
+		const els = page.locator(
+			'.ttm-series-single .ttm-series-featured__part'
+		);
+		const count = await els.count();
+		expect( count ).toBeGreaterThan( 0 );
+		expect( await computed( els.first(), 'font-size' ) ).toBe( px( 18 ) );
+		const deks = page.locator(
+			'.ttm-series-single .ttm-series-featured__part-dek'
+		);
+		expect( await deks.count() ).toBeGreaterThan( 0 );
+	} ); // P4-03
+
+	test.fixme( // P4-03
+	'single-other: .ttm-series-single__other .ttm-series-row @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.seriesHardening, 1280 );
+		const els = page.locator( '.ttm-series-single__other .ttm-series-row' );
+		const count = await els.count();
+		expect( count ).toBeLessThanOrEqual( 4 );
+		expect( count ).toBeGreaterThanOrEqual( 1 );
+	} ); // P4-03
+
+	test.fixme( // P4-03
+	'single-nav: .ttm-masthead-inner__nav .current-menu-item > a @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.seriesHardening, 1280 );
+		const el = page.locator(
+			'.ttm-masthead-inner__nav .current-menu-item > a'
+		);
+		expect( await text( el ) ).toBe( 'Series' );
+	} ); // P4-03
+} );
+
+test.describe( 'seed', () => {
+	test.fixme( // P5-02
+	'seed-hero-color: .wp-block-post-featured-image img @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.wp-block-post-featured-image img' );
+		const distance = await el.evaluate( ( img ) => {
+			const canvas = document.createElement( 'canvas' );
+			canvas.width = img.naturalWidth;
+			canvas.height = img.naturalHeight;
+			const ctx = canvas.getContext( '2d' );
+			ctx.drawImage( img, 0, 0 );
+			const [ r, g, b ] = ctx.getImageData(
+				Math.floor( canvas.width / 2 ),
+				Math.floor( canvas.height / 2 ),
+				1,
+				1
+			).data;
+			const dr = r - 210;
+			const dg = g - 48;
+			const db = b - 19;
+			return Math.sqrt( dr * dr + dg * dg + db * db );
+		} );
+		expect( distance ).toBeGreaterThanOrEqual( 40 );
+	} ); // P5-02
+} );
+
 test.describe( 'accessibility', () => {
 	for ( const width of [ 1280, 390 ] ) {
 		test( `a11y: whole page @${ width }`, async ( { page } ) => {
@@ -840,6 +2790,26 @@ test.describe( 'accessibility', () => {
 			);
 			expect( serious ).toEqual( [] );
 		} );
+	}
+
+	// P0-04: every other seeded screen, same check, tagged for P5-02 (rule 33).
+	for ( const path of SCREEN_URLS ) {
+		if ( path === '/' ) {
+			continue;
+		}
+		for ( const width of [ 1280, 390 ] ) {
+			test.fixme( // P5-02
+			`a11y: ${ path } @${ width }`, async ( { page } ) => {
+				await gotoScreen( page, path, width );
+				const results = await new AxeBuilder( { page } )
+					.exclude( '.ttm-poster .btn-ghost' )
+					.analyze();
+				const serious = results.violations.filter( ( v ) =>
+					[ 'serious', 'critical' ].includes( v.impact )
+				);
+				expect( serious ).toEqual( [] );
+			} ); // P5-02
+		}
 	}
 } );
 
@@ -865,5 +2835,38 @@ test.describe( 'network', () => {
 				expect( url ).not.toMatch( forbidden );
 			}
 		} );
+	}
+
+	// P0-04: every other seeded screen, same check, tagged for P5-02 (rule 6).
+	for ( const path of SCREEN_URLS ) {
+		if ( path === '/' ) {
+			continue;
+		}
+		for ( const width of [ 1280, 390 ] ) {
+			test.fixme( // P5-02
+			`network: ${ path } @${ width }`, async ( { page } ) => {
+				const requests = [];
+				page.on( 'request', ( request ) =>
+					requests.push( request.url() )
+				);
+
+				await gotoScreen( page, path, width );
+
+				const origin = new URL( page.url() ).origin;
+				const forbidden =
+					/wp-json|admin-ajax\.php|fonts\.googleapis\.com/;
+
+				for ( const url of requests ) {
+					if (
+						url.startsWith( 'data:' ) ||
+						url.startsWith( 'blob:' )
+					) {
+						continue;
+					}
+					expect( url.startsWith( origin ) ).toBe( true );
+					expect( url ).not.toMatch( forbidden );
+				}
+			} ); // P5-02
+		}
 	}
 } );
