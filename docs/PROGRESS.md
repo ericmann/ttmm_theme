@@ -1,6 +1,6 @@
 # These Things Matter — phase 3 (inner-template fidelity) build progress
-Branch: (set by implement)
-Started: (set by implement)
+Branch: refine/2026-09-22
+Started: 2026-09-22T04:48:01.084Z
 
 ## Tasks
 - [ ] P0-01 Allow-list to pending lines, budget 61440, tagged fixme guard
