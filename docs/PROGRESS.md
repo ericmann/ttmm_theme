@@ -14,7 +14,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P0-09 Page container (rule 42) and the `container-*` rows
 - [x] P0-10 Inner masthead and phone-only overlay nav (rule 43, §6.1.1)
 - [x] P0-11 Inner footer variant (§6.1.2)
-- [ ] P0-12 Phase 0 push — screenshot script extension and baseline PNGs
+- [x] P0-12 Phase 0 push — screenshot script extension and baseline PNGs
 - [ ] P1-01 Series bar (§6.2, 01 §4.18)
 - [ ] P1-02 Article body row, hero, body typography and sticky aside
 - [ ] P1-03 Article header — kicker, H1, dek, byline (01 §4.22)
@@ -87,3 +87,6 @@ Pattern: outer/title groups layout:default, site-title level 0 (<p class="wp-blo
 
 ### P0-11 — 0e98115
 ttm.css 4.34: `.ttm-footer` breaks out of the page column via `margin-inline: calc(-1 * var(--wp--custom--gutter--desktop))` and pads `14px var(--wp--custom--gutter--desktop)` with border-top rule-2; `.is-after-poster .ttm-footer` pads 16px gutter with border 0 (front page unchanged: phase-2 `footer` row still reads 16px 48px / 0); the <=720 block mirrors with the 20px phone token. Result: footer text x equals the masthead title x at 1280 (48), 1920 (368) and 390 (20) -- it used to start at 96. Un-fixme'd footer-inner-rule (fidelity 98 passed / 215 skipped; every phase-2 footer-* row green). ChromePartsTest untouched (is-after-poster still lands on the template-part wrapper). test:integration 445/445; budget 45881/61440; check-fixme 170 tagged. Remaining test:e2e reds are the two known out-of-scope screens.spec.mjs axe items (article -> P1-02, journalPost -> P2-01/P5-02).
+
+### P0-12 — 5edc863
+scripts/screenshots.mjs: ZONES = the 14 phase-3 files, each with a seeded `path` (8 at 1280x900, 4 at 390x844, 2 at 1920x900, all fullPage); OUT_DIR docs/feedback/phase-3; goto(BASE_URL + zone.path); image scroll/wait logic unchanged; selector/range crop forms kept (unionClip still exported/tested). Test: `ZONES lists the fourteen phase-3 files with paths` + existing unionClip/pendingImages green. docs/feedback/phase-3/README.md pairs each PNG with its mock (2b/2c/2d/1e/1f/3b/02 §H); docs/feedback/README.md +1 phase-3 row; phase-2 PNGs untouched. Wrote the 14 baseline PNGs from a fresh `wp ttm seed --reset` (no image-load failures). foundry_verify green. Push: pushed refine/2026-09-22 to origin (`git push -u origin HEAD`, new branch, tracking set). Manual check: NOT VERIFIED (human) — compare docs/feedback/phase-3/article.png's masthead against the top of docs/feedback/design_article.png; every inner page should be a centred 1280 column with an inline nav and no "Close" button. Known state carried into phase 1: two out-of-scope screens.spec.mjs axe items (article `.entry-content code`/`pre` contrast -> P1-02; journalPost `.ttm-syndication a` no underline/1.09:1 vs neutral-700 -> P2-01/P5-02).
