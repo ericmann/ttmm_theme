@@ -8,10 +8,11 @@ const path = require( 'path' );
 
 let ZONES;
 let unionClip;
+let pendingImages;
 
 beforeAll( async () => {
 	const mod = await import( path.join( __dirname, '..', 'screenshots.mjs' ) );
-	( { ZONES, unionClip } = mod );
+	( { ZONES, unionClip, pendingImages } = mod );
 } );
 
 describe( 'ZONES', () => {
@@ -27,6 +28,30 @@ describe( 'ZONES', () => {
 			'series-strip.png',
 			'poster-footer.png',
 		] );
+	} );
+} );
+
+describe( 'pendingImages', () => {
+	it( 'pendingImages lists the sources whose naturalWidth is 0', () => {
+		const list = [
+			{ src: 'https://example.com/loaded.png', naturalWidth: 800 },
+			{ src: 'https://example.com/still-loading.png', naturalWidth: 0 },
+			{ src: 'https://example.com/broken.png', naturalWidth: 0 },
+		];
+
+		expect( pendingImages( list ) ).toEqual( [
+			'https://example.com/still-loading.png',
+			'https://example.com/broken.png',
+		] );
+	} );
+
+	it( 'returns an empty list when every image has loaded', () => {
+		const list = [
+			{ src: 'https://example.com/a.png', naturalWidth: 400 },
+			{ src: 'https://example.com/b.png', naturalWidth: 200 },
+		];
+
+		expect( pendingImages( list ) ).toEqual( [] );
 	} );
 } );
 

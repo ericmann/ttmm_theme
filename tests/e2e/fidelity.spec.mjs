@@ -565,6 +565,18 @@ test.describe( 'technology featured cell', () => {
 		);
 		expect( await computed( media, 'aspect-ratio' ) ).toBe( '3 / 2' );
 		expect( await computed( media, 'filter' ) ).toContain( 'grayscale(1)' );
+
+		// REVIEW.md F3: an empty figure (no <img>, or an <img> that never finished loading)
+		// passed this row before -- the lazy featured image below the fold hadn't loaded when
+		// docs/feedback/phase-2/front-1280.png was captured with fullPage: true.
+		const image = media.locator( 'img' );
+		await image.scrollIntoViewIfNeeded();
+		expect( await image.count() ).toBe( 1 );
+		expect(
+			await image.evaluate(
+				( img ) => img.complete && img.naturalWidth > 0
+			)
+		).toBe( true );
 	} );
 
 	test( 'tech-title: .ttm-cell.is-style-span-2 .wp-block-post:first-child .wp-block-post-title @1280', async ( {

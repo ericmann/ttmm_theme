@@ -56,6 +56,21 @@ export const ZONES = [
 ];
 
 /**
+ * The `src`/`currentSrc` of every entry in `list` whose `naturalWidth` is 0 -- an image that
+ * never finished loading (REVIEW.md F3: a lazy image below the fold hadn't loaded when
+ * `fullPage: true` captured, and the resulting empty figure went uncaught).
+ *
+ * @param {Array<{src: string, naturalWidth: number}>} list Every `document.images` entry,
+ *                                                          already read out of the page.
+ * @return {string[]} The `src` of each image that never loaded.
+ */
+export function pendingImages( list ) {
+	return list
+		.filter( ( image ) => 0 === image.naturalWidth )
+		.map( ( image ) => image.src );
+}
+
+/**
  * The bounding box that spans from the top of `a` to the bottom of `b`, at the full content
  * width (the narrower of the two boxes' left edges to the wider of their right edges).
  *
@@ -95,6 +110,48 @@ async function run() {
 		await page.setViewportSize( zone.viewport );
 		await page.goto( BASE_URL + '/', { waitUntil: 'networkidle' } );
 		await page.evaluate( () => document.fonts.ready );
+
+		// Scroll the full document height in viewport steps so every lazy-loaded image (below
+		// the fold at this viewport) starts fetching, then wait for each one to finish (or fail)
+		// loading before capturing -- otherwise a `fullPage: true` shot can capture an image
+		// that hasn't loaded yet (REVIEW.md F3).
+		await page.evaluate( async () => {
+			const step = window.innerHeight;
+			const total = document.documentElement.scrollHeight;
+			for ( let y = 0; y < total; y += step ) {
+				window.scrollTo( 0, y );
+				await new Promise( ( r ) => setTimeout( r, 50 ) );
+			}
+			window.scrollTo( 0, 0 );
+		} );
+		await page.evaluate( () =>
+			Promise.all(
+				[ ...document.images ].map( ( img ) =>
+					img.complete
+						? null
+						: new Promise( ( r ) => {
+								img.onload = r;
+								img.onerror = r;
+							} )
+				)
+			)
+		);
+
+		const pending = pendingImages(
+			await page.evaluate( () =>
+				[ ...document.images ].map( ( img ) => ( {
+					src: img.currentSrc,
+					naturalWidth: img.naturalWidth,
+				} ) )
+			)
+		);
+		if ( pending.length > 0 ) {
+			console.error(
+				`screenshots: image(s) never loaded: ${ pending.join( ', ' ) }`
+			);
+			await browser.close();
+			process.exit( 1 );
+		}
 
 		const path = join( OUT_DIR, zone.file );
 
