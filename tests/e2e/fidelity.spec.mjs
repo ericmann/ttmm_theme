@@ -2359,17 +2359,15 @@ test.describe( 'tag archive', () => {
 } );
 
 test.describe( 'search', () => {
-	test.fixme( // P3-05
-	'search-h1: .ttm-archive-head h1 @1280', async ( { page } ) => {
+	test( 'search-h1: .ttm-archive-head h1 @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.search, 1280 );
 		const h1 = page.locator( '.ttm-archive-head h1' );
 		expect( await text( h1 ) ).toBe( 'Search' );
 		const summary = page.locator( '.ttm-archive-head__summary' );
 		expect( await text( summary ) ).toBe( 'Results for “ledger”' );
-	} ); // P3-05
+	} );
 
-	test.fixme( // P3-05
-	'search-form: .ttm-archive-head .wp-block-search__input, __button @1280', async ( {
+	test( 'search-form: .ttm-archive-head .wp-block-search__input, __button @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.search, 1280 );
@@ -2384,61 +2382,57 @@ test.describe( 'search', () => {
 		expect( await button.getAttribute( 'class' ) ).toMatch(
 			/btn-secondary/
 		);
-	} ); // P3-05
+	} );
 
-	test.fixme( // P3-05
-	'search-row-kicker: .ttm-archive-row .is-style-kicker (first) @1280', async ( {
+	test( 'search-row-kicker: .ttm-archive-row .is-style-kicker (first) @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.search, 1280 );
 		const el = page.locator( '.ttm-archive-row .is-style-kicker' ).first();
 		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
 		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
-	} ); // P3-05
+	} );
 } );
 
 test.describe( '404', () => {
-	test.fixme( // P3-05
-	'404-h1: main h1 @1280', async ( { page } ) => {
+	test( '404-h1: main h1 @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.notFound, 1280 );
 		const el = page.locator( 'main h1' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 80 ) );
 		expect( await text( el ) ).toBe( 'Not here.' );
-	} ); // P3-05
+	} );
 
-	test.fixme( // P3-05
-	'404-strip: .ttm-series-strip .ttm-series-row @1280', async ( {
+	test( '404-strip: .ttm-series-strip .ttm-series-row @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.notFound, 1280 );
 		const els = page.locator( '.ttm-series-strip .ttm-series-row' );
 		expect( await els.count() ).toBe( 3 );
-	} ); // P3-05
+	} );
 
-	test.fixme( // P3-05
-	'404-latest: .ttm-latest .ttm-numbered__row @1280', async ( { page } ) => {
+	test( '404-latest: .ttm-latest .ttm-numbered__row @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.notFound, 1280 );
 		const els = page.locator( '.ttm-latest .ttm-numbered__row' );
 		expect( await els.count() ).toBe( 4 );
-	} ); // P3-05
+	} );
 } );
 
 test.describe( 'page', () => {
-	test.fixme( // P3-05
-	'page-grid: main.is-style-grid-8-4 @1280', async ( { page } ) => {
+	test( 'page-grid: main.is-style-grid-8-4 @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.about, 1280 );
 		const el = page.locator( 'main.is-style-grid-8-4' );
 		const t = await tracks( el );
 		expect( t.length ).toBe( 2 );
 		expect( await computed( el, 'padding' ) ).toBe( '40px 0px 48px' );
-	} ); // P3-05
+	} );
 
-	test.fixme( // P3-05
-	'page-h1: main h1 @1280', async ( { page } ) => {
+	test( 'page-h1: main h1 @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.about, 1280 );
 		const el = page.locator( 'main h1' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 56 ) );
-	} ); // P3-05
+	} );
 } );
 
 test.describe( 'hub', () => {

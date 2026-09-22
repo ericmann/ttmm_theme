@@ -51,3 +51,4 @@ blockquote.is-style-pull cite # editor block style (04 §3)
 .ttm-series-toc__dek # optional dek (showDek): no seeded ttm/series-toc sets it
 .ttm-journal-head__count # state: F14 word count only when the journal post has no syndication URL; the seeded journal post is syndicated
 .ttm-journal-stream:not(:has(.wp-block-post)) # state: the stream hides itself when no other journal entry exists; the seed has nine
+.ttm-item h3 # state: writing-cell's "also running" list (plain h3, no class); the seeded front page currently shows none, and index.html (its other consumer) is not a fidelity screen

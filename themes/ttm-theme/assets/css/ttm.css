@@ -281,6 +281,10 @@ p.is-style-poster {
 	max-width: 60em;
 }
 
+.ttm-archive-head__summary {
+	margin: 0;
+}
+
 .is-style-dek-l {
 	font-size: 21px;
 	font-weight: 400;
@@ -2419,7 +2423,7 @@ ul.modern-footnotes-list,
 .ttm-archive-row {
 	display: grid;
 	grid-template-columns: 72px 1fr;
-	grid-template-rows: auto auto auto;
+	grid-template-rows: auto auto auto auto;
 	column-gap: 20px;
 	padding: 14px 0;
 	border-bottom: var(--ttm-rule-1);
@@ -2427,9 +2431,18 @@ ul.modern-footnotes-list,
 	text-decoration: none;
 }
 
+/* Search rows only (P3-05): a category kicker above the title. */
+.ttm-archive-row .is-style-kicker {
+	grid-column: 2;
+	grid-row: 1;
+	margin: 0;
+	font-size: 12px;
+	color: var(--wp--preset--color--accent-700);
+}
+
 .ttm-archive-row__date {
 	grid-column: 1;
-	grid-row: 1;
+	grid-row: 2;
 	margin: 0;
 	padding-top: 4px;
 	font-size: 12px;
@@ -2439,7 +2452,7 @@ ul.modern-footnotes-list,
 
 .ttm-archive-row__title {
 	grid-column: 2;
-	grid-row: 1;
+	grid-row: 2;
 	margin: 0;
 	font-size: 20px;
 	font-weight: 800;
@@ -2452,7 +2465,7 @@ ul.modern-footnotes-list,
 
 .ttm-archive-row__dek {
 	grid-column: 2;
-	grid-row: 2;
+	grid-row: 3;
 	margin: 5px 0 0;
 	font-size: 14px;
 	line-height: 1.45;
@@ -2462,7 +2475,7 @@ ul.modern-footnotes-list,
 
 .ttm-archive-row__meta {
 	grid-column: 2;
-	grid-row: 3;
+	grid-row: 4;
 	margin: 6px 0 0;
 	font-size: 12px;
 	color: var(--wp--preset--color--neutral-700);
@@ -2524,11 +2537,59 @@ ul.modern-footnotes-list,
 	font-feature-settings: "tnum";
 }
 
+/* 4.29 404 "Latest": the number column is a CSS counter, not markup (Decision "404 Latest
+ * numbers") -- the row is the shared .ttm-numbered__row grid, so the counter is its implicit
+ * first grid item. */
+.ttm-latest .wp-block-query .wp-block-post-template {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	counter-reset: ttm-latest;
+}
+
+.ttm-latest .ttm-numbered__row {
+	grid-template-columns: 24px 1fr auto;
+	counter-increment: ttm-latest;
+}
+
+.ttm-latest .ttm-numbered__row::before {
+	content: counter(ttm-latest, decimal-leading-zero);
+	font-weight: 800;
+	color: var(--wp--preset--color--neutral-700);
+	font-feature-settings: "tnum";
+}
+
+/* stylelint-disable-next-line no-descending-specificity */
+.ttm-latest .wp-block-post-title {
+	grid-column: 2;
+	margin: 0;
+	font-size: 17px;
+	font-weight: 800;
+}
+
+.ttm-latest .ttm-numbered__date {
+	grid-column: 3;
+	margin: 0;
+	font-size: 12px;
+	color: var(--wp--preset--color--neutral-700);
+	text-align: right;
+}
+
+.ttm-search .wp-block-search__inside-wrapper {
+	display: flex;
+	gap: 6px;
+}
+
 .ttm-search .wp-block-search__input,
 .ttm-search .wp-block-search__button {
 	border: var(--ttm-rule-1);
 	font-size: var(--wp--preset--font-size--body-s);
 	border-radius: 0;
+}
+
+.ttm-search .wp-block-search__input {
+	flex-grow: 0;
+	width: 320px;
 }
 
 .ttm-search .wp-block-search__button {
@@ -2537,6 +2598,21 @@ ul.modern-footnotes-list,
 	padding: 8px 14px;
 	font-weight: 800;
 	cursor: pointer;
+}
+
+/* 4.24 static page */
+.ttm-page__portrait {
+	aspect-ratio: 3 / 2;
+	margin-bottom: 28px;
+}
+
+main.is-style-grid-8-4 {
+	padding: 40px 0 48px;
+}
+
+main.is-style-grid-8-4 h1 {
+	margin: 0 0 18px;
+	font-size: 56px;
 }
 
 /* 4.19 series progress */

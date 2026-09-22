@@ -192,6 +192,14 @@ class Sources {
 				'get_value_callback' => [ self::class, 'archive_kind' ],
 			]
 		);
+
+		register_block_bindings_source(
+			'ttm/search-summary',
+			[
+				'label'              => __( 'TTM: Search summary', 'ttm-core' ),
+				'get_value_callback' => [ self::class, 'search_summary' ],
+			]
+		);
 	}
 
 	/**
@@ -217,6 +225,27 @@ class Sources {
 		];
 
 		return self::finalize( Values::archive_kind( $flags ), $block_instance, $attribute_name );
+	}
+
+	/**
+	 * `ttm/search-summary` (Decision "New bindings"): '' outside `is_search()`.
+	 *
+	 * @param array<string, mixed> $source_args    Unused: no args.
+	 * @param WP_Block             $block_instance Consuming block.
+	 * @param string               $attribute_name Consuming attribute.
+	 * @return string
+	 */
+	public static function search_summary( array $source_args, $block_instance, string $attribute_name ): string {
+		unset( $source_args );
+
+		if ( ! is_search() ) {
+			return '';
+		}
+
+		global $wp_query;
+		$found = $wp_query instanceof \WP_Query ? (int) $wp_query->found_posts : 0;
+
+		return self::finalize( Values::search_summary( get_search_query(), $found ), $block_instance, $attribute_name );
 	}
 
 	/**

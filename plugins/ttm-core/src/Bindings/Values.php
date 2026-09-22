@@ -457,4 +457,23 @@ class Values {
 			? __( '← Newer', 'ttm-core' )
 			: __( 'Older →', 'ttm-core' );
 	}
+
+	/**
+	 * Search results summary (Decision "New bindings"): "Results for “{q}”" or "Nothing
+	 * matched “{q}”." when there are none; '' when not a search request (the caller checks
+	 * `is_search()`).
+	 *
+	 * @param string $query Search query.
+	 * @param int    $found Matching post count.
+	 * @return string
+	 */
+	public static function search_summary( string $query, int $found ): string {
+		if ( 0 === $found ) {
+			/* translators: %s: the search query. */
+			return sprintf( __( 'Nothing matched “%s”.', 'ttm-core' ), $query );
+		}
+
+		/* translators: %s: the search query. */
+		return sprintf( __( 'Results for “%s”', 'ttm-core' ), $query );
+	}
 }

@@ -150,4 +150,16 @@ class HelpersTest extends TestCase {
 		$lookalike = '<div class="wp-block-group ttm-journal-rows"><h4>Title</h4></div>';
 		$this->assertSame( $lookalike, Helpers::link_rows( $lookalike, [ 'attrs' => [ 'className' => 'ttm-journal-rows' ] ] ) );
 	}
+
+
+	public function test_style_search_adds_input_and_button_classes(): void {
+		$rendered = '<form role="search" method="get" action="/" class="wp-block-search__button-outside wp-block-search__text-button ttm-search wp-block-search"><label class="wp-block-search__label screen-reader-text">Search</label><div class="wp-block-search__inside-wrapper"><input class="wp-block-search__input" type="search" name="s" /><button aria-label="Search" class="wp-block-search__button wp-element-button" type="submit">Search</button></div></form>';
+
+		$styled = Helpers::style_search( $rendered );
+
+		$this->assertStringContainsString( 'class="wp-block-search__input input"', $styled );
+		$this->assertStringContainsString( 'class="wp-block-search__button wp-element-button btn btn-secondary"', $styled );
+		// The form's own class -- which also contains the substring "button" -- is untouched.
+		$this->assertStringContainsString( 'class="wp-block-search__button-outside wp-block-search__text-button ttm-search wp-block-search"', $styled );
+	}
 }

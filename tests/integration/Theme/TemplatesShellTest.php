@@ -24,10 +24,15 @@ class TemplatesShellTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_404_template_renders_not_here_and_search(): void {
+		self::factory()->post->create_many( 5, [ 'post_status' => 'publish' ] );
+
 		$html = $this->render( '404' );
 
 		$this->assertStringContainsString( 'Not here.', $html );
 		$this->assertStringContainsString( 'wp-block-search', $html );
+		$this->assertStringContainsString( 'ttm-series-strip', $html );
+		$this->assertSame( 4, substr_count( $html, 'ttm-numbered__row' ) );
+		$this->assertStringContainsString( 'ttm-cell-heading is-rail', $html );
 	}
 
 	/**

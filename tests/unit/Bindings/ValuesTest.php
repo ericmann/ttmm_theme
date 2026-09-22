@@ -181,6 +181,11 @@ class ValuesTest extends TestCase {
 		$this->assertSame( '', Values::section_label( 'series-in', '' ) );
 	}
 
+	public function test_search_summary_with_and_without_results(): void {
+		$this->assertSame( 'Results for “ledger”', Values::search_summary( 'ledger', 3 ) );
+		$this->assertSame( 'Nothing matched “ledger”.', Values::search_summary( 'ledger', 0 ) );
+	}
+
 	public function test_archive_kind_labels_and_empty(): void {
 		$this->assertSame( 'Section', Values::archive_kind( [ 'category' => true ] ) );
 		$this->assertSame( 'Tag', Values::archive_kind( [ 'tag' => true ] ) );

@@ -126,6 +126,10 @@ class ArchiveTemplatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'ttm-archive-head', $html );
 	}
 
+	/**
+	 * SPEC §6.6 "Search": H1 "Search", the summary reads the query and result count via
+	 * `ttm/search-summary`, and each row carries a category kicker (Decision "New bindings").
+	 */
 	public function test_search_template_renders_query_and_rows(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
 		$tech = $this->category_id( 'technology', 'Technology' );
@@ -146,6 +150,18 @@ class ArchiveTemplatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'wp-block-search', $html );
 		$this->assertStringContainsString( 'ttm-archive-row', $html );
 		$this->assertStringContainsString( 'Findable Cache Article', $html );
+		$this->assertMatchesRegularExpression( '/<h1 class="[^"]*is-style-display-xl[^"]*">Search<\/h1>/', $html );
+		$this->assertStringContainsString( 'Results for “Findable”', $html );
+		$this->assertMatchesRegularExpression( '/<div class="taxonomy-category is-style-kicker wp-block-post-terms"><a[^>]*>Technology<\/a><\/div>/', $html );
+	}
+
+	public function test_search_with_no_results_shows_nothing_matched(): void {
+		$this->go_to( '/?s=NoSuchThingAnywhere' );
+
+		$html = $this->render_template( 'search' );
+
+		$this->assertStringContainsString( 'Nothing matched “NoSuchThingAnywhere”.', $html );
+		$this->assertStringNotContainsString( 'ttm-archive-row', $html );
 	}
 
 	/**

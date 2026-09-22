@@ -45,6 +45,7 @@ class Helpers {
 		add_filter( 'render_block_core/post-excerpt', [ self::class, 'excerpt_markup' ], 10, 3 );
 		add_filter( 'render_block_core/post-author-name', [ self::class, 'author_prefix' ], 10, 2 );
 		add_filter( 'render_block_core/group', [ self::class, 'link_rows' ], 10, 3 );
+		add_filter( 'render_block_core/search', [ self::class, 'style_search' ], 10, 1 );
 	}
 
 	/**
@@ -136,6 +137,33 @@ class Helpers {
 		return (string) preg_replace(
 			'#(<p class="wp-block-post-excerpt__excerpt">).*?(</p>)#s',
 			'$1' . str_replace( [ '\\', '$' ], [ '\\\\', '\\$' ], $markup ) . '$2',
+			$block_content,
+			1
+		);
+	}
+
+	/**
+	 * Decision "Search block classes": adds `input` to `.wp-block-search__input` and
+	 * `btn btn-secondary` to `.wp-block-search__button` -- the theme's own input/button
+	 * treatments, since `core/search` has no block-style API for either.
+	 *
+	 * @param string $block_content Rendered search block HTML.
+	 * @return string
+	 */
+	public static function style_search( string $block_content ): string {
+		// Scoped to the `<input`/`<button` tags themselves: the wrapping `<form>` also carries
+		// a `wp-block-search__button-outside`-style class whose "button" prefix a looser regex
+		// would also match.
+		$block_content = (string) preg_replace(
+			'/(<input\b[^>]*\bclass=")([^"]*)"/',
+			'$1$2 input"',
+			$block_content,
+			1
+		);
+
+		return (string) preg_replace(
+			'/(<button\b[^>]*\bclass=")([^"]*)"/',
+			'$1$2 btn btn-secondary"',
 			$block_content,
 			1
 		);
