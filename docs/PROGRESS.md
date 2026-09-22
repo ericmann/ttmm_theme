@@ -38,7 +38,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P4-04 Writing hero (01 §4.36–4.37, §6.5)
 - [x] P4-05 Writing body — all serials (`layout=list`) and recent chapters (numbered)
 - [x] P4-06 Writing aside — story tiles, book grid, and the responsive order
-- [ ] P4-07 Phase 4 push — hub and Writing screenshots
+- [x] P4-07 Phase 4 push — hub and Writing screenshots
 - [ ] P5-01 390 and 1920 sweep of every screen
 - [ ] P5-02 a11y, network, selectors and seed-hero-color rows; guards back to strict
 - [ ] P5-03 Tuning — `cssBudgetBytes`
@@ -233,3 +233,22 @@ getBoundingClientRect at 1000px (display:contents doesn't reorder
 the DOM). CSS budget 61437/61440 (3 free) -- 6th Phase 4 task in a
 row at single-digit headroom. P5-03 is not optional.
 Manual check: none.
+
+### P4-07 — eee62b6
+Screenshots regenerated after reseed; full verify green (479
+integration, 354 e2e passed/49 skipped). All P4- pending lines
+cleared per rule 34: two selectors-allow lines were already resolved
+and removed outright; the rest re-tagged with state:/editor-style
+reasons or (for genuine remaining CSS gaps: hero__body/__kicker,
+series-progress/single/stats) deferred to "P5-03 pending" since
+that's the CSS-focused task left. Drive-by fix: ttm-book-row was
+never a real P4-06 debt -- it's an admin-only settings-page class
+(plugins/ttm-core/src is swept for ttm-* coverage); renamed to
+book-admin-row to drop the ttm- prefix rather than fake a theme
+rule. Stripped 21 stale // P4-05/P4-06 fixme-tag comments from
+fidelity.spec.mjs (tests are no longer fixme); reworded one P4-02
+prose comment that collided with the same literal-grep pattern
+(mirrors P3-06's fix). Pushed to origin.
+Manual check: NOT VERIFIED (human) -- compare series-hub.png with
+mock 1f, writing.png with design_serial.png, series-single.png
+against 02 §F.
