@@ -34,7 +34,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P3-03 Writing cell per §6.1.6
 - [x] P3-04 Series strip per §6.1.7 (`layout=strip`)
 - [x] P3-05 Tuning — `cssBudgetBytes`
-- [ ] P3-06 Phase 3 push — section rows screenshots and allow-list under 10
+- [x] P3-06 Phase 3 push — section rows screenshots and allow-list under 10
 - [ ] P4-01 Full `3a` phone pass and ≤ 1024 pass
 - [ ] P4-02 a11y and network rows, zero-fixme guard
 - [ ] P4-03 Inner templates smoke and CI seeding
@@ -513,3 +513,34 @@ fidelity.spec.mjs left over from a prior un-fixme edit.
 
 Verified: npm run lint clean (budget 42583/43008), npm run test:e2e
 full suite green (0 failed).
+
+### P3-06 — 73ede08
+Allow-list already satisfies "< 10, no phase 2 pending" (4 lines, none
+pending) -- P3-01 through P3-04 removed their own lines as they landed.
+
+FLIGHT CONTROLLER NOTE actioned (relayed from P3-01): technology-post-2
+was doing double duty as Hardening WordPress's own part 2, but the
+mock's real part 2 is "Salts, keys and the rotation you skipped".
+Added a dedicated post (hardening-part-2-salts-and-keys, category
+security) as part 2 in series.json's parts list; removed
+technology-post-2 from that list entirely (now an ordinary technology
+article, slug/featured-image untouched so tests/e2e/lib/urls.mjs's
+`article` screen still works -- updated its stale comment). Set the
+new post's part_title to the mock's own phrase rather than a bare
+"Part N" placeholder, which would have rendered "Part 2: Part 2" once
+it became a real prev-part reference.
+
+Re-seeded, re-ran screenshots, confirmed live: lead meta now "Part 2:
+Salts, keys and the rotation you skipped"; Security cell shows the new
+post as its own article; Technology's GitHub Actions post carries no
+series indicator; Writing cell's Also running unaffected. Pushed to
+refine/2026-09-21 (d649863..73ede08).
+
+All verify commands green (test:integration 420/420, test:e2e full
+suite 0 failed, composer test:unit 142/142).
+
+Manual check: NOT VERIFIED (human) — docs/feedback/phase-2/section-rows.png
+and series-strip.png vs docs/feedback/design_blocks.png (Technology
+spans two columns with a 3:2 image, 1px column rules, Writing cell
+with two buttons and "Also running", three series rows with red
+squares).
