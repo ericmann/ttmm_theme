@@ -350,7 +350,74 @@ counts: unit 169, integration 481/481, e2e 447/447, css-coverage 193/193 markup/
    article page (R1-08).
 4. `npm run screenshots` was not re-run as part of this round (each task that touched visual CSS
    verified with a temporary, reverted screenshot or targeted Playwright check instead, noted in
-   its own log entry) — a fresh full screenshot pass against all 14 phase-3 PNGs is worth doing
-   before this branch is considered final.
+   its own log entry). This is now done: round 2's `R2-02` (commit below) regenerated and
+   committed all 14 `docs/feedback/phase-3/*.png` against the current, post-round-1-and-round-2
+   code, so the committed screenshots are current as of this handoff.
 5. `git stash list` — noted as worth a glance in the phase-3 handoff above; unrelated to this
    round but still unresolved as of this writing.
+
+## Round 2 (review-fix)
+
+Branch `refine/2026-09-22`, base `main` (`8c2b228`). Both round-2 review-fix tasks (`R2-01`,
+`R2-02`) are `[x]`; none blocked or skipped. Task counts: 53 total, 53 done, 0 open.
+
+### What each task fixed
+
+- **R2-01** (`925322a`): R1-06's budget-driven restoration of dropped declarations had edited
+  `.ttm-series-mark`, `.ttm-series-row__meta` and `.ttm-series-row__dek`'s *shared base* rules
+  instead of adding layout-scoped overrides, which silently regressed the front-page/404 strip
+  (mark 6px instead of 5px, meta lost its 4px), the category-archive rail (mark 6px instead of
+  5px) and the series-hub grid-2 dek (4px instead of 5px) while "fixing" only the Writing list
+  layout's numbers. Restored the pre-R1-06 base values (mark 5px, meta
+  `var(--wp--preset--spacing--10)` = 4px, dek 5px) and added `.ttm-series-list.is-list`-scoped
+  overrides (mark 6px, meta 6px, dek 4px, the last joined into the existing `max-width: 46ch`
+  rule) placed after the base rules in source order. Added a `stylelint-disable-next-line
+  no-descending-specificity` before the pre-existing `.ttm-series-bar .ttm-series-mark` rule,
+  which the new override made lint-flag (same pattern already used 18 other places in the file).
+  Five fidelity rows extended/added (`strip-mark`, `strip-meta`, `ar-aside-row`, new
+  `hub-grid-dek`, new `wr-serial-row-margins`); confirmed 4 of the 5 fail against the pre-fix CSS
+  (the fifth, `wr-serial-row-margins`, happened to already match since the Writing list layout was
+  R1-06's one correct target).
+- **R2-02** (commit below): regenerated all 14 `docs/feedback/phase-3/*.png` via `npm run
+  env:cli -- ttm seed --reset` + `npm run screenshots` against the current code (post R2-01, and
+  therefore post every round-1 fix too — the committed set previously dated from P5-05/`ebf010f`
+  and predated R1-01, R1-04, R1-06, R1-07, R1-08 and R2-01). No code or CSS changed in this task.
+  Eyeballed per the task's acceptance criteria: `writing.png`'s "In print" shows exactly the two
+  SPEC-named books (Salt Water Wires, Eleven Small Doors); `archive-security.png`'s 2025 group's
+  "Nov 26" row reads on one line; `search.png`'s kicker column shows plain-text labels (WRITING,
+  JOURNAL — unlinked, per R1-01); `front-1920.png`'s section-grid strip is visually unchanged from
+  phase 2/round 1 (no front-page code touched this round).
+
+### Interpretation choices this round
+
+- **R2-01**: none — the task specified exact before/after values and exact selectors for both the
+  restored base rules and the new list-only overrides; the only judgment call was where to place
+  the required `stylelint-disable-next-line` comment, resolved by following the file's existing
+  convention (immediately above the flagged selector).
+- **R2-02**: none — mechanical regeneration per the task's exact commands, no code touched.
+
+### Config keys touched this round
+
+None. `cssBudgetBytes` (⚠️ ASSUMPTION, `scripts/check-budget.mjs`, 62464) was not changed;
+`ttm.css` is 62428/62464 bytes after R2-01 (36 bytes of headroom, down from R1-10's 276 because
+R2-01 nets three new selectors against three one-line value restorations).
+
+### What a human should check by hand
+
+`foundry_verify` was green at the end of both tasks (unit 169, integration 481/481, e2e 449/449,
+composer lint, npm lint including budget/coverage/fixme, forbidden-patterns). Still, a human
+should:
+
+1. Compare the four pages named in R2-01 (front page, `/writing/`, a category archive, `/series/`)
+   against their mocks by eye now that the strip/rail/grid-2 margins are restored — this was a
+   silent regression from round 1 that only Playwright's exact-pixel assertions caught, so a mock
+   comparison is worth doing once more even though the automated coverage is now tight.
+2. Open the freshly regenerated `docs/feedback/phase-3/*.png` set and do the full paired-mock
+   comparison per `docs/feedback/phase-3/README.md` that round 1's item 4 flagged as owed — this
+   is the first time since P5-05 the screenshots reflect the code the reviewer will actually see.
+3. `git stash list` — still unresolved, still unrelated to this round.
+
+The git-ancestry check the R2-02 task specifies (`git merge-base --is-ancestor $(git log -1
+--format=%H -- themes/ttm-theme plugins/ttm-core/blocks docs/fixtures/seed) $(git log -1
+--format=%H -- docs/feedback/phase-3)`) exits 0 as of R2-02's commit — the screenshot commit is
+newer than the newest commit touching theme CSS, blocks or seed fixtures.
