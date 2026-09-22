@@ -421,3 +421,110 @@ The git-ancestry check the R2-02 task specifies (`git merge-base --is-ancestor $
 --format=%H -- themes/ttm-theme plugins/ttm-core/blocks docs/fixtures/seed) $(git log -1
 --format=%H -- docs/feedback/phase-3)`) exits 0 as of R2-02's commit — the screenshot commit is
 newer than the newest commit touching theme CSS, blocks or seed fixtures.
+
+## Round 3 (review-fix)
+
+Branch `refine/2026-09-22`, base `main` (`8c2b228`). All three round-3 review-fix tasks (`R3-01`,
+`R3-02`, `R3-03`) are `[x]`; none blocked or skipped. Task counts: 56 total, 56 done, 0 open.
+
+### What each task fixed
+
+- **R3-01** (`986c49d`): twelve computed values on the article, journal, hub and Writing screens
+  drifted from SPEC §6.2/§6.4/§6.5/§6.7 because no `fidelity.spec.mjs` row ever read them (REVIEW
+  round 2, finding 3). Added the missing declarations in `ttm.css`: `.entry-content pre`
+  `margin-bottom: 22px` (the most visible one — the paragraph after a code block sat flush against
+  it); `.is-style-pull` `margin: 36px 0` + `letter-spacing: -0.015em`; a new
+  `.ttm-journal-stream .ttm-cell-heading__link, .ttm-hub-all .ttm-cell-heading__link` rule (caption
+  size, neutral-700) that does *not* touch the shared 11px front-page rule or the 12px `.is-rail`
+  override; `.ttm-series-progress__meta { margin: 0 0 18px }`; `.ttm-series-featured__buttons { gap:
+  10px }`; `.ttm-stats__label { font-size: 13px }`; `.ttm-story-tiles`/`.ttm-book-grid { padding-top:
+  16px }`; `.ttm-book__meta { margin-top: 2px }`; `.is-chapters .ttm-numbered__dek`/`__date { font-
+  weight: 400 }`. Extended eleven fidelity rows plus one new one; confirmed each failed pre-fix.
+  Adding the declarations pushed `ttm.css` 331 bytes over the 62464 budget; shortened nine
+  over-long comments losslessly (wording only) to land at 62463/62464 — `cssBudgetBytes` did not
+  need raising.
+- **R3-02** (`dc29ced`): the `ttm/series-toc` chapters variant (Writing's "recent chapters") listed
+  scheduled parts alongside published ones, so a not-yet-published chapter could sit first (REVIEW
+  round 2, finding 1). `render.php` now filters `$ttm_rows` to `'publish' === status` whenever the
+  variant is `chapters` (previously that filter only ran for open-ended *series* variant lists),
+  applied before the sort/limit so the newest *N published* chapters are chosen; added a `return
+  ''` guard for the now-reachable zero-published-chapters case (rules 25/46, no empty wrapper). The
+  series (article TOC) variant and its F24 scheduled-row treatment are untouched — confirmed by the
+  pre-existing `test_f24_scheduled_part_unlinked_with_title_date`, which already seeds a closed
+  series and still passes. New `SeriesTocTest::test_chapters_variant_excludes_scheduled_parts` and
+  fidelity row `wr-chapter-first`; both confirmed failing pre-fix (via `git stash`) and passing
+  after.
+- **R3-03** (commit below): `/writing/`'s "Short fiction" tiles showed two Writing essays instead
+  of two of SPEC §6.10's four named stories (REVIEW round 2, finding 2), because the essays sit in
+  `writing` with no series and `Meta\Form::derive()` therefore classes them `story`. Content-model
+  changes are a non-goal, so the fix is seed-only: a new posts.json `form` fixture field
+  (`"form": "article"` on both essays) that `Seeder::seed_posts()` validates against
+  `Meta\Form`'s three allowed values (via a new pure `Seeder::normalize_form()`, unit-tested without
+  WordPress) and writes as `ttm_form` + `ttm_form_locked` after the existing category/Form
+  re-derive, so no later `save_post` can overwrite it. Also reordered `story-uptime` (`days_ago`
+  150 → 700, landing in 2024) and `story-what-the-river-audits` (`days_ago` 260 → 1090, landing in
+  2023) so `Fiction\Serials::stories(4)` returns the mock's order: The Last Cron Job (2026), A
+  Field Guide to Empty Offices (2025, `days_ago` 410, unchanged), Uptime (2024), What the River
+  Audits (2023). Removed the markdown backticks from `hardening-part-1`'s excerpt (rendered
+  literally wherever excerpts show as plain text). New `SeederTest::test_writing_short_fiction_is_the_four_spec_stories_in_mock_order`,
+  `SeederTest::test_no_seeded_excerpt_contains_a_backtick`, a unit test pair for
+  `Seeder::normalize_form()`, and fidelity row `wr-tile-titles`; the phase-2
+  `test_seeded_writing_essays_derive_as_story_but_stay_older_than_the_last_cron_job` was updated to
+  the new truth (essays are `article` + locked, not `story`) rather than deleted. Confirmed the
+  front page's "Also running" story is still The Last Cron Job after reseeding. Regenerated the 11
+  phase-3 PNGs whose seeded content changed (`writing`, `writing-390`, `article`, `article-390`,
+  `article-1920`, `journal`, `journal-390`, `series-hub`, `series-single`, `archive-security`,
+  `archive-390`) via `wp ttm seed --reset` + `npm run screenshots`; `search.png`, `404.png` and
+  `front-1920.png` were unchanged by this task's fixture edits and so were left as R2-02 wrote them.
+
+### Interpretation choices this round
+
+- **R3-01**: none on the values themselves (the task gave exact selectors and numbers); the only
+  judgment call was which comments to shorten to close the 331-byte budget gap — picked the nine
+  longest, trimmed wording only, verified no information was lost, in preference to raising
+  `cssBudgetBytes`.
+- **R3-02**: added the `return ''` empty-chapters guard even though the task's acceptance tests
+  didn't exercise it, because R3-02's own filter change makes that branch reachable for the first
+  time and the governing rule (06, rules 25/46: never an empty wrapper) applies to every block
+  unconditionally.
+- **R3-03**: made `Seeder::normalize_form()` a separate pure static method (rather than inlining
+  the validation) specifically so it could carry a WordPress-free unit test, per the task's
+  conditional "if the Seeder's field parsing is pure, add a unit test" — this is the first
+  `tests/unit/Cli/` test in the repo. Chose `days_ago` 700/1090 for Uptime/River (rather than the
+  narrowest values that would satisfy ordering) to land each squarely inside its target calendar
+  year (2024, 2023) against the `2026-09-20` reference date `TestCase::set_now()` uses, so the
+  ordering isn't a knife's-edge pass near a year boundary.
+
+### Config keys touched this round
+
+None new. `cssBudgetBytes` (⚠️ ASSUMPTION, `scripts/check-budget.mjs`, 62464) was not raised —
+R3-01's additions were absorbed by shortening existing comments. `ttm.css` is 62463/62464 bytes
+(1 byte of headroom) as of R3-01's commit and unchanged since (R3-02/R3-03 touched no CSS).
+
+### Measurements
+
+- R3-01: `ttm.css` 62795 bytes with the nine new declarations and unshortened comments (331 over
+  budget) → 62463 bytes after losslessly shortening nine long comments (1 byte of headroom left).
+- R3-03: `story-what-the-river-audits` `days_ago` was reviewer-flagged in an earlier draft of this
+  document as `260`; the fixture now carries `1090` (landing in 2023, per mock order) — noted here
+  per the task's instruction to record the Field Guide/River `days_ago` values explicitly.
+  `story-a-field-guide-to-empty-offices` keeps its existing `days_ago: 410` (2025) unchanged;
+  `story-uptime` moved from `days_ago: 150` to `700` (2024).
+
+### What a human should check by hand
+
+`foundry_verify` was green at the end of every task this round (unit 171, integration 484/484, e2e
+451/451, composer lint, npm lint including budget/coverage/fixme, forbidden-patterns). Still, a
+human should:
+
+1. Open the freshly regenerated `docs/feedback/phase-3/*.png` (11 of 14 changed this round) and
+   compare `/writing/` against mock `2d` by eye — this is the first time the screenshot shows all
+   four SPEC-named stories in the mock's order and the chapters list without a scheduled chapter
+   at the top.
+2. Spot-check `/signing-your-options-table/` and `/category/security/` for the removed backticks
+   (`wp-config.php` should read as plain text, no literal `` ` `` characters).
+3. `git stash list` — still unresolved from earlier rounds, still unrelated to this flight.
+
+The R3-03 task's git-ancestry check (`git merge-base --is-ancestor $(git log -1 --format=%H --
+themes/ttm-theme plugins/ttm-core docs/fixtures/seed) $(git log -1 --format=%H --
+docs/feedback/phase-3)`) exits 0 as of R3-03's commit.

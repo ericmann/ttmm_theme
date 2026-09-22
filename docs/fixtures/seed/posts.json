@@ -464,7 +464,8 @@
 		],
 		"days_ago": 60,
 		"excerpt": "Sometimes the honest move is to finish the book you started, not the book you would write today.",
-		"paragraphs": 8
+		"paragraphs": 8,
+		"form": "article"
 	},
 	{
 		"tags": [],
@@ -475,7 +476,8 @@
 		],
 		"days_ago": 75,
 		"excerpt": "A short outline you will actually follow beats a long one you will abandon by chapter three.",
-		"paragraphs": 8
+		"paragraphs": 8,
+		"form": "article"
 	},
 	{
 		"slug": "classic-post",
@@ -498,7 +500,7 @@
 			"security"
 		],
 		"days_ago": 20,
-		"excerpt": "Most `wp-config.php` files are written once, at launch, and never audited again.",
+		"excerpt": "Most wp-config.php files are written once, at launch, and never audited again.",
 		"paragraphs": 12,
 		"part_title": "What a scanner sees \u2014 and what it can\u2019t"
 	},
@@ -1233,7 +1235,7 @@
 		"categories": [
 			"writing"
 		],
-		"days_ago": 150,
+		"days_ago": 700,
 		"excerpt": "A short story: Uptime.",
 		"featured_image": true,
 		"alt": "Uptime cover",
@@ -1248,7 +1250,7 @@
 		"categories": [
 			"writing"
 		],
-		"days_ago": 260,
+		"days_ago": 1090,
 		"excerpt": "A short story: what the river keeps, and what it gives back.",
 		"paragraphs": 20
 	}

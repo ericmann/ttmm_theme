@@ -21,6 +21,12 @@ class Seeder {
 	private const SEED_META = '_ttm_seed';
 
 	/**
+	 * The `ttm_form` values `Meta\Form::derive()` can produce (SPEC §5.2); a posts.json `form`
+	 * override is only ever one of these.
+	 */
+	private const ALLOWED_FORMS = [ 'article', 'chapter', 'story' ];
+
+	/**
 	 * Seed placeholder colours (rule 45): neutral field, darker diagonal band, lighter inset
 	 * border, cover fill and cover text, one `[r, g, b]` array each -- values from
 	 * `docs/_ds/…/styles.css` (neutral-400, neutral-500, neutral-300, neutral-700, neutral-100).
@@ -52,6 +58,21 @@ class Seeder {
 	 */
 	public static function fixtures_dir(): string {
 		return self::fixtures_root_dir() . '/seed';
+	}
+
+	/**
+	 * Validate a posts.json `form` override (pure; no WordPress calls).
+	 *
+	 * @param mixed $form Raw fixture value.
+	 * @return string|null The value, when it is one of ALLOWED_FORMS; null otherwise (missing
+	 *                      field, wrong type, or a value `Meta\Form::derive()` never produces).
+	 */
+	public static function normalize_form( $form ): ?string {
+		if ( ! is_string( $form ) || ! in_array( $form, self::ALLOWED_FORMS, true ) ) {
+			return null;
+		}
+
+		return $form;
 	}
 
 	/**
@@ -415,6 +436,15 @@ class Seeder {
 				delete_post_meta( $post_id, 'ttm_primary_category' );
 				\TTM\Core\Meta\PrimaryCategory::on_save( $post_id, get_post( $post_id ) );
 				\TTM\Core\Meta\Form::on_save( $post_id, get_post( $post_id ) );
+			}
+
+			// A fixture `form` override wins over the re-derive above and is locked so a later
+			// save_post never overwrites it (R3-03: two Writing essays with no series would
+			// otherwise auto-classify as "story" and displace SPEC §6.10's actual stories).
+			$ttm_form = self::normalize_form( $row['form'] ?? null );
+			if ( null !== $ttm_form ) {
+				update_post_meta( $post_id, 'ttm_form', $ttm_form );
+				update_post_meta( $post_id, 'ttm_form_locked', 1 );
 			}
 
 			if ( ! empty( $row['featured_image'] ) ) {

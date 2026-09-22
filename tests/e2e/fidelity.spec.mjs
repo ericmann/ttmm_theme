@@ -2128,6 +2128,29 @@ test.describe( 'writing', () => {
 		expect( await text( el ) ).toMatch( /^[\d,]+ words · \d{4}$/ );
 	} );
 
+	test( "wr-tile-titles: .ttm-tile titles are SPEC §6.10's four stories, in mock order @1280", async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const tiles = page.locator( '.ttm-story-tiles .ttm-tile' );
+		const count = await tiles.count();
+		const titles = [];
+		for ( let i = 0; i < count; i++ ) {
+			const tile = tiles.nth( i );
+			const ariaLabel = await tile.getAttribute( 'aria-label' );
+			titles.push(
+				ariaLabel ??
+					( await text( tile.locator( '.ttm-tile__title' ) ) )
+			);
+		}
+		expect( titles ).toEqual( [
+			'The Last Cron Job',
+			'A Field Guide to Empty Offices',
+			'Uptime',
+			'What the River Audits',
+		] );
+	} );
+
 	test( 'wr-tiles-note: .ttm-story-tiles__note @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.writing, 1280 );
 		const el = page.locator( '.ttm-story-tiles__note' );

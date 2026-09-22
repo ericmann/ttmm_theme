@@ -316,6 +316,12 @@ class SeederTest extends TTM_IntegrationTestCase {
 	 * `story-the-last-cron-job`'s (40) so `Fiction\Serials::stories()` -- ordered newest first --
 	 * ranks the story ahead of them, matching the front page's "Also running" list.
 	 */
+	/**
+	 * R3-03: the two Writing essays are locked to a non-story form (a Seeder fixture field,
+	 * `form` + `ttm_form_locked`), so they no longer auto-classify as `story` and no longer
+	 * take a Fiction\Serials::stories() slot. The front page's single "Also running" story
+	 * stays The Last Cron Job either way.
+	 */
 	public function test_seeded_writing_essays_derive_as_story_but_stay_older_than_the_last_cron_job(): void {
 		( new Seeder() )->run( 'normal' );
 
@@ -327,14 +333,61 @@ class SeederTest extends TTM_IntegrationTestCase {
 		$this->assertNotNull( $essay_2 );
 		$this->assertNotNull( $story );
 
-		$this->assertSame( 'story', get_post_meta( $essay_1->ID, 'ttm_form', true ) );
-		$this->assertSame( 'story', get_post_meta( $essay_2->ID, 'ttm_form', true ) );
+		$this->assertSame( 'article', get_post_meta( $essay_1->ID, 'ttm_form', true ) );
+		$this->assertSame( 'article', get_post_meta( $essay_2->ID, 'ttm_form', true ) );
+		$this->assertSame( '1', get_post_meta( $essay_1->ID, 'ttm_form_locked', true ) );
+		$this->assertSame( '1', get_post_meta( $essay_2->ID, 'ttm_form_locked', true ) );
 
 		$this->assertGreaterThan( strtotime( $essay_1->post_date_gmt ), strtotime( $story->post_date_gmt ) );
 		$this->assertGreaterThan( strtotime( $essay_2->post_date_gmt ), strtotime( $story->post_date_gmt ) );
 
 		$stories = \TTM\Core\Fiction\Serials::stories( 1 );
 		$this->assertSame( [ $story->ID ], $stories );
+	}
+
+	/**
+	 * REVIEW round 2, finding 2: SPEC §6.10 / mock 2d name four stories, in this order.
+	 */
+	public function test_writing_short_fiction_is_the_four_spec_stories_in_mock_order(): void {
+		( new Seeder() )->run( 'normal' );
+
+		$titles = array_map( 'get_the_title', \TTM\Core\Fiction\Serials::stories( 4 ) );
+
+		$this->assertSame(
+			[
+				'The Last Cron Job',
+				'A Field Guide to Empty Offices',
+				'Uptime',
+				'What the River Audits',
+			],
+			$titles
+		);
+	}
+
+	/**
+	 * Rule 39-adjacent: a manual excerpt with markdown backticks renders literally wherever
+	 * excerpts are shown as plain text (REVIEW round 2, finding 2).
+	 */
+	public function test_no_seeded_excerpt_contains_a_backtick(): void {
+		( new Seeder() )->run( 'normal' );
+
+		$posts = get_posts(
+			[
+				'post_type'      => 'post',
+				'posts_per_page' => 200,
+				'meta_key'       => '_ttm_seed', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- test-only, bounded query.
+			]
+		);
+
+		$this->assertNotEmpty( $posts );
+
+		foreach ( $posts as $post ) {
+			$this->assertStringNotContainsString(
+				'`',
+				$post->post_excerpt,
+				"Post \"{$post->post_title}\" has a backtick in its excerpt."
+			);
+		}
 	}
 
 	public function test_seeded_article_reads_fourteen_minutes(): void {
