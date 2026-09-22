@@ -56,7 +56,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] R1-10 Prefix, stale lint entries, no-op CSS and the undocumented dd4dfbe commit
 - [x] R2-01 Scope R1-06's series-row margins to the list layout; restore strip, rail and grid-2 values
 - [x] R2-02 Regenerate and commit the phase-3 screenshots after the round-1 fixes
-- [ ] R3-01 Restore the SPEC §6.2/§6.4/§6.5/§6.7 values no fidelity row asserted
+- [x] R3-01 Restore the SPEC §6.2/§6.4/§6.5/§6.7 values no fidelity row asserted
 - [ ] R3-02 Writing 'recent chapters' lists published chapters only
 - [ ] R3-03 Seed: Short fiction shows SPEC §6.10's four stories in mock order; no literal backticks; regenerate screenshots
 
@@ -450,3 +450,9 @@ Eyeballed acceptance criteria: writing.png "In print" shows exactly 2 books (Sal
 Updated docs/HANDOFF.md round-1 item 4 to note screenshots are now current, and added a full "Round 2" section (what each task fixed, interpretation, config keys, what a human should check).
 Confirmed active theme is still ttm-theme after seeding/screenshots.
 Full foundry_verify green (unit 169, lint incl. budget 62428/62464 and coverage 193/193/0-pending, build, forbidden-patterns).
+
+### R3-01 — 986c49d
+Added the 9 missing CSS declarations (entry-content pre margin-bottom 22px; .is-style-pull margin 36px + letter-spacing -0.015em; scoped .ttm-journal-stream/.ttm-hub-all .ttm-cell-heading__link to caption size/neutral-700 without touching the shared 11px or is-rail 12px rules; .ttm-series-progress__meta margin 0 0 18px; .ttm-series-featured__buttons gap 10px; .ttm-stats__label 13px; .ttm-story-tiles/.ttm-book-grid padding-top 16px; .ttm-book__meta margin-top 2px; .is-chapters .ttm-numbered__dek/__date font-weight 400).
+Extended fidelity.spec.mjs rows: art-pre, art-pull, js-link, hub-all-head, hub-meta, hub-buttons, wr-stats, wr-tiles, wr-books, wr-book-title, wr-chapter-dek, wr-chapter-date. Confirmed each failed before the CSS fix, passed after.
+Budget: additions pushed ttm.css to 62795/62464; shortened 9 long comments losslessly (no info dropped) to land at 62463/62464 - did not need to raise cssBudgetBytes/CLAUDE.md's constraint line.
+Full fidelity project (fidelity+editors+selectors specs, 330 tests) green. Full foundry_verify green: composer lint/test:unit, npm lint/test:unit/build, forbidden-patterns, test:integration, test:e2e all passed. wp-env theme confirmed still ttm-theme after integration run.
