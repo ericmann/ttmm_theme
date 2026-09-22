@@ -36,7 +36,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P4-02 All-series grid (`layout=grid-2`) and hub clean-up
 - [x] P4-03 Single series template (`taxonomy-series.html`) and `series.related_limit`
 - [x] P4-04 Writing hero (01 §4.36–4.37, §6.5)
-- [ ] P4-05 Writing body — all serials (`layout=list`) and recent chapters (numbered)
+- [x] P4-05 Writing body — all serials (`layout=list`) and recent chapters (numbered)
 - [ ] P4-06 Writing aside — story tiles, book grid, and the responsive order
 - [ ] P4-07 Phase 4 push — hub and Writing screenshots
 - [ ] P5-01 390 and 1920 sweep of every screen
@@ -196,4 +196,20 @@ CSS budget 61433/61440 (7 free) -- 4th Phase 4 task ending at
 single-digit headroom; kicker/title/synopsis margin+line-height
 left undeclared (no fidelity coverage) as disclosed trade-off.
 Flagging again for P5-03.
+Manual check: none.
+
+### P4-05 — f323663
+All-serials list: is-list layout row now renders form/genre/cadence
+meta line (fiction "{Form} · {genre} · {cadence}"; nonfiction
+"{categories} · {cadence}"), status always font-weight:600 (colour
+still varies by state). Chapters: page-writing.html's explicit
+heading attr removed so the block composes "{Series} -- recent
+chapters" (already implemented render.php logic from P1-05/prior).
+Twelve fidelity rows un-fixme'd; two needed the ch-probe and
+textContent idioms after un-fixme. Two stale P4-04 allow-list lines
+(title/synopsis, already covered by that task's CSS) also cleaned up.
+CSS budget 61432/61440 (8 free) -- 5th Phase 4 task ending at
+single-digit headroom; list row mark/dek/meta margins and chapters
+dek/date font-size/color dropped (inherit shared defaults) as
+disclosed trade-offs. P5-03 needs a real fix, not more comment-trims.
 Manual check: none.
