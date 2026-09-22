@@ -20,7 +20,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P1-03 Article header — kicker, H1, dek, byline (01 §4.22)
 - [x] P1-04 Prev/next (01 §4.21)
 - [x] P1-05 Series TOC (01 §4.20)
-- [ ] P1-06 More in section, newsletter box copy, aside order on the phone
+- [x] P1-06 More in section, newsletter box copy, aside order on the phone
 - [ ] P1-07 Phase 1 push — article screenshots
 - [ ] P2-01 Journal post header, body column, note column and syndication line (§6.4)
 - [ ] P2-02 Journal stream (01 §4.11) with whole-row links and "Full journal · N entries"
@@ -106,4 +106,9 @@ CSS 4.21: `__prev` padding 20px 24px 20px 0 + border-right rule-1; `__next` padd
 ### P1-05 — a2d3ddf
 Tests: un-fixme'd toc-head, toc-item, toc-current, toc-scheduled, toc-phone-hub (fidelity + selectors green); SeriesTocTest 15/15 incl. new test_heading_has_series_link_and_hub_link and test_chapters_variant_composes_heading_and_all_link; test:integration 453/453; lints clean; budget 51921/61440.
 Interpretation: render.php per Decision "ttm/series-toc" (cell heading with __series name + "Hub →", rows li.__item.is-current|is-published|is-scheduled > __num.tnum + __title [+ __dek]); the F24 `title="Scheduled Sept 26"` sits on the <li> because that is what the §6.9 toc-scheduled row reads. Chapters variant emits ol.ttm-numbered > li.ttm-numbered__row under "{Series} — recent chapters"; its six ttm-numbered* classes stay `# P4-05 pending` in css-coverage-allow.txt (task text says keep pending). Old shared rules for .ttm-series-featured__part split into a /* 4.29 */ block, unchanged. selectors-allow.txt: `.ttm-series-toc__dek` (optional showDek state; no seeded TOC sets it). toc-scheduled uses .first(): the seeded series has two scheduled parts.
+Manual check: none. test:e2e red remains only journalPost axe (syndication links), owned by P2-01/P5-02.
+
+### P1-06 — 1720761
+Tests: un-fixme'd more-head, more-row, more-count, box, box-title, box-form, box-btn, box-phone, aside-phone-order (fidelity + selectors green). ValuesTest +test_newsletter_title_by_context, +test_section_label_more_in_and_empty; ArticleSourcesTest +test_newsletter_copy_binding_reads_series_context, +test_section_label_binding_reads_primary_category; ArticleTemplatesTest +test_more_in_heading_is_one_label_with_category_name; f13 test green. Unit 156; integration 456/456; lints clean; budget 52436/61440; 126 tagged fixme rows.
+Interpretation: `ttm/newsletter-copy` = is_tax('series') or (is_singular('post') and SeriesIndex::for_post(context postId)); pure Values::newsletter_title(bool). `ttm/section-label` implements both "New bindings" formats now (`more-in` from the primary category; `series-in` from the queried category on is_category()) so P3-04 reuses it; '' for an empty name or unknown format. Rows are div.ttm-item > h4.wp-block-post-title > a, styled via same-specificity scoped selectors (.ttm-more-in .wp-block-query .ttm-item, .ttm-more-in .ttm-item .wp-block-post-title a) to satisfy no-descending-specificity; the right-hand post-terms label and `.ttm-more-in { margin-top }` are removed. Phone `.btn-block`: Form::render() is out of scope, so `.ttm-newsletter-box .btn-primary` gets width 100% under 720 instead of a markup class. more-head asserts textContent (uppercase transform). Newsletter box group now `layout: default`.
 Manual check: none. test:e2e red remains only journalPost axe (syndication links), owned by P2-01/P5-02.
