@@ -11,9 +11,9 @@
 declare( strict_types=1 );
 
 ?>
-<!-- wp:group {"anchor":"newsletter","className":"is-style-surface-box ttm-newsletter-box","layout":{"type":"constrained"}} -->
+<!-- wp:group {"anchor":"newsletter","className":"is-style-surface-box ttm-newsletter-box","layout":{"type":"default"}} -->
 <div class="wp-block-group is-style-surface-box ttm-newsletter-box" id="newsletter">
-	<!-- wp:paragraph {"className":"ttm-newsletter-box__title"} -->
+	<!-- wp:paragraph {"className":"ttm-newsletter-box__title","metadata":{"bindings":{"content":{"source":"ttm/newsletter-copy"}}}} -->
 	<p class="ttm-newsletter-box__title"><?php esc_html_e( 'The weekly issue.', 'ttm-theme' ); ?></p>
 	<!-- /wp:paragraph -->
 

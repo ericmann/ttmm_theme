@@ -285,4 +285,30 @@ class ArticleTemplatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringNotContainsString( 'Syndicated to', $html );
 		$this->assertStringContainsString( '248 words', $html );
 	}
+
+	/**
+	 * SPEC §6.2 "More in {Category}": one label with the category name inline, not a second
+	 * label on the right; rows are `h4` post titles inside `.ttm-item`.
+	 */
+	public function test_more_in_heading_is_one_label_with_category_name(): void {
+		$tech  = $this->category_id( 'technology', 'Technology' );
+		$posts = [];
+		foreach ( [ 1, 2 ] as $i ) {
+			$posts[] = self::factory()->post->create(
+				[
+					'post_status'   => 'publish',
+					'post_category' => [ $tech ],
+				]
+			);
+			update_post_meta( $posts[ $i - 1 ], 'ttm_primary_category', $tech );
+		}
+
+		$html = $this->render_single( $posts[0] );
+
+		$this->assertSame( 1, preg_match( '/<div class="[^"]*ttm-more-in[^"]*"[^>]*>(.*?)<div class="wp-block-query[^"]*">/s', $html, $m ) );
+		$this->assertStringContainsString( '<h3 class="wp-block-heading ttm-cell-heading__label">More in Technology</h3>', $m[1] );
+		$this->assertSame( 1, substr_count( $m[1], 'ttm-cell-heading__label' ) );
+		$this->assertStringNotContainsString( 'wp-block-post-terms', $m[1] );
+		$this->assertMatchesRegularExpression( '/<div class="wp-block-group ttm-item[^"]*">\s*<h4 class="wp-block-post-title"><a href/', $html );
+	}
 }

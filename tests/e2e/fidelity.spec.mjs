@@ -1368,62 +1368,61 @@ test.describe( 'aside', () => {
 		expect( await text( el ) ).toBe( 'Hub →' );
 	} );
 
-	test.fixme( // P1-06
-	'more-head: .ttm-more-in .ttm-cell-heading__label @1280', async ( {
+	test( 'more-head: .ttm-more-in .ttm-cell-heading__label @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-more-in .ttm-cell-heading__label' );
-		expect( await text( el ) ).toBe( 'More in Technology' );
+		// innerText reflects the label's text-transform; assert the source text.
+		const source = await el.evaluate( ( node ) => node.textContent );
+		expect( source.trim() ).toBe( 'More in Technology' );
 		expect( await el.count() ).toBe( 1 );
-	} ); // P1-06
+	} );
 
-	test.fixme( // P1-06
-	'more-row: .ttm-more-in .ttm-item a (first) @1280', async ( { page } ) => {
+	test( 'more-row: .ttm-more-in .ttm-item a (first) @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-more-in .ttm-item a' ).first();
 		expect( await computed( el, 'font-size' ) ).toBe( px( 14 ) );
 		expect( await computed( el, 'font-weight' ) ).toBe( '600' );
 		const parent = page.locator( '.ttm-more-in .ttm-item' ).first();
 		expect( await computed( parent, 'padding' ) ).toBe( '10px 0px' );
-	} ); // P1-06
+	} );
 
-	test.fixme( // P1-06
-	'more-count: .ttm-more-in .wp-block-post @1280', async ( { page } ) => {
+	test( 'more-count: .ttm-more-in .wp-block-post @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const els = page.locator( '.ttm-more-in .wp-block-post' );
 		expect( await els.count() ).toBe( 3 );
-	} ); // P1-06
+	} );
 
-	test.fixme( // P1-06
-	'box: .ttm-newsletter-box @1280', async ( { page } ) => {
+	test( 'box: .ttm-newsletter-box @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-newsletter-box' );
 		expect( await computed( el, 'background-color' ) ).toBe(
 			color( 'surface' )
 		);
 		expect( await computed( el, 'padding' ) ).toBe( '16px 18px' );
-	} ); // P1-06
+	} );
 
-	test.fixme( // P1-06
-	'box-title: .ttm-newsletter-box__title @1280', async ( { page } ) => {
+	test( 'box-title: .ttm-newsletter-box__title @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-newsletter-box__title' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 15 ) );
 		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
 		expect( await text( el ) ).toBe( 'Get the next part' );
-	} ); // P1-06
+	} );
 
-	test.fixme( // P1-06
-	'box-form: .ttm-newsletter-box form @1280', async ( { page } ) => {
+	test( 'box-form: .ttm-newsletter-box form @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-newsletter-box form' );
 		expect( await computed( el, 'display' ) ).toBe( 'flex' );
 		expect( await computed( el, 'column-gap' ) ).toBe( px( 6 ) );
-	} ); // P1-06
+	} );
 
-	test.fixme( // P1-06
-	'box-btn: .ttm-newsletter-box button @1280', async ( { page } ) => {
+	test( 'box-btn: .ttm-newsletter-box button @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-newsletter-box button' );
 		// Colour vs a11y: accent-700, not SPEC's literal accent.
@@ -1431,17 +1430,15 @@ test.describe( 'aside', () => {
 			color( 'accent-700' )
 		);
 		expect( await computed( el, 'color' ) ).toBe( color( 'bg' ) );
-	} ); // P1-06
+	} );
 
-	test.fixme( // P1-06
-	'box-phone: .ttm-newsletter-box form @390', async ( { page } ) => {
+	test( 'box-phone: .ttm-newsletter-box form @390', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 390 );
 		const el = page.locator( '.ttm-newsletter-box form' );
 		expect( await computed( el, 'flex-direction' ) ).toBe( 'column' );
-	} ); // P1-06
+	} );
 
-	test.fixme( // P1-06
-	'aside-phone-order: .ttm-series-toc, .ttm-more-in, .ttm-newsletter-box @390', async ( {
+	test( 'aside-phone-order: .ttm-series-toc, .ttm-more-in, .ttm-newsletter-box @390', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.article, 390 );
@@ -1459,7 +1456,7 @@ test.describe( 'aside', () => {
 			expect( box.y ).toBeGreaterThan( lastY );
 			lastY = box.y;
 		}
-	} ); // P1-06
+	} );
 } );
 
 test.describe( 'journal', () => {

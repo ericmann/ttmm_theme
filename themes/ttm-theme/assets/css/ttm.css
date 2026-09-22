@@ -979,17 +979,25 @@ blockquote.is-style-pull cite,
 /* 4.32/4.33 newsletter box + poster */
 .ttm-newsletter-box {
 	background: var(--wp--preset--color--surface);
-	padding: var(--wp--preset--spacing--40) var(--wp--preset--spacing--50);
+	padding: 16px 18px;
 }
 
 .ttm-newsletter-box__title {
-	font-size: var(--wp--preset--font-size--dek);
+	margin: 0 0 8px;
+	font-size: 15px;
 	font-weight: 800;
 }
 
 .ttm-newsletter-box__copy {
+	margin: 0 0 12px;
 	font-size: var(--wp--preset--font-size--body-s);
 	color: var(--wp--preset--color--neutral-800);
+}
+
+/* The box placement's form is tighter than the shared 8px row (SPEC §6.2 "Newsletter box"). */
+.ttm-newsletter-box form {
+	display: flex;
+	gap: 6px;
 }
 
 /* `.input`/`.btn*` already style themselves; this only owns the row layout. */
@@ -1019,6 +1027,15 @@ blockquote.is-style-pull cite,
 
 	.ttm-newsletter-form__form {
 		flex-direction: column;
+	}
+
+	.ttm-newsletter-box {
+		margin-bottom: 24px;
+	}
+
+	.ttm-newsletter-box .btn-primary {
+		width: 100%;
+		justify-content: center;
 	}
 }
 
@@ -1892,9 +1909,19 @@ blockquote.is-style-pull cite,
 	text-decoration: none;
 }
 
-/* 4.20/4.13 more-in + journal head/row */
-.ttm-more-in {
-	margin-top: 40px;
+/* 4.5 headline item, scoped: "More in {Category}" rows (SPEC §6.2) + journal head/row */
+.ttm-more-in .wp-block-query .ttm-item {
+	padding: 10px 0;
+	border-top: 0;
+	border-bottom: var(--ttm-rule-1);
+}
+
+.ttm-more-in .ttm-item .wp-block-post-title a {
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.35;
+	color: inherit;
+	text-decoration: none;
 }
 
 .ttm-more-in:has(.is-empty) {

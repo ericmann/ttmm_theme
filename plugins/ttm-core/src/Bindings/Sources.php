@@ -164,6 +164,73 @@ class Sources {
 				'get_value_callback' => [ self::class, 'verse_copyright' ],
 			]
 		);
+
+		register_block_bindings_source(
+			'ttm/newsletter-copy',
+			[
+				'label'              => __( 'TTM: Newsletter copy', 'ttm-core' ),
+				'get_value_callback' => [ self::class, 'newsletter_copy' ],
+				'uses_context'       => [ 'postId', 'postType' ],
+			]
+		);
+
+		register_block_bindings_source(
+			'ttm/section-label',
+			[
+				'label'              => __( 'TTM: Section label', 'ttm-core' ),
+				'get_value_callback' => [ self::class, 'section_label' ],
+				'uses_context'       => [ 'postId', 'postType' ],
+			]
+		);
+	}
+
+	/**
+	 * `ttm/newsletter-copy` (Decision S3): "Get the next part" on a single post that belongs to
+	 * a series or on a series term archive, else "The weekly issue."
+	 *
+	 * @param array<string, mixed> $source_args    Unused: no args.
+	 * @param WP_Block             $block_instance Consuming block.
+	 * @param string               $attribute_name Consuming attribute.
+	 * @return string
+	 */
+	public static function newsletter_copy( array $source_args, $block_instance, string $attribute_name ): string {
+		unset( $source_args );
+
+		$in_series = is_tax( 'series' );
+
+		if ( ! $in_series && is_singular( 'post' ) ) {
+			$post_id   = (int) ( $block_instance->context['postId'] ?? get_queried_object_id() );
+			$in_series = $post_id > 0 && null !== SeriesIndex::for_post( $post_id );
+		}
+
+		return self::finalize( Values::newsletter_title( $in_series ), $block_instance, $attribute_name );
+	}
+
+	/**
+	 * `ttm/section-label` (Decision "New bindings"): `{"format":"more-in"}` -> "More in {primary
+	 * category name}" on a singular post; `{"format":"series-in"}` -> "Series in {queried
+	 * category name}" on a category archive; '' otherwise.
+	 *
+	 * @param array{format?: string} $source_args    `{format: 'more-in'|'series-in'}`.
+	 * @param WP_Block               $block_instance Consuming block.
+	 * @param string                 $attribute_name Consuming attribute.
+	 * @return string
+	 */
+	public static function section_label( array $source_args, $block_instance, string $attribute_name ): string {
+		$format = (string) ( $source_args['format'] ?? 'more-in' );
+		$name   = '';
+
+		if ( 'more-in' === $format ) {
+			$post_id     = (int) ( $block_instance->context['postId'] ?? 0 );
+			$category_id = $post_id ? PrimaryCategory::id( $post_id ) : 0;
+			$category    = $category_id ? get_term( $category_id, 'category' ) : null;
+			$name        = $category && ! is_wp_error( $category ) ? (string) $category->name : '';
+		} elseif ( 'series-in' === $format && is_category() ) {
+			$queried = get_queried_object();
+			$name    = $queried instanceof \WP_Term ? (string) $queried->name : '';
+		}
+
+		return self::finalize( Values::section_label( $format, $name ), $block_instance, $attribute_name );
 	}
 
 	/**

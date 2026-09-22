@@ -353,4 +353,44 @@ class Values {
 		/* translators: 1: series name, 2: "N of M" or "part N". */
 		return sprintf( __( 'Series: %1$s, %2$s', 'ttm-core' ), $name, $part_label );
 	}
+
+	/**
+	 * Newsletter box title (Decision S3): "Get the next part" in series contexts (a single
+	 * post that belongs to a series, or a series term archive), else "The weekly issue."
+	 *
+	 * @param bool $in_series Whether the request is a series context.
+	 * @return string
+	 */
+	public static function newsletter_title( bool $in_series ): string {
+		return $in_series
+			? __( 'Get the next part', 'ttm-core' )
+			: __( 'The weekly issue.', 'ttm-core' );
+	}
+
+	/**
+	 * Cell-heading label with the section name inline (Decision "New bindings"): `more-in` ->
+	 * "More in Technology", `series-in` -> "Series in Technology"; `''` without a name or for
+	 * an unknown format.
+	 *
+	 * @param string $format `more-in` or `series-in`.
+	 * @param string $name   Category name, or ''.
+	 * @return string
+	 */
+	public static function section_label( string $format, string $name ): string {
+		if ( '' === $name ) {
+			return '';
+		}
+
+		if ( 'more-in' === $format ) {
+			/* translators: %s: category name. */
+			return sprintf( __( 'More in %s', 'ttm-core' ), $name );
+		}
+
+		if ( 'series-in' === $format ) {
+			/* translators: %s: category name. */
+			return sprintf( __( 'Series in %s', 'ttm-core' ), $name );
+		}
+
+		return '';
+	}
 }

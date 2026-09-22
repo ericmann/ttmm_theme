@@ -7,6 +7,8 @@
 
 declare( strict_types=1 );
 
+use TTM\Core\Query\SeriesIndex;
+
 class ArticleSourcesTest extends TTM_IntegrationTestCase {
 
 	private function category_id( string $slug, string $name ): int {
@@ -102,5 +104,68 @@ class ArticleSourcesTest extends TTM_IntegrationTestCase {
 		$value = $this->source_value( 'ttm/journal-subline', [], $block, 'content' );
 
 		$this->assertSame( 'Sunday · Portland', $value );
+	}
+
+	public function test_newsletter_copy_binding_reads_series_context(): void {
+		$tech      = $this->category_id( 'technology', 'Technology' );
+		$term      = wp_insert_term( 'Hardening WordPress', 'series', [ 'slug' => 'hardening-wp' ] );
+		$series_id = (int) $term['term_id'];
+
+		$in_series = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+			]
+		);
+		update_post_meta( $in_series, 'ttm_series_part', 1 );
+		update_post_meta( $in_series, 'ttm_primary_category', $tech );
+		wp_set_object_terms( $in_series, [ $series_id ], 'series' );
+
+		$plain = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+			]
+		);
+		update_post_meta( $plain, 'ttm_primary_category', $tech );
+		SeriesIndex::rebuild();
+
+		$this->go_to( (string) get_permalink( $in_series ) );
+		$block = $this->make_block( 'core/paragraph', $in_series );
+		$this->assertSame( 'Get the next part', $this->source_value( 'ttm/newsletter-copy', [], $block, 'content' ) );
+
+		$this->go_to( (string) get_permalink( $plain ) );
+		$block = $this->make_block( 'core/paragraph', $plain );
+		$this->assertSame( 'The weekly issue.', $this->source_value( 'ttm/newsletter-copy', [], $block, 'content' ) );
+
+		$link = get_term_link( $series_id, 'series' );
+		if ( is_wp_error( $link ) ) {
+			$this->fail( 'Series term link could not be resolved.' );
+		}
+		$this->go_to( $link );
+		$this->assertTrue( is_tax( 'series' ) );
+		$block = $this->make_block( 'core/paragraph', 0 );
+		$this->assertSame( 'Get the next part', $this->source_value( 'ttm/newsletter-copy', [], $block, 'content' ) );
+	}
+
+	public function test_section_label_binding_reads_primary_category(): void {
+		$tech     = $this->category_id( 'technology', 'Technology' );
+		$security = $this->category_id( 'security', 'Security' );
+		$post     = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech, $security ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $security );
+
+		$block = $this->make_block( 'core/heading', $post );
+		$this->assertSame( 'More in Security', $this->source_value( 'ttm/section-label', [ 'format' => 'more-in' ], $block, 'content' ) );
+
+		$none = $this->make_block( 'core/heading', 0 );
+		$this->assertSame( '', $this->source_value( 'ttm/section-label', [ 'format' => 'more-in' ], $none, 'content' ) );
+
+		$this->go_to( (string) get_category_link( $tech ) );
+		$this->assertSame( 'Series in Technology', $this->source_value( 'ttm/section-label', [ 'format' => 'series-in' ], $none, 'content' ) );
 	}
 }

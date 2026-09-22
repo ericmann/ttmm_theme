@@ -158,4 +158,16 @@ class ValuesTest extends TestCase {
 			Values::footer_line( 'These Things Matter', '2026' )
 		);
 	}
+
+	public function test_newsletter_title_by_context(): void {
+		$this->assertSame( 'Get the next part', Values::newsletter_title( true ) );
+		$this->assertSame( 'The weekly issue.', Values::newsletter_title( false ) );
+	}
+
+	public function test_section_label_more_in_and_empty(): void {
+		$this->assertSame( 'More in Technology', Values::section_label( 'more-in', 'Technology' ) );
+		$this->assertSame( 'Series in Security', Values::section_label( 'series-in', 'Security' ) );
+		$this->assertSame( '', Values::section_label( 'more-in', '' ) );
+		$this->assertSame( '', Values::section_label( 'unknown', 'Technology' ) );
+	}
 }
