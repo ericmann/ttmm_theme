@@ -59,6 +59,9 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] R3-01 Restore the SPEC §6.2/§6.4/§6.5/§6.7 values no fidelity row asserted
 - [x] R3-02 Writing 'recent chapters' lists published chapters only
 - [x] R3-03 Seed: Short fiction shows SPEC §6.10's four stories in mock order; no literal backticks; regenerate screenshots
+- [ ] R4-01 Series-row count cell sits beside the title; Writing columns stretch their children (rule 36)
+- [ ] R4-02 Complete series read 'N chapters' / 'N parts' in the list and grid-2 right cell
+- [ ] R4-03 Test the empty-chapters branch; round-3 cleanups; regenerate screenshots
 
 ## Log
 (one entry per task, appended by implement)

@@ -655,3 +655,79 @@ Confirm the integration test and the fidelity row fail before the seed change.
 **Out of scope:** Meta\Form, Fiction\Serials, story-tiles render.php, CSS, the phase-2 screenshot directory, any visual fix spotted in the PNGs (record it in HANDOFF instead).
 **Verification:** curl /writing/ shows the four tiles in mock order. / still shows The Last Cron Job under Also running. `grep -n '`' docs/fixtures/seed/posts.json` finds nothing in excerpts. `grep -ri lorem docs/fixtures/seed/` is empty. `git merge-base --is-ancestor $(git log -1 --format=%H -- themes/ttm-theme plugins/ttm-core docs/fixtures/seed) $(git log -1 --format=%H -- docs/feedback/phase-3)` exits 0. `npm run test:integration` and `npm run test:e2e` green. Full foundry_verify.
 **Depends on:** R3-01, R3-02
+
+## Review fixes (round 4)
+
+### R4-01: Series-row count cell sits beside the title; Writing columns stretch their children (rule 36)
+**Goal:** Put the list/grid-2 series-row right cell (count over status) top-right, level with the title, as mocks 2d (line 494) and 1f (line 1015) and SPEC §6.5/§6.7 'align start … right cell count over status' require. Make the Writing body's main and aside children span their full column (mock 2d line 486: a plain flex column that stretches its children). REVIEW round 3, findings 2 and 3.
+**Files touched:** themes/ttm-theme/assets/css/ttm.css, themes/ttm-theme/templates/page-writing.html, tests/e2e/fidelity.spec.mjs, tests/integration/Theme/HubWritingTemplatesTest.php, scripts/check-budget.mjs, CLAUDE.md
+**Design constraints:** Findings and required changes:
+
+(a) Count cell. `.ttm-series-row__count` (ttm.css ~:1759) sets only `grid-column: 3`, so auto-placement drops it into the row's last grid row. Measured count-top minus title-top: 68-109px on /writing/, /series/ and /series/hardening-wordpress/. Give it a row placement starting at row 1 (e.g. `grid-row: 1 / span 3`) so it starts in the title's row. It must still render right-aligned count over status. Strip and rail layouts do not render __count and must not change. SPEC §2 forbids any front-page row moving.
+
+(b) Writing columns. page-writing.html:11 and :39 declare `main` and `aside` as core `layout: {type: flex, orientation: vertical}` groups inside the `is-style-grid-7-5` grid. Core emits `align-items: flex-start` for these, so the All-serials list renders 466px and recent chapters 535px inside a 653px column. SPEC §3.1 rule 36 extended requires column children to be `layout: default` (or flow), with ttm.css owning their layout. Change both groups to `"layout":{"type":"default"}`. In ttm.css, give `.ttm-writing-body > main` and `.ttm-writing-body > aside` `display: flex; flex-direction: column` and keep their existing gaps (36px, 32px); children must stretch to the column width. The ≤1024 `display: contents` fold must still win: it sits later in source order, at the same specificity. Keep the ≤1024 order (All serials, Short fiction, Recent chapters, In print) and the 390 layout unchanged.
+
+Requirements:
+- Presets via var(--wp--preset--…) where one exists; no hex.
+- Rule 41: every new selector must match on the seeded screen set.
+- Rule 36: grep `is-style-grid` in themes/ttm-theme/** afterwards; no grid descendant group may be flex/constrained where it is a column child.
+
+Rule 30: ttm.css is 62463/62464 (1 byte of headroom). Raise cssBudgetBytes to 63488 in scripts/check-budget.mjs (update its comment) and in CLAUDE.md's Constraints line. Add a Measurement: line with before/after bytes. Never drop a declaration to fit. Also amend CLAUDE.md's rule-36 constraint line to quote SPEC §3.1: grid column children are layout default/flow, not flex or constrained.
+**Acceptance tests:** Each new assertion must fail against the current code before the fix; record the failures in the commit body. In tests/e2e/fidelity.spec.mjs:
+- Extend `wr-serial-count`: for every `.ttm-series-list.is-list .ttm-series-row`, |count.top − title.top| ≤ 1px (getBoundingClientRect).
+- Extend `hub-grid-row` the same way for every `.ttm-series-list.is-grid-2 .ttm-series-row`.
+- Extend `single-other` the same way for `.ttm-series-single__other .ttm-series-row`.
+- New `wr-body-cols` (/writing/, 1280): the widths of `.ttm-series-list.is-list`, `.ttm-series-toc.is-chapters`, `.ttm-writing-body__stories` and `.ttm-writing-body__books` each equal their column's content width (`.ttm-writing-body > main` / `> aside`) within 1px.
+
+In tests/integration/Theme/HubWritingTemplatesTest.php, new `test_writing_body_columns_are_layout_default`: the rendered writing-body `main` and `aside` carry neither `is-layout-flex` nor `is-layout-constrained`.
+
+All phase-2 front-page rows, wr-* rows at 390, and ar-aside-row/strip rows stay green unchanged.
+**Out of scope:** Markup or render.php changes (the series-list count text is a separate task). The front page, strip and rail layouts. The hub featured block. Screenshots (the last fix task regenerates them).
+**Verification:** Playwright probe at 1280: count top equals title top on /writing/, /series/ and /series/hardening-wordpress/. On /writing/ the serials list and chapters list are both 653px wide. At 1000 and 390, /writing/ keeps the stacked order. `npm run lint` (budget, coverage, stylelint) passes. `npm run test:integration` and `npm run test:e2e` green, including selectors.spec and every phase-2 row. Full foundry_verify.
+**Depends on:** none
+
+### R4-02: Complete series read 'N chapters' / 'N parts' in the list and grid-2 right cell
+**Goal:** Make the ttm/series-list right-cell count match SPEC §6.5 ("12 of 31" / "9 chapters" over status) and the mocks: 2d lines 1195-1196 show '9 chapters' and '24 chapters'; 1f lines 1131-1134 show complete nonfiction as '4 parts'. Today a complete series renders '9 of 9' / '24 of 24' (REVIEW round 3, finding 4).
+**Files touched:** plugins/ttm-core/blocks/series-list/render.php, tests/integration/Blocks/SeriesListTest.php, tests/e2e/fidelity.spec.mjs
+**Design constraints:** In render.php (~:129-141), compute a separate right-cell string for the `__parts` span in the `list` and `grid-2` layouts only:
+- A complete series (status 'complete') renders '{published} chapters' for fiction forms (novel, novella, story-cycle) and '{published} parts' for nonfiction, each via _n() with the ttm-core text domain and a translators comment.
+- Every other state keeps today's text: 'N of M' when total > 0; the existing open-ended 'N part(s)'.
+
+Do NOT change `$ttm_count_word` as used by the strip/rail meta line: the front page's strip must not move (SPEC §2 non-goal, phase-2 rows).
+
+Other requirements:
+- Keep the wrapper shape and classes (rule 46); add or rename no class.
+- No nonces or per-visitor calls in render.php.
+- No bare numeric literals beyond structural ones (rule 24).
+**Acceptance tests:** - New `SeriesListTest::test_complete_fiction_series_count_reads_chapters`: a complete fiction series with total 9 and 9 published, layout list; the right cell contains '9 chapters' and not '9 of 9'.
+- New `SeriesListTest::test_complete_nonfiction_series_count_reads_parts`: a complete nonfiction series, total 4, grid-2; the right cell contains '4 parts'.
+- Keep or extend an in-progress case asserting '12 of 31' still renders.
+- If an existing test asserts strip/rail meta text, it stays green unchanged; otherwise add `test_strip_meta_count_unchanged_for_complete_series`.
+- Fidelity: extend `wr-serial-count` so the row whose title is 'Failover' has `.ttm-series-row__parts` text '9 chapters'.
+
+Confirm the new integration tests and the fidelity extension fail before the render change.
+**Out of scope:** CSS, the strip and rail meta line, the front page, Serials/SeriesIndex/Query code, seed data.
+**Verification:** curl /writing/ shows Failover '9 chapters · Complete' and Salt Water Wires '24 chapters'; /series/ grid shows the same; / (front page) is byte-for-byte unchanged in the series strip. `npm run test:integration` and `npm run test:e2e` green. Full foundry_verify.
+**Depends on:** none
+
+### R4-03: Test the empty-chapters branch; round-3 cleanups; regenerate screenshots
+**Goal:** Cover R3-02's new `return ''` branch with a test (REVIEW round 3, finding 1). Clear the round-3 readability leftovers (finding 5). Regenerate the phase-3 PNGs after the round-4 fixes.
+**Files touched:** tests/integration/Blocks/SeriesTocTest.php, plugins/ttm-core/blocks/series-toc/render.php, tests/integration/Cli/SeederTest.php, plugins/ttm-core/src/Cli/Seeder.php, docs/HANDOFF.md, docs/feedback/phase-3/writing.png, docs/feedback/phase-3/writing-390.png, docs/feedback/phase-3/series-hub.png, docs/feedback/phase-3/series-single.png
+**Design constraints:** (a) New SeriesTocTest case for series-toc render.php:66-68: a series whose only parts are scheduled (status future), variant chapters. The output must be exactly ''.
+
+(b) series-toc render.php, chapters branch: remove the now-unreachable unpublished `<span class="ttm-numbered__title">` path and its `$ttm_is_published` check in that loop (chapters rows are always published after R3-02). The series variant keeps its F24 behaviour and classes unchanged (rule 46).
+
+(c) tests/integration/Cli/SeederTest.php ~:312-324: delete the stale F2/R1-02 docblock stacked above the R3-03 one, and rename `test_seeded_writing_essays_derive_as_story_but_stay_older_than_the_last_cron_job` to reflect what it asserts (e.g. `test_seeded_writing_essays_are_locked_articles_and_last_cron_job_stays_first`). Do not weaken its assertions.
+
+(d) Seeder.php: drop `ALLOWED_FORMS` and validate against `\TTM\Core\Meta\PostMeta::FORMS`. Fix the docblock's non-existent 'SPEC §5.2' citation. `normalize_form()` stays pure; its unit test stays green unchanged.
+
+(e) docs/HANDOFF.md:114: Field Guide `days_ago` is 410, not 260. Correct the round-3 Measurements note (~:508) that credits the earlier flag to River.
+
+(f) After the other two fix tasks have landed, run `npm run env:cli -- ttm seed --reset` then `npm run screenshots`, and commit every changed PNG under docs/feedback/phase-3/. Add a Round 4 section to docs/HANDOFF.md.
+
+Never stage FOUNDRY_FEEDBACK.md. Restore ttm-theme if any test switches themes. Never run two test:integration at once.
+**Acceptance tests:** - New `SeriesTocTest::test_chapters_variant_with_no_published_parts_renders_nothing`. Confirm it fails with the `return ''` guard removed, then passes with it restored.
+- Existing SeriesTocTest, SeederTest (integration and unit) and wr-chapter-* rows stay green.
+**Out of scope:** CSS, series-list render, seed fixture content, Meta\Form/Fiction\Serials, the phase-2 screenshot directory. Record any visual issue spotted in the PNGs in HANDOFF; do not fix it.
+**Verification:** `git merge-base --is-ancestor $(git log -1 --format=%H -- themes/ttm-theme plugins/ttm-core docs/fixtures/seed) $(git log -1 --format=%H -- docs/feedback/phase-3)` exits 0. `grep -n ALLOWED_FORMS plugins/ttm-core/src/Cli/Seeder.php` is empty. `npm run test:integration` and `npm run test:e2e` green. Full foundry_verify.
+**Depends on:** none

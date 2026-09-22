@@ -1,197 +1,225 @@
-# Review: phase 3 (inner-template fidelity), round 2 fixes
+# Review: phase 3 (inner-template fidelity), round 3 fixes
 
-Round: 2
+Round: 3
 
-Branch `refine/2026-09-22`, base `main` (`8c2b228`), head `d0d3a3f`. 53 tasks, all `[x]`;
-0 blocked, 0 skipped. This pass reviews the two round-2 review-fix tasks (`R2-01`, `R2-02`)
-commit by commit against `## Review fixes (round 2)` in `docs/PLAN.md`. It re-runs every
-suite and the whole-branch constraint sweep. It also adds something the earlier passes did
-not do: a computed-style sweep of the SPEC §6.2–§6.7 values that no §6.9 row asserts,
-checked against the running seeded site and the mock cards.
+Branch `refine/2026-09-22`, base `main` (`8c2b228`), head `47531d9`. 56 tasks, all `[x]`;
+0 blocked, 0 skipped. This pass reviews the three round-3 review-fix tasks (`R3-01`, `R3-02`,
+`R3-03`) commit by commit against `## Review fixes (round 3)` in `docs/PLAN.md`. It re-runs every
+suite and the whole-branch constraint sweep, then compares the regenerated `writing.png` and
+`series-hub.png` with mock `2d` / `1f` and probes the running seeded site to confirm what they
+show.
 
 ## Verdict
 
 **CHANGES REQUESTED**: 3 fix tasks.
 
-Categories 1–3 (constraints, boundaries, tests) are clean for R2-01 and R2-02. Both tasks
-do what PLAN asks, and I proved the new rows bite (details below).
+All three round-3 tasks do what PLAN asks. Their tests exist and bite: I proved it by mutation
+(details below). Categories 1–2 (constraints, boundaries) are clean across the branch.
 
-I am still not approving. The new sweep found **category 5 (spec drift)** defects on the
-screens SPEC §1 says must "match its mock exactly":
+Three things block approval:
 
-- **Wrong content.** The Writing page lists a scheduled chapter under "recent chapters". Its
-  "Short fiction" tiles show two non-fiction essays in place of two of the four stories
-  SPEC §6.10 names.
-- **Missing values.** About a dozen SPEC-stated values are absent from the article, journal,
-  hub and Writing screens. The most visible: the paragraph after the article's code block
-  sits flush against it (0px; the mock has 22px).
+- **Category 3 (tests).** R3-02 added a new server-side branch with no test: the chapters variant
+  returns `''` when no chapter is published. You can delete that branch and every suite still
+  passes.
+- **Category 5 (spec drift).** This was visible for the first time in the regenerated
+  `writing.png`, now that the content is right. The series-row right cell sits at the bottom of
+  every `list`/`grid-2` row. The mocks put it at the top.
+- **Category 5 (spec drift).** Complete series read "9 of 9" where SPEC §6.5 says "9 chapters".
+  The Writing page's left column also renders its two lists narrower than the column, because a
+  core flex group sits inside the grid.
 
-None of these is covered by a §6.9 row, which is why the suite is green. Each fix task below
-names the row that would have caught its finding.
+None of the §6.9 rows checks these, which is why the suite is green. Each fix task names the row
+or test that would have caught its finding.
 
 ### What I verified myself
 
-- **Suites, run by me.** `foundry_verify` with R2-01's files passed all eight commands:
+- **Suites, run by me.** `foundry_verify` passed all eight commands, run with every file round 3
+  touched:
   - `composer lint`
-  - `composer test:unit`: 169/169
-  - `npm run lint`: budget 62428/62464, coverage 193/193 with 0 pending, fixme clean
+  - `composer test:unit`: 171/171
+  - `npm run lint`: budget 62463/62464, coverage 193/193 with 0 pending, fixme clean
   - `npm run test:unit`: 39 passed
   - `npm run build`
   - `forbidden-patterns`: clean
-  - `npm run test:integration`: 481/481, 1932 assertions
-  - `npm run test:e2e`: 449 passed
+  - `npm run test:integration`: 484/484, 2039 assertions
+  - `npm run test:e2e`: 451 passed
 
-  The active theme was `ttm-theme` afterwards.
+  The active theme was `ttm-theme` before and after. No phpunit process was left in
+  `tests-cli`.
 - **Constraint sweep, whole branch.** Every check below is clean:
   - no hex literals and no `prefers-color-scheme` in `ttm.css`
-  - `210, 48, 19` absent from the Seeder (rule 45); no lorem in the seed fixtures (rule 39)
+  - `210, 48, 19` absent from the Seeder; no lorem in the seed fixtures
   - `css-coverage-allow.txt` is 0 bytes, and `selectors-allow.txt` has no `pending` line
-  - no `test.fixme(`, `.only(` or `.skip(` in the e2e specs
+  - no `test.fixme(`, `.only(` or `test.skip(` in the e2e specs
   - `dependencies: {}`, and `TTM_CORE_API` is 1
   - nothing under `docs/phase-1/` or `docs/phase-2/` touched; `FOUNDRY_FEEDBACK.md` is not
-    tracked
+    tracked; `stash@{0}` untouched
+  - no backticks left in `posts.json`
+  - the R3-03 ancestry check exits 0
 
-  Round 2 touched only `ttm.css`, `fidelity.spec.mjs`, the PNGs and the docs.
-- **R2-01 mutation.** I reverted `ttm.css` to `925322a^` (the state before R2-01):
-  - `strip-mark`, `strip-meta`, `ar-aside-row` and `hub-grid-dek` **failed** (6≠5, 6≠4, 6≠5
-    and 4≠5).
-  - `wr-serial-row-margins` passed, as its log predicts.
+  Round 3 adds no nonces, no per-visitor calls, no clock calls and no forbidden functions.
+  `Seeder` already imported `Meta\Form`, so the new code crosses no new boundary.
+- **R3-01 mutation.** I restored `ttm.css` to `986c49d^` and ran the twelve extended rows. All
+  12 **failed**:
 
-  I then deleted only the three new `.is-list` overrides. `wr-serial-row-margins` **failed**
-  (5≠6). Restored with `git checkout --`; the tree is clean.
-- **R2-01 cascade.** The new `.ttm-series-list.is-list …` overrides sit after the base rules.
-  No later `@media` rule targets list-row mark/dek/meta, so nothing is shadowed.
-  - The one new `stylelint-disable-next-line no-descending-specificity` guards
-    `.ttm-series-bar .ttm-series-mark`. That rule is in a different context and still
-    renders 0.
-  - The grid-2 mark keeps its own 6px override, as SPEC §6.7 says ("mark margin-top 6").
-  - `/series/hardening-wordpress/`'s "Other series" is `layout=list` (SPEC §6.7), so 6/4/6
-    is correct there too.
-- **R2-02.**
-  - The ancestry check exits 0.
-  - I ran `npm run screenshots` again against the current code: 12 of 14 PNGs came out
-    byte-identical to HEAD.
-  - The other two, `archive-security.png` and `archive-390.png`, differ only in the order of
-    two filter chips with tied counts ("cryptography" and "threat-modeling"). That comes
-    from `Query\Stats::top_tags()` using `ORDER BY cnt DESC` with no tiebreak. The code is
-    pre-existing and untouched by this flight; see observation O1.
-  - I restored the PNGs, so the committed set does reflect the code.
+  | Row | Expected | Received |
+  |---|---|---|
+  | `art-pre` | 22 | 0 |
+  | `art-pull` | 36 | 32 |
+  | `js-link` | 12 | 11 |
+  | `wr-stats` | 13 | 12 |
+  | `wr-chapter-dek` | 400 | 600 |
+  | `wr-chapter-date` | 400 | 600 |
+  | `wr-tiles` | 16 | 0 |
+  | `wr-books` | 16 | 0 |
+  | `wr-book-title` | 2 | 12 |
+  | `hub-meta` | 0 | 12 |
+  | `hub-buttons` | 10 | 12 |
+  | `hub-all-head` | 12 | 11 |
+
+  Restored the file.
+- **R3-01 probe.** Computed styles at 1280 on the seeded site:
+  - The gap between the first `pre` and the next `p` is 22px.
+  - The pull quote's margins are 36/36px and its letter-spacing is −0.42px.
+  - At 390, the phone `pre` keeps its −20px inline margins and still has a 22px bottom margin.
+  - `.ttm-series-featured__buttons` gap is 10px on both `/series/` and
+    `/series/hardening-wordpress/`.
+  - The front page carries no `.ttm-stats` and no `.ttm-story-tiles`, so no phase-2 row can
+    move.
+- **R3-02 mutation.** I removed `|| $ttm_is_chapters`:
+  - `SeriesTocTest::test_chapters_variant_excludes_scheduled_parts` **failed**.
+  - `wr-chapter-first` **failed** ("A" ≠ "SPAN").
+
+  Restored. On the live site, `/writing/` now lists chapters 12, 11, 10 and 09 beside "All 12".
+- **R3-03 mutation.**
+  - I disabled the `form` override in `Seeder`. The updated essays test and
+    `test_writing_short_fiction_is_the_four_spec_stories_in_mock_order` **failed**.
+  - I set River's `days_ago` back to 260 and restored the backticks. The four-story test and
+    `test_no_seeded_excerpt_contains_a_backtick` **failed**.
+
+  Both restored. The live `/writing/` tiles are The Last Cron Job, A Field Guide to Empty
+  Offices, Uptime (image tile) and What the River Audits.
+- **Screenshots.** I ran `npm run screenshots` again against the current code. All 14 PNGs came
+  out byte-identical to HEAD.
 
 ---
 
 ## Findings
 
-Most severe first. All are category 5 (spec drift). There are no category 1–4 findings.
+Most severe first.
 
-### 1. [Spec drift] Writing "recent chapters" lists a scheduled chapter first (fix task 2)
+### 1. [Tests] The new empty-chapters branch has no test (fix task 3)
 
-`plugins/ttm-core/blocks/series-toc/render.php:50-60`. In the `chapters` variant, the
-renderer sorts and slices all of `$ttm_row['parts']`. For a closed series (The Quiet Ledger
-has 31 total parts) that includes scheduled parts: only open-ended series are filtered to
-published (`:51`).
+`plugins/ttm-core/blocks/series-toc/render.php:66-68`. R3-02 made
+`if ( $ttm_is_chapters && ! $ttm_rows ) return '';` reachable. That happens when the active serial
+has no published chapter yet, for example a new serial whose chapter 1 is scheduled.
 
-On the seeded `/writing/`, the first row is `13 · Chapter 13 · Sept 28`. That chapter is
-scheduled; it renders unlinked, in ink at 800, with no dek, and pushes chapter 9 off the
-list. The heading beside it says "All 12".
+HANDOFF lists this branch as an interpretation choice, and the choice itself is right: 06's
+governing rule and rules 25 and 46 forbid empty wrappers. But no test exercises it. Deleting the
+three lines leaves every suite green, and the block would then render a heading plus an empty
+`<ol>`.
 
-- Mock `2d` (lines 1150–1155) and `02 §D` ("recent chapters … newest first, 4 items, dek
-  line from chapter excerpt") show chapters 12, 11, 10 and 09: the published chapters.
-- The F24 treatment (neutral-700 with `title="Scheduled …"`) is not applied either.
+- **Rule:** CLAUDE.md "every `ttm/*` block … empty → `''`, a test in `tests/integration/Blocks/`".
+- **Minimal fix:** add `SeriesTocTest::test_chapters_variant_with_no_published_parts_renders_nothing`.
 
-**What breaks:** SPEC §1 "Done" for `/writing/`. A reader sees a chapter that does not exist
-yet at the top of "recent chapters".
+### 2. [Spec drift] The series-row count/status cell sits at the bottom of the row (fix task 1)
 
-**Why green:** `wr-chapter-*` assert only style. `SeriesTocTest::test_chapters_variant_newest_first_limited_with_dek`
-seeds only published parts.
+`themes/ttm-theme/assets/css/ttm.css:1759`. `.ttm-series-row__count` sets `grid-column: 3` but no
+row. Its row also contains a title, dek and meta/categories as separate grid children, so
+auto-placement puts the count in the **last** row.
 
-**Minimal fix:** in the chapters variant, filter `$ttm_rows` to `'publish' === status`
-before the sort and slice. The `series` variant keeps its F24 scheduled rows.
+Measured at 1280, the count's top sits this far below the title's top:
 
-### 2. [Spec drift] "Short fiction" shows two essays; two SPEC §6.10 stories are missing (fix task 3)
+- `/writing/` `list`: 88px and 68px
+- `/series/` `grid-2`: 102, 109, 23, 23, 69 and 69px
+- `/series/hardening-wordpress/` "Other series": 88, 23, 23 and 68px
 
-Seeded `/writing/` tiles: The Last Cron Job, "On finishing a draft you no longer believe in"
-(240 words), "Outlining for people who hate outlines" (251 words), and Uptime.
+In mocks `2d` (line 494) and `1f` (line 1015), the count is the row's third child in
+`align-items:start`, so it sits top-right, level with the title. SPEC §6.5 and §6.7 say
+"align start … right cell count over status". `writing.png` and `series-hub.png` show the
+difference plainly.
 
-- SPEC §6.10 and mock `2d` (lines 1157–1161) name the four stories as The Last Cron Job,
-  A Field Guide to Empty Offices, Uptime and What the River Audits.
-- The two essays in `docs/fixtures/seed/posts.json:459-479` sit in `writing` with no series.
-  `Meta\Form::derive()` therefore classes them `story`.
-- They are newer than Field Guide (`days_ago` 410) and River (260), so they take two of the
-  four slots in `Fiction\Serials::stories()`.
-- The phase-2 test `SeederTest::test_seeded_writing_essays_derive_as_story_but_stay_older_than_the_last_cron_job`
-  only protects the front page's single "Also running" story.
-- The mock's order also puts Field Guide (2025) second and Uptime and River as older
-  (2024, 2023). The seed has Field Guide oldest.
-- Smaller, same file (`:501`): part 1's manual excerpt uses markdown backticks
-  (``Most `wp-config.php` files…``). They render as literal backticks on
-  `/series/hardening-wordpress/` and `/category/security/`, where excerpts are plain text.
+- **Why green:** `wr-serial-count` and `hub-grid-row` check text-align, text and tracks, never
+  position.
+- **Minimal fix:** give the count cell `grid-row: 1 / span 3` (or equivalent) so it starts in the
+  title's row. CSS only.
 
-**Minimal fix:** seed-only; the content model is a non-goal. Give the two essays a locked
-non-story form through a Seeder fixture field (`ttm_form` + `ttm_form_locked`). Set Uptime's
-and River's `days_ago` so the order is Cron (2026), Field Guide (2025), Uptime (2024),
-River (2023). Remove the backticks.
+### 3. [Spec drift] The Writing left-column lists don't fill the 7fr column (fix task 1)
 
-### 3. [Spec drift] SPEC §6.2/§6.4/§6.5/§6.7 values still missing (fix task 1)
+`themes/ttm-theme/templates/page-writing.html:11,39`. `main` and `aside` are core
+`layout: {type: flex, orientation: vertical}` groups. Core emits `align-items: flex-start` for
+these, so each child shrinks to its content width. Measured at 1280, inside a 653px `main`:
 
-These are measured with computed styles at 1280 on the seeded site. The "SPEC / mock" column
-cites the SPEC section and the mock card line that states the value.
+- the All-serials list is 466px wide (48..514)
+- the recent-chapters list is 535px wide (48..583)
 
-| Screen | Element | Rendered | SPEC / mock |
-|---|---|---|---|
-| article | `.entry-content pre` margin-bottom (`ttm.css:592`) | 0, next `<p>` touches it | mock 2b `<pre style="margin:0 0 22px">` |
-| article | `.is-style-pull` margin (`:611-621`) | 32px (`spacing--60`) | §6.2 "margins 36", mock `margin:36px 0` |
-| article | `.is-style-pull` letter-spacing | normal | §6.2 "28/800/1.25/−0.015em" |
-| journal | `.ttm-journal-stream .ttm-cell-heading__link` | 11px | §6.4 "12px neutral-700", mock `font-size:12px` |
-| hub | `.ttm-hub-all .ttm-cell-heading__link` | 11px | §6.7 "12px neutral-700" |
-| hub | `.ttm-series-progress__meta` margin (`:2716`) | 12px 0 12px | §6.7 "margin 0 0 18" |
-| hub | `.ttm-series-featured__buttons` gap (`:2996`) | 12px | §6.7 "flex gap 10" |
-| writing | `.ttm-stats__label` (`:2939`) | 12px | §6.5 stat row "13px neutral-700", mock `font-size:13px` |
-| writing | `.ttm-story-tiles` padding-top (`:2835`) | 0 | §6.5 "padding-top 16" |
-| writing | `.ttm-book-grid` padding-top (`:2896`) | 0 | §6.5 "padding-top 16" |
-| writing | `.ttm-book__meta` margin-top (`:2913`) | 12px | §6.5 "margin-top 2" |
-| writing | chapters `__dek`/`__date` font-weight | 600 (inherited from `.ttm-numbered__row`) | mock 2d rows set no weight (400) |
+Mock `2d` line 486 is a plain `display:flex;flex-direction:column;gap:36px` column, which
+stretches its children. The mock's right cells line up at the column edge (x≈703). In the build
+the two lists end at different x positions, and the count cells drift inward.
 
-**Why green:** the §6.9 rows for these elements assert other properties:
+This predates the flight (`4e7ac83`, P6-05). SPEC §3.1 extended rule 36 says "column children
+are `layout: default` (or `flow`) and `ttm.css` owns their width", so the flight should have
+converted these groups. The CLAUDE.md constraint line only names `constrained`, which is why the
+sweep never caught it.
 
-- `art-pre`: bg, border, padding
-- `art-pull`: size, weight, indent
-- `js-link`, `hub-all-head`: text
-- `hub-meta`: size, text
-- `hub-buttons`: count, texts
-- `wr-stats`: tracks, rule, padding
-- `wr-tiles`, `wr-books`: tracks, gap
-- `wr-book-title`: title only
+- **Why green:** no row measures child width against the column.
+- **Minimal fix:**
+  - Make both groups `layout: default`.
+  - In `ttm.css`, give `.ttm-writing-body > main` and `.ttm-writing-body > aside`
+    `display: flex; flex-direction: column` with the existing gaps; children stretch by default.
+  - Keep the ≤1024 `display: contents` fold, which comes later in source order and still wins.
 
-HANDOFF's reviewer notes name the chapters dek/date as dropped under budget. R1-06
-restored their size and colour but not their weight.
+### 4. [Spec drift] Complete series show "N of N" instead of "N chapters" / "N parts" (fix task 2)
 
-**Minimal fix:** CSS only, scoped so no front-page row moves:
-- The 11px `.ttm-cell-heading__link` base is phase 2's front-page value, so scope the change
-  to the journal stream and hub-all.
-- `.ttm-numbered__date` is shared with the 404 "Latest", so scope the weight change to
-  `.ttm-series-toc.is-chapters`.
+`plugins/ttm-core/blocks/series-list/render.php:129-141`. Whenever `ttm_total_parts > 0`, the
+right cell's `__parts` text is "%1$d of %2$d". So Failover reads "9 of 9" and Salt Water Wires
+reads "24 of 24" on `/writing/`, `/series/` and the single-series "Other series".
 
-Extend the rows listed in fix task 1.
+- SPEC §6.5 says the right cell is `"12 of 31" / "9 chapters" over status`.
+- Mock `2d` lines 1195–1196 show "9 chapters" and "24 chapters".
+- Mock `1f` lines 1131–1134 show complete nonfiction series as "4 parts", "5 parts", and so on.
+
+- **Why green:** `wr-serial-count` checks only the first row (in progress) against
+  `/^\d+ of \d+/`.
+- **Minimal fix:** in the `list`/`grid-2` right cell only, a complete series renders
+  "{published} chapters" for fiction forms and "{published} parts" for nonfiction, pluralised
+  with `_n`. Leave the `strip`/`rail` meta string (`$ttm_count_word`) alone, because the front
+  page's strip must not move (SPEC §2).
+
+### 5. [Readability] Round-3 leftovers (fix task 3)
+
+- `tests/integration/Cli/SeederTest.php:312-324`: two stacked docblocks. The first (F2, R1-02)
+  now describes the opposite of what the test asserts. The method is still named
+  `…_derive_as_story_…` although it now asserts `article` + locked.
+- `plugins/ttm-core/src/Cli/Seeder.php:23-27`: `ALLOWED_FORMS` duplicates
+  `Meta\PostMeta::FORMS`, and its docblock cites "SPEC §5.2", which does not exist in this SPEC.
+  Use `PostMeta::FORMS` so the two lists cannot drift apart.
+- `plugins/ttm-core/blocks/series-toc/render.php`, chapters branch: the unpublished `<span>`
+  title path (`else` at ~:134) can no longer run now that chapters are filtered to published.
+- `docs/HANDOFF.md:114` still says Field Guide has `days_ago: 260`; the fixture says 410. The
+  round-3 Measurements note (:508) credits the earlier flag to River.
 
 ---
 
 ## Observations (not queued)
 
-- **O1.** `plugins/ttm-core/src/Query/Stats.php:143` has no tiebreak in `top_tags()`, so
-  chips with equal counts can swap between reseeds. The page is cached, so this is not a
-  per-visitor variance. The code predates the flight and the owner may want a `t.name`
-  tiebreak later.
-- **O2.** The 404 H1 sits directly under the masthead rule: `main` has no top padding, while
-  every other inner header has 40px. SPEC `02 §H` does not state a value, so I am not
-  queuing it. Listed as a manual check.
-- **O3.** HANDOFF's Measurements paragraph says Field Guide has `days_ago: 260`; the fixture
-  says 410. Fix task 3 changes these dates anyway.
+- **O1.** Seeded story word counts beyond SPEC §6.10's two named ones differ from mock `2d`.
+  What the River Audits shows "725 words · 2023"; the mock has 4,400. Uptime is an image tile,
+  so it shows no meta. The Writing stat shows "~12 min" (HANDOFF: `avg_minutes` 12), where §6.5's
+  example and the mock say "~14 min". SPEC §6.10 does not state these numbers, so the owner can
+  decide whether the seed should match the mock's copy exactly.
+- **O2.** Round 2's O1 (`Stats::top_tags()` has no tiebreak) and O2 (404 H1 top spacing) are
+  still open and still owner calls.
 
-## Interpretation choices (HANDOFF round 2)
+## Interpretation choices (HANDOFF round 3)
 
-- **R2-01** placement of the `stylelint-disable-next-line` comment. Agreed; it matches the
-  file's convention and the flagged rule is unaffected.
-- **R2-02** none.
+- **R3-01**, closing the budget gap by shortening comments rather than raising `cssBudgetBytes`:
+  agreed. PLAN allowed it, and I read every trimmed comment; none lost information. Fix task 1
+  will need the raise, because only 1 byte of headroom is left.
+- **R3-02**, the empty-chapters `return ''`: agreed on the behaviour. The missing test is
+  finding 1.
+- **R3-03**, the pure `Seeder::normalize_form()` with a unit test, and `days_ago` 700/1090:
+  agreed. Both land well inside their target years. Reuse `PostMeta::FORMS` (finding 5).
 
 ## Blocked and skipped tasks
 
@@ -201,47 +229,50 @@ None.
 
 ## Spec issues
 
-Carried forward from the previous review, all still open and each needing an owner ruling:
+Carried forward, each still needing an owner ruling:
 
-1. Rule 34 has no sanctioned home for identity-only block wrappers. R1-10 shipped the
-   `UNSTYLED_WRAPPERS` list inside `scripts/check-css-coverage.mjs`. The options are:
-   - exempt `data-ttm-block` wrappers by rule;
-   - permit `# hook` lines;
-   - require a real rule.
+1. Rule 34 has no sanctioned home for identity-only block wrappers (the `UNSTYLED_WRAPPERS`
+   list in `scripts/check-css-coverage.mjs`).
 2. SPEC §6.1.0 "one or the other" was resolved a third way (root padding kept and
    neutralised).
 3. The `# state:` reason category in `selectors-allow.txt`.
 4. §6.9 rows that cannot fail on SPEC's own wording (`wr-serial-form`'s `/i`).
 5. Hub, TOC, chapter and 404 part-number zero-padding (mock 1f is templated).
 6. `ValuesTest`'s impossible `month && year` archive-kind state.
-7. New: §6.9 asserts a subset of each component's SPEC prose. This review found 12
-   prose values with no row that had silently drifted. SPEC could require one row per
-   prose value, or the owner accepts that prose values are checked only visually.
+7. §6.9 asserts a subset of each component's SPEC prose. This round's findings 2–4 are again
+   prose/mock values that no row read.
+8. New: CLAUDE.md's rule-36 constraint line forbids only `constrained` groups inside grids.
+   SPEC §3.1 also limits column children to `default`/`flow`. The constraint line should quote
+   SPEC so the next sweep catches `flex` column groups (finding 3).
 
 ## Manual checks still owed
 
-Copied from `docs/HANDOFF.md`, all `NOT VERIFIED (human)`. The PNGs are current as of R2-02,
-but `writing.png`, `article.png` and `series-hub.png` will change again after the fix tasks
-below and must be regenerated.
+Copied from `docs/HANDOFF.md`, all `NOT VERIFIED (human)`. `writing.png`, `writing-390.png`,
+`series-hub.png` and `series-single.png` will change again after the fix tasks and must be
+regenerated.
 
 1. (P0-12) `article.png` masthead vs the top of `design_article.png`: a centred 1280 column,
    inline nav, no "Close".
 2. (P1-07) `article.png` vs `design_article.png`; `article-390.png` vs mock `3b`.
 3. (P2-04) `journal.png` vs `design_journal.png`.
-4. (P3-06) `archive-security.png` vs mock `1e`; `search.png` and `404.png` vs `02 §H` (see O2).
+4. (P3-06) `archive-security.png` vs mock `1e`; `search.png` and `404.png` vs `02 §H`.
 5. (P4-07) `series-hub.png` vs mock `1f`; `writing.png` vs `design_serial.png`;
    `series-single.png` vs `02 §F`.
 6. (P5-01/P5-05) Open `/signing-your-options-table/`, `/journal-post-1/`, `/writing/` and
    `/category/security/` at 390 on a real phone and compare with `3b` and the `02` Responsive
    bullets.
-7. (P5-05) Compare every `docs/feedback/phase-3/*.png` with its paired mock, and confirm CI
-   is green, including the `e2e` job and its `playwright-report` artifact.
-8. (Round 1) Search rows, prior-year archive rows and the Writing serial meta line against
-   their mocks; exactly two books in "In print"; newsletter box copy at 13px.
-9. (Round 2, HANDOFF) The front page, `/writing/`, a category archive and `/series/` against
-   their mocks now that the strip, rail and grid-2 margins are restored.
-10. (Previous review) `series-single.png`: the per-part date sits on the dek's baseline;
-    confirm against `02 §F`.
-11. (Previous review) Hub part numbering `01`–`06`: owner ruling (Spec issue 5).
-12. `git stash list` shows `stash@{0}: On poc: temp: stash foundry feedback notes before run
+7. (P5-05) Compare every `docs/feedback/phase-3/*.png` with its paired mock, and confirm CI is
+   green, including the `e2e` job and its `playwright-report` artifact.
+8. (Round 1) Search rows, prior-year archive rows and the Writing serial meta line against their
+   mocks; exactly two books in "In print"; newsletter box copy at 13px.
+9. (Round 2) The front page, `/writing/`, a category archive and `/series/` against their mocks
+   now that the strip, rail and grid-2 margins are restored.
+10. (Round 3) `/writing/` against mock `2d`: the four stories in order, and no scheduled chapter
+    at the top of "recent chapters".
+11. (Round 3) `/signing-your-options-table/` and `/category/security/`: `wp-config.php` reads
+    without literal backticks.
+12. (Previous review) `series-single.png`: the per-part date sits on the dek's baseline; confirm
+    against `02 §F`.
+13. (Previous review) Hub part numbering `01`–`06`: owner ruling (Spec issue 5).
+14. `git stash list` shows `stash@{0}: On poc: temp: stash foundry feedback notes before run
     start`. This is the owner's stash; leave it for the owner.
