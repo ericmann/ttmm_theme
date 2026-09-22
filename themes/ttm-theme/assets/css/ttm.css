@@ -43,7 +43,7 @@
 
 /* 0.2 page container */
 
-/* Rule 42: 1280, gutter0 */
+/* Rule 42: the page is a 1280px centred column with the desktop gutter as inline padding. */
 .wp-site-blocks {
 	max-width: 1280px;
 	margin-inline: auto;
@@ -509,7 +509,7 @@ a.tag {
 	aspect-ratio: 16 / 9;
 }
 
-/* :where() img; wins */
+/* :where() keeps this selector's specificity at zero, so core's own img rules still win. */
 .ttm-article :where(.wp-block-post-featured-image) img {
 	width: 100%;
 	height: 100%;
@@ -934,7 +934,7 @@ blockquote.is-style-pull cite,
 	border-bottom: var(--ttm-rule-2);
 }
 
-/* §6.1.5: 12,not11. */
+/* SPEC §6.1.5: this link is 12px (the caption size), not the 11px used elsewhere on the rail. */
 .ttm-cell-heading.is-rail .ttm-cell-heading__link {
 	font-size: var(--wp--preset--font-size--caption);
 }
@@ -1049,7 +1049,7 @@ blockquote.is-style-pull cite,
 	gap: var(--wp--preset--spacing--60);
 }
 
-/* Poster 28->40, revert */
+/* This heading is the featured size (40px), overriding the h3 default of 28px. */
 /* stylelint-disable-next-line no-descending-specificity */
 .ttm-poster h3.is-style-poster {
 	margin: 0;
@@ -1284,7 +1284,8 @@ blockquote.is-style-pull cite,
 	gap: var(--wp--preset--spacing--60);
 }
 
-/* 02 §A: 8/4>900,then1024. */
+/* 02 §A: between 901 and 1024px, the 8/4 lead row tracks get minmax(0, …) so neither
+   column overflows before the layout folds fully below 901px. */
 @media (max-width: 1024px) and (min-width: 901px) {
 
 	.ttm-lead-row {
@@ -1614,7 +1615,7 @@ blockquote.is-style-pull cite,
 	display: inline-block;
 	width: 10px;
 	height: 10px;
-	margin-top: 5px;
+	margin-top: 6px;
 }
 
 .ttm-series-mark.is-in-progress {
@@ -1683,7 +1684,7 @@ blockquote.is-style-pull cite,
 
 .ttm-series-row__meta {
 	grid-column: 2;
-	margin-top: var(--wp--preset--spacing--10);
+	margin-top: 6px;
 	font-size: var(--wp--preset--font-size--caption);
 	color: var(--wp--preset--color--neutral-700);
 	font-feature-settings: "tnum";
@@ -1716,7 +1717,7 @@ blockquote.is-style-pull cite,
 
 .ttm-series-row__dek {
 	grid-column: 2;
-	margin-top: 5px;
+	margin-top: 4px;
 	font-size: 14px;
 	line-height: 1.45;
 	color: var(--wp--preset--color--neutral-800);
@@ -1747,6 +1748,8 @@ blockquote.is-style-pull cite,
 	text-align: right;
 	font-size: var(--wp--preset--font-size--caption);
 	line-height: 1.5;
+	color: var(--wp--preset--color--neutral-700);
+	font-feature-settings: "tnum";
 }
 
 .ttm-series-row__parts {
@@ -2277,7 +2280,7 @@ ul.modern-footnotes-list,
 		font-size: 16px;
 	}
 
-	/* 3b: k11,H1 34,dek17,b12 */
+	/* Mock 3b, phone article head: kicker 11px, h1 34px, dek 17px, byline 12px. */
 	.ttm-article-head .is-style-kicker {
 		font-size: var(--wp--preset--font-size--micro);
 	}
@@ -2778,6 +2781,7 @@ main.is-style-grid-8-4 h1 {
 	grid-template-columns: 44px 1fr auto;
 	gap: 0 16px;
 	padding: 12px 0;
+	align-items: baseline;
 }
 
 .ttm-series-toc.is-chapters .ttm-numbered__num {
@@ -2792,10 +2796,20 @@ main.is-style-grid-8-4 h1 {
 .ttm-series-toc.is-chapters .ttm-numbered__title {
 	font-size: 17px;
 	font-weight: 800;
+	line-height: 1.2;
+}
+
+.ttm-series-toc.is-chapters .ttm-numbered__dek {
+	margin-top: 3px;
+	font-size: 13px;
+	color: var(--wp--preset--color--neutral-800);
 }
 
 .ttm-series-toc.is-chapters .ttm-numbered__date {
 	grid-column: 3;
+	font-size: 12px;
+	color: var(--wp--preset--color--neutral-700);
+	font-feature-settings: "tnum";
 }
 
 @media (max-width: 720px) {
@@ -3058,22 +3072,25 @@ main.is-style-grid-8-4 h1 {
 
 .ttm-serial-hero {
 	display: grid;
-	grid-template-columns: 280px 1fr;
+	grid-template-columns: 280px minmax(0, 1fr);
 	gap: 64px;
 	align-items: end;
 	padding: 40px 0;
 }
 
 .ttm-serial-hero__kicker {
-	margin-bottom: 10px;
+	margin: 0 0 12px;
 }
 
 .ttm-serial-hero__title {
+	margin: 0 0 16px -0.04em;
 	max-width: 14ch;
 }
 
 .ttm-serial-hero__synopsis {
 	font-size: 19px;
+	line-height: 1.45;
+	margin: 0 0 20px;
 	color: var(--wp--preset--color--neutral-800);
 	max-width: 48ch;
 }
@@ -3084,8 +3101,8 @@ main.is-style-grid-8-4 h1 {
 
 .ttm-serial-hero__buttons {
 	display: flex;
-	gap: var(--wp--preset--spacing--30);
-	margin: var(--wp--preset--spacing--30) 0;
+	gap: 10px;
+	margin: 0 0 22px;
 }
 
 @media (min-width: 1200px) {
@@ -3185,5 +3202,9 @@ main.is-style-grid-8-4 h1 {
 
 	.ttm-story-tiles {
 		grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+	}
+
+	.ttm-stats__value {
+		font-size: 16px;
 	}
 }

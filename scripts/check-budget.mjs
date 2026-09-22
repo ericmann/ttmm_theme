@@ -27,8 +27,12 @@
 // remaining templates (article, journal, archives, series hub, Writing);
 // no CSS added by this task. 61440 is the ⚠️ ASSUMPTION default and lives
 // only here and in CLAUDE.md; a later phase may tune it down in P5-03.
+// R1-06: ttm.css shipped at 61439/61440 -- one byte of headroom -- which had
+// forced several SPEC/PLAN-named declarations to be dropped to fit. Raised
+// to 62464 (the next 1024 multiple above 61439) to restore them with real
+// headroom. The number lives only here and in CLAUDE.md.
 import { statSync, existsSync } from 'node:fs';
-const cssBudgetBytes = 61440;
+const cssBudgetBytes = 62464;
 const file = 'themes/ttm-theme/assets/css/ttm.css';
 if ( ! existsSync( file ) ) {
 	console.error( `${ file } missing` );

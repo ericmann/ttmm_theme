@@ -1715,6 +1715,14 @@ test.describe( 'writing', () => {
 		expect( await computed( el, 'column-gap' ) ).toBe( px( 64 ) );
 		expect( await computed( el, 'align-items' ) ).toBe( 'end' );
 		expect( await computed( el, 'padding' ) ).toBe( '40px 0px' );
+		// minmax(0, 1fr) on the second track: it resolves to the remaining space (not the
+		// cover column's own intrinsic min) and the row never overflows its container.
+		expect( t[ 0 ] ).toBeCloseTo( 320, 0 );
+		expect( t[ 1 ] ).toBeLessThan( 1184 );
+		const overflow = await el.evaluate(
+			( node ) => node.scrollWidth - node.clientWidth
+		);
+		expect( overflow ).toBeLessThanOrEqual( 1 );
 	} );
 
 	test( 'wr-cover: .ttm-serial-hero .ttm-cover @1280', async ( { page } ) => {
@@ -1732,6 +1740,7 @@ test.describe( 'writing', () => {
 		const source = await el.evaluate( ( node ) => node.textContent );
 		expect( source ).toBe( 'Writing · Serial in progress' );
 		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
+		expect( await computed( el, 'margin-bottom' ) ).toBe( px( 12 ) );
 	} );
 
 	test( 'wr-title: .ttm-serial-hero__title @1280', async ( { page } ) => {
@@ -1756,6 +1765,14 @@ test.describe( 'writing', () => {
 		expect( chs ).toBeCloseTo( 14, 0 );
 	} );
 
+	test( 'wr-title-margin: .ttm-serial-hero__title @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page.locator( '.ttm-serial-hero__title' );
+		expect( await computed( el, 'margin-bottom' ) ).toBe( px( 16 ) );
+	} );
+
 	test( 'wr-synopsis: .ttm-serial-hero__synopsis @1280', async ( {
 		page,
 	} ) => {
@@ -1763,6 +1780,8 @@ test.describe( 'writing', () => {
 		const el = page.locator( '.ttm-serial-hero__synopsis' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 19 ) );
 		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-800' ) );
+		expect( await computed( el, 'line-height' ) ).toBe( px( 27.55 ) );
+		expect( await computed( el, 'margin-bottom' ) ).toBe( px( 20 ) );
 		// getComputedStyle resolves ch to px: measure one "0" in the paragraph's font.
 		const chs = await el.evaluate( ( node ) => {
 			const cs = window.getComputedStyle( node );
@@ -1800,6 +1819,9 @@ test.describe( 'writing', () => {
 		expect( await btns.nth( 2 ).getAttribute( 'class' ) ).toMatch(
 			/btn-ghost/
 		);
+		const container = page.locator( '.ttm-serial-hero__buttons' );
+		expect( await computed( container, 'column-gap' ) ).toBe( px( 10 ) );
+		expect( await computed( container, 'margin-bottom' ) ).toBe( px( 22 ) );
 	} );
 
 	test( 'wr-stats: .ttm-serial-hero .ttm-stats @1280', async ( { page } ) => {
@@ -1918,6 +1940,7 @@ test.describe( 'writing', () => {
 			.first();
 		expect( await computed( el, 'text-align' ) ).toBe( 'right' );
 		expect( await text( el ) ).toMatch( /^\d+ of \d+/ );
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
 	} );
 
 	test( 'wr-serial-status: .ttm-series-list.is-list .ttm-series-row__status (first) @1280', async ( {
@@ -1978,6 +2001,30 @@ test.describe( 'writing', () => {
 			.first();
 		expect( await computed( el, 'font-size' ) ).toBe( px( 17 ) );
 		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
+		expect( await computed( el, 'line-height' ) ).toBe( px( 20.4 ) );
+	} );
+
+	test( 'wr-chapter-dek: .ttm-series-toc.is-chapters .ttm-numbered__dek (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page
+			.locator( '.ttm-series-toc.is-chapters .ttm-numbered__dek' )
+			.first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 13 ) );
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-800' ) );
+		expect( await computed( el, 'margin-top' ) ).toBe( px( 3 ) );
+	} );
+
+	test( 'wr-chapter-date: .ttm-series-toc.is-chapters .ttm-numbered__date (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const el = page
+			.locator( '.ttm-series-toc.is-chapters .ttm-numbered__date' )
+			.first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
 	} );
 
 	test( 'wr-tiles: .ttm-story-tiles @1280', async ( { page } ) => {
@@ -2058,6 +2105,12 @@ test.describe( 'writing', () => {
 		expect( t.length ).toBe( 1 );
 		const title = page.locator( '.ttm-serial-hero__title' );
 		expect( await computed( title, 'font-size' ) ).toBe( px( 40 ) );
+	} );
+
+	test( 'wr-stat-value-phone: .ttm-stats__value @390', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.writing, 390 );
+		const el = page.locator( '.ttm-stats__value' ).first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 16 ) );
 	} );
 
 	test( 'wr-body-layout: .ttm-writing-body descendants @1280 (rule 36)', async ( {
