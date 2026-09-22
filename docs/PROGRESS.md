@@ -9,7 +9,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P0-04 Fidelity rows for every §6.9 row as tagged fixme
 - [x] P0-05 Seed images per rule 45, author display name, book and About covers
 - [x] P0-06 Tuning — `seed.image_band_angle`
-- [ ] P0-07 Seed — the `2b` article and the Hardening WordPress series
+- [x] P0-07 Seed — the `2b` article and the Hardening WordPress series
 - [ ] P0-08 Seed — journal, Writing, Security archive and series hub copy
 - [ ] P0-09 Page container (rule 42) and the `container-*` rows
 - [ ] P0-10 Inner masthead and phone-only overlay nav (rule 43, §6.1.1)
@@ -71,3 +71,6 @@ image()/cover() rewritten: FIELD/BAND/BORDER/COVER/COVER_TEXT const [r,g,b] arra
 
 ### P0-06 — dde1fca
 Measured seed.image_band_angle at 15/30/45 via a temporary wp-content/mu-plugins/ttm-band-angle.php (ttm_config filter reading an env var), reseeding between each and sampling the generated ttm-thumb PNG (About page thumbnail, 800x533) on a 10px grid for BAND-colour pixels: 15deg->22.2%, 30deg->24.3%, 45deg->20.1% of ~4320 sample points. Band stays clearly visible at all angles; kept default 30, Config.php unchanged. Note: cover() (from P0-05) never draws a band, only image() does, so the task's "ttm-cover 2:3 crop" band check doesn't apply to the actual implementation -- confirmed by a full-image scan of the-quiet-ledger-cover.png (0% band pixels at every angle, as expected since cover() has no band by design). mu-plugin and temp measurement scripts removed from the container afterward; git status clean (nothing container-only was ever in the working tree). Empty commit (no Config.php change) with Measurement in the body.
+
+### P0-07 — 238b9b0
+posts.json: signing-your-options-table gained categories+security, tags [wordpress,php,integrity], updated excerpt, full mock content (2 h2, code block, is-style-pull quote, one inline link to /hardening-part-2-salts-and-keys/), paragraphs 82 (word count 3113, 14 min), caption field. Added 3 new posts: hardening-part-4-keys-in-the-environment (published, days_ago 0), hardening-part-5-the-admin-with-the-weak-password (future, days_ago -5), hardening-part-6-incident-when-the-alarm-fires (future, days_ago -12), each with part_title. series.json: hardening-wordpress next_date_days_ahead 6->5, featured:true, parts array +4/5/6. Seeder.php: seed_posts() caption row field -> wp_update_post(post_excerpt) on the featured_image attachment; seed_series() featured row field -> update/delete_term_meta('ttm_featured') (idempotent). 5 new SeederTest methods; updated test_seeded_strip_series_are_in_progress_with_totals's hardening-wordpress published count 3->4 (real change, not regression). Full test:integration 435/435, fidelity.spec.mjs phase-2 rows 78/78 (lead still part 3). Known pre-existing CSS bug surfaced (see commit body): .entry-content code/pre selector conflict causes low-contrast text in the new core/code block on screens.spec.mjs's article screen only -- left alone (out of scope: any theme change); should self-resolve when P1-02 renames to .ttm-entry, flagged for reviewer otherwise.
