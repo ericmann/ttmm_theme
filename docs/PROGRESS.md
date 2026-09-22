@@ -26,7 +26,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P2-01 Lead story CSS and markup per §6.1.3
 - [x] P2-02 Verse box per §6.1.4
 - [x] P2-03 Journal excerpt hard cap and `ttm/category-count` entries format
-- [ ] P2-04 Journal rail per §6.1.5
+- [x] P2-04 Journal rail per §6.1.5
 - [ ] P2-05 Tuning — `journal.excerpt_max_words`
 - [ ] P2-06 Phase 2 push — lead row screenshots
 - [ ] P3-01 Section rows, cells, cell headings and headline items per §6.1.6
@@ -293,3 +293,30 @@ FrontSourcesTest link-vs-text test; JournalExcerptTest max-words-cap
 test. README documents both journal.excerpt_* keys. All verify commands
 green (composer lint, test:unit 142/142, npm lint, forbidden-patterns,
 test:integration 409/409, test:e2e full suite 0 failed).
+
+### P2-04 — cb1c343
+journal-rail.php: heading h3->h2 (a11y level, same label look); link
+format 'short'->'entries' (now a real link via P2-03's category-count
+change); dropped post-excerpt's excerptLength:40 so core's 55-word
+default applies (Decision "Journal rail excerpt").
+
+ttm.css: removed the is-rail label override (shared 12px base already
+matched spec; was wrongly forced to 11px); added is-rail-only
+.ttm-cell-heading__link override to 12px (shared default stays 11px for
+other, not-yet-built consumers). New rail entry/title/excerpt/read-more
+rules per §6.1.5 (padding 16 0 + 1px rule incl. last; h4 16/800/1.25;
+excerpt 14/1.5/neutral-800; "Continue →" 12/600/accent-700/8px
+margin-top); <=720 nth-child(n+3) hidden. Fixed date's margin (was 4px
+via wrong token, needs literal 6px) + added missing tnum. Trimmed
+several older verbose comments elsewhere in the file to stay under the
+CSS budget (now ~270 bytes headroom -- worth flagging for the future
+CSS-budget task). Removed journal-rail from css-coverage-allow.txt
+(now-empty line deleted).
+
+New FrontPageTest tests for the entries link and no-hellip marker.
+un-fixme'd all 8 rail-* rows; 4 needed .first() (query now renders 3
+real entries, Playwright throws in strict mode on multi-match
+evaluate()); rail-count-phone needed :visible (markup can't vary per
+viewport, phone hides entry 3 via CSS, plain .count() ignores
+display:none). All verify commands green (test:integration 411/411,
+test:e2e full suite 0 failed).
