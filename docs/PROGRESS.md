@@ -25,7 +25,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P2-01 Journal post header, body column, note column and syndication line (§6.4)
 - [x] P2-02 Journal stream (01 §4.11) with whole-row links and "Full journal · N entries"
 - [x] P2-03 Journal archive (`category-journal.html`)
-- [ ] P2-04 Phase 2 push — journal screenshots
+- [x] P2-04 Phase 2 push — journal screenshots
 - [ ] P3-01 Archive header (01 §4.25) and the `ttm/archive-kind` kicker
 - [ ] P3-02 Filter row (01 §4.26) placed directly, with "All"
 - [ ] P3-03 Archive body — year groups, rows, meta line and pagination (01 §4.27–4.28)
@@ -132,3 +132,8 @@ Manual check: none.
 Tests: aj-rows, aj-no-filter un-fixme'd (fidelity + selectors + all axe screens green). ArchiveTemplatesTest::test_category_journal_renders_stream_rows rewritten (>= 9 anchor rows, title first and unlinked, no filter row, no archive body, no pagination numbers, main.ttm-journal-archive not constrained). phone.spec +"journal post and archive have no horizontal overflow at 390". foundry_verify fully green: unit 160, integration 461/461, e2e 257 passed / 145 skipped, lints clean, budget 56004/61440, 29 pending coverage, 100 tagged fixme.
 Interpretation: the P2-02 row rules scoped under `.ttm-journal-stream` now use `:is(.ttm-journal-stream, .ttm-journal-archive)` so the archive shares them; `main` carries `ttm-journal-archive` (padding 0 0 48px), a class the task did not name. `query-pagination-numbers` removed here (previous/next only); pagination CSS stays P3-03's. The rule-2 hr sits between the archive header and main.
 Manual check: none.
+
+### P2-04 — 304c566
+Tests: grep 'P2-' in both allow lists -> 0; grep '// P2-' in fidelity.spec.mjs -> 0. foundry_verify fully green (lint, unit 160, e2e 257 passed / 145 skipped, budget 56004/61440, 29 pending coverage, 100 tagged fixme); SeederTest + SeedStatesTest + SeriesTocTest 47/47 after the fixture change; integration was 461/461 at P2-03 with no PHP changed since. Pushed refine/2026-09-22 (304c566).
+Interpretation: `.is-style-grid-3` is a registered block style, re-tagged `# editor block style (04 §3)` instead of deleted. Flight-controller request (relayed by the orchestrating agent) folded in: docs/fixtures/seed/posts.json `hardening-part-1` retitled "Hardening WordPress, part 1: what a scanner sees — and what it can’t" with part_title "What a scanner sees — and what it can’t" (slug unchanged) so the TOC/hub/single-series read the mock's "01" row; reseeded before the screenshots. 9 of 14 PNGs changed.
+Manual check: NOT VERIFIED (human) — compare docs/feedback/phase-3/journal.png with docs/feedback/design_journal.png (date block left, 36em body, syndication line, "Earlier" stream).
