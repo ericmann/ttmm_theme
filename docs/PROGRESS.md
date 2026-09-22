@@ -28,7 +28,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P2-03 Journal excerpt hard cap and `ttm/category-count` entries format
 - [x] P2-04 Journal rail per §6.1.5
 - [x] P2-05 Tuning — `journal.excerpt_max_words`
-- [ ] P2-06 Phase 2 push — lead row screenshots
+- [x] P2-06 Phase 2 push — lead row screenshots
 - [ ] P3-01 Section rows, cells, cell headings and headline items per §6.1.6
 - [ ] P3-02 Technology cell — inner grid and featured item with image
 - [ ] P3-03 Writing cell per §6.1.6
@@ -339,3 +339,11 @@ being raised (Decision "Journal rail excerpt").
 
 composer test:unit 142/142, npm run test:integration 411/411, both
 green (no source files changed).
+
+### P2-06 — d649863
+Re-seeded and re-ran npm run screenshots; all 7 PNGs regenerated in
+docs/feedback/phase-2/. Pushed to refine/2026-09-21 (4de9351..d649863).
+
+Manual check: NOT VERIFIED (human) — docs/feedback/phase-2/lead-row.png
+vs the lower half of docs/feedback/design_top.png (lead image 16:9
+grayscale, red kicker, 44px headline, verse box, "All N entries").
