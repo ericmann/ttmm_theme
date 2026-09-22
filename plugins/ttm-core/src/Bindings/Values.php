@@ -405,4 +405,32 @@ class Values {
 
 		return '';
 	}
+
+	/**
+	 * Archive kicker (Decision S5): the first true flag, in this order, names the archive --
+	 * "Section" (category), "Tag", "Month", "Year", "Day", "Author", "Search"; `''` otherwise
+	 * (the bound paragraph is then dropped, Decision "Empty bound blocks").
+	 *
+	 * @param array<string, bool> $flags `category|tag|month|year|day|author|search` => bool.
+	 * @return string
+	 */
+	public static function archive_kind( array $flags ): string {
+		$labels = [
+			'category' => __( 'Section', 'ttm-core' ),
+			'tag'      => __( 'Tag', 'ttm-core' ),
+			'month'    => __( 'Month', 'ttm-core' ),
+			'year'     => __( 'Year', 'ttm-core' ),
+			'day'      => __( 'Day', 'ttm-core' ),
+			'author'   => __( 'Author', 'ttm-core' ),
+			'search'   => __( 'Search', 'ttm-core' ),
+		];
+
+		foreach ( $labels as $kind => $label ) {
+			if ( ! empty( $flags[ $kind ] ) ) {
+				return $label;
+			}
+		}
+
+		return '';
+	}
 }

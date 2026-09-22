@@ -198,4 +198,34 @@ class ArchiveTemplatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'Newer', $html );
 		$this->assertStringContainsString( '2022', $html );
 	}
+
+	/**
+	 * SPEC §6.6 "Tag / date archive": the shared header pattern reads "Tag" from
+	 * `ttm/archive-kind`, the title has no "Tag:" prefix, and the stats block renders nothing.
+	 */
+	public function test_tag_archive_header_reads_tag_kicker_and_no_stats(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$tech = $this->category_id( 'technology', 'Technology' );
+
+		$post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+				'tags_input'    => [ 'php' ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $tech );
+
+		$this->go_to( get_tag_link( get_term_by( 'slug', 'php', 'post_tag' ) ) );
+
+		$html = $this->render_template( 'archive' );
+
+		$this->assertSame( 1, preg_match( '/<div class="[^"]*ttm-archive-head[^"]*"[^>]*>(.*?)<\/div>\s*<\/div>/s', $html, $m ) );
+		$head = $m[1];
+		$this->assertMatchesRegularExpression( '/<p class="is-style-kicker[^"]*">Tag<\/p>/', $head );
+		$this->assertMatchesRegularExpression( '/<h1 class="[^"]*is-style-display-xl[^"]*">php<\/h1>/', $head );
+		$this->assertStringNotContainsString( 'Tag:', $head );
+		$this->assertStringNotContainsString( 'ttm-category-stats', $head );
+		$this->assertStringNotContainsString( 'is-layout-constrained', $head );
+	}
 }

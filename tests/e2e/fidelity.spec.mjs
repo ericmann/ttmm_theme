@@ -2015,28 +2015,27 @@ test.describe( 'writing', () => {
 } );
 
 test.describe( 'archive', () => {
-	test.fixme( // P3-01
-	'ar-head: .ttm-archive-head @1280', async ( { page } ) => {
+	test( 'ar-head: .ttm-archive-head @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.securityArchive, 1280 );
 		const el = page.locator( '.ttm-archive-head' );
 		const t = await tracks( el );
 		expect( t.length ).toBe( 2 );
 		expect( await computed( el, 'padding' ) ).toBe( '40px 0px 28px' );
 		expect( await computed( el, 'align-items' ) ).toBe( 'end' );
-	} ); // P3-01
+	} );
 
-	test.fixme( // P3-01
-	'ar-kicker: .ttm-archive-head .is-style-kicker @1280', async ( {
+	test( 'ar-kicker: .ttm-archive-head .is-style-kicker @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.securityArchive, 1280 );
 		const el = page.locator( '.ttm-archive-head .is-style-kicker' );
-		expect( await text( el ) ).toBe( 'Section' );
+		// innerText reflects the kicker's text-transform; assert the source text.
+		const source = await el.evaluate( ( node ) => node.textContent );
+		expect( source.trim() ).toBe( 'Section' );
 		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
-	} ); // P3-01
+	} );
 
-	test.fixme( // P3-01
-	'ar-h1: .ttm-archive-head h1 @1280', async ( { page } ) => {
+	test( 'ar-h1: .ttm-archive-head h1 @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.securityArchive, 1280 );
 		const el = page.locator( '.ttm-archive-head h1' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 80 ) );
@@ -2045,17 +2044,15 @@ test.describe( 'archive', () => {
 			-4.64,
 			0
 		);
-	} ); // P3-01
+	} );
 
-	test.fixme( // P3-01
-	'ar-h1-phone: .ttm-archive-head h1 @390', async ( { page } ) => {
+	test( 'ar-h1-phone: .ttm-archive-head h1 @390', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.securityArchive, 390 );
 		const el = page.locator( '.ttm-archive-head h1' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 44 ) );
-	} ); // P3-01
+	} );
 
-	test.fixme( // P3-01
-	'ar-desc: .ttm-archive-head .wp-block-term-description p @1280', async ( {
+	test( 'ar-desc: .ttm-archive-head .wp-block-term-description p @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.securityArchive, 1280 );
@@ -2064,33 +2061,44 @@ test.describe( 'archive', () => {
 		);
 		expect( await computed( el, 'font-size' ) ).toBe( px( 17 ) );
 		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-800' ) );
-		expect( await computed( el, 'max-width' ) ).toBe( '52ch' );
-	} ); // P3-01
+		// getComputedStyle resolves ch: measure one "0" in the paragraph's font.
+		const chs = await el.evaluate( ( node ) => {
+			const cs = window.getComputedStyle( node );
+			const probe = document.createElement( 'span' );
+			probe.textContent = '0';
+			probe.style.font = cs.font;
+			probe.style.letterSpacing = '0';
+			probe.style.position = 'absolute';
+			probe.style.visibility = 'hidden';
+			document.body.appendChild( probe );
+			const ch = probe.getBoundingClientRect().width;
+			probe.remove();
+			return parseFloat( cs.maxWidth ) / ch;
+		} );
+		expect( chs ).toBeCloseTo( 52, 0 );
+	} );
 
-	test.fixme( // P3-01
-	'ar-stats: .ttm-category-stats @1280', async ( { page } ) => {
+	test( 'ar-stats: .ttm-category-stats @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.securityArchive, 1280 );
 		const el = page.locator( '.ttm-category-stats' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 13 ) );
 		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
 		expect( await computed( el, 'line-height' ) ).toBe( px( 20.8 ) );
-	} ); // P3-01
+	} );
 
-	test.fixme( // P3-01
-	'ar-stats-text: .ttm-category-stats @1280', async ( { page } ) => {
+	test( 'ar-stats-text: .ttm-category-stats @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.securityArchive, 1280 );
 		const el = page.locator( '.ttm-category-stats' );
 		const t = await text( el );
 		expect( t ).toMatch( /^\d+ articles · \d{4}(–\d{4})?/ );
 		expect( t ).toContain( 'Security RSS' );
-	} ); // P3-01
+	} );
 
-	test.fixme( // P3-01
-	'ar-stats-rss: .ttm-category-stats a @1280', async ( { page } ) => {
+	test( 'ar-stats-rss: .ttm-category-stats a @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.securityArchive, 1280 );
 		const el = page.locator( '.ttm-category-stats a' );
 		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
-	} ); // P3-01
+	} );
 
 	test.fixme( // P3-02
 	'ar-filter: .ttm-filter-row @1280', async ( { page } ) => {
@@ -2313,14 +2321,14 @@ test.describe( 'journal archive', () => {
 } );
 
 test.describe( 'tag archive', () => {
-	test.fixme( // P3-01
-	'tag-kicker: .ttm-archive-head .is-style-kicker @1280', async ( {
+	test( 'tag-kicker: .ttm-archive-head .is-style-kicker @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.tagArchive, 1280 );
 		const el = page.locator( '.ttm-archive-head .is-style-kicker' );
-		expect( await text( el ) ).toBe( 'Tag' );
-	} ); // P3-01
+		const source = await el.evaluate( ( node ) => node.textContent );
+		expect( source.trim() ).toBe( 'Tag' );
+	} );
 
 	test.fixme( // P3-03
 	'tag-aside: .ttm-archive-body aside .ttm-most-read, .ttm-series-list @1280', async ( {

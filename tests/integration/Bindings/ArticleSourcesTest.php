@@ -224,4 +224,32 @@ class ArticleSourcesTest extends TTM_IntegrationTestCase {
 
 		wp_reset_postdata();
 	}
+
+	public function test_archive_kind_binding_on_category_tag_and_month(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+		$post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+				'post_date'     => '2026-05-01 09:00:00',
+				'tags_input'    => [ 'php' ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $tech );
+
+		$block = $this->make_block( 'core/paragraph', 0 );
+
+		$this->go_to( (string) get_category_link( $tech ) );
+		$this->assertSame( 'Section', $this->source_value( 'ttm/archive-kind', [], $block, 'content' ) );
+
+		$this->go_to( (string) get_tag_link( get_term_by( 'slug', 'php', 'post_tag' ) ) );
+		$this->assertSame( 'Tag', $this->source_value( 'ttm/archive-kind', [], $block, 'content' ) );
+
+		$this->go_to( (string) get_month_link( 2026, 5 ) );
+		$this->assertTrue( is_month() );
+		$this->assertSame( 'Month', $this->source_value( 'ttm/archive-kind', [], $block, 'content' ) );
+
+		$this->go_to( (string) get_permalink( $post ) );
+		$this->assertSame( '', $this->source_value( 'ttm/archive-kind', [], $block, 'content' ) );
+	}
 }

@@ -2244,10 +2244,57 @@ ul.modern-footnotes-list,
 	}
 }
 
-/* 4.25 archive head */
+/* 4.25 archive head (SPEC §6.6 "Archive header") */
 .ttm-archive-head {
+	column-gap: 64px;
 	padding: 40px 0 28px;
 	align-items: end;
+}
+
+.ttm-archive-head .is-style-kicker {
+	margin: 0 0 10px;
+}
+
+.ttm-archive-head h1 {
+	margin: 0 0 14px -0.058em;
+	font-size: var(--wp--preset--font-size--display-xl);
+	font-weight: 800;
+	line-height: 0.95;
+	letter-spacing: -0.03em;
+}
+
+.ttm-archive-head.is-style-grid-8-4 .wp-block-group .wp-block-term-description p {
+	margin: 0;
+	font-size: 17px;
+	line-height: 1.5;
+	color: var(--wp--preset--color--neutral-800);
+	max-width: 52ch;
+}
+
+.ttm-category-stats {
+	font-size: 13px;
+	line-height: 1.6;
+	color: var(--wp--preset--color--neutral-700);
+	font-feature-settings: "tnum";
+}
+
+.ttm-archive-head.is-style-grid-8-4 .wp-block-ttm-category-stats.ttm-category-stats p {
+	margin: 0;
+}
+
+.ttm-archive-head .wp-block-ttm-category-stats.ttm-category-stats a {
+	color: var(--wp--preset--color--accent-700);
+}
+
+@media (max-width: 720px) {
+
+	.ttm-archive-head {
+		grid-template-columns: 1fr;
+	}
+
+	.ttm-archive-head h1 {
+		font-size: 44px;
+	}
 }
 
 /* 4.26 filter row */

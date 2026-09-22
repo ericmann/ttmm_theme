@@ -184,6 +184,39 @@ class Sources {
 				'uses_context'       => [ 'postId', 'postType' ],
 			]
 		);
+
+		register_block_bindings_source(
+			'ttm/archive-kind',
+			[
+				'label'              => __( 'TTM: Archive kind', 'ttm-core' ),
+				'get_value_callback' => [ self::class, 'archive_kind' ],
+			]
+		);
+	}
+
+	/**
+	 * `ttm/archive-kind` (Decision S5): "Section" / "Tag" / "Month" / "Year" / "Day" / "Author" /
+	 * "Search" from the main query's conditionals; '' elsewhere.
+	 *
+	 * @param array<string, mixed> $source_args    Unused: no args.
+	 * @param WP_Block             $block_instance Consuming block.
+	 * @param string               $attribute_name Consuming attribute.
+	 * @return string
+	 */
+	public static function archive_kind( array $source_args, $block_instance, string $attribute_name ): string {
+		unset( $source_args );
+
+		$flags = [
+			'category' => is_category(),
+			'tag'      => is_tag(),
+			'month'    => is_month(),
+			'year'     => is_year(),
+			'day'      => is_day(),
+			'author'   => is_author(),
+			'search'   => is_search(),
+		];
+
+		return self::finalize( Values::archive_kind( $flags ), $block_instance, $attribute_name );
 	}
 
 	/**

@@ -175,4 +175,34 @@ class ValuesTest extends TestCase {
 		$this->assertSame( '', Values::section_label( 'more-in', '' ) );
 		$this->assertSame( '', Values::section_label( 'unknown', 'Technology' ) );
 	}
+
+	public function test_archive_kind_labels_and_empty(): void {
+		$this->assertSame( 'Section', Values::archive_kind( [ 'category' => true ] ) );
+		$this->assertSame( 'Tag', Values::archive_kind( [ 'tag' => true ] ) );
+		$this->assertSame( 'Month', Values::archive_kind( [ 'month' => true ] ) );
+		$this->assertSame( 'Year', Values::archive_kind( [ 'year' => true ] ) );
+		$this->assertSame( 'Day', Values::archive_kind( [ 'day' => true ] ) );
+		$this->assertSame( 'Author', Values::archive_kind( [ 'author' => true ] ) );
+		$this->assertSame( 'Search', Values::archive_kind( [ 'search' => true ] ) );
+		// A day archive is also a month and a year archive: the most specific flag wins.
+		$this->assertSame(
+			'Month',
+			Values::archive_kind(
+				[
+					'month' => true,
+					'year'  => true,
+				] 
+			) 
+		);
+		$this->assertSame( '', Values::archive_kind( [] ) );
+		$this->assertSame(
+			'',
+			Values::archive_kind(
+				[
+					'category' => false,
+					'tag'      => false,
+				] 
+			) 
+		);
+	}
 }
