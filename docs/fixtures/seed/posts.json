@@ -478,6 +478,18 @@
 	},
 	{
 		"tags": [],
+		"slug": "hardening-part-2-salts-and-keys",
+		"title": "Hardening WordPress, part 2: salts, keys and the rotation you skipped",
+		"categories": [
+			"security"
+		],
+		"days_ago": 10,
+		"excerpt": "The secret keys in wp-config.php were generated once, at launch, and rotated never.",
+		"paragraphs": 14,
+		"part_title": "Salts, keys and the rotation you skipped"
+	},
+	{
+		"tags": [],
 		"slug": "quiet-ledger-ch-1",
 		"title": "The Quiet Ledger, Chapter 1",
 		"categories": [
