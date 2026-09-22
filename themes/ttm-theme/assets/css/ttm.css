@@ -1859,13 +1859,15 @@ blockquote.is-style-pull cite,
 	margin-top: 40px;
 }
 
-.ttm-prevnext__prev,
-.ttm-prevnext__next {
-	padding: 20px;
+/* Two ruled cells with one vertical rule between (on the left cell's right edge); a missing
+ * side keeps its cell and the rules. */
+.ttm-prevnext__prev {
+	padding: 20px 24px 20px 0;
+	border-right: var(--ttm-rule-1);
 }
 
 .ttm-prevnext__next {
-	border-left: var(--ttm-rule-1);
+	padding: 20px 0 20px 24px;
 }
 
 .ttm-prevnext__label {
@@ -1959,14 +1961,30 @@ ul.modern-footnotes-list,
 @media (max-width: 1024px) {
 
 	.ttm-article,
-	.ttm-prevnext,
 	.ttm-journal-head {
 		grid-template-columns: 1fr;
 	}
+}
+
+@media (max-width: 720px) {
+
+	/* 3b: the two cells stack with the rule between them turned horizontal. */
+	.ttm-prevnext {
+		grid-template-columns: 1fr;
+	}
+
+	.ttm-prevnext__prev {
+		padding: 20px 0;
+		border-right: 0;
+		border-bottom: var(--ttm-rule-1);
+	}
 
 	.ttm-prevnext__next {
-		border-left: 0;
-		border-top: var(--ttm-rule-1);
+		padding: 20px 0;
+	}
+
+	.ttm-prevnext__title {
+		font-size: 16px;
 	}
 }
 

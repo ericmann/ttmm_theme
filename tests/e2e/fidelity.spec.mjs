@@ -1262,8 +1262,7 @@ test.describe( 'article', () => {
 } );
 
 test.describe( 'prev/next', () => {
-	test.fixme( // P1-04
-	'prevnext: .ttm-prevnext @1280', async ( { page } ) => {
+	test( 'prevnext: .ttm-prevnext @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-prevnext' );
 		const t = await tracks( el );
@@ -1271,44 +1270,42 @@ test.describe( 'prev/next', () => {
 		expect( t[ 0 ] ).toBeCloseTo( t[ 1 ], 0 );
 		expect( await computed( el, 'border-top-width' ) ).toBe( px( 2 ) );
 		expect( await computed( el, 'margin-top' ) ).toBe( px( 40 ) );
-	} ); // P1-04
+	} );
 
-	test.fixme( // P1-04
-	'prevnext-prev: .ttm-prevnext__prev @1280', async ( { page } ) => {
+	test( 'prevnext-prev: .ttm-prevnext__prev @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-prevnext__prev' );
 		expect( await computed( el, 'border-right-width' ) ).toBe( px( 1 ) );
 		expect( await computed( el, 'padding' ) ).toBe( '20px 24px 20px 0px' );
-	} ); // P1-04
+	} );
 
-	test.fixme( // P1-04
-	'prevnext-label: .ttm-prevnext__label (first) @1280', async ( {
+	test( 'prevnext-label: .ttm-prevnext__label (first) @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-prevnext__label' ).first();
 		expect( await computed( el, 'font-size' ) ).toBe( px( 11 ) );
 		expect( await computed( el, 'text-transform' ) ).toBe( 'uppercase' );
-		expect( await text( el ) ).toBe( '← Part 2' );
-	} ); // P1-04
+		// innerText reflects text-transform; the row specifies the source text.
+		const source = await el.evaluate( ( node ) => node.textContent );
+		expect( source.replace( /\s+/g, ' ' ).trim() ).toBe( '← Part 2' );
+	} );
 
-	test.fixme( // P1-04
-	'prevnext-title: .ttm-prevnext__title (first) @1280', async ( {
+	test( 'prevnext-title: .ttm-prevnext__title (first) @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-prevnext__title' ).first();
 		expect( await computed( el, 'font-size' ) ).toBe( px( 18 ) );
 		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
-	} ); // P1-04
+	} );
 
-	test.fixme( // P1-04
-	'prevnext-phone: .ttm-prevnext @390', async ( { page } ) => {
+	test( 'prevnext-phone: .ttm-prevnext @390', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 390 );
 		const el = page.locator( '.ttm-prevnext' );
 		const t = await tracks( el );
 		expect( t.length ).toBe( 1 );
-	} ); // P1-04
+	} );
 } );
 
 test.describe( 'aside', () => {
