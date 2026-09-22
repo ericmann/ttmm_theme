@@ -21,6 +21,7 @@
  * - `securityArchive`: the Security category archive (`category.html`).
  * - `seriesHub`: the Series index page (`page-series.html`).
  * - `seriesEntry`: the seeded fiction serial "The Quiet Ledger" (`taxonomy-series.html`).
+ * - `about`: the seeded "About" page (`page.html`), the eighth screen (P4-03, SPEC §8 Phase 4).
  */
 export const SCREENS = {
 	front: '/',
@@ -30,6 +31,7 @@ export const SCREENS = {
 	securityArchive: '/category/security/',
 	seriesHub: '/series/',
 	seriesEntry: '/series/the-quiet-ledger/',
+	about: '/about/',
 };
 
 export const SCREEN_URLS = Object.values( SCREENS );

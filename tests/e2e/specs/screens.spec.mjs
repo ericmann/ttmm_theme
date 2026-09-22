@@ -1,7 +1,7 @@
 /**
- * Seven seeded screens x two viewports: exactly one <main>, zero serious/critical axe
- * violations, and a single high-priority hero image on the front page and an article
- * (SPEC §3.4 rule 33, Phase 8).
+ * Eight seeded screens (P4-03 added `about`) x two viewports: exactly one <main>, zero
+ * serious/critical axe violations, and a single high-priority hero image on the front page and
+ * an article (SPEC §3.4 rule 33, Phase 8).
  */
 
 import { test, expect } from '@playwright/test';
