@@ -141,9 +141,24 @@
 	align-self: start;
 }
 
-@media (min-width: 1024px) {
+/* Article body row (SPEC §6.2 "Body row"): the 8/4 grid with unconstrained columns; its
+ * aside stacks its zones and sticks at >= 1025 (single column, static, at <= 1024 below). */
+.ttm-article {
+	column-gap: 64px;
+	row-gap: 0;
+	padding: 40px 0 48px;
+}
 
-	.is-style-sticky-aside {
+.ttm-article aside {
+	display: flex;
+	flex-direction: column;
+	row-gap: 28px;
+	align-self: start;
+}
+
+@media (min-width: 1025px) {
+
+	.ttm-article aside {
 		position: sticky;
 		top: 24px;
 	}
@@ -475,6 +490,29 @@ p.is-style-poster {
 	clip-path: inset(50%);
 }
 
+/* 4.23 figure */
+
+/* The article hero: colour (no grayscale on singles), 16:9 owned here rather than by the block
+ * attribute, with the attachment caption the plugin appends as a figcaption. */
+.ttm-article .wp-block-post-featured-image {
+	margin-top: 28px;
+	aspect-ratio: 16 / 9;
+}
+
+/* `:where()` keeps this at the specificity of the other `… img` rules (stylelint's
+ * no-descending-specificity); source order still makes it win over core's `height: auto`. */
+.ttm-article :where(.wp-block-post-featured-image) img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.ttm-hero__caption {
+	font-size: var(--wp--preset--font-size--caption);
+	color: var(--wp--preset--color--neutral-700);
+	margin-top: 8px;
+}
+
 /* 4.24 body typography */
 .entry-content {
 	font-size: var(--wp--preset--font-size--body);
@@ -483,7 +521,12 @@ p.is-style-poster {
 }
 
 .entry-content p {
-	margin: var(--wp--preset--spacing--50) 0;
+	margin: 0 0 22px;
+}
+
+/* F12: with no hero the byline runs straight into the body with this gap (SPEC §6.2). */
+.ttm-entry {
+	padding-top: 28px;
 }
 
 .entry-content a {
@@ -513,7 +556,9 @@ p.is-style-poster {
 
 .entry-content h2 {
 	font-size: var(--wp--preset--font-size--article-h-2);
-	margin: var(--wp--preset--spacing--80) 0 var(--wp--preset--spacing--30);
+	line-height: 1.1;
+	letter-spacing: -0.02em;
+	margin: 40px 0 14px;
 }
 
 .entry-content h3 {
@@ -544,6 +589,15 @@ p.is-style-poster {
 	padding: 18px 20px;
 	border-left: 4px solid var(--wp--preset--color--accent);
 	overflow-x: auto;
+}
+
+/* A code block's inner <code> keeps the block's dark field: the inline-code surface rule
+ * above would otherwise paint it light under the light text (axe: 1.11:1). */
+.entry-content :where(pre) code {
+	background: none;
+	color: inherit;
+	font-size: inherit;
+	padding: 0;
 }
 
 .wp-block-quote.is-style-pull,
@@ -1882,13 +1936,34 @@ ul.modern-footnotes-list,
 
 @media (max-width: 720px) {
 
-	.ttm-article-head figure,
+	/* 3b: the hero and code blocks go full-bleed by the phone gutter (rule 42). */
+	.ttm-article .wp-block-post-featured-image {
+		margin: 20px -20px 0;
+		width: calc(100% + 40px);
+		aspect-ratio: 4 / 3;
+	}
+
 	.entry-content pre {
 		margin-left: -20px;
 		margin-right: -20px;
 		width: calc(100% + 40px);
+		padding-left: 20px;
+		padding-right: 20px;
 	}
 
+	.entry-content {
+		font-size: 17px;
+		line-height: 1.6;
+	}
+
+	.entry-content h2 {
+		font-size: 24px;
+	}
+
+	.wp-block-quote.is-style-pull,
+	blockquote.is-style-pull {
+		font-size: 22px;
+	}
 }
 
 /* 4.25 archive head */

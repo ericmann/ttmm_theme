@@ -38,4 +38,31 @@ class HelpersTest extends TestCase {
 		$this->assertStringContainsString( 'is-empty', $html );
 		$this->assertStringContainsString( 'data-ttm-block="verse"', $html );
 	}
+
+	public function test_featured_caption_inserts_figcaption_before_closing_figure(): void {
+		Functions\stubs( [ 'esc_html' ] );
+		Functions\when( 'is_singular' )->justReturn( true );
+		Functions\when( 'get_the_ID' )->justReturn( 12 );
+		Functions\when( 'get_post_thumbnail_id' )->justReturn( 34 );
+		Functions\when( 'wp_get_attachment_caption' )->justReturn( 'Photographs are grayscale only on the front page.' );
+
+		$html = Helpers::featured_caption( '<figure class="wp-block-post-featured-image"><img src="x.png" alt=""></figure>' );
+
+		$this->assertSame(
+			'<figure class="wp-block-post-featured-image"><img src="x.png" alt=""><figcaption class="ttm-hero__caption">Photographs are grayscale only on the front page.</figcaption></figure>',
+			$html
+		);
+	}
+
+	public function test_featured_caption_leaves_figure_without_caption_alone(): void {
+		Functions\stubs( [ 'esc_html' ] );
+		Functions\when( 'is_singular' )->justReturn( true );
+		Functions\when( 'get_the_ID' )->justReturn( 12 );
+		Functions\when( 'get_post_thumbnail_id' )->justReturn( 34 );
+		Functions\when( 'wp_get_attachment_caption' )->justReturn( '' );
+
+		$figure = '<figure class="wp-block-post-featured-image"><img src="x.png" alt=""></figure>';
+
+		$this->assertSame( $figure, Helpers::featured_caption( $figure ) );
+	}
 }

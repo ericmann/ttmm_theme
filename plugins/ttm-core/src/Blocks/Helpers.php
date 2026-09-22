@@ -40,6 +40,53 @@ class Helpers {
 	public static function register(): void {
 		add_filter( 'render_block_data', [ self::class, 'track_archive_scope' ] );
 		add_filter( 'render_block_core/post-template', [ self::class, 'group_by_year' ], 10, 1 );
+		add_filter( 'render_block_core/post-featured-image', [ self::class, 'featured_caption' ], 10, 3 );
+	}
+
+	/**
+	 * `render_block_core/post-featured-image`: on a singular view, append the attachment's
+	 * caption as `figcaption.ttm-hero__caption` before the closing `</figure>` (SPEC §6.2
+	 * "Hero", Decision "Featured-image caption"). No caption, not singular, or no figure ->
+	 * unchanged.
+	 *
+	 * @param string               $block_content Rendered block HTML.
+	 * @param array<string, mixed> $block         Parsed block.
+	 * @param \WP_Block|null       $instance      Block instance (postId context), when given.
+	 * @return string
+	 */
+	public static function featured_caption( string $block_content, array $block = [], $instance = null ): string {
+		unset( $block );
+
+		if ( '' === $block_content || ! is_singular() ) {
+			return $block_content;
+		}
+
+		$post_id = 0;
+		if ( is_object( $instance ) && isset( $instance->context['postId'] ) ) {
+			$post_id = (int) $instance->context['postId'];
+		}
+		if ( ! $post_id ) {
+			$post_id = (int) get_the_ID();
+		}
+
+		$attachment_id = $post_id ? (int) get_post_thumbnail_id( $post_id ) : 0;
+		if ( ! $attachment_id ) {
+			return $block_content;
+		}
+
+		$caption = trim( (string) wp_get_attachment_caption( $attachment_id ) );
+		if ( '' === $caption ) {
+			return $block_content;
+		}
+
+		$closing = strrpos( $block_content, '</figure>' );
+		if ( false === $closing ) {
+			return $block_content;
+		}
+
+		$figcaption = '<figcaption class="ttm-hero__caption">' . esc_html( $caption ) . '</figcaption>';
+
+		return substr( $block_content, 0, $closing ) . $figcaption . substr( $block_content, $closing );
 	}
 
 	/**

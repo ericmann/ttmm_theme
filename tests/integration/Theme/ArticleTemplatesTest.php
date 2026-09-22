@@ -117,6 +117,67 @@ class ArticleTemplatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringNotContainsString( 'wp-block-post-featured-image', $html );
 	}
 
+	/**
+	 * Rule 36 (extended): the row's direct children -- `main` and `aside` -- are
+	 * `layout: default` groups, so no `is-layout-constrained` (and no core global padding)
+	 * sits inside `.ttm-article`.
+	 */
+	public function test_article_columns_are_not_constrained(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+		$post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $tech );
+
+		$html = $this->render_single( $post );
+
+		$this->assertSame( 1, preg_match( '/<main class="([^"]*)"[^>]*id="main"/', $html, $main ) );
+		$this->assertStringNotContainsString( 'is-layout-constrained', $main[1] );
+		$this->assertSame( 1, preg_match( '/<aside class="([^"]*)"/', $html, $aside ) );
+		$this->assertStringNotContainsString( 'is-layout-constrained', $aside[1] );
+		$this->assertStringContainsString( 'is-style-grid-8-4 ttm-article', $html );
+	}
+
+	/**
+	 * SPEC §6.2 "Hero" / Decision "Featured-image caption": the attachment's caption
+	 * (`post_excerpt`) renders as `figcaption.ttm-hero__caption` inside the hero figure.
+	 */
+	public function test_hero_caption_renders_from_attachment_excerpt(): void {
+		if ( ! function_exists( 'imagecreatetruecolor' ) ) {
+			$this->markTestSkipped( 'GD is not available.' );
+		}
+
+		$tech = $this->category_id( 'technology', 'Technology' );
+		$post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $tech );
+
+		$attachment_id = ( new \TTM\Core\Cli\Seeder() )->image( 'Caption test', 'ttm-lead' );
+		$this->assertGreaterThan( 0, $attachment_id );
+		wp_update_post(
+			[
+				'ID'           => $attachment_id,
+				'post_excerpt' => 'Caption in the theme\'s meta type.',
+			]
+		);
+		set_post_thumbnail( $post, $attachment_id );
+
+		$html = $this->render_single( $post );
+
+		$this->assertStringContainsString( 'wp-block-post-featured-image', $html );
+		$this->assertMatchesRegularExpression(
+			'/<figcaption class="ttm-hero__caption">Caption in the theme(&#039;|\')s meta type\.<\/figcaption><\/figure>/',
+			$html
+		);
+	}
+
 	public function test_f13_more_in_section_marks_empty_when_no_other_posts(): void {
 		$tech = $this->category_id( 'technology', 'Technology' );
 		$post = self::factory()->post->create(

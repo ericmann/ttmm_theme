@@ -1077,18 +1077,16 @@ test.describe( 'series bar', () => {
 } );
 
 test.describe( 'article', () => {
-	test.fixme( // P1-02
-	'art-row: .ttm-article @1280', async ( { page } ) => {
+	test( 'art-row: .ttm-article @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-article' );
 		const t = await tracks( el );
 		expect( t.length ).toBe( 2 );
 		expect( await computed( el, 'column-gap' ) ).toBe( px( 64 ) );
 		expect( await computed( el, 'padding' ) ).toBe( '40px 0px 48px' );
-	} ); // P1-02
+	} );
 
-	test.fixme( // P1-02
-	'art-row-layout: .ttm-article > * @1280', async ( { page } ) => {
+	test( 'art-row-layout: .ttm-article > * @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const children = page.locator( '.ttm-article > *' );
 		const count = await children.count();
@@ -1097,7 +1095,7 @@ test.describe( 'article', () => {
 				( await children.nth( i ).getAttribute( 'class' ) ) || '';
 			expect( cls ).not.toMatch( /is-layout-constrained/ );
 		}
-	} ); // P1-02
+	} );
 
 	test.fixme( // P1-03
 	'art-kicker: .ttm-article-head .is-style-kicker @1280', async ( {
@@ -1178,8 +1176,7 @@ test.describe( 'article', () => {
 		);
 	} ); // P1-03
 
-	test.fixme( // P1-02
-	'art-hero: .ttm-article .wp-block-post-featured-image @1280', async ( {
+	test( 'art-hero: .ttm-article .wp-block-post-featured-image @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
@@ -1187,38 +1184,35 @@ test.describe( 'article', () => {
 		expect( await computed( el, 'margin-top' ) ).toBe( px( 28 ) );
 		expect( await computed( el, 'aspect-ratio' ) ).toBe( '16 / 9' );
 		expect( await computed( el, 'filter' ) ).toBe( 'none' );
-	} ); // P1-02
+	} );
 
-	test.fixme( // P1-02
-	'art-hero-phone: .ttm-article .wp-block-post-featured-image @390', async ( {
+	test( 'art-hero-phone: .ttm-article .wp-block-post-featured-image @390', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.article, 390 );
 		const el = page.locator( '.ttm-article .wp-block-post-featured-image' );
 		expect( await computed( el, 'margin-left' ) ).toBe( px( -20 ) );
 		expect( await computed( el, 'width' ) ).toBe( px( 390 ) );
-	} ); // P1-02
+	} );
 
-	test.fixme( // P1-02
-	'art-body: .ttm-entry p (first) @1280', async ( { page } ) => {
+	test( 'art-body: .ttm-entry p (first) @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-entry p' ).first();
 		expect( await computed( el, 'font-size' ) ).toBe( px( 18 ) );
 		expect( await computed( el, 'line-height' ) ).toBe( px( 29.7 ) );
+		// getComputedStyle resolves em lengths: 38em at the 18px body size.
 		const parent = page.locator( '.ttm-entry' );
-		expect( await computed( parent, 'max-width' ) ).toBe( '38em' );
-	} ); // P1-02
+		expect( await computed( parent, 'max-width' ) ).toBe( px( 38 * 18 ) );
+	} );
 
-	test.fixme( // P1-02
-	'art-h2: .ttm-entry h2 (first) @1280', async ( { page } ) => {
+	test( 'art-h2: .ttm-entry h2 (first) @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-entry h2' ).first();
 		expect( await computed( el, 'font-size' ) ).toBe( px( 30 ) );
 		expect( await computed( el, 'margin-top' ) ).toBe( px( 40 ) );
-	} ); // P1-02
+	} );
 
-	test.fixme( // P1-02
-	'art-pre: .ttm-entry pre (first) @1280', async ( { page } ) => {
+	test( 'art-pre: .ttm-entry pre (first) @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-entry pre' ).first();
 		expect( await computed( el, 'background-color' ) ).toBe(
@@ -1229,10 +1223,9 @@ test.describe( 'article', () => {
 			color( 'accent' )
 		);
 		expect( await computed( el, 'padding' ) ).toBe( '18px 20px' );
-	} ); // P1-02
+	} );
 
-	test.fixme( // P1-02
-	'art-pull: .ttm-entry .is-style-pull @1280', async ( { page } ) => {
+	test( 'art-pull: .ttm-entry .is-style-pull @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-entry .is-style-pull' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 28 ) );
@@ -1241,17 +1234,16 @@ test.describe( 'article', () => {
 			-13.9,
 			0
 		);
-	} ); // P1-02
+	} );
 
-	test.fixme( // P1-02
-	'art-link: .ttm-entry p a (first) @1280', async ( { page } ) => {
+	test( 'art-link: .ttm-entry p a (first) @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-entry p a' ).first();
 		expect( await computed( el, 'text-decoration-line' ) ).toBe(
 			'underline'
 		);
 		expect( await computed( el, 'text-underline-offset' ) ).toBe( px( 3 ) );
-	} ); // P1-02
+	} );
 } );
 
 test.describe( 'prev/next', () => {
@@ -1305,14 +1297,13 @@ test.describe( 'prev/next', () => {
 } );
 
 test.describe( 'aside', () => {
-	test.fixme( // P1-02
-	'aside-sticky: .ttm-article aside @1280', async ( { page } ) => {
+	test( 'aside-sticky: .ttm-article aside @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-article aside' );
 		expect( await computed( el, 'position' ) ).toBe( 'sticky' );
 		expect( await computed( el, 'top' ) ).toBe( px( 24 ) );
 		expect( await computed( el, 'row-gap' ) ).toBe( px( 28 ) );
-	} ); // P1-02
+	} );
 
 	test.fixme( // P1-05
 	'toc-head: .ttm-series-toc .ttm-cell-heading @1280', async ( { page } ) => {

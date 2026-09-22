@@ -4,7 +4,6 @@ ttm-book # P4-06 pending
 ttm-book-row # P4-06 pending
 ttm-book__links # P4-06 pending
 ttm-category-stats # P3-04 pending
-ttm-entry # P1-02 pending
 ttm-filter-row # P3-02 pending
 ttm-hub-head # P4-01 pending
 ttm-journal-stream # P2-02 pending
