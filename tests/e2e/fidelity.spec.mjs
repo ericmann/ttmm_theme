@@ -268,7 +268,7 @@ test.describe( 'verse', () => {
 } );
 
 test.describe( 'journal rail', () => {
-	test.fixme( 'rail-head: .ttm-journal-rail .ttm-cell-heading.is-rail @1280', async ( {
+	test( 'rail-head: .ttm-journal-rail .ttm-cell-heading.is-rail @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -278,7 +278,7 @@ test.describe( 'journal rail', () => {
 		expect( await computed( head, 'border-bottom-width' ) ).toBe( px( 2 ) );
 	} );
 
-	test.fixme( 'rail-head-link: .ttm-journal-rail .ttm-cell-heading__link @1280', async ( {
+	test( 'rail-head-link: .ttm-journal-rail .ttm-cell-heading__link @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -288,7 +288,7 @@ test.describe( 'journal rail', () => {
 		expect( await link.innerText() ).toMatch( /^All \d+ entries$/ );
 	} );
 
-	test.fixme( 'rail-entry: .ttm-journal-rail .wp-block-post (first) @1280', async ( {
+	test( 'rail-entry: .ttm-journal-rail .wp-block-post (first) @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -301,35 +301,37 @@ test.describe( 'journal rail', () => {
 		);
 	} );
 
-	test.fixme( 'rail-date: .ttm-journal-rail .ttm-journal-excerpt__date @1280', async ( {
+	test( 'rail-date: .ttm-journal-rail .ttm-journal-excerpt__date @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
-		const date = page.locator(
-			'.ttm-journal-rail .ttm-journal-excerpt__date'
-		);
+		const date = page
+			.locator( '.ttm-journal-rail .ttm-journal-excerpt__date' )
+			.first();
 		expect( await computed( date, 'font-size' ) ).toBe( px( 11 ) );
 		expect( await computed( date, 'color' ) ).toBe(
 			color( 'neutral-700' )
 		);
 	} );
 
-	test.fixme( 'rail-title: .ttm-journal-rail .wp-block-post-title @1280', async ( {
+	test( 'rail-title: .ttm-journal-rail .wp-block-post-title @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
-		const title = page.locator( '.ttm-journal-rail .wp-block-post-title' );
+		const title = page
+			.locator( '.ttm-journal-rail .wp-block-post-title' )
+			.first();
 		expect( await computed( title, 'font-size' ) ).toBe( px( 16 ) );
 		expect( await computed( title, 'font-weight' ) ).toBe( '800' );
 	} );
 
-	test.fixme( 'rail-excerpt: .ttm-journal-rail .wp-block-post-excerpt__excerpt @1280', async ( {
+	test( 'rail-excerpt: .ttm-journal-rail .wp-block-post-excerpt__excerpt @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
-		const excerpt = page.locator(
-			'.ttm-journal-rail .wp-block-post-excerpt__excerpt'
-		);
+		const excerpt = page
+			.locator( '.ttm-journal-rail .wp-block-post-excerpt__excerpt' )
+			.first();
 		expect( await computed( excerpt, 'font-size' ) ).toBe( px( 14 ) );
 		expect( await computed( excerpt, 'color' ) ).toBe(
 			color( 'neutral-800' )
@@ -338,23 +340,30 @@ test.describe( 'journal rail', () => {
 		expect( text.trim().split( /\s+/ ).length ).toBeLessThanOrEqual( 55 );
 	} );
 
-	test.fixme( 'rail-more: .ttm-journal-rail .wp-block-read-more @1280', async ( {
+	test( 'rail-more: .ttm-journal-rail .wp-block-read-more @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
-		const more = page.locator( '.ttm-journal-rail .wp-block-read-more' );
+		const more = page
+			.locator( '.ttm-journal-rail .wp-block-read-more' )
+			.first();
 		expect( await computed( more, 'font-size' ) ).toBe( px( 12 ) );
 		expect( await computed( more, 'font-weight' ) ).toBe( '600' );
 		expect( await computed( more, 'color' ) ).toBe( color( 'accent-700' ) );
 		expect( await computed( more, 'margin-top' ) ).toBe( px( 8 ) );
 	} );
 
-	test.fixme( 'rail-count-phone: .ttm-journal-rail .wp-block-post @390', async ( {
+	// Markup can't vary per viewport (the query always fetches 3), so the phone row hides the
+	// 3rd entry with CSS (`nth-child(n+3){display:none}`) rather than fetching fewer -- Playwright's
+	// plain `.count()` counts DOM nodes regardless of `display:none`, so this needs `:visible`.
+	test( 'rail-count-phone: .ttm-journal-rail .wp-block-post @390', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 390 );
 		expect(
-			await page.locator( '.ttm-journal-rail .wp-block-post' ).count()
+			await page
+				.locator( '.ttm-journal-rail .wp-block-post:visible' )
+				.count()
 		).toBe( 2 );
 	} );
 } );

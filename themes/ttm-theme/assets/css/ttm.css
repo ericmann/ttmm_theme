@@ -634,14 +634,9 @@ blockquote.is-style-pull cite,
 	gap: 28px;
 }
 
-/* Decision "Colour vs a11y": accent (#ec3013 on bg) fails WCAG AA contrast at this weight/size,
- * so every `.current-menu-item` (front masthead included) uses accent-700 instead of the SPEC
- * table's literal "accent" -- `.ttm-masthead-front__nav` already carries the shared `.ttm-nav`
- * class, so one rule covers both. `!important` needed: core's own
- * `.wp-block-navigation-item__content.wp-block-navigation-item__content{color:inherit}` (a
- * repeated-class specificity trick) matches at the same class-count as this selector and wins
- * the cascade despite this selector's extra `a` type selector (confirmed via a live render) --
- * see the identical note on `.ttm-nav__hub > a` below. */
+/* Decision "Colour vs a11y": accent fails WCAG AA at this weight/size, so accent-700 replaces
+ * the SPEC table's literal "accent". `!important` beats core's own repeated-class
+ * `.wp-block-navigation-item__content.wp-block-navigation-item__content{color:inherit}`. */
 .ttm-nav .current-menu-item > a {
 	color: var(--wp--preset--color--accent-700) !important;
 }
@@ -653,11 +648,6 @@ blockquote.is-style-pull cite,
 .ttm-masthead-front__nav .ttm-nav__hub > a {
 	margin-left: auto;
 	font-weight: 400;
-
-	/* `!important` needed: `.wp-block-navigation-item__content.wp-block-navigation-item__content`
-	 * (core's own repeated-class specificity trick) sets `color: inherit` at the same
-	 * class-count as this rule and wins the type-selector tiebreak in some browsers' actual
-	 * cascade resolution despite this selector's extra `a` type selector. */
 	color: var(--wp--preset--color--neutral-700) !important;
 }
 
@@ -793,8 +783,10 @@ blockquote.is-style-pull cite,
 	border-bottom: var(--ttm-rule-2);
 }
 
-.ttm-cell-heading.is-rail .ttm-cell-heading__label {
-	font-size: var(--wp--preset--font-size--micro);
+/* §6.1.5's rail link is 12px, unlike the shared 11px default other (out-of-scope) consumers
+ * of this component may need -- scoped to `.is-rail` only. */
+.ttm-cell-heading.is-rail .ttm-cell-heading__link {
+	font-size: var(--wp--preset--font-size--caption);
 }
 
 /* 4.5 headline item */
@@ -911,11 +903,8 @@ blockquote.is-style-pull cite,
 	font-size: var(--wp--preset--font-size--featured);
 }
 
-/* 01 §2.1 explicitly permits this one exception: the ghost button's usual transparent-bg/
- * accent-700-text treatment doesn't apply here -- SPEC's own literal poster-ghost look (bg
- * colour text, 1px bg colour border, transparent background) is 3.77:1 against the accent
- * field, under WCAG AA; the `a11y` fidelity row's AxeBuilder excludes `.ttm-poster .btn-ghost`
- * for exactly this reason (see tests/e2e/fidelity.spec.mjs), so no colour substitution here. */
+/* 01 §2.1's one permitted exception: literal bg-on-accent is 3.77:1, under AA, but the a11y
+ * fidelity row excludes `.ttm-poster .btn-ghost` from axe for exactly this reason. */
 .ttm-poster .btn-ghost {
 	background: transparent;
 	color: var(--wp--preset--color--bg);
@@ -1118,11 +1107,9 @@ blockquote.is-style-pull cite,
 
 	.ttm-lead__title {
 
-		/* theme.json's "h2" slug becomes --font-size--h-2 (WordPress inserts a hyphen at the
-		 * letter/digit boundary) -- confirmed against the page's own rendered custom properties;
-		 * .is-style-journal-title and .entry-content h2 both reference the non-existent
-		 * --font-size--h2 and are pre-existing, out-of-scope latent bugs this incidentally
-		 * surfaced (SPEC §6.1.3's own selectors don't cover either). */
+		/* theme.json's "h2" slug becomes --font-size--h-2 (WP hyphenates letter/digit
+		 * boundaries); .is-style-journal-title/.entry-content h2 wrongly use --h2 (pre-existing,
+		 * out of scope here). */
 		font-size: var(--wp--preset--font-size--h-2);
 	}
 
@@ -1192,7 +1179,52 @@ blockquote.is-style-pull cite,
 
 /* 4.10 journal excerpt */
 .ttm-journal-excerpt__date {
-	margin-bottom: var(--wp--preset--spacing--10);
+	margin: 0 0 6px;
+	font-feature-settings: "tnum";
+}
+
+.ttm-journal-rail .wp-block-post {
+	padding: 16px 0;
+	border-bottom: var(--ttm-rule-1);
+}
+
+.ttm-journal-rail .wp-block-post-title {
+	margin: 0 0 6px;
+	font-size: 16px;
+	font-weight: 800;
+	line-height: 1.25;
+}
+
+/* stylelint-disable-next-line no-descending-specificity -- unrelated component (rail title link vs. .entry-content a:hover) */
+.ttm-journal-rail .wp-block-post-title a {
+	color: var(--wp--preset--color--text);
+	text-decoration: none;
+}
+
+.ttm-journal-rail .wp-block-post-title a:hover {
+	color: var(--wp--preset--color--accent);
+}
+
+.ttm-journal-rail .wp-block-post-excerpt__excerpt {
+	margin: 0;
+	font-size: var(--wp--preset--font-size--body-s);
+	line-height: 1.5;
+	color: var(--wp--preset--color--neutral-800);
+}
+
+.ttm-journal-rail .wp-block-read-more {
+	display: inline-block;
+	margin-top: var(--wp--preset--spacing--20);
+	font-size: var(--wp--preset--font-size--caption);
+	font-weight: 600;
+	color: var(--wp--preset--color--accent-700);
+}
+
+@media (max-width: 720px) {
+
+	.ttm-journal-rail .wp-block-post:nth-child(n+3) {
+		display: none;
+	}
 }
 
 /* 4.14 cell */
@@ -1461,6 +1493,7 @@ blockquote.is-style-pull cite,
 }
 
 /* Q-M1/Q-M2 classic content: footnotes */
+/* stylelint-disable-next-line no-descending-specificity -- unrelated component (classic footnote link vs. rail title link hover) */
 .entry-content sup.modern-footnotes-footnote a {
 	text-decoration: none;
 }

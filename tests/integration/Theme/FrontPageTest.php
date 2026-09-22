@@ -160,6 +160,61 @@ class FrontPageTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'Continue', $html );
 	}
 
+	public function test_journal_rail_heading_links_all_n_entries(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$journal = $this->category_id( 'journal', 'Journal' );
+
+		self::factory()->post->create_many(
+			2,
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $journal ],
+				'post_date'     => '2026-09-20 09:00:00',
+			]
+		);
+		foreach (
+			get_posts(
+				[
+					'category' => $journal,
+					'fields'   => 'ids',
+				]
+			) as $post_id
+		) {
+			update_post_meta( $post_id, 'ttm_primary_category', $journal );
+		}
+
+		$this->go_to( '/' );
+		$html = $this->render_template( 'front-page' );
+
+		$rail_start = strpos( $html, 'ttm-journal-rail' );
+		$this->assertIsInt( $rail_start );
+		$rail_html = substr( $html, $rail_start, 1500 );
+
+		$this->assertMatchesRegularExpression( '/<a href="[^"]*">All \d+ entries<\/a>/', $rail_html );
+	}
+
+	public function test_journal_rail_excerpt_has_no_trailing_hellip_marker(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$journal = $this->category_id( 'journal', 'Journal' );
+
+		$post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $journal ],
+				'post_date'     => '2026-09-20 09:00:00',
+				'post_content'  => str_repeat( 'Word ', 60 ) . 'end.',
+				'post_excerpt'  => '',
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $journal );
+
+		$this->go_to( '/' );
+		$html = $this->render_template( 'front-page' );
+
+		$this->assertStringNotContainsString( '[&hellip;]', $html );
+		$this->assertStringNotContainsString( '[…]', $html );
+	}
+
 	public function test_no_nonce_and_no_wp_json_strings_in_output(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
 		$this->seed( 'normal' );
