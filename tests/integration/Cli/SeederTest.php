@@ -215,4 +215,31 @@ class SeederTest extends TTM_IntegrationTestCase {
 		$this->assertNotNull( $chapter_12 );
 		$this->assertSame( 'Reconciliation', get_post_meta( $chapter_12->ID, 'ttm_part_title', true ) );
 	}
+
+	/**
+	 * F2 (REVIEW.md, R1-02): the two seriesless Writing essays derive `ttm_form=story` like the
+	 * short story does, but their `days_ago` (60, 75) must stay older than
+	 * `story-the-last-cron-job`'s (40) so `Fiction\Serials::stories()` -- ordered newest first --
+	 * ranks the story ahead of them, matching the front page's "Also running" list.
+	 */
+	public function test_seeded_writing_essays_derive_as_story_but_stay_older_than_the_last_cron_job(): void {
+		( new Seeder() )->run( 'normal' );
+
+		$essay_1 = get_page_by_path( 'finishing-a-draft-you-no-longer-believe-in', OBJECT, 'post' );
+		$essay_2 = get_page_by_path( 'outlining-for-people-who-hate-outlines', OBJECT, 'post' );
+		$story   = get_page_by_path( 'story-the-last-cron-job', OBJECT, 'post' );
+
+		$this->assertNotNull( $essay_1 );
+		$this->assertNotNull( $essay_2 );
+		$this->assertNotNull( $story );
+
+		$this->assertSame( 'story', get_post_meta( $essay_1->ID, 'ttm_form', true ) );
+		$this->assertSame( 'story', get_post_meta( $essay_2->ID, 'ttm_form', true ) );
+
+		$this->assertGreaterThan( strtotime( $essay_1->post_date_gmt ), strtotime( $story->post_date_gmt ) );
+		$this->assertGreaterThan( strtotime( $essay_2->post_date_gmt ), strtotime( $story->post_date_gmt ) );
+
+		$stories = \TTM\Core\Fiction\Serials::stories( 1 );
+		$this->assertSame( [ $story->ID ], $stories );
+	}
 }

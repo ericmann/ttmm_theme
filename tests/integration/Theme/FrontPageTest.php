@@ -357,4 +357,50 @@ class FrontPageTest extends TTM_IntegrationTestCase {
 		$poster_html = substr( $html, $poster_start, $footer_start - $poster_start );
 		$this->assertStringNotContainsString( 'href="mailto:', $poster_html );
 	}
+
+	/**
+	 * F2 (REVIEW.md): the series strip is nonfiction-only (mock `2a`, SPEC §6.5); the fiction
+	 * serial "The Quiet Ledger" belongs to the Writing cell, not the strip.
+	 */
+	public function test_series_strip_lists_the_three_nonfiction_series_newest_first(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$this->seed( 'normal' );
+		$this->go_to( '/' );
+
+		$html = $this->render_template( 'front-page' );
+
+		if ( ! preg_match_all( '/ttm-series-row__title">([^<]*)</', $html, $matches ) ) {
+			$this->fail( 'No series row titles found on the front page.' );
+		}
+
+		$this->assertSame(
+			[ 'Hardening WordPress', 'The Consultant&#039;s Ledger', 'Ordinary Time' ],
+			$matches[1]
+		);
+		$this->assertNotContains( 'The Quiet Ledger', $matches[1] );
+	}
+
+	/**
+	 * F2 (REVIEW.md): with the two Writing essays pushed past the story's own `days_ago`
+	 * (`docs/fixtures/seed/posts.json`), the Writing cell's "Also running" list ends with the
+	 * short story again, matching mock `2a` (lines 297-301), not an essay with no series.
+	 */
+	public function test_writing_cell_also_running_lists_failover_salt_water_wires_and_the_last_cron_job(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$this->seed( 'normal' );
+		$this->go_to( '/' );
+
+		$html = $this->render_template( 'front-page' );
+
+		if ( ! preg_match_all( '/ttm-writing-cell__also-title">([^<]*)</', $html, $titles ) ) {
+			$this->fail( 'No "Also running" rows found in the Writing cell.' );
+		}
+		if ( ! preg_match_all( '/ttm-writing-cell__also-meta">([^<]*)</', $html, $metas ) ) {
+			$this->fail( 'No "Also running" meta rows found in the Writing cell.' );
+		}
+
+		$this->assertSame( [ 'Failover', 'Salt Water Wires', 'The Last Cron Job' ], $titles[1] );
+		$this->assertArrayHasKey( 2, $metas[1] );
+		$this->assertMatchesRegularExpression( '/^Short story · [\d,]+ words$/u', $metas[1][2] );
+	}
 }

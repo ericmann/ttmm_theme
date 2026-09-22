@@ -29,6 +29,6 @@ declare( strict_types=1 );
 	</div>
 	<!-- /wp:group -->
 
-	<!-- wp:ttm/series-list {"status":"in-progress","limit":3,"layout":"strip"} /-->
+	<!-- wp:ttm/series-list {"status":"in-progress","limit":3,"layout":"strip","form":"nonfiction"} /-->
 </div>
 <!-- /wp:group -->
