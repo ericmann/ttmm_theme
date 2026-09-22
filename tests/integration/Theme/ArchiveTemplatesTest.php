@@ -65,25 +65,42 @@ class ArchiveTemplatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'ttm-most-read', $html );
 	}
 
+	/**
+	 * SPEC §6.6 "Journal archive": the stream rows full width (each one anchor, title first,
+	 * Decision "Whole-row links"), no filter row, no 8/4 body, previous/next pagination only.
+	 */
 	public function test_category_journal_renders_stream_rows(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
 		$journal = $this->category_id( 'journal', 'Journal' );
 
-		$post = self::factory()->post->create(
-			[
-				'post_status'   => 'publish',
-				'post_category' => [ $journal ],
-				'post_date'     => '2026-05-01 09:00:00',
-			]
-		);
-		update_post_meta( $post, 'ttm_primary_category', $journal );
+		$posts = [];
+		foreach ( range( 1, 9 ) as $i ) {
+			$post = self::factory()->post->create(
+				[
+					'post_status'   => 'publish',
+					'post_category' => [ $journal ],
+					'post_date'     => sprintf( '2026-05-%02d 09:00:00', $i ),
+				]
+			);
+			update_post_meta( $post, 'ttm_primary_category', $journal );
+			$posts[] = $post;
+		}
 
 		$this->go_to( (string) get_category_link( $journal ) );
 
 		$html = $this->render_template( 'category-journal' );
 
-		$this->assertStringContainsString( 'ttm-journal-row', $html );
-		$this->assertStringContainsString( get_the_title( $post ), $html );
+		$this->assertGreaterThanOrEqual( 9, preg_match_all( '/<a href="[^"]+" class="wp-block-group ttm-journal-row[^"]*">/', $html ) );
+		$this->assertStringContainsString( 'href="' . get_permalink( $posts[0] ) . '"', $html );
+		$this->assertStringContainsString( get_the_title( $posts[0] ), $html );
+		$this->assertStringNotContainsString( '<h3 class="wp-block-post-title"><a', $html );
+		$this->assertMatchesRegularExpression( '/<a href="[^"]+" class="wp-block-group ttm-journal-row[^"]*">\s*<h3 class="wp-block-post-title">/', $html );
+		$this->assertStringNotContainsString( 'ttm-filter-row', $html );
+		$this->assertStringNotContainsString( 'ttm-archive-body', $html );
+		$this->assertStringNotContainsString( 'wp-block-query-pagination-numbers', $html );
+		$this->assertSame( 1, preg_match( '/<main class="([^"]*)"/', $html, $m ) );
+		$this->assertStringContainsString( 'ttm-journal-archive', $m[1] );
+		$this->assertStringNotContainsString( 'is-layout-constrained', $m[1] );
 	}
 
 	public function test_tag_archive_has_no_filter_row_and_keeps_most_read(): void {

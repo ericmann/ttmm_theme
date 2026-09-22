@@ -2296,22 +2296,20 @@ test.describe( 'archive', () => {
 } );
 
 test.describe( 'journal archive', () => {
-	test.fixme( // P2-03
-	'aj-rows: .ttm-journal-row @1280', async ( { page } ) => {
+	test( 'aj-rows: .ttm-journal-row @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.journalArchive, 1280 );
 		const els = page.locator( '.ttm-journal-row' );
 		const count = await els.count();
 		expect( count ).toBeGreaterThanOrEqual( 9 );
 		const t = await tracks( els.first() );
 		expect( t.length ).toBe( 3 );
-	} ); // P2-03
+	} );
 
-	test.fixme( // P2-03
-	'aj-no-filter: .ttm-filter-row @1280', async ( { page } ) => {
+	test( 'aj-no-filter: .ttm-filter-row @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.journalArchive, 1280 );
 		const els = page.locator( '.ttm-filter-row' );
 		expect( await els.count() ).toBe( 0 );
-	} ); // P2-03
+	} );
 } );
 
 test.describe( 'tag archive', () => {

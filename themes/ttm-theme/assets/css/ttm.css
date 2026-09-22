@@ -1928,9 +1928,14 @@ blockquote.is-style-pull cite,
 	display: none;
 }
 
-/* 4.11 journal stream row (SPEC §6.4 "stream"): each row is one anchor (link_rows()). */
+/* 4.11 journal stream row (SPEC §6.4 "stream"): each row is one anchor (link_rows()). The
+ * journal archive (`main.ttm-journal-archive`, SPEC §6.6) reuses the rows full width. */
 .ttm-journal-stream {
 	padding: 24px 0 40px;
+}
+
+.ttm-journal-archive {
+	padding: 0 0 48px;
 }
 
 .ttm-journal-stream:not(:has(.wp-block-post)) {
@@ -1941,7 +1946,7 @@ blockquote.is-style-pull cite,
 	margin-bottom: 8px;
 }
 
-.ttm-journal-stream .wp-block-query .wp-block-post-template {
+:is(.ttm-journal-stream, .ttm-journal-archive) .wp-block-query .wp-block-post-template {
 	list-style: none;
 	margin: 0;
 	padding: 0;
@@ -1969,7 +1974,7 @@ blockquote.is-style-pull cite,
 	font-feature-settings: "tnum";
 }
 
-.ttm-journal-stream .wp-block-query .wp-block-post .ttm-journal-row .wp-block-post-title {
+:is(.ttm-journal-stream, .ttm-journal-archive) .wp-block-query .wp-block-post .ttm-journal-row .wp-block-post-title {
 	grid-column: 2;
 	grid-row: 1;
 	margin: 0;
@@ -1978,11 +1983,11 @@ blockquote.is-style-pull cite,
 	line-height: 1.25;
 }
 
-.ttm-journal-stream .wp-block-query .wp-block-post .ttm-journal-row:hover .wp-block-post-title {
+:is(.ttm-journal-stream, .ttm-journal-archive) .wp-block-query .wp-block-post .ttm-journal-row:hover .wp-block-post-title {
 	color: var(--wp--preset--color--accent);
 }
 
-.ttm-journal-stream .wp-block-post .ttm-journal-row .wp-block-post-excerpt {
+:is(.ttm-journal-stream, .ttm-journal-archive) .wp-block-post .ttm-journal-row .wp-block-post-excerpt {
 	grid-column: 2;
 	grid-row: 2;
 }

@@ -1,7 +1,7 @@
 /**
- * Front-page layout facts that only make sense at the phone viewport (SPEC §6.1.9, 02 §A
+ * Layout facts that only make sense at the phone viewport (SPEC §6.1.9, §6.4, 02 §A
  * Responsive) and aren't already covered by a `tests/e2e/fidelity.spec.mjs` row. Runs only in
- * the `phone` project (390x844; see `../playwright.config.mjs`), against the seeded front page.
+ * the `phone` project (390x844; see `../playwright.config.mjs`), against the seeded site.
  */
 import { test, expect } from '@playwright/test';
 
@@ -11,6 +11,18 @@ test( 'front page has no horizontal overflow at 390', async ( { page } ) => {
 		() => document.documentElement.scrollWidth
 	);
 	expect( scrollWidth ).toBeLessThanOrEqual( 390 );
+} );
+
+test( 'journal post and archive have no horizontal overflow at 390', async ( {
+	page,
+} ) => {
+	for ( const path of [ '/journal-post-1/', '/category/journal/' ] ) {
+		await page.goto( path );
+		const scrollWidth = await page.evaluate(
+			() => document.documentElement.scrollWidth
+		);
+		expect( scrollWidth, path ).toBeLessThanOrEqual( 390 );
+	}
 } );
 
 test( 'section nav scrolls horizontally at 390', async ( { page } ) => {
