@@ -1010,17 +1010,23 @@ blockquote.is-style-pull cite,
 }
 
 /* 4.34 footer */
+
+/* §6.1.0/§6.1.2: full-bleed to the page column by negative gutter margins, then the gutter as
+ * its own padding, so the footer text lines up with the masthead title at x = gutter. */
 .ttm-footer {
 	display: flex;
 	justify-content: space-between;
-	padding: var(--wp--preset--spacing--40) var(--wp--preset--spacing--80);
+	margin-inline: calc(-1 * var(--wp--custom--gutter--desktop));
+	padding: 14px var(--wp--custom--gutter--desktop);
 	font-size: var(--wp--preset--font-size--caption);
 	color: var(--wp--preset--color--neutral-700);
 	border-top: var(--ttm-rule-2);
 }
 
-/* `wp:template-part`'s own `className` lands on its wrapper div, not the `<footer>` itself. */
+/* `wp:template-part`'s own `className` lands on its wrapper div, not the `<footer>` itself.
+ * Front page: the poster sits directly above, so no rule and 16px. */
 .is-after-poster .ttm-footer {
+	padding: 16px var(--wp--custom--gutter--desktop);
 	border-top: 0;
 }
 
@@ -1062,6 +1068,8 @@ blockquote.is-style-pull cite,
 	.ttm-footer {
 		flex-direction: column;
 		gap: var(--wp--preset--spacing--20);
+		margin-inline: calc(-1 * var(--wp--custom--gutter--phone));
+		padding-inline: var(--wp--custom--gutter--phone);
 		font-size: 11px;
 		line-height: 1.6;
 	}

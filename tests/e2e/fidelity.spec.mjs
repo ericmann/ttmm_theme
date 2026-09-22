@@ -1001,13 +1001,12 @@ test.describe( 'masthead inner', () => {
 } );
 
 test.describe( 'footer inner', () => {
-	test.fixme( // P0-11
-	'footer-inner-rule: .ttm-footer @1280', async ( { page } ) => {
+	test( 'footer-inner-rule: .ttm-footer @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-footer' );
 		expect( await computed( el, 'border-top-width' ) ).toBe( px( 2 ) );
 		expect( await computed( el, 'padding' ) ).toBe( '14px 48px' );
-	} ); // P0-11
+	} );
 } );
 
 test.describe( 'series bar', () => {
