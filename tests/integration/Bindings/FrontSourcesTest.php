@@ -145,10 +145,11 @@ class FrontSourcesTest extends TTM_IntegrationTestCase {
 			[
 				'post_status'   => 'publish',
 				'post_category' => [ $tech ],
-			] 
+			]
 		);
 
-		$block = $this->make_block( 'core/paragraph', 0 );
+		// A block other than core/paragraph: plain text, like ttm/meta-line.
+		$block = $this->make_block( 'core/heading', 0 );
 		$value = $this->source_value(
 			'ttm/category-count',
 			[
@@ -160,6 +161,41 @@ class FrontSourcesTest extends TTM_IntegrationTestCase {
 		);
 
 		$this->assertSame( '3 →', $value );
+	}
+
+	public function test_category_count_is_a_link_in_paragraph_content_and_text_elsewhere(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+		self::factory()->post->create_many(
+			3,
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+			]
+		);
+
+		$args = [
+			'category' => 'technology',
+			'format'   => 'entries',
+		];
+
+		$paragraph_value = $this->source_value(
+			'ttm/category-count',
+			$args,
+			$this->make_block( 'core/paragraph', 0 ),
+			'content'
+		);
+		$this->assertSame(
+			'<a href="' . get_category_link( $tech ) . '">All 3 entries</a>',
+			$paragraph_value
+		);
+
+		$heading_value = $this->source_value(
+			'ttm/category-count',
+			$args,
+			$this->make_block( 'core/heading', 0 ),
+			'content'
+		);
+		$this->assertSame( 'All 3 entries', $heading_value );
 	}
 
 	public function tear_down(): void {

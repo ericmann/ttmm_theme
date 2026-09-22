@@ -16,6 +16,7 @@ use TTM\Core\Query\Archive;
 use TTM\Core\Query\SeriesIndex;
 use TTM\Core\Support\Clock;
 use TTM\Core\Support\Dates;
+use TTM\Core\Support\Html;
 use TTM\Core\Support\Text;
 use WP_Block;
 
@@ -336,8 +337,14 @@ class Sources {
 
 		$term  = '' !== $slug ? get_term_by( 'slug', $slug, 'category' ) : null;
 		$count = $term && ! is_wp_error( $term ) ? (int) $term->count : 0;
+		$text  = Values::category_count( $count, $format );
 
-		return self::finalize( Values::category_count( $count, $format ), $block_instance, $attribute_name );
+		if ( $term && ! is_wp_error( $term ) ) {
+			$link = (string) get_category_link( $term );
+			return self::finalize( Html::link( $link, $text ), $block_instance, $attribute_name, true );
+		}
+
+		return self::finalize( $text, $block_instance, $attribute_name );
 	}
 
 	/**

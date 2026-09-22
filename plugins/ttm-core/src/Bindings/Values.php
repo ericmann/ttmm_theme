@@ -152,15 +152,20 @@ class Values {
 	}
 
 	/**
-	 * "431 articles →" / "431 →"; 0 → "All →" (F25).
+	 * "431 articles →" / "431 →" / "All 431 entries"; 0 → "All →" for every format (F25).
 	 *
 	 * @param int    $count  Post count.
-	 * @param string $format `articles` or `short`.
+	 * @param string $format `articles`, `short` or `entries`.
 	 * @return string
 	 */
 	public static function category_count( int $count, string $format ): string {
 		if ( 0 === $count ) {
 			return __( 'All →', 'ttm-core' );
+		}
+
+		if ( 'entries' === $format ) {
+			/* translators: %d: post count. */
+			return sprintf( __( 'All %d entries', 'ttm-core' ), $count );
 		}
 
 		if ( 'short' === $format ) {

@@ -134,6 +134,16 @@ class ValuesTest extends TestCase {
 		$this->assertSame( '5 →', Values::category_count( 5, 'short' ) );
 	}
 
+	public function test_category_count_entries_format(): void {
+		$this->assertSame( 'All 87 entries', Values::category_count( 87, 'entries' ) );
+	}
+
+	public function test_category_count_zero_reads_all_arrow_for_every_format(): void {
+		$this->assertSame( 'All →', Values::category_count( 0, 'articles' ) );
+		$this->assertSame( 'All →', Values::category_count( 0, 'short' ) );
+		$this->assertSame( 'All →', Values::category_count( 0, 'entries' ) );
+	}
+
 	public function test_today_formats(): void {
 		$now = $this->date( '2026-09-20' );
 

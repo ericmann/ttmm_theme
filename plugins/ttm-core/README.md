@@ -125,6 +125,12 @@ A narrow subset (`newsletter.*`, `lead.sticky_days`, `lead.stale_days`, `journal
 `comments_enabled`) is also editable from Settings → These Things Matter, stored in the
 `ttm_settings` option, and overlaid on top of the defaults before `ttm_config` runs.
 
+`journal.excerpt_words` (default `40`) is the target length `Query\JournalExcerpt` aims for when
+a Journal post has no manual excerpt (`Support\Text::sentence_excerpt()` extends to the nearest
+sentence end); `journal.excerpt_max_words` (default `55`, coupled to core's own default excerpt
+length so a derived excerpt never reads longer than a manual one would) is the hard cap — past
+it, the excerpt is cut mid-sentence with an ellipsis rather than extended further.
+
 Secrets are constants, never options, never `show_in_rest`, and masked (`••••`) when set in any
 admin screen that reports on them:
 

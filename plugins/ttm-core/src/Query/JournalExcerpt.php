@@ -46,7 +46,11 @@ class JournalExcerpt {
 
 		$content = wp_strip_all_tags( strip_shortcodes( $post->post_content ) );
 
-		return Text::sentence_excerpt( $content, (int) Config::get( 'journal.excerpt_words', 40 ) );
+		return Text::sentence_excerpt(
+			$content,
+			(int) Config::get( 'journal.excerpt_words', 40 ),
+			(int) Config::get( 'journal.excerpt_max_words', 55 )
+		);
 	}
 
 	/**
