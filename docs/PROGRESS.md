@@ -48,7 +48,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] R1-02 Rule 36: remove `layout: constrained` from inside grid groups
 - [x] R1-03 Fix the dead ≤720 override on the series featured part rows
 - [x] R1-04 Archive row dates and the serial meta line must match SPEC's literal text
-- [ ] R1-05 Close the test gaps on the flight's own late fixes
+- [x] R1-05 Close the test gaps on the flight's own late fixes
 - [ ] R1-06 Raise cssBudgetBytes and restore the declarations dropped under it
 - [ ] R1-07 Seed fixture drift: the third book, and a tautological Sunday test
 - [ ] R1-08 Scope the global post-excerpt filter; newsletter box copy is 13px
@@ -385,3 +385,11 @@ Root cause 1: ttm/short-date always appended the year when it differed from now 
 Root cause 2: series-list/render.php's list/grid-3 meta line ucfirst'd the stored cadence; SPEC §6.5 wants it lowercase ("monthly"). Removed the mb_strtoupper/mb_substr capitalisation there only; serial-hero's stat value (ttm-stats__value) capitalisation is a separate code path, untouched.
 Tests: unit test_short_date_no_year_never_includes_a_year; integration test_archive_row_date_omits_year_but_journal_stream_keeps_it (same prior-year post/date: category.html drops the year, category-journal.html keeps "Nov 26, 2022"); SeriesListTest asserts lowercase "monthly"/"weekly" + assertStringNotContainsString('· Monthly<'); e2e ar-row-date-no-year on the second year group.
 Verified: full foundry_verify green after a phpcbf pass fixed 3 docblock spacing errors (composer lint, unit 168, npm lint/build, forbidden-patterns, integration 481/481). Manually confirmed via npm run screenshots (not committed, out of file scope): archive-security.png's 2025 rows no longer wrap; writing.png's list meta line is lowercase while the hero stat stays "Monthly".
+
+### R1-05 — 0da5e51
+No production changes; added assertions that fail if any of the four late fixes are reverted, and proved each by reverting/restoring:
+1. wr-synopsis + hub-dek (fidelity.spec.mjs): assert innerHTML has no '<p>'/'&lt;p&gt;'. Proved by switching serial-hero/series-featured render.php's get_term_field(...,'raw') back to the default 'display' context -- both failed with the wpautop leak, then restored.
+2. ar-aside-series: added text-transform:uppercase alongside the existing textContent check; new row ar-mostread-head pairs the same idiom for .ttm-most-read .ttm-cell-heading__label ("Most read"). Proved by re-adding the old `.ttm-archive-body aside .ttm-cell-heading__label { text-transform: none }` override to ttm.css -- failed, then removed.
+3. MostReadTest: asserts literal `<span class="ttm-numbered__num tnum">1</span>` + assertStringNotContainsString('>01<'). Proved by reverting most-read/render.php to sprintf('%02d', ...) -- failed on "01" vs "1", then restored.
+4. SeriesListTest grid-2 test: categories_for() collects one (primary) category per PART, so a single post with two WP categories never produces a join -- needed a second part in a different section. Added one (security, part 2), asserted 'Technology · Security', updated the parts count to "2 parts". Proved by reducing render.php's join to $ttm_category_names[0] -- failed, then restored. hub-grid-cats' unreachable `|| t.length > 0` disjunct removed so it asserts the real ' · ' join (already true against live seeded data, mock 1e's grid-2 series has 2 categories).
+Verified: full foundry_verify green (integration 481/481, e2e 441/441); git status clean at the end -- confirmed no leftover production diffs after each revert/restore cycle.
