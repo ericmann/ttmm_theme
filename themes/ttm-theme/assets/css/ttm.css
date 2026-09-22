@@ -8,9 +8,8 @@
 
 @media (max-width: 720px) {
 
-	/* Root-padding-aware alignment (`.has-global-padding`, core) reads these two custom
-	 * properties off `body`; overriding them switches the global side gutter to the phone
-	 * token below 720px instead of the desktop one theme.json's styles.spacing.padding sets. */
+	/* Root-padding-aware alignment (core) reads these off `body`; switches the global side
+	 * gutter to the phone token below 720px instead of the desktop one. */
 	body {
 		--wp--style--root--padding-left: var(--wp--custom--gutter--phone);
 		--wp--style--root--padding-right: var(--wp--custom--gutter--phone);
@@ -49,11 +48,9 @@
 	border: 0;
 	opacity: 1;
 
-	/* Rule 35: full width regardless of the parent's constrained/default layout. `!important`
-	 * is needed to beat two rules WordPress core prints inline: the separator block's own
-	 * `.wp-block-separator:not(.is-style-wide):not(.is-style-dots){width:100px}` (three
-	 * :not() classes outweigh this rule's one) and the constrained-layout centering rule's
-	 * `margin-left/right: auto !important`. */
+	/* Rule 35: full width regardless of layout. `!important` beats core's inline
+	 * `.wp-block-separator:not(.is-style-wide):not(.is-style-dots){width:100px}` and the
+	 * constrained-layout centering rule's `margin-left/right: auto !important`. */
 	width: 100% !important;
 	max-width: none !important;
 	margin-left: 0 !important;
@@ -136,11 +133,12 @@
 }
 
 .is-style-cell {
-	padding: var(--wp--preset--spacing--40) var(--wp--preset--spacing--60) var(--wp--preset--spacing--50) 0;
+	padding: 20px var(--wp--preset--spacing--60) var(--wp--preset--spacing--50) 0;
 	border-right: var(--ttm-rule-1);
 }
 
 .is-style-cell:last-child {
+	padding-right: 0;
 	border-right: 0;
 }
 
@@ -165,6 +163,17 @@
 	.is-style-grid-7-5,
 	.is-style-grid-3-7-2 {
 		grid-template-columns: 1fr;
+	}
+
+	/* §6.1.9: 2 cells per row (.ttm-section-row is the only is-style-grid-4 consumer). */
+	.ttm-section-row.is-style-grid-4 {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	/* Right rules only on the left cell of each pair. */
+	.ttm-section-row .ttm-cell:nth-child(even) {
+		padding-right: 0;
+		border-right: 0;
 	}
 }
 
@@ -585,7 +594,7 @@ blockquote.is-style-pull cite,
 	border-bottom: var(--ttm-rule-1);
 }
 
-/* stylelint-disable-next-line no-descending-specificity -- unrelated component (masthead meta links vs. .entry-content a:hover) */
+/* stylelint-disable-next-line no-descending-specificity */
 .ttm-masthead-front__links a {
 	margin-left: var(--wp--preset--spacing--40);
 }
@@ -607,7 +616,7 @@ blockquote.is-style-pull cite,
 	color: var(--wp--preset--color--neutral-700);
 }
 
-/* stylelint-disable-next-line no-descending-specificity -- unrelated component (masthead byline vs. .entry-content a:hover) */
+/* stylelint-disable-next-line no-descending-specificity */
 .ttm-masthead-front__byline a {
 	font-weight: 600;
 }
@@ -731,7 +740,7 @@ blockquote.is-style-pull cite,
 }
 
 /* 4.3 nav */
-/* stylelint-disable-next-line no-descending-specificity -- unrelated component (core nav vs. .entry-content a:hover) */
+/* stylelint-disable-next-line no-descending-specificity */
 .wp-block-navigation a {
 	font-weight: 600;
 	color: var(--wp--preset--color--text);
@@ -776,6 +785,7 @@ blockquote.is-style-pull cite,
 .ttm-cell-heading__link {
 	font-size: var(--wp--preset--font-size--micro);
 	color: var(--wp--preset--color--neutral-700);
+	font-feature-settings: "tnum";
 }
 
 .ttm-cell-heading.is-rail {
@@ -783,8 +793,7 @@ blockquote.is-style-pull cite,
 	border-bottom: var(--ttm-rule-2);
 }
 
-/* §6.1.5's rail link is 12px, unlike the shared 11px default other (out-of-scope) consumers
- * of this component may need -- scoped to `.is-rail` only. */
+/* §6.1.5's rail link is 12px, unlike the shared 11px default -- scoped to `.is-rail`. */
 .ttm-cell-heading.is-rail .ttm-cell-heading__link {
 	font-size: var(--wp--preset--font-size--caption);
 }
@@ -809,15 +818,16 @@ blockquote.is-style-pull cite,
 }
 
 .ttm-item__dek {
-	font-size: var(--wp--preset--font-size--body-s);
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.45;
 	color: var(--wp--preset--color--neutral-800);
-	margin: var(--wp--preset--spacing--10) 0 0;
 }
 
 .ttm-item__meta {
+	margin: 6px 0 0;
 	font-size: var(--wp--preset--font-size--caption);
 	color: var(--wp--preset--color--neutral-700);
-	margin: var(--wp--preset--spacing--10) 0 0;
 }
 
 /* 4.6 featured item */
@@ -850,8 +860,7 @@ blockquote.is-style-pull cite,
 	color: var(--wp--preset--color--neutral-800);
 }
 
-/* The email `.input` and submit `.btn`/`.btn-ghost`/`.btn-primary` classes already style
- * themselves (§4.32 input, §4.30 buttons); this only owns the row layout. */
+/* `.input`/`.btn*` already style themselves; this only owns the row layout. */
 .ttm-newsletter-form__form {
 	display: flex;
 	align-items: center;
@@ -891,10 +900,9 @@ blockquote.is-style-pull cite,
 	gap: var(--wp--preset--spacing--60);
 }
 
-/* `.is-style-poster` (§2.3) already sets 800/1.05/-0.02em/pull(28px) on the h3; the poster
- * bumps its font-size to featured(40px) here, then the §6.1.9 phone query below drops it back
- * to the same pull(28px) `.is-style-poster` already has, since 28px is also the phone value. */
-/* stylelint-disable-next-line no-descending-specificity -- unrelated component (poster h3 vs. .ttm-item:hover h3) */
+/* `.is-style-poster` already sets 800/1.05/-0.02em/pull(28px); this bumps font-size to
+ * featured(40px), then the phone query below drops it back to the same 28px. */
+/* stylelint-disable-next-line no-descending-specificity */
 .ttm-poster h3.is-style-poster {
 	margin: 0;
 	margin-left: -0.058em;
@@ -967,7 +975,7 @@ blockquote.is-style-pull cite,
 	gap: 0;
 }
 
-/* stylelint-disable-next-line no-descending-specificity -- unrelated component (footer nav vs. .entry-content a:hover) */
+/* stylelint-disable-next-line no-descending-specificity */
 .ttm-footer__nav a {
 	font-weight: 400;
 	color: var(--wp--preset--color--neutral-700);
@@ -1055,7 +1063,7 @@ blockquote.is-style-pull cite,
 	max-width: 22ch;
 }
 
-/* stylelint-disable-next-line no-descending-specificity -- unrelated component (lead title link vs. .entry-content a:hover) */
+/* stylelint-disable-next-line no-descending-specificity */
 .ttm-lead__title a {
 	color: var(--wp--preset--color--text);
 	text-decoration: none;
@@ -1085,7 +1093,7 @@ blockquote.is-style-pull cite,
 	font-feature-settings: "tnum";
 }
 
-/* stylelint-disable-next-line no-descending-specificity -- unrelated component (lead meta prev-part link vs. .entry-content a:hover) */
+/* stylelint-disable-next-line no-descending-specificity */
 .ttm-lead__meta a {
 	color: var(--wp--preset--color--accent-700);
 }
@@ -1107,9 +1115,8 @@ blockquote.is-style-pull cite,
 
 	.ttm-lead__title {
 
-		/* theme.json's "h2" slug becomes --font-size--h-2 (WP hyphenates letter/digit
-		 * boundaries); .is-style-journal-title/.entry-content h2 wrongly use --h2 (pre-existing,
-		 * out of scope here). */
+		/* "h2" slug becomes --font-size--h-2 (WP hyphenates letter/digit boundaries); other
+		 * rules wrongly use --h2 (pre-existing, out of scope here). */
 		font-size: var(--wp--preset--font-size--h-2);
 	}
 
@@ -1159,7 +1166,7 @@ blockquote.is-style-pull cite,
 }
 
 /* P8-07: underline for WCAG 1.4.1 -- color alone no longer distinguishes the link (axe). */
-/* stylelint-disable-next-line no-descending-specificity -- unrelated component (verse attribution vs. .entry-content a:hover) */
+/* stylelint-disable-next-line no-descending-specificity */
 .ttm-verse__attribution a {
 	color: var(--wp--preset--color--accent-700);
 	text-decoration: underline;
@@ -1195,7 +1202,7 @@ blockquote.is-style-pull cite,
 	line-height: 1.25;
 }
 
-/* stylelint-disable-next-line no-descending-specificity -- unrelated component (rail title link vs. .entry-content a:hover) */
+/* stylelint-disable-next-line no-descending-specificity */
 .ttm-journal-rail .wp-block-post-title a {
 	color: var(--wp--preset--color--text);
 	text-decoration: none;
@@ -1232,6 +1239,10 @@ blockquote.is-style-pull cite,
 	grid-auto-flow: dense;
 }
 
+.ttm-section-row.is-row-1 {
+	padding: 0 0 8px;
+}
+
 .ttm-section-row .wp-block-query.is-empty {
 	display: none;
 }
@@ -1243,6 +1254,41 @@ blockquote.is-style-pull cite,
 .ttm-cell .wp-block-post:not(:first-child) .wp-block-post-excerpt,
 .ttm-cell .wp-block-post:not(:first-child) .wp-block-post-featured-image {
 	display: none;
+}
+
+/* .ttm-item's rule/padding (shared with .ttm-more-in) moves to the `<li>` here. */
+.ttm-cell .ttm-item {
+	border-top: 0;
+	padding: 0;
+}
+
+.ttm-cell .wp-block-post:not(:first-child) {
+	border-top: var(--ttm-rule-1);
+	padding-top: 12px;
+}
+
+.ttm-cell .wp-block-post:not(:last-child) {
+	margin-bottom: 12px;
+}
+
+.ttm-cell .wp-block-post-title {
+	margin: 0 0 8px;
+	line-height: 1.15;
+}
+
+.ttm-cell .wp-block-post:not(:first-child) .wp-block-post-title {
+	margin: 0 0 4px;
+	font-size: 15px;
+	line-height: 1.3;
+}
+
+@media (max-width: 720px) {
+
+	.ttm-cell {
+		padding: 18px 0 20px;
+		border-right: 0;
+		border-top: var(--ttm-rule-2);
+	}
 }
 
 /* 4.15 writing cell */
@@ -1447,7 +1493,7 @@ blockquote.is-style-pull cite,
 	line-height: 1.25;
 }
 
-/* stylelint-disable-next-line no-descending-specificity -- unrelated component (prev/next link vs. .entry-content a:hover) */
+/* stylelint-disable-next-line no-descending-specificity */
 .ttm-prevnext a {
 	color: inherit;
 	text-decoration: none;
@@ -1483,7 +1529,7 @@ blockquote.is-style-pull cite,
 	color: var(--wp--preset--color--neutral-700);
 }
 
-/* stylelint-disable-next-line no-descending-specificity -- unrelated component (syndication link vs. .entry-content a:hover) */
+/* stylelint-disable-next-line no-descending-specificity */
 .ttm-syndication a {
 	color: var(--wp--preset--color--accent-700);
 }
@@ -1493,7 +1539,7 @@ blockquote.is-style-pull cite,
 }
 
 /* Q-M1/Q-M2 classic content: footnotes */
-/* stylelint-disable-next-line no-descending-specificity -- unrelated component (classic footnote link vs. rail title link hover) */
+/* stylelint-disable-next-line no-descending-specificity */
 .entry-content sup.modern-footnotes-footnote a {
 	text-decoration: none;
 }

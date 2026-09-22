@@ -39,7 +39,7 @@ declare( strict_types=1 );
 
 				<!-- wp:post-excerpt {"className":"ttm-item__dek"} /-->
 
-				<!-- wp:paragraph {"className":"ttm-item__meta","metadata":{"bindings":{"content":{"source":"ttm/meta-line","args":{"parts":["date","reading"]}}}}} -->
+				<!-- wp:paragraph {"className":"ttm-item__meta","metadata":{"bindings":{"content":{"source":"ttm/meta-line","args":{"parts":["date"]}}}}} -->
 				<p class="ttm-item__meta"></p>
 				<!-- /wp:paragraph -->
 			</div>

@@ -369,9 +369,7 @@ test.describe( 'journal rail', () => {
 } );
 
 test.describe( 'section rows', () => {
-	test.fixme( 'row-grid: .ttm-section-row (each) @1280', async ( {
-		page,
-	} ) => {
+	test( 'row-grid: .ttm-section-row (each) @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const row = page.locator( '.ttm-section-row' ).first();
 		const cols = await tracks( row );
@@ -381,7 +379,7 @@ test.describe( 'section rows', () => {
 		);
 	} );
 
-	test.fixme( 'row-grid-tablet: .ttm-section-row (each) @1000', async ( {
+	test( 'row-grid-tablet: .ttm-section-row (each) @1000', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1000 );
@@ -390,17 +388,13 @@ test.describe( 'section rows', () => {
 		expect( cols ).toHaveLength( 2 );
 	} );
 
-	test.fixme( 'row-gap: .ttm-section-row (each) @1280', async ( {
-		page,
-	} ) => {
+	test( 'row-gap: .ttm-section-row (each) @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const row = page.locator( '.ttm-section-row' ).first();
 		expect( await computed( row, 'column-gap' ) ).toBe( px( 32 ) );
 	} );
 
-	test.fixme( 'row-layout: .ttm-section-row (each) @1280', async ( {
-		page,
-	} ) => {
+	test( 'row-layout: .ttm-section-row (each) @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const row = page.locator( '.ttm-section-row' ).first();
 		const classes = await row.evaluate( ( el ) => el.className );
@@ -409,7 +403,7 @@ test.describe( 'section rows', () => {
 } );
 
 test.describe( 'section cells', () => {
-	test.fixme( 'cell-pad: .ttm-cell:not(:last-child) (first) @1280', async ( {
+	test( 'cell-pad: .ttm-cell:not(:last-child) (first) @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -420,7 +414,7 @@ test.describe( 'section cells', () => {
 		expect( await computed( cell, 'border-right-width' ) ).toBe( px( 1 ) );
 	} );
 
-	test.fixme( 'cell-last: .ttm-section-row .ttm-cell:last-child @1280', async ( {
+	test( 'cell-last: .ttm-section-row .ttm-cell:last-child @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -428,7 +422,7 @@ test.describe( 'section cells', () => {
 		expect( await computed( cell, 'border-right-width' ) ).toBe( px( 0 ) );
 	} );
 
-	test.fixme( 'cell-head: .ttm-cell .ttm-cell-heading__label @1280', async ( {
+	test( 'cell-head: .ttm-cell .ttm-cell-heading__label @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -442,7 +436,7 @@ test.describe( 'section cells', () => {
 		);
 	} );
 
-	test.fixme( 'cell-head-link: .ttm-cell .ttm-cell-heading__link @1280', async ( {
+	test( 'cell-head-link: .ttm-cell .ttm-cell-heading__link @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -450,12 +444,14 @@ test.describe( 'section cells', () => {
 			.locator( '.ttm-cell .ttm-cell-heading__link' )
 			.first();
 		expect( await computed( link, 'font-size' ) ).toBe( px( 11 ) );
+		// Decision "Colour vs a11y" names this exact row: neutral-700 replaces the SPEC table's
+		// literal neutral-600 (see ttm.css).
 		expect( await computed( link, 'color' ) ).toBe(
-			color( 'neutral-600' )
+			color( 'neutral-700' )
 		);
 	} );
 
-	test.fixme( 'cell-lead: .ttm-cell:not(.is-style-span-2) .wp-block-post:first-child .wp-block-post-title @1280', async ( {
+	test( 'cell-lead: .ttm-cell:not(.is-style-span-2) .wp-block-post:first-child .wp-block-post-title @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -467,7 +463,7 @@ test.describe( 'section cells', () => {
 		expect( await computed( title, 'font-size' ) ).toBe( px( 21 ) );
 	} );
 
-	test.fixme( 'cell-lead-dek: .ttm-cell:not(.is-style-span-2) .wp-block-post:first-child .ttm-item__dek @1280', async ( {
+	test( 'cell-lead-dek: .ttm-cell:not(.is-style-span-2) .wp-block-post:first-child .ttm-item__dek @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -480,7 +476,7 @@ test.describe( 'section cells', () => {
 		expect( await computed( dek, 'display' ) ).toBe( 'block' );
 	} );
 
-	test.fixme( 'cell-item: .ttm-cell:not(.is-style-span-2) .wp-block-post:nth-child(2) .wp-block-post-title @1280', async ( {
+	test( 'cell-item: .ttm-cell:not(.is-style-span-2) .wp-block-post:nth-child(2) .wp-block-post-title @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -498,7 +494,7 @@ test.describe( 'section cells', () => {
 		expect( await computed( parent, 'border-top-width' ) ).toBe( px( 1 ) );
 	} );
 
-	test.fixme( 'cell-item-nodek: .ttm-cell .wp-block-post:nth-child(2) .ttm-item__dek @1280', async ( {
+	test( 'cell-item-nodek: .ttm-cell .wp-block-post:nth-child(2) .ttm-item__dek @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
@@ -508,7 +504,7 @@ test.describe( 'section cells', () => {
 		expect( await computed( dek, 'display' ) ).toBe( 'none' );
 	} );
 
-	test.fixme( 'cell-meta: .ttm-cell .ttm-item__meta (first) @1280', async ( {
+	test( 'cell-meta: .ttm-cell .ttm-item__meta (first) @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );

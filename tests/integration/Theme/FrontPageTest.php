@@ -140,6 +140,43 @@ class FrontPageTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'Politics', $html );
 	}
 
+	public function test_small_cells_meta_line_is_date_only(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$business = $this->category_id( 'business', 'Business' );
+		$tech     = $this->category_id( 'technology', 'Technology' );
+
+		// A lead candidate newer than the business post below, so Lead::compute() picks it
+		// instead and the business post isn't excluded from its own section cell.
+		$lead = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+				'post_date'     => '2026-09-20 09:00:00',
+			]
+		);
+		update_post_meta( $lead, 'ttm_primary_category', $tech );
+
+		$post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $business ],
+				'post_date'     => '2026-09-19 09:00:00',
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $business );
+		update_post_meta( $post, 'ttm_word_count', 460 );
+
+		$this->go_to( '/' );
+		$html = $this->render_template( 'front-page' );
+
+		$title_pos = strpos( $html, get_the_title( $post ) );
+		$this->assertIsInt( $title_pos );
+		$cell_html = substr( $html, $title_pos, 400 );
+
+		$this->assertStringContainsString( 'Sept', $cell_html );
+		$this->assertStringNotContainsString( 'min', $cell_html );
+	}
+
 	public function test_journal_rail_shows_relative_dates_and_continue(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
 		$journal = $this->category_id( 'journal', 'Journal' );
