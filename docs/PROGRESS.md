@@ -30,7 +30,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P2-05 Tuning — `journal.excerpt_max_words`
 - [x] P2-06 Phase 2 push — lead row screenshots
 - [x] P3-01 Section rows, cells, cell headings and headline items per §6.1.6
-- [ ] P3-02 Technology cell — inner grid and featured item with image
+- [x] P3-02 Technology cell — inner grid and featured item with image
 - [ ] P3-03 Writing cell per §6.1.6
 - [ ] P3-04 Series strip per §6.1.7 (`layout=strip`)
 - [ ] P3-05 Tuning — `cssBudgetBytes`
@@ -386,4 +386,34 @@ remove technology-post-2 from the series' parts list, re-seed before
 screenshots.
 
 All verify commands green (test:integration 412/412, test:e2e full
+suite 0 failed, composer test:unit 142/142).
+
+### P3-02 — f2f54cc
+Sources::meta_line() reads new readingFormat arg ('long' default);
+'short' swaps to "%d min" in its own reading_time_string() helper
+(separate from Values::reading_time()'s existing short format).
+
+section-cell-large.php: post-featured-image className is-style-grayscale
+-> ttm-item-featured__media (grayscale filter now on the figure
+directly, matching P2-01's lead pattern); meta-line gains
+readingFormat:short.
+
+ttm.css /* 4.6 featured item */ (relocated after /* 4.14 cell */ for
+stylelint specificity ordering): post-template is 1fr 1fr grid gap 20 28;
+.ttm-item -> display:contents; first li spans 2 cols, itself 200px/1fr
+grid (1fr when no image); .ttm-item-featured__media carries 3:2 ratio +
+grayscale directly, grid-row 1/span 3; dek 14px/meta margin-top 8px for
+this cell only; following items padding-top 14, title 17px/1.25.
+Featured title's 24/800/1.15 comes free from is-style-cell-lead-l +
+P3-01's base rule.
+
+Trimmed more verbose comments to stay under budget (56 bytes headroom
+left -- flag for the CSS budget task). Removed item-featured from
+css-coverage-allow.txt.
+
+New FrontSourcesTest/FrontPageTest tests. Un-fixme'd all 5 tech-* rows;
+tech-featured's own expectation needed fixing (Chrome's computed
+grid-column for bare `span 2` is "span 2", not "span 2 / span 2").
+
+All verify commands green (test:integration 414/414, test:e2e full
 suite 0 failed, composer test:unit 142/142).
