@@ -240,10 +240,16 @@ class Values {
 	/**
 	 * "248 words"; `''` when the count is 0 (not yet computed).
 	 *
-	 * @param int $words Word count.
+	 * @param int  $words      Word count.
+	 * @param bool $suppressed `whenUnsyndicated` in effect: the post is syndicated, so the
+	 *                         standing-note column must not repeat the count (F14 inverse).
 	 * @return string
 	 */
-	public static function word_count( int $words ): string {
+	public static function word_count( int $words, bool $suppressed = false ): string {
+		if ( $suppressed ) {
+			return '';
+		}
+
 		if ( 0 === $words ) {
 			return '';
 		}

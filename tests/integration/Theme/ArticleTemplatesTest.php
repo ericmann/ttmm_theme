@@ -311,4 +311,33 @@ class ArticleTemplatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringNotContainsString( 'wp-block-post-terms', $m[1] );
 		$this->assertMatchesRegularExpression( '/<div class="wp-block-group ttm-item[^"]*">\s*<h4 class="wp-block-post-title"><a href/', $html );
 	}
+
+	/**
+	 * SPEC §6.4: the three journal-head columns are `layout: default` groups (rule 36 extended),
+	 * the note column carries the mock's copy and the RSS link, and a syndicated post drops the
+	 * bound word-count paragraph entirely (Decision "Empty bound blocks").
+	 */
+	public function test_journal_head_columns_are_not_constrained_and_note_has_mock_copy(): void {
+		$journal = $this->category_id( 'journal', 'Journal' );
+		$post    = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $journal ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $journal );
+		update_post_meta( $post, 'ttm_word_count', 248 );
+		update_post_meta( $post, 'ttm_syndication', [ 'x' => 'https://x.com/example/1' ] );
+
+		$html = $this->render_single( $post, 'single-journal' );
+
+		$this->assertSame( 1, preg_match( '/<div class="([^"]*)ttm-journal-head([^"]*)"[^>]*>(.*?)<hr /s', $html, $m ) );
+		$this->assertStringNotContainsString( 'is-layout-constrained', $m[3] );
+		$this->assertMatchesRegularExpression( '/<p class="ttm-journal-head__note[^"]*">Journal entries are short and unpolished — things I saw and what they made me think\. Longer arguments land in a section\.<\/p>/', $html );
+		$this->assertMatchesRegularExpression( '/<p class="ttm-journal-head__rss[^"]*"><a href="\/category\/journal\/feed\/">Journal RSS<\/a><\/p>/', $html );
+		$this->assertMatchesRegularExpression( '/<h1 class="[^"]*is-style-journal-title[^"]*"/', $html );
+		$this->assertStringContainsString( 'ttm-journal-head__subline', $html );
+		$this->assertStringNotContainsString( 'ttm-journal-head__count', $html );
+		$this->assertStringContainsString( '<span class="ttm-syndication__words">', $html );
+	}
 }

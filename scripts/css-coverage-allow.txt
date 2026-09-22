@@ -22,7 +22,6 @@ ttm-series-featured__title # P4-01 pending
 ttm-series-progress # P4-03 pending
 ttm-series-single # P4-03 pending
 ttm-series-stats # P4-03 pending
-ttm-syndication__words # P2-01 pending
 ttm-numbered # P4-05 pending
 ttm-numbered__row # P4-05 pending
 ttm-numbered__num # P4-05 pending

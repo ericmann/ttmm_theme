@@ -168,4 +168,60 @@ class ArticleSourcesTest extends TTM_IntegrationTestCase {
 		$this->go_to( (string) get_category_link( $tech ) );
 		$this->assertSame( 'Series in Technology', $this->source_value( 'ttm/section-label', [ 'format' => 'series-in' ], $none, 'content' ) );
 	}
+
+	public function test_word_count_binding_is_empty_when_post_is_syndicated(): void {
+		$journal = $this->category_id( 'journal', 'Journal' );
+		$post    = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $journal ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $journal );
+		update_post_meta( $post, 'ttm_word_count', 248 );
+		update_post_meta(
+			$post,
+			'ttm_syndication',
+			[
+				'x'        => 'https://x.com/example/1',
+				'mastodon' => '',
+			]
+		);
+
+		$block = $this->make_block( 'core/paragraph', $post );
+
+		$this->assertSame( '', $this->source_value( 'ttm/word-count', [ 'whenUnsyndicated' => true ], $block, 'content' ) );
+		$this->assertSame( '248 words', $this->source_value( 'ttm/word-count', [], $block, 'content' ) );
+
+		update_post_meta( $post, 'ttm_syndication', [ 'x' => '' ] );
+		$this->assertSame( '248 words', $this->source_value( 'ttm/word-count', [ 'whenUnsyndicated' => true ], $block, 'content' ) );
+	}
+
+	public function test_empty_bound_paragraph_renders_nothing(): void {
+		$journal = $this->category_id( 'journal', 'Journal' );
+		$post    = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $journal ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $journal );
+		update_post_meta( $post, 'ttm_word_count', 248 );
+		update_post_meta( $post, 'ttm_syndication', [ 'x' => 'https://x.com/example/1' ] );
+
+		$bound = '<!-- wp:paragraph {"className":"ttm-journal-head__count","metadata":{"bindings":{"content":{"source":"ttm/word-count","args":{"whenUnsyndicated":true}}}}} --><p class="ttm-journal-head__count"></p><!-- /wp:paragraph -->';
+		$plain = '<!-- wp:paragraph --><p></p><!-- /wp:paragraph -->';
+
+		$GLOBALS['post'] = get_post( $post ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- render context for the postId block context.
+		setup_postdata( $GLOBALS['post'] );
+
+		$this->assertSame( '', trim( (string) do_blocks( $bound ) ) );
+		// An unbound empty paragraph is left alone (core's own behaviour).
+		$this->assertStringContainsString( '<p', (string) do_blocks( $plain ) );
+
+		update_post_meta( $post, 'ttm_syndication', [] );
+		$this->assertStringContainsString( '248 words', (string) do_blocks( $bound ) );
+
+		wp_reset_postdata();
+	}
 }

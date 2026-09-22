@@ -39,9 +39,6 @@ blockquote.is-style-pull cite # editor block style (04 §3)
 .ttm-series-strip:has(.ttm-series-list.is-complete) .ttm-series-strip__heading-fallback # state: fallback heading when the listed series are all complete
 .ttm-series-list.is-grid-3 # editor block style (04 §3)
 .ttm-series-row__dek # P4-02 pending
-.ttm-syndication # P2-01 pending
-.ttm-syndication a # P2-01 pending
-.ttm-journal-head:has(.ttm-syndication) .ttm-journal-head__count # P2-01 pending
 .ttm-filter-row__label # P3-02 pending
 .ttm-filter-row__sort # P3-02 pending
 .ttm-most-read__list # P3-04 pending
@@ -52,3 +49,4 @@ blockquote.is-style-pull cite # editor block style (04 §3)
 .ttm-writing-body:not(:has(.ttm-book-grid)) .ttm-writing-body__books # P4-06 pending
 .ttm-writing-body:not(:has(.ttm-story-tiles, .ttm-book-grid)) # P4-06 pending
 .ttm-series-toc__dek # optional dek (showDek): no seeded ttm/series-toc sets it
+.ttm-journal-head__count # state: F14 word count only when the journal post has no syndication URL; the seeded journal post is syndicated

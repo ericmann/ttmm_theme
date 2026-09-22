@@ -1460,68 +1460,61 @@ test.describe( 'aside', () => {
 } );
 
 test.describe( 'journal', () => {
-	test.fixme( // P2-01
-	'jr-grid: .ttm-journal-head @1280', async ( { page } ) => {
+	test( 'jr-grid: .ttm-journal-head @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.journalPost, 1280 );
 		const el = page.locator( '.ttm-journal-head' );
 		const t = await tracks( el );
 		expect( t.length ).toBe( 3 );
 		expect( await computed( el, 'column-gap' ) ).toBe( px( 48 ) );
 		expect( await computed( el, 'padding' ) ).toBe( '40px 0px 48px' );
-	} ); // P2-01
+	} );
 
-	test.fixme( // P2-01
-	'jr-kicker: .ttm-journal-head .is-style-kicker @1280', async ( {
+	test( 'jr-kicker: .ttm-journal-head .is-style-kicker @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.journalPost, 1280 );
 		const el = page.locator( '.ttm-journal-head .is-style-kicker' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
 		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
-	} ); // P2-01
+	} );
 
-	test.fixme( // P2-01
-	'jr-date: .is-style-journal-date @1280', async ( { page } ) => {
+	test( 'jr-date: .is-style-journal-date @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.journalPost, 1280 );
 		const el = page.locator( '.is-style-journal-date' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 48 ) );
 		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
 		expect( await computed( el, 'line-height' ) ).toBe( px( 48 ) );
-	} ); // P2-01
+	} );
 
-	test.fixme( // P2-01
-	'jr-date-phone: .is-style-journal-date @390', async ( { page } ) => {
+	test( 'jr-date-phone: .is-style-journal-date @390', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.journalPost, 390 );
 		const el = page.locator( '.is-style-journal-date' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 36 ) );
-	} ); // P2-01
+	} );
 
-	test.fixme( // P2-01
-	'jr-sub: .ttm-journal-head__subline @1280', async ( { page } ) => {
+	test( 'jr-sub: .ttm-journal-head__subline @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.journalPost, 1280 );
 		const el = page.locator( '.ttm-journal-head__subline' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 14 ) );
 		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
 		expect( await text( el ) ).toMatch( /^[A-Z][a-z]+day( · .+)?$/ );
-	} ); // P2-01
+	} );
 
-	test.fixme( // P2-01
-	'jr-h1: .ttm-journal-head h1 @1280', async ( { page } ) => {
+	test( 'jr-h1: .ttm-journal-head h1 @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.journalPost, 1280 );
 		const el = page.locator( '.ttm-journal-head h1' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 30 ) );
 		expect( await computed( el, 'line-height' ) ).toBe( px( 33.6 ) );
-	} ); // P2-01
+	} );
 
-	test.fixme( // P2-01
-	'jr-body: .ttm-journal-head main @1280', async ( { page } ) => {
+	test( 'jr-body: .ttm-journal-head main @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.journalPost, 1280 );
 		const el = page.locator( '.ttm-journal-head main' );
-		expect( await computed( el, 'max-width' ) ).toBe( '36em' );
-	} ); // P2-01
+		// getComputedStyle resolves em to px: 36em at the 18px body size.
+		expect( await computed( el, 'max-width' ) ).toBe( px( 36 * 18 ) );
+	} );
 
-	test.fixme( // P2-01
-	'jr-body-p: .ttm-journal-head main .entry-content p (first) @1280', async ( {
+	test( 'jr-body-p: .ttm-journal-head main .entry-content p (first) @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.journalPost, 1280 );
@@ -1530,66 +1523,75 @@ test.describe( 'journal', () => {
 			.first();
 		expect( await computed( el, 'font-size' ) ).toBe( px( 18 ) );
 		expect( await computed( el, 'margin-bottom' ) ).toBe( px( 18 ) );
-	} ); // P2-01
+	} );
 
-	test.fixme( // P2-01
-	'jr-synd: .ttm-syndication @1280', async ( { page } ) => {
+	test( 'jr-synd: .ttm-syndication @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.journalPost, 1280 );
 		const el = page.locator( '.ttm-syndication' );
 		expect( await computed( el, 'border-top-width' ) ).toBe( px( 1 ) );
 		expect( await computed( el, 'padding-top' ) ).toBe( px( 14 ) );
 		expect( await computed( el, 'margin-top' ) ).toBe( px( 28 ) );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 13 ) );
-	} ); // P2-01
+	} );
 
-	test.fixme( // P2-01
-	'jr-synd-link: .ttm-syndication a (first) @1280', async ( { page } ) => {
+	test( 'jr-synd-link: .ttm-syndication a (first) @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.journalPost, 1280 );
 		const el = page.locator( '.ttm-syndication a' ).first();
 		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
-	} ); // P2-01
+	} );
 
-	test.fixme( // P2-01
-	'jr-synd-words: .ttm-syndication__words @1280', async ( { page } ) => {
+	test( 'jr-synd-words: .ttm-syndication__words @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.journalPost, 1280 );
 		const el = page.locator( '.ttm-syndication__words' );
-		expect( await computed( el, 'margin-left' ) ).toBe( 'auto' );
+		// A flex item's `margin-left: auto` resolves to a used px value; assert its effect:
+		// the words sit flush right, clear of the sentence.
+		const wrapper = await page.locator( '.ttm-syndication' ).boundingBox();
+		const textBox = await page
+			.locator( '.ttm-syndication__text' )
+			.boundingBox();
+		const words = await el.boundingBox();
+		expect(
+			Math.abs( words.x + words.width - ( wrapper.x + wrapper.width ) )
+		).toBeLessThan( 1 );
+		expect( words.x ).toBeGreaterThan( textBox.x + textBox.width + 20 );
 		expect( await text( el ) ).toMatch( /^\d+ words$/ );
-	} ); // P2-01
+	} );
 
-	test.fixme( // P2-01
-	'jr-note: .ttm-journal-head__note @1280', async ( { page } ) => {
+	test( 'jr-note: .ttm-journal-head__note @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.journalPost, 1280 );
 		const el = page.locator( '.ttm-journal-head__note' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
 		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
 		expect( await computed( el, 'line-height' ) ).toBe( px( 18 ) );
-	} ); // P2-01
+	} );
 
-	test.fixme( // P2-01
-	'jr-rss: .ttm-journal-head__rss a @1280', async ( { page } ) => {
+	test( 'jr-rss: .ttm-journal-head__rss a @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.journalPost, 1280 );
 		const el = page.locator( '.ttm-journal-head__rss a' );
 		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
 		expect( await text( el ) ).toBe( 'Journal RSS' );
-	} ); // P2-01
+	} );
 
-	test.fixme( // P2-01
-	'jr-count-hidden: .ttm-journal-head__count @1280', async ( { page } ) => {
+	test( 'jr-count-hidden: .ttm-journal-head__count @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.journalPost, 1280 );
 		const el = page.locator( '.ttm-journal-head__count' );
 		expect( await el.count() ).toBe( 0 );
-	} ); // P2-01
+	} );
 
-	test.fixme( // P2-01
-	'jr-rule: .ttm-journal-head + hr.is-style-rule-2 @1280', async ( {
+	test( 'jr-rule: .ttm-journal-head + hr.is-style-rule-2 @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.journalPost, 1280 );
 		const el = page.locator( '.ttm-journal-head + hr.is-style-rule-2' );
 		expect( await computed( el, 'height' ) ).toBe( px( 2 ) );
 		expect( await computed( el, 'width' ) ).toBe( px( 1184 ) );
-	} ); // P2-01
+	} );
 } );
 
 test.describe( 'journal stream', () => {

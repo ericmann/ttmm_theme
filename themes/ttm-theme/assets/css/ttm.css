@@ -1938,10 +1938,76 @@ blockquote.is-style-pull cite,
 	color: var(--wp--preset--color--neutral-700);
 }
 
+/* 4.12 journal post header (SPEC §6.4) */
+.ttm-journal-head {
+	gap: 0 48px;
+	padding: 40px 0 48px;
+}
+
+.ttm-journal-head .is-style-kicker {
+	margin: 0 0 6px;
+}
+
+.ttm-journal-head .is-style-journal-date {
+	margin: 0 0 0 -0.03em;
+}
+
+.ttm-journal-head__subline {
+	margin: 6px 0 0;
+	font-size: 14px;
+	color: var(--wp--preset--color--neutral-700);
+}
+
+.ttm-journal-head main {
+	max-width: 36em;
+}
+
+.ttm-journal-head h1 {
+	margin: 0 0 18px;
+}
+
+.ttm-journal-head main .entry-content p {
+	margin: 0 0 18px;
+}
+
+.ttm-journal-head main .entry-content p:last-child {
+	margin-bottom: 0;
+}
+
+.ttm-journal-head__aside {
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--wp--preset--color--neutral-700);
+}
+
+.ttm-journal-head__note {
+	margin: 0 0 8px;
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--wp--preset--color--neutral-700);
+}
+
+.ttm-journal-head__rss {
+	margin: 0;
+	font-size: 12px;
+}
+
+.ttm-journal-head .ttm-journal-head__aside .ttm-journal-head__rss a {
+	color: var(--wp--preset--color--accent-700);
+	text-decoration: none;
+}
+
+.ttm-journal-head__count {
+	margin: 8px 0 0;
+	font-size: 12px;
+	color: var(--wp--preset--color--neutral-700);
+}
+
+/* 4.13 syndication line */
 .ttm-syndication {
 	display: flex;
-	justify-content: space-between;
-	align-items: baseline;
+	gap: 20px;
+	align-items: center;
 	border-top: var(--ttm-rule-1);
 	padding-top: 14px;
 	margin-top: 28px;
@@ -1949,13 +2015,21 @@ blockquote.is-style-pull cite,
 	color: var(--wp--preset--color--neutral-700);
 }
 
+.ttm-syndication__text {
+	display: inline;
+}
+
+/* Underlined so the accent link is distinguishable from the grey sentence (axe link-in-text-block). */
 /* stylelint-disable-next-line no-descending-specificity */
 .ttm-syndication a {
 	color: var(--wp--preset--color--accent-700);
+	text-decoration: underline;
+	text-underline-offset: 3px;
 }
 
-.ttm-journal-head:has(.ttm-syndication) .ttm-journal-head__count {
-	display: none;
+.ttm-syndication__words {
+	margin-left: auto;
+	font-feature-settings: "tnum";
 }
 
 /* Q-M1/Q-M2 classic content: footnotes */
@@ -1991,9 +2065,29 @@ ul.modern-footnotes-list,
 	.ttm-journal-head {
 		grid-template-columns: 1fr;
 	}
+
+	/* §6.4: the standing note becomes a 1px-ruled footnote under the body. */
+	.ttm-journal-head__aside {
+		margin-top: 28px;
+		padding-top: 14px;
+		border-top: var(--ttm-rule-1);
+	}
 }
 
 @media (max-width: 720px) {
+
+	.ttm-journal-head .is-style-journal-date {
+		font-size: 36px;
+	}
+
+	.ttm-journal-head h1 {
+		font-size: 26px;
+	}
+
+	.ttm-journal-head main .entry-content {
+		font-size: 17px;
+		line-height: 1.6;
+	}
 
 	/* 3b: the two cells stack with the rule between them turned horizontal. */
 	.ttm-prevnext {

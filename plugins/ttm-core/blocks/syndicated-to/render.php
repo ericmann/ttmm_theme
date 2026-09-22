@@ -1,6 +1,7 @@
 <?php
 /**
- * `ttm/syndicated-to` render (01 §4.13): single Journal posts only, F14 -> '' with no URLs.
+ * `ttm/syndicated-to` render (01 §4.13, SPEC §6.4): single Journal posts only, F14 -> '' with no
+ * URLs. Two spans (sentence + word count) inside the flex wrapper; no `<p>`.
  *
  * @package TTM\Core\Blocks
  *
@@ -74,18 +75,16 @@ $ttm_sentence = wp_kses(
 );
 ?>
 <div <?php echo Helpers::wrapper( 'syndication' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() output is already escaped. ?>>
-	<p>
-		<?php echo $ttm_sentence; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_kses()'d above. ?>
-		<span class="ttm-syndication__words">
-			<?php
-			echo esc_html(
-				sprintf(
-					/* translators: %d: word count. */
-					_n( '%d word', '%d words', $ttm_words, 'ttm-core' ),
-					$ttm_words
-				)
-			);
-			?>
-		</span>
-	</p>
+	<span class="ttm-syndication__text"><?php echo $ttm_sentence; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_kses()'d above. ?></span>
+	<span class="ttm-syndication__words">
+		<?php
+		echo esc_html(
+			sprintf(
+				/* translators: %d: word count. */
+				_n( '%d word', '%d words', $ttm_words, 'ttm-core' ),
+				$ttm_words
+			)
+		);
+		?>
+	</span>
 </div>

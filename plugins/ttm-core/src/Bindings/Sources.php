@@ -32,6 +32,8 @@ class Sources {
 	 */
 	public static function register(): void {
 		add_action( 'init', [ self::class, 'register_sources' ] );
+		add_filter( 'render_block_core/paragraph', [ self::class, 'drop_empty_bound' ], 20, 2 );
+		add_filter( 'render_block_core/heading', [ self::class, 'drop_empty_bound' ], 20, 2 );
 		add_filter( 'render_block_core/query-pagination-next', [ self::class, 'label_next' ], 10, 3 );
 		add_filter( 'render_block_core/query-pagination-previous', [ self::class, 'label_previous' ], 10, 3 );
 	}
@@ -456,7 +458,7 @@ class Sources {
 	}
 
 	/**
-	 * `ttm/word-count`.
+	 * `ttm/word-count` (`{"whenUnsyndicated": true}` -> '' when the post has any syndication URL).
 	 *
 	 * @param array<string, mixed> $source_args    Unused: no args.
 	 * @param WP_Block             $block_instance Consuming block.
@@ -464,16 +466,53 @@ class Sources {
 	 * @return string
 	 */
 	public static function word_count( array $source_args, $block_instance, string $attribute_name ): string {
-		unset( $source_args );
-
 		$post_id = (int) ( $block_instance->context['postId'] ?? 0 );
 		if ( ! $post_id ) {
 			return '';
 		}
 
-		$words = (int) get_post_meta( $post_id, 'ttm_word_count', true );
+		$words      = (int) get_post_meta( $post_id, 'ttm_word_count', true );
+		$suppressed = ! empty( $source_args['whenUnsyndicated'] ) && self::is_syndicated( $post_id );
 
-		return self::finalize( Values::word_count( $words ), $block_instance, $attribute_name );
+		return self::finalize( Values::word_count( $words, $suppressed ), $block_instance, $attribute_name );
+	}
+
+	/**
+	 * Whether `ttm_syndication` holds at least one non-empty URL (SPEC §6.4 F14 inverse).
+	 *
+	 * @param int $post_id Post id.
+	 * @return bool
+	 */
+	private static function is_syndicated( int $post_id ): bool {
+		$syndication = get_post_meta( $post_id, 'ttm_syndication', true );
+		if ( ! is_array( $syndication ) ) {
+			return false;
+		}
+
+		foreach ( $syndication as $url ) {
+			if ( is_string( $url ) && '' !== trim( $url ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Decision "Empty bound blocks": a paragraph/heading bound to a `ttm/*` source whose rendered
+	 * text is empty renders nothing at all (06 governing rule: nothing renders empty).
+	 *
+	 * @param string               $content      Rendered block HTML.
+	 * @param array<string, mixed> $parsed_block Parsed block.
+	 * @return string
+	 */
+	public static function drop_empty_bound( string $content, array $parsed_block ): string {
+		$source = (string) ( $parsed_block['attrs']['metadata']['bindings']['content']['source'] ?? '' );
+		if ( 0 !== strpos( $source, 'ttm/' ) ) {
+			return $content;
+		}
+
+		return '' === trim( wp_strip_all_tags( $content ) ) ? '' : $content;
 	}
 
 	/**

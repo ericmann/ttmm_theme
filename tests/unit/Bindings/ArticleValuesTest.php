@@ -38,6 +38,11 @@ class ArticleValuesTest extends TestCase {
 		$this->assertSame( '', Values::word_count( 0 ) );
 	}
 
+	public function test_word_count_when_unsyndicated_flag(): void {
+		$this->assertSame( '', Values::word_count( 248, true ) );
+		$this->assertSame( '248 words', Values::word_count( 248, false ) );
+	}
+
 	public function test_journal_subline_with_and_without_location(): void {
 		$sunday = $this->date( '2026-09-20' );
 

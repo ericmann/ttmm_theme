@@ -85,7 +85,9 @@ class ChromePartsTest extends TTM_IntegrationTestCase {
 		$html = (string) do_blocks( '<!-- wp:template-part {"slug":"footer","theme":"ttm-theme"} /-->' );
 
 		$this->assertSame( 1, substr_count( $html, 'ttm-footer__meta' ) );
-		$this->assertSame( 1, substr_count( $html, 'ttm-footer__copyright' ) );
+		// Decision "Empty bound blocks" (P2-01): with no stored verse the bound copyright
+		// paragraph renders nothing at all rather than an empty slot.
+		$this->assertSame( 0, substr_count( $html, 'ttm-footer__copyright' ) );
 		$this->assertSame( 9, substr_count( $html, '<li class="wp-block-navigation-item' ) );
 	}
 
