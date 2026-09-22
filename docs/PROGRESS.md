@@ -45,7 +45,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P5-04 Handoff, SETUP/README notes and CI check
 - [x] P5-05 Phase 5 push — final screenshots
 - [x] R1-01 Search result rows must be whole-row links
-- [ ] R1-02 Rule 36: remove `layout: constrained` from inside grid groups
+- [x] R1-02 Rule 36: remove `layout: constrained` from inside grid groups
 - [ ] R1-03 Fix the dead ≤720 override on the series featured part rows
 - [ ] R1-04 Archive row dates and the serial meta line must match SPEC's literal text
 - [ ] R1-05 Close the test gaps on the flight's own late fixes
@@ -366,3 +366,10 @@ No new CSS needed: `.ttm-archive-row .is-style-kicker { grid-row: 1 }` already e
 Tests: unit test_section_label_search_row_and_empty (normal 'Technology' + empty ''); integration test_search_template_renders_query_and_rows updated to assert `<a href=... class="wp-block-group ttm-archive-row...">` wrapping `<h3 class="ttm-archive-row__title` and assert no `<div class="wp-block-group ttm-archive-row` remains; e2e new row `search-row-link` asserts tagName A, non-empty href, headline-first text.
 Verified: full foundry_verify green (composer lint, test:unit, npm lint, npm test:unit, npm build, forbidden-patterns, test:integration 480/480, test:e2e 433/433).
 Nothing for a later task: search-row format is search.html-specific (no other template uses core/post-terms for its row kicker).
+
+### R1-02 — bc58144
+Changed page-writing.html's ttm-writing-body__stories/__books groups and stat-row.php's three groups (inside the core layout:grid .ttm-stats group) from layout:constrained to layout:default. No CSS changes needed; existing ttm.css rules already own width/gap and the ≤1024 display:contents reorder at ttm.css:3130-3133 still applies cleanly.
+Verified nesting sweep: grep -rl constrained across themes/ttm-theme/{templates,parts,patterns} now only matches the out-of-scope top-level groups (front-page.html, index.html, page-series.html:33, masthead-front.php, header-front.html, code-figure.php) — none nested inside an is-style-grid-*/layout:grid group.
+Tests added (fidelity.spec.mjs): wr-body-layout (.ttm-writing-body descendants @1280), ar-body-layout (.ttm-archive-body), jr-head-layout (.ttm-journal-head), hub-head-layout (.ttm-hub-head), hub-featured-layout (.ttm-series-featured) — each asserts no descendant class matches /is-layout-constrained/, covering every is-style-grid-* screen per the task.
+Verified: full foundry_verify green (composer lint, unit x2, npm lint/build, forbidden-patterns, integration 480/480, e2e 438/438 incl. 5 new rows).
+Nothing further needed by later tasks.
