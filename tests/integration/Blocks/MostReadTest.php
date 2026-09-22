@@ -73,6 +73,33 @@ class MostReadTest extends TTM_IntegrationTestCase {
 		$this->assertSame( 1, substr_count( $html, 'ttm-most-read__item' ) );
 	}
 
+	/**
+	 * SPEC §6.6 "Tag / date archive": aside = Most read only, so a tag archive (no category
+	 * context) reads flagged posts site-wide rather than scoped to a category.
+	 */
+	public function test_renders_sitewide_flagged_posts_on_tag_archive(): void {
+		$tech     = $this->category_id( 'technology', 'Technology' );
+		$security = $this->category_id( 'security', 'Security' );
+
+		$a = $this->flagged_post( $tech, 'From Technology', '2026-09-10 09:00:00' );
+		$b = $this->flagged_post( $security, 'From Security', '2026-09-20 09:00:00' );
+		wp_set_post_tags( $a, [ 'php' ] );
+		wp_set_post_tags( $b, [ 'php' ] );
+
+		$this->go_to( get_tag_link( get_term_by( 'slug', 'php', 'post_tag' ) ) );
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'From Technology', $html );
+		$this->assertStringContainsString( 'From Security', $html );
+	}
+
+	public function test_renders_nothing_outside_any_archive(): void {
+		$this->go_to( '/' );
+
+		$this->assertSame( '', trim( $this->render() ) );
+	}
+
 	public function test_zero_renders_nothing(): void {
 		$tech = $this->category_id( 'technology', 'Technology' );
 		self::factory()->post->create(

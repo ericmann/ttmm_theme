@@ -56,6 +56,8 @@ class ArchiveByYearTest extends TTM_IntegrationTestCase {
 		$html = (string) do_blocks( $this->wrapped_query() );
 
 		$this->assertSame( 2, substr_count( $html, 'ttm-archive-year__label' ) );
+		$this->assertStringContainsString( '<p class="ttm-archive-year__label tnum">2024</p>', $html );
+		$this->assertStringNotContainsString( '<h2 class="ttm-archive-year__label', $html );
 
 		$pos_2024 = strpos( $html, '>2024<' );
 		$pos_2023 = strpos( $html, '>2023<' );

@@ -669,6 +669,18 @@ class Sources {
 			return $content;
 		}
 
+		// Decision "Pagination": core renders '' when there is no next/previous page; that
+		// side becomes a disabled, unlinked span with the literal (year-less) label.
+		if ( '' === trim( $content ) ) {
+			$tag = 'older' === $dir ? 'next' : 'previous';
+
+			return sprintf(
+				'<span class="wp-block-query-pagination-%1$s is-disabled">%2$s</span>',
+				$tag,
+				esc_html( Values::pagination_disabled_label( $dir ) )
+			);
+		}
+
 		$label = self::resolve_pagination_label( $dir );
 		if ( '' === $label ) {
 			return $content;
@@ -859,7 +871,7 @@ class Sources {
 
 		$names = wp_list_pluck( array_slice( $tags, 0, $limit ), 'name' );
 
-		return implode( ', ', $names );
+		return Values::tags_line( $names );
 	}
 
 	/**

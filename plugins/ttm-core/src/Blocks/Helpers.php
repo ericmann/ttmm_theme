@@ -299,7 +299,7 @@ class Helpers {
 		$html = '';
 		foreach ( $order as $year ) {
 			$html .= sprintf(
-				'<div class="ttm-archive-year"><h2 class="ttm-archive-year__label tnum">%1$d</h2><ul class="wp-block-post-template ttm-archive-year__rows">%2$s</ul></div>',
+				'<div class="ttm-archive-year"><p class="ttm-archive-year__label tnum">%1$d</p><ul class="wp-block-post-template ttm-archive-year__rows">%2$s</ul></div>',
 				$year,
 				implode( '', $groups[ $year ] )
 			);

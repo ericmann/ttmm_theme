@@ -205,4 +205,9 @@ class ValuesTest extends TestCase {
 			) 
 		);
 	}
+
+	public function test_meta_line_tags_joined_with_middle_dots(): void {
+		$this->assertSame( 'wordpress · php', Values::tags_line( [ 'wordpress', 'php' ] ) );
+		$this->assertSame( '', Values::tags_line( [] ) );
+	}
 }

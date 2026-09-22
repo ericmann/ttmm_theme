@@ -433,4 +433,28 @@ class Values {
 
 		return '';
 	}
+
+	/**
+	 * Join tag names for the "tags-or-series" meta-line part (Decision "New bindings"
+	 * extension): middle dots, not commas.
+	 *
+	 * @param string[] $names Tag names.
+	 * @return string
+	 */
+	public static function tags_line( array $names ): string {
+		return implode( ' · ', $names );
+	}
+
+	/**
+	 * The disabled side of pagination (Decision "Pagination"): literal, with no year range,
+	 * since there is no target page to name one from.
+	 *
+	 * @param string $dir `older` or `newer`.
+	 * @return string
+	 */
+	public static function pagination_disabled_label( string $dir ): string {
+		return 'newer' === $dir
+			? __( '← Newer', 'ttm-core' )
+			: __( 'Older →', 'ttm-core' );
+	}
 }

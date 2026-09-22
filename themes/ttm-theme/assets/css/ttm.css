@@ -2308,6 +2308,12 @@ ul.modern-footnotes-list,
 	font-size: 12px;
 }
 
+.ttm-archive-body {
+	column-gap: 64px;
+	padding: 8px 0 48px;
+	border-top: var(--ttm-rule-2);
+}
+
 /* Decision S6: the filter row owns the 2px rule below it too, so the body group that
  * follows -- .ttm-archive-body, added in P3-03 -- needs none of its own. */
 .ttm-filter-row + .ttm-archive-body {
@@ -2334,30 +2340,113 @@ ul.modern-footnotes-list,
 	}
 }
 
-/* 4.27 year group */
+/* 4.27 year group (SPEC §6.6 "Body") */
 .ttm-archive-year {
-	margin-bottom: var(--wp--preset--spacing--50);
+	display: grid;
+	grid-template-columns: 120px 1fr;
+	column-gap: 24px;
+	padding: 24px 0 8px;
+	border-top: var(--ttm-rule-2);
 }
 
 .ttm-archive-year__label {
-	font-size: 28px;
+	margin: 0;
+	font-size: 32px;
 	font-weight: 800;
-	border-bottom: var(--ttm-rule-2);
-	padding-bottom: 8px;
-	margin-bottom: var(--wp--preset--spacing--20);
+	line-height: 1;
+	letter-spacing: -0.02em;
+	font-feature-settings: "tnum";
 }
 
+.ttm-archive-year__rows {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+/* Rows are anchors (Decision "Whole-row links", link_rows()). */
 .ttm-archive-row {
-	border-top: var(--ttm-rule-1);
-	padding: var(--wp--preset--spacing--30) 0;
+	display: grid;
+	grid-template-columns: 72px 1fr;
+	grid-template-rows: auto auto auto;
+	column-gap: 20px;
+	padding: 14px 0;
+	border-bottom: var(--ttm-rule-1);
+	color: inherit;
+	text-decoration: none;
+}
+
+.ttm-archive-row__date {
+	grid-column: 1;
+	grid-row: 1;
+	margin: 0;
+	padding-top: 4px;
+	font-size: 12px;
+	color: var(--wp--preset--color--neutral-700);
+	font-feature-settings: "tnum";
+}
+
+.ttm-archive-row__title {
+	grid-column: 2;
+	grid-row: 1;
+	margin: 0;
+	font-size: 20px;
+	font-weight: 800;
+	line-height: 1.2;
+}
+
+.ttm-archive-row:hover .ttm-archive-row__title {
+	color: var(--wp--preset--color--accent);
+}
+
+.ttm-archive-row__dek {
+	grid-column: 2;
+	grid-row: 2;
+	margin: 5px 0 0;
+	font-size: 14px;
+	line-height: 1.45;
+	color: var(--wp--preset--color--neutral-800);
+	max-width: 56ch;
+}
+
+.ttm-archive-row__meta {
+	grid-column: 2;
+	grid-row: 3;
+	margin: 6px 0 0;
+	font-size: 12px;
+	color: var(--wp--preset--color--neutral-700);
 }
 
 /* 4.28 pagination */
 .wp-block-query-pagination {
+	display: flex;
 	justify-content: space-between;
-	border-top: var(--ttm-rule-2);
-	padding-top: var(--wp--preset--spacing--30);
-	margin-top: var(--wp--preset--spacing--40);
+	padding: 20px 0;
+	margin: 0;
+	border-top: 0;
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.wp-block-query-pagination .is-disabled {
+	color: var(--wp--preset--color--neutral-700);
+}
+
+@media (max-width: 720px) {
+
+	.ttm-archive-year {
+		grid-template-columns: 1fr;
+	}
+
+	.ttm-archive-year__label {
+		font-size: 24px;
+		border-bottom: var(--ttm-rule-2);
+		padding-bottom: 8px;
+	}
+
+	.ttm-archive-row {
+		grid-template-columns: auto 1fr;
+	}
 }
 
 /* 4.29 numbered rows */
@@ -2393,13 +2482,6 @@ ul.modern-footnotes-list,
 	padding: 8px 14px;
 	font-weight: 800;
 	cursor: pointer;
-}
-
-@media (max-width: 720px) {
-
-	.ttm-archive-year__label {
-		border-bottom: var(--ttm-rule-2);
-	}
 }
 
 /* 4.19 series progress */

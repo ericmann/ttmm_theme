@@ -148,6 +148,10 @@ class ArchiveTemplatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'Findable Cache Article', $html );
 	}
 
+	/**
+	 * Decision "Whole-row links": the row's outer group is the single anchor (link_rows());
+	 * the title (isLink: false) is not itself a link and comes first in the DOM.
+	 */
 	public function test_archive_row_is_single_link_with_title_name(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
 		$security = $this->category_id( 'security', 'Security' );
@@ -165,9 +169,44 @@ class ArchiveTemplatesTest extends TTM_IntegrationTestCase {
 
 		$html = $this->render_template( 'category' );
 
-		// One archive row for the single seeded post: exactly one linked title anchor.
-		$this->assertSame( 1, substr_count( $html, 'class="wp-block-post-title"><a' ) );
-		$this->assertStringContainsString( '>Only Row Title</a>', $html );
+		$this->assertSame( 1, preg_match_all( '/<a href="[^"]+" class="wp-block-group ttm-archive-row[^"]*">/', $html ) );
+		$this->assertStringNotContainsString( '<h3 class="wp-block-post-title"><a', $html );
+		$this->assertMatchesRegularExpression( '/<a href="[^"]+" class="wp-block-group ttm-archive-row[^"]*">\s*<h3 class="ttm-archive-row__title wp-block-post-title">Only Row Title<\/h3>/', $html );
+	}
+
+	/**
+	 * Decision "Pagination": the missing side (page 1 has no previous) renders as a disabled,
+	 * unlinked span with the literal label, not core's empty string.
+	 */
+	public function test_pagination_missing_side_renders_disabled_span(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$security = $this->category_id( 'security', 'Security' );
+
+		add_filter(
+			'ttm_config',
+			static function ( array $config ): array {
+				$config['archive.per_page'] = 1;
+				return $config;
+			}
+		);
+
+		foreach ( [ '2022-05-01 09:00:00', '2026-05-01 09:00:00' ] as $date ) {
+			$id = self::factory()->post->create(
+				[
+					'post_status'   => 'publish',
+					'post_category' => [ $security ],
+					'post_date'     => $date,
+				]
+			);
+			update_post_meta( $id, 'ttm_primary_category', $security );
+		}
+
+		$this->go_to( (string) get_category_link( $security ) );
+
+		$html = $this->render_template( 'category' );
+
+		$this->assertMatchesRegularExpression( '/<span class="wp-block-query-pagination-previous is-disabled">← Newer<\/span>/', $html );
+		$this->assertStringNotContainsString( 'wp-block-query-pagination-numbers', $html );
 	}
 
 	public function test_category_page_two_has_newer_label_with_years(): void {
