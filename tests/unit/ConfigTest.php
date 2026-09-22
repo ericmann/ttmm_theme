@@ -45,6 +45,7 @@ class ConfigTest extends TestCase {
 			'series.index_batch',
 			'series.max_purchase_links',
 			'series.hub_featured_parts',
+			'series.related_limit',
 			'writing.also_running_limit',
 			'writing.chapters_recent',
 			'writing.story_tiles',
@@ -95,6 +96,7 @@ class ConfigTest extends TestCase {
 			'journal_in_main_feed',
 			'comments_enabled',
 			'seed.quiet_offset_days',
+			'seed.image_band_angle',
 		];
 
 		$defaults = Config::defaults();
@@ -168,5 +170,13 @@ class ConfigTest extends TestCase {
 
 	public function test_verse_endpoint_default_is_the_dailymedtoday_api(): void {
 		$this->assertSame( 'https://dailymedtoday.com/api/v1/meditations/', Config::get( 'verse.endpoint' ) );
+	}
+
+	public function test_series_related_limit_default_is_four(): void {
+		$this->assertSame( 4, Config::get( 'series.related_limit' ) );
+	}
+
+	public function test_seed_image_band_angle_default_is_thirty(): void {
+		$this->assertSame( 30, Config::get( 'seed.image_band_angle' ) );
 	}
 }

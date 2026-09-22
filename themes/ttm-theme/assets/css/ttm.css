@@ -226,7 +226,7 @@ p.is-style-poster {
 }
 
 .is-style-kicker {
-	font-size: var(--wp--preset--font-size--kicker);
+	font-size: var(--wp--preset--font-size--caption);
 	font-weight: 600;
 	line-height: 1.2;
 	letter-spacing: 0.08em;
@@ -280,7 +280,7 @@ p.is-style-poster {
 }
 
 .is-style-journal-title {
-	font-size: var(--wp--preset--font-size--h2);
+	font-size: var(--wp--preset--font-size--article-h-2);
 	font-weight: 800;
 	line-height: 1.12;
 	letter-spacing: -0.015em;
@@ -488,7 +488,7 @@ p.is-style-poster {
 }
 
 .entry-content h2 {
-	font-size: var(--wp--preset--font-size--h2);
+	font-size: var(--wp--preset--font-size--article-h-2);
 	margin: var(--wp--preset--spacing--80) 0 var(--wp--preset--spacing--30);
 }
 
@@ -1110,8 +1110,7 @@ blockquote.is-style-pull cite,
 
 	.ttm-lead__title {
 
-		/* "h2" slug becomes --font-size--h-2 (WP hyphenates letter/digit boundaries). */
-		font-size: var(--wp--preset--font-size--h-2);
+		font-size: var(--wp--preset--font-size--article-h-2);
 	}
 
 	.ttm-lead__dek {

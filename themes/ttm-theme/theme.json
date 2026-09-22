@@ -66,7 +66,7 @@
 				{ "slug": "cell-lead", "name": "Cell lead", "size": "21px" },
 				{ "slug": "cell-lead-l", "name": "Cell lead large", "size": "24px" },
 				{ "slug": "pull", "name": "Pull", "size": "28px" },
-				{ "slug": "h2", "name": "Heading 2", "size": "30px" },
+				{ "slug": "article-h2", "name": "Article heading 2", "size": "30px" },
 				{ "slug": "featured", "name": "Featured", "size": "40px" },
 				{ "slug": "lead", "name": "Lead", "size": "44px" },
 				{ "slug": "journal-date", "name": "Journal date", "size": "48px" },
@@ -134,10 +134,10 @@
 				"typography": { "fontWeight": "800", "letterSpacing": "-0.02em", "lineHeight": "1.1" }
 			},
 			"h1": {
-				"typography": { "fontSize": "var(--wp--preset--font-size--h1)", "lineHeight": "1.02", "letterSpacing": "-0.025em" }
+				"typography": { "fontSize": "var(--wp--preset--font-size--h-1)", "lineHeight": "1.02", "letterSpacing": "-0.025em" }
 			},
 			"h2": {
-				"typography": { "fontSize": "var(--wp--preset--font-size--h2)" }
+				"typography": { "fontSize": "var(--wp--preset--font-size--article-h-2)" }
 			},
 			"h6": {
 				"typography": { "fontSize": "var(--wp--preset--font-size--caption)", "textTransform": "uppercase", "letterSpacing": "0.08em" }
