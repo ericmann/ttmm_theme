@@ -87,6 +87,100 @@ class SeederTest extends TTM_IntegrationTestCase {
 		$this->assertSame( 'Test Image', get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) );
 	}
 
+	public function test_generated_image_is_neutral_with_no_red_pixels(): void {
+		if ( ! function_exists( 'imagecreatetruecolor' ) ) {
+			$this->markTestSkipped( 'GD is not available.' );
+		}
+
+		$seeder        = new Seeder();
+		$attachment_id = $seeder->image( 'Neutral Image', 'ttm-tile' );
+		$file          = get_attached_file( $attachment_id );
+		$image         = imagecreatefrompng( $file );
+
+		$width  = imagesx( $image );
+		$height = imagesy( $image );
+
+		// Sample interior points only (5px margin) so the thin BORDER stroke, which is a
+		// lighter neutral but not part of the "field vs. band" contrast this test cares about,
+		// never lands in the sample.
+		for ( $i = 0; $i < 20; $i++ ) {
+			$x     = 5 + (int) ( ( $width - 10 ) * ( $i / 19 ) );
+			$y     = 5 + (int) ( ( $height - 10 ) * ( ( $i * 7 ) % 20 ) / 19 );
+			$rgb   = imagecolorat( $image, $x, $y );
+			$color = imagecolorsforindex( $image, $rgb );
+
+			$this->assertLessThanOrEqual( 20, $color['red'] - $color['green'], "pixel ({$x},{$y}) is reddish" );
+			$this->assertLessThan( 200, $color['red'], "pixel ({$x},{$y}) is too bright to be neutral" );
+		}
+
+		imagedestroy( $image );
+	}
+
+	public function test_cover_is_two_by_three_and_darker_than_field(): void {
+		if ( ! function_exists( 'imagecreatetruecolor' ) ) {
+			$this->markTestSkipped( 'GD is not available.' );
+		}
+
+		$seeder        = new Seeder();
+		$attachment_id = $seeder->cover( 'A Cover Title' );
+		$meta          = wp_get_attachment_metadata( $attachment_id );
+
+		$this->assertSame( 600, $meta['width'] );
+		$this->assertSame( 900, $meta['height'] );
+
+		$file  = get_attached_file( $attachment_id );
+		$image = imagecreatefrompng( $file );
+		// Sample a corner, away from the centred title text.
+		$rgb   = imagecolorat( $image, 10, 10 );
+		$color = imagecolorsforindex( $image, $rgb );
+		imagedestroy( $image );
+
+		// COVER (neutral-700, [96, 93, 93]) is darker than FIELD (neutral-400, [186, 182, 182]).
+		$this->assertLessThan( 150, $color['red'] );
+	}
+
+	public function test_books_with_cover_flag_get_cover_ids(): void {
+		if ( ! function_exists( 'imagecreatetruecolor' ) ) {
+			$this->markTestSkipped( 'GD is not available.' );
+		}
+
+		$seeder = new Seeder();
+		$seeder->seed_series();
+		$books = $seeder->seed_books();
+
+		$this->assertNotEmpty( $books );
+		foreach ( $books as $book ) {
+			$this->assertGreaterThan( 0, $book['cover_id'] );
+		}
+	}
+
+	public function test_about_page_has_three_by_two_thumbnail(): void {
+		if ( ! function_exists( 'imagecreatetruecolor' ) ) {
+			$this->markTestSkipped( 'GD is not available.' );
+		}
+
+		$seeder = new Seeder();
+		$seeder->seed_pages();
+
+		$about = get_page_by_path( 'about', OBJECT, 'page' );
+		$this->assertNotNull( $about );
+
+		$thumbnail_id = get_post_thumbnail_id( $about->ID );
+		$this->assertGreaterThan( 0, $thumbnail_id );
+
+		$meta = wp_get_attachment_metadata( $thumbnail_id );
+		$this->assertSame( 800, $meta['width'] );
+		$this->assertSame( 533, $meta['height'] );
+	}
+
+	public function test_admin_display_name_is_eric_mann(): void {
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$user = get_userdata( 1 );
+		$this->assertSame( 'Eric Mann', $user->display_name );
+	}
+
 	/**
 	 * Invoke Seeder's private `prose()` (SPEC §6.5: deterministic-by-index paragraph draw).
 	 *

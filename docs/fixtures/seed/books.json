@@ -13,7 +13,8 @@
 				"url": "https://amazon.com/the-quiet-ledger"
 			}
 		],
-		"series_slug": "the-quiet-ledger"
+		"series_slug": "the-quiet-ledger",
+		"cover": true
 	},
 	{
 		"title": "Salt Water Wires",
@@ -28,6 +29,7 @@
 				"url": "https://amazon.com/salt-water-wires"
 			}
 		],
-		"series_slug": "salt-water-wires"
+		"series_slug": "salt-water-wires",
+		"cover": true
 	}
 ]

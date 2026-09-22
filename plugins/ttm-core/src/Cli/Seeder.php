@@ -21,6 +21,17 @@ class Seeder {
 	private const SEED_META = '_ttm_seed';
 
 	/**
+	 * Seed placeholder colours (rule 45): neutral field, darker diagonal band, lighter inset
+	 * border, cover fill and cover text, one `[r, g, b]` array each -- values from
+	 * `docs/_ds/…/styles.css` (neutral-400, neutral-500, neutral-300, neutral-700, neutral-100).
+	 */
+	private const FIELD      = [ 186, 182, 182 ];
+	private const BAND       = [ 155, 151, 151 ];
+	private const BORDER     = [ 215, 211, 211 ];
+	private const COVER      = [ 96, 93, 93 ];
+	private const COVER_TEXT = [ 248, 244, 244 ];
+
+	/**
 	 * Days added to every post's `days_ago` for the "quiet" state.
 	 *
 	 * @var int
@@ -127,6 +138,14 @@ class Seeder {
 		// SPEC §6.5: the mock's tagline. A translatable literal here is fine -- seed content
 		// only, never read at request time.
 		update_option( 'blogdescription', __( 'Technology, business, faith and the occasional story. One writer, several desks.', 'ttm-core' ) );
+
+		// P0-05: every seeded post's author display name, for the byline (SPEC §6.2 art-byline).
+		wp_update_user(
+			[
+				'ID'           => 1,
+				'display_name' => __( 'Eric Mann', 'ttm-core' ),
+			]
+		);
 
 		return [
 			'categories' => count( $categories ),
@@ -235,6 +254,14 @@ class Seeder {
 			if ( $post_id && ! is_wp_error( $post_id ) ) {
 				update_post_meta( $post_id, '_wp_page_template', $row['template'] . '.html' );
 				update_post_meta( $post_id, self::SEED_META, 1 );
+
+				if ( ! empty( $row['featured_image'] ) ) {
+					$attachment_id = $this->image( $row['title'], 'ttm-thumb' );
+					if ( $attachment_id ) {
+						set_post_thumbnail( $post_id, $attachment_id );
+					}
+				}
+
 				$ids[] = $post_id;
 			}
 		}//end foreach
@@ -433,7 +460,7 @@ class Seeder {
 			}
 
 			if ( ! empty( $row['cover'] ) ) {
-				$cover_id = $this->image( $row['name'] . ' cover', 'ttm-cover' );
+				$cover_id = $this->cover( $row['name'] );
 				if ( $cover_id ) {
 					update_term_meta( $term_id, 'ttm_cover_id', $cover_id );
 				}
@@ -487,16 +514,18 @@ class Seeder {
 				}
 			}
 
+			$cover_id = ! empty( $row['cover'] ) ? $this->cover( $row['title'] ) : 0;
+
 			$books[] = [
 				'title'     => $row['title'],
 				'form'      => $row['form'],
 				'year'      => (int) $row['year'],
-				'cover_id'  => 0,
+				'cover_id'  => $cover_id,
 				'formats'   => $row['formats'] ?? [],
 				'links'     => $row['links'] ?? [],
 				'series_id' => $series_id,
 			];
-		}
+		}//end foreach
 
 		update_option( 'ttm_books', \TTM\Core\Fiction\Books::sanitize( $books ) );
 
@@ -564,7 +593,10 @@ class Seeder {
 	}
 
 	/**
-	 * Generate a solid-colour PNG at the given images.sizes dimensions and attach it.
+	 * Generate a neutral placeholder PNG (rule 45: never red) at the given images.sizes
+	 * dimensions and attach it: a `FIELD`-coloured background, a rotated `BAND` polygon whose
+	 * position along the diagonal is deterministic per label, and a 2px `BORDER` rectangle
+	 * inset at the edge.
 	 *
 	 * @param string $label    Alt text / file base name.
 	 * @param string $size_key Key into Config images.sizes.
@@ -579,16 +611,111 @@ class Seeder {
 		[ $width, $height ] = $sizes[ $size_key ] ?? [ 800, 600, true ];
 
 		$image = imagecreatetruecolor( $width, $height );
-		$color = imagecolorallocate( $image, 210, 48, 19 );
-		imagefill( $image, 0, 0, $color );
+		$field = imagecolorallocate( $image, ...self::FIELD );
+		imagefill( $image, 0, 0, $field );
 
+		$this->draw_band( $image, $width, $height, $label );
+
+		$border = imagecolorallocate( $image, ...self::BORDER );
+		imagesetthickness( $image, 2 );
+		imagerectangle( $image, 1, 1, $width - 2, $height - 2, $border );
+
+		return $this->upload_png( $image, sanitize_title( $label ) . '.png', $label );
+	}
+
+	/**
+	 * Generate a `ttm-cover` placeholder PNG (rule 45): a `COVER`-coloured 2:3 field, a
+	 * `BORDER` rectangle inset at the edge, and the title centred, word-wrapped at 18
+	 * characters.
+	 *
+	 * @param string $title Cover title (also the alt text / file base name).
+	 * @return int Attachment id, or 0 when GD is unavailable.
+	 */
+	public function cover( string $title ): int {
+		if ( ! function_exists( 'imagecreatetruecolor' ) ) {
+			return 0;
+		}
+
+		$sizes              = (array) Config::get( 'images.sizes', [] );
+		[ $width, $height ] = $sizes['ttm-cover'] ?? [ 600, 900, true ];
+
+		$image = imagecreatetruecolor( $width, $height );
+		$bg    = imagecolorallocate( $image, ...self::COVER );
+		imagefill( $image, 0, 0, $bg );
+
+		$border = imagecolorallocate( $image, ...self::BORDER );
+		imagesetthickness( $image, 2 );
+		imagerectangle( $image, 1, 1, $width - 2, $height - 2, $border );
+
+		$text         = imagecolorallocate( $image, ...self::COVER_TEXT );
+		$lines        = explode( "\n", wordwrap( $title, 18, "\n", true ) );
+		$line_height  = imagefontheight( 5 ) + 6;
+		$total_height = count( $lines ) * $line_height;
+		$y            = (int) ( ( $height - $total_height ) / 2 );
+		foreach ( $lines as $line ) {
+			$x = (int) ( ( $width - imagefontwidth( 5 ) * strlen( $line ) ) / 2 );
+			imagestring( $image, 5, $x, $y, $line, $text );
+			$y += $line_height;
+		}
+
+		return $this->upload_png( $image, sanitize_title( $title ) . '-cover.png', $title );
+	}
+
+	/**
+	 * Draw the diagonal placeholder band (rule 45): a filled polygon roughly 22% of the
+	 * shorter side wide, rotated by `seed.image_band_angle`, centred at a point along the
+	 * canvas whose horizontal offset is `crc32( $label ) % $width` -- deterministic per label,
+	 * not per run (rule 9: no clock in seed content).
+	 *
+	 * @param \GdImage $image  Target image (mutated in place).
+	 * @param int      $width  Canvas width.
+	 * @param int      $height Canvas height.
+	 * @param string   $label  Deterministic seed for the band's position.
+	 */
+	private function draw_band( $image, int $width, int $height, string $label ): void {
+		$band_color = imagecolorallocate( $image, ...self::BAND );
+		$band_width = (int) round( 0.22 * min( $width, $height ) );
+		$angle      = deg2rad( (float) Config::get( 'seed.image_band_angle', 30 ) );
+		$length     = $width + $height; 
+		// Long enough to cross the canvas at any angle.
+
+		$cx = crc32( $label ) % $width;
+		$cy = $height / 2;
+		$dx = cos( $angle );
+		$dy = sin( $angle );
+		// Perpendicular unit vector, for the band's thickness.
+		$px = -$dy;
+		$py = $dx;
+
+		$points = [
+			$cx - $dx * $length / 2 - $px * $band_width / 2,
+			$cy - $dy * $length / 2 - $py * $band_width / 2,
+			$cx + $dx * $length / 2 - $px * $band_width / 2,
+			$cy + $dy * $length / 2 - $py * $band_width / 2,
+			$cx + $dx * $length / 2 + $px * $band_width / 2,
+			$cy + $dy * $length / 2 + $py * $band_width / 2,
+			$cx - $dx * $length / 2 + $px * $band_width / 2,
+			$cy - $dy * $length / 2 + $py * $band_width / 2,
+		];
+
+		imagefilledpolygon( $image, $points, $band_color );
+	}
+
+	/**
+	 * Encode a GD image as PNG, upload it and attach it to the media library.
+	 *
+	 * @param \GdImage $image    Image to encode (destroyed by this call).
+	 * @param string   $filename Upload filename.
+	 * @param string   $label    Alt text / attachment title.
+	 * @return int Attachment id, or 0 on failure.
+	 */
+	private function upload_png( $image, string $filename, string $label ): int {
 		ob_start();
 		imagepng( $image );
 		$data = ob_get_clean();
 		imagedestroy( $image );
 
-		$filename = sanitize_title( $label ) . '.png';
-		$upload   = wp_upload_bits( $filename, null, $data );
+		$upload = wp_upload_bits( $filename, null, $data );
 		if ( ! empty( $upload['error'] ) ) {
 			return 0;
 		}
