@@ -1,22 +1,5 @@
 [
 	{
-		"title": "The Quiet Ledger",
-		"form": "novel",
-		"year": 2026,
-		"formats": [
-			"ebook",
-			"paperback"
-		],
-		"links": [
-			{
-				"label": "Amazon",
-				"url": "https://amazon.com/the-quiet-ledger"
-			}
-		],
-		"series_slug": "the-quiet-ledger",
-		"cover": true
-	},
-	{
 		"title": "Salt Water Wires",
 		"form": "novel",
 		"year": 2022,

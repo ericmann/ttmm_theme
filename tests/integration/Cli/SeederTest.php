@@ -406,8 +406,14 @@ class SeederTest extends TTM_IntegrationTestCase {
 		);
 	}
 
+	/**
+	 * R1-07: `now` must NOT already be a Sunday, or `journal-post-1`'s `"days_ago": 0` makes
+	 * the post date equal `now` regardless of whether Seeder.php's weekday walk-back loop
+	 * runs at all -- the only coverage for that loop would then be tautological. 2026-09-23
+	 * is a Wednesday; the walk-back must land exactly 3 days earlier, on the Sunday.
+	 */
 	public function test_journal_post_one_is_on_a_sunday_with_location_and_syndication(): void {
-		$this->set_now( '2026-09-20 12:00:00' );
+		$this->set_now( '2026-09-23 12:00:00' );
 
 		$seeder = new Seeder();
 		$seeder->run( 'normal' );
@@ -415,6 +421,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 		$post = get_page_by_path( 'journal-post-1', OBJECT, 'post' );
 		$this->assertNotNull( $post );
 		$this->assertSame( 'Sunday', gmdate( 'l', strtotime( $post->post_date_gmt ) ) );
+		$this->assertSame( '2026-09-20', gmdate( 'Y-m-d', strtotime( $post->post_date_gmt ) ) );
 		$this->assertSame( 'Portland', get_post_meta( $post->ID, 'ttm_location', true ) );
 
 		$syndication = get_post_meta( $post->ID, 'ttm_syndication', true );
@@ -528,13 +535,18 @@ class SeederTest extends TTM_IntegrationTestCase {
 		);
 	}
 
+	/**
+	 * R1-07: SPEC §6.10 and mock 2d's "In print" grid name exactly two books -- an
+	 * assertContains() pair cannot catch a stray third row, so this asserts the exact,
+	 * sorted title set.
+	 */
 	public function test_books_are_salt_water_wires_and_eleven_small_doors(): void {
 		$seeder = new Seeder();
 		$books  = $seeder->seed_books();
 
 		$titles = array_column( $books, 'title' );
-		$this->assertContains( 'Salt Water Wires', $titles );
-		$this->assertContains( 'Eleven Small Doors', $titles );
+		sort( $titles );
+		$this->assertSame( [ 'Eleven Small Doors', 'Salt Water Wires' ], $titles );
 
 		foreach ( $books as $book ) {
 			if ( 'Salt Water Wires' === $book['title'] ) {
