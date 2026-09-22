@@ -30,7 +30,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P3-02 Filter row (01 §4.26) placed directly, with "All"
 - [x] P3-03 Archive body — year groups, rows, meta line and pagination (01 §4.27–4.28)
 - [x] P3-04 Archive aside — series rail, most read (01 §4.29) and the tablet grid
-- [ ] P3-05 Search, 404 and static page (02 §H)
+- [x] P3-05 Search, 404 and static page (02 §H)
 - [ ] P3-06 Phase 3 push — archive screenshots
 - [ ] P4-01 Series hub header and featured block (01 §4.38, §6.7)
 - [ ] P4-02 All-series grid (`layout=grid-2`) and hub clean-up
@@ -156,4 +156,10 @@ Manual check: none.
 ### P3-04 — 13af2ab
 Tests: ar-aside-series, ar-aside-row, ar-mostread, ar-mostread-num, ar-tablet-aside un-fixme'd (fidelity + selectors + all axe screens green). ValuesTest +test_section_label_series_in; SeriesListTest +test_rail_layout_renders_title_and_meta_only, +test_layout_rows_is_no_longer_accepted, "rows layout" test renamed to "list layout"; MostReadTest updated to ttm-numbered__row; ArchiveTemplatesTest +test_category_aside_reads_series_in_section_and_numbered_most_read. foundry_verify fully green: unit 164, integration 470/470, e2e 287 passed / 115 skipped, lints clean, budget 59830/61440, 25 pending coverage, 70 tagged fixme. `grep -rn '"layout":"rows"' themes plugins tests` returns nothing.
 Interpretation: series-list's layout enum drops "rows" for "list" (same markup) and adds "rail" (mark+title+one meta line, reusing strip's assembly); category.html's aside uses layout:"rail". most-read now emits the shared ttm-cell-heading.is-rail / ttm-numbered/__row/__num markup (replacing __list/__item/__num); three of the six P1-05 ttm-numbered* pending lines are now real, satisfied by new base CSS. ttm/section-label{format:series-in} (already built in P1-06/P3-01) is now wired into category.html's aside heading. .ttm-archive-body aside owns the shared padding-top/flex/gap-28 layout and the <=1024 two-column grid for every archive kind. The aside's "Series in Security" heading gets a scoped text-transform:none override (reads as a sentence per the mock and the row's own textContent assertion), unlike sibling kicker-style cell-heading labels which stay uppercase.
+Manual check: none.
+
+### P3-05 — 4fd5157
+Tests: search-h1, search-form, search-row-kicker, 404-h1, 404-strip, 404-latest, page-grid, page-h1 un-fixme'd (fidelity + selectors + all axe screens green). HelpersTest +test_style_search_adds_input_and_button_classes; ValuesTest +test_search_summary_with_and_without_results; ArchiveTemplatesTest's search test extended + new no-results test; TemplatesShellTest's 404 test extended. foundry_verify fully green: unit 166, integration 471/471, e2e 295 passed / 107 skipped, lints clean, budget 61405/61440 (35 bytes headroom), 25 pending coverage, 62 tagged fixme.
+Interpretation: ttm/search-summary is the only new binding (found_posts via global $wp_query). Helpers::style_search() scopes its regexes to <input>/<button> tags themselves -- a looser class="..." match hit the wrapping <form>'s own "button-outside"-style class first. Search rows extend P3-03's archive row with a leading post-terms kicker; .ttm-archive-row gained a 4th grid row globally (harmless elsewhere). 404's "Latest" numbering is CSS counters (::before as the grid's implicit first item), not markup, per Decision "404 Latest numbers"; its title rule needed a stylelint-disable comment rather than an inflating selector chain given the budget. Search input needed flex-grow:0 alongside width:320px (core's :where(.wp-block-search__input) sets flex-grow:1). `.ttm-item h3` (writing-cell's unstyled "also running" item) became orphaned once 404.html's old markup was replaced; allow-listed as a state selector, out of this task's scope to fix.
+⚠️ CSS budget is now at 35/61440 bytes headroom -- flag for P5-03 (the budget assumption) and for phases 4-5, which will need real trims, not just careful additions.
 Manual check: none.
