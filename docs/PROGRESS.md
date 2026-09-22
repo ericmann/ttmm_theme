@@ -28,7 +28,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P2-04 Phase 2 push — journal screenshots
 - [x] P3-01 Archive header (01 §4.25) and the `ttm/archive-kind` kicker
 - [x] P3-02 Filter row (01 §4.26) placed directly, with "All"
-- [ ] P3-03 Archive body — year groups, rows, meta line and pagination (01 §4.27–4.28)
+- [x] P3-03 Archive body — year groups, rows, meta line and pagination (01 §4.27–4.28)
 - [ ] P3-04 Archive aside — series rail, most read (01 §4.29) and the tablet grid
 - [ ] P3-05 Search, 404 and static page (02 §H)
 - [ ] P3-06 Phase 3 push — archive screenshots
@@ -146,4 +146,9 @@ Manual check: none.
 ### P3-02 — a075d8e
 Tests: ar-filter, ar-filter-all, ar-filter-active, ar-filter-sort un-fixme'd (fidelity + selectors + all axe screens green). TagFilterTest +test_all_chip_is_accent_without_tag_and_neutral_with_tag; ArchiveTemplatesTest updated (no wrap group, "All" chip present). foundry_verify fully green: unit 161, integration 464/464, e2e 270 passed / 132 skipped, lints clean, budget 57398/61440, 29 pending coverage, 87 tagged fixme. `grep -rn ttm-filter-row-wrap themes plugins scripts` returns nothing.
 Interpretation: pattern ttm/filter-row deleted; category.html places <!-- wp:ttm/tag-filter /--> directly. render.php's "All" chip links to the bare category URL, accent only when get_query_var('tag') is empty. Decision S6's rule (.ttm-filter-row + .ttm-archive-body { border-top: 0 }) added now per the task text even though .ttm-archive-body doesn't exist until P3-03; both allow-listed as pending/state until then. ar-filter-sort's margin-left:auto asserted by bounding-box effect (resolves to used px).
+Manual check: none.
+
+### P3-03 — 4065c74
+Tests: ar-body, ar-year, ar-year-label, ar-row, ar-row-date, ar-row-title, ar-row-dek, ar-row-meta, ar-pagination, ar-pagination-numbers, ar-phone-year, tag-aside un-fixme'd (fidelity + selectors + all axe screens green). ValuesTest +test_meta_line_tags_joined_with_middle_dots; PaginationValuesTest +test_disabled_labels; ArchiveByYearTest asserts the <p> label; MostReadTest +sitewide-on-tag-archive, +nothing-outside-any-archive; ArchiveTemplatesTest's single-link test rewritten (anchor row, title first) + new disabled-span test. foundry_verify fully green: unit 163, integration 467/467, e2e 282 passed / 120 skipped, lints clean, budget 58789/61440, 28 pending coverage, 75 tagged fixme.
+Interpretation: group_by_year() emits <p class="ttm-archive-year__label tnum"> (was h2) inside a 120px/1fr grid with <ul class="ttm-archive-year__rows">. Rows are div.ttm-archive-row (title first, isLink:false, then date/dek/meta) turned into anchors by the existing link_rows(); the row's own grid places children by grid-column/grid-row so DOM order and visual order differ per rule 33. New pure Values::pagination_disabled_label() ("Older →"/"← Newer", no range); Sources::relabel_pagination() renders a disabled span whenever core's render is empty and the query inherits. New pure Values::tags_line() (tag-name join, now " · "); Sources::tags_or_series() calls it. Row meta binding gets readingFormat:"short" to match the mock's row text. ttm/most-read's guard widened to is_tag()/is_month()/is_year()/is_day() too, dropping the ttm_primary_category constraint with no category term, so it reads site-wide on tag/date archives per SPEC "aside = Most read only"; class markup/styling for most-read stays P3-04's job. Several archive-body/row selectors needed reordering (not suppression) for no-descending-specificity against the P3-02 filter-row rules.
 Manual check: none.
