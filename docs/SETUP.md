@@ -68,6 +68,7 @@ These are the commands the Foundry pipeline runs after every task (`docs/foundry
 | `npm run build` | `wp-scripts build` for the plugin | no |
 | `npm run test:integration` | starts wp-env if needed, then PHPUnit with the WordPress test suite inside the `tests-cli` container (`tests/integration`) | yes |
 | `npm run test:e2e` | starts wp-env, reseeds it (`wp ttm seed --reset`), then Playwright + axe against the eight seeded screens at 1280×900 and 390×844, plus the `fidelity`/`editors`/`phone` projects (`tests/e2e`) | yes |
+| `npm run screenshots` | against a running, seeded wp-env, writes the seven `docs/feedback/phase-2/*.png` zone crops (`scripts/screenshots.mjs`); does not reseed | yes |
 | `bash scripts/forbidden-patterns.sh` | greps for the mechanical rules in `SPEC.md §3` | no |
 
 Fix formatting automatically with `composer lint:fix` (phpcbf) and `npx wp-scripts format`.
