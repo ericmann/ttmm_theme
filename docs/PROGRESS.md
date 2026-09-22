@@ -58,7 +58,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] R2-02 Regenerate and commit the phase-3 screenshots after the round-1 fixes
 - [x] R3-01 Restore the SPEC §6.2/§6.4/§6.5/§6.7 values no fidelity row asserted
 - [x] R3-02 Writing 'recent chapters' lists published chapters only
-- [ ] R3-03 Seed: Short fiction shows SPEC §6.10's four stories in mock order; no literal backticks; regenerate screenshots
+- [x] R3-03 Seed: Short fiction shows SPEC §6.10's four stories in mock order; no literal backticks; regenerate screenshots
 
 ## Log
 (one entry per task, appended by implement)
@@ -462,3 +462,9 @@ render.php: moved $ttm_is_chapters definition earlier and extended the publish-o
 New SeriesTocTest::test_chapters_variant_excludes_scheduled_parts: closed series (total_parts=4), parts 1-3 published + part 4 future, chapters/desc/limit=2 -> asserts >03</>02< present, >04</title absent. Verified it fails pre-fix (scheduled ch. 4 rendered first) via git stash, passes post-fix. Confirmed test_f24_scheduled_part_unlinked_with_title_date (closed series) already covers the series variant still showing scheduled rows - no new sibling needed.
 New fidelity row wr-chapter-first (/writing/, 1280): first .ttm-numbered__title is <a> "Reconciliation" (ch.12 from seed), first .ttm-numbered__num is "12".
 Full SeriesTocTest (9 tests) and full fidelity project (450 tests) green; full foundry_verify green (composer lint/unit, npm lint/unit/build, forbidden-patterns, test:integration 482 tests, test:e2e 450 tests). wp-env theme confirmed ttm-theme after all runs.
+
+### R3-03 — ac18815
+Seeder.php: added ALLOWED_FORMS const + pure static normalize_form() (no WP calls), applied in seed_posts() after the existing category/Form re-derive - writes ttm_form + ttm_form_locked=1 when a posts.json row carries a valid `form` field. posts.json: two Writing essays get "form": "article" (they were auto-classing as story with no series); story-uptime days_ago 150->700 (2024), story-what-the-river-audits days_ago 260->1090 (2023), story-a-field-guide days_ago 410 (2025) unchanged, story-the-last-cron-job days_ago 40 (2026) unchanged - Serials::stories(4) now returns the mock order. Removed markdown backticks from hardening-part-1's excerpt.
+Tests: new SeederTest::test_writing_short_fiction_is_the_four_spec_stories_in_mock_order, test_no_seeded_excerpt_contains_a_backtick; updated test_seeded_writing_essays_derive_as_story_but_stay_older_than_the_last_cron_job (essays now ttm_form=article+locked, not story - kept, not deleted). New tests/unit/Cli/SeederTest.php (2 tests) for normalize_form - first unit test in tests/unit/Cli/. New fidelity row wr-tile-titles asserts the four tile titles/aria-labels in order.
+Confirmed /writing/ curl output and front-page "Also running" (still The Last Cron Job) manually. Regenerated 11 phase-3 PNGs (writing/-390, article/-390/-1920, journal/-390, series-hub, series-single, archive-security/-390) via wp ttm seed --reset + npm run screenshots; search.png/404.png/front-1920.png untouched (content unchanged). Updated docs/HANDOFF.md with a full Round 3 section (all 3 R3 tasks) including Measurements for the days_ago changes.
+Full suite green: composer lint/unit (171 tests), npm lint (fixed 2 prettier issues in the new fidelity test via --fix), npm test:unit, npm build, forbidden-patterns, test:integration (484 tests - had to kill one orphaned phpunit process left in the tests-cli container from an earlier interrupted run before a clean rerun succeeded), test:e2e all 3 projects (451 tests). wp-env theme confirmed ttm-theme throughout. git-ancestry check for phase-3 screenshots exits 0.
