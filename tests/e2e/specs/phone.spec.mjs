@@ -4,6 +4,54 @@
  * the `phone` project (390x844; see `../playwright.config.mjs`), against the seeded site.
  */
 import { test, expect } from '@playwright/test';
+import { SCREEN_URLS } from '../lib/urls.mjs';
+
+test( 'every seeded screen has no horizontal overflow at 390', async ( {
+	page,
+} ) => {
+	for ( const path of SCREEN_URLS ) {
+		await page.goto( path );
+		const scrollWidth = await page.evaluate(
+			() => document.documentElement.scrollWidth
+		);
+		expect( scrollWidth, path ).toBeLessThanOrEqual( 390 );
+	}
+} );
+
+test( 'archive filter row scrolls horizontally at 390', async ( { page } ) => {
+	await page.goto( '/category/security/' );
+	const row = page.locator( '.ttm-filter-row' );
+
+	/* eslint-disable no-undef */
+	const overflowX = await row.evaluate(
+		( el ) => getComputedStyle( el ).overflowX
+	);
+	const [ scrollWidth, clientWidth ] = await row.evaluate( ( el ) => [
+		el.scrollWidth,
+		el.clientWidth,
+	] );
+	/* eslint-enable no-undef */
+
+	expect( overflowX ).toBe( 'auto' );
+	expect( scrollWidth ).toBeGreaterThan( clientWidth );
+} );
+
+test( 'article aside zones follow prev/next at 390', async ( { page } ) => {
+	await page.goto( '/signing-your-options-table/' );
+
+	const top = ( locator ) =>
+		locator.evaluate( ( el ) => el.getBoundingClientRect().top );
+
+	const prevNext = page.locator( '.ttm-prevnext' );
+	const aside = page.locator( '.ttm-article aside' );
+
+	const [ prevNextTop, asideTop ] = await Promise.all( [
+		top( prevNext ),
+		top( aside ),
+	] );
+
+	expect( prevNextTop ).toBeLessThan( asideTop );
+} );
 
 test( 'front page has no horizontal overflow at 390', async ( { page } ) => {
 	await page.goto( '/' );
