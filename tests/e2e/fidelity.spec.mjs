@@ -1252,6 +1252,7 @@ test.describe( 'article', () => {
 			color( 'accent' )
 		);
 		expect( await computed( el, 'padding' ) ).toBe( '18px 20px' );
+		expect( await computed( el, 'margin-bottom' ) ).toBe( px( 22 ) );
 	} );
 
 	test( 'art-pull: .ttm-entry .is-style-pull @1280', async ( { page } ) => {
@@ -1263,6 +1264,11 @@ test.describe( 'article', () => {
 			-13.9,
 			0
 		);
+		expect( await computed( el, 'margin-top' ) ).toBe( px( 36 ) );
+		expect( await computed( el, 'margin-bottom' ) ).toBe( px( 36 ) );
+		expect(
+			parseFloat( await computed( el, 'letter-spacing' ) )
+		).toBeCloseTo( -0.42, 1 );
 	} );
 
 	test( 'art-link: .ttm-entry p a (first) @1280', async ( { page } ) => {
@@ -1653,6 +1659,8 @@ test.describe( 'journal stream', () => {
 			'.ttm-journal-stream .ttm-cell-heading__link'
 		);
 		expect( await text( el ) ).toMatch( /^Full journal · \d+ entries$/ );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
 	} );
 
 	test( 'js-row: .ttm-journal-row (first) @1280', async ( { page } ) => {
@@ -1855,6 +1863,8 @@ test.describe( 'writing', () => {
 		expect( t.length ).toBe( 3 );
 		expect( await computed( el, 'border-top-width' ) ).toBe( px( 2 ) );
 		expect( await computed( el, 'padding-top' ) ).toBe( px( 14 ) );
+		const label = page.locator( '.ttm-stats__label' ).first();
+		expect( await computed( label, 'font-size' ) ).toBe( px( 13 ) );
 	} );
 
 	test( 'wr-stat-value: .ttm-stats__value (first) @1280', async ( {
@@ -2051,6 +2061,7 @@ test.describe( 'writing', () => {
 		expect( await computed( el, 'font-size' ) ).toBe( px( 13 ) );
 		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-800' ) );
 		expect( await computed( el, 'margin-top' ) ).toBe( px( 3 ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '400' );
 	} );
 
 	test( 'wr-chapter-date: .ttm-series-toc.is-chapters .ttm-numbered__date (first) @1280', async ( {
@@ -2062,6 +2073,7 @@ test.describe( 'writing', () => {
 			.first();
 		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
 		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '400' );
 	} );
 
 	test( 'wr-tiles: .ttm-story-tiles @1280', async ( { page } ) => {
@@ -2070,6 +2082,7 @@ test.describe( 'writing', () => {
 		const t = await tracks( el );
 		expect( t.length ).toBe( 2 );
 		expect( await computed( el, 'gap' ) ).toBe( px( 16 ) );
+		expect( await computed( el, 'padding-top' ) ).toBe( px( 16 ) );
 	} );
 
 	test( 'wr-tile: .ttm-tile (first) @1280', async ( { page } ) => {
@@ -2113,6 +2126,7 @@ test.describe( 'writing', () => {
 		const t = await tracks( el );
 		expect( t.length ).toBe( 2 );
 		expect( await computed( el, 'gap' ) ).toBe( px( 20 ) );
+		expect( await computed( el, 'padding-top' ) ).toBe( px( 16 ) );
 	} );
 
 	test( 'wr-book-cover: .ttm-book .ttm-cover (first) @1280', async ( {
@@ -2131,6 +2145,8 @@ test.describe( 'writing', () => {
 		const el = page.locator( '.ttm-book__title' ).first();
 		expect( await computed( el, 'font-size' ) ).toBe( px( 14 ) );
 		expect( await computed( el, 'margin-top' ) ).toBe( px( 10 ) );
+		const meta = page.locator( '.ttm-book__meta' ).first();
+		expect( await computed( meta, 'margin-top' ) ).toBe( px( 2 ) );
 	} );
 
 	test( 'wr-phone: .ttm-serial-hero / .ttm-serial-hero__title @390', async ( {
@@ -2763,6 +2779,8 @@ test.describe( 'hub', () => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
 		const el = page.locator( '.ttm-series-progress__meta' );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
+		expect( await computed( el, 'margin-top' ) ).toBe( px( 0 ) );
+		expect( await computed( el, 'margin-bottom' ) ).toBe( px( 18 ) );
 		expect( await text( el ) ).toMatch(
 			/^\d+ of \d+ published( · next part .+)?$/
 		);
@@ -2776,6 +2794,8 @@ test.describe( 'hub', () => {
 		expect( await btns.count() ).toBe( 2 );
 		expect( await text( btns.first() ) ).toBe( 'Start at part 1' );
 		expect( await text( btns.last() ) ).toBe( 'Follow this series' );
+		const wrap = page.locator( '.ttm-series-featured__buttons' );
+		expect( await computed( wrap, 'column-gap' ) ).toBe( px( 10 ) );
 	} );
 
 	test( 'hub-parts: .ttm-series-featured__parts @1280', async ( {
@@ -2833,6 +2853,7 @@ test.describe( 'hub', () => {
 		await gotoScreen( page, SCREENS.seriesHub, 1280 );
 		const el = page.locator( '.ttm-hub-all .ttm-cell-heading__link' );
 		expect( await text( el ) ).toBe( 'Sorted by last update' );
+		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
 	} );
 
 	test( 'hub-grid: .ttm-series-list.is-grid-2 @1280', async ( { page } ) => {

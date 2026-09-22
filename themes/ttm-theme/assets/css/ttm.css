@@ -8,8 +8,7 @@
 
 @media (max-width: 720px) {
 
-	/* Root-padding-aware alignment (core) reads these off `body`; switches the global side
-	 * gutter to the phone token below 720px instead of the desktop one. */
+	/* Root-padding-aware alignment reads these off `body`: swap to the phone gutter below 720px. */
 	body {
 		--wp--style--root--padding-left: var(--wp--custom--gutter--phone);
 		--wp--style--root--padding-right: var(--wp--custom--gutter--phone);
@@ -43,7 +42,7 @@
 
 /* 0.2 page container */
 
-/* Rule 42: the page is a 1280px centred column with the desktop gutter as inline padding. */
+/* Rule 42: 1280px centred column; desktop gutter as inline pad. */
 .wp-site-blocks {
 	max-width: 1280px;
 	margin-inline: auto;
@@ -509,7 +508,7 @@ a.tag {
 	aspect-ratio: 16 / 9;
 }
 
-/* :where() keeps this selector's specificity at zero, so core's own img rules still win. */
+/* :where() keeps specificity zero, so core's img rules still win. */
 .ttm-article :where(.wp-block-post-featured-image) img {
 	width: 100%;
 	height: 100%;
@@ -596,6 +595,7 @@ a.tag {
 	line-height: 1.55;
 	font-family: ui-monospace, Menlo, monospace;
 	padding: 18px 20px;
+	margin-bottom: 22px;
 	border-left: 4px solid var(--wp--preset--color--accent);
 	overflow-x: auto;
 }
@@ -615,9 +615,10 @@ blockquote.is-style-pull {
 	line-height: 1.25;
 	font-style: normal;
 	border: 0;
-	margin: var(--wp--preset--spacing--60) 0;
+	margin: 36px 0;
 	max-width: 26ch;
 	text-indent: -0.496em;
+	letter-spacing: -0.015em;
 }
 
 blockquote.is-style-pull cite,
@@ -854,9 +855,8 @@ blockquote.is-style-pull cite,
 		display: none;
 	}
 
-	/* S2: core shows the list inline from 600px; the theme's breakpoint is 720, so between
-	 * 600 and 720 the closed list is re-hidden and the "Menu" button re-shown. The repeated
-	 * classes match core's own repeated-class button rule so the theme's values win. */
+	/* S2: core shows the list from 600px, but our breakpoint is 720; re-hide 600-720 and
+	 * re-show "Menu". Repeated classes match core's repeated-class rule. */
 	.ttm-masthead-inner .ttm-masthead-inner__nav .wp-block-navigation__responsive-container:not(.is-menu-open) {
 		display: none;
 	}
@@ -929,12 +929,19 @@ blockquote.is-style-pull cite,
 	font-feature-settings: "tnum";
 }
 
+/* §6.4/§6.7: journal + hub headings are caption size, not front-page micro. */
+.ttm-journal-stream .ttm-cell-heading__link,
+.ttm-hub-all .ttm-cell-heading__link {
+	font-size: var(--wp--preset--font-size--caption);
+	color: var(--wp--preset--color--neutral-700);
+}
+
 .ttm-cell-heading.is-rail {
 	padding-bottom: var(--wp--preset--spacing--20);
 	border-bottom: var(--ttm-rule-2);
 }
 
-/* SPEC §6.1.5: this link is 12px (the caption size), not the 11px used elsewhere on the rail. */
+/* §6.1.5: 12px (caption), not the 11px used elsewhere on the rail. */
 .ttm-cell-heading.is-rail .ttm-cell-heading__link {
 	font-size: var(--wp--preset--font-size--caption);
 }
@@ -1049,7 +1056,7 @@ blockquote.is-style-pull cite,
 	gap: var(--wp--preset--spacing--60);
 }
 
-/* This heading is the featured size (40px), overriding the h3 default of 28px. */
+/* Featured size (40px), overrides h3 default of 28px. */
 /* stylelint-disable-next-line no-descending-specificity */
 .ttm-poster h3.is-style-poster {
 	margin: 0;
@@ -1281,8 +1288,8 @@ blockquote.is-style-pull cite,
 	gap: var(--wp--preset--spacing--60);
 }
 
-/* 02 §A: between 901 and 1024px, the 8/4 lead row tracks get minmax(0, …) so neither
-   column overflows before the layout folds fully below 901px. */
+/* 02 §A: 901-1024px, the 8/4 lead row tracks get minmax(0, …) so neither overflows
+   before folding fully below 901px. */
 @media (max-width: 1024px) and (min-width: 901px) {
 
 	.ttm-lead-row {
@@ -2287,7 +2294,7 @@ ul.modern-footnotes-list,
 		font-size: 16px;
 	}
 
-	/* Mock 3b, phone article head: kicker 11px, h1 34px, dek 17px, byline 12px. */
+	/* Mock 3b phone: kicker 11px, h1 34px, dek 17px, byline 12px. */
 	.ttm-article-head .is-style-kicker {
 		font-size: var(--wp--preset--font-size--micro);
 	}
@@ -2714,6 +2721,7 @@ main.is-style-grid-8-4 h1 {
 }
 
 .ttm-series-progress__meta {
+	margin: 0 0 18px;
 	font-size: var(--wp--preset--font-size--caption);
 	color: var(--wp--preset--color--neutral-700);
 }
@@ -2804,12 +2812,14 @@ main.is-style-grid-8-4 h1 {
 .ttm-series-toc.is-chapters .ttm-numbered__dek {
 	margin-top: 3px;
 	font-size: 13px;
+	font-weight: 400;
 	color: var(--wp--preset--color--neutral-800);
 }
 
 .ttm-series-toc.is-chapters .ttm-numbered__date {
 	grid-column: 3;
 	font-size: 12px;
+	font-weight: 400;
 	color: var(--wp--preset--color--neutral-700);
 	font-feature-settings: "tnum";
 }
@@ -2836,6 +2846,7 @@ main.is-style-grid-8-4 h1 {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: var(--wp--preset--spacing--40);
+	padding-top: 16px;
 }
 
 .ttm-tile {
@@ -2897,6 +2908,7 @@ main.is-style-grid-8-4 h1 {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 20px;
+	padding-top: 16px;
 }
 
 .ttm-book {
@@ -2911,6 +2923,7 @@ main.is-style-grid-8-4 h1 {
 }
 
 .ttm-book__meta {
+	margin-top: 2px;
 	font-size: 12px;
 	color: var(--wp--preset--color--neutral-700);
 }
@@ -2938,7 +2951,7 @@ main.is-style-grid-8-4 h1 {
 
 .ttm-stats__label {
 	display: block;
-	font-size: var(--wp--preset--font-size--caption);
+	font-size: 13px;
 	color: var(--wp--preset--color--neutral-700);
 }
 
@@ -2995,7 +3008,7 @@ main.is-style-grid-8-4 h1 {
 
 .ttm-series-featured__buttons {
 	display: flex;
-	gap: var(--wp--preset--spacing--30);
+	gap: 10px;
 	margin: var(--wp--preset--spacing--30) 0;
 }
 
