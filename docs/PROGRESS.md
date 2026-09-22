@@ -37,7 +37,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P4-03 Single series template (`taxonomy-series.html`) and `series.related_limit`
 - [x] P4-04 Writing hero (01 §4.36–4.37, §6.5)
 - [x] P4-05 Writing body — all serials (`layout=list`) and recent chapters (numbered)
-- [ ] P4-06 Writing aside — story tiles, book grid, and the responsive order
+- [x] P4-06 Writing aside — story tiles, book grid, and the responsive order
 - [ ] P4-07 Phase 4 push — hub and Writing screenshots
 - [ ] P5-01 390 and 1920 sweep of every screen
 - [ ] P5-02 a11y, network, selectors and seed-hero-color rows; guards back to strict
@@ -212,4 +212,24 @@ CSS budget 61432/61440 (8 free) -- 5th Phase 4 task ending at
 single-digit headroom; list row mark/dek/meta margins and chapters
 dek/date font-size/color dropped (inherit shared defaults) as
 disclosed trade-offs. P5-03 needs a real fix, not more comment-trims.
+Manual check: none.
+
+### P4-06 — 2823f91
+Story tiles/book grid/responsive order all wired. Fixed a real bug:
+Fiction\Books' "collection" form label was "Collection", Decision
+"Book form label" wants "Stories" -- BookGridTest updated to cover
+it. .ttm-book-grid gap fixed from 24px (spacing-50) to spec's 20px.
+Added missing <=720 override .ttm-serial-hero__title{font-size:40px}
+(was inheriting desktop 64px on phone -- no prior override existed).
+"Short fiction"/"In print" headings now wrapped in the reused
+.ttm-cell-heading.is-rail (no CSS cost); "All serials"/"Recent
+chapters" wrapped in new __serials/__chapters groups so all four
+Writing sections have a class for the <=1024 order:1-4 rule.
+HubWritingTemplatesTest's empty-state check switched to
+data-ttm-block= since the new .ttm-story-tiles__note class contains
+"ttm-story-tiles" as a substring (false-positive break, not a real
+regression). New phone.spec.mjs test checks visual reorder via
+getBoundingClientRect at 1000px (display:contents doesn't reorder
+the DOM). CSS budget 61437/61440 (3 free) -- 6th Phase 4 task in a
+row at single-digit headroom. P5-03 is not optional.
 Manual check: none.
