@@ -40,6 +40,9 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P4-03 Inner templates smoke and CI seeding
 - [x] P4-04 Handoff, SETUP and final budget measurement
 - [x] P4-05 Phase 4 push — final screenshots
+- [ ] R1-01 Jetpack provider subscribes server-side through the ttm handler (no page nonce)
+- [ ] R1-02 Seeded front page matches the mock: series strip is non-fiction, Also running ends with The Last Cron Job
+- [ ] R1-03 Screenshots wait for every image; tech-img asserts a loaded image; regenerate the phase-2 PNGs
 
 ## Log
 (one entry per task, appended by implement)
