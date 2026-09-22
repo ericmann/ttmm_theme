@@ -1,405 +1,240 @@
-# Review — phase 3 (inner-template fidelity)
+# Review: phase 3 (inner-template fidelity), round 1 fixes
 
 Round: 1
 
-Branch `refine/2026-09-22`, base `main` (`8c2b228`), head `5498214`. 41 tasks, all `[x]`;
-0 blocked, 0 skipped. Reviewed every task commit against `docs/PLAN.md` and the SPEC/design
-sections it cites, plus the one out-of-sequence commit `dd4dfbe`.
+Branch `refine/2026-09-22`, base `main` (`8c2b228`), head `223301c`. 51 tasks, all `[x]`;
+0 blocked, 0 skipped. This pass reviews the ten review-fix tasks `R1-01`..`R1-10` commit by
+commit against the round-1 `## Review fixes` section of `docs/PLAN.md` and the SPEC sections
+they cite. It also re-runs the whole-branch mechanical constraint sweep and every suite. The
+P-task commits were reviewed in full in the previous pass. I did not re-audit them line by
+line, but the constraint sweep, the rule-36 nesting sweep and the media-query shadow scan below
+cover the whole branch.
 
 ## Verdict
 
-**CHANGES REQUESTED** — 10 fix tasks.
+**CHANGES REQUESTED**: 2 fix tasks.
 
-Category 1 (constraints) is not clean: `themes/ttm-theme/templates/page-writing.html` carries two
-`layout: constrained` groups inside an `is-style-grid-*` grid group, which SPEC §3.1 rule 36
-(extended this flight), CLAUDE.md `## Constraints` and PLAN Conventions all forbid, and which
-SPEC §1 named as one of the six defects this flight exists to fix. Category 3 (tests) is not
-clean either: the search template ships a user-visible functional regression that no test covers,
-and three of the flight's own headline fixes — the `wpautop` `<p>` fix at e2e level, the
-archive-aside label case, the most-read numbering — are not guarded by any assertion that would
-fail if they were reverted.
+Categories 1 and 2 (constraints, boundaries) are clean. Category 3 (tests) is not.
 
-This is otherwise a strong flight. Everything I could check mechanically and independently held
-up, and much of the work is better than the log claims.
+- R1-06 restored three SPEC/PLAN margins by editing the shared **base** rules
+  `.ttm-series-mark`, `.ttm-series-row__meta` and `.ttm-series-row__dek`. It should have
+  edited the `.is-list` layout the task named. The base edits moved the front-page series
+  strip, which SPEC §2 forbids, and also changed the category-archive rail and the hub grid-2
+  rows. R1-06's own acceptance criterion was "a fidelity row per restored value". Those three
+  margins got no row, so the suite stayed green through the regression.
+- The committed `docs/feedback/phase-3/*.png` files date from P5-05. They show every screen
+  as it looked before R1. Most of the manual checks still owed consist of comparing those
+  PNGs with the mocks.
+
+Nine of the ten R1 tasks do what their PLAN entry asks, and I checked each one against the
+running site, not only against the log.
 
 ### What I verified myself
 
-- **Suites, run by me, not read from the log.** `foundry_verify` green on all six commands
-  (`composer lint`, `composer test:unit` 166/166, `npm run lint` — budget 61439/61440, coverage
-  195 markup / 195 css / 0 pending, `check-fixme: clean` — `npm run test:unit` 38 passed,
-  `npm run build`, `forbidden-patterns: clean`). `npm run test:integration`: **480/480, 1926
-  assertions**. `npm run test:e2e`: **432 passed, 0 skipped, 0 flaky.** All match P5-05's claims.
-- **Mechanical constraint sweep**: theme data APIs, plugin inline styles, nonces in cacheable
-  output, per-visitor markup, clock reads outside `Support/Clock.php`, unbounded queries,
-  dangerous PHP, front-end network calls, `wp_safe_remote_*` call sites, hex literals in
-  `ttm.css`, `prefers-color-scheme`, `dependencies: {}`, `npm audit --audit-level=high`
-  (0 vulnerabilities), rule 45 (`210, 48, 19` absent), rule 39 (no lorem), `FOUNDRY_FEEDBACK.md`
-  untouched, commits unsigned as intended — **all clean**. `functions.php:32`'s
-  `wp_enqueue_style` on `wp_enqueue_scripts` is **not** a violation: phase-1 rule 2 scopes that
-  prohibition to `plugins/ttm-core/`. CLAUDE.md's abbreviation drops the scope (see Spec issues).
-- **§6.9 transcription completeness**: I diffed all 187 SPEC §6.9 row ids against the test names
-  in `tests/e2e/fidelity.spec.mjs`. **Every row has a real test.** Only `a11y`, `network` and
-  `selectors` are absent as single rows, and those are per-screen loops
-  (`fidelity.spec.mjs:2817-2900`) plus `selectors.spec.mjs`, exactly as PLAN specifies. No
-  `test.skip`, `test.only` or `test.fail` anywhere in the e2e suites.
-- **Mutation sampling, one per module** (each restored with `git checkout --` afterwards; working
-  tree confirmed clean and `foundry_verify` re-run green):
-  - *Integration* — removed the `'raw'` argument from
-    `plugins/ttm-core/blocks/series-featured/render.php:134`. Output became
-    `<p class="ttm-series-featured__dek">&lt;p&gt;Six parts on hardening a WordPress
-    install.&lt;/p&gt;</p>` and `SeriesFeaturedTest::test_dek_is_plain_text_not_wpautop_wrapped`
-    **failed** (480 tests, 1 failure). Real guard.
-  - *PHP unit* — made `Helpers::link_rows()` return early.
-    `HelpersTest::test_link_rows_turns_row_group_into_anchor` **failed**. Real guard.
-  - *JS / scripts* — inverted `taggedFixmeHits()`'s condition in `scripts/lib/fixme.mjs`.
-    `check-fixme.test.js` **failed** on two cases. Real guard.
+- **Suites, run by me.** `foundry_verify` passed all six commands:
+  - `composer lint`
+  - `composer test:unit`: 169/169
+  - `npm run lint`: budget 62188/62464, coverage 193/193 with 0 pending, `check-fixme`
+    clean
+  - `npm run test:unit`: 39 passed
+  - `npm run build`
+  - `forbidden-patterns`: clean
 
-### Operator-flagged items — both confirmed, with one caveat
+  I also ran `npm run test:integration` (**481/481, 1932 assertions**) and `npm run test:e2e`
+  (**447 passed**, 0 failed/flaky/skipped). These counts match HANDOFF's round-1 claims.
+  The active theme was still `ttm-theme` afterwards.
+- **Mechanical constraint sweep, whole branch.** Every category below came back clean:
+  - theme data APIs under `themes/ttm-theme/`
+  - nonces in render/pattern/part/template files
+  - per-visitor calls in render/bindings/theme, and `is_user_logged_in` outside
+    `Cache/Headers.php`
+  - clock reads outside `Support/Clock.php`
+  - unbounded queries
+  - dangerous PHP (`eval`, `unserialize`, `extract`, `curl_`, `file_get_contents('http'` and
+    the rest of the list)
+  - `wp_safe_remote_*` outside the three permitted files
+  - front-end network calls in theme JS
+  - `<style` and non-exempt `style="` in the plugin
+  - hex literals in `ttm.css`, and `prefers-color-scheme`
+  - rule 45 (`210, 48, 19` is absent) and rule 39 (no lorem)
+  - `dependencies: {}` and `TTM_CORE_API === 1`
+  - no `test.fixme(` / `test.skip|only|fail(` in the e2e suites
+  - `css-coverage-allow.txt` at 0 bytes, and no `pending` line in `selectors-allow.txt`
 
-**(1) Term descriptions no longer render literal `<p>`.** Confirmed on all three pages, from the
-committed screenshots rendered against the seeded site:
-`docs/feedback/phase-3/writing.png` (synopsis), `series-hub.png` (featured dek) and
-`series-single.png` (`/series/hardening-wordpress/`) all render clean prose. Both blocks read the
-`'raw'` context (`serial-hero/render.php:47`, `series-featured/render.php:134`); I swept the whole
-plugin and there is no other `get_term_field()` call, no `wpautop`/`term_description` use, and the
-only other description read (`series-list/render.php:128`) uses the raw `$term->description`
-property. **Caveat on the guard**: it is an *integration* test, not a fidelity row — and it is a
-genuine one (mutation-proven above). But `wr-synopsis` (`fidelity.spec.mjs:1746`) and `hub-dek`
-(`:2550`) assert only font-size, colour and max-width; neither reads text, so **deleting `'raw'`
-leaves both e2e rows green**. SPEC §6.9's own rows specify only style properties, so there is
-nothing to "tighten" — an assertion must be added. That is task R1-05.
-
-**(2) The archive aside headings match mock 1e.** Confirmed. `dd4dfbe` fully reverted the scoped
-`.ttm-archive-body aside .ttm-cell-heading__label { text-transform: none }` override, and nothing
-else in `ttm.css` overrides that label. Both headings render through the shared
-`.ttm-cell-heading.is-rail > .ttm-cell-heading__label` rule (`ttm.css:918-924`: 12px / 800 /
-uppercase / .08em). `docs/feedback/phase-3/archive-security.png` shows "SERIES IN SECURITY" and
-"MOST READ" uppercase, with plain `1` / `2` / `3`. **Mock 1e agrees**: both headings are `<h6>`
-(`docs/Eric Mann Newspaper.dc.html:958,964`) and the mock's design system sets
-`h6 { letter-spacing: 0.08em; text-transform: uppercase }`
-(`docs/_ds/modernist-.../styles.css:92-93`); its most-read numbers are literal `1`/`2`/`3`. So
-P3-04's original "reads as a sentence here" justification was wrong and `dd4dfbe` is right.
-**Caveat**: neither half of `dd4dfbe` is tested. `ar-aside-series` asserts `textContent`, which is
-unaffected by `text-transform`, so re-adding the override would be green; and no assertion
-anywhere covers the numbering — `MostReadTest` counts rows only, `ar-mostread-num` asserts colour
-and weight only. Task R1-05.
+  `ttm.css` is 62188 of 62464 bytes.
+- **Rule 36 nesting sweep.** I ran a nesting-aware parse of every template, part and pattern
+  block comment. It found zero `layout: constrained` groups under any `is-style-grid-*` or
+  `layout: grid` ancestor, and zero grid groups using `constrained` or `flow`. R1-02 is
+  complete.
+- **Media-query shadow scan.** A postcss pass over `ttm.css` checked every `@media` rule
+  against every later rule for the same selector outside a max-width media query, including
+  shorthand/longhand families. It found zero hits. R1-03 is complete, and no other instance of
+  the P5-01 hazard remains.
+- **Rendered-output checks against the running seeded site**, using Playwright computed
+  styles:
+  - `/?s=ledger` rows are `<a>` grid rows, and the plain-text kicker sits in `grid-row: 1`
+    (R1-01).
+  - `.ttm-footer__copyright` renders on every screen because a verse is seeded, so R1-10's
+    new `margin: 0` rule is live and not dead.
+  - The series-row margins in finding 1.
+- **Mutation sampling**, restored each time with `git checkout --` or a backup, with a clean
+  tree confirmed afterwards:
+  - *JS/scripts*: `filterSrcFiles()` returning `files` unfiltered made
+    `check-css-coverage.test.js` "filterSrcFiles (R1-10)" **fail**. The guard is real.
+  - *PHP unit*: replacing R1-08's `is-style-dek-l` guard in `Helpers::excerpt_markup()` with
+    `if ( false )` made
+    `HelpersTest::test_excerpt_markup_is_a_no_op_outside_the_article_header_dek` **fail**.
+    The guard is real.
+  - *Integration*: forcing `Sources::short_date()`'s `noYear` branch off made
+    `ArchiveTemplatesTest::test_archive_row_date_omits_year_but_journal_stream_keeps_it`
+    **fail** (the `Nov 26` regex). The guard is real.
+  - *E2E*: I did not mutate here, because R1-09's commit body records a mutation per
+    tightened row. For the one e2e hole I found, finding 1 shows by live measurement that
+    the suite passes with the regression in place.
 
 ---
 
 ## Findings
 
-Most severe first. Category in brackets; task ID is the task that owns the fix.
+Most severe first.
 
-### 1. [Tests / spec drift] Search result rows are not links at all — R1-01 (owner: P3-05)
+### 1. [Tests / spec drift] R1-06 moved the front-page strip, the archive rail and the hub grid by editing shared base rules (R1-11, owner R1-06)
 
-`themes/ttm-theme/templates/search.html:34` places
-`<!-- wp:post-terms {"term":"category","className":"is-style-kicker"} /-->` inside the row group,
-**before** the title. `core/post-terms` always renders a linked term, so the row content contains
-an `<a>`, which trips the rule-33 nested-anchor guard at
-`plugins/ttm-core/src/Blocks/Helpers.php:80`:
+`themes/ttm-theme/assets/css/ttm.css`:
 
-```php
-if ( false !== stripos( $block_content, '<a ' ) ) {
-    return $block_content;
-}
-```
+| Line | Rule | Before R1-06 | After |
+|---|---|---|---|
+| `:1611-1616` | `.ttm-series-mark` | `margin-top: 5px` | `6px` |
+| `:1682-1688` | `.ttm-series-row__meta` | `margin-top: var(--wp--preset--spacing--10)` (4px) | `6px` |
+| `:1715-1722` | `.ttm-series-row__dek` | `margin-top: 5px` | `4px` |
 
-`link_rows()` bails, and the row's `core/post-title` is `"isLink":false`. I confirmed this against
-the running seeded site — `curl http://localhost:8888/?s=ledger` returns:
+All three are unscoped base rules shared by every `ttm/series-list` layout. The task named
+the `list` layout: PLAN P4-05 gives the `.is-list` rows mark 6, dek 4 and meta 6. R1-06's own
+PLAN text calls them "list-row" margins. The implementer changed the base values instead of
+adding `.ttm-series-list.is-list …` overrides.
 
-```html
-<div class="wp-block-group ttm-archive-row is-layout-flow wp-block-group-is-layout-flow">
-    <div class="taxonomy-category is-style-kicker wp-block-post-terms"><a href="…/category/writing/" rel="tag">Writing</a></div>
-    <h3 class="ttm-archive-row__title wp-block-post-title">The Quiet Ledger, Chapter 12: Reconciliation</h3>
-```
+I measured the result on the running seeded site at 1280:
 
-**What breaks:** on `/?s=…` the headline and the row go nowhere; the only clickable thing in a
-search result is the category chip. The same fetch against `/category/security/`,
-`/category/journal/` and `/tag/wordpress/` returns `<a href="…" class="wp-block-group
-ttm-archive-row …">`, so this is specific to search. It violates SPEC §6.6 "Search" ("rows as
-archive rows plus the matched section as a kicker line") and CLAUDE.md's "every whole-row link is
-one `<a>` with the headline first in its text" — even if the anchor fired, the kicker precedes the
-headline, so the accessible name would begin "Writing".
-
-**Minimal fix:** render the search kicker as a bound plain-text paragraph (a `ttm/*` binding, as
-`ttm/archive-kind` and `ttm/section-label` already do) rather than `core/post-terms`, and move it
-after the title in the DOM — `ttm.css` already places it with `grid-row: 1`.
-
-**No test catches it:** `search-row-kicker` asserts font-size and colour only; `ar-row`'s
-`tagName === 'A'` assertion runs on the security archive only.
-
-### 2. [Constraint — rule 36 extended] `layout: constrained` inside a grid group — R1-02 (owner: P4-06)
-
-`themes/ttm-theme/templates/page-writing.html:41` and `:59`:
-
-```
-<!-- wp:group {"className":"ttm-writing-body__stories","layout":{"type":"constrained"}} -->
-<!-- wp:group {"className":"ttm-writing-body__books","layout":{"type":"constrained"}} -->
-```
-
-Both are nested inside the `is-style-grid-7-5 ttm-writing-body` grid group at `:9`. CLAUDE.md
-`## Constraints`: *"no `core/group` with `is-style-grid-*` uses `constrained`/`flow`, and no
-`layout: constrained` group sits inside one (rule 36 extended)."* SPEC §3.1 rule 36 and PLAN
-Conventions (line 52) say the same. SPEC §1 lists "Constrained wrappers inside grids" as one of
-the six diagnosed defects this flight exists to fix, so these are in scope even though they
-pre-date the branch; P4-06 edited this exact file and added `__serials`/`__chapters` at
-`layout: default` correctly, but left these two.
-
-I swept every template, part and pattern with a nesting-aware parser; these are the only two
-`is-style-grid-*` cases. `themes/ttm-theme/patterns/stat-row.php:16,27,38` has the same shape
-against a core `layout: grid` group (`.ttm-stats`) — a weaker reading of the rule's literal text,
-but the same hazard, and it should be fixed in the same pass.
-
-**What breaks:** core emits `.is-layout-constrained > * { max-width: <content-size>;
-margin-inline: auto }` on the group's children. At ≤1024 `ttm.css:3130-3133` makes the `aside`
-`display: contents`, so these two become direct grid items still carrying core's constrained
-rules, competing with the `ttm.css`-owned track sizing — exactly the class of bug rule 36 exists
-to prevent.
-
-**Minimal fix:** `"layout":{"type":"default"}` on both (and the matching `<div class=…>` lines).
-
-**No test catches it:** `art-row-layout` (`fidelity.spec.mjs:1089`) checks only
-`.ttm-article > *`, on the article screen only. No equivalent row exists for `.ttm-writing-body`.
-
-### 3. [Spec drift / dead code] The ≤720 series part-row override is dead — R1-03 (owner: P4-01, missed by P5-01)
-
-`themes/ttm-theme/assets/css/ttm.css:2697`, inside `@media (max-width: 720px)`:
-
-```css
-.ttm-series-featured__part { grid-template-columns: 28px 1fr; }
-```
-
-The unscoped base rule sits **later** in the file, at `ttm.css:3012`:
-
-```css
-.ttm-series-featured__part { display: grid; grid-template-columns: 40px 1fr auto; … }
-```
-
-Equal specificity (0,1,0); a media query adds none, so source order wins at every viewport. The
-phone override never applies. SPEC §6.7: *"≤ 720: H1 44; part rows `28px 1fr` with the date on a
-second line."* `/series/` and `/series/hardening-wordpress/` therefore render the desktop
-three-track row at 390.
-
-This is precisely the bug class P5-01 documented as a spec issue and claimed to have swept for
-(its interpretation #3, for `.ttm-series-single .ttm-series-featured__title`), and PLAN P5-01's
-own 390 checklist lists "hub: featured stacked, part rows `28px 1fr`" as walked.
-
-**Minimal fix:** move the `@media (max-width: 720px)` block at `ttm.css:2687-2704` to after
-`.ttm-series-featured__date` (ends `:3051`).
-
-**No test catches it:** `hub-phone` (`:2707`) asserts only `.ttm-series-featured` track count and
-the `h1` font-size.
-
-### 4. [Spec drift] Archive row dates repeat the year inside a year group — R1-04 (owner: P3-03)
-
-`ttm/short-date` resolves to `Support\Dates::short()`
-(`plugins/ttm-core/src/Support/Dates.php:36-44`), which appends `, {Y}` when the year differs from
-"now". In a **year-grouped** archive the year is already the 120px group label, so
-`/category/security/` renders "Nov 26, 2025" inside a 72px date column, wrapping to two lines and
-dropping the row's title off the group's baseline. This is plainly visible in the committed
-`docs/feedback/phase-3/archive-security.png` (2025 group).
-
-SPEC §6.6 specifies the archive row date as `12px neutral-700 tnum padding-top 4 ("Sept 10")` in a
-`72px 1fr` grid; mock 1e (`docs/Eric Mann Newspaper.dc.html:945`) shows no year.
-
-**Minimal fix:** give the year-grouped rows a year-less format (a `ttm/short-date` arg, e.g.
-`{"noYear":true}`, used by `category.html` and `archive.html`), leaving the journal stream and
-search rows — which are not year-grouped — on the current behaviour.
-
-**No test catches it:** `ar-row-date` asserts font-size, colour and padding-top only.
-
-Folded into the same task: the serial meta line capitalises cadence
-(`plugins/ttm-core/blocks/series-list/render.php:174-177` → "Novel · literary thriller ·
-Monthly"), where SPEC §6.5 writes it lowercase and PLAN's spec-issue #18 says the capitalisation
-belongs only to the hero stat. `wr-serial-form`'s regex carries SPEC's own `/i` flag, so nothing
-can distinguish.
-
-### 5. [Tests] The flight's own headline fixes are unguarded — R1-05 (owners: P5-02, dd4dfbe, P4-02)
-
-Four assertions that would not fail if the mechanic were removed:
-
-- `tests/e2e/fidelity.spec.mjs:1746` (`wr-synopsis`) and `:2550` (`hub-dek`) never read text, so
-  removing `'raw'` from either render leaves them green. Add
-  `expect( await el.innerHTML() ).not.toContain( '<p>' )`.
-- `:2282` (`ar-aside-series`) asserts `textContent`, which `text-transform` does not affect.
-  Sibling rows that use the same idiom (`cell-head:455`, `writing-head:629`, `:1107`, `:1288`)
-  *pair* it with `expect( await computed( el, 'text-transform' ) ).toBe( 'uppercase' )`; this one
-  does not. Add that line.
-- `tests/integration/Blocks/MostReadTest.php` never asserts the number text, so reverting
-  `plugins/ttm-core/blocks/most-read/render.php:75` to `sprintf( '%02d', … )` passes everything.
-  Add `assertStringContainsString( '<span class="ttm-numbered__num tnum">1</span>', $html )` and
-  `assertStringNotContainsString( '>01<', $html )`.
-- `tests/integration/Blocks/SeriesListTest.php:266` asserts a single category
-  (`'ttm-series-row__categories">Technology<'`), so **nothing** tests that `grid-2` joins
-  categories with " · "; `hub-grid-cats` (`fidelity.spec.mjs:2698`) is
-  `expect( t.includes( ' · ' ) || t.length > 0 ).toBe( true )`, where the second disjunct makes
-  the first unreachable (it mirrors SPEC §6.9's own loose wording, so this is not an implementer
-  loosening — but it leaves the hole).
-
-### 6. [Spec drift] Declarations named in SPEC/PLAN were dropped under budget pressure — R1-06 (owners: P4-04, P4-05, P5-03)
-
-`ttm.css` is **61439 of 61440 bytes — one byte of headroom.** `HANDOFF.md` concedes some drops and
-argues the budget is correctly sized; I disagree on both counts.
-
-The disclosure is incomplete and self-contradictory. `HANDOFF.md:196-202` says headroom was
-"managed each time by losslessly shortening existing comments **rather than dropping real
-declarations**"; `HANDOFF.md:203-209` then lists drops. Items missing from that list:
-
-| SPEC / PLAN | Shipped | Where |
-|---|---|---|
-| hero grid `280px minmax(0,1fr)` | `280px 1fr` | `ttm.css:3059` — this is what forced P5-01's `.ttm-serial-hero__body { min-width: 0 }` band-aid; ≥721 is still unguarded |
-| kicker `margin 0 0 12` | `margin-bottom: 10px` | `:3067` — added by P5-02 only to satisfy the coverage lint, at the wrong value |
-| title `margin 0 0 16 −0.04em` | absent | `:3071` |
-| synopsis `19px/**1.45**` … `margin 0 0 20` | line-height and margin absent | `:3075` |
-| buttons `gap 10` … `margin 0 0 22` | `gap: 12px`, `margin: 12px 0` | `:3085` |
-| ≤720 "stats 3-across at **16px values**" | no `.ttm-stats__value` rule in the ≤720 block | `:3159-3186` |
-| chapters `__dek` 13px neutral-800, `__date` 12px neutral-700 tnum, `__title` line-height 1.2, row `align-items: baseline` | all inherit `.ttm-numbered__row`'s 14px/600/1.35 | `:2796-2818` |
-| list-row mark/dek/meta margins 6/4/6 | 5/5/4 | `:1613, :1717, :1684` |
-| `__count` "12px neutral-700 tnum" | no colour, no `font-feature-settings` | `:1745` |
-
-P5-03 also *lost* ground: it entered at 61410 (30 free) and left at 61439 (1 free) — the
-media-query merge saved ~22 bytes but an added `stylelint-disable-next-line` comment cost ~47. Its
-"no duplication to reclaim" claim is nonetheless **correct** — I scanned independently and found
-zero duplicate declarations; every repeated selector is a legitimate base-plus-override pair. What
-the scan *should* have surfaced is finding 3.
-
-At 0.0016% headroom any single-character CSS addition fails `npm run lint`, which sits inside
-`verify` and therefore blocks every subsequent task. The constraint has already cost real
-declarations and degraded comments to fragments (`ttm.css:2283` `/* 3b: k11,H1 34,dek17,b12 */`,
-`:937` `/* §6.1.5: 12,not11. */`, `:46` `/* Rule 42: 1280, gutter0 */`). PLAN's own "round up to
-the next 1024" reads naturally as 62464.
-
-**Minimal fix:** raise `cssBudgetBytes` to 62464 in `scripts/check-budget.mjs` and `CLAUDE.md`,
-restore the declarations above, and add a fidelity row per restored value so they cannot silently
-vanish again.
-
-### 7. [Tests] Seed fixture drift and a tautological seed test — R1-07 (owner: P0-08)
-
-- `docs/fixtures/seed/books.json` holds **three** books (`The Quiet Ledger`, `Salt Water Wires`,
-  `Eleven Small Doors`). SPEC §6.10 and PLAN P0-08 both say two; mock 2d's "In print" grid shows
-  those two. The Writing page's `wr-books`/`wr-book-*` rows therefore render a book the mock does
-  not have. `tests/integration/Cli/SeederTest.php:531-549` was written as
-  `assertContains( … )` per title rather than asserting the set, which hides the extra row.
-- `SeederTest.php:409-422` (`test_journal_post_one_is_on_a_sunday_with_location_and_syndication`)
-  calls `set_now( '2026-09-20 12:00:00' )` — **2026-09-20 is itself a Sunday** (verified) — and
-  `journal-post-1` carries `"days_ago": 0` (verified). The post date equals "now" and is a Sunday
-  whatever the mechanic does; the weekday walk-back loop at `Cli/Seeder.php:366-369` could be
-  deleted and the test stays green. It is the only coverage of Decision "Journal Sunday".
-
-**Minimal fix:** drop the third book and assert the exact set; `set_now( '2026-09-23' )` (a
-Wednesday) and additionally assert the date moved back exactly 3 days.
-
-### 8. [Boundary / spec drift] Global excerpt filter, and the newsletter-box copy size — R1-08 (owners: P1-03, P1-06)
-
-- `plugins/ttm-core/src/Blocks/Helpers.php:45` registers `excerpt_markup` on
-  `render_block_core/post-excerpt` **globally** — no `is_singular()` guard, no className check.
-  For any post whose manual excerpt contains `<`, it replaces core's `wp_trim_words()` output with
-  the full kses'd excerpt, on the front-page lead dek, "More in" rows, archive rows, everywhere.
-  Its sibling `featured_caption` (`:43`) *does* guard on `is_singular()`. Today only the seeded
-  `2b` article has markup in its excerpt, so nothing is visibly wrong, but this is a site-wide
-  behaviour change shipped under an "article header" task.
-- `themes/ttm-theme/assets/css/ttm.css:991-995`:
-  `.ttm-newsletter-box__copy { font-size: var(--wp--preset--font-size--body-s) }` = **14px**.
-  SPEC §6.2 "Newsletter box" and PLAN P1-06 both say **13px** (the `ui` preset). P1-06 edited this
-  exact rule and left the wrong size; §6.9 has no `box-copy` row, so nothing catches it.
-
-### 9. [Tests] Fidelity rows that assert less than the §6.9 row they cite — R1-09
-
-All in `tests/e2e/fidelity.spec.mjs`. Each is green today and would stay green under a real
-regression:
-
-| row | line | §6.9 says | asserts | task |
+| Screen / layout | Element | Spec | Rendered | Source |
 |---|---|---|---|---|
-| `art-row` | 1080 | `2:1 tracks` | `t.length === 2` only — `is-style-grid-6-6` would pass | P1-02 |
-| `art-hero` | 1194 | `filter: none` | evaluated on the **figure**; every grayscale rule targets an `img`, so a grayscale hero passes | P1-02 |
-| `art-byline-author` | 1175 | `600 / text` | weight only; the byline's own `neutral-700` would silently win | P1-03 |
-| `art-byline-tags` | 1183 | "right of the read-time span" | font-size + background only; `margin-left: auto` untested | P1-03 |
-| `toc-item` | 1329 | `28px + 1` | `t.length === 2` only | P1-05 |
-| `aside-phone-order` | 1441 | "all below `.ttm-prevnext`" | compares against prev/next's **top**, so an overlapping zone passes | P1-06 |
-| `ar-year`, `ar-row`, `ar-mostread`, `ar-aside-row` | 2140–2296 | `120px+1`, `72px+1`, `24px 1fr`, `10px 1fr` | track **count** only; `tracks()` returns pixels and the suite asserts them elsewhere (`:1018`) | P3-03/04 |
-| single-series h1 at 390 | — | P5-01 fixed the 44px cascade bug | only indirectly covered by the phone overflow loop; no assertion states the size | P5-01 |
+| `/` strip (also the 404 strip) | mark margin-top | 5px | **6px** | phase-2 SPEC §6.1.7 |
+| `/` strip | meta margin-top | 4px | **6px** | phase-2 SPEC §6.1.7 |
+| `/category/security/` rail | mark margin-top | 5px | **6px** | PLAN P3-04 |
+| `/series/` grid-2 | dek margin-top | 5px | **4px** | SPEC §6.7, PLAN P4-02 |
+| `/writing/` list | mark / dek / meta | 6 / 4 / 6 | 6 / 4 / 6 (correct) | PLAN P4-05 |
 
-### 10. [Constraint / hygiene] Prefix dropped, stale lint entries, no-op CSS, doc drift — R1-10
+**What breaks:** SPEC §2 lists as a non-goal "Front-page changes beyond what shared chrome
+forces … must not move a single front-page fidelity row". This change moves front-page
+elements on a task that was scoped to the Writing page's list layout. The 404 strip, the
+category rail and the hub grid-2 dek move with it.
 
-- `plugins/ttm-core/src/Fiction/Books.php:128` emits `class="book-admin-row"` (was
-  `ttm-book-row`), renamed purely to silence `scripts/check-css-coverage.mjs`. CLAUDE.md:
-  *"Prefixes: … CSS `ttm-`"*. Low functional risk (wp-admin only) but it leaves a generic,
-  collision-prone class; the scanner should exclude admin-only files instead.
-- `themes/ttm-theme/assets/css/ttm.css:2426-2429`: `.ttm-archive, .ttm-most-read { display: block }`
-  is a self-admitted no-op added by P3-06 to clear rule 34's letter while defeating its purpose.
-- `tests/e2e/selectors-allow.txt`: `.ttm-series-featured__part-dek # state: … the hub template
-  leaves it at its false default` is **false** since P4-03 —
-  `taxonomy-series.html:5` sets `"showDek":true`, `/series/hardening-wordpress/` is in
-  `SCREEN_URLS`, and `single-parts` asserts `deks.count() > 0`. The line exempts a live selector
-  from dead-selector detection. Delete it.
-- `ttm.css:1119` `.ttm-footer__copyright:empty` can never match now that `drop_empty_bound()`
-  removes empty bound paragraphs; its `selectors-allow.txt` reason is stale.
-- `dd4dfbe` has **no `docs/PROGRESS.md` entry**, and `docs/PROGRESS.md:158` still documents the
-  `text-transform: none` override that `dd4dfbe` removed as if it shipped.
+**Why the suite is green:** R1-06's acceptance criterion reads "A fidelity row per restored
+value, since the absence of one is exactly why each was droppable". The list-row mark, dek
+and meta margins got no row. `strip-mark`, `strip-meta`, `ar-aside-row` and `hub-grid-row`
+do not read margins either.
+
+**Minimal fix:** restore the base values: mark 5px, meta `var(--wp--preset--spacing--10)`,
+dek 5px. Then add `.ttm-series-list.is-list .ttm-series-mark { margin-top: 6px }`,
+`.ttm-series-list.is-list .ttm-series-row__meta { margin-top: 6px }` and
+`.ttm-series-list.is-list .ttm-series-row__dek { margin-top: 4px }` under `/* 4.17 series row */`,
+after the base rules. Add margin assertions to `strip-mark`, `strip-meta`, `ar-aside-row`,
+`hub-grid-row` or a new `hub-grid-dek`, plus a new `wr-serial-row-margins`.
+
+### 2. [Manual-check integrity] Committed screenshots predate every R1 fix (R1-12, owner R1-01..R1-08)
+
+`docs/feedback/phase-3/*.png` was last written by `ebf010f` (P5-05). Several round-1 tasks
+changed what those screens render:
+
+- R1-01: search rows
+- R1-04: archive dates and the serial meta line
+- R1-06: hero spacing, chapter rows, and the regression in finding 1
+- R1-07: two books instead of three on the Writing page
+- R1-08: the newsletter box copy size
+
+HANDOFF states that screenshots were "not re-run as part of this round". R1-04, R1-06 and R1-07
+each regenerated screenshots locally and then threw them away. As a result:
+
+- `writing.png` still shows the removed third book.
+- `archive-security.png` still shows "Nov 26, 2025" wrapping in the 72px column.
+- `search.png` still shows the old post-terms kicker.
+
+Manual checks 4 to 7 below ask a human to compare exactly these PNGs with the mocks, so today
+they would validate superseded output. SPEC §1 "Done" and §8 require the PNGs to be committed
+per phase. After a review round the final set has to reflect the final code.
+
+**Minimal fix:** after R1-11 lands, run `npm run screenshots` and commit all 14 PNGs. The
+fix task names the check that would have caught this.
+
+---
+
+## Interpretation choices (HANDOFF round 1)
+
+- **R1-08, scoping by `is-style-dek-l` className rather than `is_singular()`.** Agreed. It is
+  the narrower guard. `article-header.php:20` is the only `post-excerpt` carrying that class,
+  and the filter is registered with 3 args, so `$block` arrives.
+- **R1-09, `toBeGreaterThanOrEqual` in `aside-phone-order`.** Agreed. Flush stacking is
+  correct markup, and overlap still fails.
+- **R1-10, `UNSTYLED_WRAPPERS` in `check-css-coverage.mjs`.** This is the reading the round-1
+  task itself prescribed ("via the scanner's wrapper handling, not a decorative rule"), but it
+  is not what SPEC says. See Spec issue 1. I have not queued a fix task, because any fix needs
+  an owner ruling first.
+- **R1-02, applying rule 36 to the `layout: grid` `.ttm-stats` group in `stat-row.php`.**
+  Agreed. It is the same hazard.
+
+## Blocked and skipped tasks
+
+None.
 
 ---
 
 ## Spec issues
 
-These are places where SPEC (or the mock) is itself unclear or wrong. None of them excuses a
-deviation; they need an owner decision.
+1. **Rule 34 has no sanctioned home for identity-only block wrappers.** Phase-2 rule 34 says
+   `Helpers::wrapper('x')` counts as `ttm-x`, and that intentionally unstyled hooks go in
+   `scripts/css-coverage-allow.txt`. The phase-3 amendment requires that file to be empty
+   at flight end. Together those force every block wrapper to carry a CSS rule. For
+   `ttm-archive` and `ttm-most-read`, which need no styling, the only options are:
+   - a decorative no-op rule, which round 1 rejected;
+   - a second, unlisted allow-list inside the script, which R1-10 shipped as
+     `UNSTYLED_WRAPPERS` at `scripts/check-css-coverage.mjs:97`.
 
-1. **CLAUDE.md's restatement of rule 2 drops its scope.** Phase-1 rule 2 reads "No
-   `wp_enqueue_style` hooked to `wp_enqueue_scripts` … **in any file under
-   `plugins/ttm-core/`**"; CLAUDE.md's `## Constraints` line drops the scope, so the theme's
-   entirely correct `functions.php:32` enqueue reads as a violation. Restore the scope.
-2. **SPEC §6.1.0's "one or the other" was resolved a third way.** SPEC says root padding is kept
-   only if it does not double the gutter, "otherwise root padding is removed and the container
-   owns it — one or the other". P0-09 keeps `useRootPaddingAwareAlignments: true` *and* neutralises
-   it with `ttm.css:53-55` `.wp-site-blocks .has-global-padding { padding-inline: 0 }`. It works
-   and `container-gutter` passes, but it silently zeroes global padding for any future constrained
-   group. Either amend SPEC or take SPEC's stated fallback.
-3. **Rule 41's reason vocabulary grew mid-flight.** PLAN sanctioned two reason kinds for
-   `selectors-allow.txt` (`# P<n>-<nn> pending`, `# editor block style`). P1-07 and P3-06
-   converted nine pending lines into a third, permanent `# state: …` category rather than making
-   the selectors reachable. Each conversion is substantively defensible and rule 41 permits
-   reasoned entries, but it satisfied the push tasks' literal acceptance check (`grep -c 'P1-'
-   → 0`) without resolving anything. Worth ratifying the category explicitly or trimming it.
-4. **§6.9 has rows that cannot fail.** `hub-grid-cats`'s "contains ' · ' or single name" and
-   `wr-serial-form`'s `/i` flag are SPEC's own wording; the tests faithfully transcribe assertions
-   that assert nothing. Tighten SPEC, not just the tests.
-5. **Hub part numbering is undetermined.** `/series/` renders `01`–`06`; mock 1f's part number is
-   templated (`{{ p.n }}`), so unlike mock 1e it settles nothing. `dd4dfbe` chose plain numbers
-   for most-read on mock evidence; the hub, the article TOC, the chapter list and the 404 "Latest"
-   list all still zero-pad. Needs an owner ruling, not a guess.
-6. **`Values::archive_kind()`'s precedence test asserts an impossible state.**
-   `tests/unit/Bindings/ValuesTest.php` asserts `archive_kind( ['month'=>true,'year'=>true] )`
-   with the note "a day archive is also a month and a year archive". `WP_Query::parse_query()`
-   guards each branch with `if ( ! $this->is_date )`, so exactly one flag is ever true. Harmless,
-   but the test proves nothing and the recorded interpretation is factually wrong.
+   The second option is a deviation from rule 34's letter: two emitted classes have no
+   selector and the lint does not fail. The owner should choose one of these:
+   - amend rule 34 to exempt `data-ttm-block` wrapper classes by rule, not by a hand list;
+   - permit permanent `# hook` lines in the allow-list;
+   - require a real rule.
 
----
+   I am recording this and not approving it.
+2. Carried forward from the previous review and still open, because each needs an owner
+   decision:
+   - SPEC §6.1.0 "one or the other" was resolved a third way (root padding kept and
+     neutralised).
+   - The `# state:` reason category in `selectors-allow.txt`.
+   - §6.9 rows that cannot fail on SPEC's own wording (`wr-serial-form`'s `/i`).
+   - Hub, TOC, chapter and 404 part-number zero-padding (mock 1f is templated).
+   - `ValuesTest`'s impossible `month && year` archive-kind state.
 
 ## Manual checks still owed
 
-Copied from `docs/HANDOFF.md`, all still `NOT VERIFIED (human)`:
+Copied from `docs/HANDOFF.md`, all still `NOT VERIFIED (human)`. Checks 1–7 must wait for
+R1-12's regenerated PNGs.
 
 1. (P0-12) `docs/feedback/phase-3/article.png` masthead vs the top of
-   `docs/feedback/design_article.png` — every inner page a centred 1280 column, inline nav, no
+   `docs/feedback/design_article.png`: every inner page a centred 1280 column, inline nav, no
    "Close" button.
-2. (P1-07) `article.png` vs `design_article.png`, and `article-390.png` vs mock `3b`
-   (`docs/Eric Mann Newspaper.dc.html` lines 118–163).
-3. (P2-04) `journal.png` vs `design_journal.png` — date block left, 36px body, syndication line,
-   "Earlier" stream.
+2. (P1-07) `article.png` vs `design_article.png`, and `article-390.png` vs mock `3b`.
+3. (P2-04) `journal.png` vs `design_journal.png`.
 4. (P3-06) `archive-security.png` vs mock `1e`; `search.png` and `404.png` vs `02 §H`.
 5. (P4-07) `series-hub.png` vs mock `1f`; `writing.png` vs `design_serial.png`;
    `series-single.png` vs `02 §F`.
 6. (P5-01 / P5-05) Open `/signing-your-options-table/`, `/journal-post-1/`, `/writing/` and
-   `/category/security/` at 390 in a **real phone browser** and compare with mock `3b` and the
+   `/category/security/` at 390 in a real phone browser and compare with mock `3b` and the
    `02` Responsive bullets.
-7. (P5-05) The final end-to-end comparison of every `docs/feedback/phase-3/*.png` against its
-   paired mock per that directory's README, plus confirmation that CI is green on the branch
-   including the `e2e` job and its `playwright-report` artifact.
-
-Added by this review:
-
-8. `docs/feedback/phase-3/series-single.png`: the per-part date sits on the **dek's** baseline
-   rather than the title's, because the `40px 1fr auto` grid is `align-items: baseline` and the
-   `1fr` cell wraps to two lines. `single-parts` asserts count, font-size and dek count only.
-   Confirm against `02 §F` whether this is acceptable as drawn.
-9. Hub part numbering (`01`–`06`) — see Spec issue 5.
+7. (P5-05) Final comparison of every `docs/feedback/phase-3/*.png` against its paired mock,
+   plus CI green on the branch including the `e2e` job and its `playwright-report` artifact.
+8. (Round 1) Search results, prior-year archive rows and the Writing serial meta line against
+   their mocks (R1-01, R1-04); exactly two books in "In print" (R1-07); newsletter box copy
+   visibly 13px (R1-08).
+9. (Previous review) `series-single.png`: the per-part date sits on the dek's baseline, not
+   the title's. Confirm against `02 §F`.
+10. (Previous review) Hub part numbering `01`–`06`: owner ruling (Spec issue 2).

@@ -54,6 +54,8 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] R1-08 Scope the global post-excerpt filter; newsletter box copy is 13px
 - [x] R1-09 Tighten the fidelity rows that assert less than their §6.9 row
 - [x] R1-10 Prefix, stale lint entries, no-op CSS and the undocumented dd4dfbe commit
+- [ ] R2-01 Scope R1-06's series-row margins to the list layout; restore strip, rail and grid-2 values
+- [ ] R2-02 Regenerate and commit the phase-3 screenshots after the round-1 fixes
 
 ## Log
 (one entry per task, appended by implement)
