@@ -44,7 +44,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P5-03 Tuning — `cssBudgetBytes`
 - [x] P5-04 Handoff, SETUP/README notes and CI check
 - [x] P5-05 Phase 5 push — final screenshots
-- [ ] R1-01 Search result rows must be whole-row links
+- [x] R1-01 Search result rows must be whole-row links
 - [ ] R1-02 Rule 36: remove `layout: constrained` from inside grid groups
 - [ ] R1-03 Fix the dead ≤720 override on the series featured part rows
 - [ ] R1-04 Archive row dates and the serial meta line must match SPEC's literal text
@@ -359,3 +359,10 @@ browser against mock 3b/02 Responsive; confirm CI green on the
 branch including the e2e job; compare all 14 docs/feedback/phase-3
 PNGs against design_article/journal/serial.png and mocks 1e/1f end
 to end.
+
+### R1-01 — 32a9d67
+Root cause: core/post-terms rendered a linked term, tripping link_rows()'s nested-anchor guard. Fixed by extending ttm/section-label (Sources.php, Values.php) with a `search-row` format returning the plain primary-category name (empty '' when none), and swapping search.html's post-terms kicker for a bound paragraph placed AFTER post-title so the row's whole-row anchor text is headline-first.
+No new CSS needed: `.ttm-archive-row .is-style-kicker { grid-row: 1 }` already existed and still matches (rule 34 unaffected).
+Tests: unit test_section_label_search_row_and_empty (normal 'Technology' + empty ''); integration test_search_template_renders_query_and_rows updated to assert `<a href=... class="wp-block-group ttm-archive-row...">` wrapping `<h3 class="ttm-archive-row__title` and assert no `<div class="wp-block-group ttm-archive-row` remains; e2e new row `search-row-link` asserts tagName A, non-empty href, headline-first text.
+Verified: full foundry_verify green (composer lint, test:unit, npm lint, npm test:unit, npm build, forbidden-patterns, test:integration 480/480, test:e2e 433/433).
+Nothing for a later task: search-row format is search.html-specific (no other template uses core/post-terms for its row kicker).
