@@ -129,6 +129,9 @@ class ArchiveTemplatesTest extends TTM_IntegrationTestCase {
 	/**
 	 * SPEC §6.6 "Search": H1 "Search", the summary reads the query and result count via
 	 * `ttm/search-summary`, and each row carries a category kicker (Decision "New bindings").
+	 * R1-01: the row is a single whole-row anchor with the headline first (rule 33); the
+	 * kicker is bound plain text (`ttm/section-label`, `search-row` format) after the title,
+	 * not `core/post-terms` (which would nest a second anchor).
 	 */
 	public function test_search_template_renders_query_and_rows(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
@@ -152,7 +155,9 @@ class ArchiveTemplatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'Findable Cache Article', $html );
 		$this->assertMatchesRegularExpression( '/<h1 class="[^"]*is-style-display-xl[^"]*">Search<\/h1>/', $html );
 		$this->assertStringContainsString( 'Results for “Findable”', $html );
-		$this->assertMatchesRegularExpression( '/<div class="taxonomy-category is-style-kicker wp-block-post-terms"><a[^>]*>Technology<\/a><\/div>/', $html );
+		$this->assertMatchesRegularExpression( '/<a href="[^"]+" class="wp-block-group ttm-archive-row[^"]*">\s*<h3 class="ttm-archive-row__title/', $html );
+		$this->assertStringNotContainsString( '<div class="wp-block-group ttm-archive-row', $html );
+		$this->assertMatchesRegularExpression( '/<p class="is-style-kicker[^"]*">Technology<\/p>/', $html );
 	}
 
 	public function test_search_with_no_results_shows_nothing_matched(): void {

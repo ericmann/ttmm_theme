@@ -181,6 +181,15 @@ class ValuesTest extends TestCase {
 		$this->assertSame( '', Values::section_label( 'series-in', '' ) );
 	}
 
+	/**
+	 * R1-01: `search-row` returns the category name plain (no prefix) for the search result
+	 * row kicker, and '' when the row has no category (rule 26: normal and empty cases).
+	 */
+	public function test_section_label_search_row_and_empty(): void {
+		$this->assertSame( 'Technology', Values::section_label( 'search-row', 'Technology' ) );
+		$this->assertSame( '', Values::section_label( 'search-row', '' ) );
+	}
+
 	public function test_search_summary_with_and_without_results(): void {
 		$this->assertSame( 'Results for “ledger”', Values::search_summary( 'ledger', 3 ) );
 		$this->assertSame( 'Nothing matched “ledger”.', Values::search_summary( 'ledger', 0 ) );

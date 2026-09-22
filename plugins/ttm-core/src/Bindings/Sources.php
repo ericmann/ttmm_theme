@@ -273,9 +273,11 @@ class Sources {
 	/**
 	 * `ttm/section-label` (Decision "New bindings"): `{"format":"more-in"}` -> "More in {primary
 	 * category name}" on a singular post; `{"format":"series-in"}` -> "Series in {queried
-	 * category name}" on a category archive; '' otherwise.
+	 * category name}" on a category archive; `{"format":"search-row"}` -> the looped post's
+	 * primary category name, plain (R1-01: search result row kicker, whole-row-link safe); ''
+	 * otherwise.
 	 *
-	 * @param array{format?: string} $source_args    `{format: 'more-in'|'series-in'}`.
+	 * @param array{format?: string} $source_args    `{format: 'more-in'|'series-in'|'search-row'}`.
 	 * @param WP_Block               $block_instance Consuming block.
 	 * @param string                 $attribute_name Consuming attribute.
 	 * @return string
@@ -284,7 +286,7 @@ class Sources {
 		$format = (string) ( $source_args['format'] ?? 'more-in' );
 		$name   = '';
 
-		if ( 'more-in' === $format ) {
+		if ( 'more-in' === $format || 'search-row' === $format ) {
 			$post_id     = (int) ( $block_instance->context['postId'] ?? 0 );
 			$category_id = $post_id ? PrimaryCategory::id( $post_id ) : 0;
 			$category    = $category_id ? get_term( $category_id, 'category' ) : null;

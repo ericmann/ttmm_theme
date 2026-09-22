@@ -2424,6 +2424,20 @@ test.describe( 'search', () => {
 		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
 		expect( await computed( el, 'color' ) ).toBe( color( 'accent-700' ) );
 	} );
+
+	test( 'search-row-link: .ttm-archive-row (first) is a whole-row anchor, headline first @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.search, 1280 );
+		const el = page.locator( '.ttm-archive-row' ).first();
+		expect( await el.evaluate( ( node ) => node.tagName ) ).toBe( 'A' );
+		expect( await el.getAttribute( 'href' ) ).not.toBe( '' );
+		const title = await text(
+			page.locator( '.ttm-archive-row__title' ).first()
+		);
+		const rowText = await text( el );
+		expect( rowText.startsWith( title ) ).toBe( true );
+	} );
 } );
 
 test.describe( '404', () => {

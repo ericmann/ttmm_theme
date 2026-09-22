@@ -381,10 +381,11 @@ class Values {
 
 	/**
 	 * Cell-heading label with the section name inline (Decision "New bindings"): `more-in` ->
-	 * "More in Technology", `series-in` -> "Series in Technology"; `''` without a name or for
-	 * an unknown format.
+	 * "More in Technology", `series-in` -> "Series in Technology", `search-row` -> "Technology"
+	 * (plain, for the search result row kicker, R1-01); `''` without a name or for an unknown
+	 * format.
 	 *
-	 * @param string $format `more-in` or `series-in`.
+	 * @param string $format `more-in`, `series-in` or `search-row`.
 	 * @param string $name   Category name, or ''.
 	 * @return string
 	 */
@@ -401,6 +402,10 @@ class Values {
 		if ( 'series-in' === $format ) {
 			/* translators: %s: category name. */
 			return sprintf( __( 'Series in %s', 'ttm-core' ), $name );
+		}
+
+		if ( 'search-row' === $format ) {
+			return $name;
 		}
 
 		return '';
