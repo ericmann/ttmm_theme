@@ -22,7 +22,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P1-05 Series TOC (01 §4.20)
 - [x] P1-06 More in section, newsletter box copy, aside order on the phone
 - [x] P1-07 Phase 1 push — article screenshots
-- [ ] P2-01 Journal post header, body column, note column and syndication line (§6.4)
+- [x] P2-01 Journal post header, body column, note column and syndication line (§6.4)
 - [ ] P2-02 Journal stream (01 §4.11) with whole-row links and "Full journal · N entries"
 - [ ] P2-03 Journal archive (`category-journal.html`)
 - [ ] P2-04 Phase 2 push — journal screenshots
@@ -117,3 +117,8 @@ Manual check: none. test:e2e red remains only journalPost axe (syndication links
 Tests: grep 'P1-' in scripts/css-coverage-allow.txt and tests/e2e/selectors-allow.txt -> 0 each; grep '// P1-' in fidelity.spec.mjs -> 0. Full verify green (composer lint, unit 156, npm lint: budget 52436/61440, 31 pending coverage, 126 tagged fixme; test:unit; build; forbidden-patterns); test:e2e 228 passed / 171 skipped with only the known journalPost axe red (syndication links, P2-01/P5-02); test:integration 456/456 on the P1-06 tree (no PHP changed since). Pushed refine/2026-09-22 (c02d335).
 Interpretation: the two P1 pending selector lines (`.ttm-newsletter-form__statement`, `.ttm-lead__media.is-ratio-4-3`) are state selectors, re-tagged with state reasons instead of deleted; four stale P0 pending lines (`.ttm-footer__copyright:empty`, three `.ttm-series-strip` variants) that P0-12 missed are re-tagged the same way. 11 of 14 PNGs changed; search, series-single, front-1920 identical.
 Manual check: NOT VERIFIED (human) — compare docs/feedback/phase-3/article.png with docs/feedback/design_article.png and article-390.png with mock 3b (docs/Eric Mann Newspaper.dc.html lines 118–163).
+
+### P2-01 — 6eb4350
+Tests: fifteen jr-* rows un-fixme'd (fidelity + selectors green; journalPost axe screens green for the first time). ArticleValuesTest +test_word_count_when_unsyndicated_flag (unit 157); ArticleSourcesTest +test_word_count_binding_is_empty_when_post_is_syndicated, +test_empty_bound_paragraph_renders_nothing; SyndicatedToTest asserts two spans, no <p>; ArticleTemplatesTest +test_journal_head_columns_are_not_constrained_and_note_has_mock_copy, f14 green; ChromePartsTest footer test updated (empty bound copyright paragraph renders nothing). test:integration 459/459 after that update; test:e2e 245 passed / 156 skipped, zero failures; lints clean; budget 54161/61440; 30 pending coverage; 111 tagged fixme.
+Interpretation: drop_empty_bound() (render_block_core/paragraph + /heading, priority 20) applies to every ttm/*-bound block, so the footer's ttm/verse-copyright paragraph also vanishes with no stored verse (ChromePartsTest updated; `.ttm-footer__copyright:empty` CSS left as-is, footer out of scope). Values::word_count(int, bool $suppressed=false) carries the whenUnsyndicated flag; only non-blank URLs count as syndication. Note column group carries `ttm-journal-head__aside` for the <= 1024 footnote rule (PLAN named no class). `.ttm-syndication a` underlined: grey sentence + accent link failed axe link-in-text-block, which the a11y row forbids. jr-body asserts px(36*18); jr-synd-words asserts margin-left:auto by bounding boxes (flex auto margins resolve to px). `.ttm-journal-head__count` allow-listed as a state selector (seeded journal post is syndicated).
+Manual check: none.
