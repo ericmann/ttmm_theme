@@ -5,7 +5,7 @@ Started: 2026-09-22T04:48:01.084Z
 ## Tasks
 - [x] P0-01 Allow-list to pending lines, budget 61440, tagged fixme guard
 - [x] P0-02 Config keys, `article-h2` slug and the theme.json variable check
-- [ ] P0-03 Runtime selector coverage spec (rule 41) and the e2e screen set
+- [x] P0-03 Runtime selector coverage spec (rule 41) and the e2e screen set
 - [ ] P0-04 Fidelity rows for every §6.9 row as tagged fixme
 - [ ] P0-05 Seed images per rule 45, author display name, book and About covers
 - [ ] P0-06 Tuning — `seed.image_band_angle`
@@ -53,3 +53,10 @@ Strict allow-list format enforced: parseAllowList(text, {strict:true}) requires 
 
 ### P0-02 — 3bf37fd
 Config: added series.related_limit=4, seed.image_band_angle=30 (⚠️ ASSUMPTION, Seeder only per rule 24). theme.json: fontSizes slug h2->article-h2 ("Article heading 2", 30px); h1 element's var fixed --h1->--h-1; h2 element's var ->--article-h-2. ttm.css: 3 refs (.is-style-journal-title, .entry-content h2, .ttm-lead__title phone) -> --article-h-2, dropped stale comment. New scripts/lib/theme-json-vars.mjs: kebabSlug(slug) (both letter->digit and digit->letter boundary regexes, lower-cased), generatedVars(themeJson) (font-size+color preset vars), referencedVars(cssText). check-theme-json.mjs now scans ttm.css, style.css and JSON.stringify(theme.styles) for --wp--preset--(font-size|color)--* refs and fails on any not in generatedVars — this caught two pre-existing bugs I fixed in-commit (see commit body: h1 element ref, .is-style-kicker's nonexistent --font-size--kicker -> --font-size--caption). Budget now 42923/61440. Tests: ConfigTest 2 new methods; theme-json-vars.test.js 3 tests. Full foundry_verify (incl. e2e/integration) green.
+
+### P0-03 — 29cbd39
+Tests: scripts/test/css-selectors.test.js (selectorsOf split/media-flag/comment-strip/:not() comma, queryable pseudo-element strip, isExempt state+media, parseSelectorAllow); tests/e2e/selectors.spec.mjs green on the 14-screen set (SCREEN_URLS ∪ securityFiltered). npm run test:e2e (all 169 tests) and npm run lint/test:unit/composer lint/test:unit all green via foundry_verify.
+wc -l tests/e2e/selectors-allow.txt: 54.
+Interpretation: tests/e2e/lib/urls.mjs (13-screen SCREEN_URLS incl. securityFiltered export) and screens.spec.mjs (fetchpriority front/article-only) already matched the Decision's required shape from prior work; only playwright.config.mjs's fidelity testMatch/desktop+phone testIgnore needed "selectors" added.
+Allow-list mapping (54 lines): component selectors -> owning phase task, e.g. ttm-syndication(+a)/is-style-grid-3/ttm-journal-head:has(...) -> P2-01; ttm-filter-row__label/__sort -> P3-02; ttm-item h4/ttm-cell empty variants/is-style-grid-5-7/ttm-most-read__* -> P3-04; is-style-grid-2/ttm-series-row__dek/ttm-series-mark.is-hiatus -> P4-02; ttm-tile img/ttm-writing-cell__footnote/ttm-writing-body:not(...) -> P4-06; ttm-newsletter-form__statement -> P1-06; ttm-footer__copyright:empty -> P0-11; ttm-lead__media.is-ratio-4-3 -> P1-02; is-style-rule-1/.is-style-tags .tag -> P1-03; ttm-series-strip state variants -> P0-08. Remaining .is-style-* editor-only styles (zone/tile/lead/poster/headline-s/short/cover/cover-shadow/numbered-rows, button/quote styles) tagged "# editor block style (04 §3)" per the task's list — may remain past the flight.
+Note: an unrelated themes/ttm-theme/templates/404.html change (adding className "ttm-search" to core/search, matching P3-05's decision) appeared mid-task from what looked like a second concurrent process on this repo; git-stashed (not discarded) so it isn't lost — whoever runs P3-05 should check `git stash list`.
