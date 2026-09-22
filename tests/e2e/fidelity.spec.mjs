@@ -2249,8 +2249,7 @@ test.describe( 'archive', () => {
 		expect( await els.count() ).toBe( 0 );
 	} );
 
-	test.fixme( // P3-04
-	'ar-aside-series: .ttm-archive-body aside .ttm-cell-heading__label (first) @1280', async ( {
+	test( 'ar-aside-series: .ttm-archive-body aside .ttm-cell-heading__label (first) @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.securityArchive, 1280 );
@@ -2258,10 +2257,9 @@ test.describe( 'archive', () => {
 			.locator( '.ttm-archive-body aside .ttm-cell-heading__label' )
 			.first();
 		expect( await text( el ) ).toBe( 'Series in Security' );
-	} ); // P3-04
+	} );
 
-	test.fixme( // P3-04
-	'ar-aside-row: .ttm-series-list.is-rail .ttm-series-row (first) @1280', async ( {
+	test( 'ar-aside-row: .ttm-series-list.is-rail .ttm-series-row (first) @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.securityArchive, 1280 );
@@ -2273,10 +2271,9 @@ test.describe( 'archive', () => {
 		expect( await computed( el, 'padding' ) ).toBe( '12px 0px' );
 		const title = el.locator( '.ttm-series-row__title' );
 		expect( await computed( title, 'font-size' ) ).toBe( px( 15 ) );
-	} ); // P3-04
+	} );
 
-	test.fixme( // P3-04
-	'ar-mostread: .ttm-most-read .ttm-numbered__row (first) @1280', async ( {
+	test( 'ar-mostread: .ttm-most-read .ttm-numbered__row (first) @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.securityArchive, 1280 );
@@ -2285,10 +2282,9 @@ test.describe( 'archive', () => {
 		expect( t.length ).toBe( 2 );
 		expect( await computed( el, 'font-size' ) ).toBe( px( 14 ) );
 		expect( await computed( el, 'font-weight' ) ).toBe( '600' );
-	} ); // P3-04
+	} );
 
-	test.fixme( // P3-04
-	'ar-mostread-num: .ttm-most-read .ttm-numbered__num (first) @1280', async ( {
+	test( 'ar-mostread-num: .ttm-most-read .ttm-numbered__num (first) @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.securityArchive, 1280 );
@@ -2296,7 +2292,7 @@ test.describe( 'archive', () => {
 		// Colour vs a11y: neutral-700, not SPEC's literal neutral-500.
 		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
 		expect( await computed( el, 'font-weight' ) ).toBe( '800' );
-	} ); // P3-04
+	} );
 
 	test( 'ar-phone-year: .ttm-archive-year (first) @390', async ( {
 		page,
@@ -2309,14 +2305,15 @@ test.describe( 'archive', () => {
 		expect( await computed( label, 'font-size' ) ).toBe( px( 24 ) );
 	} );
 
-	test.fixme( // P3-04
-	'ar-tablet-aside: .ttm-archive-body aside @1000', async ( { page } ) => {
+	test( 'ar-tablet-aside: .ttm-archive-body aside @1000', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.securityArchive, 1000 );
 		const el = page.locator( '.ttm-archive-body aside' );
 		const t = await tracks( el );
 		expect( t.length ).toBe( 2 );
 		expect( t[ 0 ] ).toBeCloseTo( t[ 1 ], 0 );
-	} ); // P3-04
+	} );
 } );
 
 test.describe( 'journal archive', () => {

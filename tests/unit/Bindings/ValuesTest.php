@@ -176,6 +176,11 @@ class ValuesTest extends TestCase {
 		$this->assertSame( '', Values::section_label( 'unknown', 'Technology' ) );
 	}
 
+	public function test_section_label_series_in(): void {
+		$this->assertSame( 'Series in Security', Values::section_label( 'series-in', 'Security' ) );
+		$this->assertSame( '', Values::section_label( 'series-in', '' ) );
+	}
+
 	public function test_archive_kind_labels_and_empty(): void {
 		$this->assertSame( 'Section', Values::archive_kind( [ 'category' => true ] ) );
 		$this->assertSame( 'Tag', Values::archive_kind( [ 'tag' => true ] ) );

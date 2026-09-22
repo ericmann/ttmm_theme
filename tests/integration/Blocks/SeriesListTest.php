@@ -153,7 +153,7 @@ class SeriesListTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'ttm-series-row__meta', $html );
 	}
 
-	public function test_categories_are_joined_with_middle_dots_in_rows_layout(): void {
+	public function test_categories_are_joined_with_middle_dots_in_list_layout(): void {
 		// SeriesIndex::categories_for() collects each *chapter's* primary category, not a
 		// single post's multiple categories, so two categories on one series needs two parts
 		// with different primary categories.
@@ -203,5 +203,39 @@ class SeriesListTest extends TTM_IntegrationTestCase {
 		preg_match( '/<a[^>]*>(.*?)<\/a>/s', $html, $matches );
 		$this->assertNotEmpty( $matches );
 		$this->assertStringStartsWith( 'Solo Series', trim( wp_strip_all_tags( $matches[1] ) ) );
+	}
+
+	public function test_rail_layout_renders_title_and_meta_only(): void {
+		$this->seed( 'normal' );
+
+		$html = $this->render(
+			[
+				'status' => 'in-progress',
+				'limit'  => 10,
+				'layout' => 'rail',
+			]
+		);
+
+		$row_start = strpos( $html, 'Ordinary Time' );
+		$this->assertIsInt( $row_start );
+		$row_html = substr( $html, $row_start, 400 );
+
+		$this->assertStringContainsString( 'Faith · 9 of 12 · Sundays', $row_html );
+		$this->assertStringNotContainsString( 'ttm-series-row__dek', $row_html );
+		$this->assertStringNotContainsString( 'ttm-series-row__count', $row_html );
+	}
+
+	public function test_layout_rows_is_no_longer_accepted(): void {
+		$schema = json_decode(
+			(string) file_get_contents( TTM_CORE_DIR . '/blocks/series-list/block.json' ),
+			true
+		);
+
+		$enum = $schema['attributes']['layout']['enum'];
+
+		$this->assertNotContains( 'rows', $enum );
+		$this->assertContains( 'list', $enum );
+		$this->assertContains( 'rail', $enum );
+		$this->assertSame( 'list', $schema['attributes']['layout']['default'] );
 	}
 }

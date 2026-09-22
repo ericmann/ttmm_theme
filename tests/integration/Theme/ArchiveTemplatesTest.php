@@ -269,4 +269,50 @@ class ArchiveTemplatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringNotContainsString( 'ttm-category-stats', $head );
 		$this->assertStringNotContainsString( 'is-layout-constrained', $head );
 	}
+
+	/**
+	 * SPEC §6.6 "Right aside": the "Series in {Section}" heading reads the queried category
+	 * name via `ttm/section-label`, the series rows are the `rail` layout, and Most read is
+	 * the shared numbered component.
+	 */
+	public function test_category_aside_reads_series_in_section_and_numbered_most_read(): void {
+		$security = $this->category_id( 'security', 'Security' );
+
+		$term      = wp_insert_term( 'Hardening WordPress', 'series' );
+		$series_id = (int) $term['term_id'];
+		$part      = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $security ],
+			]
+		);
+		update_post_meta( $part, 'ttm_series_part', 1 );
+		update_post_meta( $part, 'ttm_primary_category', $security );
+		wp_set_object_terms( $part, [ $series_id ], 'series' );
+		\TTM\Core\Query\SeriesIndex::rebuild();
+
+		$flagged = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $security ],
+				'post_title'    => 'Flagged Post',
+			]
+		);
+		update_post_meta( $flagged, 'ttm_primary_category', $security );
+		update_post_meta( $flagged, 'ttm_featured_in_section', '1' );
+
+		$this->go_to( (string) get_category_link( $security ) );
+
+		$html = $this->render_template( 'category' );
+
+		$this->assertSame( 1, preg_match( '/<aside[^>]*>(.*)<\/aside>/s', $html, $m ) );
+		$aside = $m[1];
+
+		$this->assertMatchesRegularExpression( '/<h3 class="wp-block-heading ttm-cell-heading__label">Series in Security<\/h3>/', $aside );
+		$this->assertStringContainsString( 'ttm-series-list is-rail', $aside );
+		$this->assertStringContainsString( 'Hardening WordPress', $aside );
+		$this->assertStringContainsString( 'ttm-numbered__row', $aside );
+		$this->assertStringContainsString( 'Flagged Post', $aside );
+		$this->assertStringNotContainsString( 'ttm-most-read__item', $aside );
+	}
 }

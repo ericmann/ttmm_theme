@@ -1,6 +1,8 @@
 <?php
 /**
- * `ttm/series-list` render: series rows (01 §4.16/§4.17), F4 in-progress fallback.
+ * `ttm/series-list` render: series rows (01 §4.16/§4.17), F4 in-progress fallback. `list`
+ * (default) shows a dek, categories and count; `rail`/`strip` collapse those into one
+ * `__meta` line (categories · count · cadence); `grid-2`/`grid-3` reuse `list`'s markup.
  *
  * @package TTM\Core\Blocks
  *
@@ -26,7 +28,7 @@ $ttm_status          = (string) ( $attributes['status'] ?? 'in-progress' );
 $ttm_form            = (string) ( $attributes['form'] ?? 'any' );
 $ttm_in_category     = ! empty( $attributes['inCategory'] );
 $ttm_exclude_current = ! empty( $attributes['excludeCurrent'] );
-$ttm_layout          = (string) ( $attributes['layout'] ?? 'rows' );
+$ttm_layout          = (string) ( $attributes['layout'] ?? 'list' );
 $ttm_orderby         = (string) ( $attributes['orderby'] ?? 'updated' );
 $ttm_show_dek        = ! isset( $attributes['showDek'] ) || $attributes['showDek'];
 $ttm_show_cats       = ! isset( $attributes['showCategories'] ) || $attributes['showCategories'];
@@ -145,7 +147,7 @@ $ttm_extra = $ttm_is_fallback ? [ 'data-ttm-empty-heading' => __( 'Series', 'ttm
 		<a class="ttm-series-row" href="<?php echo esc_url( home_url( '/series/' . $ttm_row['slug'] . '/' ) ); ?>">
 			<span class="ttm-series-mark is-<?php echo esc_attr( $ttm_row['status'] ); ?>"></span>
 			<span class="ttm-series-row__title"><?php echo esc_html( $ttm_row['name'] ); ?></span>
-			<?php if ( 'strip' === $ttm_layout ) : ?>
+			<?php if ( in_array( $ttm_layout, [ 'strip', 'rail' ], true ) ) : ?>
 				<?php
 				$ttm_meta_parts   = $ttm_category_names;
 				$ttm_meta_parts[] = $ttm_count_word;

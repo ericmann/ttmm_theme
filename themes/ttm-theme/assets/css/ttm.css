@@ -1739,6 +1739,57 @@ blockquote.is-style-pull cite,
 	}
 }
 
+/* Right aside (SPEC §6.6 "Right aside"): shared by every archive kind's aside. */
+.ttm-archive-body aside {
+	padding-top: 24px;
+	display: flex;
+	flex-direction: column;
+	gap: 28px;
+}
+
+/* "Series in Security" reads as a sentence here, not the shared kicker's small caps. */
+.ttm-archive-body aside .ttm-cell-heading__label {
+	text-transform: none;
+	letter-spacing: normal;
+}
+
+.ttm-series-list.is-rail .ttm-series-row {
+	grid-template-columns: 10px 1fr;
+	gap: 12px;
+	padding: 12px 0;
+	border-top: 0;
+	border-bottom: var(--ttm-rule-1);
+}
+
+.ttm-series-list.is-rail .ttm-series-row__title {
+	font-size: 15px;
+	font-weight: 800;
+	line-height: 1.25;
+}
+
+.ttm-series-list.is-rail .ttm-series-row__meta {
+	margin-top: 3px;
+	font-size: 12px;
+	color: var(--wp--preset--color--neutral-700);
+}
+
+@media (max-width: 1024px) {
+
+	.ttm-archive-body aside {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0 32px;
+	}
+}
+
+@media (max-width: 720px) {
+
+	.ttm-archive-body aside {
+		display: flex;
+		flex-direction: column;
+	}
+}
+
 /* 4.18 series bar */
 .ttm-series-bar {
 	display: grid;
@@ -2450,23 +2501,27 @@ ul.modern-footnotes-list,
 }
 
 /* 4.29 numbered rows */
-.ttm-most-read__list {
+.ttm-numbered {
 	list-style: none;
 	margin: 0;
 	padding: 0;
 }
 
-.ttm-most-read__item {
+.ttm-numbered__row {
 	display: grid;
 	grid-template-columns: 24px 1fr;
-	gap: var(--wp--preset--spacing--20);
-	padding: var(--wp--preset--spacing--20) 0;
-	border-top: var(--ttm-rule-1);
+	gap: 8px;
+	padding: 10px 0;
+	border-bottom: var(--ttm-rule-1);
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.35;
 }
 
-.ttm-most-read__num {
-	color: var(--wp--preset--color--neutral-700);
+.ttm-numbered__num {
 	font-weight: 800;
+	color: var(--wp--preset--color--neutral-700);
+	font-feature-settings: "tnum";
 }
 
 .ttm-search .wp-block-search__input,
@@ -2589,7 +2644,7 @@ ul.modern-footnotes-list,
 	}
 }
 
-/* 4.29 numbered part lists (series featured; the shared `ttm-numbered` rows land in P4-05) */
+/* 4.29 numbered part lists (series featured; the shared .ttm-numbered rows are above) */
 .ttm-series-featured__part {
 	display: grid;
 	grid-template-columns: 28px 1fr auto;

@@ -70,7 +70,7 @@ class MostReadTest extends TTM_IntegrationTestCase {
 		$html = $this->render();
 
 		$this->assertStringContainsString( 'Only One', $html );
-		$this->assertSame( 1, substr_count( $html, 'ttm-most-read__item' ) );
+		$this->assertSame( 1, substr_count( $html, 'ttm-numbered__row' ) );
 	}
 
 	/**

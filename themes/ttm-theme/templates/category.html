@@ -41,17 +41,15 @@
 
 	<!-- wp:group {"tagName":"aside","layout":{"type":"default"}} -->
 	<aside class="wp-block-group" aria-label="Section extras">
-		<!-- wp:group {"className":"ttm-cell-heading","layout":{"type":"default"}} -->
-		<div class="wp-block-group ttm-cell-heading">
-			<!-- wp:heading {"level":3,"className":"ttm-cell-heading__label"} -->
+		<!-- wp:group {"className":"ttm-cell-heading is-rail","layout":{"type":"default"}} -->
+		<div class="wp-block-group ttm-cell-heading is-rail">
+			<!-- wp:heading {"level":3,"className":"ttm-cell-heading__label","metadata":{"bindings":{"content":{"source":"ttm/section-label","args":{"format":"series-in"}}}}} -->
 			<h3 class="wp-block-heading ttm-cell-heading__label">Series in</h3>
 			<!-- /wp:heading -->
-
-			<!-- wp:query-title {"type":"archive","showPrefix":false,"className":"ttm-cell-heading__link"} /-->
 		</div>
 		<!-- /wp:group -->
 
-		<!-- wp:ttm/series-list {"inCategory":true,"layout":"rows","limit":4} /-->
+		<!-- wp:ttm/series-list {"inCategory":true,"layout":"rail","limit":4} /-->
 
 		<!-- wp:ttm/most-read /-->
 	</aside>
