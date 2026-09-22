@@ -37,7 +37,7 @@ Started: 2026-09-21T19:10:39.166Z
 - [x] P3-06 Phase 3 push — section rows screenshots and allow-list under 10
 - [x] P4-01 Full `3a` phone pass and ≤ 1024 pass
 - [x] P4-02 a11y and network rows, zero-fixme guard
-- [ ] P4-03 Inner templates smoke and CI seeding
+- [x] P4-03 Inner templates smoke and CI seeding
 - [ ] P4-04 Handoff, SETUP and final budget measurement
 - [ ] P4-05 Phase 4 push — final screenshots
 
@@ -601,3 +601,19 @@ New CellsTest tests for both the suppression and the Journal carve-out.
 All verify commands green (test:integration 422/422, test:e2e 132
 passed/0 failed/0 skipped -- zero fixme rows remain, composer test:unit
 142/142, budget 42980/43008).
+
+### P4-03 — 011277b
+Added the eighth screen (about: '/about/') to urls.mjs (seeded About
+page already exists). screens.spec.mjs header comment updated (7 -> 8).
+
+ci.yml: e2e job already ran npm run build before env:start/seed/e2e
+(no change needed). Added refine/** to pull_request branches (push
+already had it).
+
+SETUP.md: screen count to 8; documented check-fixme.mjs guard and the
+new phone.spec.mjs (P4-01), excluded from desktop.
+
+All verify commands green: test:e2e full suite 138 passed/0 failed
+(about renders one <main>, zero serious/critical axe violations at
+both viewports), composer test:unit 142/142, composer lint 0 errors,
+forbidden-patterns clean. grep -n 'refine' ci.yml shows both triggers.
