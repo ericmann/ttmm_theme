@@ -18,7 +18,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] P1-01 Series bar (§6.2, 01 §4.18)
 - [x] P1-02 Article body row, hero, body typography and sticky aside
 - [x] P1-03 Article header — kicker, H1, dek, byline (01 §4.22)
-- [ ] P1-04 Prev/next (01 §4.21)
+- [x] P1-04 Prev/next (01 §4.21)
 - [ ] P1-05 Series TOC (01 §4.20)
 - [ ] P1-06 More in section, newsletter box copy, aside order on the phone
 - [ ] P1-07 Phase 1 push — article screenshots
@@ -99,3 +99,6 @@ single.html: main/aside groups layout:default; featured image drops aspectRatio 
 
 ### P1-03 — 709bea1
 Pattern: head/byline groups layout:default, category post-terms separator " · ", author isLink. PrimaryCategory::order_terms() on get_the_terms (category, front end): primary first, then sections.order index of the top-level ancestor, then name. Helpers gained three render filters: style_tag_terms (is-style-tags -> a.tag.tag-neutral, separators dropped), excerpt_markup (core/post-excerpt's wp_trim_words strips tags, so the manual excerpt's kses-limited code/em/strong is restored into the rendered <p>), author_prefix (core/post-author-name has no prefix attr; the pattern's "By " is prepended inside the wrapper). Seeder: seed_posts() sets post_author 1 -- seeded posts had author 0 so the author block rendered nothing (needed for art-byline-author; outside the listed files). CSS 4.22: head margin-bottom 0; kicker margin 0 0 14 (links inherit); h1 --h-1/800/1.02/-0.025em margin 0 0 18px -0.03em max-width 18ch; dek margin 0 0 22 + `.is-style-dek-l code` 18px surface; `.is-style-tags` = byline right group (flex, gap 6, margin-left auto; old `.is-style-tags .tag` rule removed); author link 600 ink; phone kicker 11/H1 34/dek 17/byline wraps 6px 14px 12px. Un-fixme'd the 8 rows (art-kicker via textContent; art-h1's 18ch measured against a "0" probe; art-dek 32em -> px(32*21)). 6 unit + 2 integration tests. selectors-allow: `.is-style-tags .tag` line removed; `.is-style-rule-1` re-tagged editor block style (no markup uses it). fidelity 123/190 skipped; integration 450/450; unit 154; budget 50072. Remaining e2e red: journalPost axe (syndication links) -> P2-01/P5-02.
+
+### P1-04 — d4dfee8
+CSS 4.21: `__prev` padding 20px 24px 20px 0 + border-right rule-1; `__next` padding 20px 0 20px 24px, no left border; label/title/link rules unchanged. The old <=1024 stacking of .ttm-prevnext (and its __next border-top) is gone -- cells stay side by side at 1024; new <=720 block stacks to 1 track, __prev border-right 0 / border-bottom rule-1, both cells padding 20px 0, titles 16px. render.php unchanged (all classes already emitted). Un-fixme'd the 5 prevnext rows (prevnext-label reads textContent -- innerText reflects text-transform). SeriesPrevNextTest +test_missing_side_keeps_empty_cell (first part). fidelity 128/185 skipped; integration 451/451; budget 50485; check-fixme 140. Remaining e2e red: journalPost axe (syndication links) -> P2-01/P5-02.
