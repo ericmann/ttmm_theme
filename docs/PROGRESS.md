@@ -18,7 +18,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] P1-06 Phase 1 screenshots and push
 - [x] P2-01 seed --starter-only, Seeder::reset() from a live state, wp ttm stats:flush
 - [x] P2-02 primary:assign --from-yoast and series:assign --from-tags/--form/--status/--total/--name
-- [ ] P2-03 migrate:excerpts --from=yoast and excerpt_length
+- [x] P2-03 migrate:excerpts --from=yoast and excerpt_length
 - [ ] P2-04 migrate:images and migration.* keys
 - [ ] P2-05 audit flags and --summary
 - [ ] P2-06 docs/migration/series.json, import.sh, plan.sh, env:live
@@ -142,3 +142,6 @@ PrimaryCommand.php: --from-yoast branch -- for posts without ttm_primary_categor
 SeriesCommand.php: --from-tags=a,b (union of tagged posts, deduped) alongside the existing single --from-tag; --name sets the series term's name on creation only (existing term's name untouched); --total writes ttm_total_parts; --status explicit value overrides the days-since-newest-part inference (elseif branch).
 Tests: PrimaryCommandTest (new, 4 tests), SeriesCommandTest (new, 5 tests).
 Verified: composer lint 0 errors; targeted filter (19 tests) then full npm run test:integration (549 tests, was 540) green; npm run lint green; forbidden-patterns clean.
+
+### P2-03 — f0ae64e
+Added migrate:excerpts --from=yoast (MigrateCommand::excerpts), new Text::truncate_sentences helper, excerpt_length Config key (default 55). Fills empty, non-Journal-primary post excerpts from _yoast_wpseo_metadesc, truncated at a sentence boundary within excerpt_length words (hard-cut with ellipsis fallback); never overwrites existing excerpts; dry-run writes nothing. Registered in Cli/Loader. Unit tests for truncate_sentences (3) and Config key; integration tests for fill/exclude-journal, never-overwrite, dry-run, and truncation length (4). composer test:unit 176/176 and full npm run test:integration 553/553 green (a --filter-only subset run of MigrateCommandTest showed 2 unrelated pre-existing failures from a WP-core PHPUnit transaction-isolation artifact at the class boundary, not reproducible in the full suite, which is the task's actual Verification command).
