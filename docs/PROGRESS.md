@@ -59,7 +59,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] R3-01 Restore the SPEC §6.2/§6.4/§6.5/§6.7 values no fidelity row asserted
 - [x] R3-02 Writing 'recent chapters' lists published chapters only
 - [x] R3-03 Seed: Short fiction shows SPEC §6.10's four stories in mock order; no literal backticks; regenerate screenshots
-- [ ] R4-01 Series-row count cell sits beside the title; Writing columns stretch their children (rule 36)
+- [x] R4-01 Series-row count cell sits beside the title; Writing columns stretch their children (rule 36)
 - [ ] R4-02 Complete series read 'N chapters' / 'N parts' in the list and grid-2 right cell
 - [ ] R4-03 Test the empty-chapters branch; round-3 cleanups; regenerate screenshots
 
@@ -471,3 +471,31 @@ Seeder.php: added ALLOWED_FORMS const + pure static normalize_form() (no WP call
 Tests: new SeederTest::test_writing_short_fiction_is_the_four_spec_stories_in_mock_order, test_no_seeded_excerpt_contains_a_backtick; updated test_seeded_writing_essays_derive_as_story_but_stay_older_than_the_last_cron_job (essays now ttm_form=article+locked, not story - kept, not deleted). New tests/unit/Cli/SeederTest.php (2 tests) for normalize_form - first unit test in tests/unit/Cli/. New fidelity row wr-tile-titles asserts the four tile titles/aria-labels in order.
 Confirmed /writing/ curl output and front-page "Also running" (still The Last Cron Job) manually. Regenerated 11 phase-3 PNGs (writing/-390, article/-390/-1920, journal/-390, series-hub, series-single, archive-security/-390) via wp ttm seed --reset + npm run screenshots; search.png/404.png/front-1920.png untouched (content unchanged). Updated docs/HANDOFF.md with a full Round 3 section (all 3 R3 tasks) including Measurements for the days_ago changes.
 Full suite green: composer lint/unit (171 tests), npm lint (fixed 2 prettier issues in the new fidelity test via --fix), npm test:unit, npm build, forbidden-patterns, test:integration (484 tests - had to kill one orphaned phpunit process left in the tests-cli container from an earlier interrupted run before a clean rerun succeeded), test:e2e all 3 projects (451 tests). wp-env theme confirmed ttm-theme throughout. git-ancestry check for phase-3 screenshots exits 0.
+
+### R4-01 — 5e8211d
+Fixed .ttm-series-row__count auto-placement (grid-row: 1 / span 3) so the
+count/status cell sits beside the title on is-list, is-grid-2 and
+.ttm-series-single__other (all share the same __count selector; strip/rail
+don't render it, unaffected). Changed page-writing.html main/aside groups
+from layout:{type:flex,orientation:vertical} to layout:{type:default} (rule
+36); ttm.css now gives .ttm-writing-body > main/aside display:flex;
+flex-direction:column directly so children stretch to column width; the
+<=1024 display:contents fold (later in source, same specificity) still wins.
+
+cssBudgetBytes raised 62464 -> 63488 in scripts/check-budget.mjs and
+CLAUDE.md (measured 62463 -> 62568, +105 bytes). Amended CLAUDE.md's rule-36
+constraint line to spell out that grid column children must be ttm.css-owned
+flex/flow, never the block's own flex layout attribute -- useful for R4-02/
+R4-03 if they touch other grid groups.
+
+Tests: fidelity.spec.mjs extended wr-serial-count/hub-grid-row/single-other
+with per-row count-vs-title top alignment; added wr-body-cols (column-width
+match). HubWritingTemplatesTest.php added
+test_writing_body_columns_are_layout_default. Full foundry_verify green:
+composer lint/test:unit, npm lint/test:unit/build, forbidden-patterns,
+test:integration (485 tests), test:e2e (452 tests, incl. selectors.spec).
+
+Note: `npm run build` and an earlier stray `eslint --fix` touched ~20
+unrelated build-output/config files (prettier reformatting from an
+@wordpress/scripts version bump, not from this task); those were reverted
+before commit and only the 6 Files-touched paths were staged.
