@@ -1378,10 +1378,11 @@ test.describe( 'prev/next', () => {
 		expect( t.length ).toBe( 1 );
 	} );
 
-	// P0-04, SPEC §6.11: outside any series, prev/next falls back to the primary category's
+	// P1-02, SPEC §6.11: outside any series, prev/next falls back to the primary category's
 	// chronology.
-	// prettier-ignore
-	test.fixme( 'prevnext-auto-label: .ttm-prevnext__label @1280', async ( { page } ) => { // P1-02
+	test( 'prevnext-auto-label: .ttm-prevnext__label @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.articleNoSeries, 1280 );
 		const labels = page.locator( '.ttm-prevnext__label' );
 		const texts = [];
@@ -1395,9 +1396,10 @@ test.describe( 'prev/next', () => {
 		expect( texts ).toEqual( [ '← Previously in Technology', 'Next →' ] );
 	} );
 
-	// P0-04, SPEC §6.11.
-	// prettier-ignore
-	test.fixme( 'prevnext-auto-title: .ttm-prevnext__title @1280', async ( { page } ) => { // P1-02
+	// P1-02, SPEC §6.11.
+	test( 'prevnext-auto-title: .ttm-prevnext__title @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.articleNoSeries, 1280 );
 		const titles = page.locator( '.ttm-prevnext__title' );
 		expect( await titles.count() ).toBe( 2 );
@@ -1577,23 +1579,22 @@ test.describe( 'aside', () => {
 		}
 	} );
 
-	// P0-04, SPEC §6.11: outside any series, the TOC/bar don't render at all.
-	// prettier-ignore
-	test.fixme( 'toc-absent: .ttm-series-toc @1280', async ( { page } ) => { // P1-02
+	// P1-02, SPEC §6.11: outside any series, the TOC/bar don't render at all.
+	test( 'toc-absent: .ttm-series-toc @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.articleNoSeries, 1280 );
 		expect( await page.locator( '.ttm-series-toc' ).count() ).toBe( 0 );
 	} );
 
-	// P0-04, SPEC §6.11.
-	// prettier-ignore
-	test.fixme( 'bar-absent: .ttm-series-bar @1280', async ( { page } ) => { // P1-02
+	// P1-02, SPEC §6.11.
+	test( 'bar-absent: .ttm-series-bar @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.articleNoSeries, 1280 );
 		expect( await page.locator( '.ttm-series-bar' ).count() ).toBe( 0 );
 	} );
 
-	// P0-04, SPEC §6.11: with no TOC, "More in <section>" moves to the top of the aside.
-	// prettier-ignore
-	test.fixme( 'aside-noseries-order: .ttm-article aside > * @1280', async ( { page } ) => { // P1-02
+	// P1-02, SPEC §6.11: with no TOC, "More in <section>" moves to the top of the aside.
+	test( 'aside-noseries-order: .ttm-article aside > * @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.articleNoSeries, 1280 );
 		const children = page.locator( '.ttm-article aside > *' );
 		const first = await children.nth( 0 ).getAttribute( 'class' );
@@ -1602,9 +1603,10 @@ test.describe( 'aside', () => {
 		expect( second ).toMatch( /\bttm-newsletter-box\b/ );
 	} );
 
-	// P0-04, SPEC §6.11.
-	// prettier-ignore
-	test.fixme( 'box-noseries: .ttm-newsletter-box__title @1280', async ( { page } ) => { // P1-02
+	// P1-02, SPEC §6.11.
+	test( 'box-noseries: .ttm-newsletter-box__title @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.articleNoSeries, 1280 );
 		const el = page.locator( '.ttm-newsletter-box__title' );
 		expect( await text( el ) ).toBe( 'The weekly issue.' );

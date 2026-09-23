@@ -329,4 +329,55 @@ class SeriesTocTest extends TTM_IntegrationTestCase {
 
 		$this->assertSame( '', trim( $html ) );
 	}
+
+	/**
+	 * P1-02, SPEC §6.3: the `series` variant is scoped to an explicit seriesId or the current
+	 * post's own series -- it must never fall back to Serials::active(), even when an
+	 * in-progress fiction serial exists.
+	 */
+	public function test_post_without_series_renders_nothing_while_an_in_progress_serial_exists(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$series = $this->make_series( 'the-quiet-ledger', 'The Quiet Ledger', 0, [ [ 'part' => 1 ] ] );
+		update_term_meta( $series['series_id'], 'ttm_form', 'novel' );
+		SeriesIndex::rebuild();
+		$this->assertNotNull( \TTM\Core\Fiction\Serials::active() );
+
+		$tech    = $this->category_id( 'technology', 'Technology' );
+		$post_id = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+			]
+		);
+		update_post_meta( $post_id, 'ttm_primary_category', $tech );
+
+		$html = $this->render( $post_id );
+
+		$this->assertSame( '', trim( $html ) );
+	}
+
+	/**
+	 * P1-02, SPEC §6.3: unlike `series`, the `chapters` variant still falls back to the active
+	 * serial when there is no seriesId/post series -- that's the Writing page's own use.
+	 */
+	public function test_chapters_variant_still_falls_back_to_the_active_serial(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$series = $this->make_series( 'the-quiet-ledger', 'The Quiet Ledger', 0, [ [ 'part' => 1 ] ] );
+		update_term_meta( $series['series_id'], 'ttm_form', 'novel' );
+		SeriesIndex::rebuild();
+
+		$tech    = $this->category_id( 'technology', 'Technology' );
+		$post_id = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+			]
+		);
+		update_post_meta( $post_id, 'ttm_primary_category', $tech );
+
+		$html = $this->render( $post_id, [ 'variant' => 'chapters' ] );
+
+		$this->assertStringContainsString( 'The Quiet Ledger', $html );
+		$this->assertStringContainsString( 'ttm-numbered__row', $html );
+	}
 }

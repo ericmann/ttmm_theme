@@ -198,4 +198,87 @@ class SeriesPrevNextTest extends TTM_IntegrationTestCase {
 
 		$this->assertStringContainsString( '← Part 1', $html );
 	}
+
+	/**
+	 * P1-02, F11: three Technology-primary posts outside any series, the middle one rendered
+	 * -- both neighbour titles and both labels.
+	 */
+	public function test_f11_chronological_pair_asserts_both_titles_and_labels(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$tech = $this->category_id( 'technology', 'Technology' );
+
+		$older = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+				'post_date'     => '2026-09-10 09:00:00',
+				'post_title'    => 'Older Post',
+			]
+		);
+		update_post_meta( $older, 'ttm_primary_category', $tech );
+
+		$current = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+				'post_date'     => '2026-09-15 09:00:00',
+			]
+		);
+		update_post_meta( $current, 'ttm_primary_category', $tech );
+
+		$newer = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+				'post_date'     => '2026-09-18 09:00:00',
+				'post_title'    => 'Newer Post',
+			]
+		);
+		update_post_meta( $newer, 'ttm_primary_category', $tech );
+
+		$html = $this->render( $current );
+
+		$this->assertStringContainsString( '← Previously in Technology', $html );
+		$this->assertStringContainsString( 'Next →', $html );
+		$this->assertStringContainsString( 'Older Post', $html );
+		$this->assertStringContainsString( 'Newer Post', $html );
+	}
+
+	/**
+	 * P1-02, SPEC §6.3: chronology ignores series membership -- a series part sharing the
+	 * post's primary category is a valid chronological neighbour.
+	 */
+	public function test_chronological_neighbour_may_be_a_series_part(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$tech = $this->category_id( 'technology', 'Technology' );
+
+		$series_term = wp_insert_term( 'Hardening WordPress', 'series', [ 'slug' => 'hardening-wp' ] );
+		$series_id   = (int) $series_term['term_id'];
+
+		$series_part = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+				'post_date'     => '2026-09-10 09:00:00',
+				'post_title'    => 'Series Part One',
+			]
+		);
+		update_post_meta( $series_part, 'ttm_primary_category', $tech );
+		update_post_meta( $series_part, 'ttm_series_part', 1 );
+		wp_set_object_terms( $series_part, [ $series_id ], 'series' );
+		SeriesIndex::rebuild();
+
+		$current = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+				'post_date'     => '2026-09-15 09:00:00',
+			]
+		);
+		update_post_meta( $current, 'ttm_primary_category', $tech );
+
+		$html = $this->render( $current );
+
+		$this->assertStringContainsString( 'Series Part One', $html );
+	}
 }
