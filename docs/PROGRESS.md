@@ -61,7 +61,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] R3-03 Seed: Short fiction shows SPEC §6.10's four stories in mock order; no literal backticks; regenerate screenshots
 - [x] R4-01 Series-row count cell sits beside the title; Writing columns stretch their children (rule 36)
 - [x] R4-02 Complete series read 'N chapters' / 'N parts' in the list and grid-2 right cell
-- [ ] R4-03 Test the empty-chapters branch; round-3 cleanups; regenerate screenshots
+- [x] R4-03 Test the empty-chapters branch; round-3 cleanups; regenerate screenshots
 
 ## Log
 (one entry per task, appended by implement)
@@ -524,3 +524,34 @@ Note for R4-03: `npm run build` after editing render.php only touched
 plugins/ttm-core/blocks/series-list/index.js compiled output if the JS
 changed -- it didn't here, so no build/ diff appeared; confirm before
 staging if R4-03 also runs build.
+
+### R4-03 — ffdbae7
+All five sub-fixes landed in one commit (task's Files touched list is one
+cohesive change):
+(a) New SeriesTocTest::test_chapters_variant_with_no_published_parts_renders_nothing;
+confirmed it fails when the `return ''` guard is temporarily removed
+(renders a heading + empty <ol> instead of ''), passes restored.
+(b) series-toc/render.php chapters loop: removed dead $ttm_is_published
+branch (always true post-R3-02 filter); series/article-TOC variant's F24
+branch (separate code path) untouched.
+(c) SeederTest.php: deleted stale F2/R1-02 docblock, renamed the R3-03 test
+method; assertions unchanged.
+(d) Seeder.php: ALLOWED_FORMS removed, normalize_form() now validates
+against Meta\PostMeta::FORMS (imported); docblock's stale "SPEC §5.2" fixed
+(phase 3 SPEC has no §5.2). Unit test (composer test:unit, 171 tests)
+unaffected since PostMeta::FORMS is a plain const, no WP calls needed.
+(e) HANDOFF.md: fixed Field Guide days_ago (410 not 260) and the R3-03
+Measurements note's misattribution to River; added the Round 4 section.
+
+Reseeded + npm run screenshots: only writing.png, writing-390.png,
+series-hub.png, series-single.png changed (git status confirmed) — exactly
+R4-01/R4-02's scope. Visually verified all four: count/status cell level
+with title throughout, Failover "9 chapters · Complete", Salt Water Wires
+"24 chapters · Complete", Writing columns fill width at 1280 and stack
+correctly at 390. No new visual issues to flag.
+
+Verification commands both pass: `git merge-base --is-ancestor ...` exits 0;
+`grep -n ALLOWED_FORMS plugins/ttm-core/src/Cli/Seeder.php` is empty. Full
+foundry_verify green: composer lint/test:unit (171), npm lint/test:unit/
+build, forbidden-patterns, test:integration (490 tests), test:e2e (452
+tests). This was the last open task — foundry_status now reports 0 open.
