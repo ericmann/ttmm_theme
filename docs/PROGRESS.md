@@ -13,7 +13,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] P1-01 Footer: one line, eight items, no Scripture copyright
 - [x] P1-02 Series TOC F11 and chronological prev/next
 - [x] P1-03 Related series: relatedTo=current, heading, F27
-- [ ] P1-04 F28: Writing page on real content and the editor-only story derivation
+- [x] P1-04 F28: Writing page on real content and the editor-only story derivation
 - [ ] P1-05 Rule 50 sweep: no-context cases in every block test
 - [ ] P1-06 Phase 1 screenshots and push
 - [ ] P2-01 seed --starter-only, Seeder::reset() from a live state, wp ttm stats:flush
@@ -109,3 +109,12 @@ docs/06-fallbacks.md: added F27 row.
 Tests: SeriesListTest 5 new (same-form-only, shared-section-then-update ranking, F27 empty, heading render, outside-series-page empty) plus a go_to_series() helper mirroring the existing excludeCurrent test's query-var pattern.
 fidelity.spec.mjs: un-fixme'd the 4 P1-03 rows -- single-other's count corrected from SPEC's literal "4" to the actually-achievable 3 (related_limit is a cap, not a guarantee; hardening-wordpress only has 3 other nonfiction series once the 3 fiction ones are excluded by form) -- fidelity.spec.mjs now has zero test.fixme rows.
 Verified: composer lint 0 errors; SeriesListTest alone (23 tests) green; full npm run test:integration (507 tests) green; npm run lint green (0 tagged fixme remain); npm run test:e2e --project fidelity: 356 passed, 0 skipped, 0 failed; forbidden-patterns clean; check:block-json clean.
+
+### P1-04 — 72cb27f
+Form.php: is_editor_save() (true unless WP_CLI/WP_IMPORTING defined, filterable via ttm_form_editor_save); on_save() gains optional $from_editor param, skips writing 'story' (leaves meta untouched) when not an editor save; article/chapter always written. Seeder's two Form::on_save() call sites now pass true explicitly.
+Stats.php: story_count() (published ttm_form=story count, cached ttm_stats_story_count, TTL stats.cache_seconds; WP_Query fields=ids/posts_per_page=1 + found_posts keeps it bounded); invalidated on added/updated/deleted_post_meta for key ttm_form and by flush_all().
+Serials::has_any_fiction() reads Stats::story_count() instead of stories(1).
+Hierarchy.php: is_f28() (no fiction-form SeriesIndex row and story_count()===0); pre_get_posts route_writing_page() rewrites the /writing/ page query into the Writing category archive while F28 holds (also nulls WP_Query's already-cached queried_object/queried_object_id, set earlier in parse_query() -- pre_get_posts alone isn't enough); category_hierarchy() only prepends page-writing when !is_f28().
+docs/06-fallbacks.md: F28 row added.
+Tests: unit FormTest 1 new; integration SaveHooksTest 3 new, StatsTest 1 new, HierarchyTest 4 new + 1 renamed (fiction now required for the page-writing-prepend case), ArchiveTemplatesTest 1 new, HubWritingTemplatesTest's existing page-writing assertion updated to seed a fiction series first (F28 changed its default outcome).
+Verified: composer lint 0 errors, composer test:unit 172; targeted filter (46 tests) then full npm run test:integration (516 tests) green; npm run lint green (0 fixme); npm run test:e2e (356 passed, 0 skipped, seed unchanged since seed always has fiction); forbidden-patterns clean; foundry_verify ok:true (extraVerify env:live/test:live also ran since Seeder.php touched, both skip cleanly as expected).
