@@ -14,7 +14,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] P1-02 Series TOC F11 and chronological prev/next
 - [x] P1-03 Related series: relatedTo=current, heading, F27
 - [x] P1-04 F28: Writing page on real content and the editor-only story derivation
-- [ ] P1-05 Rule 50 sweep: no-context cases in every block test
+- [x] P1-05 Rule 50 sweep: no-context cases in every block test
 - [ ] P1-06 Phase 1 screenshots and push
 - [ ] P2-01 seed --starter-only, Seeder::reset() from a live state, wp ttm stats:flush
 - [ ] P2-02 primary:assign --from-yoast and series:assign --from-tags/--form/--status/--total/--name
@@ -118,3 +118,7 @@ Hierarchy.php: is_f28() (no fiction-form SeriesIndex row and story_count()===0);
 docs/06-fallbacks.md: F28 row added.
 Tests: unit FormTest 1 new; integration SaveHooksTest 3 new, StatsTest 1 new, HierarchyTest 4 new + 1 renamed (fiction now required for the page-writing-prepend case), ArchiveTemplatesTest 1 new, HubWritingTemplatesTest's existing page-writing assertion updated to seed a fiction series first (F28 changed its default outcome).
 Verified: composer lint 0 errors, composer test:unit 172; targeted filter (46 tests) then full npm run test:integration (516 tests) green; npm run lint green (0 fixme); npm run test:e2e (356 passed, 0 skipped, seed unchanged since seed always has fiction); forbidden-patterns clean; foundry_verify ok:true (extraVerify env:live/test:live also ran since Seeder.php touched, both skip cleanly as expected).
+
+### P1-05 — b102231
+Added test_rule_50_no_context_with_other_content() to all 19 block test classes. Classification: strict (assert '', already correct code, or one small fix): archive-by-year (render.php now returns '' when $content is empty rather than an empty wrapper div -- the only render.php change), category-stats, most-read, series-bar, series-prev-next, series-progress, series-toc (default series variant), syndicated-to, tag-filter. Sanctioned per SPEC (assert normal output, reading Serials::active()/Books::all()): serial-hero, story-tiles, book-grid, series-toc chapters variant (covered by P1-02's existing fallback test too). Extended-sanctioned, my interpretation (assert normal output, no post/term context to read at all by design): lead-story (Query\Lead::compute()), verse-of-the-day (stored option), newsletter-form (settings singleton), series-featured (documented 03 §3 auto-pick), series-list default (SeriesIndex::all()), series-stats (SeriesIndex::all()), writing-cell (Serials::active() fallback, same shape as serial-hero/writing shelf).
+Verified: composer lint 0 errors; targeted filter (159 tests, all new) green; full npm run test:integration (535 tests, was 516) green; npm run lint green; npm run test:e2e (356 passed, 0 skipped/failed, nothing visibly changed); forbidden-patterns clean.
