@@ -376,3 +376,86 @@ Derived from docs/SPEC.md v4.0 on 2026-09-22. SPEC.md wins over this file.
 10. **§3.1 rule 34 wording** still says "check-fixme.mjs is held to the same standard" while §8 Phase 0 asks for tagged `fixme` rows. Resolution: `ALLOW_TAGGED = true` during the flight (P0-01), `false` at close-out (P5-03), mirroring phase 3.
 11. **§6.6 step 1 "re-run the theme's starter content"** through a plugin command. The plugin cannot call `TTM\Theme\create_starter_content()` (the §4 arrow). Resolution: `seed --starter-only` runs the Seeder's own categories/pages/navigation (same slugs, idempotent), Decision "seed --starter-only".
 12. **Rule 50 vs front-page blocks.** `lead-story`, `verse-of-the-day`, `series-list` (strip), `most-read` on tag archives read site-wide by contract; the rule names only the Writing-page exceptions. Resolution: Decision "Rule 50 sweep" documents the sanctioned set in each block's test docblock.
+
+## Review fixes (round 1)
+
+### R1-01: Primary category survives the WordPress importer; --from-yoast works on imported posts
+**Goal:** Imported posts end up with their Yoast primary category (else nav order), never a stale Uncategorized from the importer's insert-then-set-terms order.
+**Files touched:** plugins/ttm-core/src/Meta/PrimaryCategory.php, plugins/ttm-core/src/Cli/PrimaryCommand.php, tests/integration/Cli/PrimaryCommandTest.php, tests/integration/Meta/SaveHooksTest.php, tests/unit/Meta/PrimaryCategoryTest.php, docs/MIGRATION.md
+**Design constraints:** SPEC §6.7 primary:assign --from-yoast ('for posts without ttm_primary_category'), §9 Q2, rule 49 (dry-run, counts, non-destructive), rule 12 (batched), rule 24. PrimaryCategory::on_save must not persist a primary category during an import (gate on WP_IMPORTING via a filter, e.g. `ttm_primary_on_import`, mirroring Form::is_editor_save()); PrimaryCategory::id() and on_save treat a stored term the post no longer carries as empty (fall back to nav-order resolution on read, never write on read); PrimaryCommand (both modes) treats a stale stored value (not in wp_get_post_categories) as missing. Editor saves keep today's behaviour. No per-visitor branching; Cli imports Meta only.
+**Acceptance tests:** PrimaryCommandTest::test_from_yoast_after_importer_order_uses_yoast() — WITHOUT delete_post_meta: with the import filter on, wp_insert_post (no categories → default category), then wp_set_post_terms([security, technology]), Yoast meta = security → primary:assign --from-yoast writes security and reports used=1; PrimaryCommandTest::test_plain_assign_replaces_a_stale_stored_primary(); SaveHooksTest::test_import_save_does_not_store_default_category_primary(); an id()-level test that a stale stored term resolves to the post's current nav-order category (integration or unit). Each must fail on the current code (the reviewer's probe: stored=uncategorized, --from-yoast 'Would use 0').
+**Out of scope:** Live re-run and screenshots (separate task); live.spec changes; editor sidebar UI.
+**Verification:** npm run test:integration; composer test:unit; composer lint
+**Depends on:** none
+
+### R1-02: Restore the §6.10 single-screen kicker and masthead checks against each post's real primary category
+**Goal:** test:live asserts the masthead current item and the kicker's first term equal the post's primary category name on every single screen, instead of only 'non-empty'.
+**Files touched:** tests/e2e/live.spec.mjs, scripts/live/lib/screens.mjs, scripts/live/screens.mjs, scripts/test/live-screens.test.js
+**Design constraints:** SPEC §6.10 (Singles: kicker equals the primary category name; masthead current item equals the page's section), rule 47 (screens.json stays gitignored, no titles), Decision 'screens.json shape' (add a `primary` field: the primary category's display name read via wp post meta get ttm_primary_category + wp term get, host side). Kicker is core/post-terms (all categories, primary first), so compare its first term (text before the first ' · '). Masthead check runs on single screens against `screen.primary`. Revert the P4-04 relaxation comments.
+**Acceptance tests:** scripts/test/live-screens.test.js: it('carries each single post\'s primary category name') for buildScreens; live.spec.mjs single-kind block asserts kicker first term === screen.primary and masthead current === screen.primary (would fail on the current live import where primary is Uncategorized).
+**Out of scope:** Running the live import (R1-09); PHP changes.
+**Verification:** npm run lint; npm run test:unit; npm run test:live (skips cleanly without screens.json)
+**Depends on:** R1-01
+
+### R1-03: env:live runs end to end: text mismatches do not abort the plan; footnotes verified exactly once in the list
+**Goal:** `npm run env:live` completes on the real export without manual steps, leaving text-mismatched posts classic and listed, and the footnote check catches duplicated notes.
+**Files touched:** scripts/convert-classic.mjs, scripts/live/plan.sh, plugins/ttm-core/src/Cli/ConvertCommand.php, scripts/test/convert-classic.test.js, tests/integration/Cli/ConvertCommandTest.php
+**Design constraints:** SPEC §1.3 'Done', §6.6 (whole plan non-interactive, each step aborts on a real non-zero exit), §6.8 (footnote texts appear in the rendered page exactly once each), rule 49 (non-destructive; backup once). convert-classic.mjs gains a flag (e.g. --allow-text-mismatch) under which textEqual:false is still printed but exit is 0; plan.sh passes it. convert:import skips (does not convert, writes no ttm_classic_backup) any record whose report.textEqual is false, with a '[text-mismatch, skipped]' message, and counts them in its summary. footnotes_verified() counts each note's text exactly once inside the rendered core/footnotes list (ol.wp-block-footnotes or equivalent), not the whole body.
+**Acceptance tests:** convert-classic.test.js: it('--allow-text-mismatch reports mismatches and exits 0') via the exported main/exit helper (no block-library needed); ConvertCommandTest::test_import_skips_text_mismatch_records_and_keeps_them_classic(); ConvertCommandTest::test_footnote_list_duplicated_fails_verification() (a footnotes block rendered twice → [footnotes-mismatch]) and the existing 'body also contains the text' case still passes.
+**Out of scope:** Fixing the 7 malformed classic posts (owner cleanup); running the live import (R1-09).
+**Verification:** npm run test:unit; npm run test:integration; bash -n scripts/live/plan.sh; command -v shellcheck && shellcheck scripts/live/*.sh || true
+**Depends on:** none
+
+### R1-04: migration.image_hosts default per SPEC §5; docs match
+**Goal:** `wp ttm migrate:images` with no --hosts sideloads from the SPEC §5 host list, so plan.sh actually brings images home.
+**Files touched:** plugins/ttm-core/src/Config.php, tests/unit/ConfigTest.php, tests/integration/Cli/MigrateCommandTest.php, docs/MIGRATION.md, docs/05-plugin-spec.md
+**Design constraints:** SPEC §5: migration.image_hosts = [eamann.com, www.eamann.com, ttmm.io, www.ttmm.io, ttmm.wpengine.com, i0.wp.com, i1.wp.com, i2.wp.com]; read only via Config::get('migration.image_hosts', <same list>) (ConfigFallbacksTest). --hosts still overrides. Docs: MIGRATION §2.5a and 05 §10 say --hosts is optional (defaults to the key); MIGRATION §2.1 flag list gains remote-image, shortcode, post-format-aside, no-tags, writing-no-form. Tests never hit the network (pre_http_request).
+**Acceptance tests:** ConfigTest asserts the exact default list; MigrateCommandTest::test_images_without_hosts_uses_configured_default_hosts() (pre_http_request PNG for an eamann.com src, no --hosts → attachment created, src rewritten).
+**Out of scope:** Running the live import; timeout tuning.
+**Verification:** composer test:unit; npm run test:integration; bash scripts/forbidden-patterns.sh
+**Depends on:** none
+
+### R1-05: Verse attribution without a date (SPEC §6.1.1)
+**Goal:** The verse block's attribution reads 'Meditation from dailymedtoday.com' (linked), undated, including the F6 stale fallback.
+**Files touched:** plugins/ttm-core/blocks/verse-of-the-day/render.php, tests/integration/Blocks/VerseOfTheDayTest.php, tests/e2e/fidelity.spec.mjs, docs/03-content-model.md, docs/06-fallbacks.md
+**Design constraints:** SPEC §6.1.1: string translatable (e.g. __( 'Meditation from %s', 'ttm-core' ) with the linked domain), link to the item URL or the site root, no date anywhere in the attribution; F6 amended the same way (last good verse, undated attribution); 03 §6 and 06 F6 text updated. Wrapper shape unchanged (rule 46); no new ttm-* class. Remove now-unused imports.
+**Acceptance tests:** VerseOfTheDayTest: replace the 'Meditation for Sept 18'/'Sept 5' assertions with test_attribution_is_undated() and test_stale_fallback_attribution_is_undated() (text 'Meditation from dailymedtoday.com', no month name); fidelity row verse-attr asserts normalised text === 'Meditation from dailymedtoday.com' in addition to its colour/underline.
+**Out of scope:** Verse fetching, cache boundary, other front-page rows.
+**Verification:** npm run test:integration; npm run test:e2e; npm run lint
+**Depends on:** none
+
+### R1-06: F28 /writing/ archive uses archive.per_page
+**Goal:** In the F28 state, /writing/ paginates exactly like /category/writing/ (archive.per_page).
+**Files touched:** plugins/ttm-core/src/Templates/Hierarchy.php, tests/integration/Templates/HierarchyTest.php
+**Design constraints:** PLAN Decision 'F28 routing' (posts_per_page = archive.per_page, read via Config::get('archive.per_page', 12)); Query\Archive::shape runs before Hierarchy on pre_get_posts, so the rewrite must set it itself (or run earlier); rule 8, rule 24; no per-request WP_Query added.
+**Acceptance tests:** HierarchyTest::test_writing_page_in_f28_state_uses_archive_per_page() — go_to('/writing/') in the F28 state, assert $wp_query->get('posts_per_page') === Config::get('archive.per_page', 12) (fails today: site option 10).
+**Out of scope:** Template/CSS changes; the seeded fiction state.
+**Verification:** npm run test:integration
+**Depends on:** none
+
+### R1-07: Rule 47 check catches private files directly under docs/
+**Goal:** forbidden-patterns.sh fails for a tracked docs/dump.sql, docs/x.csv, docs/b.tar.gz or docs/e.sql.gz, not only nested ones.
+**Files touched:** scripts/forbidden-patterns.sh, scripts/check-private-data.sh, scripts/test/private-data.test.js
+**Design constraints:** SPEC rule 47 (any *.xml, *.sql, *.sql.gz, *.tar.gz, *.csv under docs/, or anything under docs/fixtures/live/). Extract the git ls-files check into scripts/check-private-data.sh (runs against the cwd's repo), called from forbidden-patterns.sh; use top-level and nested pathspecs (or :(glob) magic). Shell: set -euo pipefail, shellcheck clean when installed.
+**Acceptance tests:** scripts/test/private-data.test.js: creates a temp git repo, force-adds docs/dump.sql (and csv, tar.gz, sql.gz, nested docs/a/c.sql, docs/fixtures/live/s.json) and asserts the script exits non-zero naming each; a clean temp repo exits 0. The top-level cases fail against today's pathspecs.
+**Out of scope:** Other forbidden-pattern checks.
+**Verification:** npm run test:unit; bash scripts/forbidden-patterns.sh
+**Depends on:** none
+
+### R1-08: Seeder::reset() removes every post type after a live import
+**Goal:** `wp ttm seed --reset` after env:live leaves no imported feedback/custom_css/wp_block/wp_navigation/nav_menu_item/wp_template/wp_global_styles rows, per the PLAN decision.
+**Files touched:** plugins/ttm-core/src/Cli/Seeder.php, tests/integration/Cli/SeedStatesTest.php
+**Design constraints:** PLAN Decision 'Seeder::reset() from a live state' (every remaining post of every post type, batched by cli.batch; comments; guarded by may_wipe); rule 12 (bounded batches, also bound the get_terms() term deletion by cli.batch); rule 48. The seeder's own navigation is recreated by run(); the default category survives.
+**Acceptance tests:** SeedStatesTest::test_reset_removes_inert_imported_post_types() — create a wp_block, a wp_navigation, a nav_menu_item and a registered-for-test 'feedback' post, reset(), assert none remain; existing reset tests stay green.
+**Out of scope:** Live import changes.
+**Verification:** npm run test:integration; npm run test:e2e
+**Depends on:** none
+
+### R1-09: Re-run env:live and test:live on the export; correct LIVE-TRIAGE; retake live and seeded screenshots; push
+**Goal:** Prove the fixes on the real 889 posts end to end from one command and record the corrected triage.
+**Files touched:** docs/feedback/phase-4/LIVE-TRIAGE.md, docs/feedback/phase-4/*.png, docs/HANDOFF.md, docs/PROGRESS.md
+**Design constraints:** SPEC §1.3, §6.6, §6.10, §6.14, rules 47, 48, 52. Run `npm run env:live` (full or LIVE_SKIP_ATTACHMENTS=1, say which) with no manual steps; record per-step counts including primary:assign --from-yoast used/skipped (expect ~424 used), migrate:images attempts/successes/failures, convert:import skipped-mismatch count. Reclassify the P4-04 'kicker/masthead not a defect' row as the primary-category defect (fix R1-01, test R1-01/R1-02). Break the audit 'shortcode' 51 down by name from detail.shortcodes; if [caption]/[audio] remain in converted post_content, that is a render-class finding to fix with a synthetic test in this task, else document which posts/names they are. `npm run test:live` exit 0. Then `npm run screenshots` (live set), `npm run env:seed -- --reset`, `npm run test:e2e`, `npm run screenshots` (seeded set, front.png shows the undated verse), commit, push. Nothing under docs/fixtures/live/ staged. If the export is absent, log blocked: no export.
+**Acceptance tests:** npm run test:live 0 failures with the R1-02 checks active; npm run test:e2e green after reset; any new rule-52 fix carries its synthetic test.
+**Out of scope:** Content cleanup; beta deployment.
+**Verification:** npm run env:live; npm run test:live; npm run env:seed -- --reset && npm run test:e2e; bash scripts/forbidden-patterns.sh; git push; log Manual check: NOT VERIFIED (human) — open live-front.png and /, a Journal post, /category/security/ on the live import: kicker/section cells show real categories, never Uncategorized.
+**Depends on:** R1-01, R1-02, R1-03, R1-04, R1-05, R1-08

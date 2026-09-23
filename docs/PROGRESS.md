@@ -37,6 +37,15 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] P5-02 Documentation (§6.13)
 - [x] P5-03 Close-out guards, CSS budget record, HANDOFF
 - [x] P5-04 Final seed reset, screenshots and push
+- [ ] R1-01 Primary category survives the WordPress importer; --from-yoast works on imported posts
+- [ ] R1-02 Restore the §6.10 single-screen kicker and masthead checks against each post's real primary category
+- [ ] R1-03 env:live runs end to end: text mismatches do not abort the plan; footnotes verified exactly once in the list
+- [ ] R1-04 migration.image_hosts default per SPEC §5; docs match
+- [ ] R1-05 Verse attribution without a date (SPEC §6.1.1)
+- [ ] R1-06 F28 /writing/ archive uses archive.per_page
+- [ ] R1-07 Rule 47 check catches private files directly under docs/
+- [ ] R1-08 Seeder::reset() removes every post type after a live import
+- [ ] R1-09 Re-run env:live and test:live on the export; correct LIVE-TRIAGE; retake live and seeded screenshots; push
 
 ## Log
 (one entry per task, appended by implement)
