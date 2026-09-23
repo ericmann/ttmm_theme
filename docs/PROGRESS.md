@@ -19,7 +19,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] P2-01 seed --starter-only, Seeder::reset() from a live state, wp ttm stats:flush
 - [x] P2-02 primary:assign --from-yoast and series:assign --from-tags/--form/--status/--total/--name
 - [x] P2-03 migrate:excerpts --from=yoast and excerpt_length
-- [ ] P2-04 migrate:images and migration.* keys
+- [x] P2-04 migrate:images and migration.* keys
 - [ ] P2-05 audit flags and --summary
 - [ ] P2-06 docs/migration/series.json, import.sh, plan.sh, env:live
 - [ ] P2-07 screens.mjs and the live screens manifest
@@ -145,3 +145,6 @@ Verified: composer lint 0 errors; targeted filter (19 tests) then full npm run t
 
 ### P2-03 — f0ae64e
 Added migrate:excerpts --from=yoast (MigrateCommand::excerpts), new Text::truncate_sentences helper, excerpt_length Config key (default 55). Fills empty, non-Journal-primary post excerpts from _yoast_wpseo_metadesc, truncated at a sentence boundary within excerpt_length words (hard-cut with ellipsis fallback); never overwrites existing excerpts; dry-run writes nothing. Registered in Cli/Loader. Unit tests for truncate_sentences (3) and Config key; integration tests for fill/exclude-journal, never-overwrite, dry-run, and truncation length (4). composer test:unit 176/176 and full npm run test:integration 553/553 green (a --filter-only subset run of MigrateCommandTest showed 2 unrelated pre-existing failures from a WP-core PHPUnit transaction-isolation artifact at the class boundary, not reproducible in the full suite, which is the task's actual Verification command).
+
+### P2-04 — 0d32bce
+Added migrate:images [--hosts=] [--post=] [--dry-run] (MigrateCommand::images), new Support\Html helpers (image_srcs, photon_origin_url, replace_url), migration.image_hosts/image_timeout/photon_origin Config keys, and ttm_images_rewritten post meta (hidden from REST). Photon URLs for migration.photon_origin rewrite to the plain origin with no fetch; other listed hosts are sideloaded via media_sideload_image under a temporary http_request_timeout filter and both src and any wrapping href to the same URL are rewritten to the new attachment URL; fetch failures leave src untouched. ttm_classic_backup is written once (first writer wins, shared with convert:import/revert); ttm_images_rewritten records the per-post count. Registered in Cli/Loader. 4 new Html unit tests, 3 new Config keys, 1 new REST-hidden meta test, 5 new MigrateCommandTest integration tests (photon rewrite without fetch, PNG sideload via pre_http_request, fetch failure, dry-run, backup-written-once). Discovered pre_http_request entirely bypasses WP_Http's stream-to-file step that download_url() depends on, so the sideload test mock writes the PNG body to $args['filename'] itself. composer test:unit 180/180 and full npm run test:integration 559/559 green; grep -rn media_sideload_image plugins/ttm-core/src | grep -v Cli/MigrateCommand.php prints nothing.
