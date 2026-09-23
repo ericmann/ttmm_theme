@@ -97,6 +97,9 @@ class Config {
 			'books.link_rows'                  => 2,
 			'cli.batch'                        => 200,
 			'cli.series_tag_min'               => 3,
+			// `migrate:excerpts --from=yoast`'s truncation cap (SPEC §5 Decision Q3);
+			// coupled to core `post-excerpt`'s default `excerptLength` (55) — ⚠️ ASSUMPTION.
+			'excerpt_length'                   => 55,
 
 			'archive.per_page'                 => 12,
 			'archive.tag_filter_limit'         => 5,

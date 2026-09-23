@@ -200,4 +200,123 @@ class MigrateCommandTest extends TTM_IntegrationTestCase {
 		$redirects = get_option( 'ttm_redirects' );
 		$this->assertCount( 2, $redirects );
 	}
+
+	private function category_id( string $slug, string $name ): int {
+		$term = term_exists( $slug, 'category' );
+		if ( $term ) {
+			return (int) $term['term_id'];
+		}
+
+		$created = wp_insert_term( $name, 'category', [ 'slug' => $slug ] );
+
+		return (int) $created['term_id'];
+	}
+
+	/**
+	 * P2-03, SPEC §6.7: an empty excerpt on a non-Journal post gets the Yoast meta description;
+	 * a Journal-primary post is excluded even with an empty excerpt and a Yoast description.
+	 */
+	public function test_excerpts_from_yoast_fills_only_empty_non_journal_excerpts(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+		$post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+				'post_excerpt'  => '',
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $tech );
+		update_post_meta( $post, '_yoast_wpseo_metadesc', 'A short meta description.' );
+
+		$journal = $this->category_id( 'journal', 'Journal' );
+		$jpost   = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $journal ],
+				'post_excerpt'  => '',
+			]
+		);
+		update_post_meta( $jpost, 'ttm_primary_category', $journal );
+		update_post_meta( $jpost, '_yoast_wpseo_metadesc', 'A journal meta description.' );
+
+		$result = ( new MigrateCommand() )->excerpts( [], [ 'from' => 'yoast' ] );
+
+		$this->assertTrue( $result['ok'] );
+		$this->assertSame( 'A short meta description.', get_post( $post )->post_excerpt );
+		$this->assertSame( '', get_post( $jpost )->post_excerpt );
+
+		$ids = array_column( $result['rows'], 'post_id' );
+		$this->assertContains( $post, $ids );
+		$this->assertNotContains( $jpost, $ids );
+	}
+
+	public function test_excerpts_never_overwrite(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+		$post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+				'post_excerpt'  => 'A hand-written excerpt.',
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $tech );
+		update_post_meta( $post, '_yoast_wpseo_metadesc', 'A short meta description.' );
+
+		( new MigrateCommand() )->excerpts( [], [ 'from' => 'yoast' ] );
+
+		$this->assertSame( 'A hand-written excerpt.', get_post( $post )->post_excerpt );
+	}
+
+	public function test_excerpts_dry_run_writes_nothing(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+		$post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+				'post_excerpt'  => '',
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $tech );
+		update_post_meta( $post, '_yoast_wpseo_metadesc', 'A short meta description.' );
+
+		$result = ( new MigrateCommand() )->excerpts(
+			[],
+			[
+				'from'    => 'yoast',
+				'dry-run' => true,
+			]
+		);
+
+		$this->assertTrue( $result['ok'] );
+		$this->assertSame( '', get_post( $post )->post_excerpt );
+		$this->assertStringContainsString( 'Would fill 1 excerpt(s) from Yoast.', $result['messages'][0] );
+	}
+
+	public function test_excerpts_are_truncated_to_excerpt_length(): void {
+		$tech  = $this->category_id( 'technology', 'Technology' );
+		$words = [];
+		for ( $i = 1; $i <= 80; $i++ ) {
+			$words[] = "word{$i}";
+		}
+		$long_desc = implode( ' ', $words ); // no terminal punctuation at all -> hard cut.
+
+		$post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+				'post_excerpt'  => '',
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $tech );
+		update_post_meta( $post, '_yoast_wpseo_metadesc', $long_desc );
+
+		( new MigrateCommand() )->excerpts( [], [ 'from' => 'yoast' ] );
+
+		$excerpt = get_post( $post )->post_excerpt;
+		$this->assertStringEndsWith( '…', $excerpt );
+		$this->assertLessThanOrEqual(
+			(int) \TTM\Core\Config::get( 'excerpt_length', 55 ) + 1, // +1: the trailing "…" isn't a counted word but splits oddly on whitespace.
+			count( preg_split( '/\s+/', trim( $excerpt ) ) )
+		);
+	}
 }

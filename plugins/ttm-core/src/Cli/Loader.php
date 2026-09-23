@@ -67,6 +67,12 @@ class Loader {
 			}
 		);
 		\WP_CLI::add_command( 'ttm migrate:syndication', self::wrap( new SyndicationCommand() ) );
+		\WP_CLI::add_command(
+			'ttm migrate:excerpts',
+			static function ( array $args, array $assoc ): void {
+				self::output( ( new MigrateCommand() )->excerpts( $args, $assoc ) );
+			}
+		);
 	}
 
 	/**

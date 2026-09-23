@@ -69,6 +69,31 @@ class TextTest extends TestCase {
 		);
 	}
 
+	public function test_truncate_sentences_keeps_short_text(): void {
+		$this->assertSame(
+			'One two three.',
+			Text::truncate_sentences( 'One two three.', 10 )
+		);
+	}
+
+	public function test_truncate_sentences_cuts_at_sentence_boundary(): void {
+		$text = 'One two three. Four five six seven eight nine ten.';
+
+		$this->assertSame(
+			'One two three.',
+			Text::truncate_sentences( $text, 6 )
+		);
+	}
+
+	public function test_truncate_sentences_falls_back_to_word_cut_with_ellipsis(): void {
+		$text = 'One two three four five six seven eight nine ten';
+
+		$this->assertSame(
+			'One two three four five…',
+			Text::truncate_sentences( $text, 5 )
+		);
+	}
+
 	public function test_curly_quotes_pairs_double_quotes_and_apostrophes(): void {
 		$input  = 'She said "it\'s <b>fine</b>" to us.';
 		$result = Text::curly_quotes( $input );

@@ -1,6 +1,7 @@
 <?php
 /**
- * `wp ttm migrate:politics|migrate:redirects|migrate:close-comments` (SPEC §6.7, Q3).
+ * `wp ttm migrate:politics|migrate:redirects|migrate:close-comments|migrate:excerpts`
+ * (SPEC §6.7, Q3).
  *
  * @package TTM\Core\Cli
  */
@@ -10,6 +11,8 @@ declare( strict_types=1 );
 namespace TTM\Core\Cli;
 
 use TTM\Core\Config;
+use TTM\Core\Meta\PrimaryCategory;
+use TTM\Core\Support\Text;
 use WP_Query;
 use WP_Term;
 
@@ -173,6 +176,96 @@ class MigrateCommand extends Command {
 				$dry_run
 					? sprintf( 'Would close comments/pings on %d post(s).', count( $rows ) )
 					: sprintf( 'Closed comments/pings on %d post(s).', count( $rows ) ),
+			],
+		];
+	}
+
+	/**
+	 * `migrate:excerpts --from=yoast [--dry-run]` (SPEC §6.7): posts with an empty
+	 * `post_excerpt` and a non-empty `_yoast_wpseo_metadesc` get it as the excerpt, truncated
+	 * at a sentence boundary within `excerpt_length` words. Never overwrites an existing
+	 * excerpt; Journal-primary posts are excluded (their excerpt is derived, not migrated).
+	 *
+	 * {@inheritDoc}
+	 *
+	 * @param string[]             $args  Positional args (unused).
+	 * @param array<string, mixed> $assoc --from=yoast, --dry-run.
+	 */
+	public function excerpts( array $args, array $assoc ): array {
+		unset( $args );
+
+		$from = (string) ( $assoc['from'] ?? '' );
+		if ( 'yoast' !== $from ) {
+			return [
+				'ok'       => false,
+				'rows'     => [],
+				'messages' => [ 'Usage: migrate:excerpts --from=yoast [--dry-run]' ],
+			];
+		}
+
+		$dry_run      = ! empty( $assoc['dry-run'] );
+		$batch        = (int) Config::get( 'cli.batch', 200 );
+		$max_words    = (int) Config::get( 'excerpt_length', 55 );
+		$journal_slug = (string) Config::get( 'sections.journal_slug', 'journal' );
+		$rows         = [];
+		$paged        = 1;
+
+		do {
+			$query = new WP_Query(
+				[
+					'post_type'      => 'post',
+					'post_status'    => 'any',
+					'posts_per_page' => $batch,
+					'paged'          => $paged,
+					'fields'         => 'ids',
+				]
+			);
+
+			foreach ( $query->posts as $post_id ) {
+				$post_id = (int) $post_id;
+				$post    = get_post( $post_id );
+
+				if ( ! $post || '' !== trim( (string) $post->post_excerpt ) ) {
+					continue;
+				}
+
+				if ( PrimaryCategory::slug( $post_id ) === $journal_slug ) {
+					continue;
+				}
+
+				$meta_desc = (string) get_post_meta( $post_id, '_yoast_wpseo_metadesc', true );
+				if ( '' === trim( $meta_desc ) ) {
+					continue;
+				}
+
+				$excerpt = Text::truncate_sentences( $meta_desc, $max_words );
+
+				if ( ! $dry_run ) {
+					wp_update_post(
+						[
+							'ID'           => $post_id,
+							'post_excerpt' => $excerpt,
+						]
+					);
+				}
+
+				$rows[] = [
+					'post_id' => $post_id,
+					'excerpt' => $excerpt,
+				];
+			}//end foreach
+
+			$found = count( $query->posts );
+			++$paged;
+		} while ( $found === $batch );
+
+		return [
+			'ok'       => true,
+			'rows'     => $rows,
+			'messages' => [
+				$dry_run
+					? sprintf( 'Would fill %d excerpt(s) from Yoast.', count( $rows ) )
+					: sprintf( 'Filled %d excerpt(s) from Yoast.', count( $rows ) ),
 			],
 		];
 	}

@@ -56,6 +56,7 @@ class ConfigTest extends TestCase {
 			'books.blank_rows',
 			'books.link_rows',
 			'cli.batch',
+			'excerpt_length',
 			'archive.per_page',
 			'archive.tag_filter_limit',
 			'archive.row_tags',
