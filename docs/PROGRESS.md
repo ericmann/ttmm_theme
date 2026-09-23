@@ -15,7 +15,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] P1-03 Related series: relatedTo=current, heading, F27
 - [x] P1-04 F28: Writing page on real content and the editor-only story derivation
 - [x] P1-05 Rule 50 sweep: no-context cases in every block test
-- [ ] P1-06 Phase 1 screenshots and push
+- [x] P1-06 Phase 1 screenshots and push
 - [ ] P2-01 seed --starter-only, Seeder::reset() from a live state, wp ttm stats:flush
 - [ ] P2-02 primary:assign --from-yoast and series:assign --from-tags/--form/--status/--total/--name
 - [ ] P2-03 migrate:excerpts --from=yoast and excerpt_length
@@ -122,3 +122,9 @@ Verified: composer lint 0 errors, composer test:unit 172; targeted filter (46 te
 ### P1-05 — b102231
 Added test_rule_50_no_context_with_other_content() to all 19 block test classes. Classification: strict (assert '', already correct code, or one small fix): archive-by-year (render.php now returns '' when $content is empty rather than an empty wrapper div -- the only render.php change), category-stats, most-read, series-bar, series-prev-next, series-progress, series-toc (default series variant), syndicated-to, tag-filter. Sanctioned per SPEC (assert normal output, reading Serials::active()/Books::all()): serial-hero, story-tiles, book-grid, series-toc chapters variant (covered by P1-02's existing fallback test too). Extended-sanctioned, my interpretation (assert normal output, no post/term context to read at all by design): lead-story (Query\Lead::compute()), verse-of-the-day (stored option), newsletter-form (settings singleton), series-featured (documented 03 §3 auto-pick), series-list default (SeriesIndex::all()), series-stats (SeriesIndex::all()), writing-cell (Serials::active() fallback, same shape as serial-hero/writing shelf).
 Verified: composer lint 0 errors; targeted filter (159 tests, all new) green; full npm run test:integration (535 tests, was 516) green; npm run lint green; npm run test:e2e (356 passed, 0 skipped/failed, nothing visibly changed); forbidden-patterns clean.
+
+### P1-06 — e1832b9
+Reseeded, rebuilt, ran npm run screenshots against the phase-4 zones; visually confirmed article-noseries.png (no series bar/TOC, chronological "Previously in Technology"/"Next" prev-next), series-single.png ("Other series": Reading CVEs first, no fiction series, count 3), and footer.png (single line, no copyright, no RSS, 8 nav items) match the P1 defect fixes.
+foundry_verify green (composer lint/test:unit, npm run lint/test:unit/build, forbidden-patterns, all constraints ok:true).
+Pushed to origin refine/2026-09-23 (fee247f..e1832b9).
+Manual check: NOT VERIFIED (human) -- open /transients-object-caches-and-fast-enough/, /series/hardening-wordpress/ and / on the seeded site; compare with mock 2b, 1f, 2a line 327.
