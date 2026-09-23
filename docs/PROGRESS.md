@@ -16,7 +16,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] P1-04 F28: Writing page on real content and the editor-only story derivation
 - [x] P1-05 Rule 50 sweep: no-context cases in every block test
 - [x] P1-06 Phase 1 screenshots and push
-- [ ] P2-01 seed --starter-only, Seeder::reset() from a live state, wp ttm stats:flush
+- [x] P2-01 seed --starter-only, Seeder::reset() from a live state, wp ttm stats:flush
 - [ ] P2-02 primary:assign --from-yoast and series:assign --from-tags/--form/--status/--total/--name
 - [ ] P2-03 migrate:excerpts --from=yoast and excerpt_length
 - [ ] P2-04 migrate:images and migration.* keys
@@ -128,3 +128,11 @@ Reseeded, rebuilt, ran npm run screenshots against the phase-4 zones; visually c
 foundry_verify green (composer lint/test:unit, npm run lint/test:unit/build, forbidden-patterns, all constraints ok:true).
 Pushed to origin refine/2026-09-23 (fee247f..e1832b9).
 Manual check: NOT VERIFIED (human) -- open /transients-object-caches-and-fast-enough/, /series/hardening-wordpress/ and / on the seeded site; compare with mock 2b, 1f, 2a line 327.
+
+### P2-01 — b9240d4
+Seeder.php: run_starter() (categories+pages+navigation only, no posts/series/books/verse/newsletter); may_wipe(string $environment_type): bool pure gate; reset() rewritten -- now guarded by may_wipe(), wipes ALL posts/pages/attachments (batched by cli.batch, attachment loop uses an explicit status list since 'any' excludes 'inherit') and every category/post_tag/series term (wp_delete_term() itself refuses the default category), not just _ttm_seed-tagged rows.
+SeedCommand.php: --starter-only routes to run_starter(); allowed() now delegates to Seeder::may_wipe().
+StatsCommand.php (new) + Loader.php: wp ttm stats:flush -> Stats::flush_all(), message "Flushed N stats transient(s)".
+Stats::flush_all() now returns int (count of transients deleted), was void.
+Tests: unit SeederTest 1 new (may_wipe); integration SeedStatesTest 4 new (starter-only x2, reset-foreign-content, reset-seed-only); MaintenanceCommandsTest 1 new (stats:flush); Cli/SeederTest's old test_reset_removes_only_seeded_content renamed/inverted to test_reset_removes_every_post_not_only_seeded_content to match reset()'s new, intentionally broader contract.
+Verified: composer lint 0 errors; targeted filter (21 tests) then full npm run test:integration (540 tests) green; npm run lint green; npm run test:e2e (356 passed); forbidden-patterns clean (had to reword a comment that accidentally matched the rule-12 unbounded-query regex); manually ran wp ttm seed --starter-only then wp ttm seed --reset, confirmed the site returns to the full seed (8 categories/4 pages/107 posts/7 series); foundry_verify ok:true including the env:live/test:live extraVerify triggered by Seeder.php (both skip cleanly, no export present).
