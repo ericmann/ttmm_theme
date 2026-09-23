@@ -30,5 +30,6 @@ Governing rule: **a block never renders empty and never renders placeholder copy
 | F24 | Series TOC | A part is scheduled (future) | Row shown unlinked in neutral-700 with `title="Scheduled Sept 26"`; hub list shows the date in the right column. | plugin |
 | F25 | Any list with a “N →” count link | Count is 0 | Link text becomes “All →”. | `ttm/category-count` binding |
 | F26 | Newsletter poster/box | No provider configured | Poster still renders (it is design, not function) with the form pointing at the settings-defined fallback (mailto) — or, if the owner disables it, the poster shows the statement only, no form. | plugin `ttm/newsletter-form` |
+| F27 | Single series · no other series of the same form | No other series shares the current series' form class (fiction vs nonfiction) | Section omitted (block returns `''`) — no heading, no empty list. | plugin `ttm/series-list relatedTo=current` |
 
 Implementation note: fallbacks are **server-side branches** in `render.php` files and Query filters, not editor-visible block variations. The Site Editor previews should exercise them with a “Preview state” dropdown in the `ttm/*` block sidebar (normal / empty / thin) so the owner can see each state without changing content.

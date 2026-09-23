@@ -470,4 +470,108 @@ class SeriesListTest extends TTM_IntegrationTestCase {
 
 		$this->assertSame( 2, substr_count( $html, 'class="ttm-series-row"' ) );
 	}
+
+	/**
+	 * Point the current query at a series term, the way visiting `/series/<slug>/` would.
+	 */
+	private function go_to_series( int $series_id ): void {
+		$term = get_term( $series_id, 'series' );
+		global $wp_query;
+		$wp_query->queried_object         = $term;
+		$wp_query->queried_object_id      = $series_id;
+		$wp_query->query_vars['taxonomy'] = 'series';
+		set_query_var( 'series', get_term_field( 'slug', $series_id, 'series' ) );
+	}
+
+	/**
+	 * P1-03, SPEC §6.4, rule 51: relatedTo=current never crosses form (nonfiction current
+	 * never lists a novel).
+	 */
+	public function test_related_to_current_lists_same_form_only(): void {
+		$tech    = $this->category_id( 'technology', 'Technology' );
+		$current = $this->make_series( 'current-nonfiction', 'Current Nonfiction', 'in-progress', 'nonfiction', $tech );
+		$this->make_series( 'other-novel', 'Other Novel', 'in-progress', 'novel', $tech );
+		$this->make_series( 'other-nonfiction', 'Other Nonfiction', 'in-progress', 'nonfiction', $tech );
+
+		$this->go_to_series( $current );
+
+		$html = $this->render( [ 'relatedTo' => 'current' ] );
+
+		$this->assertStringNotContainsString( 'Other Novel', $html );
+		$this->assertStringContainsString( 'Other Nonfiction', $html );
+	}
+
+	/**
+	 * P1-03, rule 51: candidates rank by shared section count first, then last_update -- a
+	 * same-section series outranks a more recently updated series from a different section.
+	 */
+	public function test_related_to_current_ranks_shared_sections_then_last_update(): void {
+		$security = $this->category_id( 'security', 'Security' );
+		$business = $this->category_id( 'business', 'Business' );
+
+		$current = $this->make_series( 'current-security', 'Current Security', 'in-progress', 'nonfiction', $security, '2026-01-01 00:00:00' );
+		$this->make_series( 'security-series', 'Security Series', 'in-progress', 'nonfiction', $security, '2026-01-05 00:00:00' );
+		$this->make_series( 'business-series', 'Business Series', 'in-progress', 'nonfiction', $business, '2026-09-01 00:00:00' );
+
+		$this->go_to_series( $current );
+
+		$html = $this->render( [ 'relatedTo' => 'current' ] );
+
+		$pos_security = strpos( $html, 'Security Series' );
+		$pos_business = strpos( $html, 'Business Series' );
+		$this->assertNotFalse( $pos_security );
+		$this->assertNotFalse( $pos_business );
+		$this->assertLessThan( $pos_business, $pos_security );
+	}
+
+	/**
+	 * P1-03, F27: no other series shares the current series' form class -> the block returns
+	 * '' (no heading, no empty list).
+	 */
+	public function test_related_to_current_renders_nothing_without_candidates(): void {
+		$tech    = $this->category_id( 'technology', 'Technology' );
+		$current = $this->make_series( 'only-nonfiction', 'Only Nonfiction', 'in-progress', 'nonfiction', $tech );
+		$this->make_series( 'only-novel', 'Only Novel', 'in-progress', 'novel', $tech );
+
+		$this->go_to_series( $current );
+
+		$html = $this->render( [ 'relatedTo' => 'current' ] );
+
+		$this->assertSame( '', trim( $html ) );
+	}
+
+	/**
+	 * P1-03, SPEC §6.4: a non-empty `heading` attribute renders the same
+	 * `.ttm-cell-heading.is-rail` markup `ttm/series-toc` uses, before the rows.
+	 */
+	public function test_related_to_current_renders_heading_when_set(): void {
+		$tech    = $this->category_id( 'technology', 'Technology' );
+		$current = $this->make_series( 'current', 'Current', 'in-progress', 'nonfiction', $tech );
+		$this->make_series( 'other', 'Other', 'in-progress', 'nonfiction', $tech );
+
+		$this->go_to_series( $current );
+
+		$html = $this->render(
+			[
+				'relatedTo' => 'current',
+				'heading'   => 'Other series',
+			]
+		);
+
+		$this->assertStringContainsString( '<div class="ttm-cell-heading is-rail">', $html );
+		$this->assertStringContainsString( '<span class="ttm-cell-heading__label">Other series</span>', $html );
+	}
+
+	/**
+	 * P1-03, rule 50: relatedTo=current has no meaning outside a series page.
+	 */
+	public function test_related_to_current_outside_series_page_renders_nothing(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+		$this->make_series( 'a', 'A', 'in-progress', 'nonfiction', $tech );
+		$this->make_series( 'b', 'B', 'in-progress', 'nonfiction', $tech );
+
+		$html = $this->render( [ 'relatedTo' => 'current' ] );
+
+		$this->assertSame( '', trim( $html ) );
+	}
 }

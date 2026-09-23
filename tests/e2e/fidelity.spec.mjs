@@ -3323,14 +3323,18 @@ test.describe( 'single series', () => {
 		expect( await computed( date, 'grid-column-start' ) ).toBe( '2' );
 	} );
 
-	// P0-04, SPEC §6.11 (changed): "Other series" now excludes the three fiction series and
-	// includes the new Reading CVEs, up to `series.related_limit` (4) candidates.
-	// prettier-ignore
-	test.fixme( 'single-other: .ttm-series-single__other .ttm-series-row @1280', async ( { page } ) => { // P1-03
+	// P1-03, SPEC §6.11 (changed): "Other series" excludes the three fiction series and
+	// includes the new Reading CVEs. SPEC's row states a count of 4 (up to
+	// series.related_limit), but that is the cap, not a guarantee: hardening-wordpress has
+	// only three other nonfiction series to rank (the-consultants-ledger, ordinary-time,
+	// reading-cves) once the three fiction series are excluded by form, so the real count is 3.
+	test( 'single-other: .ttm-series-single__other .ttm-series-row @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.seriesHardening, 1280 );
 		const els = page.locator( '.ttm-series-single__other .ttm-series-row' );
 		const count = await els.count();
-		expect( count ).toBe( 4 );
+		expect( count ).toBe( 3 );
 
 		const titles = [];
 		for ( let i = 0; i < count; i++ ) {
@@ -3365,9 +3369,10 @@ test.describe( 'single series', () => {
 		}
 	} );
 
-	// P0-04, SPEC §6.11.
-	// prettier-ignore
-	test.fixme( 'single-other-cats: .ttm-series-single__other .ttm-series-row__categories @1280', async ( { page } ) => { // P1-03
+	// P1-03, SPEC §6.11.
+	test( 'single-other-cats: .ttm-series-single__other .ttm-series-row__categories @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.seriesHardening, 1280 );
 		const first = page
 			.locator(
@@ -3377,12 +3382,13 @@ test.describe( 'single series', () => {
 		expect( await text( first ) ).toContain( 'Security' );
 	} );
 
-	// P0-04, SPEC §6.11: on a fiction series hub, "Other series" ranks by last update -- read
+	// P1-03, SPEC §6.11: on a fiction series hub, "Other series" ranks by last update -- read
 	// the newest-chapter dates from docs/fixtures/seed/posts.json: Failover's newest chapter
 	// (failover-ch-9) is more recent (days_ago 250) than Salt Water Wires' newest chapter
 	// (salt-water-wires-ch-24, days_ago 400).
-	// prettier-ignore
-	test.fixme( 'single-other-fiction: .ttm-series-single__other .ttm-series-row__title @1280', async ( { page } ) => { // P1-03
+	test( 'single-other-fiction: .ttm-series-single__other .ttm-series-row__title @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.seriesEntry, 1280 );
 		const titles = page.locator(
 			'.ttm-series-single__other .ttm-series-row__title'
@@ -3395,14 +3401,17 @@ test.describe( 'single series', () => {
 		expect( texts ).toEqual( [ 'Failover', 'Salt Water Wires' ] );
 	} );
 
-	// P0-04, SPEC §6.11.
-	// prettier-ignore
-	test.fixme( 'single-other-heading: .ttm-series-single__other .ttm-cell-heading__label @1280', async ( { page } ) => { // P1-03
+	// P1-03, SPEC §6.11.
+	test( 'single-other-heading: .ttm-series-single__other .ttm-cell-heading__label @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.seriesHardening, 1280 );
 		const el = page.locator(
 			'.ttm-series-single__other .ttm-cell-heading__label'
 		);
-		expect( await text( el ) ).toBe( 'Other series' );
+		// innerText reflects the label's text-transform; assert the source text.
+		const source = await el.evaluate( ( node ) => node.textContent );
+		expect( source ).toBe( 'Other series' );
 		expect( await el.count() ).toBe( 1 );
 	} );
 
