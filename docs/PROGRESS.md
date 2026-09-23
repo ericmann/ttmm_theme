@@ -1,6 +1,6 @@
 # These Things Matter — phase 4 (real content) build progress
-Branch: (set by implement)
-Started: (set by implement)
+Branch: refine/2026-09-23
+Started: 2026-09-23T05:03:31.529Z
 
 ## Tasks
 - [ ] P0-01 Rule 47 check, tagged-fixme guard, live-script entry points, phase-4 screenshot set

@@ -4,5 +4,14 @@
   "reviewed": false,
   "verdict": null,
   "summarized": false,
-  "halted": null
+  "halted": null,
+  "preexistingUntracked": [],
+  "policies": {
+    "signing": "auto",
+    "push": true,
+    "pr": "draft",
+    "feedback": true
+  },
+  "signing": "none",
+  "rounds": []
 }
