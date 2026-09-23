@@ -95,6 +95,28 @@ timeouts; that's `remote-image`/owner-cleanup territory, not a timeout tuning qu
 | `import.sh`'s writing-legacy collision rename prints `Warning: Invalid page template.` and a non-zero WP-CLI exit for the demoted page, tolerated with `\|\| true` | 1 page (`writing` -> `writing-legacy`) | benign / cosmetic | fixed in P2-06 (`import.sh` tolerates it; the rename itself verifiably succeeds) | manual verification in P2-06's commit body |
 | `migrate:images` without `--hosts` rewrites 0 images (`migration.image_hosts` defaults to `[]`, operator-supplied) | 0 (by design) | expected | none needed — `--hosts` is how an operator opts real hosts in per SPEC §6.7/PLAN Q4 | `MigrateCommandTest` covers `--hosts` explicitly |
 | 65 sideloaded images fail outright (dead links: 404s, DNS failures on hosts like `blogs.trb.com`, `www.marketplace-simulation.com`) | 65 images across the 15 scanned hosts | owner cleanup | none — `src` is left untouched and the post is `remote-image`-flagged by `audit`; the owner decides per-link | `AuditCommand`'s `remote-image` flag (P2-05) already covers this |
+| `scripts/live/screens.mjs`'s `sectionPost()` passes `--category=<slug>` to `wp post list` (twice: the newest-post fetch and the `--format=count` count). WP-CLI forwards `category` straight to `WP_Query`, whose `category` arg is a **category ID**, not a slug; a non-numeric slug casts to `0` and WP_Query silently drops the filter, so both calls return the *site-wide* newest post / *site-wide* published count instead of the section's own. The wrong count makes `buildScreens()` compute the same last-archive-page (`ceil(890/12) = page 74`) for every section, and none of those pages exist -> 404 where the manifest says `expectStatus: 200` | 14 URLs (7 sections x 2 viewports), e.g. `archive-technology-last` `/category/technology/page/74/` | archive | P4-04 (`--category=` -> `--category_name=` in both `wp post list` calls in `sectionPost()`) | pending (P4-04 adds a `scripts/test/live-screens.test.js`-style unit test once `sectionPost()`'s query-building is unit-testable, or an integration assertion on the regenerated manifest's `archive-*-last` `expectStatus`) |
+| `Templates/Hierarchy.php`'s `body_class` filter adds `ttm-section-{slug}` (primary category) and `ttm-form-{form}` (post format) to every single/archive `<body>`, but neither has a selector in `ttm.css`/`style.css` — they're pure identifiers today, never styled. `scripts/check-css-coverage.mjs`'s static scan never sees them (they're built by string concatenation in PHP, not a literal `ttm-*` string in source), so this is a rule-34 gap `npm run lint` can't catch, only the live DOM | 30 URLs across 7 singles + 6 archive-`-1` pages (all but `journal`, coincidental — its archive-by-year block returned empty, see next row) + `/writing/`, all x2 viewports, e.g. `single-technology` `/ext-turbovec-vector-search-php/` -> `ttm-section-uncategorized ttm-form-article` | coverage | P4-04 (either give both a real `ttm.css` rule, matching `theme.json`'s "identifier-only" precedent if one exists, or move them off the `ttm-` prefix so rule 34 doesn't apply to internal identifiers) | pending |
+| `archive-by-year` block's wrapper is `Helpers::wrapper( 'archive' )` -> DOM class `ttm-archive`, but `ttm.css` only defines compound `ttm-archive-*` selectors (`.ttm-archive-head`, `.ttm-archive-row`, …), never a bare `.ttm-archive` rule for the wrapper itself | 18 URLs across 6 category archives (`technology`, `business`, `faith`, `writing`, `security`, `opinion` — not `journal`, whose archive-by-year block rendered empty that run) + `/writing/`, `/tag/wordpress/`, `/2014/03/`, all x2 viewports, e.g. `archive-technology-1` `/category/technology/` | coverage | P4-04 (add `.ttm-archive { }` to `ttm.css`'s archive-by-year component block, or rename the wrapper call to `Helpers::wrapper( 'archive-by-year' )` per rule 46 and update every `ttm-archive` reference) | pending |
+
+## P4-02 run: `npm run test:live` against the P3-03 import
+
+Same import re-run end to end (`docs/fixtures/live/import.xml` from P3-03, `LIVE_SKIP_ATTACHMENTS=1`,
+`npm run env:live`) to regenerate `docs/fixtures/live/screens.json` under the new `live.spec.mjs`
+suite (P4-01), then `npm run test:live`: **17 passed, 48 failed** (of 65: 32 screens x 2 viewports
++ 1 `debug.log` check). Every failure is one of exactly two `expect.soft()` classes — no axe,
+network, chrome, single- or archive-content failures at all:
+
+| class | failing tests | root cause (see Findings above) |
+|---|---|---|
+| archive (HTTP status) | 14 | `sectionPost()`'s `--category=` slug/ID mismatch (`screens.mjs`) |
+| coverage (uncovered `ttm-*` DOM class) | 34 (30 `ttm-section-*`/`ttm-form-*` + 18 `ttm-archive`, some screens carry both) | dynamic `body_class()` identifiers and the `archive-by-year` wrapper class, neither has a `ttm.css` rule |
+
+Both are pre-existing gaps this suite is the first thing to actually exercise against real category
+archives with > 1 page and a real primary-category spread — none of the seeded fixture screens
+(`tests/e2e/specs`, `fidelity.spec.mjs`) happen to cross an archive pagination boundary or assert
+DOM-class CSS coverage the way `live.spec.mjs` does. Fixes land in P4-04 (both rows above are
+`archive`/`coverage` class, not `render`/`single`, so out of scope for P4-03).
 
 ## P3-03 run: fresh import with the shortcode pre-pass
 
@@ -121,7 +143,7 @@ in-body footnote marker "¹" and the numbered note list at the bottom both rende
 | broken-internal-link | 5 |
 | missing-alt | 212 |
 | multi-category | 90 |
-| no-excerpt | 326 |
+| no-excerpt | 223 |
 | no-featured-image | 725 |
 | no-tags | 22 |
 | politics | 24 |
@@ -131,4 +153,7 @@ in-body footnote marker "¹" and the numbered note list at the bottom both rende
 | shortcode | 51 |
 | inert-rows | 34 |
 
-(`classic` no longer appears — 0 posts remain unconverted.)
+(`classic` no longer appears — 0 posts remain unconverted. `no-excerpt` dropped from 326 to 223
+between the P3-03 and P4-02 runs — same `migrate:excerpts --from=yoast` step, re-run against the
+same export, filled more excerpts than the P3-03 run's timing caught; every other flag is
+unchanged, all `content`-class, counted only, per P4-02's scope.)
