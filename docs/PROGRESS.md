@@ -30,7 +30,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] P3-03 Fresh import, plan re-run, conversion counts, screenshots and push
 - [x] P4-01 live.spec.mjs and the live Playwright project
 - [x] P4-02 Run test:live and write the triage table
-- [ ] P4-03 Fix render-class findings with synthetic tests
+- [x] P4-03 Fix render-class findings with synthetic tests
 - [ ] P4-04 Fix chrome/archive-class findings with synthetic tests
 - [ ] P4-05 Green test:live, LIVE-TRIAGE complete, live screenshots and push
 - [ ] P5-01 backup.sh, restore.sh, drill.sh, env:drill in CI
@@ -178,3 +178,6 @@ Added tests/e2e/live.spec.mjs + tests/e2e/lib/live.mjs (debugLogLineCount, class
 
 ### P4-02 — a1ffce0
 Ran a fresh npm run env:live (P3-03's import.xml, LIVE_SKIP_ATTACHMENTS=1) end to end through screens.mjs (32 screens), then npm run test:live under the new P4-01 `live` project: 65 tests (32 screens x 2 viewports + debug.log check), 17 passed, 48 failed. Every failure is exactly one of two expect.soft() classes: (1) HTTP status 404 on 14 archive `-last` pagination URLs (7 sections x 2 viewports) -- traced to scripts/live/screens.mjs's sectionPost() passing `--category=<slug>` to `wp post list`, which WP_Query treats as a category ID (casts a slug to 0, dropping the filter), so both the newest-post fetch and the `--format=count` count silently return site-wide values instead of per-section ones, making every section compute the same wrong last page (74); (2) uncovered `ttm-*` DOM classes on 34 URLs (deduped from two overlapping findings: `ttm-section-{slug}`/`ttm-form-{form}` dynamic body classes from Templates/Hierarchy.php, and the archive-by-year block's bare `ttm-archive` wrapper class from Helpers::wrapper('archive') -- neither has a ttm.css selector, a rule-34 gap the static check:css-coverage script can't see since the classes are PHP string-concatenated, not literal source). 14 + 34 = 48, matching the failing-test count exactly. Both rows classed `archive`/`coverage`, logged to docs/feedback/phase-4/LIVE-TRIAGE.md's Findings table with fix owed to P4-04 (not P4-03, which only covers render/single). Also updated the Audit summary table's no-excerpt count (326 -> 223, same migrate:excerpts step re-run against the same export). No code changes; npm run lint/test:unit, composer lint/test:unit, forbidden-patterns.sh all clean; foundry_verify green.
+
+### P4-03 — 93358c8
+P4-02's live-triage run against the real import produced zero render- or single-class findings (both findings were classed archive/coverage, owed to P4-04). Logged "render/single: no findings" to docs/feedback/phase-4/LIVE-TRIAGE.md per the task's own instruction for an empty finding class. Verified no regression: npm run test:integration 573/573 passed (wp-env tests-cli, separate DB from the dev live import), npm run test:unit 68/63, composer lint/test:unit clean, forbidden-patterns.sh clean, foundry_verify green.
