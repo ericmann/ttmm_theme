@@ -8,7 +8,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] P0-03 Seed: Reading CVEs series
 - [x] P0-04 New screens and §6.11 rows as tagged fixme
 - [x] P0-05 Stats invalidation, tiebreak, flush_all; Business filter row green
-- [ ] P0-06 §3.1 fold-in edits (regex tightening, ValuesTest case)
+- [x] P0-06 §3.1 fold-in edits (regex tightening, ValuesTest case)
 - [ ] P0-07 Phase 0 screenshots and push
 - [ ] P1-01 Footer: one line, eight items, no Scripture copyright
 - [ ] P1-02 Series TOC F11 and chronological prev/next
@@ -74,3 +74,8 @@ Seeder.php: Stats::flush_all() called first in run() and reset().
 Tests: StatsTest 5 new (tiebreak, tag-attach refresh, category-move flush, empty-result TTL via _transient_timeout_ option, flush_all); TagFilterTest::test_import_order_terms_after_status_produces_the_row (publish then tag, simulating WXR import order).
 fidelity.spec.mjs: ar-filter-business/-pos/-sort-business un-fixme'd to real test(...) (owner P0-05 in the row-to-task map).
 Verified: composer lint 0 errors; StatsTest+TagFilterTest+SeederTest+SeedStatesTest filter (68 tests) green; full npm run test:integration (501 tests) green; npm run lint green (16 tagged fixme remain, 0 untagged); npm run test:e2e --project fidelity: 341 passed, 16 skipped, 0 failed; forbidden-patterns clean.
+
+### P0-06 — c37dd85
+tests/e2e/fidelity.spec.mjs: hub-grid-cats now asserts exact text "Technology · Security" (computed: the-quiet-ledger grid is sorted by last_update desc across all 7 series; hardening-wordpress's hardening-part-4-keys-in-the-environment at days_ago 0 is the most recent published part of any series, so hardening-wordpress is first; its categories in sections.order are Technology, Security). wr-serial-form asserts exact "Novel · literary thriller · monthly" (the-quiet-ledger, first row of the Writing page's is-list), no /i flag.
+tests/unit/Bindings/ValuesTest.php: removed the "day is also month and year" assertSame('Month', ...) block from test_archive_kind_labels_and_empty; kept the seven single-flag assertions and both empty-input cases.
+Verified: composer test:unit (171 tests) green; npm run lint green (16 tagged fixme, unchanged); npm run test:e2e --project fidelity: 341 passed, 16 skipped, 0 failed (full run, not just the two changed rows, since hub-grid-cats touches ordering semantics broadly); forbidden-patterns clean.
