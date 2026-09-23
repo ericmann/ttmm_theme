@@ -812,22 +812,81 @@ test.describe( 'footer', () => {
 		);
 	} );
 
-	test( 'footer-copy: .ttm-footer__copyright @1280', async ( { page } ) => {
+	// P0-04, SPEC §6.11 (changed): footer-copy now targets `.ttm-footer__left p` (the old
+	// `.ttm-footer__copyright` slot is gone -- rule 47/verse-copyright removal is a later
+	// task).
+	// prettier-ignore
+	test.fixme( 'footer-copy: .ttm-footer__left p @1280', async ( { page } ) => { // P1-01
 		await gotoFront( page, 1280 );
-		const copyright = page.locator( '.ttm-footer__copyright' );
-		expect( await copyright.count() ).toBe( 1 );
-		expect( await computed( copyright, 'font-size' ) ).toBe( px( 12 ) );
+		const el = page.locator( '.ttm-footer__left p' );
+		expect( await el.count() ).toBe( 1 );
+		expect( await text( el ) ).toMatch(
+			/^These Things Matter · © \d{4} Eric Mann · Built on WordPress$/
+		);
 	} );
 
-	test( 'footer-nav: .ttm-footer .wp-block-navigation-item @1280', async ( {
-		page,
-	} ) => {
+	// P0-04, SPEC §6.11.
+	// prettier-ignore
+	test.fixme( 'footer-nocopyright: .ttm-footer @1280', async ( { page } ) => { // P1-01
+		for ( const path of [ SCREENS.article, '/' ] ) {
+			await gotoScreen( page, path, 1280 );
+			const footerText = await text( page.locator( '.ttm-footer' ) );
+			for ( const forbidden of [
+				'Scripture',
+				'Copyright ©',
+				'Biblica',
+				'Zondervan',
+			] ) {
+				expect( footerText ).not.toContain( forbidden );
+			}
+		}
+	} );
+
+	// P0-04, SPEC §6.11 (changed): eight nav items, no /feed/ link.
+	// prettier-ignore
+	test.fixme( 'footer-nav: .ttm-footer__nav .wp-block-navigation-item @1280', async ( { page } ) => { // P1-01
+		for ( const path of [ SCREENS.article, '/' ] ) {
+			await gotoScreen( page, path, 1280 );
+			const items = page.locator(
+				'.ttm-footer__nav .wp-block-navigation-item'
+			);
+			expect( await items.count() ).toBe( 8 );
+			expect( await text( items.last() ) ).toBe( 'Series' );
+			const feedLinks = page.locator(
+				'.ttm-footer__nav a[href$="/feed/"]'
+			);
+			expect( await feedLinks.count() ).toBe( 0 );
+		}
+	} );
+
+	// P0-04, SPEC §6.11.
+	// prettier-ignore
+	test.fixme( 'footer-one-line: .ttm-footer__nav ul @1280', async ( { page } ) => { // P1-01
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const ul = page.locator( '.ttm-footer__nav ul' );
+		const ulBox = await ul.boundingBox();
+		expect( ulBox.height ).toBeLessThanOrEqual( 20 );
+		const footerBox = await page.locator( '.ttm-footer' ).boundingBox();
+		expect( footerBox.height ).toBeLessThanOrEqual( 48 );
+	} );
+
+	// P0-04, SPEC §6.11.
+	// prettier-ignore
+	test.fixme( 'footer-font: .ttm-footer__nav a (first) @1280', async ( { page } ) => { // P1-01
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-footer__nav a' ).first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '400' );
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
+	} );
+
+	// P0-04, SPEC §6.11.
+	// prettier-ignore
+	test.fixme( 'footer-front-nors: .ttm-footer__nav a[href$="/feed/"] @1280', async ( { page } ) => { // P1-01
 		await gotoFront( page, 1280 );
 		expect(
-			await page
-				.locator( '.ttm-footer .wp-block-navigation-item' )
-				.count()
-		).toBe( 9 );
+			await page.locator( '.ttm-footer__nav a[href$="/feed/"]' ).count()
+		).toBe( 0 );
 	} );
 
 	test( 'footer-nav-sep: .ttm-footer .wp-block-navigation-item:nth-child(2)::before @1280', async ( {
@@ -1326,6 +1385,44 @@ test.describe( 'prev/next', () => {
 		const t = await tracks( el );
 		expect( t.length ).toBe( 1 );
 	} );
+
+	// P0-04, SPEC §6.11: outside any series, prev/next falls back to the primary category's
+	// chronology.
+	// prettier-ignore
+	test.fixme( 'prevnext-auto-label: .ttm-prevnext__label @1280', async ( { page } ) => { // P1-02
+		await gotoScreen( page, SCREENS.articleNoSeries, 1280 );
+		const labels = page.locator( '.ttm-prevnext__label' );
+		const texts = [];
+		const count = await labels.count();
+		for ( let i = 0; i < count; i++ ) {
+			const source = await labels
+				.nth( i )
+				.evaluate( ( node ) => node.textContent );
+			texts.push( source.replace( /\s+/g, ' ' ).trim() );
+		}
+		expect( texts ).toEqual( [ '← Previously in Technology', 'Next →' ] );
+	} );
+
+	// P0-04, SPEC §6.11.
+	// prettier-ignore
+	test.fixme( 'prevnext-auto-title: .ttm-prevnext__title @1280', async ( { page } ) => { // P1-02
+		await gotoScreen( page, SCREENS.articleNoSeries, 1280 );
+		const titles = page.locator( '.ttm-prevnext__title' );
+		expect( await titles.count() ).toBe( 2 );
+		expect( await computed( titles.first(), 'font-size' ) ).toBe(
+			px( 18 )
+		);
+		const origin = new URL( page.url() ).origin;
+		const count = await titles.count();
+		for ( let i = 0; i < count; i++ ) {
+			const href = await titles
+				.nth( i )
+				.locator( 'xpath=ancestor::a[1]' )
+				.getAttribute( 'href' );
+			expect( href ).not.toBeNull();
+			expect( href.startsWith( origin ) ).toBe( true );
+		}
+	} );
 } );
 
 test.describe( 'aside', () => {
@@ -1486,6 +1583,39 @@ test.describe( 'aside', () => {
 			expect( box.y ).toBeGreaterThanOrEqual( lastY );
 			lastY = box.y;
 		}
+	} );
+
+	// P0-04, SPEC §6.11: outside any series, the TOC/bar don't render at all.
+	// prettier-ignore
+	test.fixme( 'toc-absent: .ttm-series-toc @1280', async ( { page } ) => { // P1-02
+		await gotoScreen( page, SCREENS.articleNoSeries, 1280 );
+		expect( await page.locator( '.ttm-series-toc' ).count() ).toBe( 0 );
+	} );
+
+	// P0-04, SPEC §6.11.
+	// prettier-ignore
+	test.fixme( 'bar-absent: .ttm-series-bar @1280', async ( { page } ) => { // P1-02
+		await gotoScreen( page, SCREENS.articleNoSeries, 1280 );
+		expect( await page.locator( '.ttm-series-bar' ).count() ).toBe( 0 );
+	} );
+
+	// P0-04, SPEC §6.11: with no TOC, "More in <section>" moves to the top of the aside.
+	// prettier-ignore
+	test.fixme( 'aside-noseries-order: .ttm-article aside > * @1280', async ( { page } ) => { // P1-02
+		await gotoScreen( page, SCREENS.articleNoSeries, 1280 );
+		const children = page.locator( '.ttm-article aside > *' );
+		const first = await children.nth( 0 ).getAttribute( 'class' );
+		const second = await children.nth( 1 ).getAttribute( 'class' );
+		expect( first ).toMatch( /\bttm-more-in\b/ );
+		expect( second ).toMatch( /\bttm-newsletter-box\b/ );
+	} );
+
+	// P0-04, SPEC §6.11.
+	// prettier-ignore
+	test.fixme( 'box-noseries: .ttm-newsletter-box__title @1280', async ( { page } ) => { // P1-02
+		await gotoScreen( page, SCREENS.articleNoSeries, 1280 );
+		const el = page.locator( '.ttm-newsletter-box__title' );
+		expect( await text( el ) ).toBe( 'The weekly issue.' );
 	} );
 } );
 
@@ -2406,6 +2536,38 @@ test.describe( 'archive', () => {
 		).toBeLessThan( 1 );
 	} );
 
+	// P0-04, SPEC §6.11: Business has six tags (five plus "All"), a second seeded section
+	// exercising the filter row beyond Security.
+	// prettier-ignore
+	test.fixme( 'ar-filter-business: .ttm-filter-row .tag @1280', async ( { page } ) => { // P0-05
+		await gotoScreen( page, SCREENS.businessArchive, 1280 );
+		const tags = page.locator( '.ttm-filter-row .tag' );
+		expect( await tags.count() ).toBe( 6 );
+		expect( await text( tags.first() ) ).toBe( 'All' );
+	} );
+
+	// P0-04, SPEC §6.11.
+	// prettier-ignore
+	test.fixme( 'ar-filter-business-pos: .ttm-filter-row @1280', async ( { page } ) => { // P0-05
+		await gotoScreen( page, SCREENS.businessArchive, 1280 );
+		const head = await page.locator( '.ttm-archive-head' ).boundingBox();
+		const filter = await page.locator( '.ttm-filter-row' ).boundingBox();
+		const body = await page.locator( '.ttm-archive-body' ).boundingBox();
+		expect( filter.y ).toBeGreaterThanOrEqual( head.y + head.height );
+		expect( filter.y + filter.height ).toBeLessThanOrEqual( body.y );
+		const el = page.locator( '.ttm-filter-row' );
+		expect( await computed( el, 'border-top-width' ) ).toBe( px( 2 ) );
+		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 1 ) );
+	} );
+
+	// P0-04, SPEC §6.11.
+	// prettier-ignore
+	test.fixme( 'ar-filter-sort-business: .ttm-filter-row__sort @1280', async ( { page } ) => { // P0-05
+		await gotoScreen( page, SCREENS.businessArchive, 1280 );
+		const el = page.locator( '.ttm-filter-row__sort' );
+		expect( await text( el ) ).toBe( 'Newest first' );
+	} );
+
 	test( 'ar-body: .ttm-archive-body @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.securityArchive, 1280 );
 		const el = page.locator( '.ttm-archive-body' );
@@ -3159,14 +3321,29 @@ test.describe( 'single series', () => {
 		expect( await computed( date, 'grid-column-start' ) ).toBe( '2' );
 	} );
 
-	test( 'single-other: .ttm-series-single__other .ttm-series-row @1280', async ( {
-		page,
-	} ) => {
+	// P0-04, SPEC §6.11 (changed): "Other series" now excludes the three fiction series and
+	// includes the new Reading CVEs, up to `series.related_limit` (4) candidates.
+	// prettier-ignore
+	test.fixme( 'single-other: .ttm-series-single__other .ttm-series-row @1280', async ( { page } ) => { // P1-03
 		await gotoScreen( page, SCREENS.seriesHardening, 1280 );
 		const els = page.locator( '.ttm-series-single__other .ttm-series-row' );
 		const count = await els.count();
-		expect( count ).toBeLessThanOrEqual( 4 );
-		expect( count ).toBeGreaterThanOrEqual( 1 );
+		expect( count ).toBe( 4 );
+
+		const titles = [];
+		for ( let i = 0; i < count; i++ ) {
+			titles.push(
+				await text( els.nth( i ).locator( '.ttm-series-row__title' ) )
+			);
+		}
+		expect( titles[ 0 ] ).toBe( 'Reading CVEs' );
+		for ( const excluded of [
+			'The Quiet Ledger',
+			'Failover',
+			'Salt Water Wires',
+		] ) {
+			expect( titles ).not.toContain( excluded );
+		}
 
 		// Rule 36 / SPEC §6.9: the count-and-status cell sits beside the
 		// title, not dropped to the row's last grid row.
@@ -3184,6 +3361,47 @@ test.describe( 'single series', () => {
 				1
 			);
 		}
+	} );
+
+	// P0-04, SPEC §6.11.
+	// prettier-ignore
+	test.fixme( 'single-other-cats: .ttm-series-single__other .ttm-series-row__categories @1280', async ( { page } ) => { // P1-03
+		await gotoScreen( page, SCREENS.seriesHardening, 1280 );
+		const first = page
+			.locator(
+				'.ttm-series-single__other .ttm-series-row__categories, .ttm-series-single__other .ttm-series-row__meta'
+			)
+			.first();
+		expect( await text( first ) ).toContain( 'Security' );
+	} );
+
+	// P0-04, SPEC §6.11: on a fiction series hub, "Other series" ranks by last update -- read
+	// the newest-chapter dates from docs/fixtures/seed/posts.json: Failover's newest chapter
+	// (failover-ch-9) is more recent (days_ago 250) than Salt Water Wires' newest chapter
+	// (salt-water-wires-ch-24, days_ago 400).
+	// prettier-ignore
+	test.fixme( 'single-other-fiction: .ttm-series-single__other .ttm-series-row__title @1280', async ( { page } ) => { // P1-03
+		await gotoScreen( page, SCREENS.seriesEntry, 1280 );
+		const titles = page.locator(
+			'.ttm-series-single__other .ttm-series-row__title'
+		);
+		const count = await titles.count();
+		const texts = [];
+		for ( let i = 0; i < count; i++ ) {
+			texts.push( await text( titles.nth( i ) ) );
+		}
+		expect( texts ).toEqual( [ 'Failover', 'Salt Water Wires' ] );
+	} );
+
+	// P0-04, SPEC §6.11.
+	// prettier-ignore
+	test.fixme( 'single-other-heading: .ttm-series-single__other .ttm-cell-heading__label @1280', async ( { page } ) => { // P1-03
+		await gotoScreen( page, SCREENS.seriesHardening, 1280 );
+		const el = page.locator(
+			'.ttm-series-single__other .ttm-cell-heading__label'
+		);
+		expect( await text( el ) ).toBe( 'Other series' );
+		expect( await el.count() ).toBe( 1 );
 	} );
 
 	test( 'single-nav: .ttm-masthead-inner__nav .current-menu-item > a @1280', async ( {
