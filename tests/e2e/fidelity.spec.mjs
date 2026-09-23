@@ -1994,6 +1994,19 @@ test.describe( 'writing', () => {
 				1
 			);
 		}
+
+		// R4-02 / SPEC §6.5: a complete series' right cell reads "N chapters",
+		// not "N of N".
+		const failoverRow = page
+			.locator( '.ttm-series-list.is-list .ttm-series-row', {
+				has: page.locator( '.ttm-series-row__title', {
+					hasText: 'Failover',
+				} ),
+			} )
+			.first();
+		expect(
+			await text( failoverRow.locator( '.ttm-series-row__parts' ) )
+		).toBe( '9 chapters' );
 	} );
 
 	test( 'wr-serial-status: .ttm-series-list.is-list .ttm-series-row__status (first) @1280', async ( {

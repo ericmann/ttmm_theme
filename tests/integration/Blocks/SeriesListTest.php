@@ -309,6 +309,121 @@ class SeriesListTest extends TTM_IntegrationTestCase {
 	}
 
 	/**
+	 * SPEC §6.5/§6.7 R4-02: a complete series' right cell reads "{N} chapters"
+	 * (fiction) / "{N} parts" (nonfiction) rather than "{N} of {N}" once the
+	 * planned total is reached.
+	 */
+	public function test_complete_fiction_series_count_reads_chapters(): void {
+		$tech      = $this->category_id( 'technology', 'Technology' );
+		$series_id = $this->make_series( 'failover', 'Failover', 'complete', 'novel', $tech );
+		update_term_meta( $series_id, 'ttm_total_parts', 9 );
+
+		for ( $i = 2; $i <= 9; $i++ ) {
+			$post_id = self::factory()->post->create(
+				[
+					'post_status'   => 'publish',
+					'post_category' => [ $tech ],
+					'post_date'     => "2026-0{$i}-01 09:00:00",
+				]
+			);
+			update_post_meta( $post_id, 'ttm_series_part', $i );
+			update_post_meta( $post_id, 'ttm_primary_category', $tech );
+			wp_set_object_terms( $post_id, [ $series_id ], 'series' );
+		}
+		SeriesIndex::rebuild();
+
+		$html = $this->render(
+			[
+				'status' => 'any',
+				'layout' => 'list',
+			]
+		);
+
+		$this->assertStringContainsString( 'ttm-series-row__parts">9 chapters<', $html );
+		$this->assertStringNotContainsString( '9 of 9', $html );
+	}
+
+	public function test_complete_nonfiction_series_count_reads_parts(): void {
+		$tech      = $this->category_id( 'technology', 'Technology' );
+		$series_id = $this->make_series( 'hardening-wp', 'Hardening WordPress', 'complete', 'nonfiction', $tech );
+		update_term_meta( $series_id, 'ttm_total_parts', 4 );
+
+		for ( $i = 2; $i <= 4; $i++ ) {
+			$post_id = self::factory()->post->create(
+				[
+					'post_status'   => 'publish',
+					'post_category' => [ $tech ],
+					'post_date'     => "2026-0{$i}-01 09:00:00",
+				]
+			);
+			update_post_meta( $post_id, 'ttm_series_part', $i );
+			update_post_meta( $post_id, 'ttm_primary_category', $tech );
+			wp_set_object_terms( $post_id, [ $series_id ], 'series' );
+		}
+		SeriesIndex::rebuild();
+
+		$html = $this->render(
+			[
+				'status' => 'any',
+				'layout' => 'grid-2',
+			]
+		);
+
+		$this->assertStringContainsString( 'ttm-series-row__parts">4 parts<', $html );
+		$this->assertStringNotContainsString( '4 of 4', $html );
+	}
+
+	/**
+	 * An in-progress series with a planned total still reads "N of M" (unchanged).
+	 */
+	public function test_in_progress_series_still_reads_n_of_m(): void {
+		$tech      = $this->category_id( 'technology', 'Technology' );
+		$series_id = $this->make_series( 'quiet-ledger', 'The Quiet Ledger', 'in-progress', 'novel', $tech );
+		update_term_meta( $series_id, 'ttm_total_parts', 31 );
+
+		for ( $i = 2; $i <= 12; $i++ ) {
+			$post_id = self::factory()->post->create(
+				[
+					'post_status'   => 'publish',
+					'post_category' => [ $tech ],
+					// All within January so every post stays published (not
+					// auto-promoted to "future") relative to the real clock.
+					'post_date'     => sprintf( '2026-01-%02d 09:00:00', $i ),
+				]
+			);
+			update_post_meta( $post_id, 'ttm_series_part', $i );
+			update_post_meta( $post_id, 'ttm_primary_category', $tech );
+			wp_set_object_terms( $post_id, [ $series_id ], 'series' );
+		}
+		SeriesIndex::rebuild();
+
+		$html = $this->render( [ 'status' => 'any' ] );
+
+		$this->assertStringContainsString( 'ttm-series-row__parts">12 of 31<', $html );
+	}
+
+	/**
+	 * REVIEW round 3 finding 4 / SPEC §2: the strip/rail meta line's count word is
+	 * untouched by the complete-series "chapters"/"parts" wording -- the front page's
+	 * strip must not move.
+	 */
+	public function test_strip_meta_count_unchanged_for_complete_series(): void {
+		$tech      = $this->category_id( 'technology', 'Technology' );
+		$series_id = $this->make_series( 'failover', 'Failover', 'complete', 'novel', $tech );
+		update_term_meta( $series_id, 'ttm_total_parts', 9 );
+
+		$html = $this->render(
+			[
+				'status' => 'any',
+				'layout' => 'strip',
+			]
+		);
+
+		$this->assertStringContainsString( '1 of 9', $html );
+		$this->assertStringNotContainsString( 'chapter', $html );
+	}
+
+	/**
 	 * SPEC §5: `excludeCurrent` with no explicit `limit` reads `series.related_limit`
 	 * (default 4), not the strip's own default of 3.
 	 */

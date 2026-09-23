@@ -147,6 +147,25 @@ $ttm_extra = $ttm_is_fallback ? [ 'data-ttm-empty-heading' => __( 'Series', 'ttm
 				$ttm_category_names[] = $ttm_category->name;
 			}
 		}
+
+		// R4-02 / SPEC §6.5, §6.7: a complete series' right cell (list/grid-2 only;
+		// the strip/rail meta line keeps $ttm_count_word unchanged) reads "{N} chapters"
+		// for fiction and "{N} parts" for nonfiction, not "{N} of {N}".
+		$ttm_right_cell_word = $ttm_count_word;
+		if ( in_array( $ttm_layout, [ 'list', 'grid-2' ], true ) && 'complete' === $ttm_row['status'] ) {
+			$ttm_fiction_forms   = [ 'novel', 'novella', 'story-cycle' ];
+			$ttm_right_cell_word = in_array( $ttm_row['form'], $ttm_fiction_forms, true )
+				? sprintf(
+					/* translators: %d: published parts. */
+					_n( '%d chapter', '%d chapters', (int) $ttm_row['published'], 'ttm-core' ),
+					(int) $ttm_row['published']
+				)
+				: sprintf(
+					/* translators: %d: published parts. */
+					_n( '%d part', '%d parts', (int) $ttm_row['published'], 'ttm-core' ),
+					(int) $ttm_row['published']
+				);
+		}
 		?>
 		<a class="ttm-series-row" href="<?php echo esc_url( home_url( '/series/' . $ttm_row['slug'] . '/' ) ); ?>">
 			<span class="ttm-series-mark is-<?php echo esc_attr( $ttm_row['status'] ); ?>"></span>
@@ -195,7 +214,7 @@ $ttm_extra = $ttm_is_fallback ? [ 'data-ttm-empty-heading' => __( 'Series', 'ttm
 				<?php endif; ?>
 				<?php if ( $ttm_show_count ) : ?>
 			<span class="ttm-series-row__count">
-				<span class="ttm-series-row__parts"><?php echo esc_html( $ttm_count_word ); ?></span>
+				<span class="ttm-series-row__parts"><?php echo esc_html( $ttm_right_cell_word ); ?></span>
 				<span class="ttm-series-row__status"><?php echo esc_html( Helpers::status_word( $ttm_row['status'] ) ); ?></span>
 			</span>
 			<?php endif; ?>
