@@ -7,7 +7,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] P0-02 Seed: tags for every section and the older Technology neighbour
 - [x] P0-03 Seed: Reading CVEs series
 - [x] P0-04 New screens and §6.11 rows as tagged fixme
-- [ ] P0-05 Stats invalidation, tiebreak, flush_all; Business filter row green
+- [x] P0-05 Stats invalidation, tiebreak, flush_all; Business filter row green
 - [ ] P0-06 §3.1 fold-in edits (regex tightening, ValuesTest case)
 - [ ] P0-07 Phase 0 screenshots and push
 - [ ] P1-01 Footer: one line, eight items, no Scripture copyright
@@ -67,3 +67,10 @@ tests/e2e/fidelity.spec.mjs: added/changed the 19 SPEC §6.11 rows as test.fixme
 Gotcha: multi-line test.fixme(...) signatures get reflowed by eslint --fix/prettier, which moves a trailing `// P<owner>` comment off the `test.fixme(` line and breaks check-fixme.mjs's same-line tag requirement. Fixed by collapsing the arg destructuring to `{ page }` (fits one line) and adding `// prettier-ignore` above each multi-line call so the format (and the tag's position) is never touched again.
 single-other row: SPEC table says count 4 (up to series.related_limit, form-filtered so quiet-ledger/failover/salt-water-wires never appear); PLAN's task prose said 3 for the same row. Went with SPEC per CLAUDE.md precedence (SPEC wins over PLAN).
 Verified: npm run lint green (check-fixme: 19 tagged, 0 untagged); npm run test:e2e --project fidelity (fidelity+editors+selectors specs): 338 passed, 19 skipped (new fixme rows), 0 failed; forbidden-patterns clean.
+
+### P0-05 — 897b818
+Stats.php: on_set_object_terms (set_object_terms, priority 10, 6 args) -- post_tag flushes flush_for_post(); category flushes both $tt_ids and $old_tt_ids via a term_taxonomy_id -> term_id lookup. top_tags() SQL ORDER BY cnt DESC, t.slug ASC (tiebreak); empty result cached stats.cache_seconds, non-empty stats.tags_cache_seconds. flush_all() selects matching option_name rows then delete_transient() per key (see Interpretation).
+Seeder.php: Stats::flush_all() called first in run() and reset().
+Tests: StatsTest 5 new (tiebreak, tag-attach refresh, category-move flush, empty-result TTL via _transient_timeout_ option, flush_all); TagFilterTest::test_import_order_terms_after_status_produces_the_row (publish then tag, simulating WXR import order).
+fidelity.spec.mjs: ar-filter-business/-pos/-sort-business un-fixme'd to real test(...) (owner P0-05 in the row-to-task map).
+Verified: composer lint 0 errors; StatsTest+TagFilterTest+SeederTest+SeedStatesTest filter (68 tests) green; full npm run test:integration (501 tests) green; npm run lint green (16 tagged fixme remain, 0 untagged); npm run test:e2e --project fidelity: 341 passed, 16 skipped, 0 failed; forbidden-patterns clean.
