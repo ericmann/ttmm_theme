@@ -60,7 +60,7 @@ Started: 2026-09-22T04:48:01.084Z
 - [x] R3-02 Writing 'recent chapters' lists published chapters only
 - [x] R3-03 Seed: Short fiction shows SPEC §6.10's four stories in mock order; no literal backticks; regenerate screenshots
 - [x] R4-01 Series-row count cell sits beside the title; Writing columns stretch their children (rule 36)
-- [ ] R4-02 Complete series read 'N chapters' / 'N parts' in the list and grid-2 right cell
+- [x] R4-02 Complete series read 'N chapters' / 'N parts' in the list and grid-2 right cell
 - [ ] R4-03 Test the empty-chapters branch; round-3 cleanups; regenerate screenshots
 
 ## Log
@@ -499,3 +499,28 @@ Note: `npm run build` and an earlier stray `eslint --fix` touched ~20
 unrelated build-output/config files (prettier reformatting from an
 @wordpress/scripts version bump, not from this task); those were reverted
 before commit and only the 6 Files-touched paths were staged.
+
+### R4-02 — 3252970
+Added $ttm_right_cell_word in series-list/render.php: for list/grid-2 layouts
+only, a complete series' __parts span reads "%d chapter(s)" (form in
+novel/novella/story-cycle) or "%d part(s)" (nonfiction) via _n(), computed
+from $ttm_row['published']. $ttm_count_word itself is untouched and still
+feeds the strip/rail __meta line and the "N of M"/open-ended fallback for
+every other layout/status combination.
+
+Verified front page ("/") HTML is byte-for-byte identical before/after via
+git stash + curl diff (strip meta line unaffected, confirming the phase-2
+non-goal row didn't move). curl /writing/ shows "Failover ... 9 chapters" and
+"Salt Water Wires ... 24 chapters" as required by Verification.
+
+Tests: SeriesListTest gained 4 tests (2 new-behavior, 1 unchanged-behavior
+regression guard, 1 strip-meta guard); all failed for the right reason
+(wrong count word) before the render.php change. fidelity.spec.mjs's
+wr-serial-count extended to check the seeded Failover row. Full
+foundry_verify green: composer lint/test:unit, npm lint/test:unit/build,
+forbidden-patterns, test:integration (489 tests), test:e2e (452 tests).
+
+Note for R4-03: `npm run build` after editing render.php only touched
+plugins/ttm-core/blocks/series-list/index.js compiled output if the JS
+changed -- it didn't here, so no build/ diff appeared; confirm before
+staging if R4-03 also runs build.
