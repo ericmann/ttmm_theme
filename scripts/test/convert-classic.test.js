@@ -35,6 +35,25 @@ function fixturePost( postId ) {
 	return match ? match[ 1 ] : null;
 }
 
+const SHORTCODES_FIXTURE_PATH = path.join(
+	__dirname,
+	'..',
+	'..',
+	'docs',
+	'fixtures',
+	'classic-shortcodes.html'
+);
+
+function shortcodeFixturePost( postId ) {
+	const html = readFileSync( SHORTCODES_FIXTURE_PATH, 'utf8' );
+	const match = html.match(
+		new RegExp(
+			`<article[^>]*data-post-id="${ postId }"[^>]*>([\\s\\S]*?)<\\/article>`
+		)
+	);
+	return match ? match[ 1 ] : null;
+}
+
 /**
  * @return {{ rawHandler: Function, serialize: Function } | null} null if the block-library
  *          build can't load under this environment (spike Outcome B).
@@ -162,6 +181,60 @@ describe( 'convert-classic (rawHandler under jsdom)', () => {
 			expect(
 				result.report.blockCounts[ 'core/heading' ]
 			).toBeGreaterThan( 0 );
+		}
+	);
+
+	maybeIt(
+		'rawHandler maps the pre-pass output to core/code, core/audio, core/image and footnote markers',
+		async () => {
+			const { convertPost } = await import( '../convert-classic.mjs' );
+
+			const html = [
+				shortcodeFixturePost( '100' ),
+				shortcodeFixturePost( '102' ),
+				shortcodeFixturePost( '104' ),
+				shortcodeFixturePost( '105' ),
+			].join( '\n' );
+
+			const result = convertPost(
+				{ id: 900, slug: 'shortcode-mix', content_raw: html },
+				editor
+			);
+
+			expect( result.report.blockCounts[ 'core/code' ] ).toBeGreaterThan(
+				0
+			);
+			expect( result.report.blockCounts[ 'core/audio' ] ).toBeGreaterThan(
+				0
+			);
+			expect( result.report.blockCounts[ 'core/image' ] ).toBeGreaterThan(
+				0
+			);
+			expect( result.footnotes ).toHaveLength( 1 );
+			expect( result.blocks ).toContain( 'ref-900-1' );
+		}
+	);
+
+	maybeIt(
+		'report lists remaining shortcodes and footnote count',
+		async () => {
+			const { convertPost } = await import( '../convert-classic.mjs' );
+
+			const html = [
+				shortcodeFixturePost( '101' ),
+				shortcodeFixturePost( '106' ),
+			].join( '\n' );
+
+			const result = convertPost(
+				{ id: 901, slug: 'shortcode-remaining', content_raw: html },
+				editor
+			);
+
+			expect( result.report.shortcodes ).toEqual( [
+				{ name: 'seoslides', count: 1 },
+			] );
+			expect( result.report.footnotes ).toBe( 2 );
+			expect( result.footnotes ).toHaveLength( 2 );
 		}
 	);
 } );

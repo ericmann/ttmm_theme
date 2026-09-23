@@ -12,10 +12,14 @@
  * Usage: node scripts/convert-classic.mjs <in.ndjson> <out.ndjson> [--allow-freeform]
  *   in.ndjson lines:  {"id":6917,"slug":"...","content_raw":"<p>...</p>","footnotes_meta":null}
  *   out.ndjson lines: {"id":...,"slug":...,"blocks":"<!-- wp:paragraph -->...","footnotes":[...],
- *                      "report":{"blockCounts":{...},"freeform":0,"html":0,"textEqual":true}}
+ *                      "report":{"blockCounts":{...},"freeform":0,"html":0,"textEqual":true,
+ *                                "shortcodes":[{"name":"seoslides","count":1}],"footnotes":2}}
  *   report.freeform/report.html are the `core/freeform`/`core/html` counts respectively (PLAN
  *   P8-01's contract), each also present individually in report.blockCounts; kept as their own
  *   fields because they're the two block names `--allow-freeform` treats as a decision to make.
+ *   report.shortcodes (P3-01, SPEC §6.8) lists any shortcode the pre-pass deliberately left in
+ *   place (today: `seoslides`); report.footnotes is the merged shortcode + modern-footnotes
+ *   count.
  *
  * Exit 1 if any post has report.textEqual === false, or (without --allow-freeform) any post has
  * report.freeform > 0 or report.html > 0.
@@ -24,6 +28,7 @@
 import { createRequire } from 'node:module';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { transformFootnotes } from './lib/footnotes.mjs';
+import { preprocessShortcodes } from './lib/shortcodes.mjs';
 import { buildBlockReport } from './lib/report.mjs';
 
 /**
@@ -111,10 +116,20 @@ function normalizedText( html ) {
  * @return {{ id, slug, blocks: string, footnotes: Array, report: object }} The converted post record.
  */
 export function convertPost( post, editor ) {
-	const { html: transformedHtml, footnotes } = transformFootnotes(
-		post.content_raw,
-		post.id
-	);
+	const {
+		html: afterShortcodes,
+		footnotes: shortcodeFootnotes,
+		remaining,
+	} = preprocessShortcodes( post.content_raw, post.id );
+
+	const { html: transformedHtml, footnotes: mfnFootnotes } =
+		transformFootnotes(
+			afterShortcodes,
+			post.id,
+			shortcodeFootnotes.length + 1
+		);
+
+	const footnotes = [ ...shortcodeFootnotes, ...mfnFootnotes ];
 
 	const blockList = editor.rawHandler( { HTML: transformedHtml } );
 	const serialized = editor.serialize( blockList );
@@ -129,7 +144,14 @@ export function convertPost( post, editor ) {
 		slug: post.slug,
 		blocks: serialized,
 		footnotes,
-		report: { blockCounts, freeform, html, textEqual },
+		report: {
+			blockCounts,
+			freeform,
+			html,
+			textEqual,
+			shortcodes: remaining,
+			footnotes: footnotes.length,
+		},
 	};
 }
 
