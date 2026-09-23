@@ -244,7 +244,20 @@ class HubWritingTemplatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringNotContainsString( 'is-layout-constrained', $aside_class );
 	}
 
+	/**
+	 * P1-04, F28: page-writing is only used while fiction exists -- an in-progress serial
+	 * clears F28.
+	 */
 	public function test_writing_category_archive_uses_page_writing_template(): void {
+		$this->make_series(
+			'the-quiet-ledger',
+			'The Quiet Ledger',
+			31,
+			[ [ 'part' => 1 ] ],
+			[ 'ttm_form' => 'novel' ],
+			'writing'
+		);
+
 		$writing = $this->category_id( 'writing', 'Writing' );
 		$this->go_to( (string) get_category_link( $writing ) );
 

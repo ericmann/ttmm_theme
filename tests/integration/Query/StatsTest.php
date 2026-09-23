@@ -270,4 +270,28 @@ class StatsTest extends TTM_IntegrationTestCase {
 		$this->assertFalse( get_transient( "ttm_category_stats_{$two}" ) );
 		$this->assertFalse( get_transient( "ttm_top_tags_{$two}" ) );
 	}
+
+	/**
+	 * P1-04, F28: story_count() is cached and invalidated when a post's ttm_form meta changes
+	 * (added/updated/deleted), so the F28 gate sees a newly-story'd or un-story'd post.
+	 */
+	public function test_story_count_is_cached_and_flushed_on_form_meta_change(): void {
+		$this->assertSame( 0, Stats::story_count() );
+		$this->assertNotFalse( get_transient( 'ttm_stats_story_count' ) );
+
+		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		update_post_meta( $post_id, 'ttm_form', 'story' );
+
+		$this->assertSame( 1, Stats::story_count() );
+
+		update_post_meta( $post_id, 'ttm_form', 'article' );
+
+		$this->assertSame( 0, Stats::story_count() );
+
+		update_post_meta( $post_id, 'ttm_form', 'story' );
+		$this->assertSame( 1, Stats::story_count() );
+
+		delete_post_meta( $post_id, 'ttm_form' );
+		$this->assertSame( 0, Stats::story_count() );
+	}
 }

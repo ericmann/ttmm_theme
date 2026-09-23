@@ -12,6 +12,7 @@ namespace TTM\Core\Query;
 use TTM\Core\Config;
 use TTM\Core\Support\Clock;
 use WP_Post;
+use WP_Query;
 
 /**
  * Reads/caches ttm_category_stats_{id} and ttm_top_tags_{id} transients.
@@ -24,6 +25,26 @@ class Stats {
 	public static function register(): void {
 		add_action( 'transition_post_status', [ self::class, 'on_transition' ], 10, 3 );
 		add_action( 'set_object_terms', [ self::class, 'on_set_object_terms' ], 10, 6 );
+		add_action( 'added_post_meta', [ self::class, 'on_meta_change' ], 10, 3 );
+		add_action( 'updated_post_meta', [ self::class, 'on_meta_change' ], 10, 3 );
+		add_action( 'deleted_post_meta', [ self::class, 'on_meta_change' ], 10, 3 );
+	}
+
+	/**
+	 * Flush the cached story count when `ttm_form` changes (F28, SPEC §6.5). `$meta_id` is a
+	 * single id on `added_post_meta`/`updated_post_meta` and an array of ids on
+	 * `deleted_post_meta`, so it's left untyped/unused rather than narrowed.
+	 *
+	 * @param mixed  $meta_id  Meta row id(s); unused.
+	 * @param int    $post_id  Post id; unused.
+	 * @param string $meta_key Meta key.
+	 */
+	public static function on_meta_change( $meta_id, int $post_id, string $meta_key ): void {
+		unset( $meta_id, $post_id );
+
+		if ( 'ttm_form' === $meta_key ) {
+			delete_transient( 'ttm_stats_story_count' );
+		}
 	}
 
 	/**
@@ -226,6 +247,38 @@ class Stats {
 	}
 
 	/**
+	 * Count of published posts with `ttm_form = story`, cached. `Fiction\Serials::has_any_fiction()`
+	 * reads this instead of `stories( 1 )` (F28, SPEC §6.5) so the F28 gate is a cheap cached
+	 * count, not a bounded `WP_Query` re-run on every request.
+	 *
+	 * @return int
+	 */
+	public static function story_count(): int {
+		$key    = 'ttm_stats_story_count';
+		$cached = get_transient( $key );
+		if ( false !== $cached ) {
+			return (int) $cached;
+		}
+
+		$query = new WP_Query(
+			[
+				'post_type'      => 'post',
+				'post_status'    => 'publish',
+				'meta_key'       => 'ttm_form', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- bounded (fields=ids, posts_per_page=1); found_posts gives the real total.
+				'meta_value'     => 'story', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				'fields'         => 'ids',
+				'posts_per_page' => 1,
+			]
+		);
+
+		$count = (int) $query->found_posts;
+
+		set_transient( $key, $count, (int) Config::get( 'stats.cache_seconds', 3600 ) );
+
+		return $count;
+	}
+
+	/**
 	 * Delete both transients for a category.
 	 *
 	 * @param int $term_id Category term id.
@@ -266,5 +319,7 @@ class Stats {
 		foreach ( (array) $names as $name ) {
 			delete_transient( substr( (string) $name, strlen( '_transient_' ) ) );
 		}
+
+		delete_transient( 'ttm_stats_story_count' );
 	}
 }

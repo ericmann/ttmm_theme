@@ -448,7 +448,7 @@ class Seeder {
 				// fresh resolve of both now that the post's real categories are in place.
 				delete_post_meta( $post_id, 'ttm_primary_category' );
 				\TTM\Core\Meta\PrimaryCategory::on_save( $post_id, get_post( $post_id ) );
-				\TTM\Core\Meta\Form::on_save( $post_id, get_post( $post_id ) );
+				\TTM\Core\Meta\Form::on_save( $post_id, get_post( $post_id ), true );
 			}
 
 			// A fixture `form` override wins over the re-derive above and is locked so a later
@@ -559,7 +559,7 @@ class Seeder {
 				// the Writing cell's "Also running" list showed the featured serial's own latest
 				// chapter a second time, labelled "Story", because Serials::stories() matches
 				// ttm_form=story. Re-derive now that the real series membership is in place.
-				\TTM\Core\Meta\Form::on_save( $post->ID, get_post( $post->ID ) );
+				\TTM\Core\Meta\Form::on_save( $post->ID, get_post( $post->ID ), true );
 			}
 
 			$ids[] = $term_id;

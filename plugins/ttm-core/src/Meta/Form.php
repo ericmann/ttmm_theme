@@ -44,12 +44,31 @@ class Form {
 	}
 
 	/**
-	 * Write ttm_form unless ttm_form_locked is true.
+	 * Whether this save originates from the editor (a human publishing/updating a post),
+	 * rather than WP-CLI or an import -- both of which can plausibly publish a real essay
+	 * into Writing that isn't fiction (Decision "Editor-only story derivation"). `true` unless
+	 * `WP_CLI`/`WP_IMPORTING` is defined and set; filterable so tests and other write paths
+	 * can force either answer.
 	 *
-	 * @param int     $post_id Post ID.
-	 * @param WP_Post $post    Post object.
+	 * @return bool
 	 */
-	public static function on_save( int $post_id, WP_Post $post ): void {
+	public static function is_editor_save(): bool {
+		$default = ! ( ( defined( 'WP_CLI' ) && WP_CLI ) || ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) );
+
+		return (bool) apply_filters( 'ttm_form_editor_save', $default );
+	}
+
+	/**
+	 * Write ttm_form unless ttm_form_locked is true. The `story` derivation (a Writing post
+	 * with no series) only fires on an editor save; article/chapter are always written --
+	 * only "a Writing post with no series is fiction" is the assumption that doesn't hold for
+	 * CLI/import saves (Decision "Editor-only story derivation").
+	 *
+	 * @param int       $post_id     Post ID.
+	 * @param WP_Post   $post        Post object.
+	 * @param bool|null $from_editor Override for `is_editor_save()` (tests / other call sites).
+	 */
+	public static function on_save( int $post_id, WP_Post $post, ?bool $from_editor = null ): void {
 		if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) || 'auto-draft' === $post->post_status ) {
 			return;
 		}
@@ -69,6 +88,12 @@ class Form {
 		$categories   = wp_get_post_categories( $post_id, [ 'fields' => 'slugs' ] );
 		$in_writing   = in_array( $writing_slug, $categories, true );
 
-		update_post_meta( $post_id, 'ttm_form', self::derive( $series_form, $in_writing ) );
+		$derived = self::derive( $series_form, $in_writing );
+
+		if ( 'story' === $derived && ! ( $from_editor ?? self::is_editor_save() ) ) {
+			return;
+		}
+
+		update_post_meta( $post_id, 'ttm_form', $derived );
 	}
 }
