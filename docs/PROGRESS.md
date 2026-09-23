@@ -9,7 +9,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] P0-04 New screens and §6.11 rows as tagged fixme
 - [x] P0-05 Stats invalidation, tiebreak, flush_all; Business filter row green
 - [x] P0-06 §3.1 fold-in edits (regex tightening, ValuesTest case)
-- [ ] P0-07 Phase 0 screenshots and push
+- [x] P0-07 Phase 0 screenshots and push
 - [ ] P1-01 Footer: one line, eight items, no Scripture copyright
 - [ ] P1-02 Series TOC F11 and chronological prev/next
 - [ ] P1-03 Related series: relatedTo=current, heading, F27
@@ -79,3 +79,9 @@ Verified: composer lint 0 errors; StatsTest+TagFilterTest+SeederTest+SeedStatesT
 tests/e2e/fidelity.spec.mjs: hub-grid-cats now asserts exact text "Technology · Security" (computed: the-quiet-ledger grid is sorted by last_update desc across all 7 series; hardening-wordpress's hardening-part-4-keys-in-the-environment at days_ago 0 is the most recent published part of any series, so hardening-wordpress is first; its categories in sections.order are Technology, Security). wr-serial-form asserts exact "Novel · literary thriller · monthly" (the-quiet-ledger, first row of the Writing page's is-list), no /i flag.
 tests/unit/Bindings/ValuesTest.php: removed the "day is also month and year" assertSame('Month', ...) block from test_archive_kind_labels_and_empty; kept the seven single-flag assertions and both empty-input cases.
 Verified: composer test:unit (171 tests) green; npm run lint green (16 tagged fixme, unchanged); npm run test:e2e --project fidelity: 341 passed, 16 skipped, 0 failed (full run, not just the two changed rows, since hub-grid-cats touches ordering semantics broadly); forbidden-patterns clean.
+
+### P0-07 — fee247f
+Captured the 17-file phase-4 seeded screenshot set via npm run screenshots against wp-env (seeded --reset); no live PNGs yet since docs/fixtures/live/screens.json doesn't exist (P2-06+). archive-business.png visually confirms the filter row (Filter · All · five tags: strategy/clients/consulting/invoicing/pricing · Newest first) between the archive head and the year list, matching SPEC §8 Phase 0's visible result.
+foundry_verify green (composer lint 0 errors, composer test:unit 171, npm run lint/test:unit/build, forbidden-patterns) -- same two pre-existing footer-no-rss/verse-copyright-removed constraint misses as every prior task, unrelated to this task's PNG-only files.
+Pushed refine/2026-09-23 to origin (new branch).
+Manual check: NOT VERIFIED (human) -- compare docs/feedback/phase-4/archive-business.png with mock 1e line 933.
