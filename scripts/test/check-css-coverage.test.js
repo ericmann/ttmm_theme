@@ -12,6 +12,8 @@ let globToRegExp;
 let parseAllowList;
 let filterSrcFiles;
 let report;
+let isIdentifierClass;
+let UNSTYLED_WRAPPERS;
 
 beforeAll( async () => {
 	const mod = await import(
@@ -24,6 +26,8 @@ beforeAll( async () => {
 		parseAllowList,
 		filterSrcFiles,
 		report,
+		isIdentifierClass,
+		UNSTYLED_WRAPPERS,
 	} = mod );
 } );
 
@@ -204,5 +208,26 @@ describe( 'report', () => {
 
 		expect( result.allowCount ).toBe( 10 );
 		expect( result.allowCount >= 10 ).toBe( true );
+	} );
+} );
+
+describe( 'isIdentifierClass / UNSTYLED_WRAPPERS (P4-04)', () => {
+	it( 'exempts the archive-by-year/most-read wrapper classes', () => {
+		expect( UNSTYLED_WRAPPERS.has( 'ttm-archive' ) ).toBe( true );
+		expect( UNSTYLED_WRAPPERS.has( 'ttm-most-read' ) ).toBe( true );
+		expect( UNSTYLED_WRAPPERS.has( 'ttm-lead' ) ).toBe( false );
+	} );
+
+	it( 'exempts ttm-section-{slug} and ttm-form-{form} for any slug/form', () => {
+		expect( isIdentifierClass( 'ttm-section-technology' ) ).toBe( true );
+		expect( isIdentifierClass( 'ttm-section-uncategorized' ) ).toBe( true );
+		expect( isIdentifierClass( 'ttm-form-article' ) ).toBe( true );
+		expect( isIdentifierClass( 'ttm-form-chapter' ) ).toBe( true );
+		expect( isIdentifierClass( 'ttm-in-series' ) ).toBe( true );
+	} );
+
+	it( 'does not exempt an unrelated ttm-* class', () => {
+		expect( isIdentifierClass( 'ttm-archive-row' ) ).toBe( false );
+		expect( isIdentifierClass( 'ttm-lead' ) ).toBe( false );
 	} );
 } );

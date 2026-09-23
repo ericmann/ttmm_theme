@@ -5,12 +5,13 @@
 const path = require( 'path' );
 
 let buildScreens;
+let sectionCategoryArgs;
 
 beforeAll( async () => {
 	const mod = await import(
 		path.join( __dirname, '..', 'live', 'lib', 'screens.mjs' )
 	);
-	( { buildScreens } = mod );
+	( { buildScreens, sectionCategoryArgs } = mod );
 } );
 
 const SECTIONS = [
@@ -108,6 +109,28 @@ describe( 'buildScreens', () => {
 		expect( paths ).toContain( '/category/technology/page/3/' );
 	} );
 
+	it( "uses a section's own archivePerPageBySection override for its last page (P4-04)", () => {
+		const { screens } = buildScreens(
+			baseInputs( {
+				archivePerPageBySection: { journal: 20 },
+				sectionPosts: [
+					{
+						section: 'journal',
+						newest: post( 'journal-newest' ),
+						count: 87,
+					},
+				],
+			} )
+		);
+
+		const paths = screens.map( ( screen ) => screen.path );
+
+		// ceil(87 / 20) = 5, not ceil(87 / 12) = 8 (the default archivePerPage, which 404'd --
+		// see docs/feedback/phase-4/LIVE-TRIAGE.md).
+		expect( paths ).toContain( '/category/journal/page/5/' );
+		expect( paths ).not.toContain( '/category/journal/page/8/' );
+	} );
+
 	it( 'never includes a duplicate path', () => {
 		// The same post slug surfaces from two different discovery paths (section-newest and
 		// journal-newest both resolve to the same post) -- the second must be dropped, not
@@ -145,5 +168,16 @@ describe( 'buildScreens', () => {
 
 		expect( dated.date ).toBe( '2014-03-05 12:00:00' );
 		expect( front.date ).toBeNull();
+	} );
+} );
+
+describe( 'sectionCategoryArgs (P4-04)', () => {
+	it( 'filters wp post list by slug via --category_name, not --category', () => {
+		const args = sectionCategoryArgs( 'technology' );
+
+		expect( args ).toContain( '--category_name=technology' );
+		expect( args.some( ( arg ) => arg.startsWith( '--category=' ) ) ).toBe(
+			false
+		);
 	} );
 } );

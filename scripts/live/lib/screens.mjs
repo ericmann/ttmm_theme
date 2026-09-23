@@ -10,6 +10,23 @@
  *                 classic: boolean, freeform: boolean, date: string|null }] }
  */
 
+/**
+ * `wp post list` args for a category section's newest-post/count queries (P4-04, SPEC §6.10
+ * archive finding). WP-CLI forwards `--category` straight through to `WP_Query`, whose
+ * `category` arg is a **category ID**, not a slug; a non-numeric slug casts to `0` and
+ * `WP_Query` silently drops the filter, so `--category=<slug>` (the bug this replaces) returned
+ * the *site-wide* newest post / published count instead of the section's own -- and made every
+ * section compute the same wrong "last archive page" (`ceil(<site-wide count>/perPage)`), which
+ * 404s. `--category_name` is WP_Query's slug-based equivalent.
+ *
+ * @param {string} section Category slug.
+ * @return {string[]} Extra `wp post list` flags, appended after the shared `--post_type`/
+ *                     `--post_status` flags.
+ */
+export function sectionCategoryArgs( section ) {
+	return [ `--category_name=${ section }` ];
+}
+
 const KIND = {
 	FRONT: 'front',
 	SINGLE: 'single',
@@ -30,25 +47,29 @@ const KIND = {
 
 /**
  * @param {Object}                                                           inputs
- * @param {string}                                                           inputs.host             `LIVE_HOST`.
- * @param {number}                                                           inputs.archivePerPage   `archive.per_page`, for each section's last page.
+ * @param {string}                                                           inputs.host                      `LIVE_HOST`.
+ * @param {number}                                                           inputs.archivePerPage            `archive.per_page`, for each section's last page (P4-04: overridden per section by
+ *                                                                                                            `inputs.archivePerPageBySection`, e.g. Journal's own `journal.archive_per_page`).
+ * @param {Record<string, number>}                                           [inputs.archivePerPageBySection]
+ *                                                                                                            Per-section overrides of `archivePerPage`, keyed by section slug.
  * @param {Array<{section: string, newest: ScreenPost|null, count: number}>} inputs.sectionPosts
- *                                                                                                   One entry per section, in nav order.
- * @param {ScreenPost|null}                                                  [inputs.oldest]         Oldest published post overall.
- * @param {ScreenPost|null}                                                  [inputs.journalNewest]  Newest Journal post.
- * @param {ScreenPost[]}                                                     [inputs.refPosts]       Posts whose classic backup had `[ref]` (≤ 2 used).
- * @param {ScreenPost[]}                                                     [inputs.ccPosts]        Posts whose classic backup had `[cci]`/`[cc]` (≤ 2 used).
- * @param {ScreenPost[]}                                                     [inputs.mfnPosts]       Posts whose classic backup had `[mfn]` (≤ 1 used).
- * @param {ScreenPost|null}                                                  [inputs.asidePost]      A `post-format-aside` post.
- * @param {ScreenPost|null}                                                  [inputs.featuredPost]   A post with a featured image.
- * @param {ScreenPost|null}                                                  [inputs.unfeaturedPost] A post without one.
- * @param {string[]}                                                         [inputs.seriesSlugs]    `docs/migration/series.json` slugs.
+ *                                                                                                            One entry per section, in nav order.
+ * @param {ScreenPost|null}                                                  [inputs.oldest]                  Oldest published post overall.
+ * @param {ScreenPost|null}                                                  [inputs.journalNewest]           Newest Journal post.
+ * @param {ScreenPost[]}                                                     [inputs.refPosts]                Posts whose classic backup had `[ref]` (≤ 2 used).
+ * @param {ScreenPost[]}                                                     [inputs.ccPosts]                 Posts whose classic backup had `[cci]`/`[cc]` (≤ 2 used).
+ * @param {ScreenPost[]}                                                     [inputs.mfnPosts]                Posts whose classic backup had `[mfn]` (≤ 1 used).
+ * @param {ScreenPost|null}                                                  [inputs.asidePost]               A `post-format-aside` post.
+ * @param {ScreenPost|null}                                                  [inputs.featuredPost]            A post with a featured image.
+ * @param {ScreenPost|null}                                                  [inputs.unfeaturedPost]          A post without one.
+ * @param {string[]}                                                         [inputs.seriesSlugs]             `docs/migration/series.json` slugs.
  * @return {{generated: string, host: string, screens: Array<object>}} The `screens.json` manifest.
  */
 export function buildScreens( inputs ) {
 	const {
 		host,
 		archivePerPage,
+		archivePerPageBySection = {},
 		sectionPosts = [],
 		oldest = null,
 		journalNewest = null,
@@ -126,7 +147,8 @@ export function buildScreens( inputs ) {
 			}
 		);
 
-		const lastPage = Math.max( 1, Math.ceil( count / archivePerPage ) );
+		const perPage = archivePerPageBySection[ section ] ?? archivePerPage;
+		const lastPage = Math.max( 1, Math.ceil( count / perPage ) );
 		if ( lastPage > 1 ) {
 			add(
 				`archive-${ section }-last`,

@@ -10,6 +10,36 @@
 const TTM_CLASS = /\bttm-[a-zA-Z0-9_-]+\b/g;
 
 /**
+ * Block wrapper classes with no dedicated rule by design (R1-10, shared with
+ * `tests/e2e/lib/live.mjs`'s DOM coverage check, P4-04): `archive-by-year` and `most-read` apply
+ * no layout of their own beyond their children's own selectors (`.ttm-archive-year`,
+ * `.ttm-numbered__row`, …), so `ttm-archive`/`ttm-most-read` never need a CSS rule. A prior
+ * `.ttm-archive, .ttm-most-read { display: block }` rule existed only to satisfy the coverage
+ * scanner and was removed as a self-admitted no-op; this exemption is in its place.
+ */
+export const UNSTYLED_WRAPPERS = new Set( [ 'ttm-archive', 'ttm-most-read' ] );
+
+/**
+ * Dynamic `body_class()` identifier classes (`Templates/Hierarchy.php::body_classes()`, P4-04):
+ * `ttm-section-{slug}`, `ttm-form-{form}` and `ttm-in-series` are content-driven hooks (an
+ * unbounded set of category slugs / post-format values), never styled -- the same "identifier,
+ * not visual" exemption `UNSTYLED_WRAPPERS` already carries for block wrappers, just for classes
+ * PHP builds by string concatenation rather than a literal `class="…"`/`Helpers::wrapper()` the
+ * static markup scanner above can even see. `tests/e2e/lib/live.mjs`'s runtime DOM scan can see
+ * them (they're real classes in the live HTML), so it needs this list too.
+ *
+ * @param {string} cls A `ttm-*` class name.
+ * @return {boolean} Whether `cls` is a known dynamic identifier class.
+ */
+export function isIdentifierClass( cls ) {
+	return (
+		/^ttm-section-[a-z0-9-]+$/.test( cls ) ||
+		/^ttm-form-[a-z0-9-]+$/.test( cls ) ||
+		'ttm-in-series' === cls
+	);
+}
+
+/**
  * Collect every `ttm-*` class referenced by markup sources: class="…" /
  * class='…' attributes, `"className":"…"` JSON (block comments and
  * block.json), and `Helpers::wrapper( 'name', … )` calls, which emit

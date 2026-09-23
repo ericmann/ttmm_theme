@@ -21,7 +21,7 @@
 
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { buildScreens } from './lib/screens.mjs';
+import { buildScreens, sectionCategoryArgs } from './lib/screens.mjs';
 
 // Mirrors themes/ttm-theme/inc/starter-content.php's starter_sections() -- the seven section
 // slugs, nav order.
@@ -38,6 +38,12 @@ const SECTIONS = [
 // Mirrors Config::defaults()['archive.per_page'] -- a Node script has no access to the PHP
 // Config class, so this is kept in sync by hand; only affects which page is picked as "last".
 const ARCHIVE_PER_PAGE = 12;
+
+// Mirrors Config::defaults()['journal.archive_per_page'] (P4-04): Journal's own category
+// archive paginates at a different rate than every other section's `archive.per_page`, so its
+// "last page" must be computed against 20, not 12 -- using the shared constant here 404'd
+// `archive-journal-last` (SPEC §6.10 finding, docs/feedback/phase-4/LIVE-TRIAGE.md).
+const JOURNAL_ARCHIVE_PER_PAGE = 20;
 
 /**
  * Run a `wp` command inside the dev wp-env container and return trimmed stdout. wp-env's own
@@ -93,12 +99,14 @@ function toPost( row ) {
  * @return {{section: string, newest: object|null, count: number}} The section's screen data.
  */
 function sectionPost( section ) {
+	const categoryArgs = sectionCategoryArgs( section );
+
 	const rows = wpJson( [
 		'post',
 		'list',
 		'--post_type=post',
 		'--post_status=publish',
-		`--category=${ section }`,
+		...categoryArgs,
 		'--orderby=date',
 		'--order=DESC',
 		'--posts_per_page=1',
@@ -112,7 +120,7 @@ function sectionPost( section ) {
 			'list',
 			'--post_type=post',
 			'--post_status=publish',
-			`--category=${ section }`,
+			...categoryArgs,
 			'--format=count',
 		] ) || '0'
 	);
@@ -235,6 +243,7 @@ function main() {
 	const manifest = buildScreens( {
 		host,
 		archivePerPage: ARCHIVE_PER_PAGE,
+		archivePerPageBySection: { journal: JOURNAL_ARCHIVE_PER_PAGE },
 		sectionPosts,
 		oldest: toPost( oldestRows[ 0 ] ),
 		journalNewest: journalSection ? journalSection.newest : null,
