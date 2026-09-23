@@ -211,7 +211,9 @@ export function resolveLiveZones() {
 		return [];
 	}
 
-	const screens = JSON.parse( readFileSync( LIVE_SCREENS_PATH, 'utf8' ) );
+	// screens.json's shape (P2-07, PLAN Decision "screens.json shape") is
+	// `{generated, host, screens: [...]}`, not a bare array.
+	const { screens } = JSON.parse( readFileSync( LIVE_SCREENS_PATH, 'utf8' ) );
 	const classicScreen = screens.find( ( screen ) => screen.classic );
 
 	return LIVE_ZONES.map( ( zone ) =>

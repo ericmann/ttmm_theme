@@ -5,6 +5,7 @@
  * plain import here.
  */
 
+const fs = require( 'fs' );
 const path = require( 'path' );
 
 let ZONES;
@@ -12,10 +13,18 @@ let SEEDED_ZONES;
 let LIVE_ZONES;
 let unionClip;
 let pendingImages;
+let resolveLiveZones;
 
 beforeAll( async () => {
 	const mod = await import( path.join( __dirname, '..', 'screenshots.mjs' ) );
-	( { ZONES, SEEDED_ZONES, LIVE_ZONES, unionClip, pendingImages } = mod );
+	( {
+		ZONES,
+		SEEDED_ZONES,
+		LIVE_ZONES,
+		unionClip,
+		pendingImages,
+		resolveLiveZones,
+	} = mod );
 } );
 
 describe( 'ZONES', () => {
@@ -98,6 +107,55 @@ describe( 'pendingImages', () => {
 		];
 
 		expect( pendingImages( list ) ).toEqual( [] );
+	} );
+} );
+
+describe( 'resolveLiveZones', () => {
+	const screensPath = path.join(
+		__dirname,
+		'..',
+		'..',
+		'docs',
+		'fixtures',
+		'live',
+		'screens.json'
+	);
+
+	afterEach( () => {
+		fs.rmSync( screensPath, { force: true } );
+	} );
+
+	it( 'returns [] when docs/fixtures/live/screens.json is absent', () => {
+		fs.rmSync( screensPath, { force: true } );
+
+		expect( resolveLiveZones() ).toEqual( [] );
+	} );
+
+	it( 'reads the {screens: [...]} shape (P2-07) and resolves the classic post path', () => {
+		fs.mkdirSync( path.dirname( screensPath ), { recursive: true } );
+		fs.writeFileSync(
+			screensPath,
+			JSON.stringify( {
+				generated: '2026-01-01T00:00:00.000Z',
+				host: 'http://localhost:8888',
+				screens: [
+					{ id: 'front', path: '/', classic: false },
+					{
+						id: 'oldest',
+						path: '/an-old-classic-post/',
+						classic: true,
+					},
+				],
+			} )
+		);
+
+		const zones = resolveLiveZones();
+		const classicZone = zones.find(
+			( zone ) => 'live-article-classic.png' === zone.file
+		);
+
+		expect( zones ).toHaveLength( LIVE_ZONES.length );
+		expect( classicZone.path ).toBe( '/an-old-classic-post/' );
 	} );
 } );
 
