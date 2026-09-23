@@ -1,7 +1,7 @@
 <?php
 /**
- * `wp ttm series:assign <series-slug> --from-tag=<tag> [--form=<form>] [--dry-run]` and
- * `wp ttm series:rebuild`.
+ * `wp ttm series:assign <series-slug> --from-tags=a,b [--from-tag=a] [--form=] [--status=]
+ * [--total=] [--name=] [--dry-run]` and `wp ttm series:rebuild`.
  *
  * @package TTM\Core\Cli
  */
@@ -22,38 +22,58 @@ use TTM\Core\Support\Dates;
 class SeriesCommand extends Command {
 
 	/**
-	 * `series:assign <series-slug> --from-tag=<tag> [--form=<form>] [--dry-run]`.
+	 * `series:assign <series-slug> --from-tags=a,b [--from-tag=a] [--form=] [--status=]
+	 * [--total=] [--name=] [--dry-run]`.
 	 *
 	 * {@inheritDoc}
 	 *
 	 * @param string[]             $args  [0] is the series slug.
-	 * @param array<string, mixed> $assoc --from-tag=<tag>, --form=<form>, --dry-run.
+	 * @param array<string, mixed> $assoc --from-tags=a,b, --from-tag=a, --form=, --status=,
+	 *                                    --total=, --name=, --dry-run.
 	 */
 	public function run( array $args, array $assoc ): array {
 		$slug = $args[0] ?? '';
-		$tag  = $assoc['from-tag'] ?? '';
 
-		if ( '' === $slug || '' === $tag ) {
+		// --from-tags is the union form (SPEC §6.7); --from-tag stays for a single tag.
+		$tags = [];
+		if ( ! empty( $assoc['from-tags'] ) ) {
+			$tags = array_filter( array_map( 'trim', explode( ',', (string) $assoc['from-tags'] ) ) );
+		} elseif ( ! empty( $assoc['from-tag'] ) ) {
+			$tags = [ (string) $assoc['from-tag'] ];
+		}
+
+		if ( '' === $slug || empty( $tags ) ) {
 			return [
 				'ok'       => false,
 				'rows'     => [],
-				'messages' => [ 'Usage: series:assign <series-slug> --from-tag=<tag>' ],
+				'messages' => [ 'Usage: series:assign <series-slug> --from-tags=a,b (or --from-tag=a)' ],
 			];
 		}
 
 		$dry_run = ! empty( $assoc['dry-run'] );
 		$form    = $assoc['form'] ?? null;
+		$status  = isset( $assoc['status'] ) ? (string) $assoc['status'] : null;
+		$total   = isset( $assoc['total'] ) ? (int) $assoc['total'] : null;
+		$name    = isset( $assoc['name'] ) ? (string) $assoc['name'] : null;
 
-		$tag_term = get_term_by( 'slug', $tag, 'post_tag' );
-		if ( ! $tag_term ) {
-			return [
-				'ok'       => false,
-				'rows'     => [],
-				'messages' => [ "Tag '{$tag}' does not exist." ],
-			];
+		$tag_term_ids = [];
+		foreach ( $tags as $tag ) {
+			$tag_term = get_term_by( 'slug', $tag, 'post_tag' );
+			if ( ! $tag_term ) {
+				return [
+					'ok'       => false,
+					'rows'     => [],
+					'messages' => [ "Tag '{$tag}' does not exist." ],
+				];
+			}
+			$tag_term_ids[] = (int) $tag_term->term_id;
 		}
 
-		$candidates = $this->tagged_posts( (int) $tag_term->term_id );
+		$candidates = [];
+		foreach ( $tag_term_ids as $tag_term_id ) {
+			$candidates = array_merge( $candidates, $this->tagged_posts( $tag_term_id ) );
+		}
+		$candidates = array_unique( $candidates );
 
 		$rows    = [];
 		$skipped = [];
@@ -81,14 +101,20 @@ class SeriesCommand extends Command {
 
 		$term = get_term_by( 'slug', $slug, 'series' );
 		if ( ! $term ) {
-			$created = wp_insert_term( ucwords( str_replace( '-', ' ', $slug ) ), 'series', [ 'slug' => $slug ] );
-			$term_id = (int) $created['term_id'];
+			// SPEC §6.7: --name sets the term name on creation only.
+			$term_name = $name ?? ucwords( str_replace( '-', ' ', $slug ) );
+			$created   = wp_insert_term( $term_name, 'series', [ 'slug' => $slug ] );
+			$term_id   = (int) $created['term_id'];
 		} else {
 			$term_id = (int) $term->term_id;
 		}
 
 		if ( $form ) {
 			update_term_meta( $term_id, 'ttm_form', $form );
+		}
+
+		if ( null !== $total ) {
+			update_term_meta( $term_id, 'ttm_total_parts', $total );
 		}
 
 		$part = 1;
@@ -113,7 +139,10 @@ class SeriesCommand extends Command {
 			++$part;
 		}
 
-		if ( ! empty( $rows ) ) {
+		if ( null !== $status ) {
+			// SPEC §6.7: an explicit --status overrides the inferred one below.
+			update_term_meta( $term_id, 'ttm_status', $status );
+		} elseif ( ! empty( $rows ) ) {
 			$newest = get_post( end( $rows ) );
 			$days   = Dates::days_between( Clock::at( $newest->post_date ), Clock::now() );
 			$stale  = (int) Config::get( 'lead.stale_days', 30 );

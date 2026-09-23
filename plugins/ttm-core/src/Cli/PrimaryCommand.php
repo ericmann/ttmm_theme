@@ -21,15 +21,18 @@ class PrimaryCommand extends Command {
 	 * {@inheritDoc}
 	 *
 	 * @param string[]             $args  Positional args (unused).
-	 * @param array<string, mixed> $assoc --dry-run.
+	 * @param array<string, mixed> $assoc --dry-run, --from-yoast.
 	 */
 	public function run( array $args, array $assoc ): array {
 		unset( $args );
 
-		$dry_run = ! empty( $assoc['dry-run'] );
-		$batch   = (int) Config::get( 'cli.batch', 200 );
-		$rows    = [];
-		$paged   = 1;
+		$dry_run    = ! empty( $assoc['dry-run'] );
+		$from_yoast = ! empty( $assoc['from-yoast'] );
+		$batch      = (int) Config::get( 'cli.batch', 200 );
+		$rows       = [];
+		$paged      = 1;
+		$used       = 0;
+		$skipped    = 0;
 
 		do {
 			$query = new \WP_Query(
@@ -48,6 +51,28 @@ class PrimaryCommand extends Command {
 					continue;
 				}
 
+				if ( $from_yoast ) {
+					// SPEC §6.7: use the Yoast primary category only when the post actually
+					// carries that category -- a stale/renamed Yoast value is skipped, not
+					// forced, and falls to a plain `primary:assign` pass instead.
+					$yoast_id = (int) get_post_meta( $post_id, '_yoast_wpseo_primary_category', true );
+					if ( ! $yoast_id || ! in_array( $yoast_id, wp_get_post_categories( (int) $post_id ), true ) ) {
+						++$skipped;
+						continue;
+					}
+
+					if ( ! $dry_run ) {
+						update_post_meta( $post_id, 'ttm_primary_category', $yoast_id );
+					}
+
+					++$used;
+					$rows[] = [
+						'post_id'  => (int) $post_id,
+						'category' => $yoast_id,
+					];
+					continue;
+				}//end if
+
 				$id = PrimaryCategory::id( (int) $post_id );
 				if ( ! $id ) {
 					continue;
@@ -61,11 +86,26 @@ class PrimaryCommand extends Command {
 					'post_id'  => (int) $post_id,
 					'category' => $id,
 				];
-			}
+			}//end foreach
 
 			$found = count( $query->posts );
 			++$paged;
 		} while ( $found === $batch );
+
+		if ( $from_yoast ) {
+			return [
+				'ok'       => true,
+				'rows'     => $rows,
+				'messages' => [
+					sprintf(
+						'%s %d post(s) from Yoast, skipped %d.',
+						$dry_run ? 'Would use' : 'Used',
+						$used,
+						$skipped
+					),
+				],
+			];
+		}
 
 		return [
 			'ok'       => true,
