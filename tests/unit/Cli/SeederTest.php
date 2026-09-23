@@ -26,4 +26,14 @@ class SeederTest extends TestCase {
 		$this->assertNull( Seeder::normalize_form( null ) );
 		$this->assertNull( Seeder::normalize_form( 1 ) );
 	}
+
+	/**
+	 * P2-01, rule 49: destructive seed operations are refused on production only.
+	 */
+	public function test_may_wipe_is_false_only_on_production(): void {
+		$this->assertFalse( Seeder::may_wipe( 'production' ) );
+		$this->assertTrue( Seeder::may_wipe( 'local' ) );
+		$this->assertTrue( Seeder::may_wipe( 'staging' ) );
+		$this->assertTrue( Seeder::may_wipe( 'development' ) );
+	}
 }

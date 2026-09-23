@@ -167,4 +167,29 @@ class MaintenanceCommandsTest extends TTM_IntegrationTestCase {
 		$this->assertTrue( $result['ok'] );
 		$this->assertSame( SeriesIndex::all(), $result['rows'] );
 	}
+
+	/**
+	 * P2-01, SPEC §6.7: `wp ttm stats:flush` deletes every stats/top-tags transient and reports
+	 * how many it deleted.
+	 */
+	public function test_stats_flush_deletes_transients_and_reports_count(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+		self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+				'tags_input'    => [ 'flush-me' ],
+			]
+		);
+
+		\TTM\Core\Query\Stats::category( $tech );
+		\TTM\Core\Query\Stats::top_tags( $tech );
+
+		$result = ( new \TTM\Core\Cli\StatsCommand() )->run( [], [] );
+
+		$this->assertTrue( $result['ok'] );
+		$this->assertSame( 'Flushed 2 stats transient(s).', $result['messages'][0] );
+		$this->assertFalse( get_transient( "ttm_category_stats_{$tech}" ) );
+		$this->assertFalse( get_transient( "ttm_top_tags_{$tech}" ) );
+	}
 }

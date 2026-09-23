@@ -85,4 +85,101 @@ class SeedStatesTest extends TTM_IntegrationTestCase {
 		$this->assertNotEmpty( $verse['copyright'] );
 		$this->assertStringStartsWith( 'https://dailymedtoday.com/meditation/', $verse['url'] );
 	}
+
+	/**
+	 * P2-01, SPEC §6.6 step 1 / §6.7: `--starter-only` seeds categories, the starter pages and
+	 * the Sections navigation only -- no posts, series, or books.
+	 */
+	public function test_starter_only_creates_sections_pages_and_navigation_and_no_posts(): void {
+		$summary = ( new Seeder() )->run_starter();
+
+		$this->assertGreaterThan( 0, $summary['categories'] );
+		$this->assertGreaterThan( 0, $summary['pages'] );
+		$this->assertSame( 1, $summary['navigation'] );
+
+		$this->assertNotNull( get_page_by_path( 'series' ) );
+		$this->assertNotNull( get_page_by_path( 'writing' ) );
+		$this->assertNotNull( get_page_by_path( 'newsletter' ) );
+		$this->assertNotNull( get_page_by_path( 'about' ) );
+
+		$posts = get_posts(
+			[
+				'post_type'      => 'post',
+				'post_status'    => 'any',
+				'posts_per_page' => 1,
+			]
+		);
+		$this->assertCount( 0, $posts );
+		$this->assertCount( 0, SeriesIndex::all() );
+	}
+
+	public function test_starter_only_is_idempotent(): void {
+		$seeder = new Seeder();
+		$first  = $seeder->run_starter();
+		$second = $seeder->run_starter();
+
+		// navigation is 0 on the second call by design (Seeder::seed_navigation()'s docblock:
+		// "0 if it already existed or nothing to create") -- categories/pages counts are what
+		// prove idempotency here (no duplicates created).
+		$this->assertSame( $first['categories'], $second['categories'] );
+		$this->assertSame( $first['pages'], $second['pages'] );
+
+		$pages = get_posts(
+			[
+				'post_type'      => 'page',
+				'post_status'    => 'publish',
+				'posts_per_page' => 50,
+			]
+		);
+		$slugs = wp_list_pluck( $pages, 'post_name' );
+		$this->assertSame( count( $slugs ), count( array_unique( $slugs ) ), 'starter pages must not duplicate' );
+	}
+
+	/**
+	 * P2-01, SPEC §6.6 last paragraph, Decision "Seeder::reset() from a live state": reset()
+	 * wipes non-seed content too (posts, terms, attachments), the way a live import would leave
+	 * it, while keeping the default category (wp_delete_term() refuses to delete it).
+	 */
+	public function test_reset_removes_foreign_posts_terms_and_attachments_when_present(): void {
+		$foreign_post     = self::factory()->post->create(
+			[
+				'post_status' => 'publish',
+				'post_title'  => 'Not seeded',
+				'tags_input'  => [ 'foreign-tag' ],
+			]
+		);
+		$attachment_id    = self::factory()->attachment->create_object(
+			[
+				'file'           => 'foreign.jpg',
+				'post_parent'    => $foreign_post,
+				'post_mime_type' => 'image/jpeg',
+			]
+		);
+		$default_category = (int) get_option( 'default_category' );
+
+		( new Seeder() )->reset();
+
+		$this->assertNull( get_post( $foreign_post ) );
+		$this->assertNull( get_post( $attachment_id ) );
+		$this->assertFalse( (bool) term_exists( 'foreign-tag', 'post_tag' ) );
+		$this->assertNotNull( get_term( $default_category, 'category' ), 'the default category must survive reset()' );
+	}
+
+	public function test_reset_with_only_seed_content_behaves_as_before(): void {
+		( new Seeder() )->run( 'normal' );
+
+		( new Seeder() )->reset();
+
+		$posts = get_posts(
+			[
+				'post_type'      => 'any',
+				'post_status'    => 'any',
+				'posts_per_page' => 1,
+			]
+		);
+		$this->assertCount( 0, $posts );
+		$this->assertCount( 0, SeriesIndex::all() );
+		$this->assertFalse( get_option( 'ttm_books' ) );
+		$this->assertFalse( get_option( 'ttm_verse' ) );
+	}
 }

@@ -309,7 +309,7 @@ class Stats {
 	 * timeout options through core's normal option-cache invalidation (an `$wpdb->query()`
 	 * `DELETE` alone would leave a stale `alloptions` cache entry behind).
 	 */
-	public static function flush_all(): void {
+	public static function flush_all(): int {
 		global $wpdb;
 
 		$names = $wpdb->get_col(
@@ -320,6 +320,13 @@ class Stats {
 			delete_transient( substr( (string) $name, strlen( '_transient_' ) ) );
 		}
 
+		$count = count( (array) $names );
+
+		if ( false !== get_transient( 'ttm_stats_story_count' ) ) {
+			++$count;
+		}
 		delete_transient( 'ttm_stats_story_count' );
+
+		return $count;
 	}
 }

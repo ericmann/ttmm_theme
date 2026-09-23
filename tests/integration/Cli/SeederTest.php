@@ -61,17 +61,22 @@ class SeederTest extends TTM_IntegrationTestCase {
 		$this->assertGreaterThan( 0, (int) get_post_meta( $post_id, 'ttm_word_count', true ) );
 	}
 
-	public function test_reset_removes_only_seeded_content(): void {
+	/**
+	 * P2-01, Decision "Seeder::reset() from a live state": reset() now wipes every post, not
+	 * only rows this seeder itself wrote -- a manually-created post is gone too, the way a
+	 * live import's content would be.
+	 */
+	public function test_reset_removes_every_post_not_only_seeded_content(): void {
 		$manual_post = self::factory()->post->create( [ 'post_title' => 'Not seeded' ] );
 
 		$seeder = new Seeder();
 		$seeder->run( 'normal' );
 		$seeder->reset();
 
-		$this->assertNotNull( get_post( $manual_post ) );
+		$this->assertNull( get_post( $manual_post ) );
 
 		$count = wp_count_posts( 'post' )->publish;
-		$this->assertSame( 1, (int) $count );
+		$this->assertSame( 0, (int) $count );
 	}
 
 	public function test_generated_image_is_an_attachment_with_alt(): void {

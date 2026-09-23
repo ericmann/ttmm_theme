@@ -179,6 +179,38 @@ class Seeder {
 	}
 
 	/**
+	 * `wp ttm seed --starter-only` (SPEC §6.6 step 1, §6.7): the theme's starter content only
+	 * -- categories, the Series/Writing/Newsletter/About pages, and the Sections navigation.
+	 * No posts, series, books, verse, or newsletter settings. Idempotent by slug, same as
+	 * every `seed_*()` method it calls.
+	 *
+	 * @return array{categories:int, pages:int, navigation:int}
+	 */
+	public function run_starter(): array {
+		$categories = $this->seed_categories();
+		$pages      = $this->seed_pages();
+		$navigation = $this->seed_navigation();
+
+		return [
+			'categories' => count( $categories ),
+			'pages'      => count( $pages ),
+			'navigation' => $navigation ? 1 : 0,
+		];
+	}
+
+	/**
+	 * Whether destructive seed operations (`reset()`, `--starter-only` re-running over live
+	 * content) are allowed for a given `WP_ENVIRONMENT_TYPE` value (rule 49: `seed --reset` is
+	 * the one sanctioned wipe, guarded by environment). Pure: no WordPress calls.
+	 *
+	 * @param string $environment_type `wp_get_environment_type()` value.
+	 * @return bool
+	 */
+	public static function may_wipe( string $environment_type ): bool {
+		return 'production' !== $environment_type;
+	}
+
+	/**
 	 * Slugs excluded from posts.json when seeding the "empty" state: every chapter
 	 * (from series.json parts) and every standalone story (slug prefix "story-").
 	 *
@@ -819,23 +851,60 @@ class Seeder {
 	/**
 	 * Delete every object carrying the seed meta.
 	 */
+	/**
+	 * `wp ttm seed --reset` (SPEC §6.6 last paragraph, rule 49): return the site to empty,
+	 * `wp site empty`-equivalent -- every post/page/attachment and every non-default
+	 * category/tag/series term, not only rows this seeder itself wrote (Decision "Seeder::reset()
+	 * from a live state": after a live import, non-seed content must go too). Guarded by
+	 * `may_wipe()`; a no-op when the environment doesn't allow it. `wp_delete_term()` already
+	 * refuses to delete the default category on its own, so no special case is needed here.
+	 * Batched by `cli.batch` (rule 12).
+	 */
 	public function reset(): void {
-		global $wpdb;
+		$environment = function_exists( 'wp_get_environment_type' ) ? wp_get_environment_type() : 'production';
+		if ( ! self::may_wipe( $environment ) ) {
+			return;
+		}
 
 		// P0-05: clear stats/top-tags transients before the deleted posts can leave stale data
 		// behind for whatever content (seeded or not) remains.
 		Stats::flush_all();
 
-		$post_ids = $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s", self::SEED_META ) );
-		foreach ( $post_ids as $post_id ) {
-			wp_delete_post( (int) $post_id, true );
-		}
+		$batch = (int) Config::get( 'cli.batch', 200 );
 
-		$term_ids = $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM {$wpdb->termmeta} WHERE meta_key = %s", self::SEED_META ) );
-		foreach ( $term_ids as $term_id ) {
-			$term = get_term( (int) $term_id );
-			if ( $term && ! is_wp_error( $term ) ) {
-				wp_delete_term( (int) $term_id, $term->taxonomy );
+		foreach ( [ 'post', 'page', 'attachment' ] as $post_type ) {
+			// 'any' does not include attachments' 'inherit' status (rule 12: still a bounded,
+			// explicit status list, not an unlimited page size).
+			$status = 'attachment' === $post_type
+				? [ 'inherit', 'private', 'publish', 'draft', 'pending', 'future', 'trash' ]
+				: 'any';
+
+			do {
+				$query = new \WP_Query(
+					[
+						'post_type'      => $post_type,
+						'post_status'    => $status,
+						'posts_per_page' => $batch,
+						'fields'         => 'ids',
+					]
+				);
+				foreach ( $query->posts as $post_id ) {
+					wp_delete_post( (int) $post_id, true );
+				}
+				$found = count( $query->posts );
+			} while ( $found === $batch );
+		}//end foreach
+
+		foreach ( [ 'category', 'post_tag', 'series' ] as $taxonomy ) {
+			$term_ids = get_terms(
+				[
+					'taxonomy'   => $taxonomy,
+					'hide_empty' => false,
+					'fields'     => 'ids',
+				]
+			);
+			foreach ( (array) $term_ids as $term_id ) {
+				wp_delete_term( (int) $term_id, $taxonomy );
 			}
 		}
 

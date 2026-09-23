@@ -23,6 +23,7 @@ class Loader {
 		}
 
 		\WP_CLI::add_command( 'ttm seed', self::wrap( new SeedCommand() ) );
+		\WP_CLI::add_command( 'ttm stats:flush', self::wrap( new StatsCommand() ) );
 		\WP_CLI::add_command( 'ttm verse', self::wrap( new VerseCommand() ) );
 		\WP_CLI::add_command( 'ttm recount', self::wrap( new RecountCommand() ) );
 		\WP_CLI::add_command( 'ttm primary:assign', self::wrap( new PrimaryCommand() ) );
