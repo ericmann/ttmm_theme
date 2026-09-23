@@ -24,7 +24,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] P2-06 docs/migration/series.json, import.sh, plan.sh, env:live
 - [x] P2-07 screens.mjs and the live screens manifest
 - [x] P2-08 Run env:live (skip-attachments, then full); tune excerpt_length and image_timeout; LIVE-TRIAGE skeleton
-- [ ] P2-09 Phase 2 screenshots and push
+- [x] P2-09 Phase 2 screenshots and push
 - [ ] P3-01 Shortcode pre-pass module
 - [ ] P3-02 convert:import footnotes, dry-run listing, verification; audit shortcode list
 - [ ] P3-03 Fresh import, plan re-run, conversion counts, screenshots and push
@@ -160,3 +160,6 @@ Added scripts/live/lib/screens.mjs (pure buildScreens(inputs) -> {generated, hos
 
 ### P2-08 — 206d90f
 Added --words=<n> (migrate:excerpts) and --timeout=<seconds> (migrate:images) measurement-only Config overrides, plus a sideload attempt/success/timeout/failure summary message on migrate:images. Ran LIVE_SKIP_ATTACHMENTS=1 npm run env:live then npm run env:live in full against the real owner export: both complete every step through convert:export (step timings recorded in LIVE-TRIAGE.md's new Import runs table), then correctly abort at convert-classic.mjs (178/724 textEqual mismatches on un-prepassed shortcodes -- expected, P3-01 shortcode pre-pass is out of scope for this task). Tuned excerpt_length: --words= dry-runs at 40/55/70 across 589 real candidates found 0 word-cuts at every value -- kept 55. Tuned migration.image_timeout: a real migrate:images pass against 15 genuine external hosts found in the export at 20s measured 157 attempts/92 successes/0 timeouts (0%)/65 other failures (dead links, not timeouts) -- kept 20, well under the 10% retry threshold. Reset to seed and ran npm run test:e2e: 491/491 green. composer test:unit 180/180, full npm run test:integration 567/567 green. Logged pipeline feedback: foundry_verify's extraVerify for scripts/live/* reports the expected env:live non-zero exit as ok:false, since it can't know a phase-2 task's run is meant to stop at the phase-3-scoped conversion step.
+
+### P2-09 — 0b37857
+Fixed a real bug found while executing this task: resolveLiveZones() in scripts/screenshots.mjs read docs/fixtures/live/screens.json as a bare array, but P2-07's buildScreens() writes {generated, host, screens: [...]} per PLAN's own "screens.json shape" Decision; fixed to destructure .screens, with 2 new resolveLiveZones tests. Captured screenshots in two passes: with a fresh live import + plan.sh run (through convert:export) present, npm run screenshots wrote the 7 live-*.png files correctly (live-front, live-article-classic resolved to the oldest/classic post /blue-oceans/, live-archive-technology, live-writing, live-series, live-journal, live-front-390); then removed docs/fixtures/live/ entirely, reset to seed, and re-ran screenshots for the correct 17-file SEEDED_ZONES set (404.png and front-1920.png differ from the prior commit; the rest are pixel-identical). Committed docs/feedback/phase-4/*.png only (24 files total), pushed to refine/2026-09-23. npm run lint/test:unit/build/forbidden-patterns.sh and composer test:unit all green.
