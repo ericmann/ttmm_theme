@@ -3,7 +3,7 @@ Branch: refine/2026-09-23
 Started: 2026-09-23T05:03:31.529Z
 
 ## Tasks
-- [ ] P0-01 Rule 47 check, tagged-fixme guard, live-script entry points, phase-4 screenshot set
+- [x] P0-01 Rule 47 check, tagged-fixme guard, live-script entry points, phase-4 screenshot set
 - [ ] P0-02 Seed: tags for every section and the older Technology neighbour
 - [ ] P0-03 Seed: Reading CVEs series
 - [ ] P0-04 New screens and §6.11 rows as tagged fixme
@@ -40,3 +40,11 @@ Started: 2026-09-23T05:03:31.529Z
 
 ## Log
 (one entry per task, appended by implement)
+
+### P0-01 — 9ff08d9
+Added rule 47 private-data check to forbidden-patterns.sh (git ls-files over docs/*.xml, docs/**/*.sql*, *.tar.gz, *.csv, docs/fixtures/live/). .gitignore already had the needed entries; no change needed there.
+check-fixme.mjs: ALLOW_TAGGED = true, comment "P0-01: phase 4 in flight; P5-03 flips this back"; scripts/lib/fixme.mjs untouched.
+New npm scripts env:live/env:backup/env:restore/env:drill/test:live; scripts/live/*.sh created (import.sh resolves LIVE_WXR/newest docs/*.xml/newest docs/fixtures/live/*.xml, else skip line; plan/backup/restore/drill print stub lines; test-live.sh skips cleanly without docs/fixtures/live/screens.json + tests/e2e/live.spec.mjs). All executable, shellcheck clean (one info-level SC2012 left, not required).
+screenshots.mjs: OUT_DIR -> docs/feedback/phase-4; new exports SEEDED_ZONES (17: phase-3's 14 + article-noseries.png, archive-business.png, footer.png selector crop), LIVE_ZONES (7, live:true), ZONES (24, combined), resolveLiveZones() (reads docs/fixtures/live/screens.json when present, fills live-article-classic.png's path from the first { classic: true } screen -- field names are my interpretation since P2-06 hasn't written that file yet).
+docs/feedback/phase-4/README.md added with seeded + live tables.
+Verified: npm run lint, npm run test:unit, bash scripts/forbidden-patterns.sh, npm run env:live/test:live/env:drill, composer lint/test:unit, npm run build all pass. foundry_verify flagged pre-existing footer-no-rss and verse-copyright-removed constraint misses in files this task never touches (parts/footer.html, Bindings/Sources.php etc.) -- out of scope for P0-01, left for the SPEC §6.1 task that owns those files.
