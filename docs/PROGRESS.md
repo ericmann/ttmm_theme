@@ -4,7 +4,7 @@ Started: 2026-09-23T05:03:31.529Z
 
 ## Tasks
 - [x] P0-01 Rule 47 check, tagged-fixme guard, live-script entry points, phase-4 screenshot set
-- [ ] P0-02 Seed: tags for every section and the older Technology neighbour
+- [x] P0-02 Seed: tags for every section and the older Technology neighbour
 - [ ] P0-03 Seed: Reading CVEs series
 - [ ] P0-04 New screens and §6.11 rows as tagged fixme
 - [ ] P0-05 Stats invalidation, tiebreak, flush_all; Business filter row green
@@ -48,3 +48,8 @@ New npm scripts env:live/env:backup/env:restore/env:drill/test:live; scripts/liv
 screenshots.mjs: OUT_DIR -> docs/feedback/phase-4; new exports SEEDED_ZONES (17: phase-3's 14 + article-noseries.png, archive-business.png, footer.png selector crop), LIVE_ZONES (7, live:true), ZONES (24, combined), resolveLiveZones() (reads docs/fixtures/live/screens.json when present, fills live-article-classic.png's path from the first { classic: true } screen -- field names are my interpretation since P2-06 hasn't written that file yet).
 docs/feedback/phase-4/README.md added with seeded + live tables.
 Verified: npm run lint, npm run test:unit, bash scripts/forbidden-patterns.sh, npm run env:live/test:live/env:drill, composer lint/test:unit, npm run build all pass. foundry_verify flagged pre-existing footer-no-rss and verse-copyright-removed constraint misses in files this task never touches (parts/footer.html, Bindings/Sources.php etc.) -- out of scope for P0-01, left for the SPEC §6.1 task that owns those files.
+
+### P0-02 — fc8234a
+docs/fixtures/seed/posts.json: added tags to reach >=5 distinct tag slugs per section (technology 6, business 5, faith 5, writing 6, opinion 5; security untouched, still 7; journal untouched, still 0). Appended new post why-i-still-read-the-wordpress-changelog (technology, days_ago 45, paragraphs 17 -> 611 words via prose.json cycling at row_index 102, no series/featured_image/most_read) at the end of the array so no existing row's row_index (and thus its prose()-cycled word count) shifted.
+tests/integration/Cli/SeederTest.php: three new tests -- test_every_section_except_journal_has_at_least_five_distinct_tags, test_transients_post_has_an_older_technology_neighbour (technology category, no series term, older post_date), test_changelog_post_is_about_six_hundred_words (ttm_word_count 500-700). Fixed a PHPCS short-ternary/unchecked-return error on get_the_terms() in the neighbour test.
+Verified: npm run test:integration (494 tests, full suite) green, SeederTest alone (38 tests) green, composer lint 0 errors, npm run lint/test:unit/build green, forbidden-patterns clean, grep -ri lorem docs/fixtures/seed/ empty.
