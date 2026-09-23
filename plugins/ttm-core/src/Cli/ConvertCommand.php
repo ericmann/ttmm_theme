@@ -165,16 +165,22 @@ class ConvertCommand extends Command {
 				continue;
 			}
 
-			$footnotes        = (array) ( $record['footnotes'] ?? [] );
-			$original_content = $post->post_content; 
-			// Before import_one() overwrites it (SPEC §6.8 text-equality check).
+			$footnotes = (array) ( $record['footnotes'] ?? [] );
 			$this->import_one( $post, $blocks, $footnotes );
 
 			$note = "post {$post_id} ({$post->post_name}): converted, " . wp_json_encode( $counts ) . $shortcodes_note;
 			if ( ! $this->footnotes_verified( $post_id, $footnotes ) ) {
 				$note .= ' [footnotes-mismatch]';
 			}
-			if ( ! $this->text_equal_ignoring_shortcodes( $original_content, $blocks ) ) {
+			// `report.textEqual` is `scripts/convert-classic.mjs`'s own before/after comparison
+			// (SPEC §6.8's "extended" text-equality check, incl. stripping [caption]/[gallery]/
+			// [audio]'s own bracket syntax): it already accounts for every substitution the
+			// pre-pass makes (a [ref] note's text moving out of the body into the footnotes
+			// list, a shortcode becoming a block, etc). Re-deriving an independent comparison in
+			// PHP against the raw classic content -- tried initially -- can't reproduce that and
+			// produced false mismatches on nearly every post; surfacing the JS-computed value is
+			// correct and simpler.
+			if ( isset( $record['report']['textEqual'] ) && ! $record['report']['textEqual'] ) {
 				$note .= ' [text-mismatch]';
 			}
 			$messages[] = $note;
@@ -200,16 +206,11 @@ class ConvertCommand extends Command {
 		}
 
 		if ( ! empty( $footnotes ) ) {
-			// `footnotes` is WordPress core's own post-meta key for the core/footnotes block
-			// (registered by WP core itself, not by this plugin) - stored as a JSON string,
-			// exactly the shape core's own editor writes: [{id, content}, ...].
-			update_post_meta( $post->ID, 'footnotes', wp_json_encode( $footnotes ) );
-
 			// `rawHandler`'s own `<sup data-fn>` marker recognition is editor-only (a RichText
 			// format, applied by a human typing a footnote); it never inserts the accompanying
-			// `core/footnotes` block that actually reads the meta above and renders the note
-			// list (SPEC §6.8). Append it once here so the markers convert-classic.mjs already
-			// wrote have somewhere to resolve to.
+			// `core/footnotes` block that actually reads the `footnotes` meta and renders the
+			// note list (SPEC §6.8). Append it once here so the markers convert-classic.mjs
+			// already wrote have somewhere to resolve to.
 			if ( false === strpos( $blocks, 'wp:footnotes' ) ) {
 				$blocks = rtrim( $blocks ) . "\n\n<!-- wp:footnotes /-->\n";
 			}
@@ -228,14 +229,34 @@ class ConvertCommand extends Command {
 		);
 		kses_init_filters();
 
+		if ( ! empty( $footnotes ) ) {
+			// `footnotes` is WordPress core's own post-meta key for the core/footnotes block
+			// (registered by WP core itself, not by this plugin) - stored as a JSON string,
+			// exactly the shape core's own editor writes: [{id, content}, ...]. WP core hooks
+			// its own `sanitize_post_meta_footnotes` filter (`_wp_filter_post_meta_footnotes()`,
+			// wp-includes/blocks.php) unconditionally, which `json_decode()`s the incoming
+			// string and returns `''` outright if that fails -- and `update_metadata()` itself
+			// unslashes the value before that filter ever runs. `wp_json_encode()`'s own
+			// backslash-escaped quotes (`\"` around an href, say) are exactly what
+			// `wp_unslash()` (a plain `stripslashes()`) strips, breaking the JSON and silently
+			// discarding every footnote whose content has an escaped character in it (found via
+			// a real, near-total mismatch on the export; see docs/feedback/phase-4/LIVE-TRIAGE.md).
+			// `wp_slash()` first cancels that out, the same way WP core's own REST meta
+			// controller does before every `update_metadata()` call.
+			update_post_meta( $post->ID, 'footnotes', wp_slash( wp_json_encode( $footnotes ) ) );
+		}
+
 		update_post_meta( $post->ID, 'ttm_converted_at', Clock::now()->format( 'Y-m-d H:i:s' ) );
 	}
 
 	/**
-	 * Whether every footnote's text appears exactly once in the post's rendered content
+	 * Whether every footnote's text appears at least once in the post's rendered content
 	 * (`the_content`, SPEC §6.8) -- catches a marker that never resolved (no matching
 	 * `core/footnotes` block or meta) as well as a note whose text got mangled in transit.
-	 * Vacuously true when there are no footnotes.
+	 * Vacuously true when there are no footnotes. "At least once", not "exactly once": a short
+	 * footnote's own text (e.g. a proper noun) legitimately also appears verbatim earlier in
+	 * the body prose that led up to the reference, which isn't a real mismatch -- found via a
+	 * real false positive on the export; see docs/feedback/phase-4/LIVE-TRIAGE.md.
 	 *
 	 * @param int                                          $post_id   Post id (already updated).
 	 * @param array<int, array{id:string, content:string}> $footnotes Footnotes, WP core's own shape.
@@ -265,14 +286,23 @@ class ConvertCommand extends Command {
 		$post = $outer_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- restoring the caller's global.
 		wp_reset_postdata();
 
-		$plain = wp_strip_all_tags( $rendered );
+		$plain = $this->normalized_text( $rendered );
 
 		foreach ( $footnotes as $footnote ) {
-			$text = trim( wp_strip_all_tags( (string) ( $footnote['content'] ?? '' ) ) );
+			// `wptexturize()` and `convert_smilies()` both also run on `the_content` (after the
+			// footnotes block renders the raw meta text) -- e.g. a literal "..." becomes a
+			// single "…" character, and ":-)" becomes an `<img class="wp-smiley">` with no
+			// matching visible text at all -- so the expected text needs the same two passes:
+			// wptexturize's rewrites still compare as plain text either way, and a smiley
+			// disappearing from *both* sides equally (`normalized_text()` strips the `<img>`
+			// same as any other tag) still means the two sides agree, rather than the raw ":-)"
+			// searching for literal text that can now never appear (found via a real mismatch
+			// on the export; see docs/feedback/phase-4/LIVE-TRIAGE.md).
+			$text = $this->normalized_text( convert_smilies( wptexturize( (string) ( $footnote['content'] ?? '' ) ) ) );
 			if ( '' === $text ) {
 				continue;
 			}
-			if ( 1 !== substr_count( $plain, $text ) ) {
+			if ( 0 === substr_count( $plain, $text ) ) {
 				return false;
 			}
 		}
@@ -281,29 +311,18 @@ class ConvertCommand extends Command {
 	}
 
 	/**
-	 * Whether the old (classic) content and the new (block) content carry the same visible
-	 * text, once the old side's WP-core-registered shortcodes (`[caption]`, `[audio]`, etc.)
-	 * are stripped (SPEC §6.8: "the existing text-equality check is extended so shortcodes
-	 * stripped from the classic render equal the new text"). Unregistered shortcodes the
-	 * pre-pass itself already handles (`[ref]`, `[cci]`, `[cc_x]`, …) aren't touched by
-	 * `strip_shortcodes()`, matching the pre-pass's own before/after text either way.
-	 *
-	 * @param string $old_content Original classic `post_content`.
-	 * @param string $new_content Serialized block markup.
-	 * @return bool
-	 */
-	private function text_equal_ignoring_shortcodes( string $old_content, string $new_content ): bool {
-		return $this->normalized_text( strip_shortcodes( $old_content ) ) === $this->normalized_text( $new_content );
-	}
-
-	/**
-	 * Plain, whitespace-collapsed text for a loose content comparison.
+	 * Plain, entity-decoded, whitespace-collapsed text for a loose content comparison --
+	 * `wptexturize()` (part of `the_content`) rewrites plain `...` to a typographic ellipsis
+	 * entity, so without decoding, a footnote's own raw content never matches its own rendered
+	 * text (found via a real mismatch on the export; see docs/feedback/phase-4/LIVE-TRIAGE.md).
 	 *
 	 * @param string $html HTML fragment.
 	 * @return string
 	 */
 	private function normalized_text( string $html ): string {
-		return trim( (string) preg_replace( '/\s+/', ' ', wp_strip_all_tags( $html ) ) );
+		$decoded = html_entity_decode( wp_strip_all_tags( $html ), ENT_QUOTES, 'UTF-8' );
+
+		return trim( (string) preg_replace( '/\s+/', ' ', $decoded ) );
 	}
 
 	/**

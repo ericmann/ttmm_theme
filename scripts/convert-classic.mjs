@@ -97,11 +97,29 @@ function setUpBlockEditorEnvironment() {
  * after decoding equally on both sides is what makes this a real equality check rather than a
  * false "regression" from the DOM round-trip decoding entities the *raw* string never did.
  *
+ * `[caption]`, `[gallery]` and `[audio]` are deliberately left for `rawHandler` itself to
+ * convert (their own native shortcode-type transforms -- see `preprocessShortcodes`'s
+ * docblock), so their own bracket/attribute syntax (`[caption id="…" …]`/`[/caption]`,
+ * `[gallery ids="…"]`, `[audio …]`/the legacy bare-URL `[audio http://…]` form) survives into
+ * the "old" side of a `textEqual` comparison as literal text with no `<`/`>` characters for the
+ * tag strip below to catch, even though it was never meant to be visible content and
+ * `rawHandler`'s own conversion correctly drops it. Stripped here (comparison only -- this
+ * never touches the HTML actually passed to `rawHandler`) so a converted post doesn't read as a
+ * false `textEqual: false`. Discovered via real failures on the export; see
+ * docs/feedback/phase-4/LIVE-TRIAGE.md, which also records the residual failure class this
+ * doesn't fix: legacy `<code>`/`<blockquote>` markup in the classic content itself containing
+ * unescaped nested HTML, a pre-existing content-quality issue unrelated to shortcodes.
+ *
  * @param {string} html
  * @return {string} The normalized text.
  */
 function normalizedText( html ) {
-	const withoutTags = html.replace( /<[^>]+>/g, ' ' );
+	const withoutShortcodeWrappers = html
+		.replace( /\[caption[^\]]*\]/g, '' )
+		.replace( /\[\/caption\]/g, '' )
+		.replace( /\[gallery[^\]]*\]/g, '' )
+		.replace( /\[audio[^\]]*\]/g, '' );
+	const withoutTags = withoutShortcodeWrappers.replace( /<[^>]+>/g, ' ' );
 	const withoutEntities = document.createElement( 'div' );
 	withoutEntities.innerHTML = withoutTags;
 

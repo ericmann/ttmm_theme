@@ -12,11 +12,28 @@ Every sentence below is invented for this fixture; none is copied from live cont
 </article>
 
 <article data-post-id="102">
-<p>Here is the query we used[cci lang="php"]$rows = $wpdb->get_results( "SELECT * FROM wp_posts WHERE post_status = 'publish'" );[/cci] and here is the equivalent in another language[cc lang="js"]const rows = await db.query('SELECT * FROM posts WHERE status = $1', ['publish']);[/cc] for comparison.</p>
+<p>Here is the query we used:</p>
+[cci lang="php"]$rows = $wpdb->get_results(
+	"SELECT * FROM wp_posts WHERE post_status = 'publish'"
+);[/cci]
+<p>And here is the equivalent in another language:</p>
+[cc lang="js"]const rows = await db.query(
+	'SELECT * FROM posts WHERE status = $1',
+	['publish']
+);[/cc]
+<p>Both return the same rows.</p>
 </article>
 
 <article data-post-id="103">
-<p>The short form looks like this[cc_php]if ( $a < $b && $b > 0 ) { return true; }[/cc_php] when the language is named directly in the tag.</p>
+<p>The short form looks like this:</p>
+[cc_php]function is_valid( $a, $b ) {
+	return $a < $b && $b > 0;
+}[/cc_php]
+<p>when the language is named directly in the tag.</p>
+</article>
+
+<article data-post-id="108">
+<p>They live in the global scope without using the already abused/overused [cci]global[/cci] keyword, and the [cci]$post[/cci] object is a common example.</p>
 </article>
 
 <article data-post-id="104">

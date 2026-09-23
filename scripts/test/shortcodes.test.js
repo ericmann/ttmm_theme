@@ -85,9 +85,27 @@ describe( 'preprocessShortcodes', () => {
 		const { html: transformed } = preprocessShortcodes( html, 103 );
 
 		expect( transformed ).toContain(
-			'<pre class="wp-block-code"><code lang="php">if ( $a &lt; $b &amp;&amp; $b &gt; 0 ) { return true; }</code></pre>'
+			'<pre class="wp-block-code"><code lang="php">'
+		);
+		expect( transformed ).toContain(
+			'return $a &lt; $b &amp;&amp; $b &gt; 0;'
 		);
 		expect( transformed ).not.toContain( '[cc_php]' );
+	} );
+
+	it( 'converts a single-line cci/cc to inline code, not a code block', () => {
+		// Real classic content uses [cci]/[cc] both for multi-line snippets (its own paragraph)
+		// and for a single short term inline in a sentence -- converting the inline form to a
+		// block-level <pre> splits the sentence around it into separate paragraphs, changing the
+		// visible text. Discovered via a real textEqual failure on the export; see
+		// docs/feedback/phase-4/LIVE-TRIAGE.md.
+		const html = fixturePost( '108' );
+		const { html: transformed } = preprocessShortcodes( html, 108 );
+
+		expect( transformed ).toContain( '<code lang="">global</code>' );
+		expect( transformed ).toContain( '<code lang="">$post</code>' );
+		expect( transformed ).not.toContain( '<pre' );
+		expect( transformed ).not.toContain( '[cci' );
 	} );
 
 	it( 'converts [audio] to an audio element', () => {

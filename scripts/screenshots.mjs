@@ -214,7 +214,16 @@ export function resolveLiveZones() {
 	// screens.json's shape (P2-07, PLAN Decision "screens.json shape") is
 	// `{generated, host, screens: [...]}`, not a bare array.
 	const { screens } = JSON.parse( readFileSync( LIVE_SCREENS_PATH, 'utf8' ) );
-	const classicScreen = screens.find( ( screen ) => screen.classic );
+
+	// Before the shortcode pre-pass (P3-01/P3-02) ran, `live-article-classic.png` showed a
+	// still-unconverted post; after it, the plan converts every classic post, so no
+	// `classic: true` screen exists any more (P3-03). Its purpose becomes "a converted [ref]
+	// post with its footnotes intact" instead -- `screens.mjs`'s own `ref-*` ids are exactly
+	// that (P2-07's `refPosts` discovery). Falls back to the pre-conversion `classic: true`
+	// screen when one still exists (e.g. a partial/failed conversion run).
+	const classicScreen =
+		screens.find( ( screen ) => screen.classic ) ||
+		screens.find( ( screen ) => screen.id.startsWith( 'ref-' ) );
 
 	return LIVE_ZONES.map( ( zone ) =>
 		'live-article-classic.png' === zone.file && classicScreen

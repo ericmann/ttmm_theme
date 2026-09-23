@@ -237,4 +237,30 @@ describe( 'convert-classic (rawHandler under jsdom)', () => {
 			expect( result.footnotes ).toHaveLength( 2 );
 		}
 	);
+
+	maybeIt(
+		'textEqual is unaffected by [caption], [gallery] and bare-URL [audio], which rawHandler converts natively',
+		async () => {
+			// Regression: rawHandler correctly drops [caption]/[gallery]/[audio]'s own bracket
+			// syntax when converting them (its own native shortcode transforms), but the pre-pass
+			// deliberately never touches them -- so a naive before/after text comparison saw that
+			// bracket text on the "before" side only and reported a false mismatch. Found via a
+			// real failure on the export; see docs/feedback/phase-4/LIVE-TRIAGE.md.
+			const { convertPost } = await import( '../convert-classic.mjs' );
+
+			const html =
+				'<p>Some photos from the trip.</p>' +
+				'[gallery link="file" columns="2" ids="1,2"]' +
+				'<p>And a recording.</p>' +
+				'[audio http://example.com/recording.mp3]' +
+				'[caption id="attachment_1" align="aligncenter" width="600"]<img src="https://example.com/photo.jpg" alt="" width="600" height="400" /> A caption.[/caption]';
+
+			const result = convertPost(
+				{ id: 902, slug: 'native-shortcodes', content_raw: html },
+				editor
+			);
+
+			expect( result.report.textEqual ).toBe( true );
+		}
+	);
 } );

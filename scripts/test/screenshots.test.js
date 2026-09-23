@@ -157,6 +157,35 @@ describe( 'resolveLiveZones', () => {
 		expect( zones ).toHaveLength( LIVE_ZONES.length );
 		expect( classicZone.path ).toBe( '/an-old-classic-post/' );
 	} );
+
+	it( 'falls back to a ref-* screen once no classic post remains (P3-03)', () => {
+		// After the shortcode pre-pass (P3-01/P3-02) converts every classic post, no
+		// `classic: true` screen exists any more -- live-article-classic.png's purpose becomes
+		// "a converted [ref] post with its footnotes intact" instead.
+		fs.mkdirSync( path.dirname( screensPath ), { recursive: true } );
+		fs.writeFileSync(
+			screensPath,
+			JSON.stringify( {
+				generated: '2026-01-01T00:00:00.000Z',
+				host: 'http://localhost:8888',
+				screens: [
+					{ id: 'front', path: '/', classic: false },
+					{
+						id: 'ref-1',
+						path: '/a-converted-footnote-post/',
+						classic: false,
+					},
+				],
+			} )
+		);
+
+		const zones = resolveLiveZones();
+		const classicZone = zones.find(
+			( zone ) => 'live-article-classic.png' === zone.file
+		);
+
+		expect( classicZone.path ).toBe( '/a-converted-footnote-post/' );
+	} );
 } );
 
 describe( 'unionClip', () => {

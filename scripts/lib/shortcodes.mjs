@@ -47,8 +47,31 @@ function transformRefShortcodes( html, postId ) {
 }
 
 /**
- * `[cci lang="x"]…[/cci]` and `[cc lang="x" …]…[/cc]` -> a plain code block, language read from
- * the `lang` attribute (empty string when absent).
+ * The classic corpus uses `[cci]`/`[cc]`/`[cc_x]` two ways: a real multi-line snippet (its own
+ * paragraph, blank lines around it), and a single short term or expression inline in the middle
+ * of a sentence (`the already abused/overused [cci]global[/cci] keyword`). Converting the
+ * second form to a block-level `<pre>` breaks the sentence around it into three separate
+ * paragraphs, wrongly changing the visible text -- so single-line content (no `\n`) becomes
+ * inline `<code>`, only multi-line content becomes the block form. Discovered by a real
+ * `textEqual` failure on the export; see docs/feedback/phase-4/LIVE-TRIAGE.md.
+ *
+ * @param {string} lang    Language attribute value (may be `''`).
+ * @param {string} content Raw shortcode inner content (unescaped).
+ * @return {string} `<code lang>…</code>` inline, or the `<pre class="wp-block-code">` block form.
+ */
+function codeMarkup( lang, content ) {
+	const escaped = escapeOnce( content );
+
+	if ( content.includes( '\n' ) ) {
+		return `<pre class="wp-block-code"><code lang="${ lang }">${ escaped }</code></pre>`;
+	}
+
+	return `<code lang="${ lang }">${ escaped }</code>`;
+}
+
+/**
+ * `[cci lang="x"]…[/cci]` and `[cc lang="x" …]…[/cc]` -> a code block or inline `<code>`
+ * (`codeMarkup`), language read from the `lang` attribute (empty string when absent).
  *
  * @param {string} html HTML to search.
  * @return {string} Transformed HTML.
@@ -60,16 +83,14 @@ function transformLongCodeShortcodes( html ) {
 			const langMatch = attrs.match( /\blang="([^"]*)"/ );
 			const lang = langMatch ? langMatch[ 1 ] : '';
 
-			return `<pre class="wp-block-code"><code lang="${ lang }">${ escapeOnce(
-				content
-			) }</code></pre>`;
+			return codeMarkup( lang, content );
 		}
 	);
 }
 
 /**
- * `[cc_php]…[/cc_php]` (language named in the tag itself) -> the same plain code block shape as
- * `transformLongCodeShortcodes`.
+ * `[cc_php]…[/cc_php]` (language named in the tag itself) -> the same code shape as
+ * `transformLongCodeShortcodes` (`codeMarkup`).
  *
  * @param {string} html HTML to search.
  * @return {string} Transformed HTML.
@@ -77,10 +98,7 @@ function transformLongCodeShortcodes( html ) {
 function transformShortCodeShortcodes( html ) {
 	return html.replace(
 		/\[cc_([a-z0-9_]+)\]([\s\S]*?)\[\/cc_\1\]/g,
-		( match, lang, content ) =>
-			`<pre class="wp-block-code"><code lang="${ lang }">${ escapeOnce(
-				content
-			) }</code></pre>`
+		( match, lang, content ) => codeMarkup( lang, content )
 	);
 }
 

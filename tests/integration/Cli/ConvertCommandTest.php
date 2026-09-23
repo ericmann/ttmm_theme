@@ -221,6 +221,44 @@ class ConvertCommandTest extends TTM_IntegrationTestCase {
 	}
 
 	/**
+	 * P3-03: WP core's own `sanitize_post_meta_footnotes` filter (`_wp_filter_post_meta_footnotes()`,
+	 * wp-includes/blocks.php) `json_decode()`s the incoming meta value and returns `''` outright
+	 * on failure; `update_metadata()` unslashes the value before that filter runs, so an
+	 * unslashed `wp_json_encode()` result -- whose own `\"` escaping around any quoted HTML
+	 * attribute reads as WP "magic quotes" slashing and gets stripped -- becomes invalid JSON
+	 * and silently discards every footnote. A footnote whose content has an `<a href="…">` (a
+	 * quoted attribute) reproduced this on nearly every post touched during a real import; see
+	 * docs/feedback/phase-4/LIVE-TRIAGE.md.
+	 */
+	public function test_import_stores_footnotes_meta_containing_a_quoted_attribute(): void {
+		$post_id = $this->classic_post();
+		$file    = $this->ndjson_file(
+			[
+				[
+					'id'        => $post_id,
+					'slug'      => 'x',
+					'blocks'    => "<!-- wp:paragraph -->\n<p>Converted.</p>\n<!-- /wp:paragraph -->",
+					'footnotes' => [
+						[
+							'id'      => 'ref-1-1',
+							'content' => 'See <a href="https://example.com/">this link</a> for details.',
+						],
+					],
+				],
+			]
+		);
+
+		( new ConvertCommand() )->import( [ $file ], [] );
+
+		$stored = json_decode( (string) get_post_meta( $post_id, 'footnotes', true ), true );
+		$this->assertIsArray( $stored );
+		$this->assertSame(
+			'See <a href="https://example.com/">this link</a> for details.',
+			$stored[0]['content']
+		);
+	}
+
+	/**
 	 * P3-02, SPEC §6.8: `--dry-run` lists a post's `report.shortcodes` (unconverted shortcodes
 	 * the pre-pass left in place) alongside its block counts.
 	 */
@@ -330,19 +368,24 @@ class ConvertCommandTest extends TTM_IntegrationTestCase {
 	}
 
 	/**
-	 * P3-02, SPEC §6.8: the text-equality check ignores shortcodes `strip_shortcodes()` (WP
-	 * core's own registered set, e.g. `[audio]`) would remove from the classic render.
+	 * P3-02/P3-03, SPEC §6.8: `[text-mismatch]` surfaces `scripts/convert-classic.mjs`'s own
+	 * `report.textEqual` (its before/after comparison already accounts for every substitution
+	 * the pre-pass makes -- a [ref] note's text moving into the footnotes list, [caption]/
+	 * [gallery]/[audio]'s own bracket syntax being dropped, etc. -- so the PHP side surfaces
+	 * that value rather than re-deriving its own, cruder comparison against the raw classic
+	 * content, which produced false mismatches on nearly every real post; see
+	 * docs/feedback/phase-4/LIVE-TRIAGE.md).
 	 */
 	public function test_text_equality_ignores_stripped_shortcodes(): void {
-		$original = '<p>Listen to the recording.</p>[audio src="https://example.com/a.mp3"]';
-		$post_id  = $this->classic_post( $original );
-		$file     = $this->ndjson_file(
+		$post_id = $this->classic_post( '<p>Listen to the recording.</p>[audio src="https://example.com/a.mp3"]' );
+		$file    = $this->ndjson_file(
 			[
 				[
 					'id'        => $post_id,
 					'slug'      => 'x',
 					'blocks'    => "<!-- wp:paragraph -->\n<p>Listen to the recording.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:audio -->\n<figure class=\"wp-block-audio\"><audio controls src=\"https://example.com/a.mp3\"></audio></figure>\n<!-- /wp:audio -->",
 					'footnotes' => [],
+					'report'    => [ 'textEqual' => true ],
 				],
 			]
 		);
@@ -351,5 +394,25 @@ class ConvertCommandTest extends TTM_IntegrationTestCase {
 
 		$this->assertTrue( $result['ok'] );
 		$this->assertStringNotContainsString( 'text-mismatch', $result['messages'][0] );
+	}
+
+	public function test_text_equality_reports_a_real_mismatch(): void {
+		$post_id = $this->classic_post();
+		$file    = $this->ndjson_file(
+			[
+				[
+					'id'        => $post_id,
+					'slug'      => 'x',
+					'blocks'    => "<!-- wp:paragraph -->\n<p>Converted.</p>\n<!-- /wp:paragraph -->",
+					'footnotes' => [],
+					'report'    => [ 'textEqual' => false ],
+				],
+			]
+		);
+
+		$result = ( new ConvertCommand() )->import( [ $file ], [] );
+
+		$this->assertTrue( $result['ok'] );
+		$this->assertStringContainsString( 'text-mismatch', $result['messages'][0] );
 	}
 }
