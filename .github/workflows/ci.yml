@@ -64,6 +64,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run test:integration
+      - run: npm run env:drill
       - name: Container logs on failure
         if: failure()
         run: npx wp-env logs tests || true
