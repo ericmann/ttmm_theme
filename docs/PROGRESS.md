@@ -10,7 +10,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] P0-05 Stats invalidation, tiebreak, flush_all; Business filter row green
 - [x] P0-06 §3.1 fold-in edits (regex tightening, ValuesTest case)
 - [x] P0-07 Phase 0 screenshots and push
-- [ ] P1-01 Footer: one line, eight items, no Scripture copyright
+- [x] P1-01 Footer: one line, eight items, no Scripture copyright
 - [ ] P1-02 Series TOC F11 and chronological prev/next
 - [ ] P1-03 Related series: relatedTo=current, heading, F27
 - [ ] P1-04 F28: Writing page on real content and the editor-only story derivation
@@ -85,3 +85,11 @@ Captured the 17-file phase-4 seeded screenshot set via npm run screenshots again
 foundry_verify green (composer lint 0 errors, composer test:unit 171, npm run lint/test:unit/build, forbidden-patterns) -- same two pre-existing footer-no-rss/verse-copyright-removed constraint misses as every prior task, unrelated to this task's PNG-only files.
 Pushed refine/2026-09-23 to origin (new branch).
 Manual check: NOT VERIFIED (human) -- compare docs/feedback/phase-4/archive-business.png with mock 1e line 933.
+
+### P1-01 — 038f213
+footer.html: removed .ttm-footer__copyright paragraph and the RSS nav-link (8 items: 7 sections + Series).
+ttm.css: dropped .ttm-footer__copyright and .ttm-verse__copyright rules; .ttm-footer__nav ul flex-wrap nowrap at >=721 (wrap restored under 720px); added explicit font-size (caption/12px) on .ttm-footer__nav a and line-height:1.15 on .ttm-footer (both needed beyond the listed selectors to hit the <=20px ul / <=48px footer height caps -- inherited defaults were 14px font and ~1.5 line-height). Budget 62568->62640/63488.
+Sources.php/Config.php/verse-of-the-day render.php: removed ttm/verse-copyright source, verse_copyright() method, verse.copyright_placement key, and the verse box's 'box' branch entirely.
+Tests: ChromePartsTest renamed+adjusted (8 items, no /feed/); FrontSourcesTest's 2 verse-copyright tests deleted; VerseOfTheDayTest::test_copyright_is_rendered_as_plain_text -> test_copyright_is_never_rendered (and the now-duplicate test_copyright_is_absent_from_the_box_by_default deleted); ConfigTest key list updated. fidelity.spec.mjs: 6 footer-* rows un-fixme'd; verse-nocopy row deleted (selector it checked for no longer exists in CSS/markup at all).
+Interpretation: docs/foundry.json's verse-copyright-removed constraint forbids the literal strings ttm-verse__copyright/ttm-footer__copyright/etc. anywhere in tests/, including inside assertStringNotContainsString()/substr_count() absence checks and comments -- had to scrub those too, not just the feature code, to get the constraint green.
+Verified: composer lint 0 errors, composer test:unit 171; npm run lint green (191/191 coverage, 10 tagged fixme, budget 62640/63488); full npm run test:integration (498 tests) and npm run test:e2e (481 passed/10 skipped/0 failed) green; forbidden-patterns clean; grep for verse-copyright|verse_copyright|copyright_placement across plugins/themes/tests empty; foundry_verify constraints all ok:true including footer-no-rss and verse-copyright-removed (previously failing since P0-01).
