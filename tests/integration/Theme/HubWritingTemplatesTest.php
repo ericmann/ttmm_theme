@@ -192,6 +192,58 @@ class HubWritingTemplatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'Salt and Iron', $html );
 	}
 
+	public function test_writing_body_columns_are_layout_default(): void {
+		// Rule 36 / SPEC §3.1: the writing-body main/aside columns are
+		// `layout: default` groups, not core's flex-vertical (which forces
+		// `align-items: flex-start` and shrinks its children); ttm.css owns
+		// their internal flex-column layout instead (R4-01).
+		$this->set_now( '2026-09-20 12:00:00' );
+		$this->make_series(
+			'the-quiet-ledger',
+			'The Quiet Ledger',
+			31,
+			[ [ 'part' => 1 ], [ 'part' => 2 ] ],
+			[ 'ttm_form' => 'novel' ],
+			'writing'
+		);
+
+		$page_id = self::factory()->post->create(
+			[
+				'post_type'  => 'page',
+				'post_name'  => 'writing',
+				'post_title' => 'Writing',
+			]
+		);
+		$this->go_to( (string) get_permalink( $page_id ) );
+
+		global $post;
+		$post = get_post( $page_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture mirrors a real page render context.
+		setup_postdata( $post );
+
+		$html = $this->render_template( 'page-writing' );
+
+		wp_reset_postdata();
+
+		$dom = new DOMDocument();
+		libxml_use_internal_errors( true );
+		$dom->loadHTML( '<?xml encoding="utf-8" ?>' . $html );
+		libxml_use_internal_errors( false );
+
+		$main   = $dom->getElementById( 'main' );
+		$asides = $dom->getElementsByTagName( 'aside' );
+
+		$this->assertNotNull( $main );
+		$this->assertGreaterThan( 0, $asides->length );
+
+		$main_class = $main->getAttribute( 'class' );
+		$this->assertStringNotContainsString( 'is-layout-flex', $main_class );
+		$this->assertStringNotContainsString( 'is-layout-constrained', $main_class );
+
+		$aside_class = $asides->item( 0 )->getAttribute( 'class' );
+		$this->assertStringNotContainsString( 'is-layout-flex', $aside_class );
+		$this->assertStringNotContainsString( 'is-layout-constrained', $aside_class );
+	}
+
 	public function test_writing_category_archive_uses_page_writing_template(): void {
 		$writing = $this->category_id( 'writing', 'Writing' );
 		$this->go_to( (string) get_category_link( $writing ) );

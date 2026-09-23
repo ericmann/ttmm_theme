@@ -1975,6 +1975,25 @@ test.describe( 'writing', () => {
 		expect( await computed( el, 'text-align' ) ).toBe( 'right' );
 		expect( await text( el ) ).toMatch( /^\d+ of \d+/ );
 		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
+
+		// Rule 36 / SPEC §6.5: the count-and-status cell sits beside the
+		// title, not dropped to the row's last grid row.
+		const rows = page.locator( '.ttm-series-list.is-list .ttm-series-row' );
+		const rowCount = await rows.count();
+		for ( let i = 0; i < rowCount; i++ ) {
+			const row = rows.nth( i );
+			const countLocator = row.locator( '.ttm-series-row__count' );
+			if ( ( await countLocator.count() ) === 0 ) {
+				continue;
+			}
+			const titleBox = await row
+				.locator( '.ttm-series-row__title' )
+				.boundingBox();
+			const countBox = await countLocator.boundingBox();
+			expect( Math.abs( countBox.y - titleBox.y ) ).toBeLessThanOrEqual(
+				1
+			);
+		}
 	} );
 
 	test( 'wr-serial-status: .ttm-series-list.is-list .ttm-series-row__status (first) @1280', async ( {
@@ -2000,6 +2019,38 @@ test.describe( 'writing', () => {
 		expect( await computed( mark, 'margin-top' ) ).toBe( px( 6 ) );
 		expect( await computed( dek, 'margin-top' ) ).toBe( px( 4 ) );
 		expect( await computed( meta, 'margin-top' ) ).toBe( px( 6 ) );
+	} );
+
+	test( 'wr-body-cols: .ttm-writing-body > main/aside children stretch to column width @1280', async ( {
+		page,
+	} ) => {
+		// Rule 36 / SPEC §3.1: main/aside are `layout: default` groups; ttm.css
+		// makes them flex columns whose children stretch to the column width
+		// rather than shrinking to their own content (core's flex-vertical
+		// `align-items: flex-start`).
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const mainWidth = (
+			await page.locator( '.ttm-writing-body > main' ).boundingBox()
+		).width;
+		const asideWidth = (
+			await page.locator( '.ttm-writing-body > aside' ).boundingBox()
+		).width;
+		const serials = (
+			await page.locator( '.ttm-series-list.is-list' ).boundingBox()
+		).width;
+		const chapters = (
+			await page.locator( '.ttm-series-toc.is-chapters' ).boundingBox()
+		).width;
+		const stories = (
+			await page.locator( '.ttm-writing-body__stories' ).boundingBox()
+		).width;
+		const books = (
+			await page.locator( '.ttm-writing-body__books' ).boundingBox()
+		).width;
+		expect( Math.abs( serials - mainWidth ) ).toBeLessThanOrEqual( 1 );
+		expect( Math.abs( chapters - mainWidth ) ).toBeLessThanOrEqual( 1 );
+		expect( Math.abs( stories - asideWidth ) ).toBeLessThanOrEqual( 1 );
+		expect( Math.abs( books - asideWidth ) ).toBeLessThanOrEqual( 1 );
 	} );
 
 	test( 'wr-chapters-head: .ttm-series-toc.is-chapters .ttm-cell-heading__label @1280', async ( {
@@ -2914,6 +2965,27 @@ test.describe( 'hub', () => {
 		expect( t.length ).toBe( 3 );
 		expect( await computed( el, 'padding' ) ).toBe( '18px 0px' );
 		expect( await computed( el, 'border-top-width' ) ).toBe( px( 1 ) );
+
+		// Rule 36 / SPEC §6.7: the count-and-status cell sits beside the
+		// title, not dropped to the row's last grid row.
+		const rows = page.locator(
+			'.ttm-series-list.is-grid-2 .ttm-series-row'
+		);
+		const rowCount = await rows.count();
+		for ( let i = 0; i < rowCount; i++ ) {
+			const row = rows.nth( i );
+			const countLocator = row.locator( '.ttm-series-row__count' );
+			if ( ( await countLocator.count() ) === 0 ) {
+				continue;
+			}
+			const titleBox = await row
+				.locator( '.ttm-series-row__title' )
+				.boundingBox();
+			const countBox = await countLocator.boundingBox();
+			expect( Math.abs( countBox.y - titleBox.y ) ).toBeLessThanOrEqual(
+				1
+			);
+		}
 	} );
 
 	test( 'hub-grid-title: .ttm-series-list.is-grid-2 .ttm-series-row__title (first) @1280', async ( {
@@ -3082,6 +3154,23 @@ test.describe( 'single series', () => {
 		const count = await els.count();
 		expect( count ).toBeLessThanOrEqual( 4 );
 		expect( count ).toBeGreaterThanOrEqual( 1 );
+
+		// Rule 36 / SPEC §6.9: the count-and-status cell sits beside the
+		// title, not dropped to the row's last grid row.
+		for ( let i = 0; i < count; i++ ) {
+			const row = els.nth( i );
+			const countLocator = row.locator( '.ttm-series-row__count' );
+			if ( ( await countLocator.count() ) === 0 ) {
+				continue;
+			}
+			const titleBox = await row
+				.locator( '.ttm-series-row__title' )
+				.boundingBox();
+			const countBox = await countLocator.boundingBox();
+			expect( Math.abs( countBox.y - titleBox.y ) ).toBeLessThanOrEqual(
+				1
+			);
+		}
 	} );
 
 	test( 'single-nav: .ttm-masthead-inner__nav .current-menu-item > a @1280', async ( {

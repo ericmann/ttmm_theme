@@ -1758,6 +1758,7 @@ blockquote.is-style-pull cite,
 
 .ttm-series-row__count {
 	grid-column: 3;
+	grid-row: 1 / span 3;
 	text-align: right;
 	font-size: var(--wp--preset--font-size--caption);
 	line-height: 1.5;
@@ -3133,10 +3134,14 @@ main.is-style-grid-8-4 h1 {
 }
 
 .ttm-writing-body > main {
+	display: flex;
+	flex-direction: column;
 	gap: 36px;
 }
 
 .ttm-writing-body > aside {
+	display: flex;
+	flex-direction: column;
 	gap: 32px;
 }
 
