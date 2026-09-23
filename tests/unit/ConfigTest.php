@@ -70,7 +70,6 @@ class ConfigTest extends TestCase {
 			'verse.user_agent',
 			'verse.history_size',
 			'verse.log_size',
-			'verse.copyright_placement',
 			'cache.verse_boundary_hour',
 			'cache.max_age_cap_seconds',
 			'cache.min_age_seconds',

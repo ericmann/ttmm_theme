@@ -73,9 +73,9 @@ class ChromePartsTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'is-after-poster', $html );
 	}
 
-	public function test_footer_has_one_meta_line_a_copyright_slot_and_nine_nav_items(): void {
+	public function test_footer_has_one_meta_line_no_copyright_and_eight_nav_items(): void {
 		// F18: the Series link is dropped when the series index is empty, so a non-empty
-		// index is needed to see all nine items (seven sections + Series + RSS).
+		// index is needed to see all eight items (seven sections + Series).
 		$term_id = self::factory()->term->create( [ 'taxonomy' => 'series' ] );
 		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
 		update_post_meta( $post_id, 'ttm_series_part', 1 );
@@ -85,10 +85,8 @@ class ChromePartsTest extends TTM_IntegrationTestCase {
 		$html = (string) do_blocks( '<!-- wp:template-part {"slug":"footer","theme":"ttm-theme"} /-->' );
 
 		$this->assertSame( 1, substr_count( $html, 'ttm-footer__meta' ) );
-		// Decision "Empty bound blocks" (P2-01): with no stored verse the bound copyright
-		// paragraph renders nothing at all rather than an empty slot.
-		$this->assertSame( 0, substr_count( $html, 'ttm-footer__copyright' ) );
-		$this->assertSame( 9, substr_count( $html, '<li class="wp-block-navigation-item' ) );
+		$this->assertSame( 8, substr_count( $html, '<li class="wp-block-navigation-item' ) );
+		$this->assertStringNotContainsString( '/feed/', $html );
 	}
 
 	public function test_patterns_are_registered_in_ttm_categories(): void {

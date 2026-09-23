@@ -274,13 +274,6 @@ test.describe( 'verse', () => {
 			'underline'
 		);
 	} );
-
-	test( 'verse-nocopy: .ttm-verse__copyright @1280', async ( { page } ) => {
-		await gotoFront( page, 1280 );
-		expect( await page.locator( '.ttm-verse__copyright' ).count() ).toBe(
-			0
-		);
-	} );
 } );
 
 test.describe( 'journal rail', () => {
@@ -812,11 +805,9 @@ test.describe( 'footer', () => {
 		);
 	} );
 
-	// P0-04, SPEC §6.11 (changed): footer-copy now targets `.ttm-footer__left p` (the old
-	// `.ttm-footer__copyright` slot is gone -- rule 47/verse-copyright removal is a later
-	// task).
-	// prettier-ignore
-	test.fixme( 'footer-copy: .ttm-footer__left p @1280', async ( { page } ) => { // P1-01
+	// P1-01, SPEC §6.11 (changed): footer-copy targets `.ttm-footer__left p` (the old
+	// Scripture-copyright slot is gone -- Decision "Scripture copyright").
+	test( 'footer-copy: .ttm-footer__left p @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const el = page.locator( '.ttm-footer__left p' );
 		expect( await el.count() ).toBe( 1 );
@@ -825,9 +816,8 @@ test.describe( 'footer', () => {
 		);
 	} );
 
-	// P0-04, SPEC §6.11.
-	// prettier-ignore
-	test.fixme( 'footer-nocopyright: .ttm-footer @1280', async ( { page } ) => { // P1-01
+	// P1-01, SPEC §6.11.
+	test( 'footer-nocopyright: .ttm-footer @1280', async ( { page } ) => {
 		for ( const path of [ SCREENS.article, '/' ] ) {
 			await gotoScreen( page, path, 1280 );
 			const footerText = await text( page.locator( '.ttm-footer' ) );
@@ -842,9 +832,10 @@ test.describe( 'footer', () => {
 		}
 	} );
 
-	// P0-04, SPEC §6.11 (changed): eight nav items, no /feed/ link.
-	// prettier-ignore
-	test.fixme( 'footer-nav: .ttm-footer__nav .wp-block-navigation-item @1280', async ( { page } ) => { // P1-01
+	// P1-01, SPEC §6.11 (changed): eight nav items, no /feed/ link.
+	test( 'footer-nav: .ttm-footer__nav .wp-block-navigation-item @1280', async ( {
+		page,
+	} ) => {
 		for ( const path of [ SCREENS.article, '/' ] ) {
 			await gotoScreen( page, path, 1280 );
 			const items = page.locator(
@@ -859,9 +850,8 @@ test.describe( 'footer', () => {
 		}
 	} );
 
-	// P0-04, SPEC §6.11.
-	// prettier-ignore
-	test.fixme( 'footer-one-line: .ttm-footer__nav ul @1280', async ( { page } ) => { // P1-01
+	// P1-01, SPEC §6.11.
+	test( 'footer-one-line: .ttm-footer__nav ul @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const ul = page.locator( '.ttm-footer__nav ul' );
 		const ulBox = await ul.boundingBox();
@@ -870,9 +860,10 @@ test.describe( 'footer', () => {
 		expect( footerBox.height ).toBeLessThanOrEqual( 48 );
 	} );
 
-	// P0-04, SPEC §6.11.
-	// prettier-ignore
-	test.fixme( 'footer-font: .ttm-footer__nav a (first) @1280', async ( { page } ) => { // P1-01
+	// P1-01, SPEC §6.11.
+	test( 'footer-font: .ttm-footer__nav a (first) @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-footer__nav a' ).first();
 		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
@@ -880,9 +871,10 @@ test.describe( 'footer', () => {
 		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
 	} );
 
-	// P0-04, SPEC §6.11.
-	// prettier-ignore
-	test.fixme( 'footer-front-nors: .ttm-footer__nav a[href$="/feed/"] @1280', async ( { page } ) => { // P1-01
+	// P1-01, SPEC §6.11.
+	test( 'footer-front-nors: .ttm-footer__nav a[href$="/feed/"] @1280', async ( {
+		page,
+	} ) => {
 		await gotoFront( page, 1280 );
 		expect(
 			await page.locator( '.ttm-footer__nav a[href$="/feed/"]' ).count()

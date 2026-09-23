@@ -225,42 +225,6 @@ class FrontSourcesTest extends TTM_IntegrationTestCase {
 		parent::tear_down();
 	}
 
-	public function test_verse_copyright_returns_notice_when_placement_is_footer(): void {
-		update_option( 'ttm_verse', [ 'copyright' => 'Copyright notice.' ] );
-
-		$block = $this->make_block( 'core/paragraph', 0 );
-		$value = $this->source_value( 'ttm/verse-copyright', [], $block, 'content' );
-
-		$this->assertSame( 'Copyright notice.', $value );
-	}
-
-	public function test_verse_copyright_is_empty_without_verse_or_when_placement_is_box_or_none(): void {
-		$block = $this->make_block( 'core/paragraph', 0 );
-
-		// No verse stored at all.
-		delete_option( 'ttm_verse' );
-		$this->assertSame( '', $this->source_value( 'ttm/verse-copyright', [], $block, 'content' ) );
-
-		// A verse stored, but placement isn't 'footer'.
-		update_option( 'ttm_verse', [ 'copyright' => 'Copyright notice.' ] );
-
-		foreach ( [ 'box', 'none' ] as $placement ) {
-			add_filter(
-				'ttm_config',
-				static function ( array $config ) use ( $placement ): array {
-					$config['verse.copyright_placement'] = $placement;
-					return $config;
-				}
-			);
-			\TTM\Core\Config::reset();
-
-			$this->assertSame( '', $this->source_value( 'ttm/verse-copyright', [], $block, 'content' ) );
-
-			remove_all_filters( 'ttm_config' );
-			\TTM\Core\Config::reset();
-		}
-	}
-
 	public function test_today_footer_format_uses_blogname(): void {
 		update_option( 'blogname', 'These Things Matter' );
 

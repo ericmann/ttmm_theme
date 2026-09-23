@@ -113,8 +113,6 @@ class Config {
 			'verse.user_agent'                 => 'TTM-Core/{version} (+https://eric.mann.blog)',
 			'verse.history_size'               => 30,
 			'verse.log_size'                   => 20,
-			// Where the NIV copyright notice appears: 'footer' | 'box' | 'none' (§6.4).
-			'verse.copyright_placement'        => 'footer',
 
 			'cache.verse_boundary_hour'        => 6,
 			'cache.max_age_cap_seconds'        => 86400,

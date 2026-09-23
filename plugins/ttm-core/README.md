@@ -20,9 +20,8 @@ for how it was built; this file documents the plugin as it actually ships.
   "Full journal · {N} entries"/"All →" when `N` is 0), `ttm/today`, `ttm/reading-time`,
   `ttm/word-count` (`whenUnsyndicated` arg: `''` when the post carries any `ttm_syndication`
   URL), `ttm/journal-subline`, `ttm/series-name`, `ttm/series-part`, `ttm/pagination-label`,
-  `ttm/verse-copyright` (the footer's NIV notice, plain text, empty unless
-  `verse.copyright_placement === 'footer'` and a verse is stored), `ttm/newsletter-copy` ("Get
-  the next part" on a series post/archive, else "The weekly issue."), `ttm/archive-kind`
+  `ttm/newsletter-copy` ("Get the next part" on a series post/archive, else "The weekly
+  issue."), `ttm/archive-kind`
   ("Section"/"Tag"/"Month"/"Year"/"Day"/"Author"/"Search", else `''`), `ttm/section-label`
   (`format: "more-in"` → "More in {primary category}" on a singular post; `format: "series-in"`
   → "Series in {category}" on a category archive), and `ttm/search-summary` ("Results for

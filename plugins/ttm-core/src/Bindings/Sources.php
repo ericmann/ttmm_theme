@@ -160,14 +160,6 @@ class Sources {
 		);
 
 		register_block_bindings_source(
-			'ttm/verse-copyright',
-			[
-				'label'              => __( 'TTM: Verse copyright', 'ttm-core' ),
-				'get_value_callback' => [ self::class, 'verse_copyright' ],
-			]
-		);
-
-		register_block_bindings_source(
 			'ttm/newsletter-copy',
 			[
 				'label'              => __( 'TTM: Newsletter copy', 'ttm-core' ),
@@ -297,27 +289,6 @@ class Sources {
 		}
 
 		return self::finalize( Values::section_label( $format, $name ), $block_instance, $attribute_name );
-	}
-
-	/**
-	 * `ttm/verse-copyright` (SPEC §6.4): the stored verse's NIV copyright notice, plain text,
-	 * only when `verse.copyright_placement` is `'footer'` and a verse is stored.
-	 *
-	 * @param array<string, mixed> $source_args    Unused: no args.
-	 * @param WP_Block             $block_instance Consuming block.
-	 * @param string               $attribute_name Consuming attribute.
-	 * @return string
-	 */
-	public static function verse_copyright( array $source_args, $block_instance, string $attribute_name ): string {
-		unset( $source_args );
-
-		if ( 'footer' !== Config::get( 'verse.copyright_placement', 'footer' ) ) {
-			return '';
-		}
-
-		$verse = get_option( 'ttm_verse' );
-
-		return self::finalize( (string) ( $verse['copyright'] ?? '' ), $block_instance, $attribute_name );
 	}
 
 	/**
