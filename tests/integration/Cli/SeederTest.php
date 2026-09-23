@@ -311,18 +311,12 @@ class SeederTest extends TTM_IntegrationTestCase {
 	}
 
 	/**
-	 * F2 (REVIEW.md, R1-02): the two seriesless Writing essays derive `ttm_form=story` like the
-	 * short story does, but their `days_ago` (60, 75) must stay older than
-	 * `story-the-last-cron-job`'s (40) so `Fiction\Serials::stories()` -- ordered newest first --
-	 * ranks the story ahead of them, matching the front page's "Also running" list.
-	 */
-	/**
 	 * R3-03: the two Writing essays are locked to a non-story form (a Seeder fixture field,
 	 * `form` + `ttm_form_locked`), so they no longer auto-classify as `story` and no longer
 	 * take a Fiction\Serials::stories() slot. The front page's single "Also running" story
 	 * stays The Last Cron Job either way.
 	 */
-	public function test_seeded_writing_essays_derive_as_story_but_stay_older_than_the_last_cron_job(): void {
+	public function test_seeded_writing_essays_are_locked_articles_and_last_cron_job_stays_first(): void {
 		( new Seeder() )->run( 'normal' );
 
 		$essay_1 = get_page_by_path( 'finishing-a-draft-you-no-longer-believe-in', OBJECT, 'post' );

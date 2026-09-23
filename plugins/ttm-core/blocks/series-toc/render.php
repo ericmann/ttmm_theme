@@ -124,17 +124,15 @@ $ttm_scheduled_label = static function ( array $ttm_part ): string {
 	<ol class="ttm-numbered">
 		<?php foreach ( $ttm_rows as $ttm_part ) : ?>
 			<?php
-			$ttm_is_published = 'publish' === $ttm_part['status'];
-			$ttm_title        = '' !== $ttm_part['title'] ? $ttm_part['title'] : get_the_title( $ttm_part['post_id'] );
+			// $ttm_rows is already filtered to 'publish' status above (chapters is always
+			// in the $ttm_open_ended || $ttm_is_chapters branch), so every row here is
+			// published; no is-published branch is needed (R4-03, finding 1).
+			$ttm_title = '' !== $ttm_part['title'] ? $ttm_part['title'] : get_the_title( $ttm_part['post_id'] );
 			?>
 			<li class="ttm-numbered__row">
 				<span class="ttm-numbered__num tnum"><?php echo esc_html( sprintf( '%02d', (int) $ttm_part['part'] ) ); ?></span>
-				<?php if ( $ttm_is_published ) : ?>
-					<a class="ttm-numbered__title" href="<?php echo esc_url( (string) get_permalink( $ttm_part['post_id'] ) ); ?>"><?php echo esc_html( $ttm_title ); ?></a>
-				<?php else : ?>
-					<span class="ttm-numbered__title"><?php echo esc_html( $ttm_title ); ?></span>
-				<?php endif; ?>
-				<?php if ( $ttm_show_dek && $ttm_is_published ) : ?>
+				<a class="ttm-numbered__title" href="<?php echo esc_url( (string) get_permalink( $ttm_part['post_id'] ) ); ?>"><?php echo esc_html( $ttm_title ); ?></a>
+				<?php if ( $ttm_show_dek ) : ?>
 					<span class="ttm-numbered__dek"><?php echo esc_html( wp_strip_all_tags( get_the_excerpt( $ttm_part['post_id'] ) ) ); ?></span>
 				<?php endif; ?>
 				<span class="ttm-numbered__date"><?php echo esc_html( Helpers::date_short( (string) $ttm_part['date'] ) ); ?></span>

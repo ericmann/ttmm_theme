@@ -222,6 +222,34 @@ class SeriesTocTest extends TTM_IntegrationTestCase {
 		$this->assertStringNotContainsString( 'Chapter Four', $html );
 	}
 
+	/**
+	 * R4-03, REVIEW round 3 finding 1: a series whose only parts are scheduled has no
+	 * published rows for the chapters variant to list, so render.php's `return ''`
+	 * guard (F23) must fire rather than emitting an empty `.ttm-series-toc` wrapper.
+	 */
+	public function test_chapters_variant_with_no_published_parts_renders_nothing(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$series = $this->make_series(
+			'hardening-wp',
+			'Hardening WordPress',
+			1,
+			[
+				[
+					'part'   => 1,
+					'status' => 'future',
+					'date'   => '2026-09-26 09:00:00',
+				],
+			]
+		);
+
+		$html = $this->render(
+			$series['post_ids'][1],
+			[ 'variant' => 'chapters' ]
+		);
+
+		$this->assertSame( '', $html );
+	}
+
 	public function test_series_id_attribute_overrides_context(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
 		$series = $this->make_series( 'hardening-wp', 'Hardening WordPress', 2, [ [ 'part' => 1 ], [ 'part' => 2 ] ] );

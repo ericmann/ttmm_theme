@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace TTM\Core\Cli;
 
 use TTM\Core\Config;
+use TTM\Core\Meta\PostMeta;
 use TTM\Core\Support\Clock;
 use TTM\Core\Verse\Fetcher;
 
@@ -19,12 +20,6 @@ use TTM\Core\Verse\Fetcher;
 class Seeder {
 
 	private const SEED_META = '_ttm_seed';
-
-	/**
-	 * The `ttm_form` values `Meta\Form::derive()` can produce (SPEC §5.2); a posts.json `form`
-	 * override is only ever one of these.
-	 */
-	private const ALLOWED_FORMS = [ 'article', 'chapter', 'story' ];
 
 	/**
 	 * Seed placeholder colours (rule 45): neutral field, darker diagonal band, lighter inset
@@ -64,11 +59,12 @@ class Seeder {
 	 * Validate a posts.json `form` override (pure; no WordPress calls).
 	 *
 	 * @param mixed $form Raw fixture value.
-	 * @return string|null The value, when it is one of ALLOWED_FORMS; null otherwise (missing
+	 * @return string|null The value, when it is one of `Meta\PostMeta::FORMS` (the `ttm_form`
+	 *                      values `Meta\Form::derive()` can produce); null otherwise (missing
 	 *                      field, wrong type, or a value `Meta\Form::derive()` never produces).
 	 */
 	public static function normalize_form( $form ): ?string {
-		if ( ! is_string( $form ) || ! in_array( $form, self::ALLOWED_FORMS, true ) ) {
+		if ( ! is_string( $form ) || ! in_array( $form, PostMeta::FORMS, true ) ) {
 			return null;
 		}
 

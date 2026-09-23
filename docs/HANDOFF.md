@@ -111,7 +111,7 @@ article (P0-07) carries 82 paragraphs (≈3113 words, 14 min read) to match mock
 Ledger's twelve published chapters (P0-08) each carry 80 paragraphs (`avg_minutes` 12) so
 `Fiction\Serials::stats()` reads a real, mock-plausible reading time rather than a rounding
 artifact. "The Last Cron Job" targets ≈3094 words (88 paragraphs), "A Field Guide to Empty
-Offices" ≈1817 words (52 paragraphs, `days_ago: 260`) — both against `docs/fixtures/seed/prose.json`,
+Offices" ≈1817 words (52 paragraphs, `days_ago: 410`) — both against `docs/fixtures/seed/prose.json`,
 no lorem ipsum anywhere in the fixtures (`grep -ri lorem docs/fixtures/seed/` returns nothing,
 rule 39).
 
@@ -505,11 +505,12 @@ R3-01's additions were absorbed by shortening existing comments. `ttm.css` is 62
 
 - R3-01: `ttm.css` 62795 bytes with the nine new declarations and unshortened comments (331 over
   budget) → 62463 bytes after losslessly shortening nine long comments (1 byte of headroom left).
-- R3-03: `story-what-the-river-audits` `days_ago` was reviewer-flagged in an earlier draft of this
-  document as `260`; the fixture now carries `1090` (landing in 2023, per mock order) — noted here
-  per the task's instruction to record the Field Guide/River `days_ago` values explicitly.
-  `story-a-field-guide-to-empty-offices` keeps its existing `days_ago: 410` (2025) unchanged;
-  `story-uptime` moved from `days_ago: 150` to `700` (2024).
+- R3-03: `story-a-field-guide-to-empty-offices` keeps its existing `days_ago: 410` (2025) unchanged
+  — an earlier draft of this document (§"Seeded word counts", now corrected) had misstated it as
+  `260`; the fixture itself was never wrong. `story-what-the-river-audits` `days_ago` moved from
+  `260` to `1090` (landing in 2023, per mock order); `story-uptime` moved from `days_ago: 150` to
+  `700` (2024) — noted here per the task's instruction to record the Field Guide/River `days_ago`
+  values explicitly.
 
 ### What a human should check by hand
 
@@ -528,3 +529,115 @@ human should:
 The R3-03 task's git-ancestry check (`git merge-base --is-ancestor $(git log -1 --format=%H --
 themes/ttm-theme plugins/ttm-core docs/fixtures/seed) $(git log -1 --format=%H --
 docs/feedback/phase-3)`) exits 0 as of R3-03's commit.
+
+## Round 4 (review-fix)
+
+Branch `refine/2026-09-22`, base `main` (`8c2b228`). All three round-4 review-fix tasks (`R4-01`,
+`R4-02`, `R4-03`) are `[x]`; none blocked or skipped. Task counts: 59 total, 59 done, 0 open.
+
+### What each task fixed
+
+- **R4-01** (`5e8211d`): REVIEW round 3 findings 2 and 3. `.ttm-series-row__count` had no
+  `grid-row`, so grid auto-placement (row algorithm, no backtracking) dropped it into the row's
+  last implicit row instead of beside the title — measured 68–109px below title-top on
+  `/writing/`, `/series/` and `/series/hardening-wordpress/`. Added `grid-row: 1 / span 3` (list,
+  grid-2 and `.ttm-series-single__other`, which shares the same `is-list` selector; strip/rail
+  don't render `__count`, unaffected). Separately, `page-writing.html`'s `main`/`aside` groups
+  used core's `layout: {type: flex, orientation: vertical}` (forces `align-items: flex-start`,
+  shrinking children to content width — measured 466px/535px inside a 653px column); changed both
+  to `layout: {type: default}` and gave `.ttm-writing-body > main`/`> aside` `display: flex;
+  flex-direction: column` directly in `ttm.css` (rule 36: `ttm.css` owns grid-column-child
+  layout, not the block's own `layout` attribute) — the existing `<=1024` `display: contents` fold
+  still wins (later in source, same specificity). `cssBudgetBytes` raised 62464 → 63488
+  (measured 62463 → 62568, +105 bytes) in `scripts/check-budget.mjs` and `CLAUDE.md`; CLAUDE.md's
+  rule-36 constraint line amended to quote SPEC §3.1 on grid-column-child layout. Extended
+  `wr-serial-count`, `hub-grid-row` and `single-other` with a per-row count/title top-alignment
+  check; added `wr-body-cols`; added
+  `HubWritingTemplatesTest::test_writing_body_columns_are_layout_default`. All new assertions
+  confirmed failing pre-fix.
+- **R4-02** (`3252970`): REVIEW round 3 finding 4. A complete series' right cell read "9 of 9" /
+  "24 of 24" once the published count reached the planned total, instead of SPEC §6.5/§6.7's "9
+  chapters" / "4 parts". Added `$ttm_right_cell_word` in `series-list/render.php`: for `list`/
+  `grid-2` layouts only, a complete series' `__parts` span reads `_n('%d chapter', '%d chapters',
+  …)` for fiction forms (novel/novella/story-cycle) or `_n('%d part', '%d parts', …)` for
+  nonfiction; `$ttm_count_word` itself is untouched, so the strip/rail `__meta` line and every
+  other status/layout combination ("N of M", open-ended "N part(s)") are unaffected — verified the
+  front page's `/` HTML is byte-for-byte identical before/after via `git stash` + `curl` diff.
+  `SeriesListTest` gained `test_complete_fiction_series_count_reads_chapters`,
+  `test_complete_nonfiction_series_count_reads_parts`,
+  `test_in_progress_series_still_reads_n_of_m` and
+  `test_strip_meta_count_unchanged_for_complete_series`; extended `wr-serial-count` to check the
+  seeded "Failover" row reads "9 chapters". All new integration assertions confirmed failing
+  pre-fix (wrong wording, not wrong count).
+- **R4-03** (commit below): REVIEW round 3 findings 1 and 5, plus the round's screenshot refresh.
+  Added `SeriesTocTest::test_chapters_variant_with_no_published_parts_renders_nothing` covering
+  R3-02's `return ''` guard for a series whose only part is scheduled (confirmed it fails with the
+  guard temporarily removed, passes restored). Removed the now-unreachable unpublished
+  `<span class="ttm-numbered__title">` branch and its `$ttm_is_published` check from the chapters
+  loop in `series-toc/render.php` (chapters rows are always `'publish'` after R3-02's filter; the
+  series/article-TOC variant's F24 scheduled-row treatment is a separate `else` branch, untouched).
+  In `Seeder.php`, dropped the private `ALLOWED_FORMS` const and validated `normalize_form()`
+  against `Meta\PostMeta::FORMS` instead (same three values; `normalize_form()` stays pure —
+  `PostMeta::FORMS` is a plain class constant, no WordPress calls to load it — its unit test stays
+  green unchanged) and fixed its docblock's stale "SPEC §5.2" citation (phase 3's SPEC has no §5.2;
+  reworded to cite `Meta\PostMeta::FORMS`/`Meta\Form::derive()` instead). In `SeederTest.php`,
+  deleted the stale F2/R1-02 docblock stacked above the R3-03 one and renamed
+  `test_seeded_writing_essays_derive_as_story_but_stay_older_than_the_last_cron_job` to
+  `test_seeded_writing_essays_are_locked_articles_and_last_cron_job_stays_first` (assertions
+  unchanged). Corrected two HANDOFF errors: "A Field Guide to Empty Offices" `days_ago` is `410`,
+  not `260` (the word-count paragraph had transposed River's old value); reworded the R3-03
+  Measurements note, which had credited the "flagged as 260" misstatement to
+  `story-what-the-river-audits` when it was actually about `story-a-field-guide-to-empty-offices`
+  (River's `days_ago` genuinely moved 260 → 1090; that part was always correct). Reseeded
+  (`npm run env:cli -- ttm seed --reset`) and ran `npm run screenshots`; only the four PNGs the
+  round's fixes could plausibly change were different (`writing.png`, `writing-390.png`,
+  `series-hub.png`, `series-single.png` — confirmed by `git status`), matching R4-01/R4-02's scope
+  exactly. Visually confirmed by eye: the count/status cell sits level with the title on all three
+  screens, the Writing lists fill their columns, and Failover/Salt Water Wires read "9 chapters"/
+  "24 chapters" — no new visual issues spotted.
+
+### Interpretation choices this round
+
+- **R4-01**: `grid-row: 1 / span 3` (not `grid-row: 1` alone) so the item's placement covers the
+  title/dek/meta rows it can appear beside across list, grid-2 and single-other's varying row
+  counts, while `align-items: start` (already set per layout) keeps the item's own height at its
+  content size rather than stretching it.
+- **R4-02**: scoped the new wording to `list`/`grid-2` only (not `grid-3`, which the task's Files-
+  touched/Out-of-scope lines didn't mention) even though the pre-fix code rendered `__count` there
+  too via the same shared branch; `grid-3` isn't seeded or exercised by any fidelity row this
+  flight, so left its behaviour as `$ttm_count_word` (unchanged "N of N").
+- **R4-03**: none of the task's five sub-fixes required a judgment call beyond what the task
+  specified; the `Seeder.php` docblock rewording is a paraphrase, not a new interpretation of what
+  `normalize_form()` validates.
+
+### Config keys touched this round
+
+None new. `cssBudgetBytes` (⚠️ ASSUMPTION, `scripts/check-budget.mjs`) raised 62464 → 63488 in
+R4-01 to restore the series-row `grid-row` and Writing-body flex-column fixes; `ttm.css` is
+62568/63488 bytes (920 bytes of headroom) as of R4-01's commit and unchanged since (R4-02/R4-03
+touched no CSS).
+
+### Measurements
+
+- R4-01: `ttm.css` 62463 → 62568 bytes (+105) for the `grid-row` declaration and the two `display:
+  flex; flex-direction: column` rules. `cssBudgetBytes` raised 62464 → 63488 (next 1024 multiple)
+  for headroom.
+
+### What a human should check by hand
+
+`foundry_verify` was green at the end of every task this round (unit 171, integration 490/490, e2e
+452/452, composer lint, npm lint including budget/coverage/fixme, forbidden-patterns). Still, a
+human should:
+
+1. Open `/writing/`, `/series/` and `/series/hardening-wordpress/` at 1280 and confirm by eye that
+   the count/status column sits level with the series title (this was the round's main visual
+   fix) — the regenerated `writing.png`, `series-hub.png` and `series-single.png` should already
+   show this, but a live check catches anything the fixed screen set didn't cover.
+2. Open `/writing/` at 1280, 1000 and 390 and confirm the "All serials" list and "Recent chapters"
+   list each fill their column width (not shrunk to content) at 1280, and that the stacked order
+   is unchanged at 1000/390.
+3. `git stash list` — still unresolved from earlier rounds, still unrelated to this flight.
+
+The R4-03 task's git-ancestry check (`git merge-base --is-ancestor $(git log -1 --format=%H --
+themes/ttm-theme plugins/ttm-core docs/fixtures/seed) $(git log -1 --format=%H --
+docs/feedback/phase-3)`) exits 0 as of R4-03's commit.
