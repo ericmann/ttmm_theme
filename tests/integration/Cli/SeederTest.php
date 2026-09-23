@@ -725,4 +725,35 @@ class SeederTest extends TTM_IntegrationTestCase {
 		$this->assertGreaterThanOrEqual( 500, $words );
 		$this->assertLessThanOrEqual( 700, $words );
 	}
+
+	/**
+	 * P0-03: SPEC §6.12 -- Reading CVEs is a complete, four-part nonfiction series entirely in
+	 * Security, giving the related-series ranking a same-section candidate.
+	 */
+	public function test_reading_cves_is_a_complete_security_series_of_four(): void {
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$row = \TTM\Core\Query\SeriesIndex::by_slug( 'reading-cves' );
+		$this->assertNotNull( $row );
+
+		$this->assertSame( 'complete', $row['status'] );
+		$this->assertSame( 'nonfiction', $row['form'] );
+		$this->assertSame( 4, $row['published'] );
+
+		$term = get_term_by( 'slug', 'reading-cves', 'series' );
+		$this->assertSame( 4, (int) get_term_meta( $term->term_id, 'ttm_total_parts', true ) );
+
+		$security = get_term_by( 'slug', 'security', 'category' );
+		$this->assertSame( [ $security->term_id ], $row['categories'] );
+
+		foreach ( [ 'reading-cves-part-1', 'reading-cves-part-2', 'reading-cves-part-3', 'reading-cves-part-4' ] as $slug ) {
+			$post = get_page_by_path( $slug, OBJECT, 'post' );
+			$this->assertNotNull( $post, "missing post: {$slug}" );
+			$this->assertSame( 'publish', $post->post_status );
+			$year = (int) gmdate( 'Y', strtotime( $post->post_date_gmt ) );
+			$this->assertGreaterThanOrEqual( 2024, $year );
+			$this->assertLessThanOrEqual( 2025, $year );
+		}
+	}
 }

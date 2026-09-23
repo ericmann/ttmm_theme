@@ -14,10 +14,10 @@ use TTM\Core\Support\Dates;
 
 class SeedStatesTest extends TTM_IntegrationTestCase {
 
-	public function test_normal_state_has_series_index_with_six_rows(): void {
+	public function test_normal_state_has_series_index_with_seven_rows(): void {
 		( new Seeder() )->run( 'normal' );
 
-		$this->assertCount( 6, SeriesIndex::all() );
+		$this->assertCount( 7, SeriesIndex::all() );
 	}
 
 	public function test_normal_state_has_active_serial_with_cover(): void {

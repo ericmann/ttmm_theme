@@ -366,5 +366,36 @@
 			}
 		],
 		"description": "A cable-landing station on the Oregon coast, and the family that has kept it running for sixty years."
+	},
+	{
+		"slug": "reading-cves",
+		"name": "Reading CVEs",
+		"form": "nonfiction",
+		"status": "complete",
+		"total_parts": 4,
+		"genre": "",
+		"cadence": "",
+		"next_date_days_ahead": 0,
+		"cover": false,
+		"purchase_links": [],
+		"parts": [
+			{
+				"post_slug": "reading-cves-part-1",
+				"part": 1
+			},
+			{
+				"post_slug": "reading-cves-part-2",
+				"part": 2
+			},
+			{
+				"post_slug": "reading-cves-part-3",
+				"part": 3
+			},
+			{
+				"post_slug": "reading-cves-part-4",
+				"part": 4
+			}
+		],
+		"description": "Four CVEs read the way an engineer reads them: what the advisory says, what the patch does, and what it would have taken to notice."
 	}
 ]

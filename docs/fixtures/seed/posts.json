@@ -1336,5 +1336,61 @@
 		"days_ago": 45,
 		"excerpt": "Release notes are the cheapest signal you will ever get about what is about to break.",
 		"paragraphs": 17
+	},
+	{
+		"tags": [
+			"threat-modeling",
+			"disclosure"
+		],
+		"slug": "reading-cves-part-1",
+		"title": "Reading CVEs, part 1: what the advisory actually says",
+		"categories": [
+			"security"
+		],
+		"days_ago": 640,
+		"excerpt": "Most of an advisory is boilerplate. The paragraph that matters is usually the shortest one.",
+		"paragraphs": 12
+	},
+	{
+		"tags": [
+			"wordpress",
+			"disclosure"
+		],
+		"slug": "reading-cves-part-2",
+		"title": "Reading CVEs, part 2: what the patch actually does",
+		"categories": [
+			"security"
+		],
+		"days_ago": 560,
+		"excerpt": "The diff tells you more about the real vulnerability than the advisory ever will.",
+		"paragraphs": 12
+	},
+	{
+		"tags": [
+			"cryptography",
+			"threat-modeling"
+		],
+		"slug": "reading-cves-part-3",
+		"title": "Reading CVEs, part 3: the exploit nobody published",
+		"categories": [
+			"security"
+		],
+		"days_ago": 480,
+		"excerpt": "A working proof of concept is not required to know that a bug is exploitable.",
+		"paragraphs": 12
+	},
+	{
+		"tags": [
+			"passwords",
+			"disclosure"
+		],
+		"slug": "reading-cves-part-4",
+		"title": "Reading CVEs, part 4: what it would have taken to notice",
+		"categories": [
+			"security"
+		],
+		"days_ago": 400,
+		"excerpt": "Every one of these four bugs left a trace. None of the traces were read in time.",
+		"paragraphs": 12
 	}
 ]
