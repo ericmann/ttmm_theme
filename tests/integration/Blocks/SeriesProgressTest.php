@@ -157,4 +157,17 @@ class SeriesProgressTest extends TTM_IntegrationTestCase {
 
 		$this->assertSame( '', trim( $html ) );
 	}
+
+	/**
+	 * P1-05, rule 50: no seriesId attribute, no queried series term, no postId -- other
+	 * content exists -> ''.
+	 */
+	public function test_rule_50_no_context_with_other_content(): void {
+		$this->make_series( 'hardening-wp', 'Hardening WordPress', 2, [ [ 'part' => 1 ] ] );
+		self::factory()->term->create( [ 'taxonomy' => 'post_tag' ] );
+
+		$html = $this->render( 0 );
+
+		$this->assertSame( '', trim( $html ) );
+	}
 }

@@ -380,4 +380,18 @@ class SeriesTocTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'The Quiet Ledger', $html );
 		$this->assertStringContainsString( 'ttm-numbered__row', $html );
 	}
+
+	/**
+	 * P1-05, rule 50: the default `series` variant with no seriesId/postId/queried term, other
+	 * content exists -> ''.
+	 */
+	public function test_rule_50_no_context_with_other_content(): void {
+		$this->make_series( 'hardening-wp', 'Hardening WordPress', 6, [ [ 'part' => 1 ] ] );
+		self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		self::factory()->term->create( [ 'taxonomy' => 'post_tag' ] );
+
+		$html = $this->render( 0 );
+
+		$this->assertSame( '', trim( $html ) );
+	}
 }

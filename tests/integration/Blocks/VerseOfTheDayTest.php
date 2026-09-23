@@ -167,4 +167,32 @@ class VerseOfTheDayTest extends TTM_IntegrationTestCase {
 
 		$this->assertSame( '', trim( $html ) );
 	}
+
+	/**
+	 * P1-05, rule 50: `ttm/verse-of-the-day` is a site-wide-by-design block -- the stored
+	 * `ttm_verse` option has no post/term context to read at all; it renders normally with
+	 * no current post/queried object.
+	 */
+	public function test_rule_50_no_context_with_other_content(): void {
+		update_option(
+			'ttm_verse',
+			[
+				'date'      => \TTM\Core\Support\Clock::today(),
+				'text'      => 'Text.',
+				'reference' => 'Ref.',
+				'copyright' => '',
+				'url'       => '',
+			]
+		);
+		self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		wp_insert_term( 'A Series', 'series' );
+		self::factory()->term->create( [ 'taxonomy' => 'post_tag' ] );
+
+		$GLOBALS['post'] = null;
+		wp_reset_query(); // phpcs:ignore WordPress.WP.DiscouragedFunctions.wp_reset_query_wp_reset_query -- rule 50 sweep: proving no-context behaviour.
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'Text.', $html );
+	}
 }

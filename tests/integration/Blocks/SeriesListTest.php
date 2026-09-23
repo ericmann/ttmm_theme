@@ -574,4 +574,23 @@ class SeriesListTest extends TTM_IntegrationTestCase {
 
 		$this->assertSame( '', trim( $html ) );
 	}
+
+	/**
+	 * P1-05, rule 50: `ttm/series-list`'s default (no `inCategory`/`excludeCurrent`/`relatedTo`)
+	 * is a sanctioned site-wide-default listing -- it lists `SeriesIndex::all()` filtered by
+	 * `status`/`form` attributes only, with no post/term context to read at all.
+	 */
+	public function test_rule_50_no_context_with_other_content(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+		$this->make_series( 'current-series', 'Current Series', 'in-progress', 'nonfiction', $tech );
+		self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		self::factory()->term->create( [ 'taxonomy' => 'post_tag' ] );
+
+		$GLOBALS['post'] = null;
+		wp_reset_query(); // phpcs:ignore WordPress.WP.DiscouragedFunctions.wp_reset_query_wp_reset_query -- rule 50 sweep: proving no-context behaviour.
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'Current Series', $html );
+	}
 }

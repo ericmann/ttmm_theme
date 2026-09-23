@@ -158,4 +158,28 @@ class SyndicatedToTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( '>Bluesky<', $html );
 		$this->assertStringNotContainsString( ' and ', $html );
 	}
+
+	/**
+	 * P1-05, rule 50: no postId context at all, other content exists -> ''.
+	 */
+	public function test_rule_50_no_context_with_other_content(): void {
+		$journal = $this->category_id( 'journal', 'Journal' );
+		$post    = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $journal ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $journal );
+		update_post_meta( $post, 'ttm_syndication', [ 'bluesky' => 'https://bsky.app/example/1' ] );
+		wp_insert_term( 'A Series', 'series' );
+		self::factory()->term->create( [ 'taxonomy' => 'post_tag' ] );
+
+		$GLOBALS['post'] = null;
+		wp_reset_query(); // phpcs:ignore WordPress.WP.DiscouragedFunctions.wp_reset_query_wp_reset_query -- rule 50 sweep: proving no-context behaviour.
+
+		$html = (string) do_blocks( '<!-- wp:ttm/syndicated-to /-->' );
+
+		$this->assertSame( '', trim( $html ) );
+	}
 }

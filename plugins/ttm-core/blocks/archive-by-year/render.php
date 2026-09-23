@@ -22,6 +22,13 @@ Helpers::$archive_scope = max( 0, Helpers::$archive_scope - 1 );
 if ( 'empty' === Helpers::preview_state( $attributes ) ) {
 	return '';
 }
+
+// Rule 50: this block has no context of its own (no postId, no queried term) -- it only ever
+// wraps an inner query's already-rendered rows. No inner content (e.g. used with no inner
+// `core/query` at all) means nothing to wrap, so it returns '' rather than an empty shell.
+if ( '' === trim( (string) $content ) ) {
+	return '';
+}
 ?>
 <div <?php echo Helpers::wrapper( 'archive' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() output is already escaped. ?>>
 	<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- already-rendered, escaped inner block HTML. ?>

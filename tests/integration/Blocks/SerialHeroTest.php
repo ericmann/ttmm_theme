@@ -253,4 +253,22 @@ class SerialHeroTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( '<p class="ttm-serial-hero__synopsis">Synopsis for The Quiet Ledger.</p>', $html );
 		$this->assertStringNotContainsString( '&lt;p&gt;', $html );
 	}
+
+	/**
+	 * P1-05, rule 50: `ttm/serial-hero` is one of the SPEC-named sanctioned blocks -- with no
+	 * seriesId attribute it falls back to `Serials::active()`, a site-wide default, regardless
+	 * of the current post/queried object.
+	 */
+	public function test_rule_50_no_context_with_other_content(): void {
+		$this->make_serial( 'the-quiet-ledger', 'The Quiet Ledger', 0, [ [ 'part' => 1 ] ] );
+		self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		self::factory()->term->create( [ 'taxonomy' => 'post_tag' ] );
+
+		$GLOBALS['post'] = null;
+		wp_reset_query(); // phpcs:ignore WordPress.WP.DiscouragedFunctions.wp_reset_query_wp_reset_query -- rule 50 sweep: proving no-context behaviour.
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'The Quiet Ledger', $html );
+	}
 }

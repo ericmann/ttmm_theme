@@ -281,4 +281,19 @@ class SeriesPrevNextTest extends TTM_IntegrationTestCase {
 
 		$this->assertStringContainsString( 'Series Part One', $html );
 	}
+
+	/**
+	 * P1-05, rule 50: no postId context at all, other content exists -> ''.
+	 */
+	public function test_rule_50_no_context_with_other_content(): void {
+		$this->make_series( 'hardening-wp', 'Hardening WordPress', [ [ 'part' => 1 ], [ 'part' => 2 ] ] );
+		self::factory()->term->create( [ 'taxonomy' => 'post_tag' ] );
+
+		$GLOBALS['post'] = null;
+		wp_reset_query(); // phpcs:ignore WordPress.WP.DiscouragedFunctions.wp_reset_query_wp_reset_query -- rule 50 sweep: proving no-context behaviour.
+
+		$html = (string) do_blocks( '<!-- wp:ttm/series-prev-next /-->' );
+
+		$this->assertSame( '', trim( $html ) );
+	}
 }

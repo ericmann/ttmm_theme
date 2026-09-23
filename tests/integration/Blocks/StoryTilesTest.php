@@ -114,4 +114,21 @@ class StoryTilesTest extends TTM_IntegrationTestCase {
 
 		$this->assertSame( '', trim( $html ) );
 	}
+
+	/**
+	 * P1-05, rule 50: `ttm/story-tiles` is one of the SPEC-named sanctioned blocks --
+	 * `Serials::stories()` has no post/term context to read at all.
+	 */
+	public function test_rule_50_no_context_with_other_content(): void {
+		$this->story( 'A Quiet Field' );
+		wp_insert_term( 'A Series', 'series' );
+		self::factory()->term->create( [ 'taxonomy' => 'post_tag' ] );
+
+		$GLOBALS['post'] = null;
+		wp_reset_query(); // phpcs:ignore WordPress.WP.DiscouragedFunctions.wp_reset_query_wp_reset_query -- rule 50 sweep: proving no-context behaviour.
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'A Quiet Field', $html );
+	}
 }

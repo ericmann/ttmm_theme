@@ -134,4 +134,24 @@ class TagFilterTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'ttm-filter-row', $html );
 		$this->assertStringContainsString( 'imported-late', $html );
 	}
+
+	/**
+	 * P1-05, rule 50: no queried category term, other content exists -> ''.
+	 */
+	public function test_rule_50_no_context_with_other_content(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+		self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+				'tags_input'    => [ 'php' ],
+			]
+		);
+		wp_insert_term( 'A Series', 'series' );
+
+		$GLOBALS['post'] = null;
+		wp_reset_query(); // phpcs:ignore WordPress.WP.DiscouragedFunctions.wp_reset_query_wp_reset_query -- rule 50 sweep: proving no-context behaviour.
+
+		$this->assertSame( '', trim( $this->render() ) );
+	}
 }
