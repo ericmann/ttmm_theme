@@ -2092,7 +2092,10 @@ test.describe( 'writing', () => {
 		const el = page
 			.locator( '.ttm-series-list.is-list .ttm-series-row__meta' )
 			.first();
-		expect( await text( el ) ).toMatch( /^Novel · .+ · monthly$/i );
+		// P0-06, SI-23: tightened to the seed's literal text (the-quiet-ledger).
+		expect( await text( el ) ).toBe(
+			'Novel · literary thriller · monthly'
+		);
 	} );
 
 	test( 'wr-serial-count: .ttm-series-list.is-list .ttm-series-row__count (first) @1280', async ( {
@@ -3184,8 +3187,10 @@ test.describe( 'hub', () => {
 			.locator( '.ttm-series-list.is-grid-2 .ttm-series-row__categories' )
 			.first();
 		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
-		const t = await text( el );
-		expect( t ).toContain( ' · ' );
+		// P0-06, SI-23: tightened to the seed's literal text. "All series" is sorted by
+		// last_update desc; hardening-wordpress's hardening-part-4-keys-in-the-environment
+		// (days_ago 0) is the most recent published part across every seeded series.
+		expect( await text( el ) ).toBe( 'Technology · Security' );
 	} );
 
 	test( 'hub-grid-dek: .ttm-series-list.is-grid-2 .ttm-series-row__dek (first) @1280', async ( {

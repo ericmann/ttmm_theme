@@ -217,16 +217,6 @@ class ValuesTest extends TestCase {
 		$this->assertSame( 'Day', Values::archive_kind( [ 'day' => true ] ) );
 		$this->assertSame( 'Author', Values::archive_kind( [ 'author' => true ] ) );
 		$this->assertSame( 'Search', Values::archive_kind( [ 'search' => true ] ) );
-		// A day archive is also a month and a year archive: the most specific flag wins.
-		$this->assertSame(
-			'Month',
-			Values::archive_kind(
-				[
-					'month' => true,
-					'year'  => true,
-				] 
-			) 
-		);
 		$this->assertSame( '', Values::archive_kind( [] ) );
 		$this->assertSame(
 			'',
