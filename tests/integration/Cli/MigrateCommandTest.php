@@ -11,6 +11,11 @@ use TTM\Core\Cli\MigrateCommand;
 
 class MigrateCommandTest extends TTM_IntegrationTestCase {
 
+	public function tear_down(): void {
+		remove_all_filters( 'pre_http_request' );
+		parent::tear_down();
+	}
+
 	private function politics_id(): int {
 		$term = term_exists( 'politics', 'category' );
 		if ( $term ) {
@@ -318,5 +323,150 @@ class MigrateCommandTest extends TTM_IntegrationTestCase {
 			(int) \TTM\Core\Config::get( 'excerpt_length', 55 ) + 1, // +1: the trailing "…" isn't a counted word but splits oddly on whitespace.
 			count( preg_split( '/\s+/', trim( $excerpt ) ) )
 		);
+	}
+
+	/**
+	 * P2-04, SPEC §6.7: a Photon URL for `migration.photon_origin` rewrites to the origin with
+	 * no network fetch at all.
+	 */
+	public function test_images_rewrites_photon_urls_to_origin_without_fetching(): void {
+		$original = '<p><img src="https://i0.wp.com/eric.mann.blog/wp-content/uploads/2020/photo.jpg" alt=""></p>';
+		$post_id  = self::factory()->post->create(
+			[
+				'post_status'  => 'publish',
+				'post_content' => $original,
+			]
+		);
+
+		$fetched = 0;
+		add_filter(
+			'pre_http_request',
+			static function () use ( &$fetched ) {
+				++$fetched;
+				return new WP_Error( 'unexpected_fetch', 'Should not fetch a Photon origin rewrite.' );
+			}
+		);
+
+		$result = ( new MigrateCommand() )->images( [], [] );
+
+		$this->assertTrue( $result['ok'] );
+		$this->assertSame( 0, $fetched );
+		$this->assertStringContainsString(
+			'https://eric.mann.blog/wp-content/uploads/2020/photo.jpg',
+			get_post( $post_id )->post_content
+		);
+		$this->assertSame( 1, (int) get_post_meta( $post_id, 'ttm_images_rewritten', true ) );
+		$this->assertSame( $original, get_post_meta( $post_id, 'ttm_classic_backup', true ) );
+	}
+
+	public function test_images_sideloads_listed_host_via_pre_http_request_png(): void {
+		$original = '<p><img src="https://cdn.example.com/photo.png" alt=""></p>';
+		$post_id  = self::factory()->post->create(
+			[
+				'post_status'  => 'publish',
+				'post_content' => $original,
+			]
+		);
+
+		// A minimal valid 1x1 PNG. `download_url()` streams the response straight to
+		// `$args['filename']` inside the real HTTP transport, which `pre_http_request`
+		// entirely bypasses -- so the mock must write the body to that file itself for
+		// `wp_check_filetype_and_ext()` to see real PNG bytes.
+		$png = base64_decode( 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=' );
+		add_filter(
+			'pre_http_request',
+			static function ( $preempt, array $args ) use ( $png ) {
+				if ( ! empty( $args['filename'] ) ) {
+					file_put_contents( $args['filename'], $png ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_file_put_contents -- test fixture, mocking the HTTP transport's own stream-to-file.
+				}
+
+				return [
+					'headers'  => [ 'content-type' => 'image/png' ],
+					'body'     => $png,
+					'response' => [
+						'code'    => 200,
+						'message' => 'OK',
+					],
+					'cookies'  => [],
+					'filename' => $args['filename'] ?? null,
+				];
+			},
+			10,
+			3
+		);
+
+		$result = ( new MigrateCommand() )->images( [], [ 'hosts' => 'cdn.example.com' ] );
+
+		$this->assertTrue( $result['ok'] );
+
+		$attachments = get_posts(
+			[
+				'post_type'      => 'attachment',
+				'post_parent'    => $post_id,
+				'posts_per_page' => 5,
+			]
+		);
+		$this->assertCount( 1, $attachments );
+
+		$new_content = get_post( $post_id )->post_content;
+		$this->assertStringNotContainsString( 'cdn.example.com/photo.png', $new_content );
+		$this->assertSame( 1, (int) get_post_meta( $post_id, 'ttm_images_rewritten', true ) );
+		$this->assertSame( $original, get_post_meta( $post_id, 'ttm_classic_backup', true ) );
+	}
+
+	public function test_images_leaves_src_on_fetch_failure(): void {
+		$original = '<p><img src="https://cdn.example.com/broken.jpg" alt=""></p>';
+		$post_id  = self::factory()->post->create(
+			[
+				'post_status'  => 'publish',
+				'post_content' => $original,
+			]
+		);
+
+		add_filter(
+			'pre_http_request',
+			static fn () => new WP_Error( 'http_request_failed', 'Connection failed.' )
+		);
+
+		$result = ( new MigrateCommand() )->images( [], [ 'hosts' => 'cdn.example.com' ] );
+
+		$this->assertTrue( $result['ok'] );
+		$this->assertSame( $original, get_post( $post_id )->post_content );
+		$this->assertSame( 0, (int) get_post_meta( $post_id, 'ttm_images_rewritten', true ) );
+		$this->assertSame( '', (string) get_post_meta( $post_id, 'ttm_classic_backup', true ) );
+		$this->assertSame( [], $result['rows'] );
+	}
+
+	public function test_images_dry_run_writes_nothing(): void {
+		$original = '<p><img src="https://i0.wp.com/eric.mann.blog/wp-content/uploads/2020/photo.jpg" alt=""></p>';
+		$post_id  = self::factory()->post->create(
+			[
+				'post_status'  => 'publish',
+				'post_content' => $original,
+			]
+		);
+
+		$result = ( new MigrateCommand() )->images( [], [ 'dry-run' => true ] );
+
+		$this->assertTrue( $result['ok'] );
+		$this->assertSame( $original, get_post( $post_id )->post_content );
+		$this->assertSame( 0, (int) get_post_meta( $post_id, 'ttm_images_rewritten', true ) );
+		$this->assertSame( '', (string) get_post_meta( $post_id, 'ttm_classic_backup', true ) );
+		$this->assertStringContainsString( 'Would rewrite images on 1 post(s).', $result['messages'][0] );
+	}
+
+	public function test_images_backup_is_written_once(): void {
+		$original = '<p><img src="https://i0.wp.com/eric.mann.blog/wp-content/uploads/2020/photo.jpg" alt=""></p>';
+		$post_id  = self::factory()->post->create(
+			[
+				'post_status'  => 'publish',
+				'post_content' => $original,
+			]
+		);
+		update_post_meta( $post_id, 'ttm_classic_backup', 'pre-existing backup' );
+
+		( new MigrateCommand() )->images( [], [] );
+
+		$this->assertSame( 'pre-existing backup', get_post_meta( $post_id, 'ttm_classic_backup', true ) );
 	}
 }

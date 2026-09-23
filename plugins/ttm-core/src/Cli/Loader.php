@@ -73,6 +73,12 @@ class Loader {
 				self::output( ( new MigrateCommand() )->excerpts( $args, $assoc ) );
 			}
 		);
+		\WP_CLI::add_command(
+			'ttm migrate:images',
+			static function ( array $args, array $assoc ): void {
+				self::output( ( new MigrateCommand() )->images( $args, $assoc ) );
+			}
+		);
 	}
 
 	/**

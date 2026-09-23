@@ -46,4 +46,42 @@ class HtmlTest extends TestCase {
 			)
 		);
 	}
+
+	public function test_image_srcs_lists_every_img_src(): void {
+		$html = '<p><img src="https://example.com/a.png" alt=""></p>'
+			. '<figure><img class="x" src=\'https://example.com/b.png\' /></figure>';
+
+		$this->assertSame(
+			[ 'https://example.com/a.png', 'https://example.com/b.png' ],
+			Html::image_srcs( $html )
+		);
+	}
+
+	public function test_image_srcs_returns_empty_array_when_none(): void {
+		$this->assertSame( [], Html::image_srcs( '<p>No images here.</p>' ) );
+	}
+
+	public function test_photon_origin_url_rewrites_matching_host_only(): void {
+		$this->assertSame(
+			'https://eric.mann.blog/wp-content/uploads/2020/01/photo.jpg?resize=800',
+			Html::photon_origin_url( 'https://i0.wp.com/eric.mann.blog/wp-content/uploads/2020/01/photo.jpg?resize=800', 'eric.mann.blog' )
+		);
+
+		$this->assertNull(
+			Html::photon_origin_url( 'https://i0.wp.com/example.com/photo.jpg', 'eric.mann.blog' )
+		);
+
+		$this->assertNull(
+			Html::photon_origin_url( 'https://eric.mann.blog/wp-content/uploads/photo.jpg', 'eric.mann.blog' )
+		);
+	}
+
+	public function test_replace_url_rewrites_src_and_wrapping_href(): void {
+		$html = '<a href="https://example.com/old.jpg"><img src="https://example.com/old.jpg" alt=""></a>';
+
+		$this->assertSame(
+			'<a href="https://example.com/new.jpg"><img src="https://example.com/new.jpg" alt=""></a>',
+			Html::replace_url( $html, 'https://example.com/old.jpg', 'https://example.com/new.jpg' )
+		);
+	}
 }

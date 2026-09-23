@@ -1,6 +1,6 @@
 <?php
 /**
- * `wp ttm migrate:politics|migrate:redirects|migrate:close-comments|migrate:excerpts`
+ * `wp ttm migrate:politics|migrate:redirects|migrate:close-comments|migrate:excerpts|migrate:images`
  * (SPEC §6.7, Q3).
  *
  * @package TTM\Core\Cli
@@ -12,6 +12,7 @@ namespace TTM\Core\Cli;
 
 use TTM\Core\Config;
 use TTM\Core\Meta\PrimaryCategory;
+use TTM\Core\Support\Html;
 use TTM\Core\Support\Text;
 use WP_Query;
 use WP_Term;
@@ -268,6 +269,167 @@ class MigrateCommand extends Command {
 					: sprintf( 'Filled %d excerpt(s) from Yoast.', count( $rows ) ),
 			],
 		];
+	}
+
+	/**
+	 * `migrate:images [--hosts=<comma-list>] [--post=<id>] [--dry-run]` (SPEC §6.7): for every
+	 * published post (or just `--post`), Photon (`iN.wp.com/<host>/<path>`) `<img src>` URLs
+	 * whose `<host>` equals `migration.photon_origin` are rewritten to `https://<host>/<path>`
+	 * with no network fetch; `<img src>` URLs on any other host in `--hosts`/`migration.image_hosts`
+	 * are sideloaded into the media library and both the `src` and any wrapping `<a href>` to the
+	 * same URL are rewritten to the new attachment URL. A fetch failure leaves that `src`
+	 * untouched. `ttm_classic_backup` is written once, first writer wins (shared with
+	 * convert:import/revert, rule 49); `ttm_images_rewritten` records the per-post count.
+	 *
+	 * @param string[]             $args  Positional args (unused).
+	 * @param array<string, mixed> $assoc --hosts, --post, --dry-run.
+	 * @return array{ok: bool, rows: array<int, array<string, mixed>>, messages: string[]}
+	 */
+	public function images( array $args, array $assoc ): array {
+		unset( $args );
+
+		$dry_run = ! empty( $assoc['dry-run'] );
+		$hosts   = isset( $assoc['hosts'] )
+			? array_values( array_filter( array_map( 'trim', explode( ',', (string) $assoc['hosts'] ) ) ) )
+			: (array) Config::get( 'migration.image_hosts', [] );
+		$origin  = (string) Config::get( 'migration.photon_origin', 'eric.mann.blog' );
+		$timeout = (int) Config::get( 'migration.image_timeout', 20 );
+
+		$post_ids = isset( $assoc['post'] )
+			? [ (int) $assoc['post'] ]
+			: $this->published_posts();
+
+		$rows = [];
+
+		foreach ( $post_ids as $post_id ) {
+			$post = get_post( $post_id );
+			if ( ! $post ) {
+				continue;
+			}
+
+			$content   = $post->post_content;
+			$rewritten = 0;
+
+			foreach ( Html::image_srcs( $content ) as $src ) {
+				$photon_url = Html::photon_origin_url( $src, $origin );
+				if ( null !== $photon_url ) {
+					$content = Html::replace_url( $content, $src, $photon_url );
+					++$rewritten;
+					continue;
+				}
+
+				$host = (string) wp_parse_url( $src, PHP_URL_HOST );
+				if ( '' === $host || ! in_array( $host, $hosts, true ) ) {
+					continue;
+				}
+
+				if ( $dry_run ) {
+					++$rewritten;
+					continue;
+				}
+
+				$new_url = $this->sideload( $src, $post_id, $timeout );
+				if ( null === $new_url ) {
+					continue;
+				}
+
+				$content = Html::replace_url( $content, $src, $new_url );
+				++$rewritten;
+			}//end foreach
+
+			if ( 0 === $rewritten ) {
+				continue;
+			}
+
+			$rows[] = [
+				'post_id'   => $post_id,
+				'rewritten' => $rewritten,
+			];
+
+			if ( $dry_run ) {
+				continue;
+			}
+
+			if ( '' === (string) get_post_meta( $post_id, 'ttm_classic_backup', true ) ) {
+				update_post_meta( $post_id, 'ttm_classic_backup', $post->post_content );
+			}
+
+			wp_update_post(
+				[
+					'ID'           => $post_id,
+					'post_content' => $content,
+				]
+			);
+			update_post_meta( $post_id, 'ttm_images_rewritten', $rewritten );
+		}//end foreach
+
+		return [
+			'ok'       => true,
+			'rows'     => $rows,
+			'messages' => [
+				$dry_run
+					? sprintf( 'Would rewrite images on %d post(s).', count( $rows ) )
+					: sprintf( 'Rewrote images on %d post(s).', count( $rows ) ),
+			],
+		];
+	}
+
+	/**
+	 * Sideload a remote image into the media library, with `http_request_timeout` overridden
+	 * only for the duration of this call (SPEC §6.7). Null on failure — the caller leaves the
+	 * original `src` untouched.
+	 *
+	 * @param string $url     Remote image URL.
+	 * @param int    $post_id Post to attach the sideloaded image to.
+	 * @param int    $timeout Request timeout, seconds.
+	 * @return string|null
+	 */
+	private function sideload( string $url, int $post_id, int $timeout ): ?string {
+		require_once ABSPATH . 'wp-admin/includes/media.php';
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+
+		$set_timeout = static fn (): int => $timeout;
+
+		add_filter( 'http_request_timeout', $set_timeout );
+		$attachment_id = media_sideload_image( $url, $post_id, null, 'id' ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_media_sideload_image -- CLI-only migration, see class docblock.
+		remove_filter( 'http_request_timeout', $set_timeout );
+
+		if ( is_wp_error( $attachment_id ) ) {
+			return null;
+		}
+
+		$attachment_url = wp_get_attachment_url( (int) $attachment_id );
+
+		return is_string( $attachment_url ) ? $attachment_url : null;
+	}
+
+	/**
+	 * Batched ids of every published post.
+	 *
+	 * @return int[]
+	 */
+	private function published_posts(): array {
+		$batch = (int) Config::get( 'cli.batch', 200 );
+		$ids   = [];
+		$paged = 1;
+
+		do {
+			$query = new WP_Query(
+				[
+					'post_type'      => 'post',
+					'post_status'    => 'publish',
+					'posts_per_page' => $batch,
+					'paged'          => $paged,
+					'fields'         => 'ids',
+				]
+			);
+			$ids   = array_merge( $ids, $query->posts );
+			$found = count( $query->posts );
+			++$paged;
+		} while ( $found === $batch );
+
+		return $ids;
 	}
 
 	/**

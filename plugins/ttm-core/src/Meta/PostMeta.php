@@ -188,6 +188,21 @@ class PostMeta {
 				'show_in_rest'      => false,
 			]
 		);
+
+		// P2-04 `migrate:images`: count of `<img>` URLs rewritten (Photon origin rewrite or
+		// sideload) on this post. Internal migration bookkeeping, not editorial content.
+		register_post_meta(
+			'post',
+			'ttm_images_rewritten',
+			[
+				'type'              => 'integer',
+				'single'            => true,
+				'default'           => 0,
+				'sanitize_callback' => 'absint',
+				'auth_callback'     => $auth,
+				'show_in_rest'      => false,
+			]
+		);
 	}
 
 	/**

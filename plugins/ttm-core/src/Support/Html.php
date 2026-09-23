@@ -76,4 +76,52 @@ class Html {
 			)
 		);
 	}
+
+	/**
+	 * Every `<img src="…">` URL in an HTML fragment, in document order (P2-04, SPEC §6.7).
+	 *
+	 * @param string $html HTML fragment (e.g. post_content).
+	 * @return string[]
+	 */
+	public static function image_srcs( string $html ): array {
+		if ( ! preg_match_all( '/<img\b[^>]*\bsrc=["\']([^"\']+)["\']/i', $html, $matches ) ) {
+			return [];
+		}
+
+		return $matches[1];
+	}
+
+	/**
+	 * Rewrite a Photon URL (`https://iN.wp.com/<host>/<path>`) to its origin
+	 * (`https://<host>/<path>`), only when `<host>` equals `$origin`. Returns null for anything
+	 * else (not a Photon URL, or a Photon URL for a different host) — P2-04, SPEC §6.7.
+	 *
+	 * @param string $url    Candidate image URL.
+	 * @param string $origin Expected Photon origin host (`migration.photon_origin`).
+	 * @return string|null
+	 */
+	public static function photon_origin_url( string $url, string $origin ): ?string {
+		if ( ! preg_match( '#^https?://i[0-9]\.wp\.com/([^/]+)/(.+)$#i', $url, $matches ) ) {
+			return null;
+		}
+
+		if ( $matches[1] !== $origin ) {
+			return null;
+		}
+
+		return 'https://' . $origin . '/' . $matches[2];
+	}
+
+	/**
+	 * Replace every literal occurrence of a URL in an HTML fragment with another — covers both
+	 * an `<img src>` and a wrapping `<a href>` pointing at the same file (P2-04, SPEC §6.7).
+	 *
+	 * @param string $html HTML fragment.
+	 * @param string $from URL to replace.
+	 * @param string $to   Replacement URL.
+	 * @return string
+	 */
+	public static function replace_url( string $html, string $from, string $to ): string {
+		return str_replace( $from, $to, $html );
+	}
 }
