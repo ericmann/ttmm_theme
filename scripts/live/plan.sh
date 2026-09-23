@@ -76,10 +76,6 @@ mkdir -p docs/fixtures/live
 "${WP[@]}" ttm audit --format=csv >docs/fixtures/live/audit.csv
 echo "plan.sh: audit.csv written ($(wc -l <docs/fixtures/live/audit.csv) line(s))"
 
-if [ -f scripts/live/screens.mjs ]; then
-	step "screens.mjs" node scripts/live/screens.mjs
-else
-	echo "screens.mjs: lands in P2-07"
-fi
+step "screens.mjs" node scripts/live/screens.mjs
 
 echo "plan.sh: done"
