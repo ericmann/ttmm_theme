@@ -17,7 +17,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] P1-05 Rule 50 sweep: no-context cases in every block test
 - [x] P1-06 Phase 1 screenshots and push
 - [x] P2-01 seed --starter-only, Seeder::reset() from a live state, wp ttm stats:flush
-- [ ] P2-02 primary:assign --from-yoast and series:assign --from-tags/--form/--status/--total/--name
+- [x] P2-02 primary:assign --from-yoast and series:assign --from-tags/--form/--status/--total/--name
 - [ ] P2-03 migrate:excerpts --from=yoast and excerpt_length
 - [ ] P2-04 migrate:images and migration.* keys
 - [ ] P2-05 audit flags and --summary
@@ -136,3 +136,9 @@ StatsCommand.php (new) + Loader.php: wp ttm stats:flush -> Stats::flush_all(), m
 Stats::flush_all() now returns int (count of transients deleted), was void.
 Tests: unit SeederTest 1 new (may_wipe); integration SeedStatesTest 4 new (starter-only x2, reset-foreign-content, reset-seed-only); MaintenanceCommandsTest 1 new (stats:flush); Cli/SeederTest's old test_reset_removes_only_seeded_content renamed/inverted to test_reset_removes_every_post_not_only_seeded_content to match reset()'s new, intentionally broader contract.
 Verified: composer lint 0 errors; targeted filter (21 tests) then full npm run test:integration (540 tests) green; npm run lint green; npm run test:e2e (356 passed); forbidden-patterns clean (had to reword a comment that accidentally matched the rule-12 unbounded-query regex); manually ran wp ttm seed --starter-only then wp ttm seed --reset, confirmed the site returns to the full seed (8 categories/4 pages/107 posts/7 series); foundry_verify ok:true including the env:live/test:live extraVerify triggered by Seeder.php (both skip cleanly, no export present).
+
+### P2-02 — c06e7a0
+PrimaryCommand.php: --from-yoast branch -- for posts without ttm_primary_category, uses _yoast_wpseo_primary_category only when the post actually carries that category (wp_get_post_categories), else skips (falls to a later plain pass); reports "Used N post(s) from Yoast, skipped N." (or "Would use..." on --dry-run). Plain primary:assign unchanged.
+SeriesCommand.php: --from-tags=a,b (union of tagged posts, deduped) alongside the existing single --from-tag; --name sets the series term's name on creation only (existing term's name untouched); --total writes ttm_total_parts; --status explicit value overrides the days-since-newest-part inference (elseif branch).
+Tests: PrimaryCommandTest (new, 4 tests), SeriesCommandTest (new, 5 tests).
+Verified: composer lint 0 errors; targeted filter (19 tests) then full npm run test:integration (549 tests, was 540) green; npm run lint green; forbidden-patterns clean.
