@@ -24,7 +24,7 @@ export default defineConfig( {
 	projects: [
 		{
 			name: 'desktop',
-			testIgnore: /(fidelity|editors|phone)\.spec\.mjs$/,
+			testIgnore: /(fidelity|editors|selectors|phone)\.spec\.mjs$/,
 			use: {
 				...devices[ 'Desktop Chrome' ],
 				viewport: { width: 1280, height: 900 },
@@ -35,7 +35,7 @@ export default defineConfig( {
 			// horizontal overflow, nav scroll, stacked poster/writing cell), so `desktop`
 			// excludes it above rather than running it twice at the wrong viewport.
 			name: 'phone',
-			testIgnore: /(fidelity|editors)\.spec\.mjs$/,
+			testIgnore: /(fidelity|editors|selectors)\.spec\.mjs$/,
 			use: {
 				...devices[ 'Desktop Chrome' ],
 				viewport: { width: 390, height: 844 },
@@ -47,7 +47,7 @@ export default defineConfig( {
 			// live directly under tests/e2e/ (not tests/e2e/specs/, which is phase 1's suite).
 			name: 'fidelity',
 			testDir: '.',
-			testMatch: /(fidelity|editors)\.spec\.mjs$/,
+			testMatch: /(fidelity|editors|selectors)\.spec\.mjs$/,
 			use: {
 				...devices[ 'Desktop Chrome' ],
 			},

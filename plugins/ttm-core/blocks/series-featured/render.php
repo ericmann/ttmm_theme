@@ -86,7 +86,7 @@ if ( ! $ttm_row ) {
 
 $ttm_is_complete = 'complete' === $ttm_row['status'];
 
-$ttm_categories = implode( ', ', array_map( 'get_cat_name', $ttm_row['categories'] ) );
+$ttm_categories = implode( ' · ', array_map( 'get_cat_name', $ttm_row['categories'] ) );
 $ttm_kicker     = trim( Helpers::status_word( $ttm_row['status'] ) . ( '' !== $ttm_categories ? ' · ' . $ttm_categories : '' ) );
 
 $ttm_progress = render_block(
@@ -113,13 +113,25 @@ $ttm_all_link = get_term_link( (int) $ttm_row['id'], 'series' );
 $ttm_all_link = is_string( $ttm_all_link ) ? $ttm_all_link : '';
 $ttm_has_more = ! $ttm_uncapped && count( $ttm_parts ) > $ttm_limit;
 $ttm_visible  = $ttm_uncapped ? $ttm_parts : array_slice( $ttm_parts, 0, $ttm_limit );
+$ttm_show_dek = ! empty( $attributes['showDek'] );
+
+// Decision "ttm/series-featured": h1 + full-width single column on the series archive itself
+// (taxonomy-series.html), h2 + the shared 5/7 grid everywhere else (the series hub, where
+// this block sits among several other headings). The h1 reuses `is-style-display-xl`
+// (80px/.95/-.03em/800/-.058em, rule 44) rather than redeclaring its type here.
+$ttm_is_single         = is_tax( 'series' );
+$ttm_title_tag         = $ttm_is_single ? 'h1' : 'h2';
+$ttm_title_extra_class = $ttm_is_single ? ' is-style-display-xl' : '';
+$ttm_grid_class        = $ttm_is_single ? [] : [ 'is-style-grid-5-7' ];
 ?>
-<div <?php echo Helpers::wrapper( 'series-featured' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() output is already escaped. ?>>
+<div <?php echo Helpers::wrapper( 'series-featured', $ttm_grid_class ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() output is already escaped. ?>>
 	<div class="ttm-series-featured__main">
 		<p class="ttm-series-featured__kicker is-style-kicker"><?php echo esc_html( $ttm_kicker ); ?></p>
-		<h2 class="ttm-series-featured__title is-style-featured-series"><?php echo esc_html( $ttm_row['name'] ); ?></h2>
+		<<?php echo esc_html( $ttm_title_tag ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_html()'d and, either way, one of two literal tag names. ?> class="ttm-series-featured__title<?php echo esc_attr( $ttm_title_extra_class ); ?>"><?php echo esc_html( $ttm_row['name'] ); ?></<?php echo esc_html( $ttm_title_tag ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_html()'d and, either way, one of two literal tag names. ?>>
 		<?php
-		$ttm_dek = (string) get_term_field( 'description', (int) $ttm_row['id'], 'series' );
+		// 'raw' context: the 'display' context runs descriptions through wpautop, wrapping
+		// them in a <p> that esc_html() would then render as literal text.
+		$ttm_dek = (string) get_term_field( 'description', (int) $ttm_row['id'], 'series', 'raw' );
 		if ( '' !== $ttm_dek ) :
 			?>
 		<p class="ttm-series-featured__dek"><?php echo esc_html( $ttm_dek ); ?></p>
@@ -141,7 +153,10 @@ $ttm_visible  = $ttm_uncapped ? $ttm_parts : array_slice( $ttm_parts, 0, $ttm_li
 			<li class="ttm-series-featured__part <?php echo $ttm_is_published ? 'is-published' : 'is-scheduled'; ?>">
 				<span class="ttm-series-featured__num tnum"><?php echo esc_html( sprintf( '%02d', (int) $ttm_part['part'] ) ); ?></span>
 				<?php if ( $ttm_is_published ) : ?>
-				<a href="<?php echo esc_url( (string) get_permalink( $ttm_part['post_id'] ) ); ?>"><?php echo esc_html( $ttm_title ); ?></a>
+				<a class="ttm-series-featured__part-title" href="<?php echo esc_url( (string) get_permalink( $ttm_part['post_id'] ) ); ?>"><?php echo esc_html( $ttm_title ); ?></a>
+					<?php if ( $ttm_show_dek ) : ?>
+				<span class="ttm-series-featured__part-dek"><?php echo esc_html( wp_strip_all_tags( get_the_excerpt( $ttm_part['post_id'] ) ) ); ?></span>
+				<?php endif; ?>
 				<?php else : ?>
 					<?php
 					$ttm_date       = \TTM\Core\Support\Clock::at( $ttm_part['date'] );
@@ -153,7 +168,7 @@ $ttm_visible  = $ttm_uncapped ? $ttm_parts : array_slice( $ttm_parts, 0, $ttm_li
 						)
 						: '';
 					?>
-				<span<?php echo $ttm_title_attr ? ' title="' . esc_attr( $ttm_title_attr ) . '"' : ''; ?>><?php echo esc_html( $ttm_title ); ?></span>
+				<span class="ttm-series-featured__part-title"<?php echo $ttm_title_attr ? ' title="' . esc_attr( $ttm_title_attr ) . '"' : ''; ?>><?php echo esc_html( $ttm_title ); ?></span>
 				<?php endif; ?>
 				<span class="ttm-series-featured__date"><?php echo esc_html( Helpers::date_short( $ttm_part['date'] ) ); ?></span>
 			</li>

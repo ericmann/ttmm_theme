@@ -1,6 +1,8 @@
 <?php
 /**
- * `ttm/series-bar` render (01 §4.18): F11 no series -> ''; F23 open-ended text + trailing segment.
+ * `ttm/series-bar` render (01 §4.18, SPEC §6.2): three grid children -- the series mark, the text
+ * group (label · name · part) and the right group (segments + "View series"). F11 no series -> '';
+ * F23 open-ended text + trailing segment.
  *
  * @package TTM\Core\Blocks
  *
@@ -75,13 +77,15 @@ $ttm_term_link = is_string( $ttm_term_link ) ? $ttm_term_link : '';
 ?>
 <div <?php echo Helpers::wrapper( 'series-bar' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() output is already escaped. ?>>
 	<span class="ttm-series-mark is-<?php echo esc_attr( $ttm_row['status'] ); ?>"></span>
-	<span class="ttm-series-bar__label"><?php esc_html_e( 'Series', 'ttm-core' ); ?></span>
-	<a class="ttm-series-bar__name" href="<?php echo esc_url( $ttm_term_link ); ?>"><?php echo esc_html( $ttm_row['name'] ); ?></a>
-	<span class="ttm-series-bar__part tnum"><?php echo esc_html( $ttm_part_label ); ?></span>
-	<span class="ttm-series-bar__segments">
-		<?php foreach ( $ttm_segments as $ttm_state ) : ?>
-		<span class="ttm-series-bar__seg <?php echo esc_attr( $ttm_state ); ?>"></span>
-		<?php endforeach; ?>
+	<span class="ttm-series-bar__text">
+		<span class="ttm-series-bar__label"><?php esc_html_e( 'Series', 'ttm-core' ); ?> &middot; </span><a class="ttm-series-bar__name" href="<?php echo esc_url( $ttm_term_link ); ?>"><?php echo esc_html( $ttm_row['name'] ); ?></a> &middot; <span class="ttm-series-bar__part tnum"><?php echo esc_html( $ttm_part_label ); ?></span>
 	</span>
-	<a class="ttm-series-bar__view" href="<?php echo esc_url( $ttm_term_link ); ?>"><?php esc_html_e( 'View series', 'ttm-core' ); ?></a>
+	<span class="ttm-series-bar__right">
+		<span class="ttm-series-bar__segments">
+			<?php foreach ( $ttm_segments as $ttm_state ) : ?>
+			<span class="ttm-series-bar__seg <?php echo esc_attr( $ttm_state ); ?>"></span>
+			<?php endforeach; ?>
+		</span>
+		<a class="ttm-series-bar__view" href="<?php echo esc_url( $ttm_term_link ); ?>"><?php esc_html_e( 'View series', 'ttm-core' ); ?></a>
+	</span>
 </div>

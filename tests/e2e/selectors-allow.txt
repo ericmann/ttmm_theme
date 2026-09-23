@@ -1,0 +1,45 @@
+.is-style-rule-1 # editor block style (04 §3)
+.is-style-grid-2 # editor block style (04 §3)
+.is-style-grid-3 # editor block style (04 §3)
+.is-style-zone # editor block style (04 §3)
+.is-style-tile # editor block style (04 §3)
+.is-style-lead # editor block style (04 §3)
+p.is-style-poster # editor block style (04 §3)
+.is-style-headline-s # editor block style (04 §3)
+.is-style-short # editor block style (04 §3)
+.is-style-cover img # editor block style (04 §3)
+.is-style-cover # editor block style (04 §3)
+.is-style-cover-shadow img # editor block style (04 §3)
+.is-style-cover-shadow # editor block style (04 §3)
+.is-style-numbered-rows # editor block style (04 §3)
+.is-style-numbered-rows li # editor block style (04 §3)
+.is-style-numbered-rows li::marker # editor block style (04 §3)
+.wp-block-button.is-style-secondary .wp-block-button__link # editor block style (04 §3)
+.wp-block-button.is-style-ghost .wp-block-button__link # editor block style (04 §3)
+.wp-block-button.is-style-ghost-on-poster .wp-block-button__link # editor block style (04 §3)
+.wp-block-button.is-style-block .wp-block-button__link # editor block style (04 §3)
+.wp-block-quote.is-style-pull # editor block style (04 §3)
+blockquote.is-style-pull # editor block style (04 §3)
+blockquote.is-style-pull cite # editor block style (04 §3)
+.wp-block-quote.is-style-pull cite # editor block style (04 §3)
+.entry-content blockquote:not(.is-style-pull) # editor block style (04 §3)
+.ttm-newsletter-form__statement # state: only the None provider renders the statement; the seeded site never does
+.ttm-lead__media.is-ratio-4-3 # state: lead-story imageRatio 4-3; the front page uses 16-9
+.ttm-verse__copyright # editor block style (04 §3)
+.ttm-series-strip:not(:has(.ttm-series-list)) # state: strip with no series list rendered
+.ttm-series-strip:has(.ttm-series-list.is-complete) .ttm-series-strip__heading # state: strip heading when the listed series are all complete
+.ttm-series-strip:has(.ttm-series-list.is-complete) .ttm-series-strip__heading-fallback # state: fallback heading when the listed series are all complete
+.ttm-series-list.is-grid-3 # editor block style (04 §3)
+.ttm-series-toc__dek # optional dek (showDek): no seeded ttm/series-toc sets it
+.ttm-journal-head__count # state: F14 word count only when the journal post has no syndication URL; the seeded journal post is syndicated
+.ttm-journal-stream:not(:has(.wp-block-post)) # state: the stream hides itself when no other journal entry exists; the seed has nine
+.ttm-item h3 # state: writing-cell's "also running" list (plain h3, no class); the seeded front page currently shows none, and index.html (its other consumer) is not a fidelity screen
+.ttm-cell .wp-block-post-excerpt:empty # state: only when a non-lead section-row post has no excerpt; the seed always sets one
+.ttm-cell .wp-block-post:not(:first-child) .wp-block-post-featured-image # state: only when a non-lead section-row post also has a featured image; the seed's non-lead posts have none
+.ttm-cell.is-style-span-2 .wp-block-post:first-child:not(:has(.ttm-item-featured__media img)) # state: fallback when the featured post has no image; the seed always sets one
+.ttm-series-featured__all # state: only when the featured series has more parts than series.hub_featured_parts; the auto-picked seeded series does not
+.ttm-writing-cell__footnote # state: writing-cell's "shelf" mode footnote; no fidelity screen falls back to that mode
+.ttm-series-mark.is-hiatus # state: no seeded series has ttm_status "hiatus"
+.ttm-writing-body:not(:has(.ttm-story-tiles)) .ttm-writing-body__stories # state: the Writing page's seed always has short fiction
+.ttm-writing-body:not(:has(.ttm-book-grid)) .ttm-writing-body__books # state: the Writing page's seed always has print books
+.ttm-writing-body:not(:has(.ttm-story-tiles, .ttm-book-grid)) # state: the Writing page's seed always has both

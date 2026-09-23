@@ -80,6 +80,20 @@ class SeriesPrevNextTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'Chapter 3', $html );
 	}
 
+	/**
+	 * SPEC §6.2 "Prev/next": a missing side keeps its cell (and so the grid and rules) -- here
+	 * the first part, which has no previous.
+	 */
+	public function test_missing_side_keeps_empty_cell(): void {
+		$ids = $this->make_series( 'hardening-wp', 'Hardening WordPress', [ [ 'part' => 1 ], [ 'part' => 2 ] ] );
+
+		$html = $this->render( $ids[1] );
+
+		$this->assertMatchesRegularExpression( '/<div class="ttm-prevnext__prev">\s*<\/div>/', $html );
+		$this->assertStringContainsString( 'class="ttm-prevnext__next"', $html );
+		$this->assertStringContainsString( 'Part 2 →', $html );
+	}
+
 	public function test_last_part_keeps_empty_next_cell(): void {
 		$ids = $this->make_series(
 			'hardening-wp',

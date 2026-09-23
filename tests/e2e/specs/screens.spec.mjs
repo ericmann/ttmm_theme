@@ -54,5 +54,17 @@ for ( const [ name, path ] of Object.entries( SCREENS ) ) {
 				).toHaveCount( 1 );
 			} );
 		}
+
+		// P5-01, rule 42: at 1920 every screen stays a centred 1280 column.
+		test( 'is a centred 1280 column at 1920', async ( { page } ) => {
+			await page.setViewportSize( { width: 1920, height: 1080 } );
+			await page.goto( path );
+			const el = page.locator( '.wp-site-blocks' );
+			expect( await el.evaluate( ( node ) => node.clientWidth ) ).toBe(
+				1280
+			);
+			const box = await el.boundingBox();
+			expect( box.x ).toBeCloseTo( ( 1920 - 1280 ) / 2, 0 );
+		} );
 	} );
 }

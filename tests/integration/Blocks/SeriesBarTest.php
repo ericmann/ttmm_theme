@@ -123,6 +123,39 @@ class SeriesBarTest extends TTM_IntegrationTestCase {
 		$this->assertSame( 1, substr_count( $html, 'is-todo' ) );
 	}
 
+	/**
+	 * Decision "Series bar": the wrapper has exactly three grid children -- the mark, the text
+	 * group (label · linked name · part) and the right group (segments + "View series" link).
+	 */
+	public function test_bar_has_text_and_right_groups_with_view_link(): void {
+		$ids = $this->make_series(
+			'hardening-wp',
+			'Hardening WordPress',
+			6,
+			[
+				[ 'part' => 1 ],
+				[ 'part' => 2 ],
+				[ 'part' => 3 ],
+			]
+		);
+
+		$html = $this->render( $ids[3] );
+		$link = get_term_link( get_term_by( 'slug', 'hardening-wp', 'series' ) );
+		if ( is_wp_error( $link ) ) {
+			$this->fail( 'Series term link could not be resolved.' );
+		}
+
+		$this->assertSame( 1, substr_count( $html, 'class="ttm-series-bar__text"' ) );
+		$this->assertSame( 1, substr_count( $html, 'class="ttm-series-bar__right"' ) );
+		$this->assertMatchesRegularExpression( '/<span class="ttm-series-bar__label">Series &middot; <\/span><a class="ttm-series-bar__name" href="[^"]+">Hardening WordPress<\/a> &middot; <span class="ttm-series-bar__part tnum">Part 3 of 6<\/span>/', $html );
+		$this->assertMatchesRegularExpression( '/<span class="ttm-series-bar__right">\s*<span class="ttm-series-bar__segments">/', $html );
+		$this->assertStringContainsString( '<a class="ttm-series-bar__view" href="' . esc_url( $link ) . '">View series</a>', $html );
+
+		// Exactly three direct children of the wrapper: mark, text, right.
+		$this->assertSame( 1, preg_match( '/<div class="[^"]*ttm-series-bar[^"]*"[^>]*>(.*)<\/div>\s*$/s', $html, $m ) );
+		$this->assertSame( 3, preg_match_all( '/^\t<span class="ttm-series-(mark|bar__text|bar__right)/m', $m[1] ) );
+	}
+
 	public function test_f11_no_series_renders_nothing(): void {
 		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
 

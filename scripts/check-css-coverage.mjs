@@ -9,6 +9,7 @@ import {
 	collectMarkupClasses,
 	collectCssClasses,
 	parseAllowList,
+	filterSrcFiles,
 	report,
 } from './lib/css-coverage.mjs';
 
@@ -26,10 +27,14 @@ const CSS_FILES = [
 
 const ALLOW_PATH = 'scripts/css-coverage-allow.txt';
 
-// Files under plugins/ttm-core/src that are known not to contain markup
-// (e.g. pure data/config classes) never emit a ttm-* class literal, so
-// walking them costs nothing; nothing is skipped today.
-const SRC_SKIP = [];
+// P5-02 (rule 34 amendment): the flight has landed; the allow-list is empty
+// and no new pending lines are tolerated.
+export const ALLOW_PENDING = false;
+
+// Files under plugins/ttm-core/src that are known not to contain front-end
+// markup: `Fiction/Books.php` renders the wp-admin repeater UI for the seeded
+// books option, styled by wp-admin's own CSS, not ttm.css/style.css (R1-10).
+const SRC_SKIP = [ 'plugins/ttm-core/src/Fiction/Books.php' ];
 
 /**
  * Recursively list files under `dir`.
@@ -75,17 +80,43 @@ const renderFiles = readdirSync( 'plugins/ttm-core/blocks' )
 		}
 	} );
 
-const srcFiles = walk( 'plugins/ttm-core/src' ).filter(
-	( p ) => p.endsWith( '.php' ) && ! SRC_SKIP.includes( p )
+const srcFiles = filterSrcFiles(
+	walk( 'plugins/ttm-core/src' ).filter( ( p ) => p.endsWith( '.php' ) ),
+	SRC_SKIP
 );
 
 const allMarkupFiles = [ ...markupFiles, ...renderFiles, ...srcFiles ];
 
-const markup = collectMarkupClasses( readAll( allMarkupFiles ) );
-const css = collectCssClasses( readAll( CSS_FILES ).join( '\n' ) );
-const allow = parseAllowList( readFileSync( ALLOW_PATH, 'utf8' ) );
+// Block wrapper classes with no dedicated rule by design (R1-10): `archive-by-year`
+// and `most-read` apply no layout of their own beyond their children's own
+// selectors (`.ttm-archive-year`, `.ttm-numbered__row`, …), so `ttm-archive`/
+// `ttm-most-read` never need a CSS rule. A prior `.ttm-archive, .ttm-most-read
+// { display: block }` rule existed only to satisfy this scanner and has been
+// removed as a self-admitted no-op; this is the scanner-level exemption in
+// its place, not a decorative CSS rule.
+const UNSTYLED_WRAPPERS = new Set( [ 'ttm-archive', 'ttm-most-read' ] );
 
-const { missing, dead, allowCount } = report( { markup, css, allow } );
+const markup = new Set(
+	[ ...collectMarkupClasses( readAll( allMarkupFiles ) ) ].filter(
+		( cls ) => ! UNSTYLED_WRAPPERS.has( cls )
+	)
+);
+const css = collectCssClasses( readAll( CSS_FILES ).join( '\n' ) );
+let allow;
+try {
+	allow = parseAllowList( readFileSync( ALLOW_PATH, 'utf8' ), {
+		strict: true,
+	} );
+} catch ( err ) {
+	console.error( `css-coverage: ${ err.message }` );
+	process.exit( 1 );
+}
+
+const { missing, dead, allowCount, pendingCount } = report( {
+	markup,
+	css,
+	allow,
+} );
 
 if ( missing.length > 0 ) {
 	console.error(
@@ -101,16 +132,20 @@ if ( dead.length > 0 ) {
 	dead.forEach( ( cls ) => console.error( `  ${ cls }` ) );
 }
 
-if ( allowCount >= 10 ) {
+if ( ! ALLOW_PENDING && allowCount > 0 ) {
 	console.error(
-		`css-coverage: ${ ALLOW_PATH } has ${ allowCount } entries; keep it under 10 (rule 34/37).`
+		`css-coverage: ${ ALLOW_PATH } must be empty at flight end (rule 34); found ${ allowCount } line(s).`
 	);
 }
 
-if ( missing.length > 0 || dead.length > 0 || allowCount >= 10 ) {
+if (
+	missing.length > 0 ||
+	dead.length > 0 ||
+	( ! ALLOW_PENDING && allowCount > 0 )
+) {
 	process.exit( 1 );
 }
 
 console.log(
-	`css-coverage: ${ markup.size } markup classes, ${ css.size } css classes, ${ allowCount } allow-listed`
+	`css-coverage: ${ markup.size } markup classes, ${ css.size } css classes, ${ pendingCount } pending`
 );

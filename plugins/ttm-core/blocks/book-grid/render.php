@@ -32,7 +32,7 @@ if ( empty( $ttm_books ) ) {
 			'novel'       => __( 'Novel', 'ttm-core' ),
 			'novella'     => __( 'Novella', 'ttm-core' ),
 			'story-cycle' => __( 'Story cycle', 'ttm-core' ),
-			'collection'  => __( 'Collection', 'ttm-core' ),
+			'collection'  => __( 'Stories', 'ttm-core' ),
 			'nonfiction'  => __( 'Nonfiction', 'ttm-core' ),
 		];
 		$ttm_form_label  = $ttm_form_labels[ $ttm_book['form'] ] ?? ucfirst( str_replace( '-', ' ', (string) $ttm_book['form'] ) );

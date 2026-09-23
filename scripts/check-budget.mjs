@@ -23,8 +23,20 @@
 // strip's real CSS was measured (41984 -> 43008; 42583 measured, after the
 // same kind of comment-trimming). P3-05 still runs its own measurement pass
 // per its own scope, but should find this settled rather than raise again.
+// P0-01: rule 30 amendment raises the budget to 61440 ahead of this flight's
+// remaining templates (article, journal, archives, series hub, Writing);
+// no CSS added by this task. 61440 is the ⚠️ ASSUMPTION default and lives
+// only here and in CLAUDE.md; a later phase may tune it down in P5-03.
+// R1-06: ttm.css shipped at 61439/61440 -- one byte of headroom -- which had
+// forced several SPEC/PLAN-named declarations to be dropped to fit. Raised
+// to 62464 (the next 1024 multiple above 61439) to restore them with real
+// headroom. The number lives only here and in CLAUDE.md.
+// R4-01: shipped at 62463/62464 -- one byte of headroom -- which blocked the
+// series-row count `grid-row` placement fix and the Writing body flex-column
+// fix (rule 36). Raised to 63488 (the next 1024 multiple) to restore real
+// headroom. The number lives only here and in CLAUDE.md.
 import { statSync, existsSync } from 'node:fs';
-const cssBudgetBytes = 43008;
+const cssBudgetBytes = 63488;
 const file = 'themes/ttm-theme/assets/css/ttm.css';
 if ( ! existsSync( file ) ) {
 	console.error( `${ file } missing` );

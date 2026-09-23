@@ -84,6 +84,7 @@ class Config {
 			'series.index_batch'               => 500,
 			'series.max_purchase_links'        => 6,
 			'series.hub_featured_parts'        => 12,
+			'series.related_limit'             => 4,
 			'writing.also_running_limit'       => 3,
 			'writing.chapters_recent'          => 4,
 			'writing.story_tiles'              => 4,
@@ -150,6 +151,8 @@ class Config {
 			'journal_in_main_feed'             => true,
 			'comments_enabled'                 => false,
 			'seed.quiet_offset_days'           => 120,
+			// ⚠️ ASSUMPTION (P0-02): seed banner-image angle in degrees, Seeder only.
+			'seed.image_band_angle'            => 30,
 		];
 	}
 

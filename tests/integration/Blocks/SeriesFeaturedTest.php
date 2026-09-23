@@ -73,6 +73,21 @@ class SeriesFeaturedTest extends TTM_IntegrationTestCase {
 		return (string) do_blocks( '<!-- wp:ttm/series-featured' . $json . ' /-->' );
 	}
 
+	/**
+	 * get_term_field()'s default 'display' context runs descriptions through wpautop,
+	 * wrapping them in a <p> that esc_html() would then render as literal text.
+	 */
+	public function test_dek_is_plain_text_not_wpautop_wrapped(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$made = $this->make_series( 'hardening-wp', 'Hardening WordPress', 1, [ [ 'part' => 1 ] ] );
+		wp_update_term( $made['series_id'], 'series', [ 'description' => 'Six parts on hardening a WordPress install.' ] );
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( '<p class="ttm-series-featured__dek">Six parts on hardening a WordPress install.</p>', $html );
+		$this->assertStringNotContainsString( '&lt;p&gt;', $html );
+	}
+
 	public function test_features_ttm_featured_term_over_auto_pick(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
 		$this->make_series(
@@ -196,6 +211,83 @@ class SeriesFeaturedTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'All 3 →', $html );
 	}
 
+	public function test_kicker_joins_categories_with_middle_dots(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$tech     = $this->category_id( 'technology', 'Technology' );
+		$security = $this->category_id( 'security', 'Security' );
+
+		$term      = wp_insert_term( 'Cross Section Series', 'series' );
+		$series_id = (int) $term['term_id'];
+		update_term_meta( $series_id, 'ttm_total_parts', 2 );
+
+		$part1 = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+			]
+		);
+		update_post_meta( $part1, 'ttm_series_part', 1 );
+		update_post_meta( $part1, 'ttm_primary_category', $tech );
+		wp_set_object_terms( $part1, [ $series_id ], 'series' );
+
+		$part2 = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $security ],
+			]
+		);
+		update_post_meta( $part2, 'ttm_series_part', 2 );
+		update_post_meta( $part2, 'ttm_primary_category', $security );
+		wp_set_object_terms( $part2, [ $series_id ], 'series' );
+
+		SeriesIndex::rebuild();
+
+		$html = $this->render();
+
+		$this->assertMatchesRegularExpression( '/ttm-series-featured__kicker is-style-kicker">In progress · Technology · Security<\/p>/', $html );
+	}
+
+	public function test_title_is_h1_on_series_archive_and_h2_elsewhere(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$this->make_series( 'hardening-wp', 'Hardening WordPress', 1, [ [ 'part' => 1 ] ] );
+
+		$html = $this->render();
+		$this->assertStringContainsString( '<h2 class="ttm-series-featured__title">Hardening WordPress</h2>', $html );
+
+		$term = get_term_by( 'slug', 'hardening-wp', 'series' );
+		$this->go_to( (string) get_term_link( $term ) );
+
+		$html = $this->render();
+		$this->assertStringContainsString( '<h1 class="ttm-series-featured__title is-style-display-xl">Hardening WordPress</h1>', $html );
+	}
+
+	public function test_show_dek_renders_part_excerpts_for_published_parts_only(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$this->make_series(
+			'hardening-wp',
+			'Hardening WordPress',
+			2,
+			[
+				[
+					'part' => 1,
+					'date' => '2026-01-01 09:00:00',
+				],
+				[
+					'part'   => 2,
+					'status' => 'future',
+					'date'   => '2026-09-26 09:00:00',
+				],
+			]
+		);
+
+		$html = $this->render( [ 'showDek' => true ] );
+
+		$this->assertSame( 1, substr_count( $html, 'ttm-series-featured__part-dek' ) );
+
+		$html = $this->render();
+		$this->assertStringNotContainsString( 'ttm-series-featured__part-dek', $html );
+	}
+
 	public function test_f24_scheduled_part_row_unlinked_with_date(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
 		$this->make_series(
@@ -218,7 +310,7 @@ class SeriesFeaturedTest extends TTM_IntegrationTestCase {
 		$html = $this->render();
 
 		$this->assertStringContainsString( 'is-scheduled', $html );
-		$this->assertStringContainsString( 'title="Scheduled Sept 26"', $html );
+		$this->assertMatchesRegularExpression( '/<span class="ttm-series-featured__part-title" title="Scheduled Sept 26">/', $html );
 
 		preg_match( '/<li class="ttm-series-featured__part is-scheduled">(.*?)<\/li>/s', $html, $m );
 		$this->assertNotEmpty( $m );

@@ -21,6 +21,7 @@
 		"slug": "about",
 		"title": "About",
 		"template": "page",
-		"content": "<!-- wp:paragraph --><p>This site is technology, business, faith and the occasional story, written by one person who works across all four most weeks and rarely at the same desk twice.</p><!-- /wp:paragraph --><!-- wp:paragraph --><p>The consulting work funds the fiction and the fiction keeps the consulting honest. The Journal is whatever did not fit anywhere else.</p><!-- /wp:paragraph -->"
+		"content": "<!-- wp:paragraph --><p>This site is technology, business, faith and the occasional story, written by one person who works across all four most weeks and rarely at the same desk twice.</p><!-- /wp:paragraph --><!-- wp:paragraph --><p>The consulting work funds the fiction and the fiction keeps the consulting honest. The Journal is whatever did not fit anywhere else.</p><!-- /wp:paragraph -->",
+		"featured_image": true
 	}
 ]

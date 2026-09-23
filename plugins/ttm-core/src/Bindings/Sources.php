@@ -32,6 +32,8 @@ class Sources {
 	 */
 	public static function register(): void {
 		add_action( 'init', [ self::class, 'register_sources' ] );
+		add_filter( 'render_block_core/paragraph', [ self::class, 'drop_empty_bound' ], 20, 2 );
+		add_filter( 'render_block_core/heading', [ self::class, 'drop_empty_bound' ], 20, 2 );
 		add_filter( 'render_block_core/query-pagination-next', [ self::class, 'label_next' ], 10, 3 );
 		add_filter( 'render_block_core/query-pagination-previous', [ self::class, 'label_previous' ], 10, 3 );
 	}
@@ -164,6 +166,137 @@ class Sources {
 				'get_value_callback' => [ self::class, 'verse_copyright' ],
 			]
 		);
+
+		register_block_bindings_source(
+			'ttm/newsletter-copy',
+			[
+				'label'              => __( 'TTM: Newsletter copy', 'ttm-core' ),
+				'get_value_callback' => [ self::class, 'newsletter_copy' ],
+				'uses_context'       => [ 'postId', 'postType' ],
+			]
+		);
+
+		register_block_bindings_source(
+			'ttm/section-label',
+			[
+				'label'              => __( 'TTM: Section label', 'ttm-core' ),
+				'get_value_callback' => [ self::class, 'section_label' ],
+				'uses_context'       => [ 'postId', 'postType' ],
+			]
+		);
+
+		register_block_bindings_source(
+			'ttm/archive-kind',
+			[
+				'label'              => __( 'TTM: Archive kind', 'ttm-core' ),
+				'get_value_callback' => [ self::class, 'archive_kind' ],
+			]
+		);
+
+		register_block_bindings_source(
+			'ttm/search-summary',
+			[
+				'label'              => __( 'TTM: Search summary', 'ttm-core' ),
+				'get_value_callback' => [ self::class, 'search_summary' ],
+			]
+		);
+	}
+
+	/**
+	 * `ttm/archive-kind` (Decision S5): "Section" / "Tag" / "Month" / "Year" / "Day" / "Author" /
+	 * "Search" from the main query's conditionals; '' elsewhere.
+	 *
+	 * @param array<string, mixed> $source_args    Unused: no args.
+	 * @param WP_Block             $block_instance Consuming block.
+	 * @param string               $attribute_name Consuming attribute.
+	 * @return string
+	 */
+	public static function archive_kind( array $source_args, $block_instance, string $attribute_name ): string {
+		unset( $source_args );
+
+		$flags = [
+			'category' => is_category(),
+			'tag'      => is_tag(),
+			'month'    => is_month(),
+			'year'     => is_year(),
+			'day'      => is_day(),
+			'author'   => is_author(),
+			'search'   => is_search(),
+		];
+
+		return self::finalize( Values::archive_kind( $flags ), $block_instance, $attribute_name );
+	}
+
+	/**
+	 * `ttm/search-summary` (Decision "New bindings"): '' outside `is_search()`.
+	 *
+	 * @param array<string, mixed> $source_args    Unused: no args.
+	 * @param WP_Block             $block_instance Consuming block.
+	 * @param string               $attribute_name Consuming attribute.
+	 * @return string
+	 */
+	public static function search_summary( array $source_args, $block_instance, string $attribute_name ): string {
+		unset( $source_args );
+
+		if ( ! is_search() ) {
+			return '';
+		}
+
+		global $wp_query;
+		$found = $wp_query instanceof \WP_Query ? (int) $wp_query->found_posts : 0;
+
+		return self::finalize( Values::search_summary( get_search_query(), $found ), $block_instance, $attribute_name );
+	}
+
+	/**
+	 * `ttm/newsletter-copy` (Decision S3): "Get the next part" on a single post that belongs to
+	 * a series or on a series term archive, else "The weekly issue."
+	 *
+	 * @param array<string, mixed> $source_args    Unused: no args.
+	 * @param WP_Block             $block_instance Consuming block.
+	 * @param string               $attribute_name Consuming attribute.
+	 * @return string
+	 */
+	public static function newsletter_copy( array $source_args, $block_instance, string $attribute_name ): string {
+		unset( $source_args );
+
+		$in_series = is_tax( 'series' );
+
+		if ( ! $in_series && is_singular( 'post' ) ) {
+			$post_id   = (int) ( $block_instance->context['postId'] ?? get_queried_object_id() );
+			$in_series = $post_id > 0 && null !== SeriesIndex::for_post( $post_id );
+		}
+
+		return self::finalize( Values::newsletter_title( $in_series ), $block_instance, $attribute_name );
+	}
+
+	/**
+	 * `ttm/section-label` (Decision "New bindings"): `{"format":"more-in"}` -> "More in {primary
+	 * category name}" on a singular post; `{"format":"series-in"}` -> "Series in {queried
+	 * category name}" on a category archive; `{"format":"search-row"}` -> the looped post's
+	 * primary category name, plain (R1-01: search result row kicker, whole-row-link safe); ''
+	 * otherwise.
+	 *
+	 * @param array{format?: string} $source_args    `{format: 'more-in'|'series-in'|'search-row'}`.
+	 * @param WP_Block               $block_instance Consuming block.
+	 * @param string                 $attribute_name Consuming attribute.
+	 * @return string
+	 */
+	public static function section_label( array $source_args, $block_instance, string $attribute_name ): string {
+		$format = (string) ( $source_args['format'] ?? 'more-in' );
+		$name   = '';
+
+		if ( 'more-in' === $format || 'search-row' === $format ) {
+			$post_id     = (int) ( $block_instance->context['postId'] ?? 0 );
+			$category_id = $post_id ? PrimaryCategory::id( $post_id ) : 0;
+			$category    = $category_id ? get_term( $category_id, 'category' ) : null;
+			$name        = $category && ! is_wp_error( $category ) ? (string) $category->name : '';
+		} elseif ( 'series-in' === $format && is_category() ) {
+			$queried = get_queried_object();
+			$name    = $queried instanceof \WP_Term ? (string) $queried->name : '';
+		}
+
+		return self::finalize( Values::section_label( $format, $name ), $block_instance, $attribute_name );
 	}
 
 	/**
@@ -273,16 +406,16 @@ class Sources {
 	}
 
 	/**
-	 * `ttm/short-date`.
+	 * `ttm/short-date`. `{"noYear":true}` (R1-04) drops the year entirely, for a row already
+	 * grouped under a year label (`ttm-archive-by-year`); the default keeps `Dates::short()`'s
+	 * year-when-different behaviour for the journal stream, search rows and hub part dates.
 	 *
-	 * @param array<string, mixed> $source_args    Unused: no args.
+	 * @param array{noYear?: bool} $source_args    `{noYear: bool}`.
 	 * @param WP_Block             $block_instance Consuming block.
 	 * @param string               $attribute_name Consuming attribute.
 	 * @return string
 	 */
 	public static function short_date( array $source_args, $block_instance, string $attribute_name ): string {
-		unset( $source_args );
-
 		$post = self::context_post( $block_instance );
 		if ( ! $post ) {
 			return '';
@@ -293,7 +426,11 @@ class Sources {
 			return '';
 		}
 
-		return self::finalize( Values::short_date( $date, Clock::now() ), $block_instance, $attribute_name );
+		$value = ! empty( $source_args['noYear'] )
+			? Values::short_date_no_year( $date )
+			: Values::short_date( $date, Clock::now() );
+
+		return self::finalize( $value, $block_instance, $attribute_name );
 	}
 
 	/**
@@ -389,7 +526,7 @@ class Sources {
 	}
 
 	/**
-	 * `ttm/word-count`.
+	 * `ttm/word-count` (`{"whenUnsyndicated": true}` -> '' when the post has any syndication URL).
 	 *
 	 * @param array<string, mixed> $source_args    Unused: no args.
 	 * @param WP_Block             $block_instance Consuming block.
@@ -397,16 +534,53 @@ class Sources {
 	 * @return string
 	 */
 	public static function word_count( array $source_args, $block_instance, string $attribute_name ): string {
-		unset( $source_args );
-
 		$post_id = (int) ( $block_instance->context['postId'] ?? 0 );
 		if ( ! $post_id ) {
 			return '';
 		}
 
-		$words = (int) get_post_meta( $post_id, 'ttm_word_count', true );
+		$words      = (int) get_post_meta( $post_id, 'ttm_word_count', true );
+		$suppressed = ! empty( $source_args['whenUnsyndicated'] ) && self::is_syndicated( $post_id );
 
-		return self::finalize( Values::word_count( $words ), $block_instance, $attribute_name );
+		return self::finalize( Values::word_count( $words, $suppressed ), $block_instance, $attribute_name );
+	}
+
+	/**
+	 * Whether `ttm_syndication` holds at least one non-empty URL (SPEC §6.4 F14 inverse).
+	 *
+	 * @param int $post_id Post id.
+	 * @return bool
+	 */
+	private static function is_syndicated( int $post_id ): bool {
+		$syndication = get_post_meta( $post_id, 'ttm_syndication', true );
+		if ( ! is_array( $syndication ) ) {
+			return false;
+		}
+
+		foreach ( $syndication as $url ) {
+			if ( is_string( $url ) && '' !== trim( $url ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Decision "Empty bound blocks": a paragraph/heading bound to a `ttm/*` source whose rendered
+	 * text is empty renders nothing at all (06 governing rule: nothing renders empty).
+	 *
+	 * @param string               $content      Rendered block HTML.
+	 * @param array<string, mixed> $parsed_block Parsed block.
+	 * @return string
+	 */
+	public static function drop_empty_bound( string $content, array $parsed_block ): string {
+		$source = (string) ( $parsed_block['attrs']['metadata']['bindings']['content']['source'] ?? '' );
+		if ( 0 !== strpos( $source, 'ttm/' ) ) {
+			return $content;
+		}
+
+		return '' === trim( wp_strip_all_tags( $content ) ) ? '' : $content;
 	}
 
 	/**
@@ -528,6 +702,18 @@ class Sources {
 	private static function relabel_pagination( string $content, $block, string $dir ): string {
 		if ( empty( $block->context['query']['inherit'] ) ) {
 			return $content;
+		}
+
+		// Decision "Pagination": core renders '' when there is no next/previous page; that
+		// side becomes a disabled, unlinked span with the literal (year-less) label.
+		if ( '' === trim( $content ) ) {
+			$tag = 'older' === $dir ? 'next' : 'previous';
+
+			return sprintf(
+				'<span class="wp-block-query-pagination-%1$s is-disabled">%2$s</span>',
+				$tag,
+				esc_html( Values::pagination_disabled_label( $dir ) )
+			);
 		}
 
 		$label = self::resolve_pagination_label( $dir );
@@ -720,7 +906,7 @@ class Sources {
 
 		$names = wp_list_pluck( array_slice( $tags, 0, $limit ), 'name' );
 
-		return implode( ', ', $names );
+		return Values::tags_line( $names );
 	}
 
 	/**

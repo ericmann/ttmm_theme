@@ -31,8 +31,8 @@
 		},
 		"layout": {
 			"type": "string",
-			"enum": [ "rows", "grid-2", "grid-3", "strip" ],
-			"default": "rows"
+			"enum": [ "list", "rail", "grid-2", "grid-3", "strip" ],
+			"default": "list"
 		},
 		"orderby": {
 			"type": "string",

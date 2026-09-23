@@ -127,6 +127,18 @@ class Values {
 	}
 
 	/**
+	 * "Sept 20" -- never a year, for a row already grouped under a year label (R1-01/R1-04:
+	 * `ttm/short-date` `{"noYear":true}`, `ttm-archive-by-year` rows). `Dates::short()` itself is
+	 * untouched: the journal stream, search rows and hub part dates keep the year when it differs.
+	 *
+	 * @param DateTimeImmutable $d Date.
+	 * @return string
+	 */
+	public static function short_date_no_year( DateTimeImmutable $d ): string {
+		return Dates::short_month( $d ) . ' ' . $d->format( 'j' );
+	}
+
+	/**
 	 * "Today · Sept 20" / "Yesterday · Sept 19" / "Thursday · Sept 17" (within `$window` days) /
 	 * "Sept 3" (within `$rail_window` days) / "Aug 3, 2026" (older — always with year, even the
 	 * current year; Decisions, P3-05).
@@ -152,15 +164,21 @@ class Values {
 	}
 
 	/**
-	 * "431 articles →" / "431 →" / "All 431 entries"; 0 → "All →" for every format (F25).
+	 * "431 articles →" / "431 →" / "All 431 entries" / "Full journal · 87 entries"; 0 → "All →"
+	 * for every format (F25).
 	 *
 	 * @param int    $count  Post count.
-	 * @param string $format `articles`, `short` or `entries`.
+	 * @param string $format `articles`, `short`, `entries` or `journal-full`.
 	 * @return string
 	 */
 	public static function category_count( int $count, string $format ): string {
 		if ( 0 === $count ) {
 			return __( 'All →', 'ttm-core' );
+		}
+
+		if ( 'journal-full' === $format ) {
+			/* translators: %d: journal entry count. */
+			return sprintf( __( 'Full journal · %d entries', 'ttm-core' ), $count );
 		}
 
 		if ( 'entries' === $format ) {
@@ -240,10 +258,16 @@ class Values {
 	/**
 	 * "248 words"; `''` when the count is 0 (not yet computed).
 	 *
-	 * @param int $words Word count.
+	 * @param int  $words      Word count.
+	 * @param bool $suppressed `whenUnsyndicated` in effect: the post is syndicated, so the
+	 *                         standing-note column must not repeat the count (F14 inverse).
 	 * @return string
 	 */
-	public static function word_count( int $words ): string {
+	public static function word_count( int $words, bool $suppressed = false ): string {
+		if ( $suppressed ) {
+			return '';
+		}
+
 		if ( 0 === $words ) {
 			return '';
 		}
@@ -352,5 +376,121 @@ class Values {
 
 		/* translators: 1: series name, 2: "N of M" or "part N". */
 		return sprintf( __( 'Series: %1$s, %2$s', 'ttm-core' ), $name, $part_label );
+	}
+
+	/**
+	 * Newsletter box title (Decision S3): "Get the next part" in series contexts (a single
+	 * post that belongs to a series, or a series term archive), else "The weekly issue."
+	 *
+	 * @param bool $in_series Whether the request is a series context.
+	 * @return string
+	 */
+	public static function newsletter_title( bool $in_series ): string {
+		return $in_series
+			? __( 'Get the next part', 'ttm-core' )
+			: __( 'The weekly issue.', 'ttm-core' );
+	}
+
+	/**
+	 * Cell-heading label with the section name inline (Decision "New bindings"): `more-in` ->
+	 * "More in Technology", `series-in` -> "Series in Technology", `search-row` -> "Technology"
+	 * (plain, for the search result row kicker, R1-01); `''` without a name or for an unknown
+	 * format.
+	 *
+	 * @param string $format `more-in`, `series-in` or `search-row`.
+	 * @param string $name   Category name, or ''.
+	 * @return string
+	 */
+	public static function section_label( string $format, string $name ): string {
+		if ( '' === $name ) {
+			return '';
+		}
+
+		if ( 'more-in' === $format ) {
+			/* translators: %s: category name. */
+			return sprintf( __( 'More in %s', 'ttm-core' ), $name );
+		}
+
+		if ( 'series-in' === $format ) {
+			/* translators: %s: category name. */
+			return sprintf( __( 'Series in %s', 'ttm-core' ), $name );
+		}
+
+		if ( 'search-row' === $format ) {
+			return $name;
+		}
+
+		return '';
+	}
+
+	/**
+	 * Archive kicker (Decision S5): the first true flag, in this order, names the archive --
+	 * "Section" (category), "Tag", "Month", "Year", "Day", "Author", "Search"; `''` otherwise
+	 * (the bound paragraph is then dropped, Decision "Empty bound blocks").
+	 *
+	 * @param array<string, bool> $flags `category|tag|month|year|day|author|search` => bool.
+	 * @return string
+	 */
+	public static function archive_kind( array $flags ): string {
+		$labels = [
+			'category' => __( 'Section', 'ttm-core' ),
+			'tag'      => __( 'Tag', 'ttm-core' ),
+			'month'    => __( 'Month', 'ttm-core' ),
+			'year'     => __( 'Year', 'ttm-core' ),
+			'day'      => __( 'Day', 'ttm-core' ),
+			'author'   => __( 'Author', 'ttm-core' ),
+			'search'   => __( 'Search', 'ttm-core' ),
+		];
+
+		foreach ( $labels as $kind => $label ) {
+			if ( ! empty( $flags[ $kind ] ) ) {
+				return $label;
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * Join tag names for the "tags-or-series" meta-line part (Decision "New bindings"
+	 * extension): middle dots, not commas.
+	 *
+	 * @param string[] $names Tag names.
+	 * @return string
+	 */
+	public static function tags_line( array $names ): string {
+		return implode( ' · ', $names );
+	}
+
+	/**
+	 * The disabled side of pagination (Decision "Pagination"): literal, with no year range,
+	 * since there is no target page to name one from.
+	 *
+	 * @param string $dir `older` or `newer`.
+	 * @return string
+	 */
+	public static function pagination_disabled_label( string $dir ): string {
+		return 'newer' === $dir
+			? __( '← Newer', 'ttm-core' )
+			: __( 'Older →', 'ttm-core' );
+	}
+
+	/**
+	 * Search results summary (Decision "New bindings"): "Results for “{q}”" or "Nothing
+	 * matched “{q}”." when there are none; '' when not a search request (the caller checks
+	 * `is_search()`).
+	 *
+	 * @param string $query Search query.
+	 * @param int    $found Matching post count.
+	 * @return string
+	 */
+	public static function search_summary( string $query, int $found ): string {
+		if ( 0 === $found ) {
+			/* translators: %s: the search query. */
+			return sprintf( __( 'Nothing matched “%s”.', 'ttm-core' ), $query );
+		}
+
+		/* translators: %s: the search query. */
+		return sprintf( __( 'Results for “%s”', 'ttm-core' ), $query );
 	}
 }

@@ -89,6 +89,24 @@ class HubWritingTemplatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'ttm-series-row', $html );
 	}
 
+	/**
+	 * Decision "ttm/series-featured" / SPEC §6.7 "All series": the hub carries no newsletter
+	 * box (removed alongside P4-02's grid-2 styling).
+	 */
+	public function test_series_index_has_no_newsletter_box(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$this->make_series( 'hardening-wp', 'Hardening WordPress', 6, [ [ 'part' => 1 ] ] );
+
+		$html = $this->render_template( 'page-series' );
+
+		$this->assertStringNotContainsString( 'ttm-newsletter-box', $html );
+	}
+
+	/**
+	 * SPEC §6.7 "Single series": the featured block's title is an h1 with `showDek: true`
+	 * (a dek per published part), the full uncapped part list, and "Other series" falls back
+	 * to `series.related_limit` (4) with no explicit `limit` on the block.
+	 */
 	public function test_single_series_renders_full_part_list_and_other_series_excluding_itself(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
 		$featured = $this->make_series(
@@ -97,19 +115,23 @@ class HubWritingTemplatesTest extends TTM_IntegrationTestCase {
 			3,
 			[ [ 'part' => 1 ], [ 'part' => 2 ], [ 'part' => 3 ] ]
 		);
-		$this->make_series( 'reading-cves', 'Reading CVEs', 4, [ [ 'part' => 4 ] ], [ 'ttm_status' => 'complete' ] );
+		foreach ( range( 1, 5 ) as $i ) {
+			$this->make_series( "other-series-{$i}", "Other Series {$i}", 1, [ [ 'part' => 1 ] ] );
+		}
 
 		$term = get_term( $featured['series_id'], 'series' );
 		$this->go_to( (string) get_term_link( $term ) );
 
 		$html = $this->render_template( 'taxonomy-series' );
 
-		$this->assertStringContainsString( 'Hardening WordPress', $html );
+		$this->assertStringContainsString( '<h1 class="ttm-series-featured__title is-style-display-xl">Hardening WordPress</h1>', $html );
 		$this->assertSame( 3, substr_count( $html, 'ttm-series-featured__part ' ) );
+		$this->assertSame( 3, substr_count( $html, 'ttm-series-featured__part-dek' ) );
 		$this->assertStringNotContainsString( 'All 3 →', $html );
 		$this->assertStringContainsString( 'Other series', $html );
-		$this->assertStringContainsString( 'Reading CVEs', $html );
-		$this->assertSame( 1, substr_count( $html, 'class="ttm-series-row"' ) );
+		$other_count = substr_count( $html, 'class="ttm-series-row"' );
+		$this->assertGreaterThanOrEqual( 1, $other_count );
+		$this->assertLessThanOrEqual( 4, $other_count );
 	}
 
 	public function test_writing_page_renders_hero_serials_chapters_tiles_and_books(): void {
@@ -163,11 +185,63 @@ class HubWritingTemplatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'ttm-serial-hero', $html );
 		$this->assertStringContainsString( 'The Quiet Ledger', $html );
 		$this->assertStringContainsString( 'All serials', $html );
-		$this->assertStringContainsString( 'Recent chapters', $html );
+		$this->assertStringContainsString( 'The Quiet Ledger — recent chapters', $html );
 		$this->assertStringContainsString( 'ttm-story-tiles', $html );
 		$this->assertStringContainsString( 'A Quiet Field', $html );
 		$this->assertStringContainsString( 'ttm-book-grid', $html );
 		$this->assertStringContainsString( 'Salt and Iron', $html );
+	}
+
+	public function test_writing_body_columns_are_layout_default(): void {
+		// Rule 36 / SPEC §3.1: the writing-body main/aside columns are
+		// `layout: default` groups, not core's flex-vertical (which forces
+		// `align-items: flex-start` and shrinks its children); ttm.css owns
+		// their internal flex-column layout instead (R4-01).
+		$this->set_now( '2026-09-20 12:00:00' );
+		$this->make_series(
+			'the-quiet-ledger',
+			'The Quiet Ledger',
+			31,
+			[ [ 'part' => 1 ], [ 'part' => 2 ] ],
+			[ 'ttm_form' => 'novel' ],
+			'writing'
+		);
+
+		$page_id = self::factory()->post->create(
+			[
+				'post_type'  => 'page',
+				'post_name'  => 'writing',
+				'post_title' => 'Writing',
+			]
+		);
+		$this->go_to( (string) get_permalink( $page_id ) );
+
+		global $post;
+		$post = get_post( $page_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture mirrors a real page render context.
+		setup_postdata( $post );
+
+		$html = $this->render_template( 'page-writing' );
+
+		wp_reset_postdata();
+
+		$dom = new DOMDocument();
+		libxml_use_internal_errors( true );
+		$dom->loadHTML( '<?xml encoding="utf-8" ?>' . $html );
+		libxml_use_internal_errors( false );
+
+		$main   = $dom->getElementById( 'main' );
+		$asides = $dom->getElementsByTagName( 'aside' );
+
+		$this->assertNotNull( $main );
+		$this->assertGreaterThan( 0, $asides->length );
+
+		$main_class = $main->getAttribute( 'class' );
+		$this->assertStringNotContainsString( 'is-layout-flex', $main_class );
+		$this->assertStringNotContainsString( 'is-layout-constrained', $main_class );
+
+		$aside_class = $asides->item( 0 )->getAttribute( 'class' );
+		$this->assertStringNotContainsString( 'is-layout-flex', $aside_class );
+		$this->assertStringNotContainsString( 'is-layout-constrained', $aside_class );
 	}
 
 	public function test_writing_category_archive_uses_page_writing_template(): void {
@@ -267,7 +341,10 @@ class HubWritingTemplatesTest extends TTM_IntegrationTestCase {
 
 		wp_reset_postdata();
 
-		$this->assertStringNotContainsString( 'ttm-story-tiles', $html );
+		// Not `ttm-story-tiles` alone: the static `.ttm-story-tiles__note` paragraph
+		// (CSS-hidden via `.ttm-writing-body:not(:has(.ttm-story-tiles))`) contains it
+		// as a substring even when the story-tiles block itself renders nothing.
+		$this->assertStringNotContainsString( 'data-ttm-block="story-tiles"', $html );
 		$this->assertStringNotContainsString( 'ttm-book-grid', $html );
 	}
 }

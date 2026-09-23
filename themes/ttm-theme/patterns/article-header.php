@@ -11,17 +11,17 @@
 declare( strict_types=1 );
 
 ?>
-<!-- wp:group {"className":"ttm-article-head","layout":{"type":"constrained"}} -->
+<!-- wp:group {"className":"ttm-article-head","layout":{"type":"default"}} -->
 <div class="wp-block-group ttm-article-head">
-	<!-- wp:post-terms {"term":"category","className":"is-style-kicker"} /-->
+	<!-- wp:post-terms {"term":"category","className":"is-style-kicker","separator":" · "} /-->
 
 	<!-- wp:post-title {"level":1} /-->
 
 	<!-- wp:post-excerpt {"className":"is-style-dek-l"} /-->
 
-	<!-- wp:group {"className":"ttm-byline","layout":{"type":"flex"}} -->
+	<!-- wp:group {"className":"ttm-byline","layout":{"type":"default"}} -->
 	<div class="wp-block-group ttm-byline">
-		<!-- wp:post-author-name {"prefix":"By "} /-->
+		<!-- wp:post-author-name {"prefix":"By ","isLink":true} /-->
 
 		<!-- wp:post-date {"format":"F j, Y"} /-->
 

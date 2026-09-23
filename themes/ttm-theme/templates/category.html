@@ -2,28 +2,28 @@
 
 <!-- wp:pattern {"slug":"ttm/archive-header"} /-->
 
-<!-- wp:pattern {"slug":"ttm/filter-row"} /-->
+<!-- wp:ttm/tag-filter /-->
 
-<!-- wp:group {"className":"is-style-grid-8-4","layout":{"type":"default"}} -->
-<div class="wp-block-group is-style-grid-8-4">
-	<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+<!-- wp:group {"className":"is-style-grid-8-4 ttm-archive-body","layout":{"type":"default"}} -->
+<div class="wp-block-group is-style-grid-8-4 ttm-archive-body">
+	<!-- wp:group {"tagName":"main","layout":{"type":"default"}} -->
 	<main class="wp-block-group" id="main">
 		<!-- wp:ttm/archive-by-year -->
 		<!-- wp:query {"queryId":0,"query":{"perPage":12,"postType":"post","inherit":true}} -->
 		<div class="wp-block-query">
 			<!-- wp:post-template -->
-				<!-- wp:group {"className":"ttm-archive-row"} -->
+				<!-- wp:group {"className":"ttm-archive-row","layout":{"type":"default"}} -->
 				<div class="wp-block-group ttm-archive-row">
-					<!-- wp:paragraph {"className":"is-style-micro","metadata":{"bindings":{"content":{"source":"ttm/short-date"}}}} -->
-					<p class="is-style-micro"></p>
+					<!-- wp:post-title {"isLink":false,"level":3,"className":"ttm-archive-row__title"} /-->
+
+					<!-- wp:paragraph {"className":"ttm-archive-row__date","metadata":{"bindings":{"content":{"source":"ttm/short-date","args":{"noYear":true}}}}} -->
+					<p class="ttm-archive-row__date"></p>
 					<!-- /wp:paragraph -->
 
-					<!-- wp:post-title {"isLink":true} /-->
+					<!-- wp:post-excerpt {"className":"ttm-archive-row__dek"} /-->
 
-					<!-- wp:post-excerpt /-->
-
-					<!-- wp:paragraph {"className":"ttm-item__meta","metadata":{"bindings":{"content":{"source":"ttm/meta-line","args":{"parts":["reading","tags-or-series"]}}}}} -->
-					<p class="ttm-item__meta"></p>
+					<!-- wp:paragraph {"className":"ttm-archive-row__meta","metadata":{"bindings":{"content":{"source":"ttm/meta-line","args":{"parts":["reading","tags-or-series"],"readingFormat":"short"}}}}} -->
+					<p class="ttm-archive-row__meta"></p>
 					<!-- /wp:paragraph -->
 				</div>
 				<!-- /wp:group -->
@@ -31,7 +31,6 @@
 
 			<!-- wp:query-pagination -->
 			<!-- wp:query-pagination-previous /-->
-			<!-- wp:query-pagination-numbers /-->
 			<!-- wp:query-pagination-next /-->
 			<!-- /wp:query-pagination -->
 		</div>
@@ -40,19 +39,17 @@
 	</main>
 	<!-- /wp:group -->
 
-	<!-- wp:group {"tagName":"aside","layout":{"type":"constrained"}} -->
+	<!-- wp:group {"tagName":"aside","layout":{"type":"default"}} -->
 	<aside class="wp-block-group" aria-label="Section extras">
-		<!-- wp:group {"className":"ttm-cell-heading","layout":{"type":"default"}} -->
-		<div class="wp-block-group ttm-cell-heading">
-			<!-- wp:heading {"level":3,"className":"ttm-cell-heading__label"} -->
-			<h3 class="ttm-cell-heading__label">Series in</h3>
+		<!-- wp:group {"className":"ttm-cell-heading is-rail","layout":{"type":"default"}} -->
+		<div class="wp-block-group ttm-cell-heading is-rail">
+			<!-- wp:heading {"level":3,"className":"ttm-cell-heading__label","metadata":{"bindings":{"content":{"source":"ttm/section-label","args":{"format":"series-in"}}}}} -->
+			<h3 class="wp-block-heading ttm-cell-heading__label">Series in</h3>
 			<!-- /wp:heading -->
-
-			<!-- wp:query-title {"type":"archive","showPrefix":false,"className":"ttm-cell-heading__link"} /-->
 		</div>
 		<!-- /wp:group -->
 
-		<!-- wp:ttm/series-list {"inCategory":true,"layout":"rows","limit":4} /-->
+		<!-- wp:ttm/series-list {"inCategory":true,"layout":"rail","limit":4} /-->
 
 		<!-- wp:ttm/most-read /-->
 	</aside>

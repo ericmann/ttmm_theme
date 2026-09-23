@@ -2,23 +2,27 @@
 
 <!-- wp:pattern {"slug":"ttm/archive-header"} /-->
 
-<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
-<main class="wp-block-group" id="main">
+<!-- wp:separator {"className":"is-style-rule-2"} -->
+<hr class="wp-block-separator has-alpha-channel-opacity is-style-rule-2"/>
+<!-- /wp:separator -->
+
+<!-- wp:group {"tagName":"main","className":"ttm-journal-archive","layout":{"type":"default"}} -->
+<main class="wp-block-group ttm-journal-archive" id="main">
 	<!-- wp:query {"queryId":0,"query":{"perPage":20,"postType":"post","inherit":true}} -->
 	<div class="wp-block-query">
 		<!-- wp:post-template -->
-			<!-- wp:group {"className":"ttm-journal-row"} -->
+			<!-- wp:group {"className":"ttm-journal-row","layout":{"type":"default"}} -->
 			<div class="wp-block-group ttm-journal-row">
+				<!-- wp:post-title {"isLink":false,"level":3} /-->
+
 				<!-- wp:paragraph {"className":"is-style-journal-stream-date","metadata":{"bindings":{"content":{"source":"ttm/short-date"}}}} -->
 				<p class="is-style-journal-stream-date"></p>
 				<!-- /wp:paragraph -->
 
-				<!-- wp:post-title {"isLink":true} /-->
-
 				<!-- wp:post-excerpt /-->
 
-				<!-- wp:paragraph {"className":"is-style-micro","metadata":{"bindings":{"content":{"source":"ttm/word-count"}}}} -->
-				<p class="is-style-micro"></p>
+				<!-- wp:paragraph {"className":"ttm-journal-row__words","metadata":{"bindings":{"content":{"source":"ttm/word-count"}}}} -->
+				<p class="ttm-journal-row__words"></p>
 				<!-- /wp:paragraph -->
 			</div>
 			<!-- /wp:group -->
@@ -26,7 +30,6 @@
 
 		<!-- wp:query-pagination -->
 		<!-- wp:query-pagination-previous /-->
-		<!-- wp:query-pagination-numbers /-->
 		<!-- wp:query-pagination-next /-->
 		<!-- /wp:query-pagination -->
 	</div>

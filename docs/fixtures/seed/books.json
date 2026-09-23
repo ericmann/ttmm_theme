@@ -1,25 +1,10 @@
 [
 	{
-		"title": "The Quiet Ledger",
-		"form": "novel",
-		"year": 2026,
-		"formats": [
-			"ebook",
-			"paperback"
-		],
-		"links": [
-			{
-				"label": "Amazon",
-				"url": "https://amazon.com/the-quiet-ledger"
-			}
-		],
-		"series_slug": "the-quiet-ledger"
-	},
-	{
 		"title": "Salt Water Wires",
-		"form": "novella",
-		"year": 2025,
+		"form": "novel",
+		"year": 2022,
 		"formats": [
+			"paperback",
 			"ebook"
 		],
 		"links": [
@@ -28,6 +13,22 @@
 				"url": "https://amazon.com/salt-water-wires"
 			}
 		],
-		"series_slug": "salt-water-wires"
+		"series_slug": "salt-water-wires",
+		"cover": true
+	},
+	{
+		"title": "Eleven Small Doors",
+		"form": "collection",
+		"year": 2019,
+		"formats": [
+			"paperback"
+		],
+		"links": [
+			{
+				"label": "Amazon",
+				"url": "https://amazon.com/eleven-small-doors"
+			}
+		],
+		"cover": true
 	}
 ]

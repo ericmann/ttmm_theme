@@ -2,7 +2,7 @@
 
 <!-- wp:group {"className":"is-style-grid-3-7-2 ttm-journal-head","layout":{"type":"default"}} -->
 <div class="wp-block-group is-style-grid-3-7-2 ttm-journal-head">
-	<!-- wp:group {"layout":{"type":"constrained"}} -->
+	<!-- wp:group {"layout":{"type":"default"}} -->
 	<div class="wp-block-group">
 		<!-- wp:paragraph {"className":"is-style-kicker"} -->
 		<p class="is-style-kicker">Journal</p>
@@ -12,15 +12,15 @@
 		<p class="is-style-journal-date"></p>
 		<!-- /wp:paragraph -->
 
-		<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"ttm/journal-subline"}}}} -->
-		<p></p>
+		<!-- wp:paragraph {"className":"ttm-journal-head__subline","metadata":{"bindings":{"content":{"source":"ttm/journal-subline"}}}} -->
+		<p class="ttm-journal-head__subline"></p>
 		<!-- /wp:paragraph -->
 	</div>
 	<!-- /wp:group -->
 
-	<!-- wp:group {"tagName":"main","layout":{"type":"constrained"}} -->
+	<!-- wp:group {"tagName":"main","layout":{"type":"default"}} -->
 	<main class="wp-block-group" id="main">
-		<!-- wp:post-title {"className":"is-style-journal-title"} /-->
+		<!-- wp:post-title {"level":1,"className":"is-style-journal-title"} /-->
 
 		<!-- wp:post-content /-->
 
@@ -28,17 +28,17 @@
 	</main>
 	<!-- /wp:group -->
 
-	<!-- wp:group {"layout":{"type":"constrained"}} -->
-	<div class="wp-block-group">
-		<!-- wp:paragraph {"className":"is-style-meta"} -->
-		<p class="is-style-meta">Short, dated entries. Longer writing lives in the sections.</p>
+	<!-- wp:group {"className":"ttm-journal-head__aside","layout":{"type":"default"}} -->
+	<div class="wp-block-group ttm-journal-head__aside">
+		<!-- wp:paragraph {"className":"ttm-journal-head__note"} -->
+		<p class="ttm-journal-head__note">Journal entries are short and unpolished — things I saw and what they made me think. Longer arguments land in a section.</p>
 		<!-- /wp:paragraph -->
 
-		<!-- wp:paragraph -->
-		<p><a href="/category/journal/feed/">Journal RSS</a></p>
+		<!-- wp:paragraph {"className":"ttm-journal-head__rss"} -->
+		<p class="ttm-journal-head__rss"><a href="/category/journal/feed/">Journal RSS</a></p>
 		<!-- /wp:paragraph -->
 
-		<!-- wp:paragraph {"className":"ttm-journal-head__count","metadata":{"bindings":{"content":{"source":"ttm/word-count"}}}} -->
+		<!-- wp:paragraph {"className":"ttm-journal-head__count","metadata":{"bindings":{"content":{"source":"ttm/word-count","args":{"whenUnsyndicated":true}}}}} -->
 		<p class="ttm-journal-head__count"></p>
 		<!-- /wp:paragraph -->
 	</div>

@@ -12,6 +12,7 @@
 | article | 2b | `design_article.png` | `preview_article.png` | phase 2 result, 2026-09-21 |
 | journal post | 2c | `design_journal.png` | `preview_journal.png` | phase 2 result |
 | Writing page | 2d | `design_serial.png` | `preview_serial.png` | phase 2 result |
+| every inner page + the front page at 1920 | 2b, 2c, 2d, 1e, 1f, 3b, 02 §H | `phase-3/` (see its README) | — | phase 3 flight, `refine/2026-09-22`, complete 2026-09-22 |
 
 The phase 2 previews were captured at 1870px wide; the page has no maximum width,
 which is itself one of the defects (SPEC v3 §6.1.0).

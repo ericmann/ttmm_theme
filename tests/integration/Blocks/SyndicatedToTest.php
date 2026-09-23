@@ -106,7 +106,8 @@ class SyndicatedToTest extends TTM_IntegrationTestCase {
 		$html = $this->render( $post );
 
 		$this->assertMatchesRegularExpression( '/^<div[^>]*class="[^"]*\bttm-syndication\b[^"]*"[^>]*data-ttm-block="syndication"/', trim( $html ) );
-		$this->assertStringContainsString( '<p>', $html );
+		$this->assertStringNotContainsString( '<p', $html );
+		$this->assertMatchesRegularExpression( '/<span class="ttm-syndication__text">Syndicated to <a href="[^"]+">X<\/a><\/span>\s*<span class="ttm-syndication__words">/', $html );
 	}
 
 	public function test_sentence_is_kses_filtered(): void {

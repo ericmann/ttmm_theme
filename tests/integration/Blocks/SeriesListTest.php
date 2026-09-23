@@ -7,9 +7,16 @@
 
 declare( strict_types=1 );
 
+use TTM\Core\Config;
 use TTM\Core\Query\SeriesIndex;
 
 class SeriesListTest extends TTM_IntegrationTestCase {
+
+	public function tear_down(): void {
+		update_option( 'ttm_settings', [] );
+		Config::reset();
+		parent::tear_down();
+	}
 
 	private function category_id( string $slug, string $name ): int {
 		$term = term_exists( $slug, 'category' );
@@ -153,7 +160,7 @@ class SeriesListTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'ttm-series-row__meta', $html );
 	}
 
-	public function test_categories_are_joined_with_middle_dots_in_rows_layout(): void {
+	public function test_categories_are_joined_with_middle_dots_in_list_layout(): void {
 		// SeriesIndex::categories_for() collects each *chapter's* primary category, not a
 		// single post's multiple categories, so two categories on one series needs two parts
 		// with different primary categories.
@@ -203,5 +210,264 @@ class SeriesListTest extends TTM_IntegrationTestCase {
 		preg_match( '/<a[^>]*>(.*?)<\/a>/s', $html, $matches );
 		$this->assertNotEmpty( $matches );
 		$this->assertStringStartsWith( 'Solo Series', trim( wp_strip_all_tags( $matches[1] ) ) );
+	}
+
+	public function test_rail_layout_renders_title_and_meta_only(): void {
+		$this->seed( 'normal' );
+
+		$html = $this->render(
+			[
+				'status' => 'in-progress',
+				'limit'  => 10,
+				'layout' => 'rail',
+			]
+		);
+
+		$row_start = strpos( $html, 'Ordinary Time' );
+		$this->assertIsInt( $row_start );
+		$row_html = substr( $html, $row_start, 400 );
+
+		$this->assertStringContainsString( 'Faith · 9 of 12 · Sundays', $row_html );
+		$this->assertStringNotContainsString( 'ttm-series-row__dek', $row_html );
+		$this->assertStringNotContainsString( 'ttm-series-row__count', $row_html );
+	}
+
+	public function test_layout_rows_is_no_longer_accepted(): void {
+		$schema = json_decode(
+			(string) file_get_contents( TTM_CORE_DIR . '/blocks/series-list/block.json' ),
+			true
+		);
+
+		$enum = $schema['attributes']['layout']['enum'];
+
+		$this->assertNotContains( 'rows', $enum );
+		$this->assertContains( 'list', $enum );
+		$this->assertContains( 'rail', $enum );
+		$this->assertSame( 'list', $schema['attributes']['layout']['default'] );
+	}
+
+	/**
+	 * SPEC §6.7 "All series": grid-2 rows are mark, title, dek, categories and count
+	 * (`__parts` over `__status`), the same markup `list` uses -- only the CSS differs.
+	 */
+	public function test_grid_2_layout_renders_dek_categories_and_count(): void {
+		$tech      = $this->category_id( 'technology', 'Technology' );
+		$security  = $this->category_id( 'security', 'Security' );
+		$series_id = $this->make_series( 'hardening-wp', 'Hardening WordPress', 'in-progress', 'nonfiction', $tech );
+		wp_update_term( $series_id, 'series', [ 'description' => 'Six parts on hardening a WordPress install.' ] );
+
+		// R1-05: `categories_for()` collects one (primary) category per part, so a second
+		// category on the row needs a second part in a different section -- and joins with
+		// " · ", not just renders.
+		$second_part = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $security ],
+				'post_date'     => '2026-02-01 09:00:00',
+			]
+		);
+		update_post_meta( $second_part, 'ttm_series_part', 2 );
+		update_post_meta( $second_part, 'ttm_primary_category', $security );
+		wp_set_object_terms( $second_part, [ $series_id ], 'series' );
+		SeriesIndex::rebuild();
+
+		$html = $this->render(
+			[
+				'status' => 'any',
+				'layout' => 'grid-2',
+			]
+		);
+
+		$this->assertStringContainsString( 'ttm-series-row__dek">Six parts on hardening a WordPress install.<', $html );
+		$this->assertStringContainsString( 'ttm-series-row__categories">Technology · Security<', $html );
+		$this->assertStringContainsString( 'ttm-series-row__count', $html );
+		$this->assertStringContainsString( 'ttm-series-row__parts">2 parts<', $html );
+		$this->assertStringContainsString( 'ttm-series-row__status">In progress<', $html );
+	}
+
+	/**
+	 * SPEC §6.5 "Body": `list` layout's meta line is "{Form} · {genre} · {cadence}" for
+	 * fiction (form labels Novel/Novella/Story cycle) and "{categories} · {cadence}" for
+	 * nonfiction, empties omitted; the stored cadence stays lowercase (SPEC §6.5, R1-04) --
+	 * capitalisation belongs only to `ttm/serial-hero`'s stat value (PLAN spec-issue #18).
+	 */
+	public function test_list_layout_form_line_for_fiction_and_nonfiction(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+
+		$fiction_id = $this->make_series( 'quiet-ledger', 'The Quiet Ledger', 'in-progress', 'novel', $tech );
+		update_term_meta( $fiction_id, 'ttm_genre', 'literary thriller' );
+		update_term_meta( $fiction_id, 'ttm_cadence', 'monthly' );
+
+		$nonfiction_id = $this->make_series( 'hardening-wp', 'Hardening WordPress', 'in-progress', 'nonfiction', $tech );
+		update_term_meta( $nonfiction_id, 'ttm_cadence', 'weekly' );
+
+		$html = $this->render( [ 'status' => 'any' ] );
+
+		$this->assertStringContainsString( 'ttm-series-row__meta">Novel · literary thriller · monthly<', $html );
+		$this->assertStringContainsString( 'ttm-series-row__meta">Technology · weekly<', $html );
+		$this->assertStringNotContainsString( '· Monthly<', $html );
+	}
+
+	/**
+	 * SPEC §6.5/§6.7 R4-02: a complete series' right cell reads "{N} chapters"
+	 * (fiction) / "{N} parts" (nonfiction) rather than "{N} of {N}" once the
+	 * planned total is reached.
+	 */
+	public function test_complete_fiction_series_count_reads_chapters(): void {
+		$tech      = $this->category_id( 'technology', 'Technology' );
+		$series_id = $this->make_series( 'failover', 'Failover', 'complete', 'novel', $tech );
+		update_term_meta( $series_id, 'ttm_total_parts', 9 );
+
+		for ( $i = 2; $i <= 9; $i++ ) {
+			$post_id = self::factory()->post->create(
+				[
+					'post_status'   => 'publish',
+					'post_category' => [ $tech ],
+					'post_date'     => "2026-0{$i}-01 09:00:00",
+				]
+			);
+			update_post_meta( $post_id, 'ttm_series_part', $i );
+			update_post_meta( $post_id, 'ttm_primary_category', $tech );
+			wp_set_object_terms( $post_id, [ $series_id ], 'series' );
+		}
+		SeriesIndex::rebuild();
+
+		$html = $this->render(
+			[
+				'status' => 'any',
+				'layout' => 'list',
+			]
+		);
+
+		$this->assertStringContainsString( 'ttm-series-row__parts">9 chapters<', $html );
+		$this->assertStringNotContainsString( '9 of 9', $html );
+	}
+
+	public function test_complete_nonfiction_series_count_reads_parts(): void {
+		$tech      = $this->category_id( 'technology', 'Technology' );
+		$series_id = $this->make_series( 'hardening-wp', 'Hardening WordPress', 'complete', 'nonfiction', $tech );
+		update_term_meta( $series_id, 'ttm_total_parts', 4 );
+
+		for ( $i = 2; $i <= 4; $i++ ) {
+			$post_id = self::factory()->post->create(
+				[
+					'post_status'   => 'publish',
+					'post_category' => [ $tech ],
+					'post_date'     => "2026-0{$i}-01 09:00:00",
+				]
+			);
+			update_post_meta( $post_id, 'ttm_series_part', $i );
+			update_post_meta( $post_id, 'ttm_primary_category', $tech );
+			wp_set_object_terms( $post_id, [ $series_id ], 'series' );
+		}
+		SeriesIndex::rebuild();
+
+		$html = $this->render(
+			[
+				'status' => 'any',
+				'layout' => 'grid-2',
+			]
+		);
+
+		$this->assertStringContainsString( 'ttm-series-row__parts">4 parts<', $html );
+		$this->assertStringNotContainsString( '4 of 4', $html );
+	}
+
+	/**
+	 * An in-progress series with a planned total still reads "N of M" (unchanged).
+	 */
+	public function test_in_progress_series_still_reads_n_of_m(): void {
+		$tech      = $this->category_id( 'technology', 'Technology' );
+		$series_id = $this->make_series( 'quiet-ledger', 'The Quiet Ledger', 'in-progress', 'novel', $tech );
+		update_term_meta( $series_id, 'ttm_total_parts', 31 );
+
+		for ( $i = 2; $i <= 12; $i++ ) {
+			$post_id = self::factory()->post->create(
+				[
+					'post_status'   => 'publish',
+					'post_category' => [ $tech ],
+					// All within January so every post stays published (not
+					// auto-promoted to "future") relative to the real clock.
+					'post_date'     => sprintf( '2026-01-%02d 09:00:00', $i ),
+				]
+			);
+			update_post_meta( $post_id, 'ttm_series_part', $i );
+			update_post_meta( $post_id, 'ttm_primary_category', $tech );
+			wp_set_object_terms( $post_id, [ $series_id ], 'series' );
+		}
+		SeriesIndex::rebuild();
+
+		$html = $this->render( [ 'status' => 'any' ] );
+
+		$this->assertStringContainsString( 'ttm-series-row__parts">12 of 31<', $html );
+	}
+
+	/**
+	 * REVIEW round 3 finding 4 / SPEC §2: the strip/rail meta line's count word is
+	 * untouched by the complete-series "chapters"/"parts" wording -- the front page's
+	 * strip must not move.
+	 */
+	public function test_strip_meta_count_unchanged_for_complete_series(): void {
+		$tech      = $this->category_id( 'technology', 'Technology' );
+		$series_id = $this->make_series( 'failover', 'Failover', 'complete', 'novel', $tech );
+		update_term_meta( $series_id, 'ttm_total_parts', 9 );
+
+		$html = $this->render(
+			[
+				'status' => 'any',
+				'layout' => 'strip',
+			]
+		);
+
+		$this->assertStringContainsString( '1 of 9', $html );
+		$this->assertStringNotContainsString( 'chapter', $html );
+	}
+
+	/**
+	 * SPEC §5: `excludeCurrent` with no explicit `limit` reads `series.related_limit`
+	 * (default 4), not the strip's own default of 3.
+	 */
+	public function test_exclude_current_without_limit_uses_related_limit(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+
+		$current = $this->make_series( 'current-series', 'Current Series', 'in-progress', 'nonfiction', $tech );
+		foreach ( range( 1, 5 ) as $i ) {
+			$this->make_series( "other-series-{$i}", "Other Series {$i}", 'in-progress', 'nonfiction', $tech );
+		}
+
+		$term = get_term( $current, 'series' );
+		global $wp_query;
+		$wp_query->queried_object         = $term;
+		$wp_query->queried_object_id      = $current;
+		$wp_query->query_vars['taxonomy'] = 'series';
+		set_query_var( 'series', get_term_field( 'slug', $current, 'series' ) );
+
+		$html = $this->render(
+			[
+				'status'         => 'any',
+				'excludeCurrent' => true,
+			] 
+		);
+
+		$this->assertStringNotContainsString( 'Current Series', $html );
+		$this->assertSame( 4, substr_count( $html, 'class="ttm-series-row"' ) );
+
+		add_filter(
+			'ttm_config',
+			static function ( array $config ): array {
+				$config['series.related_limit'] = 2;
+				return $config;
+			}
+		);
+		Config::reset();
+
+		$html = $this->render(
+			[
+				'status'         => 'any',
+				'excludeCurrent' => true,
+			] 
+		);
+
+		$this->assertSame( 2, substr_count( $html, 'class="ttm-series-row"' ) );
 	}
 }

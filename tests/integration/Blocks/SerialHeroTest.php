@@ -232,4 +232,25 @@ class SerialHeroTest extends TTM_IntegrationTestCase {
 
 		$this->assertSame( '', trim( $html ) );
 	}
+
+	/**
+	 * Rule 32: the stored cadence ("monthly") is capitalised on its first letter only for
+	 * display; the synopsis is the series term's description.
+	 */
+	public function test_cadence_is_capitalised_and_synopsis_is_term_description(): void {
+		$this->make_serial(
+			'the-quiet-ledger',
+			'The Quiet Ledger',
+			0,
+			[ [ 'part' => 1 ] ],
+			[ 'ttm_cadence' => 'monthly' ]
+		);
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( '<span class="ttm-stats__value">Monthly</span>', $html );
+		$this->assertStringNotContainsString( 'MONTHLY', $html );
+		$this->assertStringContainsString( '<p class="ttm-serial-hero__synopsis">Synopsis for The Quiet Ledger.</p>', $html );
+		$this->assertStringNotContainsString( '&lt;p&gt;', $html );
+	}
 }

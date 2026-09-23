@@ -25,4 +25,9 @@ class PaginationValuesTest extends TestCase {
 	public function test_empty_when_no_years(): void {
 		$this->assertSame( '', Values::pagination_label( 'older', null, null ) );
 	}
+
+	public function test_disabled_labels(): void {
+		$this->assertSame( 'Older →', Values::pagination_disabled_label( 'older' ) );
+		$this->assertSame( '← Newer', Values::pagination_disabled_label( 'newer' ) );
+	}
 }

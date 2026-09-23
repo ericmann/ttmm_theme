@@ -1,17 +1,24 @@
 [
 	{
-		"tags": [],
 		"slug": "signing-your-options-table",
 		"title": "Stop trusting the database: signing your options table",
 		"categories": [
-			"technology"
+			"technology",
+			"security"
+		],
+		"tags": [
+			"wordpress",
+			"php",
+			"integrity"
 		],
 		"days_ago": 1,
-		"excerpt": "A compromised admin account can rewrite <code>wp_options</code> without touching a single file. Here is how to detect it — and why file-integrity scanners never will.",
-		"paragraphs": 52,
+		"excerpt": "A compromised admin account can rewrite <code>wp_options</code> without touching a single file. Here is how to detect it — and why your file-integrity scanner never will.",
+		"content": "<!-- wp:paragraph -->\n<p>Every WordPress hardening guide begins the same way: lock down file permissions, disable the theme editor, verify core checksums. Good advice. All of it protects the filesystem — and none of it protects the thing that actually runs your site.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>The options table is executable configuration. <code>active_plugins</code>, <code>siteurl</code>, cron schedules, rewrite rules — a hostile write to any one of these changes what your site does on the next request, and every scanner you own will report green.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading -->\n<h2>What a signature buys you</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>Not prevention. A signature does not stop the write; it makes the write <em>visible</em>. On every load, WordPress recomputes an HMAC over the sensitive keys and compares it to the stored one. Mismatch means someone changed the configuration through a path you did not sign.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:code -->\n<pre class=\"wp-block-code\"><code>add_action( 'init', function () {\n\t$keys = [ 'active_plugins', 'siteurl', 'home', 'template' ];\n\t$blob = wp_json_encode( array_map( 'get_option', $keys ) );\n\t$sig  = hash_hmac( 'sha256', $blob, OPTIONS_SIGNING_KEY );\n\n\tif ( ! hash_equals( get_option( '_options_sig', '' ), $sig ) ) {\n\t\tdo_action( 'options_tampered', $keys );\n\t}\n\n\t// Every other admin-side write is unaffected; this only guards the boot-critical keys.\n}\n);</code></pre>\n<!-- /wp:code -->\n\n<!-- wp:paragraph -->\n<p>Twelve lines. The interesting work is in <code>options_tampered</code>: what you do when the alarm fires is the actual security design, building on the rotation habits from <a href=\"/hardening-part-2-salts-and-keys/\">part 2</a>.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:quote {\"className\":\"is-style-pull\"} -->\n<blockquote class=\"wp-block-quote is-style-pull\"><p>“A file-integrity scanner watches the doors. The options table is a window that was never on the blueprint.”</p></blockquote>\n<!-- /wp:quote -->\n\n<!-- wp:heading -->\n<h2>Where to keep the key</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>Not in the database — obviously — and not in <code>wp-config.php</code> if you can avoid it. Part 2 covered rotation; the same discipline applies here. In part 4 we move the key to the environment and rotate it without downtime.</p>\n<!-- /wp:paragraph -->",
+		"paragraphs": 82,
 		"featured_image": true,
+		"caption": "Caption in the theme's meta type. Photographs are grayscale only on the front page and archives.",
 		"alt": "A padlock icon over a database table illustration",
-		"most_read": true
+		"most_read": false
 	},
 	{
 		"tags": [],
@@ -139,7 +146,10 @@
 		"paragraphs": 12
 	},
 	{
-		"tags": [],
+		"tags": [
+			"threat-modeling",
+			"passwords"
+		],
 		"slug": "password-manager-weakest-link",
 		"title": "Your password manager's weakest link is the browser extension",
 		"categories": [
@@ -150,7 +160,9 @@
 		"paragraphs": 12
 	},
 	{
-		"tags": [],
+		"tags": [
+			"threat-modeling"
+		],
 		"slug": "nonces-are-not-csrf-tokens",
 		"title": "Nonces are not CSRF tokens",
 		"categories": [
@@ -158,10 +170,13 @@
 		],
 		"days_ago": 21,
 		"excerpt": "They rhyme with CSRF tokens closely enough to get a lot of WordPress code quietly wrong.",
-		"paragraphs": 12
+		"paragraphs": 12,
+		"most_read": true
 	},
 	{
-		"tags": [],
+		"tags": [
+			"cryptography"
+		],
 		"slug": "reading-a-cve-like-an-engineer",
 		"title": "Reading a CVE like an engineer",
 		"categories": [
@@ -169,10 +184,13 @@
 		],
 		"days_ago": 32,
 		"excerpt": "Severity scores are for procurement. Here is what to read instead.",
-		"paragraphs": 12
+		"paragraphs": 12,
+		"most_read": true
 	},
 	{
-		"tags": [],
+		"tags": [
+			"disclosure"
+		],
 		"slug": "disclosure-timelines-from-the-other-side",
 		"title": "Disclosure timelines, from the other side of the inbox",
 		"categories": [
@@ -347,7 +365,13 @@
 		],
 		"days_ago": 0,
 		"excerpt": "Walking back from the coffee place there was a full rainbow over the rail yard, the kind that touches down at both ends. Two guys in hard hats stopped and took pictures, and for a second nobody said a word. So did I.",
-		"paragraphs": 3
+		"content": "<!-- wp:paragraph -->\n<p>Walking back from the coffee place there was a full rainbow over the rail yard — the kind that touches down at both ends, so complete it looks staged. Two guys in hard hats stopped and took pictures. So did I. Nobody said anything, which felt right.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>I have been thinking about attention lately, mostly because part 4 of the hardening series is about what you notice and what you don't. A signature on the options table doesn't prevent anything. It just makes a change visible to someone who is looking. Most of security is that: deciding, in advance, to look.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>The rainbow lasted about four minutes. The rail yard has been there for a hundred years and I walk past it every day and I'm not sure I had ever really looked at it before. It has a water tower. Who knew.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Anyway. Good coffee. Back to the draft.</p>\n<!-- /wp:paragraph -->",
+		"weekday": "Sunday",
+		"location": "Portland",
+		"syndication": {
+			"x": "https://x.com/ericmann/status/1234567890",
+			"mastodon": "https://mastodon.social/@ericmann/1234567890"
+		}
 	},
 	{
 		"tags": [],
@@ -358,7 +382,7 @@
 		],
 		"days_ago": 2,
 		"excerpt": "Forty minutes of CI a day, every day, adds up to two working weeks a year if you do the math. I did the math out loud at dinner and nobody at the table was impressed, but I was, and now I have to do something about it.",
-		"paragraphs": 3
+		"content": "<!-- wp:paragraph -->\n<p>Forty minutes of CI a day, every day, adds up to two working weeks a year if you do the math. I did the math out loud at dinner and nobody at the table was impressed, but I was, and now I have to do something about it.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>The annoying part is that none of the forty minutes is wasted, exactly. The pipeline runs the tests, builds the assets, deploys to staging, and waits for a health check. Every step earns its keep. It is just that half of those steps could run in parallel instead of in a queue, and I have known that for over a year and done nothing about it because the pipeline was not broken, only slow.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Tonight I moved the build and the asset compile onto separate runners and cut the number in half. Still two working weeks a year, spent waiting on a screen instead of writing. Just half as many as last month, which is the kind of progress that never makes it into a retrospective but adds up anyway.</p>\n<!-- /wp:paragraph -->"
 	},
 	{
 		"tags": [],
@@ -369,7 +393,7 @@
 		],
 		"days_ago": 3,
 		"excerpt": "The kind of morning where nothing is broken and you almost distrust the quiet, waiting for the other shoe. Read the psalm twice, once for the words and once for the part of me that still does not believe it. Left the server alone.",
-		"paragraphs": 3
+		"content": "<!-- wp:paragraph -->\n<p>The kind of morning where nothing is broken and you almost distrust the quiet, waiting for the other shoe.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Read the psalm twice — once for the words, once for the part of me that still does not quite believe it. Be still, it says. I am not naturally still; stillness is a discipline I fail most days and keep returning to anyway, usually around the third cup of coffee.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Left the server alone. It did not need me. Neither, this morning, did I.</p>\n<!-- /wp:paragraph -->"
 	},
 	{
 		"tags": [],
@@ -440,7 +464,8 @@
 		],
 		"days_ago": 60,
 		"excerpt": "Sometimes the honest move is to finish the book you started, not the book you would write today.",
-		"paragraphs": 8
+		"paragraphs": 8,
+		"form": "article"
 	},
 	{
 		"tags": [],
@@ -451,7 +476,8 @@
 		],
 		"days_ago": 75,
 		"excerpt": "A short outline you will actually follow beats a long one you will abandon by chapter three.",
-		"paragraphs": 8
+		"paragraphs": 8,
+		"form": "article"
 	},
 	{
 		"slug": "classic-post",
@@ -465,19 +491,24 @@
 		"tags": []
 	},
 	{
-		"tags": [],
+		"tags": [
+			"wordpress"
+		],
 		"slug": "hardening-part-1",
-		"title": "Hardening WordPress, part 1: the config file nobody re-reads",
+		"title": "Hardening WordPress, part 1: what a scanner sees \u2014 and what it can\u2019t",
 		"categories": [
 			"security"
 		],
 		"days_ago": 20,
-		"excerpt": "Most `wp-config.php` files are written once, at launch, and never audited again.",
+		"excerpt": "Most wp-config.php files are written once, at launch, and never audited again.",
 		"paragraphs": 12,
-		"part_title": "Part 1"
+		"part_title": "What a scanner sees \u2014 and what it can\u2019t"
 	},
 	{
-		"tags": [],
+		"tags": [
+			"wordpress",
+			"cryptography"
+		],
 		"slug": "hardening-part-2-salts-and-keys",
 		"title": "Hardening WordPress, part 2: salts, keys and the rotation you skipped",
 		"categories": [
@@ -489,6 +520,134 @@
 		"part_title": "Salts, keys and the rotation you skipped"
 	},
 	{
+		"tags": [
+			"wordpress",
+			"cryptography"
+		],
+		"slug": "hardening-part-4-keys-in-the-environment",
+		"title": "Hardening WordPress, part 4: keys in the environment, rotated live",
+		"categories": [
+			"security"
+		],
+		"days_ago": 0,
+		"excerpt": "Rotating a signing key without downtime means the old and new keys both have to verify for one deploy.",
+		"paragraphs": 12,
+		"part_title": "Keys in the environment, rotated live"
+	},
+	{
+		"tags": [
+			"passwords"
+		],
+		"slug": "hardening-part-5-the-admin-with-the-weak-password",
+		"title": "Hardening WordPress, part 5: the admin with the weak password",
+		"categories": [
+			"security"
+		],
+		"future": true,
+		"days_ago": -5,
+		"excerpt": "Every hardening checklist assumes the attacker has to work for it. Sometimes they do not.",
+		"paragraphs": 12,
+		"part_title": "The admin with the weak password"
+	},
+	{
+		"tags": [],
+		"slug": "hardening-part-6-incident-when-the-alarm-fires",
+		"title": "Hardening WordPress, part 6: incident — what to do when the alarm fires",
+		"categories": [
+			"security"
+		],
+		"future": true,
+		"days_ago": -12,
+		"excerpt": "The signature told you something changed. What you do in the next ten minutes is the part nobody rehearses.",
+		"paragraphs": 12,
+		"part_title": "Incident: what to do when the alarm fires"
+	},
+	{
+		"tags": [
+			"passwords",
+			"threat-modeling"
+		],
+		"slug": "hardware-keys-for-my-parents",
+		"title": "Why I still recommend hardware keys to my parents",
+		"categories": [
+			"security"
+		],
+		"days_ago": 5,
+		"excerpt": "A $25 dongle beats every password policy I have ever written.",
+		"paragraphs": 12,
+		"most_read": true
+	},
+	{
+		"tags": [
+			"cryptography",
+			"wordpress"
+		],
+		"slug": "cookie-theft-still-works",
+		"title": "Cookie theft still works and nobody wants to talk about it",
+		"categories": [
+			"security"
+		],
+		"days_ago": 50,
+		"excerpt": "Session hijacking predates the OWASP Top Ten and it is still how most WordPress sites actually get popped.",
+		"paragraphs": 12
+	},
+	{
+		"tags": [
+			"disclosure",
+			"threat-modeling"
+		],
+		"slug": "what-coordinated-disclosure-costs",
+		"title": "What a coordinated disclosure actually costs",
+		"categories": [
+			"security"
+		],
+		"days_ago": 300,
+		"excerpt": "Ninety days sounds generous until you are the one holding the finding.",
+		"paragraphs": 12
+	},
+	{
+		"tags": [
+			"cryptography",
+			"passwords"
+		],
+		"slug": "rotating-secrets-without-an-outage",
+		"title": "Rotating secrets without an outage",
+		"categories": [
+			"security"
+		],
+		"days_ago": 320,
+		"excerpt": "The rotation itself is easy. Keeping both keys valid for one deploy is the actual engineering.",
+		"paragraphs": 12
+	},
+	{
+		"tags": [
+			"wordpress",
+			"disclosure"
+		],
+		"slug": "the-plugin-update-nobody-tested",
+		"title": "The plugin update nobody tested",
+		"categories": [
+			"security"
+		],
+		"days_ago": 350,
+		"excerpt": "A changelog that says \"security fix\" and nothing else is itself a finding.",
+		"paragraphs": 12
+	},
+	{
+		"tags": [
+			"passwords",
+			"threat-modeling"
+		],
+		"slug": "password-policies-that-make-things-worse",
+		"title": "Password policies that make things worse",
+		"categories": [
+			"security"
+		],
+		"days_ago": 380,
+		"excerpt": "Forced rotation every ninety days trained a generation of users to increment a number.",
+		"paragraphs": 12
+	},
+	{
 		"tags": [],
 		"slug": "quiet-ledger-ch-1",
 		"title": "The Quiet Ledger, Chapter 1",
@@ -496,9 +655,9 @@
 			"writing"
 		],
 		"days_ago": 331,
-		"excerpt": "Chapter 1 of The Quiet Ledger.",
-		"part_title": "Chapter 1",
-		"paragraphs": 6
+		"excerpt": "Marta opens an envelope that will end a working relationship she has not had yet.",
+		"part_title": "The Audit Letter",
+		"paragraphs": 80
 	},
 	{
 		"tags": [],
@@ -508,9 +667,9 @@
 			"writing"
 		],
 		"days_ago": 301,
-		"excerpt": "Chapter 2 of The Quiet Ledger.",
-		"part_title": "Chapter 2",
-		"paragraphs": 6
+		"excerpt": "Harlan runs on one number, and everyone has agreed not to look at it.",
+		"part_title": "Company Town",
+		"paragraphs": 80
 	},
 	{
 		"tags": [],
@@ -520,9 +679,9 @@
 			"writing"
 		],
 		"days_ago": 271,
-		"excerpt": "Chapter 3 of The Quiet Ledger.",
-		"part_title": "Chapter 3",
-		"paragraphs": 6
+		"excerpt": "The books balance. That is the first thing that worries her.",
+		"part_title": "The Ledger",
+		"paragraphs": 80
 	},
 	{
 		"tags": [],
@@ -532,9 +691,9 @@
 			"writing"
 		],
 		"days_ago": 241,
-		"excerpt": "Chapter 4 of The Quiet Ledger.",
-		"part_title": "Chapter 4",
-		"paragraphs": 6
+		"excerpt": "A number that appears once should never appear a second time, in a different column.",
+		"part_title": "Two Sets",
+		"paragraphs": 80
 	},
 	{
 		"tags": [],
@@ -544,9 +703,9 @@
 			"writing"
 		],
 		"days_ago": 211,
-		"excerpt": "Chapter 5 of The Quiet Ledger.",
-		"part_title": "Chapter 5",
-		"paragraphs": 6
+		"excerpt": "He offers her coffee before he offers her an answer.",
+		"part_title": "The Founder's Office",
+		"paragraphs": 80
 	},
 	{
 		"tags": [],
@@ -556,9 +715,9 @@
 			"writing"
 		],
 		"days_ago": 181,
-		"excerpt": "Chapter 6 of The Quiet Ledger.",
-		"part_title": "Chapter 6",
-		"paragraphs": 6
+		"excerpt": "Depreciation is a story a company tells itself. This one is lying.",
+		"part_title": "What the Mill Owes",
+		"paragraphs": 80
 	},
 	{
 		"tags": [],
@@ -570,7 +729,7 @@
 		"days_ago": 151,
 		"excerpt": "The founder asks a question he already knows the answer to.",
 		"part_title": "Going Concern",
-		"paragraphs": 6
+		"paragraphs": 80
 	},
 	{
 		"tags": [],
@@ -582,7 +741,7 @@
 		"days_ago": 121,
 		"excerpt": "Marta writes the sentence she cannot unwrite.",
 		"part_title": "Material Weakness",
-		"paragraphs": 6
+		"paragraphs": 80
 	},
 	{
 		"tags": [],
@@ -594,7 +753,7 @@
 		"days_ago": 91,
 		"excerpt": "The mill, the town, and a number that only goes down.",
 		"part_title": "Depreciation",
-		"paragraphs": 6
+		"paragraphs": 80
 	},
 	{
 		"tags": [],
@@ -606,7 +765,7 @@
 		"days_ago": 61,
 		"excerpt": "Nobody in Harlan eats alone by accident.",
 		"part_title": "The Auditor's Lunch",
-		"paragraphs": 6
+		"paragraphs": 80
 	},
 	{
 		"tags": [],
@@ -618,7 +777,7 @@
 		"days_ago": 31,
 		"excerpt": "What gets counted before it happens.",
 		"part_title": "Accruals",
-		"paragraphs": 6
+		"paragraphs": 80
 	},
 	{
 		"tags": [],
@@ -630,7 +789,7 @@
 		"days_ago": 1,
 		"excerpt": "Marta finds the second set of books. The first set, it turns out, was the lie.",
 		"part_title": "Reconciliation",
-		"paragraphs": 6
+		"paragraphs": 80
 	},
 	{
 		"tags": [],
@@ -1052,7 +1211,7 @@
 		],
 		"days_ago": 40,
 		"excerpt": "A short story: The Last Cron Job.",
-		"paragraphs": 50
+		"paragraphs": 88
 	},
 	{
 		"tags": [
@@ -1063,9 +1222,9 @@
 		"categories": [
 			"writing"
 		],
-		"days_ago": 90,
+		"days_ago": 410,
 		"excerpt": "A short story: A Field Guide to Empty Offices.",
-		"paragraphs": 30
+		"paragraphs": 52
 	},
 	{
 		"tags": [
@@ -1076,10 +1235,23 @@
 		"categories": [
 			"writing"
 		],
-		"days_ago": 150,
+		"days_ago": 700,
 		"excerpt": "A short story: Uptime.",
 		"featured_image": true,
 		"alt": "Uptime cover",
 		"paragraphs": 15
+	},
+	{
+		"tags": [
+			"fiction"
+		],
+		"slug": "story-what-the-river-audits",
+		"title": "What the River Audits",
+		"categories": [
+			"writing"
+		],
+		"days_ago": 1090,
+		"excerpt": "A short story: what the river keeps, and what it gives back.",
+		"paragraphs": 20
 	}
 ]

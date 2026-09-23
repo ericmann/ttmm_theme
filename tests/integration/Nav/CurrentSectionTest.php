@@ -96,6 +96,29 @@ class CurrentSectionTest extends TTM_IntegrationTestCase {
 		$this->assertContains( 'ttm-form-chapter', $classes );
 	}
 
+	/**
+	 * SPEC §6.1.1 / Decision "Nav current section": a single post marks its primary category
+	 * only; belonging to a series no longer makes the "Series" hub item current.
+	 */
+	public function test_single_post_in_series_does_not_mark_series_current(): void {
+		$tech    = $this->category_id( 'technology', 'Technology' );
+		$term_id = self::factory()->term->create( [ 'taxonomy' => 'series' ] );
+		$post_id = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+			]
+		);
+		update_post_meta( $post_id, 'ttm_series_part', 1 );
+		wp_set_object_terms( $post_id, [ $term_id ], 'series' );
+		SeriesIndex::rebuild();
+
+		$this->go_to( get_permalink( $post_id ) );
+
+		$this->assertStringNotContainsString( 'current-section', $this->render_nav_link( home_url( '/series/' ) ) );
+		$this->assertStringContainsString( 'current-section', $this->render_nav_link( get_category_link( $tech ) ) );
+	}
+
 	public function tear_down(): void {
 		delete_transient( 'ttm_lead_id' );
 		\TTM\Core\Config::reset();

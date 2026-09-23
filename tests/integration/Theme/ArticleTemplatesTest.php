@@ -117,6 +117,109 @@ class ArticleTemplatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringNotContainsString( 'wp-block-post-featured-image', $html );
 	}
 
+	/**
+	 * Rule 36 (extended): the row's direct children -- `main` and `aside` -- are
+	 * `layout: default` groups, so no `is-layout-constrained` (and no core global padding)
+	 * sits inside `.ttm-article`.
+	 */
+	public function test_article_columns_are_not_constrained(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+		$post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $tech );
+
+		$html = $this->render_single( $post );
+
+		$this->assertSame( 1, preg_match( '/<main class="([^"]*)"[^>]*id="main"/', $html, $main ) );
+		$this->assertStringNotContainsString( 'is-layout-constrained', $main[1] );
+		$this->assertSame( 1, preg_match( '/<aside class="([^"]*)"/', $html, $aside ) );
+		$this->assertStringNotContainsString( 'is-layout-constrained', $aside[1] );
+		$this->assertStringContainsString( 'is-style-grid-8-4 ttm-article', $html );
+	}
+
+	/**
+	 * SPEC §6.2 "Hero" / Decision "Featured-image caption": the attachment's caption
+	 * (`post_excerpt`) renders as `figcaption.ttm-hero__caption` inside the hero figure.
+	 */
+	public function test_hero_caption_renders_from_attachment_excerpt(): void {
+		if ( ! function_exists( 'imagecreatetruecolor' ) ) {
+			$this->markTestSkipped( 'GD is not available.' );
+		}
+
+		$tech = $this->category_id( 'technology', 'Technology' );
+		$post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $tech );
+
+		$attachment_id = ( new \TTM\Core\Cli\Seeder() )->image( 'Caption test', 'ttm-lead' );
+		$this->assertGreaterThan( 0, $attachment_id );
+		wp_update_post(
+			[
+				'ID'           => $attachment_id,
+				'post_excerpt' => 'Caption in the theme\'s meta type.',
+			]
+		);
+		set_post_thumbnail( $post, $attachment_id );
+
+		$html = $this->render_single( $post );
+
+		$this->assertStringContainsString( 'wp-block-post-featured-image', $html );
+		$this->assertMatchesRegularExpression(
+			'/<figcaption class="ttm-hero__caption">Caption in the theme(&#039;|\')s meta type\.<\/figcaption><\/figure>/',
+			$html
+		);
+	}
+
+	/**
+	 * Decision "Kicker term order": the seeded article (Technology primary, Security second)
+	 * reads "Technology · Security", not the alphabetical "Security, Technology".
+	 */
+	public function test_article_kicker_reads_primary_then_secondary_category(): void {
+		( new \TTM\Core\Cli\Seeder() )->run( 'normal' );
+		$post = get_page_by_path( 'signing-your-options-table', OBJECT, 'post' );
+		$this->assertNotNull( $post );
+
+		$html = $this->render_single( $post->ID );
+
+		$this->assertSame( 1, preg_match( '/<div class="[^"]*is-style-kicker[^"]*wp-block-post-terms">(.*?)<\/div>/s', $html, $m ) );
+		$this->assertSame( 'Technology · Security', trim( html_entity_decode( wp_strip_all_tags( $m[1] ), ENT_QUOTES, 'UTF-8' ) ) );
+
+		// The dek keeps the manual excerpt's inline code (core's wp_trim_words would strip it).
+		$this->assertMatchesRegularExpression( '/<p class="wp-block-post-excerpt__excerpt">[^<]*<code>wp_options<\/code>/', $html );
+	}
+
+	/**
+	 * Decision "Byline tags": the byline's post_tag terms render as `.tag.tag-neutral` chips
+	 * with no separator spans, and the author renders as a linked "By …".
+	 */
+	public function test_byline_tags_are_tag_chips(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+		$post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_author'   => 1,
+				'post_category' => [ $tech ],
+				'tags_input'    => [ 'wordpress', 'php' ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $tech );
+
+		$html = $this->render_single( $post );
+
+		$this->assertSame( 1, preg_match( '/<div class="[^"]*is-style-tags[^"]*wp-block-post-terms">(.*?)<\/div>/s', $html, $m ) );
+		$this->assertSame( 2, substr_count( $m[1], '<a class="tag tag-neutral"' ) );
+		$this->assertStringNotContainsString( 'wp-block-post-terms__separator', $m[1] );
+		$this->assertMatchesRegularExpression( '/<div class="wp-block-post-author-name">By <a[^>]*>[^<]+<\/a><\/div>/', $html );
+	}
+
 	public function test_f13_more_in_section_marks_empty_when_no_other_posts(): void {
 		$tech = $this->category_id( 'technology', 'Technology' );
 		$post = self::factory()->post->create(
@@ -181,5 +284,117 @@ class ArticleTemplatesTest extends TTM_IntegrationTestCase {
 
 		$this->assertStringNotContainsString( 'Syndicated to', $html );
 		$this->assertStringContainsString( '248 words', $html );
+	}
+
+	/**
+	 * SPEC §6.2 "More in {Category}": one label with the category name inline, not a second
+	 * label on the right; rows are `h4` post titles inside `.ttm-item`.
+	 */
+	public function test_more_in_heading_is_one_label_with_category_name(): void {
+		$tech  = $this->category_id( 'technology', 'Technology' );
+		$posts = [];
+		foreach ( [ 1, 2 ] as $i ) {
+			$posts[] = self::factory()->post->create(
+				[
+					'post_status'   => 'publish',
+					'post_category' => [ $tech ],
+				]
+			);
+			update_post_meta( $posts[ $i - 1 ], 'ttm_primary_category', $tech );
+		}
+
+		$html = $this->render_single( $posts[0] );
+
+		$this->assertSame( 1, preg_match( '/<div class="[^"]*ttm-more-in[^"]*"[^>]*>(.*?)<div class="wp-block-query[^"]*">/s', $html, $m ) );
+		$this->assertStringContainsString( '<h3 class="wp-block-heading ttm-cell-heading__label">More in Technology</h3>', $m[1] );
+		$this->assertSame( 1, substr_count( $m[1], 'ttm-cell-heading__label' ) );
+		$this->assertStringNotContainsString( 'wp-block-post-terms', $m[1] );
+		$this->assertMatchesRegularExpression( '/<div class="wp-block-group ttm-item[^"]*">\s*<h4 class="wp-block-post-title"><a href/', $html );
+	}
+
+	/**
+	 * SPEC §6.4: the three journal-head columns are `layout: default` groups (rule 36 extended),
+	 * the note column carries the mock's copy and the RSS link, and a syndicated post drops the
+	 * bound word-count paragraph entirely (Decision "Empty bound blocks").
+	 */
+	public function test_journal_head_columns_are_not_constrained_and_note_has_mock_copy(): void {
+		$journal = $this->category_id( 'journal', 'Journal' );
+		$post    = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $journal ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $journal );
+		update_post_meta( $post, 'ttm_word_count', 248 );
+		update_post_meta( $post, 'ttm_syndication', [ 'x' => 'https://x.com/example/1' ] );
+
+		$html = $this->render_single( $post, 'single-journal' );
+
+		$this->assertSame( 1, preg_match( '/<div class="([^"]*)ttm-journal-head([^"]*)"[^>]*>(.*?)<hr /s', $html, $m ) );
+		$this->assertStringNotContainsString( 'is-layout-constrained', $m[3] );
+		$this->assertMatchesRegularExpression( '/<p class="ttm-journal-head__note[^"]*">Journal entries are short and unpolished — things I saw and what they made me think\. Longer arguments land in a section\.<\/p>/', $html );
+		$this->assertMatchesRegularExpression( '/<p class="ttm-journal-head__rss[^"]*"><a href="\/category\/journal\/feed\/">Journal RSS<\/a><\/p>/', $html );
+		$this->assertMatchesRegularExpression( '/<h1 class="[^"]*is-style-journal-title[^"]*"/', $html );
+		$this->assertStringContainsString( 'ttm-journal-head__subline', $html );
+		$this->assertStringNotContainsString( 'ttm-journal-head__count', $html );
+		$this->assertStringContainsString( '<span class="ttm-syndication__words">', $html );
+	}
+
+	/**
+	 * @return int The current journal post id (five others exist, so the stream shows four).
+	 */
+	private function seed_journal_stream(): int {
+		$journal = $this->category_id( 'journal', 'Journal' );
+		$current = 0;
+		foreach ( range( 1, 6 ) as $i ) {
+			$id = self::factory()->post->create(
+				[
+					'post_status'   => 'publish',
+					'post_category' => [ $journal ],
+					'post_date'     => sprintf( '2026-09-%02d 09:00:00', $i ),
+					'post_excerpt'  => "Entry {$i} dek.",
+				]
+			);
+			update_post_meta( $id, 'ttm_primary_category', $journal );
+			update_post_meta( $id, 'ttm_word_count', 100 + $i );
+			$current = $id;
+		}
+
+		return $current;
+	}
+
+	/**
+	 * Decision "Whole-row links" / rule 33: every stream row is one anchor to its post, the
+	 * title (not a link itself) comes first, and the current post is excluded.
+	 */
+	public function test_journal_stream_rows_are_single_anchors_with_four_entries(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$current = $this->seed_journal_stream();
+
+		$html = $this->render_single( $current, 'single-journal' );
+
+		$this->assertSame( 1, preg_match( '/<div class="[^"]*ttm-journal-stream[^"]*"[^>]*>(.*)<\/div>\s*<div class="wp-block-template-part">/s', $html, $m ) );
+		$stream = $m[1];
+
+		$this->assertSame( 4, preg_match_all( '/<a href="[^"]+" class="wp-block-group ttm-journal-row[^"]*">/', $stream, $rows ) );
+		$this->assertSame( 4, substr_count( $stream, 'class="wp-block-post ' ) );
+		$this->assertStringNotContainsString( 'href="' . get_permalink( $current ) . '"', $stream );
+		// One anchor per row: no nested links in the title.
+		$this->assertStringNotContainsString( '<h3 class="wp-block-post-title"><a', $stream );
+		$this->assertMatchesRegularExpression( '/<a href="[^"]+" class="wp-block-group ttm-journal-row[^"]*">\s*<h3 class="wp-block-post-title">/', $stream );
+		$this->assertStringContainsString( 'ttm-journal-row__words', $stream );
+		$this->assertStringContainsString( '105 words', $stream );
+	}
+
+	public function test_journal_stream_heading_reads_full_journal_count(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$current = $this->seed_journal_stream();
+
+		$html = $this->render_single( $current, 'single-journal' );
+
+		$this->assertSame( 1, preg_match( '/<p class="ttm-cell-heading__link[^"]*">(.*?)<\/p>/s', $html, $m ) );
+		$this->assertStringContainsString( 'Full journal · 6 entries', $m[1] );
+		$this->assertStringContainsString( 'href="' . get_category_link( $this->category_id( 'journal', 'Journal' ) ) . '"', $m[1] );
 	}
 }

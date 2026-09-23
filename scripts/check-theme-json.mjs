@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 // Fails when themes/ttm-theme/theme.json drifts from the token sheet (docs/_ds/.../styles.css) or from 04 §2 / P0-06.
 import { readFileSync } from 'node:fs';
+import { generatedVars, referencedVars } from './lib/theme-json-vars.mjs';
 
 const path = 'themes/ttm-theme/theme.json';
 const tokenPath =
@@ -122,7 +123,7 @@ const expectedFontSizes = {
 	'cell-lead': '21px',
 	'cell-lead-l': '24px',
 	pull: '28px',
-	h2: '30px',
+	'article-h2': '30px',
 	featured: '40px',
 	lead: '44px',
 	'journal-date': '48px',
@@ -187,6 +188,27 @@ if ( json.settings?.spacing?.defaultSpacingSizes !== false ) {
 
 if ( json.settings?.border?.radius !== false ) {
 	errors.push( 'border.radius must be false' );
+}
+
+// --- Preset variable references (rule 44) -----------------------------------
+const generated = generatedVars( json );
+const cssSources = [
+	[
+		'themes/ttm-theme/assets/css/ttm.css',
+		readFileSync( 'themes/ttm-theme/assets/css/ttm.css', 'utf8' ),
+	],
+	[
+		'themes/ttm-theme/style.css',
+		readFileSync( 'themes/ttm-theme/style.css', 'utf8' ),
+	],
+	[ `${ path } (styles)`, JSON.stringify( json.styles ) ],
+];
+for ( const [ source, text ] of cssSources ) {
+	for ( const ref of referencedVars( text ) ) {
+		if ( ! generated.has( ref ) ) {
+			errors.push( `${ source }: unknown preset variable ${ ref }` );
+		}
+	}
 }
 
 if ( errors.length ) {

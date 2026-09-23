@@ -97,6 +97,20 @@ class ValuesTest extends TestCase {
 		$this->assertSame( 'Jul 30, 2025', $result );
 	}
 
+	/**
+	 * R1-04: `short_date_no_year()` never includes a year, even for a prior-year date -- the
+	 * archive-by-year rows already show it as the group label (SPEC §6.6). Rule 26: it is a
+	 * total, pure formatter (like `short_date()`/`relative_date()` above), so the genuine
+	 * empty case is `Sources::short_date()` returning '' before ever calling it; what this
+	 * layer guarantees is a normal value, a prior-year value with no year suffix, and no blank
+	 * output for a valid date.
+	 */
+	public function test_short_date_no_year_never_includes_a_year(): void {
+		$this->assertSame( 'Sept 20', Values::short_date_no_year( $this->date( '2026-09-20' ) ) );
+		$this->assertSame( 'Jul 30', Values::short_date_no_year( $this->date( '2025-07-30' ) ) );
+		$this->assertNotSame( '', Values::short_date_no_year( $this->date( '2026-09-20' ) ) );
+	}
+
 	public function test_relative_date_today_yesterday_weekday_short_and_full(): void {
 		$now = $this->date( '2026-09-20 12:00:00' );
 
@@ -138,10 +152,15 @@ class ValuesTest extends TestCase {
 		$this->assertSame( 'All 87 entries', Values::category_count( 87, 'entries' ) );
 	}
 
+	public function test_category_count_journal_full_format(): void {
+		$this->assertSame( 'Full journal · 87 entries', Values::category_count( 87, 'journal-full' ) );
+	}
+
 	public function test_category_count_zero_reads_all_arrow_for_every_format(): void {
 		$this->assertSame( 'All →', Values::category_count( 0, 'articles' ) );
 		$this->assertSame( 'All →', Values::category_count( 0, 'short' ) );
 		$this->assertSame( 'All →', Values::category_count( 0, 'entries' ) );
+		$this->assertSame( 'All →', Values::category_count( 0, 'journal-full' ) );
 	}
 
 	public function test_today_formats(): void {
@@ -157,5 +176,71 @@ class ValuesTest extends TestCase {
 			'These Things Matter · © 2026 Eric Mann · Built on WordPress',
 			Values::footer_line( 'These Things Matter', '2026' )
 		);
+	}
+
+	public function test_newsletter_title_by_context(): void {
+		$this->assertSame( 'Get the next part', Values::newsletter_title( true ) );
+		$this->assertSame( 'The weekly issue.', Values::newsletter_title( false ) );
+	}
+
+	public function test_section_label_more_in_and_empty(): void {
+		$this->assertSame( 'More in Technology', Values::section_label( 'more-in', 'Technology' ) );
+		$this->assertSame( 'Series in Security', Values::section_label( 'series-in', 'Security' ) );
+		$this->assertSame( '', Values::section_label( 'more-in', '' ) );
+		$this->assertSame( '', Values::section_label( 'unknown', 'Technology' ) );
+	}
+
+	public function test_section_label_series_in(): void {
+		$this->assertSame( 'Series in Security', Values::section_label( 'series-in', 'Security' ) );
+		$this->assertSame( '', Values::section_label( 'series-in', '' ) );
+	}
+
+	/**
+	 * R1-01: `search-row` returns the category name plain (no prefix) for the search result
+	 * row kicker, and '' when the row has no category (rule 26: normal and empty cases).
+	 */
+	public function test_section_label_search_row_and_empty(): void {
+		$this->assertSame( 'Technology', Values::section_label( 'search-row', 'Technology' ) );
+		$this->assertSame( '', Values::section_label( 'search-row', '' ) );
+	}
+
+	public function test_search_summary_with_and_without_results(): void {
+		$this->assertSame( 'Results for “ledger”', Values::search_summary( 'ledger', 3 ) );
+		$this->assertSame( 'Nothing matched “ledger”.', Values::search_summary( 'ledger', 0 ) );
+	}
+
+	public function test_archive_kind_labels_and_empty(): void {
+		$this->assertSame( 'Section', Values::archive_kind( [ 'category' => true ] ) );
+		$this->assertSame( 'Tag', Values::archive_kind( [ 'tag' => true ] ) );
+		$this->assertSame( 'Month', Values::archive_kind( [ 'month' => true ] ) );
+		$this->assertSame( 'Year', Values::archive_kind( [ 'year' => true ] ) );
+		$this->assertSame( 'Day', Values::archive_kind( [ 'day' => true ] ) );
+		$this->assertSame( 'Author', Values::archive_kind( [ 'author' => true ] ) );
+		$this->assertSame( 'Search', Values::archive_kind( [ 'search' => true ] ) );
+		// A day archive is also a month and a year archive: the most specific flag wins.
+		$this->assertSame(
+			'Month',
+			Values::archive_kind(
+				[
+					'month' => true,
+					'year'  => true,
+				] 
+			) 
+		);
+		$this->assertSame( '', Values::archive_kind( [] ) );
+		$this->assertSame(
+			'',
+			Values::archive_kind(
+				[
+					'category' => false,
+					'tag'      => false,
+				] 
+			) 
+		);
+	}
+
+	public function test_meta_line_tags_joined_with_middle_dots(): void {
+		$this->assertSame( 'wordpress · php', Values::tags_line( [ 'wordpress', 'php' ] ) );
+		$this->assertSame( '', Values::tags_line( [] ) );
 	}
 }

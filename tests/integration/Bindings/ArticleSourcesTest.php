@@ -7,6 +7,8 @@
 
 declare( strict_types=1 );
 
+use TTM\Core\Query\SeriesIndex;
+
 class ArticleSourcesTest extends TTM_IntegrationTestCase {
 
 	private function category_id( string $slug, string $name ): int {
@@ -102,5 +104,152 @@ class ArticleSourcesTest extends TTM_IntegrationTestCase {
 		$value = $this->source_value( 'ttm/journal-subline', [], $block, 'content' );
 
 		$this->assertSame( 'Sunday · Portland', $value );
+	}
+
+	public function test_newsletter_copy_binding_reads_series_context(): void {
+		$tech      = $this->category_id( 'technology', 'Technology' );
+		$term      = wp_insert_term( 'Hardening WordPress', 'series', [ 'slug' => 'hardening-wp' ] );
+		$series_id = (int) $term['term_id'];
+
+		$in_series = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+			]
+		);
+		update_post_meta( $in_series, 'ttm_series_part', 1 );
+		update_post_meta( $in_series, 'ttm_primary_category', $tech );
+		wp_set_object_terms( $in_series, [ $series_id ], 'series' );
+
+		$plain = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+			]
+		);
+		update_post_meta( $plain, 'ttm_primary_category', $tech );
+		SeriesIndex::rebuild();
+
+		$this->go_to( (string) get_permalink( $in_series ) );
+		$block = $this->make_block( 'core/paragraph', $in_series );
+		$this->assertSame( 'Get the next part', $this->source_value( 'ttm/newsletter-copy', [], $block, 'content' ) );
+
+		$this->go_to( (string) get_permalink( $plain ) );
+		$block = $this->make_block( 'core/paragraph', $plain );
+		$this->assertSame( 'The weekly issue.', $this->source_value( 'ttm/newsletter-copy', [], $block, 'content' ) );
+
+		$link = get_term_link( $series_id, 'series' );
+		if ( is_wp_error( $link ) ) {
+			$this->fail( 'Series term link could not be resolved.' );
+		}
+		$this->go_to( $link );
+		$this->assertTrue( is_tax( 'series' ) );
+		$block = $this->make_block( 'core/paragraph', 0 );
+		$this->assertSame( 'Get the next part', $this->source_value( 'ttm/newsletter-copy', [], $block, 'content' ) );
+	}
+
+	public function test_section_label_binding_reads_primary_category(): void {
+		$tech     = $this->category_id( 'technology', 'Technology' );
+		$security = $this->category_id( 'security', 'Security' );
+		$post     = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech, $security ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $security );
+
+		$block = $this->make_block( 'core/heading', $post );
+		$this->assertSame( 'More in Security', $this->source_value( 'ttm/section-label', [ 'format' => 'more-in' ], $block, 'content' ) );
+
+		$none = $this->make_block( 'core/heading', 0 );
+		$this->assertSame( '', $this->source_value( 'ttm/section-label', [ 'format' => 'more-in' ], $none, 'content' ) );
+
+		$this->go_to( (string) get_category_link( $tech ) );
+		$this->assertSame( 'Series in Technology', $this->source_value( 'ttm/section-label', [ 'format' => 'series-in' ], $none, 'content' ) );
+	}
+
+	public function test_word_count_binding_is_empty_when_post_is_syndicated(): void {
+		$journal = $this->category_id( 'journal', 'Journal' );
+		$post    = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $journal ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $journal );
+		update_post_meta( $post, 'ttm_word_count', 248 );
+		update_post_meta(
+			$post,
+			'ttm_syndication',
+			[
+				'x'        => 'https://x.com/example/1',
+				'mastodon' => '',
+			]
+		);
+
+		$block = $this->make_block( 'core/paragraph', $post );
+
+		$this->assertSame( '', $this->source_value( 'ttm/word-count', [ 'whenUnsyndicated' => true ], $block, 'content' ) );
+		$this->assertSame( '248 words', $this->source_value( 'ttm/word-count', [], $block, 'content' ) );
+
+		update_post_meta( $post, 'ttm_syndication', [ 'x' => '' ] );
+		$this->assertSame( '248 words', $this->source_value( 'ttm/word-count', [ 'whenUnsyndicated' => true ], $block, 'content' ) );
+	}
+
+	public function test_empty_bound_paragraph_renders_nothing(): void {
+		$journal = $this->category_id( 'journal', 'Journal' );
+		$post    = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $journal ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $journal );
+		update_post_meta( $post, 'ttm_word_count', 248 );
+		update_post_meta( $post, 'ttm_syndication', [ 'x' => 'https://x.com/example/1' ] );
+
+		$bound = '<!-- wp:paragraph {"className":"ttm-journal-head__count","metadata":{"bindings":{"content":{"source":"ttm/word-count","args":{"whenUnsyndicated":true}}}}} --><p class="ttm-journal-head__count"></p><!-- /wp:paragraph -->';
+		$plain = '<!-- wp:paragraph --><p></p><!-- /wp:paragraph -->';
+
+		$GLOBALS['post'] = get_post( $post ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- render context for the postId block context.
+		setup_postdata( $GLOBALS['post'] );
+
+		$this->assertSame( '', trim( (string) do_blocks( $bound ) ) );
+		// An unbound empty paragraph is left alone (core's own behaviour).
+		$this->assertStringContainsString( '<p', (string) do_blocks( $plain ) );
+
+		update_post_meta( $post, 'ttm_syndication', [] );
+		$this->assertStringContainsString( '248 words', (string) do_blocks( $bound ) );
+
+		wp_reset_postdata();
+	}
+
+	public function test_archive_kind_binding_on_category_tag_and_month(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+		$post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+				'post_date'     => '2026-05-01 09:00:00',
+				'tags_input'    => [ 'php' ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $tech );
+
+		$block = $this->make_block( 'core/paragraph', 0 );
+
+		$this->go_to( (string) get_category_link( $tech ) );
+		$this->assertSame( 'Section', $this->source_value( 'ttm/archive-kind', [], $block, 'content' ) );
+
+		$this->go_to( (string) get_tag_link( get_term_by( 'slug', 'php', 'post_tag' ) ) );
+		$this->assertSame( 'Tag', $this->source_value( 'ttm/archive-kind', [], $block, 'content' ) );
+
+		$this->go_to( (string) get_month_link( 2026, 5 ) );
+		$this->assertTrue( is_month() );
+		$this->assertSame( 'Month', $this->source_value( 'ttm/archive-kind', [], $block, 'content' ) );
+
+		$this->go_to( (string) get_permalink( $post ) );
+		$this->assertSame( '', $this->source_value( 'ttm/archive-kind', [], $block, 'content' ) );
 	}
 }

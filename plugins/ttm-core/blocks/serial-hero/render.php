@@ -42,7 +42,9 @@ if ( ! $ttm_row ) {
 $ttm_is_complete = $ttm_fallback || 'complete' === $ttm_row['status'];
 $ttm_stats       = Serials::stats( $ttm_row );
 $ttm_cover_id    = Serials::cover_id( $ttm_row );
-$ttm_synopsis    = (string) get_term_field( 'description', (int) $ttm_row['id'], 'series' );
+// 'raw' context: the 'display' context runs descriptions through wpautop, wrapping
+// them in a <p> that esc_html() would then render as literal text.
+$ttm_synopsis = (string) get_term_field( 'description', (int) $ttm_row['id'], 'series', 'raw' );
 
 $ttm_kicker = $ttm_is_complete
 	? sprintf(
@@ -107,8 +109,13 @@ $ttm_latest = Serials::latest_chapter( $ttm_row );
 				<span class="ttm-stats__label"><?php esc_html_e( 'chapters published', 'ttm-core' ); ?></span>
 			</p>
 				<?php if ( '' !== $ttm_stats['cadence'] ) : ?>
+					<?php
+					// Rule 32: first letter capitalised, the rest untouched -- the stored value
+					// ("monthly") is a plain adjective, not a title.
+					$ttm_cadence = mb_strtoupper( mb_substr( $ttm_stats['cadence'], 0, 1 ) ) . mb_substr( $ttm_stats['cadence'], 1 );
+					?>
 			<p>
-				<span class="ttm-stats__value"><?php echo esc_html( $ttm_stats['cadence'] ); ?></span>
+				<span class="ttm-stats__value"><?php echo esc_html( $ttm_cadence ); ?></span>
 					<?php if ( '' !== $ttm_stats['next_date'] ) : ?>
 				<span class="ttm-stats__label">
 						<?php

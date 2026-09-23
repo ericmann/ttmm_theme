@@ -41,10 +41,30 @@ class ChromePartsTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'Technology Renamed', $html );
 	}
 
+	/**
+	 * Rule 43 / Decision S2: `overlayMenu: mobile` + `hasIcon: false`, so the open button is
+	 * the word "Menu" (no SVG icon) and the close button is core's "Close".
+	 */
 	public function test_header_inner_renders_menu_toggle_text(): void {
 		$html = $this->render_template_part( 'header-inner' );
 
-		$this->assertStringContainsString( 'Menu', $html );
+		$this->assertMatchesRegularExpression( '/<button[^>]*wp-block-navigation__responsive-container-open[^>]*>\s*Menu\s*<\/button>/', $html );
+		$this->assertStringContainsString( 'wp-block-navigation__responsive-container-close', $html );
+		$this->assertStringNotContainsString( '<svg', $html );
+		$this->assertStringNotContainsString( 'hidden-by-default', $html );
+	}
+
+	/**
+	 * Decision "Inner masthead": the title column is `core/site-title {"level":0}` (a `<p>`,
+	 * not a heading) followed by the "by Eric Mann" line.
+	 */
+	public function test_inner_masthead_title_is_a_paragraph_with_by_line(): void {
+		$html = $this->render_template_part( 'header-inner' );
+
+		$this->assertMatchesRegularExpression( '/<p class="wp-block-site-title[^"]*"><a[^>]*>[^<]*<\/a><\/p>/', $html );
+		$this->assertStringNotContainsString( '<h1 class="wp-block-site-title', $html );
+		$this->assertStringNotContainsString( '<h2 class="wp-block-site-title', $html );
+		$this->assertMatchesRegularExpression( '/<p class="ttm-masthead-inner__by[^"]*">by Eric Mann<\/p>/', $html );
 	}
 
 	public function test_footer_after_poster_variant_has_class(): void {
@@ -65,7 +85,9 @@ class ChromePartsTest extends TTM_IntegrationTestCase {
 		$html = (string) do_blocks( '<!-- wp:template-part {"slug":"footer","theme":"ttm-theme"} /-->' );
 
 		$this->assertSame( 1, substr_count( $html, 'ttm-footer__meta' ) );
-		$this->assertSame( 1, substr_count( $html, 'ttm-footer__copyright' ) );
+		// Decision "Empty bound blocks" (P2-01): with no stored verse the bound copyright
+		// paragraph renders nothing at all rather than an empty slot.
+		$this->assertSame( 0, substr_count( $html, 'ttm-footer__copyright' ) );
 		$this->assertSame( 9, substr_count( $html, '<li class="wp-block-navigation-item' ) );
 	}
 

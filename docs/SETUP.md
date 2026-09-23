@@ -22,7 +22,7 @@ npm ci
 composer install
 npm run build              # builds plugins/ttm-core/build (blocks + editor bundle)
 npx wp-env start           # first run pulls images; a few minutes
-npm run env:seed           # wp ttm seed — demo content (available after Phase 1 of the build)
+npm run env:seed           # wp ttm seed — demo content
 ```
 
 Then:
@@ -63,21 +63,23 @@ These are the commands the Foundry pipeline runs after every task (`docs/foundry
 |---|---|---|
 | `composer lint` | `php -l` on every PHP file, then PHPCS with `WordPress-Extra`, `WordPress-Docs`, `WordPress-VIP-Go`, `PHPCompatibilityWP` (security sniffs are errors) | no |
 | `composer test:unit` | PHPUnit + Brain\Monkey, `tests/unit`; no WordPress loaded | no |
-| `npm run lint` | ESLint (`@wordpress/scripts`), stylelint, `theme.json` check, `block.json` contract check, CSS budget | no |
+| `npm run lint` | ESLint (`@wordpress/scripts`), stylelint, `theme.json` check, `block.json` contract check, CSS budget, CSS coverage (`scripts/css-coverage-allow.txt` must stay empty), fixme guard (no `test.fixme(` at all) | no |
 | `npm run test:unit` | Jest via `wp-scripts` | no |
 | `npm run build` | `wp-scripts build` for the plugin | no |
 | `npm run test:integration` | starts wp-env if needed, then PHPUnit with the WordPress test suite inside the `tests-cli` container (`tests/integration`) | yes |
-| `npm run test:e2e` | starts wp-env, reseeds it (`wp ttm seed --reset`), then Playwright + axe against the eight seeded screens at 1280×900 and 390×844, plus the `fidelity`/`editors`/`phone` projects (`tests/e2e`) | yes |
-| `npm run screenshots` | against a running, seeded wp-env, writes the seven `docs/feedback/phase-2/*.png` zone crops (`scripts/screenshots.mjs`); does not reseed | yes |
+| `npm run test:e2e` | starts wp-env, reseeds it (`wp ttm seed --reset`), then Playwright + axe against the thirteen seeded screens at 1280×900 and 390×844, plus the `fidelity`/`editors`/`phone`/`selectors` projects (`tests/e2e`) | yes |
+| `npm run screenshots` | against a running, seeded wp-env, writes the fourteen `docs/feedback/phase-3/*.png` zone crops (`scripts/screenshots.mjs`); does not reseed | yes |
 | `bash scripts/forbidden-patterns.sh` | greps for the mechanical rules in `SPEC.md §3` | no |
 
 Fix formatting automatically with `composer lint:fix` (phpcbf) and `npx wp-scripts format`.
 
 ### How the e2e suite works
 
-`npm run test:e2e` runs against the wp-env **dev** site (`http://localhost:8888`), not the tests instance on `8889` - it reseeds the dev site itself (`wp-env run cli wp ttm seed --reset`) first, and `tests/e2e/playwright.config.mjs` sets `WP_BASE_URL` explicitly for the same reason: `wp-scripts test-playwright` otherwise defaults it to the *tests* environment's port when `@wordpress/env` is installed, which would run the suite against an empty, unseeded site. `tests/e2e/lib/urls.mjs` hard-codes the eight screens' paths from the seed fixtures (`docs/fixtures/seed/{posts,series,pages}.json`); `screens.spec.mjs` checks one `<main>` landmark, zero `serious`/`critical` axe violations, and a single `img[fetchpriority="high"]` hero image on the front page and one article; `network.spec.mjs` asserts every request is same-origin, `data:`/`blob:`, or (only when Jetpack happens to be active) one of its own stats/subscribe hosts, and never hits `/wp-json/` or `admin-ajax.php`; `focus.spec.mjs` tabs through the front page and checks the skip link, first nav link, first `.ttm-item`, and first `.btn` all keep a visible focus outline. The HTML report lands at `playwright-report/` (`--open=never`); open it with `npx playwright show-report`.
+`npm run test:e2e` runs against the wp-env **dev** site (`http://localhost:8888`), not the tests instance on `8889` - it reseeds the dev site itself (`wp-env run cli wp ttm seed --reset`) first, and `tests/e2e/playwright.config.mjs` sets `WP_BASE_URL` explicitly for the same reason: `wp-scripts test-playwright` otherwise defaults it to the *tests* environment's port when `@wordpress/env` is installed, which would run the suite against an empty, unseeded site. `tests/e2e/lib/urls.mjs` hard-codes the thirteen screens' paths from the seed fixtures (`docs/fixtures/seed/{posts,series,pages}.json`); `screens.spec.mjs` checks one `<main>` landmark, zero `serious`/`critical` axe violations, a single `img[fetchpriority="high"]` hero image on the front page and one article, and (P5-01) that every screen is a centred 1280px column at a 1920px viewport; `network.spec.mjs` asserts every request is same-origin, `data:`/`blob:`, or (only when Jetpack happens to be active) one of its own stats/subscribe hosts, and never hits `/wp-json/` or `admin-ajax.php` — Jetpack itself is not installed in wp-env, so this allowance is currently unexercised; `focus.spec.mjs` tabs through the front page and checks the skip link, first nav link, first `.ttm-item`, and first `.btn` all keep a visible focus outline. The HTML report lands at `playwright-report/` (`--open=never`); open it with `npx playwright show-report`.
 
-The `fidelity` Playwright project (also driven by `npm run test:e2e`, `--config tests/e2e/playwright.config.mjs`) runs `tests/e2e/fidelity.spec.mjs` and `tests/e2e/editors.spec.mjs` — one `test()` per `docs/SPEC.md §6.2` table row, transcribed verbatim, each checking a single computed-style/text/count assertion against the seeded front page at the mock's viewport (`tests/e2e/lib/presets.mjs` reads colours/sizes from `theme.json` rather than hard-coding hex; `tests/e2e/lib/style.mjs` wraps `getComputedStyle()`), plus the `a11y`/`network` rows and the two editor-registration checks. Every fidelity/editors row is a real, passing test now (`scripts/check-fixme.mjs`, wired into `npm run lint`, fails the build if `test.fixme(` ever reappears in either file). `desktop`/`phone` (the phase 1 projects) ignore these two files; `fidelity` ignores everything else. The `phone` project additionally runs `tests/e2e/specs/phone.spec.mjs`, 390px-only layout facts (no horizontal overflow, the section nav actually scrolls, the Writing cell and poster stack) that don't fit the fidelity table's one-row-per-property shape; `desktop` ignores that file.
+The `fidelity` Playwright project (also driven by `npm run test:e2e`, `--config tests/e2e/playwright.config.mjs`) runs `tests/e2e/fidelity.spec.mjs` and `tests/e2e/editors.spec.mjs` — one `test()` per `docs/SPEC.md §6.2`/`§6.9` table row, transcribed verbatim, each checking a single computed-style/text/count assertion against a seeded screen at the mock's viewport (`tests/e2e/lib/presets.mjs` reads colours/sizes from `theme.json` rather than hard-coding hex; `tests/e2e/lib/style.mjs` wraps `getComputedStyle()`), plus the per-screen `a11y`/`network` rows and the two editor-registration checks. `scripts/check-fixme.mjs`, wired into `npm run lint`, fails the build on any `test.fixme(` in either file at all (`ALLOW_TAGGED = false`, set once every phase had landed in P5-02) — during earlier phases of this repeat's build, a row not yet built could be `test.fixme(` tagged with the task that would un-fixme it (`// P<n>-<nn>`), but no such tag is ever accepted again. `desktop`/`phone` (the phase 1 projects) ignore these files; `fidelity` ignores everything else. The `phone` project additionally runs `tests/e2e/specs/phone.spec.mjs`, 390px-only layout facts (no horizontal overflow on every seeded screen, the section nav and archive filter row actually scroll, the Writing cell/poster/Writing-page sections stack and reorder) that don't fit the fidelity table's one-row-per-property shape; `desktop` ignores that file.
+
+`tests/e2e/selectors.spec.mjs` (also in the `fidelity` project, SPEC §3.2 rule 41, P0-03) is the runtime counterpart to `npm run lint`'s static `check:css-coverage`: it parses `ttm.css`/`style.css` with the pure `scripts/lib/css-selectors.mjs`, then visits every seeded screen (`tests/e2e/lib/urls.mjs`'s `SCREEN_URLS` plus the tag-filtered security archive) and asserts every `.ttm-`/`.is-style-` selector matches at least one element somewhere across the set. A selector that's exempt (state pseudo-classes, `@media`-only rules) or listed in `tests/e2e/selectors-allow.txt` is skipped; everything else with zero matches fails the test, naming the selector. Allow-list lines carry a reason — `# editor block style (04 §3)` for editor-only block styles no seeded template uses, or `# state: ...` for a real selector whose triggering state the current seed never reaches — both may remain indefinitely (rule 41 permits reasoned entries); a `# P<n>-<nn> pending` line (CSS a later phase task would make reachable) was allowed only while the build was in progress and none remain.
 
 ### How the integration harness works
 
@@ -89,7 +91,7 @@ Run a single file: `npx wp-env run tests-cli --env-cwd=wp-content/ttm-tests php 
 
 ## Seed states
 
-`npm run env:seed` runs `wp ttm seed` (state `normal` by default), which fully populates the seven sections, four pages, navigation, ~90 posts, the four seed series (two nonfiction, two fiction, one with a cover), two books and the current verse from `docs/fixtures/verse-sample.json`. `npx wp-env run cli wp ttm seed --state=quiet` shifts every post 120 days into the past (no cell has anything within 90 days, journal nothing within 30) without changing any series status. `npx wp-env run cli wp ttm seed --state=empty` seeds everything except Security/Opinion posts, series (and their chapters), stories and books, and deletes the verse options — useful for exercising every documented fallback (`06-fallbacks.md`). Add `--reset` to any of these to delete every previously seeded object (identified by `_ttm_seed` post/term meta) first; seeding itself is idempotent by slug, so re-running `wp ttm seed` without `--reset` never duplicates content. Seeding refuses to run when `wp_get_environment_type()` returns `production`.
+`npm run env:seed` runs `wp ttm seed` (state `normal` by default), which fully populates the eight categories, four pages, ~100 posts, the six seed series (three nonfiction, three fiction, one with a cover), three books and the current verse from `docs/fixtures/verse-sample.json`. `npx wp-env run cli wp ttm seed --state=quiet` shifts every post 120 days into the past (no cell has anything within 90 days, journal nothing within 30) without changing any series status. `npx wp-env run cli wp ttm seed --state=empty` seeds everything except Security/Opinion posts, series (and their chapters), stories and books, and deletes the verse options — useful for exercising every documented fallback (`06-fallbacks.md`). Add `--reset` to any of these to delete every previously seeded object (identified by `_ttm_seed` post/term meta) first; seeding itself is idempotent by slug, so re-running `wp ttm seed` without `--reset` never duplicates content. Seeding refuses to run when `wp_get_environment_type()` returns `production`.
 
 ## Repository layout
 
@@ -110,9 +112,9 @@ Site-editable settings (Settings → These Things Matter): newsletter provider, 
 
 ## Git workflow for the proof of concept
 
-- All work lands on `poc`. Foundry creates `poc/<date>` branches from `poc` and opens draft PRs into `poc`.
-- Commits are unsigned on this branch by design; they will be rebased and signed before anything merges to `main`.
-- CI runs on pushes to `main`, `poc`, `poc/**`, `build/**` and on PRs into `main` or `poc`.
+- Earlier flights landed on `poc`, with Foundry creating `poc/<date>` branches from `poc` and opening draft PRs into `poc`. This flight (phase 3, "inner-template fidelity") instead runs on `refine/<date>` from `main` (see `docs/PLAN.md`'s Decisions).
+- Commits are unsigned on `refine/2026-09-22` by design (`commit.gpgsign=false`); the owner rebases and signs before merging to `main`.
+- CI runs on pushes to `main`, `poc`, `poc/**`, `build/**`, `refine/**` and on PRs into `main`, `poc` or `refine/**`.
 
 ## Running the Foundry flight
 
