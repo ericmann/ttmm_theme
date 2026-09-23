@@ -182,15 +182,17 @@ class MigrateCommand extends Command {
 	}
 
 	/**
-	 * `migrate:excerpts --from=yoast [--dry-run]` (SPEC §6.7): posts with an empty
+	 * `migrate:excerpts --from=yoast [--dry-run] [--words=<n>]` (SPEC §6.7): posts with an empty
 	 * `post_excerpt` and a non-empty `_yoast_wpseo_metadesc` get it as the excerpt, truncated
 	 * at a sentence boundary within `excerpt_length` words. Never overwrites an existing
 	 * excerpt; Journal-primary posts are excluded (their excerpt is derived, not migrated).
+	 * `--words=` overrides `excerpt_length` for one run, measurement only (P2-08 tuning); the
+	 * `Config` default is what every other run (and production) actually uses.
 	 *
 	 * {@inheritDoc}
 	 *
 	 * @param string[]             $args  Positional args (unused).
-	 * @param array<string, mixed> $assoc --from=yoast, --dry-run.
+	 * @param array<string, mixed> $assoc --from=yoast, --dry-run, --words=<n>.
 	 */
 	public function excerpts( array $args, array $assoc ): array {
 		unset( $args );
@@ -200,13 +202,13 @@ class MigrateCommand extends Command {
 			return [
 				'ok'       => false,
 				'rows'     => [],
-				'messages' => [ 'Usage: migrate:excerpts --from=yoast [--dry-run]' ],
+				'messages' => [ 'Usage: migrate:excerpts --from=yoast [--dry-run] [--words=<n>]' ],
 			];
 		}
 
 		$dry_run      = ! empty( $assoc['dry-run'] );
 		$batch        = (int) Config::get( 'cli.batch', 200 );
-		$max_words    = (int) Config::get( 'excerpt_length', 55 );
+		$max_words    = isset( $assoc['words'] ) ? (int) $assoc['words'] : (int) Config::get( 'excerpt_length', 55 );
 		$journal_slug = (string) Config::get( 'sections.journal_slug', 'journal' );
 		$rows         = [];
 		$paged        = 1;
@@ -272,17 +274,21 @@ class MigrateCommand extends Command {
 	}
 
 	/**
-	 * `migrate:images [--hosts=<comma-list>] [--post=<id>] [--dry-run]` (SPEC §6.7): for every
-	 * published post (or just `--post`), Photon (`iN.wp.com/<host>/<path>`) `<img src>` URLs
-	 * whose `<host>` equals `migration.photon_origin` are rewritten to `https://<host>/<path>`
-	 * with no network fetch; `<img src>` URLs on any other host in `--hosts`/`migration.image_hosts`
-	 * are sideloaded into the media library and both the `src` and any wrapping `<a href>` to the
-	 * same URL are rewritten to the new attachment URL. A fetch failure leaves that `src`
-	 * untouched. `ttm_classic_backup` is written once, first writer wins (shared with
-	 * convert:import/revert, rule 49); `ttm_images_rewritten` records the per-post count.
+	 * `migrate:images [--hosts=<comma-list>] [--post=<id>] [--dry-run] [--timeout=<seconds>]`
+	 * (SPEC §6.7): for every published post (or just `--post`), Photon (`iN.wp.com/<host>/<path>`)
+	 * `<img src>` URLs whose `<host>` equals `migration.photon_origin` are rewritten to
+	 * `https://<host>/<path>` with no network fetch; `<img src>` URLs on any other host in
+	 * `--hosts`/`migration.image_hosts` are sideloaded into the media library and both the `src`
+	 * and any wrapping `<a href>` to the same URL are rewritten to the new attachment URL. A
+	 * fetch failure leaves that `src` untouched. `ttm_classic_backup` is written once, first
+	 * writer wins (shared with convert:import/revert, rule 49); `ttm_images_rewritten` records
+	 * the per-post count. `--timeout=` overrides `migration.image_timeout` for one run,
+	 * measurement only (P2-08 tuning); the `Config` default is what every other run (and
+	 * production) actually uses. The summary message reports sideload attempts/successes/
+	 * timeouts/other-failures, also for measurement.
 	 *
 	 * @param string[]             $args  Positional args (unused).
-	 * @param array<string, mixed> $assoc --hosts, --post, --dry-run.
+	 * @param array<string, mixed> $assoc --hosts, --post, --dry-run, --timeout=<seconds>.
 	 * @return array{ok: bool, rows: array<int, array<string, mixed>>, messages: string[]}
 	 */
 	public function images( array $args, array $assoc ): array {
@@ -293,13 +299,17 @@ class MigrateCommand extends Command {
 			? array_values( array_filter( array_map( 'trim', explode( ',', (string) $assoc['hosts'] ) ) ) )
 			: (array) Config::get( 'migration.image_hosts', [] );
 		$origin  = (string) Config::get( 'migration.photon_origin', 'eric.mann.blog' );
-		$timeout = (int) Config::get( 'migration.image_timeout', 20 );
+		$timeout = isset( $assoc['timeout'] ) ? (int) $assoc['timeout'] : (int) Config::get( 'migration.image_timeout', 20 );
 
 		$post_ids = isset( $assoc['post'] )
 			? [ (int) $assoc['post'] ]
 			: $this->published_posts();
 
-		$rows = [];
+		$rows      = [];
+		$attempts  = 0;
+		$successes = 0;
+		$timeouts  = 0;
+		$failures  = 0;
 
 		foreach ( $post_ids as $post_id ) {
 			$post = get_post( $post_id );
@@ -328,12 +338,21 @@ class MigrateCommand extends Command {
 					continue;
 				}
 
-				$new_url = $this->sideload( $src, $post_id, $timeout );
-				if ( null === $new_url ) {
+				++$attempts;
+				$sideloaded = $this->sideload( $src, $post_id, $timeout );
+				if ( $sideloaded['timed_out'] ) {
+					++$timeouts;
+				} elseif ( null === $sideloaded['url'] ) {
+					++$failures;
+				} else {
+					++$successes;
+				}
+
+				if ( null === $sideloaded['url'] ) {
 					continue;
 				}
 
-				$content = Html::replace_url( $content, $src, $new_url );
+				$content = Html::replace_url( $content, $src, $sideloaded['url'] );
 				++$rewritten;
 			}//end foreach
 
@@ -370,21 +389,29 @@ class MigrateCommand extends Command {
 				$dry_run
 					? sprintf( 'Would rewrite images on %d post(s).', count( $rows ) )
 					: sprintf( 'Rewrote images on %d post(s).', count( $rows ) ),
+				sprintf(
+					'Sideload attempts: %d, successes: %d, timeouts: %d, other failures: %d.',
+					$attempts,
+					$successes,
+					$timeouts,
+					$failures
+				),
 			],
 		];
 	}
 
 	/**
 	 * Sideload a remote image into the media library, with `http_request_timeout` overridden
-	 * only for the duration of this call (SPEC §6.7). Null on failure — the caller leaves the
-	 * original `src` untouched.
+	 * only for the duration of this call (SPEC §6.7). `url` is null on failure -- the caller
+	 * leaves the original `src` untouched; `timed_out` distinguishes a timeout from any other
+	 * failure, for `migrate:images`' own attempt/success/timeout/failure summary (P2-08 tuning).
 	 *
 	 * @param string $url     Remote image URL.
 	 * @param int    $post_id Post to attach the sideloaded image to.
 	 * @param int    $timeout Request timeout, seconds.
-	 * @return string|null
+	 * @return array{url: string|null, timed_out: bool}
 	 */
-	private function sideload( string $url, int $post_id, int $timeout ): ?string {
+	private function sideload( string $url, int $post_id, int $timeout ): array {
 		require_once ABSPATH . 'wp-admin/includes/media.php';
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		require_once ABSPATH . 'wp-admin/includes/image.php';
@@ -396,12 +423,21 @@ class MigrateCommand extends Command {
 		remove_filter( 'http_request_timeout', $set_timeout );
 
 		if ( is_wp_error( $attachment_id ) ) {
-			return null;
+			$timed_out = in_array( $attachment_id->get_error_code(), [ 'http_request_failed', 'http_no_file' ], true )
+				&& false !== stripos( $attachment_id->get_error_message(), 'timed out' );
+
+			return [
+				'url'       => null,
+				'timed_out' => $timed_out,
+			];
 		}
 
 		$attachment_url = wp_get_attachment_url( (int) $attachment_id );
 
-		return is_string( $attachment_url ) ? $attachment_url : null;
+		return [
+			'url'       => is_string( $attachment_url ) ? $attachment_url : null,
+			'timed_out' => false,
+		];
 	}
 
 	/**

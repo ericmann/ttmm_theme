@@ -326,6 +326,40 @@ class MigrateCommandTest extends TTM_IntegrationTestCase {
 	}
 
 	/**
+	 * P2-08: `--words=` overrides `excerpt_length` for one measurement run, without touching
+	 * the `Config` default other callers use.
+	 */
+	public function test_excerpts_words_override_ignores_excerpt_length_config(): void {
+		$tech  = $this->category_id( 'technology', 'Technology' );
+		$words = [];
+		for ( $i = 1; $i <= 20; $i++ ) {
+			$words[] = "word{$i}";
+		}
+		$desc = implode( ' ', $words ); // no terminal punctuation -> hard cut at the word limit.
+
+		$post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+				'post_excerpt'  => '',
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $tech );
+		update_post_meta( $post, '_yoast_wpseo_metadesc', $desc );
+
+		( new MigrateCommand() )->excerpts(
+			[],
+			[
+				'from'  => 'yoast',
+				'words' => 5,
+			] 
+		);
+
+		$excerpt = get_post( $post )->post_excerpt;
+		$this->assertSame( 'word1 word2 word3 word4 word5…', $excerpt );
+	}
+
+	/**
 	 * P2-04, SPEC §6.7: a Photon URL for `migration.photon_origin` rewrites to the origin with
 	 * no network fetch at all.
 	 */
@@ -453,6 +487,52 @@ class MigrateCommandTest extends TTM_IntegrationTestCase {
 		$this->assertSame( 0, (int) get_post_meta( $post_id, 'ttm_images_rewritten', true ) );
 		$this->assertSame( '', (string) get_post_meta( $post_id, 'ttm_classic_backup', true ) );
 		$this->assertStringContainsString( 'Would rewrite images on 1 post(s).', $result['messages'][0] );
+	}
+
+	/**
+	 * P2-08: `migrate:images` reports sideload attempts/successes/timeouts/other-failures, for
+	 * the `migration.image_timeout` tuning measurement; `--timeout=` overrides `Config` for one
+	 * run without touching its default.
+	 */
+	public function test_images_reports_sideload_attempt_counts_and_honours_timeout_override(): void {
+		$original = '<p><img src="https://cdn.example.com/broken.jpg" alt=""></p>';
+		self::factory()->post->create(
+			[
+				'post_status'  => 'publish',
+				'post_content' => $original,
+			]
+		);
+
+		$seen_timeout = null;
+		add_filter(
+			'http_request_timeout',
+			static function ( $timeout ) use ( &$seen_timeout ) {
+				// Priority 20: runs after MigrateCommand's own (default-priority 10) filter, so
+				// this sees the value it actually set, not the pre-filter default.
+				$seen_timeout = $timeout;
+				return $timeout;
+			},
+			20
+		);
+		add_filter(
+			'pre_http_request',
+			static fn () => new WP_Error( 'http_request_failed', 'Operation timed out after 40001 milliseconds.' )
+		);
+
+		$result = ( new MigrateCommand() )->images(
+			[],
+			[
+				'hosts'   => 'cdn.example.com',
+				'timeout' => 40, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout -- a --timeout=<n> CLI arg value, not an actual wp_remote_* call.
+			]
+		);
+
+		$this->assertTrue( $result['ok'] );
+		$this->assertSame( 40, $seen_timeout );
+		$this->assertSame(
+			'Sideload attempts: 1, successes: 0, timeouts: 1, other failures: 0.',
+			$result['messages'][1]
+		);
 	}
 
 	public function test_images_backup_is_written_once(): void {
