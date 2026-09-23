@@ -157,3 +157,9 @@ in-body footnote marker "¹" and the numbered note list at the bottom both rende
 between the P3-03 and P4-02 runs — same `migrate:excerpts --from=yoast` step, re-run against the
 same export, filled more excerpts than the P3-03 run's timing caught; every other flag is
 unchanged, all `content`-class, counted only, per P4-02's scope.)
+
+## P4-03
+
+render/single: no findings — P4-02's full `test:live` run against the live import produced zero
+`render`- or `single`-class failures (every finding was `archive` or `coverage`, both owed to
+P4-04). Nothing to fix here.
