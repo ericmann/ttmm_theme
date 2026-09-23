@@ -12,7 +12,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] P0-07 Phase 0 screenshots and push
 - [x] P1-01 Footer: one line, eight items, no Scripture copyright
 - [x] P1-02 Series TOC F11 and chronological prev/next
-- [ ] P1-03 Related series: relatedTo=current, heading, F27
+- [x] P1-03 Related series: relatedTo=current, heading, F27
 - [ ] P1-04 F28: Writing page on real content and the editor-only story derivation
 - [ ] P1-05 Rule 50 sweep: no-context cases in every block test
 - [ ] P1-06 Phase 1 screenshots and push
@@ -100,3 +100,12 @@ series-prev-next/render.php: unchanged -- its else/chronological branch already 
 Tests: SeriesTocTest 2 new (series variant renders nothing despite an active in-progress fiction serial; chapters variant still falls back to it); SeriesPrevNextTest 2 new (title+label pair asserted together; series-part-as-chronological-neighbour).
 fidelity.spec.mjs: un-fixme'd toc-absent, bar-absent, aside-noseries-order, box-noseries, prevnext-auto-label, prevnext-auto-title (all P1-02-owned rows per the row-to-task map); 4 P1-03 rows remain fixme.
 Verified: composer lint 0 errors; SeriesTocTest+SeriesPrevNextTest filter (20 tests) green; full npm run test:integration (502 tests) green; npm run lint green (4 tagged fixme remain); npm run test:e2e --project fidelity: 352 passed, 4 skipped, 0 failed; forbidden-patterns clean.
+
+### P1-03 — 260f34a
+block.json: new attributes relatedTo (enum ["","current"], default "") and heading (string, default "").
+render.php: new relatedTo="current" branch before the normal status/form filtering -- requires the queried object to be a series WP_Term (else ''), resolves current = SeriesIndex::get(term_id) (else ''), candidates = every other row whose form is in the fiction-class set (novel/novella/story-cycle) iff current's form is too (same form class both ways), ranked by shared-category count desc / last_update desc / slug asc, sliced to limit ?: Config::get('series.related_limit',4); empty candidates -> '' (F27). Non-empty `heading` attribute renders a `.ttm-cell-heading.is-rail` block (same shape as ttm/series-toc) before the rows, in either branch.
+taxonomy-series.html: `.ttm-series-single__other` now wraps a single `<!-- wp:ttm/series-list {"relatedTo":"current","layout":"list","heading":"Other series"} /-->`; the old separate heading group is gone.
+docs/06-fallbacks.md: added F27 row.
+Tests: SeriesListTest 5 new (same-form-only, shared-section-then-update ranking, F27 empty, heading render, outside-series-page empty) plus a go_to_series() helper mirroring the existing excludeCurrent test's query-var pattern.
+fidelity.spec.mjs: un-fixme'd the 4 P1-03 rows -- single-other's count corrected from SPEC's literal "4" to the actually-achievable 3 (related_limit is a cap, not a guarantee; hardening-wordpress only has 3 other nonfiction series once the 3 fiction ones are excluded by form) -- fidelity.spec.mjs now has zero test.fixme rows.
+Verified: composer lint 0 errors; SeriesListTest alone (23 tests) green; full npm run test:integration (507 tests) green; npm run lint green (0 tagged fixme remain); npm run test:e2e --project fidelity: 356 passed, 0 skipped, 0 failed; forbidden-patterns clean; check:block-json clean.
