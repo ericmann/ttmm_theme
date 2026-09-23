@@ -11,7 +11,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] P0-06 §3.1 fold-in edits (regex tightening, ValuesTest case)
 - [x] P0-07 Phase 0 screenshots and push
 - [x] P1-01 Footer: one line, eight items, no Scripture copyright
-- [ ] P1-02 Series TOC F11 and chronological prev/next
+- [x] P1-02 Series TOC F11 and chronological prev/next
 - [ ] P1-03 Related series: relatedTo=current, heading, F27
 - [ ] P1-04 F28: Writing page on real content and the editor-only story derivation
 - [ ] P1-05 Rule 50 sweep: no-context cases in every block test
@@ -93,3 +93,10 @@ Sources.php/Config.php/verse-of-the-day render.php: removed ttm/verse-copyright 
 Tests: ChromePartsTest renamed+adjusted (8 items, no /feed/); FrontSourcesTest's 2 verse-copyright tests deleted; VerseOfTheDayTest::test_copyright_is_rendered_as_plain_text -> test_copyright_is_never_rendered (and the now-duplicate test_copyright_is_absent_from_the_box_by_default deleted); ConfigTest key list updated. fidelity.spec.mjs: 6 footer-* rows un-fixme'd; verse-nocopy row deleted (selector it checked for no longer exists in CSS/markup at all).
 Interpretation: docs/foundry.json's verse-copyright-removed constraint forbids the literal strings ttm-verse__copyright/ttm-footer__copyright/etc. anywhere in tests/, including inside assertStringNotContainsString()/substr_count() absence checks and comments -- had to scrub those too, not just the feature code, to get the constraint green.
 Verified: composer lint 0 errors, composer test:unit 171; npm run lint green (191/191 coverage, 10 tagged fixme, budget 62640/63488); full npm run test:integration (498 tests) and npm run test:e2e (481 passed/10 skipped/0 failed) green; forbidden-patterns clean; grep for verse-copyright|verse_copyright|copyright_placement across plugins/themes/tests empty; foundry_verify constraints all ok:true including footer-no-rss and verse-copyright-removed (previously failing since P0-01).
+
+### P1-02 — 9c574fc
+series-toc/render.php: moved $ttm_variant read before series-row resolution; only 'chapters' variant falls back to Serials::active() when no seriesId/post-series is found -- 'series' variant now returns '' instead.
+series-prev-next/render.php: unchanged -- its else/chronological branch already queries WP_Query by primary category only (no series exclusion), so a series part sharing the primary category was already a valid neighbour; verified with a new test rather than a code change.
+Tests: SeriesTocTest 2 new (series variant renders nothing despite an active in-progress fiction serial; chapters variant still falls back to it); SeriesPrevNextTest 2 new (title+label pair asserted together; series-part-as-chronological-neighbour).
+fidelity.spec.mjs: un-fixme'd toc-absent, bar-absent, aside-noseries-order, box-noseries, prevnext-auto-label, prevnext-auto-title (all P1-02-owned rows per the row-to-task map); 4 P1-03 rows remain fixme.
+Verified: composer lint 0 errors; SeriesTocTest+SeriesPrevNextTest filter (20 tests) green; full npm run test:integration (502 tests) green; npm run lint green (4 tagged fixme remain); npm run test:e2e --project fidelity: 352 passed, 4 skipped, 0 failed; forbidden-patterns clean.
