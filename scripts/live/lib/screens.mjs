@@ -3,11 +3,11 @@
  * plain data (SPEC §6.10, PLAN Decision "screens.json shape"). No I/O, no wp-cli, no network --
  * the CLI wrapper (`scripts/live/screens.mjs`) fetches everything and calls this.
  *
- * `screens.json` shape (PLAN Decision):
+ * `screens.json` shape (PLAN Decision, `date` added P4-01 for `live.spec.mjs`'s byline check):
  *   { generated: "<ISO>", host: "<LIVE_HOST>",
  *     screens: [{ id, path, kind: "front|single|archive|page|search|404",
  *                 expectStatus: 200|404, section: "<slug>"|null,
- *                 classic: boolean, freeform: boolean }] }
+ *                 classic: boolean, freeform: boolean, date: string|null }] }
  */
 
 const KIND = {
@@ -21,10 +21,11 @@ const KIND = {
 
 /**
  * @typedef {Object} ScreenPost
- * @property {number}  id       Post ID (informational only; not written to the manifest).
- * @property {string}  slug     `post_name`.
- * @property {boolean} classic  Still has no `<!-- wp:` block markup.
- * @property {boolean} freeform Contains a `core/freeform`/`core/html` fallback block.
+ * @property {number}      id       Post ID (informational only; not written to the manifest).
+ * @property {string}      slug     `post_name`.
+ * @property {boolean}     classic  Still has no `<!-- wp:` block markup.
+ * @property {boolean}     freeform Contains a `core/freeform`/`core/html` fallback block.
+ * @property {string|null} [date]   `post_date` (P4-01: `live.spec.mjs`'s byline-date check).
  */
 
 /**
@@ -76,6 +77,7 @@ export function buildScreens( inputs ) {
 			section: options.section ?? null,
 			classic: options.classic ?? false,
 			freeform: options.freeform ?? false,
+			date: options.date ?? null,
 		} );
 	};
 
@@ -87,6 +89,7 @@ export function buildScreens( inputs ) {
 			section,
 			classic: Boolean( post.classic ),
 			freeform: Boolean( post.freeform ),
+			date: post.date ?? null,
 		} );
 	};
 

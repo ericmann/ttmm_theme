@@ -130,4 +130,20 @@ describe( 'buildScreens', () => {
 		const paths = screens.map( ( screen ) => screen.path );
 		expect( new Set( paths ).size ).toBe( paths.length );
 	} );
+
+	it( 'carries each post’s date through, null when absent (P4-01)', () => {
+		const { screens } = buildScreens(
+			baseInputs( {
+				oldest: post( 'dated-post', { date: '2014-03-05 12:00:00' } ),
+			} )
+		);
+
+		const dated = screens.find(
+			( screen ) => screen.path === '/dated-post/'
+		);
+		const front = screens.find( ( screen ) => screen.kind === 'front' );
+
+		expect( dated.date ).toBe( '2014-03-05 12:00:00' );
+		expect( front.date ).toBeNull();
+	} );
 } );

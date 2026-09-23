@@ -68,8 +68,8 @@ function wpJson( args ) {
 /**
  * A raw `wp post list` row -> the pure builder's `ScreenPost` shape, or null.
  *
- * @param {object|undefined} row `{ID, post_name, post_content}`.
- * @return {{id: number, slug: string, classic: boolean, freeform: boolean}|null} The screen post, or null.
+ * @param {object|undefined} row `{ID, post_name, post_content, post_date}`.
+ * @return {{id: number, slug: string, classic: boolean, freeform: boolean, date: string|null}|null} The screen post, or null.
  */
 function toPost( row ) {
 	if ( ! row ) {
@@ -82,6 +82,7 @@ function toPost( row ) {
 		classic: ! content.includes( '<!-- wp:' ),
 		freeform:
 			content.includes( 'wp:freeform' ) || content.includes( 'wp:html' ),
+		date: row.post_date ?? null,
 	};
 }
 
@@ -102,7 +103,7 @@ function sectionPost( section ) {
 		'--order=DESC',
 		'--posts_per_page=1',
 		'--format=json',
-		'--fields=ID,post_name,post_content',
+		'--fields=ID,post_name,post_content,post_date',
 	] );
 
 	const count = Number(
@@ -140,7 +141,7 @@ function classicShortcodePosts( pattern, limit ) {
 		'--order=DESC',
 		'--posts_per_page=500',
 		'--format=json',
-		'--fields=ID,post_name',
+		'--fields=ID,post_name,post_date',
 	] );
 
 	const matches = [];
@@ -161,6 +162,7 @@ function classicShortcodePosts( pattern, limit ) {
 				slug: row.post_name,
 				classic: false,
 				freeform: false,
+				date: row.post_date ?? null,
 			} );
 		}
 	}
@@ -193,7 +195,7 @@ function main() {
 		'--order=ASC',
 		'--posts_per_page=1',
 		'--format=json',
-		'--fields=ID,post_name,post_content',
+		'--fields=ID,post_name,post_content,post_date',
 	] );
 
 	const asideRows = wpJson( [
@@ -204,7 +206,7 @@ function main() {
 		'--post_format=aside',
 		'--posts_per_page=1',
 		'--format=json',
-		'--fields=ID,post_name,post_content',
+		'--fields=ID,post_name,post_content,post_date',
 	] );
 
 	const featuredRows = wpJson( [
@@ -215,7 +217,7 @@ function main() {
 		'--meta_key=_thumbnail_id',
 		'--posts_per_page=1',
 		'--format=json',
-		'--fields=ID,post_name,post_content',
+		'--fields=ID,post_name,post_content,post_date',
 	] );
 
 	const unfeaturedRows = wpJson( [
@@ -227,7 +229,7 @@ function main() {
 		'--meta_compare=NOT EXISTS',
 		'--posts_per_page=1',
 		'--format=json',
-		'--fields=ID,post_name,post_content',
+		'--fields=ID,post_name,post_content,post_date',
 	] );
 
 	const manifest = buildScreens( {
