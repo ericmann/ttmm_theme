@@ -2536,19 +2536,21 @@ test.describe( 'archive', () => {
 		).toBeLessThan( 1 );
 	} );
 
-	// P0-04, SPEC §6.11: Business has six tags (five plus "All"), a second seeded section
+	// P0-05, SPEC §6.11: Business has six tags (five plus "All"), a second seeded section
 	// exercising the filter row beyond Security.
-	// prettier-ignore
-	test.fixme( 'ar-filter-business: .ttm-filter-row .tag @1280', async ( { page } ) => { // P0-05
+	test( 'ar-filter-business: .ttm-filter-row .tag @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.businessArchive, 1280 );
 		const tags = page.locator( '.ttm-filter-row .tag' );
 		expect( await tags.count() ).toBe( 6 );
 		expect( await text( tags.first() ) ).toBe( 'All' );
 	} );
 
-	// P0-04, SPEC §6.11.
-	// prettier-ignore
-	test.fixme( 'ar-filter-business-pos: .ttm-filter-row @1280', async ( { page } ) => { // P0-05
+	// P0-05, SPEC §6.11.
+	test( 'ar-filter-business-pos: .ttm-filter-row @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.businessArchive, 1280 );
 		const head = await page.locator( '.ttm-archive-head' ).boundingBox();
 		const filter = await page.locator( '.ttm-filter-row' ).boundingBox();
@@ -2560,9 +2562,10 @@ test.describe( 'archive', () => {
 		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 1 ) );
 	} );
 
-	// P0-04, SPEC §6.11.
-	// prettier-ignore
-	test.fixme( 'ar-filter-sort-business: .ttm-filter-row__sort @1280', async ( { page } ) => { // P0-05
+	// P0-05, SPEC §6.11.
+	test( 'ar-filter-sort-business: .ttm-filter-row__sort @1280', async ( {
+		page,
+	} ) => {
 		await gotoScreen( page, SCREENS.businessArchive, 1280 );
 		const el = page.locator( '.ttm-filter-row__sort' );
 		expect( await text( el ) ).toBe( 'Newest first' );

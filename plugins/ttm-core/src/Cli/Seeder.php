@@ -11,6 +11,7 @@ namespace TTM\Core\Cli;
 
 use TTM\Core\Config;
 use TTM\Core\Meta\PostMeta;
+use TTM\Core\Query\Stats;
 use TTM\Core\Support\Clock;
 use TTM\Core\Verse\Fetcher;
 
@@ -142,6 +143,9 @@ class Seeder {
 	public function run( string $state ): array {
 		$this->state       = $state;
 		$this->days_offset = 'quiet' === $state ? (int) Config::get( 'seed.quiet_offset_days', 120 ) : 0;
+
+		// P0-05: a previous run's stats/top-tags transients must never leak into this one.
+		Stats::flush_all();
 
 		$categories = $this->seed_categories();
 		$pages      = $this->seed_pages();
@@ -817,6 +821,10 @@ class Seeder {
 	 */
 	public function reset(): void {
 		global $wpdb;
+
+		// P0-05: clear stats/top-tags transients before the deleted posts can leave stale data
+		// behind for whatever content (seeded or not) remains.
+		Stats::flush_all();
 
 		$post_ids = $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s", self::SEED_META ) );
 		foreach ( $post_ids as $post_id ) {
