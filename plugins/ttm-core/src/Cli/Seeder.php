@@ -227,6 +227,12 @@ class Seeder {
 	private function upsert_category( array $row, array $ids ): int {
 		$existing = get_term_by( 'slug', $row['slug'], 'category' );
 		if ( $existing ) {
+			// The theme's starter content (after_switch_theme) creates the sections with no
+			// description, so a seed on a fresh install must still apply the fixture's copy.
+			$description = $row['description'] ?? '';
+			if ( '' !== $description && $description !== $existing->description ) {
+				wp_update_term( (int) $existing->term_id, 'category', [ 'description' => $description ] );
+			}
 			return (int) $existing->term_id;
 		}
 
@@ -254,6 +260,13 @@ class Seeder {
 		foreach ( $rows as $row ) {
 			$existing = get_page_by_path( $row['slug'], OBJECT, 'page' );
 			if ( $existing ) {
+				// The theme's starter content creates `about` without a portrait; add it.
+				if ( ! empty( $row['featured_image'] ) && ! has_post_thumbnail( $existing->ID ) ) {
+					$attachment_id = $this->image( $row['title'], 'ttm-thumb' );
+					if ( $attachment_id ) {
+						set_post_thumbnail( $existing->ID, $attachment_id );
+					}
+				}
 				$ids[] = $existing->ID;
 				continue;
 			}

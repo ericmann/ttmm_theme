@@ -173,6 +173,30 @@ class SeederTest extends TTM_IntegrationTestCase {
 		$this->assertSame( 533, $meta['height'] );
 	}
 
+	public function test_seed_fills_description_and_portrait_on_starter_content(): void {
+		if ( ! function_exists( 'imagecreatetruecolor' ) ) {
+			$this->markTestSkipped( 'GD is not available.' );
+		}
+
+		// What the theme's after_switch_theme starter content leaves on a fresh install.
+		wp_insert_term( 'Security', 'category', [ 'slug' => 'security' ] );
+		$about_id = self::factory()->post->create(
+			[
+				'post_type'  => 'page',
+				'post_name'  => 'about',
+				'post_title' => 'About',
+			]
+		);
+
+		$seeder = new Seeder();
+		$seeder->seed_categories();
+		$seeder->seed_pages();
+
+		$security = get_term_by( 'slug', 'security', 'category' );
+		$this->assertStringStartsWith( 'Application security for people who ship.', $security->description );
+		$this->assertGreaterThan( 0, get_post_thumbnail_id( $about_id ) );
+	}
+
 	public function test_admin_display_name_is_eric_mann(): void {
 		$seeder = new Seeder();
 		$seeder->run( 'normal' );
