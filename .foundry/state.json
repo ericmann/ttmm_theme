@@ -3,6 +3,6 @@
   "implemented": true,
   "reviewed": true,
   "verdict": "APPROVED",
-  "summarized": false,
+  "summarized": true,
   "halted": null
 }
