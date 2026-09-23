@@ -208,6 +208,118 @@ class AuditCommandTest extends TTM_IntegrationTestCase {
 		$this->assertNotContains( 'broken-internal-link', $this->flags_for( $result, $post ) );
 	}
 
+	public function test_remote_image_flag_for_off_origin_img(): void {
+		$upload_path = (string) wp_parse_url( (string) wp_get_upload_dir()['baseurl'], PHP_URL_PATH );
+
+		$remote = self::factory()->post->create(
+			[ 'post_content' => '<p><img src="https://cdn.example.com/photo.jpg" alt=""></p>' ]
+		);
+		$local  = self::factory()->post->create(
+			[ 'post_content' => sprintf( '<p><img src="%s" alt=""></p>', home_url( $upload_path . '/2026/09/photo.jpg' ) ) ]
+		);
+
+		$result = ( new AuditCommand() )->run( [], [] );
+
+		$this->assertContains( 'remote-image', $this->flags_for( $result, $remote ) );
+		$this->assertNotContains( 'remote-image', $this->flags_for( $result, $local ) );
+	}
+
+	public function test_shortcode_flag_lists_known_names_only(): void {
+		$flagged   = self::factory()->post->create( [ 'post_content' => '<p>See [ref] and [cc_by].</p>' ] );
+		$unflagged = self::factory()->post->create( [ 'post_content' => '<p>The [architect] spoke.</p>' ] );
+
+		$result = ( new AuditCommand() )->run( [], [] );
+
+		$row = null;
+		foreach ( $result['rows'] as $candidate ) {
+			if ( $candidate['id'] === $flagged ) {
+				$row = $candidate;
+			}
+		}
+
+		$this->assertNotNull( $row );
+		$this->assertContains( 'shortcode', $row['flags'] );
+		$this->assertContains( 'ref', $row['detail']['shortcodes'] );
+		$this->assertContains( 'cc_by', $row['detail']['shortcodes'] );
+		$this->assertNotContains( 'shortcode', $this->flags_for( $result, $unflagged ) );
+	}
+
+	public function test_post_format_aside_flag(): void {
+		$aside = self::factory()->post->create();
+		set_post_format( $aside, 'aside' );
+		$regular = self::factory()->post->create();
+
+		$result = ( new AuditCommand() )->run( [], [] );
+
+		$this->assertContains( 'post-format-aside', $this->flags_for( $result, $aside ) );
+		$this->assertNotContains( 'post-format-aside', $this->flags_for( $result, $regular ) );
+	}
+
+	public function test_no_tags_flag(): void {
+		$untagged = self::factory()->post->create();
+		$tagged   = self::factory()->post->create( [ 'tags_input' => [ 'some-tag' ] ] );
+
+		$result = ( new AuditCommand() )->run( [], [] );
+
+		$this->assertContains( 'no-tags', $this->flags_for( $result, $untagged ) );
+		$this->assertNotContains( 'no-tags', $this->flags_for( $result, $tagged ) );
+	}
+
+	public function test_writing_no_form_flag(): void {
+		$writing = $this->category_id( 'writing', 'Writing' );
+		$other   = $this->category_id( 'technology', 'Technology' );
+
+		// Meta\Form::on_save() writes ttm_form on every editorial save, so "no ttm_form" (SPEC
+		// §6.7) only describes legacy/imported content that predates it -- simulated here by
+		// deleting the row the save hook just wrote.
+		$no_form = self::factory()->post->create( [ 'post_category' => [ $writing ] ] );
+		update_post_meta( $no_form, 'ttm_primary_category', $writing );
+		delete_post_meta( $no_form, 'ttm_form' );
+
+		$has_form = self::factory()->post->create( [ 'post_category' => [ $writing ] ] );
+		update_post_meta( $has_form, 'ttm_primary_category', $writing );
+		update_post_meta( $has_form, 'ttm_form', 'chapter' );
+
+		$elsewhere = self::factory()->post->create( [ 'post_category' => [ $other ] ] );
+		update_post_meta( $elsewhere, 'ttm_primary_category', $other );
+
+		$result = ( new AuditCommand() )->run( [], [] );
+
+		$this->assertContains( 'writing-no-form', $this->flags_for( $result, $no_form ) );
+		$this->assertNotContains( 'writing-no-form', $this->flags_for( $result, $has_form ) );
+		$this->assertNotContains( 'writing-no-form', $this->flags_for( $result, $elsewhere ) );
+	}
+
+	public function test_summary_counts_flags_and_inert_rows(): void {
+		self::factory()->post->create( [ 'post_excerpt' => '' ] );
+		self::factory()->post->create( [ 'post_excerpt' => '' ] );
+
+		wp_insert_post(
+			[
+				'post_type'   => 'custom_css',
+				'post_status' => 'publish',
+				'post_title'  => 'ttm-theme',
+				'post_name'   => 'ttm-theme',
+			]
+		);
+
+		$result = ( new AuditCommand() )->run( [], [ 'summary' => true ] );
+
+		$this->assertTrue( $result['ok'] );
+
+		$by_flag = [];
+		foreach ( $result['rows'] as $row ) {
+			$this->assertArrayHasKey( 'flag', $row );
+			$this->assertArrayHasKey( 'count', $row );
+			$by_flag[ $row['flag'] ] = $row['count'];
+		}
+
+		$this->assertArrayHasKey( 'no-excerpt', $by_flag );
+		$this->assertGreaterThanOrEqual( 2, $by_flag['no-excerpt'] );
+		$this->assertArrayHasKey( 'inert-rows', $by_flag );
+		$this->assertGreaterThanOrEqual( 1, $by_flag['inert-rows'] );
+	}
+
 	public function test_only_filter_restricts_checks(): void {
 		$post = self::factory()->post->create(
 			[
