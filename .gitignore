@@ -13,3 +13,4 @@ playwright-report/
 docs/fixtures/live-export*.xml
 docs/fixtures/live/
 FOUNDRY_FEEDBACK.md
+docs/*.xml
