@@ -6,7 +6,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] P0-01 Rule 47 check, tagged-fixme guard, live-script entry points, phase-4 screenshot set
 - [x] P0-02 Seed: tags for every section and the older Technology neighbour
 - [x] P0-03 Seed: Reading CVEs series
-- [ ] P0-04 New screens and §6.11 rows as tagged fixme
+- [x] P0-04 New screens and §6.11 rows as tagged fixme
 - [ ] P0-05 Stats invalidation, tiebreak, flush_all; Business filter row green
 - [ ] P0-06 §3.1 fold-in edits (regex tightening, ValuesTest case)
 - [ ] P0-07 Phase 0 screenshots and push
@@ -60,3 +60,10 @@ posts.json: appended 4 new Security posts (reading-cves-part-1..4, days_ago 640/
 SeedStatesTest::test_normal_state_has_series_index_with_six_rows renamed to ..._seven_rows, asserts 7.
 SeederTest: new test_reading_cves_is_a_complete_security_series_of_four (SeriesIndex::by_slug row: status complete, form nonfiction, published 4; term meta ttm_total_parts 4; row['categories'] == [security term_id]; all 4 posts published, year 2024-2025).
 Verified: full npm run test:integration (495 tests, was 494) green, SeederTest+SeedStatesTest alone (46 tests) green including test_security_top_tags_are_the_mock_five (simulated tag-count math before writing: top 5 by count is still exactly wordpress/threat-modeling/passwords/cryptography/disclosure, well ahead of php/integrity at 1 each), composer lint 0 errors, npm run lint/test:unit/build green, forbidden-patterns clean, no lorem.
+
+### P0-04 — 311d562
+tests/e2e/lib/urls.mjs: SCREENS.articleNoSeries (transients-object-caches-and-fast-enough) and SCREENS.businessArchive (/category/business/), both flow into SCREEN_URLS so a11y/network/selectors loops cover them automatically.
+tests/e2e/fidelity.spec.mjs: added/changed the 19 SPEC §6.11 rows as test.fixme( ..., async (...) => {...} ) // P<owner> per PLAN's row-to-task map (footer-* -> P1-01, ar-filter-business* -> P0-05, toc/bar/aside/box/prevnext-auto-* -> P1-02, single-other* -> P1-03). Old footer-copy (.ttm-footer__copyright) test deleted, not kept; footer-left untouched. footer-nav count changed 9->8 with new assertions.
+Gotcha: multi-line test.fixme(...) signatures get reflowed by eslint --fix/prettier, which moves a trailing `// P<owner>` comment off the `test.fixme(` line and breaks check-fixme.mjs's same-line tag requirement. Fixed by collapsing the arg destructuring to `{ page }` (fits one line) and adding `// prettier-ignore` above each multi-line call so the format (and the tag's position) is never touched again.
+single-other row: SPEC table says count 4 (up to series.related_limit, form-filtered so quiet-ledger/failover/salt-water-wires never appear); PLAN's task prose said 3 for the same row. Went with SPEC per CLAUDE.md precedence (SPEC wins over PLAN).
+Verified: npm run lint green (check-fixme: 19 tagged, 0 untagged); npm run test:e2e --project fidelity (fidelity+editors+selectors specs): 338 passed, 19 skipped (new fixme rows), 0 failed; forbidden-patterns clean.
