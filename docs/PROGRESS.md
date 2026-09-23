@@ -5,7 +5,7 @@ Started: 2026-09-23T05:03:31.529Z
 ## Tasks
 - [x] P0-01 Rule 47 check, tagged-fixme guard, live-script entry points, phase-4 screenshot set
 - [x] P0-02 Seed: tags for every section and the older Technology neighbour
-- [ ] P0-03 Seed: Reading CVEs series
+- [x] P0-03 Seed: Reading CVEs series
 - [ ] P0-04 New screens and §6.11 rows as tagged fixme
 - [ ] P0-05 Stats invalidation, tiebreak, flush_all; Business filter row green
 - [ ] P0-06 §3.1 fold-in edits (regex tightening, ValuesTest case)
@@ -53,3 +53,10 @@ Verified: npm run lint, npm run test:unit, bash scripts/forbidden-patterns.sh, n
 docs/fixtures/seed/posts.json: added tags to reach >=5 distinct tag slugs per section (technology 6, business 5, faith 5, writing 6, opinion 5; security untouched, still 7; journal untouched, still 0). Appended new post why-i-still-read-the-wordpress-changelog (technology, days_ago 45, paragraphs 17 -> 611 words via prose.json cycling at row_index 102, no series/featured_image/most_read) at the end of the array so no existing row's row_index (and thus its prose()-cycled word count) shifted.
 tests/integration/Cli/SeederTest.php: three new tests -- test_every_section_except_journal_has_at_least_five_distinct_tags, test_transients_post_has_an_older_technology_neighbour (technology category, no series term, older post_date), test_changelog_post_is_about_six_hundred_words (ttm_word_count 500-700). Fixed a PHPCS short-ternary/unchecked-return error on get_the_terms() in the neighbour test.
 Verified: npm run test:integration (494 tests, full suite) green, SeederTest alone (38 tests) green, composer lint 0 errors, npm run lint/test:unit/build green, forbidden-patterns clean, grep -ri lorem docs/fixtures/seed/ empty.
+
+### P0-03 — 7179e05
+series.json: appended "reading-cves" (nonfiction, complete, total_parts 4, cadence "", cover false, exact SPEC description) after salt-water-wires, 4 parts pointing at reading-cves-part-1..4.
+posts.json: appended 4 new Security posts (reading-cves-part-1..4, days_ago 640/560/480/400, paragraphs 12, tags drawn only from {cryptography,disclosure,passwords,threat-modeling,wordpress}, no most_read) at the end of the array -- older than every existing security post so /category/security/ page 1 is untouched, and no existing row's row_index (prose() cycling) shifts.
+SeedStatesTest::test_normal_state_has_series_index_with_six_rows renamed to ..._seven_rows, asserts 7.
+SeederTest: new test_reading_cves_is_a_complete_security_series_of_four (SeriesIndex::by_slug row: status complete, form nonfiction, published 4; term meta ttm_total_parts 4; row['categories'] == [security term_id]; all 4 posts published, year 2024-2025).
+Verified: full npm run test:integration (495 tests, was 494) green, SeederTest+SeedStatesTest alone (46 tests) green including test_security_top_tags_are_the_mock_five (simulated tag-count math before writing: top 5 by count is still exactly wordpress/threat-modeling/passwords/cryptography/disclosure, well ahead of php/integrity at 1 each), composer lint 0 errors, npm run lint/test:unit/build green, forbidden-patterns clean, no lorem.
