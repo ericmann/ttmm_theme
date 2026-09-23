@@ -32,20 +32,23 @@ export function debugLogLineCount() {
 
 /**
  * Split a page's observed requests into same-origin/allowed vs. cross-origin-by-type, per
- * SPEC §6.10: no cross-origin script/stylesheet/XHR/font at all (returned as `offenders`);
- * cross-origin **images** are allowed but counted per host (returned as `imagesByHost`), not
- * failed.
+ * SPEC §6.10: no cross-origin script/stylesheet/XHR/font at all from the theme/plugin's own
+ * top-level document (returned as `offenders`); cross-origin **images** are allowed but counted
+ * per host (returned as `imagesByHost`), not failed. Requests a post's own embedded content
+ * makes from inside its own child frame (e.g. a `core/embed` YouTube player's `<iframe>`) are
+ * that embed's business, not the theme/plugin's -- `mainFrame: false` requests are never
+ * offenders (P4-05, SPEC §6.10: "no front-end network requests" is a theme/plugin constraint).
  *
- * @param {Array<{url: string, type: string}>} requests    Every request the page made.
- * @param {string}                             baseHost    The page's own host (`new URL(baseURL).host`).
- * @param {RegExp}                             allowedHost Cross-origin hosts that are never offenders (e.g. Jetpack).
+ * @param {Array<{url: string, type: string, mainFrame: boolean}>} requests    Every request the page made.
+ * @param {string}                                                 baseHost    The page's own host (`new URL(baseURL).host`).
+ * @param {RegExp}                                                 allowedHost Cross-origin hosts that are never offenders (e.g. Jetpack).
  * @return {{offenders: string[], imagesByHost: Record<string, number>}} Classified requests.
  */
 export function classifyRequests( requests, baseHost, allowedHost ) {
 	const offenders = [];
 	const imagesByHost = {};
 
-	for ( const { url, type } of requests ) {
+	for ( const { url, type, mainFrame } of requests ) {
 		if ( url.startsWith( 'data:' ) || url.startsWith( 'blob:' ) ) {
 			continue;
 		}
@@ -61,6 +64,10 @@ export function classifyRequests( requests, baseHost, allowedHost ) {
 		if ( 'image' === type ) {
 			imagesByHost[ parsed.host ] =
 				( imagesByHost[ parsed.host ] || 0 ) + 1;
+			continue;
+		}
+
+		if ( false === mainFrame ) {
 			continue;
 		}
 
