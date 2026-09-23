@@ -216,7 +216,140 @@ class ConvertCommandTest extends TTM_IntegrationTestCase {
 					'content' => 'A footnote.',
 				],
 			],
-			$stored 
+			$stored
 		);
+	}
+
+	/**
+	 * P3-02, SPEC §6.8: `--dry-run` lists a post's `report.shortcodes` (unconverted shortcodes
+	 * the pre-pass left in place) alongside its block counts.
+	 */
+	public function test_dry_run_lists_remaining_shortcodes_and_freeform(): void {
+		$post_id = $this->classic_post();
+		$file    = $this->ndjson_file(
+			[
+				[
+					'id'        => $post_id,
+					'slug'      => 'x',
+					'blocks'    => "<!-- wp:paragraph -->\n<p>Converted.</p>\n<!-- /wp:paragraph -->",
+					'footnotes' => [],
+					'report'    => [
+						'freeform'   => 0,
+						'shortcodes' => [
+							[
+								'name'  => 'seoslides',
+								'count' => 2,
+							],
+						],
+					],
+				],
+			]
+		);
+
+		$result = ( new ConvertCommand() )->import( [ $file ], [ 'dry-run' => true ] );
+
+		$this->assertTrue( $result['ok'] );
+		$this->assertStringContainsString( 'remaining shortcodes: seoslides(2)', $result['messages'][0] );
+	}
+
+	/**
+	 * P3-02, SPEC §6.8: after conversion, each footnote's text must appear exactly once in the
+	 * rendered post (`the_content`) -- `import_one()` appends the `core/footnotes` block the
+	 * `<sup data-fn>` markers need to resolve against, since `rawHandler` never adds one itself.
+	 */
+	public function test_import_verifies_each_footnote_appears_once(): void {
+		$post_id = $this->classic_post();
+		$file    = $this->ndjson_file(
+			[
+				[
+					'id'        => $post_id,
+					'slug'      => 'x',
+					'blocks'    => '<!-- wp:paragraph --><p>Signed off<sup data-fn="ref-1-1" class="fn"><a href="#ref-1-1" id="ref-1-1-link">1</a></sup> on the draft.</p><!-- /wp:paragraph -->',
+					'footnotes' => [
+						[
+							'id'      => 'ref-1-1',
+							'content' => 'A clarifying note.',
+						],
+					],
+				],
+			]
+		);
+
+		$result = ( new ConvertCommand() )->import( [ $file ], [] );
+
+		$this->assertTrue( $result['ok'] );
+		$this->assertStringNotContainsString( 'footnotes-mismatch', $result['messages'][0] );
+
+		$post = get_post( $post_id );
+		$this->assertStringContainsString( 'wp:footnotes', $post->post_content );
+
+		global $post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- setup_postdata() needs the global itself set, not just passed as an argument.
+		$post = get_post( $post_id );
+		setup_postdata( $post );
+		$rendered = apply_filters( 'the_content', $post->post_content );
+		wp_reset_postdata();
+
+		$this->assertSame( 1, substr_count( wp_strip_all_tags( $rendered ), 'A clarifying note.' ) );
+	}
+
+	/**
+	 * P3-02: a footnote that never actually resolves in the rendered post is reported, but the
+	 * import still proceeds and the classic backup is still written exactly once. Simulated by
+	 * having `blocks` already contain the literal substring "wp:footnotes" as inert prose
+	 * (not a real block comment) -- `import_one()`'s "already has one" guard sees it and skips
+	 * appending the real `core/footnotes` block, so the note text never actually renders.
+	 */
+	public function test_import_reports_footnote_mismatch_without_writing_backup_twice(): void {
+		$original = '<p>Some classic content.</p>';
+		$post_id  = $this->classic_post( $original );
+		$file     = $this->ndjson_file(
+			[
+				[
+					'id'        => $post_id,
+					'slug'      => 'x',
+					'blocks'    => "<!-- wp:paragraph -->\n<p>Converted, mentions wp:footnotes in passing.</p>\n<!-- /wp:paragraph -->",
+					'footnotes' => [
+						[
+							'id'      => 'ref-1-1',
+							'content' => 'This note never got referenced.',
+						],
+					],
+				],
+			]
+		);
+
+		$result = ( new ConvertCommand() )->import( [ $file ], [] );
+
+		$this->assertTrue( $result['ok'] );
+		$this->assertStringContainsString( 'footnotes-mismatch', $result['messages'][0] );
+		$this->assertSame( $original, get_post_meta( $post_id, 'ttm_classic_backup', true ) );
+
+		// A second import (e.g. a retry) must still not touch the backup.
+		( new ConvertCommand() )->import( [ $file ], [] );
+		$this->assertSame( $original, get_post_meta( $post_id, 'ttm_classic_backup', true ) );
+	}
+
+	/**
+	 * P3-02, SPEC §6.8: the text-equality check ignores shortcodes `strip_shortcodes()` (WP
+	 * core's own registered set, e.g. `[audio]`) would remove from the classic render.
+	 */
+	public function test_text_equality_ignores_stripped_shortcodes(): void {
+		$original = '<p>Listen to the recording.</p>[audio src="https://example.com/a.mp3"]';
+		$post_id  = $this->classic_post( $original );
+		$file     = $this->ndjson_file(
+			[
+				[
+					'id'        => $post_id,
+					'slug'      => 'x',
+					'blocks'    => "<!-- wp:paragraph -->\n<p>Listen to the recording.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:audio -->\n<figure class=\"wp-block-audio\"><audio controls src=\"https://example.com/a.mp3\"></audio></figure>\n<!-- /wp:audio -->",
+					'footnotes' => [],
+				],
+			]
+		);
+
+		$result = ( new ConvertCommand() )->import( [ $file ], [] );
+
+		$this->assertTrue( $result['ok'] );
+		$this->assertStringNotContainsString( 'text-mismatch', $result['messages'][0] );
 	}
 }

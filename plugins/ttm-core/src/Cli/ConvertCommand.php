@@ -154,16 +154,30 @@ class ConvertCommand extends Command {
 					'id'   => $post_id,
 					'slug' => $post->post_name,
 				],
-				$counts 
+				$counts
 			);
 
+			$remaining_shortcodes = (array) ( $record['report']['shortcodes'] ?? [] );
+			$shortcodes_note      = $this->shortcodes_note( $remaining_shortcodes );
+
 			if ( $dry_run ) {
-				$messages[] = "post {$post_id} ({$post->post_name}): dry run, " . wp_json_encode( $counts );
+				$messages[] = "post {$post_id} ({$post->post_name}): dry run, " . wp_json_encode( $counts ) . $shortcodes_note;
 				continue;
 			}
 
-			$this->import_one( $post, $blocks, (array) ( $record['footnotes'] ?? [] ) );
-			$messages[] = "post {$post_id} ({$post->post_name}): converted, " . wp_json_encode( $counts );
+			$footnotes        = (array) ( $record['footnotes'] ?? [] );
+			$original_content = $post->post_content; 
+			// Before import_one() overwrites it (SPEC §6.8 text-equality check).
+			$this->import_one( $post, $blocks, $footnotes );
+
+			$note = "post {$post_id} ({$post->post_name}): converted, " . wp_json_encode( $counts ) . $shortcodes_note;
+			if ( ! $this->footnotes_verified( $post_id, $footnotes ) ) {
+				$note .= ' [footnotes-mismatch]';
+			}
+			if ( ! $this->text_equal_ignoring_shortcodes( $original_content, $blocks ) ) {
+				$note .= ' [text-mismatch]';
+			}
+			$messages[] = $note;
 		}//end foreach
 
 		return [
@@ -190,6 +204,15 @@ class ConvertCommand extends Command {
 			// (registered by WP core itself, not by this plugin) - stored as a JSON string,
 			// exactly the shape core's own editor writes: [{id, content}, ...].
 			update_post_meta( $post->ID, 'footnotes', wp_json_encode( $footnotes ) );
+
+			// `rawHandler`'s own `<sup data-fn>` marker recognition is editor-only (a RichText
+			// format, applied by a human typing a footnote); it never inserts the accompanying
+			// `core/footnotes` block that actually reads the meta above and renders the note
+			// list (SPEC §6.8). Append it once here so the markers convert-classic.mjs already
+			// wrote have somewhere to resolve to.
+			if ( false === strpos( $blocks, 'wp:footnotes' ) ) {
+				$blocks = rtrim( $blocks ) . "\n\n<!-- wp:footnotes /-->\n";
+			}
 		}
 
 		wp_save_post_revision( $post->ID );
@@ -206,6 +229,101 @@ class ConvertCommand extends Command {
 		kses_init_filters();
 
 		update_post_meta( $post->ID, 'ttm_converted_at', Clock::now()->format( 'Y-m-d H:i:s' ) );
+	}
+
+	/**
+	 * Whether every footnote's text appears exactly once in the post's rendered content
+	 * (`the_content`, SPEC §6.8) -- catches a marker that never resolved (no matching
+	 * `core/footnotes` block or meta) as well as a note whose text got mangled in transit.
+	 * Vacuously true when there are no footnotes.
+	 *
+	 * @param int                                          $post_id   Post id (already updated).
+	 * @param array<int, array{id:string, content:string}> $footnotes Footnotes, WP core's own shape.
+	 * @return bool
+	 */
+	private function footnotes_verified( int $post_id, array $footnotes ): bool {
+		if ( empty( $footnotes ) ) {
+			return true;
+		}
+
+		$post = get_post( $post_id );
+		if ( ! $post ) {
+			return false;
+		}
+
+		// `core/footnotes`' render callback only receives `postId` block context when a real
+		// "current post" is set up (WP core's own context provider reads `get_the_ID()`) --
+		// without this, `apply_filters( 'the_content', … )` alone renders it as empty (verified
+		// against this project's WP core version).
+		global $post;
+		$outer_post = $post;
+		$post       = get_post( $post_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- setup_postdata() requires the global, restored below.
+		setup_postdata( $post );
+
+		$rendered = (string) apply_filters( 'the_content', $post->post_content );
+
+		$post = $outer_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- restoring the caller's global.
+		wp_reset_postdata();
+
+		$plain = wp_strip_all_tags( $rendered );
+
+		foreach ( $footnotes as $footnote ) {
+			$text = trim( wp_strip_all_tags( (string) ( $footnote['content'] ?? '' ) ) );
+			if ( '' === $text ) {
+				continue;
+			}
+			if ( 1 !== substr_count( $plain, $text ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Whether the old (classic) content and the new (block) content carry the same visible
+	 * text, once the old side's WP-core-registered shortcodes (`[caption]`, `[audio]`, etc.)
+	 * are stripped (SPEC §6.8: "the existing text-equality check is extended so shortcodes
+	 * stripped from the classic render equal the new text"). Unregistered shortcodes the
+	 * pre-pass itself already handles (`[ref]`, `[cci]`, `[cc_x]`, …) aren't touched by
+	 * `strip_shortcodes()`, matching the pre-pass's own before/after text either way.
+	 *
+	 * @param string $old_content Original classic `post_content`.
+	 * @param string $new_content Serialized block markup.
+	 * @return bool
+	 */
+	private function text_equal_ignoring_shortcodes( string $old_content, string $new_content ): bool {
+		return $this->normalized_text( strip_shortcodes( $old_content ) ) === $this->normalized_text( $new_content );
+	}
+
+	/**
+	 * Plain, whitespace-collapsed text for a loose content comparison.
+	 *
+	 * @param string $html HTML fragment.
+	 * @return string
+	 */
+	private function normalized_text( string $html ): string {
+		return trim( (string) preg_replace( '/\s+/', ' ', wp_strip_all_tags( $html ) ) );
+	}
+
+	/**
+	 * The dry-run/converted message suffix listing any shortcode the pre-pass deliberately left
+	 * in place (SPEC §6.8, `report.shortcodes`), or `''` when none.
+	 *
+	 * @param array<int, array{name: string, count: int}> $remaining Remaining shortcode names/counts.
+	 * @return string
+	 */
+	private function shortcodes_note( array $remaining ): string {
+		if ( empty( $remaining ) ) {
+			return '';
+		}
+
+		$parts = array_map(
+			static fn ( array $entry ): string => sprintf( '%s(%d)', $entry['name'], $entry['count'] ),
+			$remaining
+		);
+
+		return ', remaining shortcodes: ' . implode( ', ', $parts );
 	}
 
 	/**
