@@ -111,5 +111,11 @@ out=$(g "echo '[A-Za-z]|esc_html\( '[A-Za-z]" plugins/ttm-core/blocks --include=
 out=$(g 'style="' plugins/ttm-core/blocks plugins/ttm-core/src | grep -vE 'style="(grid-column|aspect-ratio|--ttm-)[^"]*"' || true)
 [ -n "$out" ] && { echo "$out"; hit "plugin inline style outside allow-list (SPEC rule 2)"; }
 
+# Rule 47: private data never enters the repository -- the WXR export, database dumps,
+# uploads and audit output live under docs/fixtures/live/ (gitignored) or as docs/*.xml
+# (gitignored). Fail if any of those ever got committed anyway.
+out=$(git ls-files -- 'docs/*.xml' 'docs/**/*.xml' 'docs/**/*.sql' 'docs/**/*.sql.gz' 'docs/**/*.tar.gz' 'docs/**/*.csv' 'docs/fixtures/live/' 2>/dev/null || true)
+[ -n "$out" ] && { echo "$out"; hit "private data committed under docs/ (SPEC rule 47)"; }
+
 [ "$fail" = 0 ] && echo "forbidden-patterns: clean"
 exit $fail

@@ -27,7 +27,12 @@
     "env:destroy": "wp-env destroy",
     "env:seed": "npm run build && wp-env run cli wp ttm seed",
     "env:cli": "wp-env run cli wp",
-    "env:logs": "wp-env logs"
+    "env:logs": "wp-env logs",
+    "env:live": "bash scripts/live/import.sh && bash scripts/live/plan.sh",
+    "env:backup": "bash scripts/live/backup.sh",
+    "env:restore": "bash scripts/live/restore.sh",
+    "env:drill": "bash scripts/live/drill.sh",
+    "test:live": "bash scripts/live/test-live.sh"
   },
   "dependencies": {},
   "devDependencies": {

@@ -9,8 +9,8 @@ import { taggedFixmeHits } from './lib/fixme.mjs';
 
 const FILES = [ 'tests/e2e/fidelity.spec.mjs', 'tests/e2e/editors.spec.mjs' ];
 
-// P5-02: the flight has landed; no fixme, tagged or not, survives.
-export const ALLOW_TAGGED = false;
+// P0-01: phase 4 in flight; P5-03 flips this back.
+export const ALLOW_TAGGED = true;
 
 let hits = 0;
 let tagged = 0;

@@ -1,23 +1,34 @@
 /**
- * Tests for the screenshot script's pure helpers (scripts/screenshots.mjs; P0-05, extended in P0-12). Importing
- * the module does not launch Playwright -- the capture only runs when the file is executed
- * directly (see its own `import.meta.url` guard), so this is a safe, plain import here.
+ * Tests for the screenshot script's pure helpers (scripts/screenshots.mjs; P0-05, extended in
+ * P0-12, P0-01). Importing the module does not launch Playwright -- the capture only runs when
+ * the file is executed directly (see its own `import.meta.url` guard), so this is a safe,
+ * plain import here.
  */
 
 const path = require( 'path' );
 
 let ZONES;
+let SEEDED_ZONES;
+let LIVE_ZONES;
 let unionClip;
 let pendingImages;
 
 beforeAll( async () => {
 	const mod = await import( path.join( __dirname, '..', 'screenshots.mjs' ) );
-	( { ZONES, unionClip, pendingImages } = mod );
+	( { ZONES, SEEDED_ZONES, LIVE_ZONES, unionClip, pendingImages } = mod );
 } );
 
 describe( 'ZONES', () => {
-	it( 'ZONES lists the fourteen phase-3 files with paths', () => {
-		expect( ZONES.map( ( zone ) => [ zone.file, zone.path ] ) ).toEqual( [
+	it( 'ZONES has 17 seeded entries and 7 live entries', () => {
+		expect( ZONES ).toHaveLength( 24 );
+		expect( SEEDED_ZONES ).toHaveLength( 17 );
+		expect( LIVE_ZONES ).toHaveLength( 7 );
+	} );
+
+	it( 'lists the phase-3 fourteen plus the three phase-4 files with paths', () => {
+		expect(
+			SEEDED_ZONES.map( ( zone ) => [ zone.file, zone.path ] )
+		).toEqual( [
 			[ 'article.png', '/signing-your-options-table/' ],
 			[ 'journal.png', '/journal-post-1/' ],
 			[ 'writing.png', '/writing/' ],
@@ -32,20 +43,36 @@ describe( 'ZONES', () => {
 			[ 'archive-390.png', '/category/security/' ],
 			[ 'front-1920.png', '/' ],
 			[ 'article-1920.png', '/signing-your-options-table/' ],
+			[
+				'article-noseries.png',
+				'/transients-object-caches-and-fast-enough/',
+			],
+			[ 'archive-business.png', '/category/business/' ],
+			[ 'footer.png', '/' ],
 		] );
+	} );
 
-		const viewports = ZONES.map(
-			( zone ) => `${ zone.viewport.width }x${ zone.viewport.height }`
-		);
-		expect( viewports.slice( 0, 8 ) ).toEqual(
-			Array( 8 ).fill( '1280x900' )
-		);
-		expect( viewports.slice( 8, 12 ) ).toEqual(
-			Array( 4 ).fill( '390x844' )
-		);
-		expect( viewports.slice( 12 ) ).toEqual( [ '1920x900', '1920x900' ] );
-		expect( ZONES.every( ( zone ) => true === zone.fullPage ) ).toBe(
+	it( 'live zones are flagged live and seeded zones are not', () => {
+		expect( SEEDED_ZONES.every( ( zone ) => false === zone.live ) ).toBe(
 			true
+		);
+		expect( LIVE_ZONES.every( ( zone ) => true === zone.live ) ).toBe(
+			true
+		);
+		expect( ZONES.filter( ( zone ) => zone.live ) ).toEqual( LIVE_ZONES );
+		expect( ZONES.filter( ( zone ) => ! zone.live ) ).toEqual(
+			SEEDED_ZONES
+		);
+	} );
+
+	it( 'OUT_DIR is docs/feedback/phase-4', () => {
+		const source = require( 'fs' ).readFileSync(
+			path.join( __dirname, '..', 'screenshots.mjs' ),
+			'utf8'
+		);
+
+		expect( source ).toMatch(
+			/OUT_DIR = join\( 'docs', 'feedback', 'phase-4' \)/
 		);
 	} );
 } );

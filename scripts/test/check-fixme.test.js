@@ -2,6 +2,7 @@
  * Tests for the P0-01 tagged-fixme guard (scripts/lib/fixme.mjs).
  */
 
+const fs = require( 'fs' );
 const path = require( 'path' );
 
 let taggedFixmeHits;
@@ -38,5 +39,16 @@ describe( 'taggedFixmeHits', () => {
 
 		expect( hits ).toHaveLength( 1 );
 		expect( hits[ 0 ].tagged ).toBe( true );
+	} );
+} );
+
+describe( 'check-fixme.mjs', () => {
+	it( 'ALLOW_TAGGED is true while phase 4 is in flight', () => {
+		const source = fs.readFileSync(
+			path.join( __dirname, '..', 'check-fixme.mjs' ),
+			'utf8'
+		);
+
+		expect( source ).toMatch( /export const ALLOW_TAGGED = true;/ );
 	} );
 } );

@@ -1,28 +1,33 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
 /**
- * `npm run screenshots` (SPEC §6.11, P0-12): writes the fourteen-PNG phase-3 comparison set into
- * `docs/feedback/phase-3/` from the running, seeded site so the owner can compare each inner
- * page against its mock (see `docs/feedback/phase-3/README.md`). Requires `wp-env start` +
- * `wp ttm seed --reset` first. The phase-2 set in `docs/feedback/phase-2/` is history and is
- * left as it was.
+ * `npm run screenshots` (SPEC §6.14, P0-01, formerly P0-12): writes the phase-4 comparison set
+ * into `docs/feedback/phase-4/` from the running, seeded site so the owner can compare each
+ * inner page against its mock (see `docs/feedback/phase-4/README.md`). Requires `wp-env start`
+ * + `wp ttm seed --reset` first. `SEEDED_ZONES` is phase 3's fourteen plus three new files
+ * (`article-noseries.png`, `archive-business.png`, `footer.png`); `LIVE_ZONES` is written only
+ * when `docs/fixtures/live/screens.json` exists, and `live-article-classic.png`'s path is read
+ * from that file at capture time (the first screen with `classic: true`) rather than fixed
+ * here. `docs/feedback/phase-3/` is history and is left as it was.
  */
-import { mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 /**
- * The fourteen files this script writes, in write order. `path` is the seeded URL (SPEC §1
- * "Done"); `viewport` is set before navigating; every phase-3 shot is `fullPage`. The
+ * The seeded and live files this script writes, in write order. `path` is the seeded URL
+ * (SPEC §1 "Done"); `viewport` is set before navigating; every shot is `fullPage`. The
  * `selector`/`range` forms (one element, or top of the first to bottom of the second at full
- * content width -- see `unionClip`) are kept for ad-hoc crops.
+ * content width -- see `unionClip`) are kept for ad-hoc crops. `live: true` zones show the
+ * owner's public content (SPEC §6.14) and are only written when the live import is present;
+ * `live-article-classic.png`'s `path` is `null` here and resolved at capture time.
  *
- * @type {Array<{file: string, path: string, viewport: {width: number, height: number}, fullPage?: boolean, selector?: string, range?: [string, string], rangeEdge?: ['first' | 'last', 'first' | 'last']}>}
+ * @type {Array<{file: string, path: string|null, viewport: {width: number, height: number}, fullPage?: boolean, live: boolean, selector?: string, range?: [string, string], rangeEdge?: ['first' | 'last', 'first' | 'last']}>}
  */
 const DESKTOP = { width: 1280, height: 900 };
 const PHONE = { width: 390, height: 844 };
 const WIDE = { width: 1920, height: 900 };
 
-export const ZONES = [
+const PHASE_3_ZONES = [
 	{
 		file: 'article.png',
 		path: '/signing-your-options-table/',
@@ -105,6 +110,118 @@ export const ZONES = [
 ];
 
 /**
+ * The three files new in phase 4 (SPEC §6.14): mock `2b` without series chrome, mock `1e`
+ * (a section without a lead), and a crop of the front footer.
+ */
+const PHASE_4_ZONES = [
+	{
+		file: 'article-noseries.png',
+		path: '/transients-object-caches-and-fast-enough/',
+		viewport: DESKTOP,
+		fullPage: true,
+	},
+	{
+		file: 'archive-business.png',
+		path: '/category/business/',
+		viewport: DESKTOP,
+		fullPage: true,
+	},
+	{
+		file: 'footer.png',
+		path: '/',
+		viewport: DESKTOP,
+		selector: '.ttm-footer',
+	},
+];
+
+export const SEEDED_ZONES = [ ...PHASE_3_ZONES, ...PHASE_4_ZONES ].map(
+	( zone ) => ( { ...zone, live: false } )
+);
+
+/**
+ * The seven live files (SPEC §6.14), written only when `docs/fixtures/live/screens.json`
+ * exists. `live-article-classic.png`'s `path` is resolved from that file at capture time (see
+ * `resolveLiveZones`), not fixed here.
+ */
+export const LIVE_ZONES = [
+	{
+		file: 'live-front.png',
+		path: '/',
+		viewport: DESKTOP,
+		fullPage: true,
+		live: true,
+	},
+	{
+		file: 'live-article-classic.png',
+		path: null,
+		viewport: DESKTOP,
+		fullPage: true,
+		live: true,
+	},
+	{
+		file: 'live-archive-technology.png',
+		path: '/category/technology/',
+		viewport: DESKTOP,
+		fullPage: true,
+		live: true,
+	},
+	{
+		file: 'live-writing.png',
+		path: '/writing/',
+		viewport: DESKTOP,
+		fullPage: true,
+		live: true,
+	},
+	{
+		file: 'live-series.png',
+		path: '/series/',
+		viewport: DESKTOP,
+		fullPage: true,
+		live: true,
+	},
+	{
+		file: 'live-journal.png',
+		path: '/category/journal/',
+		viewport: DESKTOP,
+		fullPage: true,
+		live: true,
+	},
+	{
+		file: 'live-front-390.png',
+		path: '/',
+		viewport: PHONE,
+		fullPage: true,
+		live: true,
+	},
+];
+
+export const ZONES = [ ...SEEDED_ZONES, ...LIVE_ZONES ];
+
+const LIVE_SCREENS_PATH = join( 'docs', 'fixtures', 'live', 'screens.json' );
+
+/**
+ * The live zones to capture this run: `[]` when the live import hasn't happened
+ * (`docs/fixtures/live/screens.json` absent, rule 48), otherwise `LIVE_ZONES` with
+ * `live-article-classic.png`'s `path` filled in from the first `classic: true` screen.
+ *
+ * @return {Array<object>} Live zones to capture, each with a resolved (non-null) `path`.
+ */
+export function resolveLiveZones() {
+	if ( ! existsSync( LIVE_SCREENS_PATH ) ) {
+		return [];
+	}
+
+	const screens = JSON.parse( readFileSync( LIVE_SCREENS_PATH, 'utf8' ) );
+	const classicScreen = screens.find( ( screen ) => screen.classic );
+
+	return LIVE_ZONES.map( ( zone ) =>
+		'live-article-classic.png' === zone.file && classicScreen
+			? { ...zone, path: classicScreen.path }
+			: zone
+	);
+}
+
+/**
  * The `src`/`currentSrc` of every entry in `list` whose `naturalWidth` is 0 -- an image that
  * never finished loading (REVIEW.md F3: a lazy image below the fold hadn't loaded when
  * `fullPage: true` captured, and the resulting empty figure went uncaught).
@@ -136,7 +253,7 @@ export function unionClip( a, b ) {
 	return { x: left, y: top, width: right - left, height: bottom - top };
 }
 
-const OUT_DIR = join( 'docs', 'feedback', 'phase-3' );
+const OUT_DIR = join( 'docs', 'feedback', 'phase-4' );
 const BASE_URL = process.env.WP_BASE_URL || 'http://localhost:8888';
 
 /**
@@ -155,7 +272,9 @@ async function run() {
 	const browser = await chromium.launch();
 	const page = await browser.newPage();
 
-	for ( const zone of ZONES ) {
+	const zones = [ ...SEEDED_ZONES, ...resolveLiveZones() ];
+
+	for ( const zone of zones ) {
 		await page.setViewportSize( zone.viewport );
 		await page.goto( BASE_URL + zone.path, { waitUntil: 'networkidle' } );
 		await page.evaluate( () => document.fonts.ready );
