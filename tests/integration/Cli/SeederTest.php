@@ -630,4 +630,99 @@ class SeederTest extends TTM_IntegrationTestCase {
 			}
 		}
 	}
+
+	/**
+	 * P0-02: every section but Journal has at least five distinct tags spread across its
+	 * seeded posts (SPEC §6.12). Stats::top_tags() invalidation lands in P0-05, so this counts
+	 * distinct tag slugs directly off wp_get_post_tags() instead.
+	 */
+	public function test_every_section_except_journal_has_at_least_five_distinct_tags(): void {
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$sections = [ 'technology', 'business', 'faith', 'writing', 'security', 'opinion' ];
+
+		foreach ( $sections as $slug ) {
+			$term  = get_term_by( 'slug', $slug, 'category' );
+			$posts = get_posts(
+				[
+					'category'       => $term->term_id,
+					'post_status'    => 'publish',
+					'posts_per_page' => 200,
+				]
+			);
+
+			$slugs = [];
+			foreach ( $posts as $post ) {
+				foreach ( wp_get_post_tags( $post->ID ) as $tag ) {
+					$slugs[ $tag->slug ] = true;
+				}
+			}
+
+			$this->assertGreaterThanOrEqual(
+				5,
+				count( $slugs ),
+				"expected at least five distinct tags in {$slug}"
+			);
+		}
+
+		$journal = get_term_by( 'slug', 'journal', 'category' );
+		$posts   = get_posts(
+			[
+				'category'       => $journal->term_id,
+				'post_status'    => 'publish',
+				'posts_per_page' => 200,
+			]
+		);
+		$slugs = [];
+		foreach ( $posts as $post ) {
+			foreach ( wp_get_post_tags( $post->ID ) as $tag ) {
+				$slugs[ $tag->slug ] = true;
+			}
+		}
+		$this->assertCount( 0, $slugs, 'Journal should stay untagged' );
+	}
+
+	/**
+	 * P0-02: SPEC §6.3 -- the transients post gets an older Technology neighbour so both
+	 * prev/next cells render, and that neighbour is not in any series.
+	 */
+	public function test_transients_post_has_an_older_technology_neighbour(): void {
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$transients = get_page_by_path( 'transients-object-caches-and-fast-enough', OBJECT, 'post' );
+		$this->assertNotNull( $transients );
+
+		$neighbour = get_page_by_path( 'why-i-still-read-the-wordpress-changelog', OBJECT, 'post' );
+		$this->assertNotNull( $neighbour );
+		$this->assertSame( 'publish', $neighbour->post_status );
+
+		$categories = get_the_terms( $neighbour->ID, 'category' );
+		$this->assertIsArray( $categories );
+		$this->assertContains( 'technology', wp_list_pluck( $categories, 'slug' ) );
+
+		$this->assertLessThan(
+			strtotime( $transients->post_date_gmt ),
+			strtotime( $neighbour->post_date_gmt ),
+			'the neighbour should be older than the transients post'
+		);
+
+		$this->assertSame( [], wp_get_post_terms( $neighbour->ID, 'series' ) );
+	}
+
+	/**
+	 * P0-02: the older Technology neighbour is sized to ~600 words (SPEC §6.3).
+	 */
+	public function test_changelog_post_is_about_six_hundred_words(): void {
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$post = get_page_by_path( 'why-i-still-read-the-wordpress-changelog', OBJECT, 'post' );
+		$this->assertNotNull( $post );
+
+		$words = (int) get_post_meta( $post->ID, 'ttm_word_count', true );
+		$this->assertGreaterThanOrEqual( 500, $words );
+		$this->assertLessThanOrEqual( 700, $words );
+	}
 }

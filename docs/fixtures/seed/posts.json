@@ -21,7 +21,10 @@
 		"most_read": false
 	},
 	{
-		"tags": [],
+		"tags": [
+			"caching",
+			"performance"
+		],
 		"slug": "technology-post-2",
 		"title": "Why I moved my build pipeline off GitHub Actions — and what it cost",
 		"categories": [
@@ -35,7 +38,10 @@
 		"most_read": true
 	},
 	{
-		"tags": [],
+		"tags": [
+			"php",
+			"hosting"
+		],
 		"slug": "php-85-readonly-classes",
 		"title": "PHP 8.5 readonly classes are the feature nobody asked for and everybody needed",
 		"categories": [
@@ -47,7 +53,10 @@
 		"most_read": true
 	},
 	{
-		"tags": [],
+		"tags": [
+			"performance",
+			"wordpress"
+		],
 		"slug": "block-editor-document-model",
 		"title": "The block editor is a document model. Treat it like one.",
 		"categories": [
@@ -58,7 +67,10 @@
 		"paragraphs": 12
 	},
 	{
-		"tags": [],
+		"tags": [
+			"caching",
+			"hosting"
+		],
 		"slug": "composer-lockfiles-are-a-security-control",
 		"title": "Composer lockfiles are a security control",
 		"categories": [
@@ -69,7 +81,10 @@
 		"paragraphs": 10
 	},
 	{
-		"tags": [],
+		"tags": [
+			"wordpress",
+			"hosting"
+		],
 		"slug": "on-writing-a-wordpress-theme-in-2026",
 		"title": "On writing a WordPress theme in 2026",
 		"categories": [
@@ -91,7 +106,10 @@
 		"paragraphs": 10
 	},
 	{
-		"tags": [],
+		"tags": [
+			"pricing",
+			"strategy"
+		],
 		"slug": "charge-for-outcome-bill-for-hour",
 		"title": "Charge for the outcome, bill for the hour",
 		"categories": [
@@ -102,7 +120,10 @@
 		"paragraphs": 12
 	},
 	{
-		"tags": [],
+		"tags": [
+			"consulting",
+			"clients"
+		],
 		"slug": "one-page-operating-agreement",
 		"title": "The one-page operating agreement",
 		"categories": [
@@ -113,7 +134,10 @@
 		"paragraphs": 12
 	},
 	{
-		"tags": [],
+		"tags": [
+			"clients",
+			"invoicing"
+		],
 		"slug": "fire-the-client-who-pays-late-twice",
 		"title": "Fire the client who pays late twice",
 		"categories": [
@@ -124,7 +148,10 @@
 		"paragraphs": 12
 	},
 	{
-		"tags": [],
+		"tags": [
+			"invoicing",
+			"strategy"
+		],
 		"slug": "retainers-are-a-promise-about-attention",
 		"title": "Retainers are a promise about attention",
 		"categories": [
@@ -135,7 +162,10 @@
 		"paragraphs": 12
 	},
 	{
-		"tags": [],
+		"tags": [
+			"consulting",
+			"strategy"
+		],
 		"slug": "what-a-cto-actually-does-all-day",
 		"title": "What a CTO actually does all day",
 		"categories": [
@@ -201,7 +231,10 @@
 		"paragraphs": 12
 	},
 	{
-		"tags": [],
+		"tags": [
+			"prayer",
+			"doubt"
+		],
 		"slug": "praying-for-people-who-file-bug-reports",
 		"title": "On praying for the people who file the bug reports",
 		"categories": [
@@ -212,7 +245,10 @@
 		"paragraphs": 10
 	},
 	{
-		"tags": [],
+		"tags": [
+			"liturgy",
+			"prayer"
+		],
 		"slug": "sabbath-for-people-who-ship-on-fridays",
 		"title": "Sabbath for people who ship on Fridays",
 		"categories": [
@@ -223,7 +259,10 @@
 		"paragraphs": 8
 	},
 	{
-		"tags": [],
+		"tags": [
+			"psalms",
+			"liturgy"
+		],
 		"slug": "ordinary-time-week-9",
 		"title": "Ordinary Time, week nine",
 		"categories": [
@@ -234,7 +273,10 @@
 		"paragraphs": 6
 	},
 	{
-		"tags": [],
+		"tags": [
+			"advent",
+			"psalms"
+		],
 		"slug": "ordinary-time-week-8",
 		"title": "Ordinary Time, week eight",
 		"categories": [
@@ -245,7 +287,10 @@
 		"paragraphs": 6
 	},
 	{
-		"tags": [],
+		"tags": [
+			"doubt",
+			"advent"
+		],
 		"slug": "ordinary-time-week-7",
 		"title": "Ordinary Time, week seven",
 		"categories": [
@@ -322,7 +367,10 @@
 		"paragraphs": 6
 	},
 	{
-		"tags": [],
+		"tags": [
+			"open-source",
+			"platforms"
+		],
 		"slug": "open-source-not-a-business-model",
 		"title": "Open source is not a business model. It is a distribution channel.",
 		"categories": [
@@ -333,7 +381,10 @@
 		"paragraphs": 10
 	},
 	{
-		"tags": [],
+		"tags": [
+			"policy",
+			"culture"
+		],
 		"slug": "city-council-meeting-nobody-attends",
 		"title": "The city council meeting nobody attends",
 		"categories": [
@@ -345,7 +396,10 @@
 		"paragraphs": 8
 	},
 	{
-		"tags": [],
+		"tags": [
+			"culture",
+			"privacy"
+		],
 		"slug": "local-news-is-infrastructure",
 		"title": "Local news is infrastructure",
 		"categories": [
@@ -456,7 +510,10 @@
 		"paragraphs": 3
 	},
 	{
-		"tags": [],
+		"tags": [
+			"craft",
+			"drafting"
+		],
 		"slug": "finishing-a-draft-you-no-longer-believe-in",
 		"title": "On finishing a draft you no longer believe in",
 		"categories": [
@@ -468,7 +525,10 @@
 		"form": "article"
 	},
 	{
-		"tags": [],
+		"tags": [
+			"drafting",
+			"revision"
+		],
 		"slug": "outlining-for-people-who-hate-outlines",
 		"title": "Outlining for people who hate outlines",
 		"categories": [
@@ -648,7 +708,10 @@
 		"paragraphs": 12
 	},
 	{
-		"tags": [],
+		"tags": [
+			"serials",
+			"craft"
+		],
 		"slug": "quiet-ledger-ch-1",
 		"title": "The Quiet Ledger, Chapter 1",
 		"categories": [
@@ -805,7 +868,10 @@
 		"paragraphs": 6
 	},
 	{
-		"tags": [],
+		"tags": [
+			"serials",
+			"habit"
+		],
 		"slug": "failover-ch-1",
 		"title": "Failover, Chapter 1",
 		"categories": [
@@ -913,7 +979,10 @@
 		"paragraphs": 5
 	},
 	{
-		"tags": [],
+		"tags": [
+			"habit",
+			"revision"
+		],
 		"slug": "salt-water-wires-ch-1",
 		"title": "Salt Water Wires, Chapter 1",
 		"categories": [
@@ -1253,5 +1322,19 @@
 		"days_ago": 1090,
 		"excerpt": "A short story: what the river keeps, and what it gives back.",
 		"paragraphs": 20
+	},
+	{
+		"tags": [
+			"wordpress",
+			"caching"
+		],
+		"slug": "why-i-still-read-the-wordpress-changelog",
+		"title": "Why I still read the WordPress changelog",
+		"categories": [
+			"technology"
+		],
+		"days_ago": 45,
+		"excerpt": "Release notes are the cheapest signal you will ever get about what is about to break.",
+		"paragraphs": 17
 	}
 ]
