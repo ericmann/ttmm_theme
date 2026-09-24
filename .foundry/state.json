@@ -1,73 +1,15 @@
 {
-  "round": 6,
-  "implemented": true,
-  "reviewed": true,
-  "verdict": "APPROVED",
-  "summarized": true,
+  "round": 0,
+  "implemented": false,
+  "reviewed": false,
+  "verdict": null,
+  "summarized": false,
   "halted": null,
-  "preexistingUntracked": [],
   "policies": {
     "signing": "auto",
     "push": true,
     "pr": "draft",
     "feedback": true
   },
-  "signing": "none",
-  "rounds": [
-    {
-      "round": 1,
-      "fixTasks": 9,
-      "unblocked": 0,
-      "verdict": "CHANGES REQUESTED",
-      "nonConverging": false,
-      "at": "2026-09-23T23:45:15.652Z"
-    },
-    {
-      "round": 2,
-      "fixTasks": 5,
-      "unblocked": 0,
-      "verdict": "CHANGES REQUESTED",
-      "nonConverging": false,
-      "at": "2026-09-24T04:55:55.343Z"
-    },
-    {
-      "round": 3,
-      "fixTasks": 3,
-      "unblocked": 0,
-      "verdict": "CHANGES REQUESTED",
-      "nonConverging": false,
-      "at": "2026-09-24T07:32:27.838Z"
-    },
-    {
-      "round": 4,
-      "fixTasks": 1,
-      "unblocked": 0,
-      "verdict": "CHANGES REQUESTED",
-      "nonConverging": false,
-      "at": "2026-09-24T08:31:19.930Z"
-    },
-    {
-      "round": 5,
-      "fixTasks": 1,
-      "unblocked": 0,
-      "verdict": "CHANGES REQUESTED",
-      "nonConverging": true,
-      "at": "2026-09-24T09:00:01.272Z"
-    },
-    {
-      "round": 6,
-      "fixTasks": 1,
-      "unblocked": 0,
-      "verdict": "CHANGES REQUESTED",
-      "nonConverging": true,
-      "at": "2026-09-24T11:53:21.445Z"
-    },
-    {
-      "round": 7,
-      "fixTasks": 0,
-      "unblocked": 0,
-      "verdict": "APPROVED",
-      "at": "2026-09-24T12:33:05.926Z"
-    }
-  ]
+  "signing": "none"
 }
