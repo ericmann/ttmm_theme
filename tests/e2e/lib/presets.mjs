@@ -74,3 +74,36 @@ export function authorName() {
 	}
 	return match[ 1 ];
 }
+
+const seedPostsPath = join( 'docs', 'fixtures', 'seed', 'posts.json' );
+const seedPagesPath = join( 'docs', 'fixtures', 'seed', 'pages.json' );
+
+/**
+ * The `docs/fixtures/seed/posts.json` row for `slug` (P0-03, SPEC §6.9 demo-* rows).
+ *
+ * @param {string} slug Post slug.
+ * @return {Object} The matching row.
+ */
+export function seedPost( slug ) {
+	const posts = JSON.parse( readFileSync( seedPostsPath, 'utf8' ) );
+	const post = posts.find( ( row ) => row.slug === slug );
+	if ( ! post ) {
+		throw new Error( `No seed post with slug ${ slug }` );
+	}
+	return post;
+}
+
+/**
+ * The `docs/fixtures/seed/pages.json` row for `slug`.
+ *
+ * @param {string} slug Page slug.
+ * @return {Object} The matching row.
+ */
+export function seedPage( slug ) {
+	const pages = JSON.parse( readFileSync( seedPagesPath, 'utf8' ) );
+	const page = pages.find( ( row ) => row.slug === slug );
+	if ( ! page ) {
+		throw new Error( `No seed page with slug ${ slug }` );
+	}
+	return page;
+}

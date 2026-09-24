@@ -10,7 +10,7 @@
  */
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { color, px, authorName } from './lib/presets.mjs';
+import { color, px, authorName, seedPost } from './lib/presets.mjs';
 import { computed, tracks, before, text, visibleCount } from './lib/style.mjs';
 import { SCREENS, SCREEN_URLS, securityFiltered } from './lib/urls.mjs';
 
@@ -935,6 +935,144 @@ test.describe( 'name', () => {
 		const el = page.locator( '.ttm-masthead-inner__by' );
 		expect( await text( el ) ).toBe( `by ${ authorName() }` );
 	} );
+} );
+
+/**
+ * Force a lazy image to load and wait until its natural dimensions are known (P0-03: several
+ * demo-* rows read `naturalWidth`/`naturalHeight`, which stay 0 for an unloaded `loading=lazy`
+ * image outside the viewport).
+ *
+ * @param {import('@playwright/test').Locator} locator Image locator.
+ * @return {Promise<void>}
+ */
+async function loadImage( locator ) {
+	await locator.evaluate( ( img ) => {
+		img.loading = 'eager';
+	} );
+	await locator.evaluate(
+		( img ) =>
+			new Promise( ( resolve ) => {
+				if ( img.complete && img.naturalWidth > 0 ) {
+					resolve();
+					return;
+				}
+				img.addEventListener( 'load', () => resolve(), {
+					once: true,
+				} );
+			} )
+	);
+}
+
+// P0-03, SPEC §6.9 demo-* rows: seeded posts get a real demo photo, not a placeholder. Made to
+// pass in P1-05, once the demo images actually land.
+test.describe( 'demo', () => {
+	// prettier-ignore
+	test.fixme( 'demo-lead-photo: .ttm-lead-story img @1280', async ( { page } ) => { // P1-05
+		await gotoFront( page, 1280 );
+		const img = page.locator( '.ttm-lead-story img' );
+		expect( await img.count() ).toBe( 1 );
+		const src = await img.getAttribute( 'src' );
+		expect( src ).toMatch( /demo-[a-z0-9-]+\.jpg$/ );
+		const width = parseInt( await img.getAttribute( 'width' ), 10 );
+		expect( width ).toBeGreaterThanOrEqual( 1200 );
+	} );
+
+	// prettier-ignore
+	test.fixme( 'demo-cells-photo: .ttm-cell.is-style-span-2 .ttm-item-featured__media img @1280', async ( { page } ) => { // P1-05
+		await gotoFront( page, 1280 );
+		const media = page.locator(
+			'.ttm-cell.is-style-span-2 .ttm-item-featured__media img[src*="demo-"]'
+		);
+		expect( await media.count() ).toBeGreaterThanOrEqual( 1 );
+
+		let visited = 0;
+		const cells = page.locator( '.ttm-cell' );
+		const cellCount = await cells.count();
+		for ( let i = 0; i < cellCount; i++ ) {
+			const cell = cells.nth( i );
+			const label = cell.locator( '.ttm-cell-heading__label' );
+			if ( ( await label.count() ) === 0 ) {
+				continue;
+			}
+			const labelText = ( await text( label ) ).trim();
+			if (
+				! [ 'Business', 'Security', 'Faith', 'Opinion' ].includes(
+					labelText
+				)
+			) {
+				continue;
+			}
+			const href = await cell
+				.locator( '.wp-block-post-title a' )
+				.first()
+				.getAttribute( 'href' );
+			await page.goto( href );
+			await page.setViewportSize( { width: 1280, height: 900 } );
+			const heroImg = page.locator(
+				'.ttm-article .wp-block-post-featured-image img'
+			);
+			const heroSrc = await heroImg.getAttribute( 'src' );
+			expect( heroSrc ).toContain( 'demo-' );
+			visited++;
+		}
+		expect( visited ).toBe( 4 );
+	} );
+
+	// prettier-ignore
+	test.fixme( 'demo-article-hero: .ttm-article .wp-block-post-featured-image @1280', async ( { page } ) => { // P1-05
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const img = page.locator(
+			'.ttm-article .wp-block-post-featured-image img'
+		);
+		expect( await img.getAttribute( 'src' ) ).toContain( 'demo-' );
+		const caption = page.locator(
+			'.ttm-article .wp-block-post-featured-image figcaption'
+		);
+		expect( await text( caption ) ).toBe(
+			seedPost( 'signing-your-options-table' ).caption
+		);
+	} );
+
+	// prettier-ignore
+	test.fixme( 'demo-about-portrait: .ttm-page__portrait @1280', async ( { page } ) => { // P1-05
+		await gotoScreen( page, SCREENS.about, 1280 );
+		const img = page.locator( 'main img' ).first();
+		expect( await img.getAttribute( 'src' ) ).toContain( 'demo-' );
+		await loadImage( img );
+		const ratio = await img.evaluate(
+			( node ) => node.naturalHeight / node.naturalWidth
+		);
+		expect( ratio ).toBeGreaterThanOrEqual( 1.35 );
+		expect( ratio ).toBeLessThanOrEqual( 1.65 );
+		const portrait = page.locator( '.ttm-page__portrait' );
+		expect( await computed( portrait, 'aspect-ratio' ) ).toBe( '3 / 2' );
+	} );
+
+	// prettier-ignore
+	test.fixme( 'demo-tile-cover: .ttm-tile.is-cover img @1280', async ( { page } ) => { // P1-05
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const img = page.locator( '.ttm-tile.is-cover img' );
+		expect( await img.count() ).toBe( 1 );
+		expect( await img.getAttribute( 'src' ) ).toContain( 'demo-' );
+	} );
+
+	for ( const width of [ 1280, 390 ] ) {
+		// prettier-ignore
+		test.fixme( `demo-alt: img[src*="demo-"] @${ width }`, async ( { page } ) => { // P1-05
+			let seen = 0;
+			for ( const path of SCREEN_URLS ) {
+				await gotoScreen( page, path, width );
+				const images = page.locator( 'img[src*="demo-"]' );
+				const count = await images.count();
+				for ( let i = 0; i < count; i++ ) {
+					const alt = await images.nth( i ).getAttribute( 'alt' );
+					expect( ( alt ?? '' ).trim() ).not.toBe( '' );
+					seen++;
+				}
+			}
+			expect( seen ).toBeGreaterThan( 0 );
+		} );
+	}
 } );
 
 // P0-04: every remaining SPEC §6.9 row, transcribed in table order, tagged as a fixme test.
