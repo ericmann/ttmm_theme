@@ -5,11 +5,13 @@
   "verdict": null,
   "summarized": false,
   "halted": null,
+  "preexistingUntracked": [],
   "policies": {
     "signing": "auto",
     "push": true,
     "pr": "draft",
     "feedback": true
   },
-  "signing": "none"
+  "signing": "none",
+  "rounds": []
 }

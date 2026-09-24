@@ -1,6 +1,6 @@
 # These Things Matter — phase 5 (demo content, Playground, open source) build progress
-Branch: (set by implement)
-Started: (set by implement)
+Branch: refine/2026-09-24
+Started: 2026-09-24T16:34:49.705Z
 
 ## Tasks
 - [ ] P0-01 Flight harness: tagged-fixme window, devDependencies, entry points, demo constants
