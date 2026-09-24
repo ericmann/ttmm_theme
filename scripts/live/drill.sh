@@ -19,15 +19,22 @@ URLS=(
 echo "drill.sh: seeding a known state"
 "${WP[@]}" ttm seed --reset
 
+echo "drill.sh: checking pages are deterministic before the wipe"
+declare -a before_hashes=()
+for url in "${URLS[@]}"; do
+	hash_a=$(node scripts/live/hash-body.mjs "${BASE_URL}${url}")
+	hash_b=$(node scripts/live/hash-body.mjs "${BASE_URL}${url}")
+	if [ "$hash_a" != "$hash_b" ]; then
+		echo "drill.sh: FAIL ${url} is not deterministic before the wipe" >&2
+		exit 1
+	fi
+	before_hashes+=("$hash_a")
+done
+echo "drill.sh: recorded ${#before_hashes[@]} page hash(es) before wipe (deterministic)"
+
 echo "drill.sh: backing up"
 DIR=$(bash scripts/live/backup.sh | tail -n1)
 before_count=$("${WP[@]}" post list --post_type=post --post_status=publish --format=count)
-
-declare -a before_hashes=()
-for url in "${URLS[@]}"; do
-	before_hashes+=("$(node scripts/live/hash-body.mjs "${BASE_URL}${url}")")
-done
-echo "drill.sh: recorded ${#before_hashes[@]} page hash(es) before wipe"
 
 echo "drill.sh: wiping the site"
 "${WP[@]}" site empty --uploads --yes

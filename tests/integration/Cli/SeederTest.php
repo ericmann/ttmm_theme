@@ -505,6 +505,62 @@ class SeederTest extends TTM_IntegrationTestCase {
 		$this->assertNotEmpty( $syndication['mastodon'] ?? '' );
 	}
 
+	/**
+	 * R5-01: reproduced live on 2026-09-24 (a Thursday) -- `journal-post-1`'s ("days_ago": 0,
+	 * "weekday": "Sunday") walk-back landed on the same calendar day as `journal-post-4`
+	 * ("days_ago": 4), and the rows were inserted within the same wall-clock second, so they
+	 * got the same post_date and `ORDER BY post_date DESC` (no tiebreaker) made the front
+	 * page's journal column flip between requests.
+	 *
+	 * @dataProvider provide_seven_consecutive_days
+	 */
+	public function test_seeded_post_dates_are_unique_on_every_weekday( string $now ): void {
+		$this->set_now( $now );
+
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		global $wpdb;
+		$dupes = $wpdb->get_col(
+			"SELECT post_date FROM {$wpdb->posts}
+			WHERE post_type = 'post' AND post_status IN ('publish','future')
+			GROUP BY post_date HAVING COUNT(*) > 1"
+		);
+
+		$this->assertSame( [], $dupes, "Duplicate post_date values seeded for now={$now}: " . implode( ', ', $dupes ) );
+	}
+
+	/**
+	 * @return array<string, array{0: string}>
+	 */
+	public function provide_seven_consecutive_days(): array {
+		return [
+			'2026-09-20 (Sunday)'    => [ '2026-09-20 12:00:00' ],
+			'2026-09-21 (Monday)'    => [ '2026-09-21 12:00:00' ],
+			'2026-09-22 (Tuesday)'   => [ '2026-09-22 12:00:00' ],
+			'2026-09-23 (Wednesday)' => [ '2026-09-23 12:00:00' ],
+			'2026-09-24 (Thursday)'  => [ '2026-09-24 12:00:00' ],
+			'2026-09-25 (Friday)'    => [ '2026-09-25 12:00:00' ],
+			'2026-09-26 (Saturday)'  => [ '2026-09-26 12:00:00' ],
+		];
+	}
+
+	/**
+	 * R5-01: the per-row second offset is subtracted BEFORE the weekday walk-back, so a
+	 * moment just after midnight must still walk back to the correct Sunday rather than the
+	 * offset nudging it across the day boundary first.
+	 */
+	public function test_journal_post_one_stays_on_sunday_when_now_is_just_after_midnight(): void {
+		$this->set_now( '2026-09-24 00:00:30' );
+
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$post = get_page_by_path( 'journal-post-1', OBJECT, 'post' );
+		$this->assertNotNull( $post );
+		$this->assertSame( 'Sunday', gmdate( 'l', strtotime( $post->post_date_gmt ) ) );
+	}
+
 	public function test_journal_word_counts_near_the_mock(): void {
 		$seeder = new Seeder();
 		$seeder->run( 'normal' );

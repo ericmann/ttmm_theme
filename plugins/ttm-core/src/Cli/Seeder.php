@@ -399,6 +399,12 @@ class Seeder {
 		$rows     = $this->load( 'posts.json' );
 		$ids      = [];
 		$excluded = 'empty' === $this->state ? $this->empty_state_excluded_slugs() : [];
+		// R5-01: read the clock once for the whole run and offset every row by its fixture
+		// index in seconds (structural arithmetic, not a Config tunable, rule 24) so rows
+		// inserted within the same wall-clock second still get distinct post_date values.
+		// The offset is applied BEFORE the weekday walk-back below so a pin still lands on
+		// the right weekday even when the offset crosses midnight.
+		$now = Clock::now();
 
 		foreach ( $rows as $index => $row ) {
 			if ( 'empty' === $this->state ) {
@@ -425,7 +431,8 @@ class Seeder {
 
 			$is_future = ! empty( $row['future'] );
 			$days_ago  = $is_future ? (int) $row['days_ago'] : (int) $row['days_ago'] + $this->days_offset;
-			$moment    = Clock::now()->modify( ( $days_ago >= 0 ? '-' : '+' ) . abs( $days_ago ) . ' days' );
+			$moment    = $now->modify( ( $days_ago >= 0 ? '-' : '+' ) . abs( $days_ago ) . ' days' )
+				->modify( '-' . (int) $index . ' seconds' );
 
 			// P0-08: pin a post to a specific weekday (e.g. the Journal's Sunday post),
 			// walking back at most a week -- never forward, so a "future" post stays future.
