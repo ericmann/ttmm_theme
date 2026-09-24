@@ -722,7 +722,7 @@ class Seeder {
 	 * are off, or when `featured_image` is the legacy boolean `true` (P1-04's fixtures switch
 	 * every row to a demo file name; `true` only lingers for a row P1-04 hasn't touched yet).
 	 *
-	 * @param array<string, mixed> $row      The fixture row (`featured_image`, `title`, `caption`).
+	 * @param array<string, mixed> $row      The fixture row (`featured_image`, `title`, `alt`, `caption`).
 	 * @param int                  $post_id  Post to attach to.
 	 * @param string               $size_key Placeholder size key (`image()`'s `$size_key`, unused for a real demo photo).
 	 * @return int Attachment id, or 0.
@@ -730,10 +730,14 @@ class Seeder {
 	public function featured_image_for( array $row, int $post_id, string $size_key ): int {
 		$featured = $row['featured_image'] ?? false;
 		$title    = (string) ( $row['title'] ?? '' );
+		// P1-04: a demo photograph's alt text describes the photograph itself, which is not
+		// necessarily the post title -- falls back to the title when a row has no dedicated
+		// `alt` (e.g. before P1-04 named the real photographs).
+		$alt      = (string) ( $row['alt'] ?? $title );
 		$caption  = (string) ( $row['caption'] ?? '' );
 
 		if ( $this->demo_images && is_string( $featured ) ) {
-			$attachment_id = DemoImage::attach( $featured, $post_id, $title, $caption );
+			$attachment_id = DemoImage::attach( $featured, $post_id, $alt, $caption );
 			if ( $attachment_id ) {
 				return $attachment_id;
 			}

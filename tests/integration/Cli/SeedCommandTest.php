@@ -55,5 +55,16 @@ class SeedCommandTest extends TTM_IntegrationTestCase {
 		( new SeedCommand() )->run( [], [ 'starter-only' => true ] );
 
 		$this->assertTrue( $seen );
+
+		// P1-04: with the filter genuinely on, --starter-only's seed_pages() call now
+		// sideloads the real demo-about.jpg (pages.json names it) -- clean it up so it
+		// doesn't collide with SeederTest.php's own assertion on that exact bare filename.
+		$about = get_page_by_path( 'about', OBJECT, 'page' );
+		if ( $about ) {
+			$thumbnail_id = get_post_thumbnail_id( $about->ID );
+			if ( $thumbnail_id ) {
+				wp_delete_attachment( $thumbnail_id, true );
+			}
+		}
 	}
 }

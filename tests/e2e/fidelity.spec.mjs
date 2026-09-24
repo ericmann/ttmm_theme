@@ -589,12 +589,16 @@ test.describe( 'technology featured cell', () => {
 		expect( await computed( featured, 'grid-column' ) ).toBe( 'span 2' );
 	} );
 
-	test( 'tech-img: .ttm-cell.is-style-span-2 .ttm-item-featured__media @1280', async ( {
+	test( 'tech-img: .ttm-cell.is-style-span-2 .wp-block-post:first-child .ttm-item-featured__media @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
+		// P1-04: scoped to the first post -- once every seeded technology-category row has a
+		// real demo photograph (not just this cell's own featured item), the bare
+		// `.ttm-item-featured__media` selector matches every item in the query loop, not just
+		// the featured one this row means to check.
 		const media = page.locator(
-			'.ttm-cell.is-style-span-2 .ttm-item-featured__media'
+			'.ttm-cell.is-style-span-2 .wp-block-post:first-child .ttm-item-featured__media'
 		);
 		expect( await computed( media, 'aspect-ratio' ) ).toBe( '3 / 2' );
 		expect( await computed( media, 'filter' ) ).toContain( 'grayscale(1)' );

@@ -13,7 +13,7 @@ use TTM\Core\Query\Lead;
 class SeederTest extends TTM_IntegrationTestCase {
 
 	public function test_seed_creates_seven_sections_and_politics_child(): void {
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->seed_categories();
 
 		$sections = [ 'technology', 'business', 'faith', 'journal', 'writing', 'security', 'opinion' ];
@@ -28,7 +28,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_seed_creates_pages_with_templates(): void {
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->seed_pages();
 
 		$series = get_page_by_path( 'series', OBJECT, 'page' );
@@ -40,7 +40,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_seed_is_idempotent(): void {
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->seed_categories();
 		$first  = $seeder->seed_posts();
 		$second = $seeder->seed_posts();
@@ -52,7 +52,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_seed_posts_have_primary_category_and_word_count(): void {
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->seed_categories();
 		$ids = $seeder->seed_posts();
 
@@ -69,7 +69,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	public function test_reset_removes_every_post_not_only_seeded_content(): void {
 		$manual_post = self::factory()->post->create( [ 'post_title' => 'Not seeded' ] );
 
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->run( 'normal' );
 		$seeder->reset();
 
@@ -84,7 +84,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 			$this->markTestSkipped( 'GD is not available.' );
 		}
 
-		$seeder        = new Seeder();
+		$seeder        = new Seeder( false );
 		$attachment_id = $seeder->image( 'Test Image', 'ttm-tile' );
 
 		$this->assertGreaterThan( 0, $attachment_id );
@@ -97,7 +97,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 			$this->markTestSkipped( 'GD is not available.' );
 		}
 
-		$seeder        = new Seeder();
+		$seeder        = new Seeder( false );
 		$attachment_id = $seeder->image( 'Neutral Image', 'ttm-tile' );
 		$file          = get_attached_file( $attachment_id );
 		$image         = imagecreatefrompng( $file );
@@ -126,7 +126,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 			$this->markTestSkipped( 'GD is not available.' );
 		}
 
-		$seeder        = new Seeder();
+		$seeder        = new Seeder( false );
 		$attachment_id = $seeder->cover( 'A Cover Title' );
 		$meta          = wp_get_attachment_metadata( $attachment_id );
 
@@ -149,7 +149,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 			$this->markTestSkipped( 'GD is not available.' );
 		}
 
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->seed_series();
 		$books = $seeder->seed_books();
 
@@ -164,7 +164,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 			$this->markTestSkipped( 'GD is not available.' );
 		}
 
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->seed_pages();
 
 		$about = get_page_by_path( 'about', OBJECT, 'page' );
@@ -193,7 +193,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 			]
 		);
 
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->seed_categories();
 		$seeder->seed_pages();
 
@@ -203,7 +203,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_admin_display_name_is_eric_mann(): void {
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->run( 'normal' );
 
 		$user = get_userdata( 1 );
@@ -226,7 +226,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_prose_paragraphs_are_drawn_deterministically_by_index(): void {
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 
 		$first  = $this->prose( $seeder, 3, 2 );
 		$second = $this->prose( $seeder, 3, 2 );
@@ -239,7 +239,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_seed_sets_the_mock_tagline(): void {
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->run( 'normal' );
 
 		$this->assertSame(
@@ -251,7 +251,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	public function test_seeded_lead_is_signing_your_options_table(): void {
 		$this->set_now();
 
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->run( 'normal' );
 
 		$lead = get_post( Lead::id() );
@@ -261,7 +261,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_seeded_journal_excerpts_are_38_to_48_words(): void {
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->run( 'normal' );
 
 		$journal = get_term_by( 'slug', 'journal', 'category' );
@@ -311,7 +311,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_seeded_strip_series_are_in_progress_with_totals(): void {
-		( new Seeder() )->run( 'normal' );
+		( new Seeder( false ) )->run( 'normal' );
 
 		$expected = [
 			'hardening-wordpress'    => [ 4, 6 ],
@@ -332,7 +332,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_seeded_quiet_ledger_latest_chapter_is_reconciliation(): void {
-		( new Seeder() )->run( 'normal' );
+		( new Seeder( false ) )->run( 'normal' );
 
 		$chapter_12 = get_page_by_path( 'quiet-ledger-ch-12', OBJECT, 'post' );
 		$this->assertNotNull( $chapter_12 );
@@ -346,7 +346,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	 * stays The Last Cron Job either way.
 	 */
 	public function test_seeded_writing_essays_are_locked_articles_and_last_cron_job_stays_first(): void {
-		( new Seeder() )->run( 'normal' );
+		( new Seeder( false ) )->run( 'normal' );
 
 		$essay_1 = get_page_by_path( 'finishing-a-draft-you-no-longer-believe-in', OBJECT, 'post' );
 		$essay_2 = get_page_by_path( 'outlining-for-people-who-hate-outlines', OBJECT, 'post' );
@@ -372,7 +372,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	 * REVIEW round 2, finding 2: SPEC §6.10 / mock 2d name four stories, in this order.
 	 */
 	public function test_writing_short_fiction_is_the_four_spec_stories_in_mock_order(): void {
-		( new Seeder() )->run( 'normal' );
+		( new Seeder( false ) )->run( 'normal' );
 
 		$titles = array_map( 'get_the_title', \TTM\Core\Fiction\Serials::stories( 4 ) );
 
@@ -392,7 +392,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	 * excerpts are shown as plain text (REVIEW round 2, finding 2).
 	 */
 	public function test_no_seeded_excerpt_contains_a_backtick(): void {
-		( new Seeder() )->run( 'normal' );
+		( new Seeder( false ) )->run( 'normal' );
 
 		$posts = get_posts(
 			[
@@ -414,7 +414,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_seeded_article_reads_fourteen_minutes(): void {
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->run( 'normal' );
 
 		$post  = get_page_by_path( 'signing-your-options-table', OBJECT, 'post' );
@@ -425,7 +425,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_seeded_article_has_two_h2_a_code_block_and_a_pull_quote(): void {
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->run( 'normal' );
 
 		$post = get_page_by_path( 'signing-your-options-table', OBJECT, 'post' );
@@ -437,16 +437,16 @@ class SeederTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_hardening_series_has_four_published_and_two_scheduled_parts(): void {
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->run( 'normal' );
 
 		$slugs = [
-			'hardening-part-1'                                  => 'publish',
-			'hardening-part-2-salts-and-keys'                   => 'publish',
-			'signing-your-options-table'                        => 'publish',
-			'hardening-part-4-keys-in-the-environment'          => 'publish',
+			'hardening-part-1'                         => 'publish',
+			'hardening-part-2-salts-and-keys'          => 'publish',
+			'signing-your-options-table'               => 'publish',
+			'hardening-part-4-keys-in-the-environment' => 'publish',
 			'hardening-part-5-the-admin-with-the-weak-password' => 'future',
-			'hardening-part-6-incident-when-the-alarm-fires'    => 'future',
+			'hardening-part-6-incident-when-the-alarm-fires' => 'future',
 		];
 
 		foreach ( $slugs as $slug => $status ) {
@@ -457,7 +457,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_hardening_is_the_featured_series(): void {
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->run( 'normal' );
 
 		$term = get_term_by( 'slug', 'hardening-wordpress', 'series' );
@@ -468,16 +468,16 @@ class SeederTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_seeded_article_hero_has_caption(): void {
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->run( 'normal' );
 
-		$post          = get_page_by_path( 'signing-your-options-table', OBJECT, 'post' );
-		$thumbnail_id  = get_post_thumbnail_id( $post );
+		$post         = get_page_by_path( 'signing-your-options-table', OBJECT, 'post' );
+		$thumbnail_id = get_post_thumbnail_id( $post );
 		$this->assertGreaterThan( 0, $thumbnail_id );
 
 		$attachment = get_post( $thumbnail_id );
 		$this->assertSame(
-			"Caption in the theme's meta type. Photographs are grayscale only on the front page and archives.",
+			'Every signed request still travels down a cable like this one — trust the signature, not the wire.',
 			$attachment->post_excerpt
 		);
 	}
@@ -491,7 +491,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	public function test_journal_post_one_is_on_a_sunday_with_location_and_syndication(): void {
 		$this->set_now( '2026-09-23 12:00:00' );
 
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->run( 'normal' );
 
 		$post = get_page_by_path( 'journal-post-1', OBJECT, 'post' );
@@ -517,7 +517,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	public function test_seeded_post_dates_are_unique_on_every_weekday( string $now ): void {
 		$this->set_now( $now );
 
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->run( 'normal' );
 
 		global $wpdb;
@@ -571,7 +571,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 		$now     = sprintf( '2026-09-24 00:00:%02d', $seconds );
 		$this->set_now( $now );
 
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->run( 'normal' );
 
 		$post = get_page_by_path( 'journal-post-1', OBJECT, 'post' );
@@ -580,7 +580,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_journal_word_counts_near_the_mock(): void {
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->run( 'normal' );
 
 		$post_2 = get_page_by_path( 'journal-post-2', OBJECT, 'post' );
@@ -596,7 +596,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_quiet_ledger_has_synopsis_genre_cadence_and_titled_chapters(): void {
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->run( 'normal' );
 
 		$term = get_term_by( 'slug', 'the-quiet-ledger', 'series' );
@@ -621,10 +621,10 @@ class SeederTest extends TTM_IntegrationTestCase {
 	public function test_security_has_two_year_groups_on_page_one_and_a_second_page(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
 
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->run( 'normal' );
 
-		$term = get_term_by( 'slug', 'security', 'category' );
+		$term  = get_term_by( 'slug', 'security', 'category' );
 		$query = new WP_Query(
 			[
 				'cat'            => $term->term_id,
@@ -647,11 +647,11 @@ class SeederTest extends TTM_IntegrationTestCase {
 	public function test_security_top_tags_are_the_mock_five(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
 
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->run( 'normal' );
 
-		$term = get_term_by( 'slug', 'security', 'category' );
-		$tags = \TTM\Core\Query\Stats::top_tags( $term->term_id );
+		$term  = get_term_by( 'slug', 'security', 'category' );
+		$tags  = \TTM\Core\Query\Stats::top_tags( $term->term_id );
 		$slugs = array_column( $tags, 'slug' );
 
 		sort( $slugs );
@@ -662,7 +662,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	public function test_three_security_posts_are_most_read(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
 
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->run( 'normal' );
 
 		$term  = get_term_by( 'slug', 'security', 'category' );
@@ -691,7 +691,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	 * sorted title set.
 	 */
 	public function test_books_are_salt_water_wires_and_eleven_small_doors(): void {
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$books  = $seeder->seed_books();
 
 		$titles = array_column( $books, 'title' );
@@ -716,7 +716,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	 * distinct tag slugs directly off wp_get_post_tags() instead.
 	 */
 	public function test_every_section_except_journal_has_at_least_five_distinct_tags(): void {
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->run( 'normal' );
 
 		$sections = [ 'technology', 'business', 'faith', 'writing', 'security', 'opinion' ];
@@ -753,7 +753,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 				'posts_per_page' => 200,
 			]
 		);
-		$slugs = [];
+		$slugs   = [];
 		foreach ( $posts as $post ) {
 			foreach ( wp_get_post_tags( $post->ID ) as $tag ) {
 				$slugs[ $tag->slug ] = true;
@@ -767,7 +767,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	 * prev/next cells render, and that neighbour is not in any series.
 	 */
 	public function test_transients_post_has_an_older_technology_neighbour(): void {
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->run( 'normal' );
 
 		$transients = get_page_by_path( 'transients-object-caches-and-fast-enough', OBJECT, 'post' );
@@ -794,7 +794,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	 * P0-02: the older Technology neighbour is sized to ~600 words (SPEC §6.3).
 	 */
 	public function test_changelog_post_is_about_six_hundred_words(): void {
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->run( 'normal' );
 
 		$post = get_page_by_path( 'why-i-still-read-the-wordpress-changelog', OBJECT, 'post' );
@@ -810,7 +810,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	 * Security, giving the related-series ranking a same-section candidate.
 	 */
 	public function test_reading_cves_is_a_complete_security_series_of_four(): void {
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$seeder->run( 'normal' );
 
 		$row = \TTM\Core\Query\SeriesIndex::by_slug( 'reading-cves' );
@@ -843,7 +843,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 	 */
 	private const FEATURED_IMAGE_FILE = 'demo-fixture-seeder-test.jpg';
 
-	private ?string $featured_image_tmp_dir = null;
+	private ?string $featured_image_tmp_dir    = null;
 	private ?string $featured_image_images_dir = null;
 
 	private function set_up_demo_images_fixture(): void {
@@ -967,5 +967,132 @@ class SeederTest extends TTM_IntegrationTestCase {
 		$this->assertSame( 'image/png', get_post_mime_type( $attachment_id ) );
 
 		$this->tear_down_demo_images_fixture();
+	}
+
+	/**
+	 * P1-04: with demo images on, every fixture row naming a real `demo-*.jpg` gets that
+	 * photograph -- its own alt and caption, not a placeholder's.
+	 */
+	public function test_normal_seed_with_demo_images_attaches_the_thirteen_photographs(): void {
+		if ( ! function_exists( 'imagecreatetruecolor' ) ) {
+			$this->markTestSkipped( 'GD is not available.' );
+		}
+
+		$this->seed( 'normal', true );
+
+		$rows = $this->demo_fixture_rows();
+		$this->assertCount( 13, $rows, 'expected 13 demo photograph rows across posts.json/pages.json' );
+
+		// The uploaded files survive the DB rollback (see DemoImageTest's equivalent comment)
+		// -- force-delete every one of them before returning, in a `finally`, so a re-run of
+		// this test (or any later one) never collides with a leftover upload and picks up a
+		// "-N"-suffixed name instead of the bare one asserted below; an assertion failure
+		// partway through the loop must not skip the cleanup of the rows already checked.
+		$attachment_ids = [];
+
+		try {
+			foreach ( $rows as $row ) {
+				$post = get_page_by_path( $row['slug'], OBJECT, $row['post_type'] );
+				$this->assertNotNull( $post, "missing post/page: {$row['slug']}" );
+
+				$attachment_id    = get_post_thumbnail_id( $post->ID );
+				$attachment_ids[] = $attachment_id;
+				$this->assertGreaterThan( 0, $attachment_id, "no thumbnail for {$row['slug']}" );
+				$this->assertSame(
+					$row['featured_image'],
+					basename( (string) get_attached_file( $attachment_id ) ),
+					"wrong file for {$row['slug']}"
+				);
+				$this->assertSame( 'image/jpeg', get_post_mime_type( $attachment_id ) );
+				$this->assertSame(
+					$row['alt'],
+					get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
+					"wrong alt for {$row['slug']}"
+				);
+				$this->assertSame(
+					$row['caption'],
+					get_post( $attachment_id )->post_excerpt,
+					"wrong caption for {$row['slug']}"
+				);
+			}
+		} finally {
+			foreach ( $attachment_ids as $attachment_id ) {
+				if ( $attachment_id ) {
+					wp_delete_attachment( $attachment_id, true );
+				}
+			}
+		}
+	}
+
+	/**
+	 * P1-04: without demo images, every one of those same rows still gets a thumbnail --
+	 * the rule 45 placeholder, not the real photograph.
+	 */
+	public function test_normal_seed_without_demo_images_uses_placeholders(): void {
+		if ( ! function_exists( 'imagecreatetruecolor' ) ) {
+			$this->markTestSkipped( 'GD is not available.' );
+		}
+
+		$this->seed( 'normal' ); // demo images off by default (TTM_IntegrationTestCase::seed()).
+
+		$rows = $this->demo_fixture_rows();
+
+		foreach ( $rows as $row ) {
+			$post = get_page_by_path( $row['slug'], OBJECT, $row['post_type'] );
+			$this->assertNotNull( $post, "missing post/page: {$row['slug']}" );
+
+			$attachment_id = get_post_thumbnail_id( $post->ID );
+			$this->assertGreaterThan( 0, $attachment_id, "no thumbnail for {$row['slug']}" );
+			$this->assertSame(
+				'image/png',
+				get_post_mime_type( $attachment_id ),
+				"expected a placeholder PNG for {$row['slug']}"
+			);
+		}
+	}
+
+	/**
+	 * P1-04: every demo photograph fixture row has real alt/caption text (never blank).
+	 */
+	public function test_every_demo_fixture_has_alt_and_caption(): void {
+		$rows = $this->demo_fixture_rows();
+		$this->assertCount( 13, $rows );
+
+		foreach ( $rows as $row ) {
+			$this->assertNotSame( '', trim( $row['alt'] ), "missing alt for {$row['slug']}" );
+			$this->assertNotSame( '', trim( $row['caption'] ), "missing caption for {$row['slug']}" );
+		}
+	}
+
+	/**
+	 * Every `posts.json`/`pages.json` row whose `featured_image` names a real demo photograph
+	 * (a string, not the legacy placeholder-only boolean `true`).
+	 *
+	 * @return array<int, array{slug: string, post_type: string, featured_image: string, alt: string, caption: string}>
+	 */
+	private function demo_fixture_rows(): array {
+		$rows = [];
+
+		foreach ( [
+			'posts.json' => 'post',
+			'pages.json' => 'page',
+		] as $file => $post_type ) {
+			$path         = Seeder::fixtures_dir() . '/' . $file;
+			$fixture_rows = (array) json_decode( (string) file_get_contents( $path ), true );
+
+			foreach ( $fixture_rows as $row ) {
+				if ( isset( $row['featured_image'] ) && is_string( $row['featured_image'] ) ) {
+					$rows[] = [
+						'slug'           => (string) $row['slug'],
+						'post_type'      => $post_type,
+						'featured_image' => $row['featured_image'],
+						'alt'            => (string) ( $row['alt'] ?? '' ),
+						'caption'        => (string) ( $row['caption'] ?? '' ),
+					];
+				}
+			}
+		}
+
+		return $rows;
 	}
 }
