@@ -50,7 +50,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] R2-02 migrate:politics is idempotent per post: Politics posts get Opinion and primary Opinion even when Politics is already under Opinion
 - [x] R2-03 primary:assign --from-yoast maps source term IDs through the WXR's own category map
 - [x] R2-04 Journal single: keep .ttm-entry identity but no F12 padding; jr-entry asserts mock 2c spacing
-- [ ] R2-05 Re-run env:live and test:live after the round 2 fixes; correct LIVE-TRIAGE; retake live and seeded screenshots; push
+- [x] R2-05 Re-run env:live and test:live after the round 2 fixes; correct LIVE-TRIAGE; retake live and seeded screenshots; push
 
 ## Log
 (one entry per task, appended by implement)
@@ -296,3 +296,11 @@ Verify: npm run test:unit, npm run lint, bash -n on both shell scripts, forbidde
 Added `.ttm-journal-head .ttm-entry { padding-top: 0; }` in the 4.12 journal header component section of ttm.css: F12's article-only byline-to-body padding-top (28px) was doubling the 18px gap the journal single's h1 already provides via its own margin-bottom, since a journal single has no byline between h1 and .ttm-entry. .ttm-entry className stays on the markup (axe exclusion + SPEC §6.10 "present and non-empty" check, per R1-09).
 Tests: fidelity.spec.mjs jr-entry rewritten to assert padding-top: 0px and that the gap between the h1's bounding-box bottom and .ttm-entry's bounding-box top is exactly 18px, replacing the old 28px padding-top assertion.
 Verify: npm run lint green; CSS budget 63090/63488 bytes; ran the jr-entry and selectors.spec.mjs fidelity tests directly against the already-running wp-env dev site (WP_BASE_URL=http://localhost:8888 wp-scripts test-playwright --project fidelity -g "..."), both pass; css-coverage stays 0 pending since .ttm-entry already had coverage.
+
+### R2-05 — b373fe7
+Ran LIVE_SKIP_ATTACHMENTS=1 npm run env:live end to end against the same 2026-09-23 WXR export with R2-01..R2-04 in place, then npm run test:live (77 passed, 0 failed, exit 0).
+Real numbers: primary:assign --from-yoast --term-map=wp-content/ttm-fixtures/live/term-map.json "Used 110 post(s) from Yoast, skipped 767" (was 3/898); migrate:politics "Updated 24 Politics post(s)" (was 0, "already child of Opinion"); convert-classic.mjs: 0 merged-paragraph blocks across all 724 posts (no --allow-merged-paragraphs needed), textEqual:false 3 (was 7 -- the remaining 3, securing-forms-without-captcha/the-hackiest-hack-that-ever-was-hacked/use-your-head, are pre-existing malformed classic-editor markup, owner cleanup, unchanged from R2-01's own measurement).
+docs/feedback/phase-4/LIVE-TRIAGE.md: corrected the R1-09 "3 used, not ~424 -- structural limitation" section in place (struck through, marked superseded, mechanism explained) and added a new "R2-05 run" section with a before/after table for all three round-2 fixes plus the screenshot evidence.
+Screenshots retaken: live set (docs/feedback/phase-4/live-*.png) against the live import -- live-front.png's Opinion cell now lists real rows, live-article-classic.png (keeping-fresh) shows clean separate paragraphs; then docs/fixtures/live/screens.json deleted (gitignored, rule 47) before npm run env:seed -- --reset && npm run test:e2e (492 passed; one selectors.spec.mjs timeout under full concurrent load, confirmed a resource-contention flake by re-running it alone: 13s, pass); then seeded set retaken, journal.png shows R2-04's 18px mock-2c spacing.
+Nothing under docs/fixtures/live/ staged or committed. Pushed via foundry_run_finish next.
+Manual check: NOT VERIFIED (human) -- open live-front.png, live-article-classic.png and journal.png to confirm visually.
