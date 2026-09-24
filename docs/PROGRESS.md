@@ -55,6 +55,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] R3-02 Pure, tested classic pre-rawHandler pipeline order; mergedParagraphs counts nested blocks
 - [x] R3-03 Re-run env:live and test:live with the merged-paragraph check live; complete LIVE-TRIAGE rows; push
 - [x] R4-01 Pipeline-order test fails when autop runs before the shortcode pre-pass
+- [ ] R5-01 Deterministic seed post dates so env:drill is green in CI; drill detects nondeterminism; CI log step terminates
 
 ## Log
 (one entry per task, appended by implement)

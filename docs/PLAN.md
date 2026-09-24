@@ -546,3 +546,35 @@ Derived from docs/SPEC.md v4.0 on 2026-09-22. SPEC.md wins over this file.
 **Out of scope:** Changing the pipeline itself; CodeColorer <code lang> tag syntax (spec issue); live re-run; any PHP/theme change.
 **Verification:** npm run test:unit; npm run lint; temporarily swap the order in scripts/lib/prepare-classic.mjs, confirm the prepareClassicHtml tests fail, then git checkout -- scripts/lib/prepare-classic.mjs
 **Depends on:** none
+
+## Review fixes (round 5)
+
+### R5-01: Deterministic seed post dates so env:drill is green in CI; drill detects nondeterminism; CI log step terminates
+**Goal:** Every seeded post gets a distinct, deterministic post_date on every weekday, so seeded pages are byte-stable across requests and `npm run env:drill` passes in CI (SPEC §1.3 Done, §6.9); the drill reports page nondeterminism separately from restore data loss; the CI failure-log step no longer hangs until the 6-hour timeout.
+**Files touched:** plugins/ttm-core/src/Cli/Seeder.php, tests/integration/Cli/SeederTest.php, scripts/live/drill.sh, .github/workflows/ci.yml
+**Design constraints:** Root cause, reproduced by the reviewer on 2026-09-24 (a Thursday): `Seeder::seed_posts()` reads `Clock::now()` separately for each row (Seeder.php:428), and the P0-08 `weekday` walk-back moves `journal-post-1` (`days_ago` 0, weekday Sunday) onto the same day as `journal-post-4` (`days_ago` 4) on Thursdays, and onto the same day as `journal-post-3` on Wednesdays. The rows are inserted within the same second, so they get the same `post_date` (`2026-09-20 01:57:20` for both). The seed has two other ties: `salt-water-wires-ch-24`/`reading-cves-part-4` and `classic-post`/`what-coordinated-disclosure-costs`. `ORDER BY post_date DESC` has no tiebreaker, so the front page's journal column flips between requests (8 of 12 curls vs 4 of 12), and drill.sh's `/` hash differs before and after the restore. The fix:
+- Read `Clock::now()` once per `seed_posts()` run.
+- Subtract the row's fixture index in seconds (structural arithmetic, not a Config tunable, rule 24) BEFORE the weekday walk-back, so the weekday pin still lands on the right weekday even if the offset crosses midnight.
+- Keep the date/time rule (rule 9): only Clock is used, with no `time()`, `date(` or `new DateTime`.
+- Do not change the fixture JSON day offsets.
+- Existing SeederTest expectations (the Sunday journal post, the Security year groups, the lead, the Hardening series part counts) must still pass unchanged.
+
+drill.sh must hash each of the five URLs twice before `wp site empty`. If the two hashes differ, it prints `drill.sh: FAIL <url> is not deterministic before the wipe` and exits 1 without wiping, so seed nondeterminism is never reported as backup/restore data loss. In `.github/workflows/ci.yml`, the `Container logs on failure` step must not watch: use `npx wp-env logs all --watch=false || true`. Do not touch any other CI step.
+**Acceptance tests:** In tests/integration/Cli/SeederTest.php, add `test_seeded_post_dates_are_unique_on_every_weekday`:
+- Use a data provider covering seven consecutive days, `2026-09-20 12:00:00` through `2026-09-26 12:00:00`, via `set_now()`.
+- For each day, seed the normal state.
+- Assert that `SELECT post_date FROM wp_posts WHERE post_type = 'post' AND post_status IN ('publish','future') GROUP BY post_date HAVING COUNT(*) > 1` returns no rows.
+
+With a frozen clock this fails today on the Wednesday and Thursday cases (the `journal-post-1` tie) and on the `reading-cves-part-4`/`salt-water-wires-ch-24` tie.
+
+Also add `test_journal_post_one_stays_on_sunday_when_now_is_just_after_midnight`: call `set_now( '2026-09-24 00:00:30' )` and assert that `journal-post-1`'s `post_date` is a Sunday.
+
+The existing `test_journal_post_one_is_on_a_sunday_with_location_and_syndication` must still pass.
+**Out of scope:** Adding an ID tiebreaker to core/query ordering or any template/theme change; fixture JSON changes; Stats/series index logic; live import scripts; the other CI jobs; the HANDOFF/LIVE-TRIAGE history beyond noting in this task's log that the round-3 'sandbox flakiness' diagnosis was the seed tie.
+**Verification:** - `composer lint`; `composer test:unit`; `npm run lint`; `npm run test:unit`.
+- `npm run test:integration`, including the new SeederTest cases. Mutation check: revert the Seeder change, confirm the new unique-date test fails for the Thursday case, then restore it with `git checkout`.
+- `npm run env:drill` exits 0 locally, run twice.
+- `for i in $(seq 1 12); do curl -s http://localhost:8888/ | md5sum; done | sort -u | wc -l` prints 1 after `npm run env:seed -- --reset`.
+- `npm run test:e2e` stays green.
+- Push and confirm the GitHub Actions integration job's `npm run env:drill` step passes. If it fails, the job must end in minutes, not hang in the logs step.
+**Depends on:** none
