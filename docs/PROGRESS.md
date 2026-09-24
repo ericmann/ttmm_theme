@@ -56,7 +56,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] R3-03 Re-run env:live and test:live with the merged-paragraph check live; complete LIVE-TRIAGE rows; push
 - [x] R4-01 Pipeline-order test fails when autop runs before the shortcode pre-pass
 - [x] R5-01 Deterministic seed post dates so env:drill is green in CI; drill detects nondeterminism; CI log step terminates
-- [ ] R6-01 Make the after-midnight Seeder test and the editor-registration login actually test what they claim
+- [x] R6-01 Make the after-midnight Seeder test and the editor-registration login actually test what they claim
 
 ## Log
 (one entry per task, appended by implement)
@@ -333,3 +333,28 @@ ci.yml: "Container logs on failure" step now `npx wp-env logs all --watch=false 
 Verified locally: composer lint/test:unit, npm lint/test:unit/build, forbidden-patterns all clean; SeederTest isolated run 47/47 green; npm run env:drill green x2; 12x curl of / identical hash after reseed; npm run test:e2e green (491 passed/1 skipped/0 failed).
 Could NOT complete a full npm run test:integration run in this sandbox: this shared dev box's wp-env docker state was destroyed/OOM-killed three times in a row by unrelated projects' containers on the same host (mysql exited 137, docker-compose.yml vanished, then a WordPress-core git clone itself failed) -- host resource contention, not a regression, since isolated Seeder/e2e suites stayed green throughout. Logged as pipeline friction; flagged in HANDOFF for human re-run on a quieter box or CI.
 Also logged (feedback): ~/.local/bin/php is a stale shim from an unrelated project that silently breaks `php -l`/composer lint on this repo; worked around with /usr/bin/php8.3 directly, did not touch the shim.
+
+### R6-01 — 87d8795
+Rewrote the after-midnight SeederTest to derive `now` from journal-post-1's actual fixture
+index (30) instead of a hardcoded 30s offset that never crossed midnight: seconds =
+max(0, index-20) = 10, now = 2026-09-24 00:00:10. Weekday assertion now uses
+(new DateTimeImmutable($post->post_date, wp_timezone()))->format('l') instead of
+gmdate() on post_date_gmt, matching the task's SPEC-cited requirement.
+
+editors.spec.mjs: login() now does
+Promise.all([page.waitForURL(/\/wp-admin\//), click #wp-submit]) instead of a bare click.
+assertBlocksRegistered() asserts page.url() does not contain 'wp-login.php' before the
+block-registry wait, so a lost session fails loudly instead of as "19 blocks missing".
+
+Verification: composer lint/test:unit run via /usr/bin/php directly, since the `php` on
+PATH is a shim routing to an unrelated project's docker container on this host (not a
+repo issue) -- both green. Mutation test: moved the seconds-offset modify() in
+Seeder::seed_posts() to after the weekday walk-back loop by hand -- the after-midnight
+test failed (Saturday instead of Sunday) as required, then `git checkout --` reverted
+Seeder.php (no production change committed). wp-env SeederTest filter: 47/47 green.
+editors.spec.mjs --repeat-each=10 --workers=1: 20/20 green (deterministic). At this
+sandboxed host's default (higher) worker count the same repeat-each run hit resource
+contention un­related to the fix (Playwright's own "host missing deps" warning); the new
+wp-login.php assertion never fired there, confirming the failures were not a login race.
+Full `npm run test:e2e`: 492 passed, 1 skipped, green (includes both editors.spec.mjs
+rows). No test.fixme in either file. No production code touched.
