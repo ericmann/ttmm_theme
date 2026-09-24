@@ -22,6 +22,7 @@ class Loader {
 			return;
 		}
 
+		// wp ttm seed [--reset] [--state=<normal|quiet|empty>] [--starter-only] [--no-demo-images].
 		\WP_CLI::add_command( 'ttm seed', self::wrap( new SeedCommand() ) );
 		\WP_CLI::add_command( 'ttm stats:flush', self::wrap( new StatsCommand() ) );
 		\WP_CLI::add_command( 'ttm verse', self::wrap( new VerseCommand() ) );

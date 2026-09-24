@@ -835,4 +835,137 @@ class SeederTest extends TTM_IntegrationTestCase {
 			$this->assertLessThanOrEqual( 2025, $year );
 		}
 	}
+
+	/**
+	 * P1-02: Seeder::featured_image_for() -- a synthetic demo images fixture, filtered into
+	 * place via `ttm_demo_images_dir`, the same shape tests/integration/Cli/DemoImageTest.php
+	 * uses.
+	 */
+	private const FEATURED_IMAGE_FILE = 'demo-fixture-seeder-test.jpg';
+
+	private ?string $featured_image_tmp_dir = null;
+	private ?string $featured_image_images_dir = null;
+
+	private function set_up_demo_images_fixture(): void {
+		$this->featured_image_tmp_dir    = sys_get_temp_dir() . '/ttm-seeder-demo-image-' . wp_generate_password( 8, false ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_tempnam -- test-only fixture tree.
+		$this->featured_image_images_dir = $this->featured_image_tmp_dir . '/images';
+		mkdir( $this->featured_image_images_dir, 0777, true ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.directory_mkdir -- test-only fixture tree.
+
+		$image = imagecreatetruecolor( 1600, 1000 );
+		$grey  = imagecolorallocate( $image, 186, 182, 182 );
+		imagefill( $image, 0, 0, $grey );
+		imagejpeg( $image, $this->featured_image_images_dir . '/' . self::FEATURED_IMAGE_FILE ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_imagejpeg -- test-only fixture tree.
+		imagedestroy( $image );
+
+		add_filter( 'ttm_demo_images_dir', [ $this, 'filter_featured_image_dir' ] );
+	}
+
+	private function tear_down_demo_images_fixture(): void {
+		remove_filter( 'ttm_demo_images_dir', [ $this, 'filter_featured_image_dir' ] );
+
+		$files = glob( $this->featured_image_images_dir . '/*' );
+		foreach ( false === $files ? [] : $files as $file ) {
+			wp_delete_file( $file );
+		}
+		@rmdir( $this->featured_image_images_dir ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPressVIPMinimum.Functions.RestrictedFunctions.directory_rmdir -- test-only fixture tree.
+		@rmdir( $this->featured_image_tmp_dir ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPressVIPMinimum.Functions.RestrictedFunctions.directory_rmdir -- test-only fixture tree.
+	}
+
+	public function filter_featured_image_dir(): string {
+		return $this->featured_image_images_dir;
+	}
+
+	public function test_featured_image_for_uses_the_demo_file_when_present(): void {
+		if ( ! function_exists( 'imagecreatetruecolor' ) ) {
+			$this->markTestSkipped( 'GD is not available.' );
+		}
+		$this->set_up_demo_images_fixture();
+
+		$post_id = self::factory()->post->create();
+		$seeder  = new Seeder( true );
+		$row     = [
+			'featured_image' => self::FEATURED_IMAGE_FILE,
+			'title'          => 'A Demo Photo',
+			'caption'        => 'A demo caption.',
+		];
+
+		$attachment_id = $seeder->featured_image_for( $row, $post_id, 'ttm-tile' );
+
+		$this->assertGreaterThan( 0, $attachment_id );
+		$this->assertSame( 'image/jpeg', get_post_mime_type( $attachment_id ) );
+		$this->assertSame( self::FEATURED_IMAGE_FILE, basename( get_attached_file( $attachment_id ) ) );
+
+		// See DemoImageTest's equivalent cleanup: the uploaded file survives the DB rollback,
+		// so it must be force-deleted here or a re-run of this same test would collide with
+		// its own previous upload and get a "-2"-suffixed name instead of the bare one.
+		wp_delete_attachment( $attachment_id, true );
+		$this->tear_down_demo_images_fixture();
+	}
+
+	public function test_featured_image_for_falls_back_to_a_placeholder_when_absent(): void {
+		if ( ! function_exists( 'imagecreatetruecolor' ) ) {
+			$this->markTestSkipped( 'GD is not available.' );
+		}
+		$this->set_up_demo_images_fixture();
+
+		$post_id = self::factory()->post->create();
+		$seeder  = new Seeder( true );
+		$row     = [
+			'featured_image' => 'demo-does-not-exist.jpg',
+			'title'          => 'Placeholder Photo',
+			'caption'        => 'A placeholder caption.',
+		];
+
+		$attachment_id = $seeder->featured_image_for( $row, $post_id, 'ttm-tile' );
+
+		$this->assertGreaterThan( 0, $attachment_id );
+		$this->assertSame( 'image/png', get_post_mime_type( $attachment_id ) );
+		$this->assertSame( 'A placeholder caption.', get_post( $attachment_id )->post_excerpt );
+
+		$this->tear_down_demo_images_fixture();
+	}
+
+	public function test_featured_image_for_true_is_a_placeholder(): void {
+		if ( ! function_exists( 'imagecreatetruecolor' ) ) {
+			$this->markTestSkipped( 'GD is not available.' );
+		}
+		$this->set_up_demo_images_fixture();
+
+		$post_id = self::factory()->post->create();
+		$seeder  = new Seeder( true );
+		$row     = [
+			'featured_image' => true,
+			'title'          => 'Legacy Boolean Photo',
+			'caption'        => '',
+		];
+
+		$attachment_id = $seeder->featured_image_for( $row, $post_id, 'ttm-tile' );
+
+		$this->assertGreaterThan( 0, $attachment_id );
+		$this->assertSame( 'image/png', get_post_mime_type( $attachment_id ) );
+
+		$this->tear_down_demo_images_fixture();
+	}
+
+	public function test_featured_image_for_with_demo_images_off_is_a_placeholder(): void {
+		if ( ! function_exists( 'imagecreatetruecolor' ) ) {
+			$this->markTestSkipped( 'GD is not available.' );
+		}
+		$this->set_up_demo_images_fixture();
+
+		$post_id = self::factory()->post->create();
+		$seeder  = new Seeder( false );
+		$row     = [
+			'featured_image' => self::FEATURED_IMAGE_FILE,
+			'title'          => 'Demo Images Off Photo',
+			'caption'        => '',
+		];
+
+		$attachment_id = $seeder->featured_image_for( $row, $post_id, 'ttm-tile' );
+
+		$this->assertGreaterThan( 0, $attachment_id );
+		$this->assertSame( 'image/png', get_post_mime_type( $attachment_id ) );
+
+		$this->tear_down_demo_images_fixture();
+	}
 }

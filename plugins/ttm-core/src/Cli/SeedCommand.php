@@ -1,6 +1,6 @@
 <?php
 /**
- * `wp ttm seed [--reset] [--state=<normal|quiet|empty>]`.
+ * `wp ttm seed [--reset] [--state=<normal|quiet|empty>] [--starter-only] [--no-demo-images]`.
  *
  * @package TTM\Core\Cli
  */
@@ -18,7 +18,7 @@ class SeedCommand extends Command {
 	 * {@inheritDoc}
 	 *
 	 * @param string[]             $args  Positional args (unused).
-	 * @param array<string, mixed> $assoc --reset, --starter-only, --state=<normal|quiet|empty>.
+	 * @param array<string, mixed> $assoc --reset, --starter-only, --state=<normal|quiet|empty>, --no-demo-images.
 	 */
 	public function run( array $args, array $assoc ): array {
 		unset( $args );
@@ -33,7 +33,9 @@ class SeedCommand extends Command {
 			];
 		}
 
-		$seeder = new Seeder();
+		// P1-02: --no-demo-images falls back to the rule 45 placeholder even when a fixture
+		// names a real demo photograph (e.g. for a fast/offline seed).
+		$seeder = new Seeder( empty( $assoc['no-demo-images'] ) );
 
 		if ( ! empty( $assoc['reset'] ) ) {
 			$seeder->reset();
