@@ -46,6 +46,11 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] R1-07 Rule 47 check catches private files directly under docs/
 - [x] R1-08 Seeder::reset() removes every post type after a live import
 - [x] R1-09 Re-run env:live and test:live on the export; correct LIVE-TRIAGE; retake live and seeded screenshots; push
+- [ ] R2-01 Classic conversion keeps paragraph breaks: real autop on every classic post, merged-paragraph signal
+- [ ] R2-02 migrate:politics is idempotent per post: Politics posts get Opinion and primary Opinion even when Politics is already under Opinion
+- [ ] R2-03 primary:assign --from-yoast maps source term IDs through the WXR's own category map
+- [ ] R2-04 Journal single: keep .ttm-entry identity but no F12 padding; jr-entry asserts mock 2c spacing
+- [ ] R2-05 Re-run env:live and test:live after the round 2 fixes; correct LIVE-TRIAGE; retake live and seeded screenshots; push
 
 ## Log
 (one entry per task, appended by implement)
