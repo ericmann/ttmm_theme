@@ -1,0 +1,93 @@
+[
+	{
+		"file": "demo-signing-your-options-table.jpg",
+		"query": "server room cables",
+		"orientation": "wide",
+		"subject": "server room cables",
+		"post": "signing-your-options-table"
+	},
+	{
+		"file": "demo-technology-post-2.jpg",
+		"query": "circuit board macro",
+		"orientation": "wide",
+		"subject": "circuit board macro",
+		"post": "technology-post-2"
+	},
+	{
+		"file": "demo-charge-for-outcome-bill-for-hour.jpg",
+		"query": "notebook ledger",
+		"orientation": "wide",
+		"subject": "notebook ledger",
+		"post": "charge-for-outcome-bill-for-hour"
+	},
+	{
+		"file": "demo-hardening-part-4-keys-in-the-environment.jpg",
+		"query": "keys on table",
+		"orientation": "wide",
+		"subject": "keys on table",
+		"post": "hardening-part-4-keys-in-the-environment"
+	},
+	{
+		"file": "demo-praying-for-people-who-file-bug-reports.jpg",
+		"query": "cathedral light",
+		"orientation": "wide",
+		"subject": "cathedral light",
+		"post": "praying-for-people-who-file-bug-reports"
+	},
+	{
+		"file": "demo-open-source-not-a-business-model.jpg",
+		"query": "harbor cranes",
+		"orientation": "wide",
+		"subject": "harbor cranes",
+		"post": "open-source-not-a-business-model"
+	},
+	{
+		"file": "demo-transients-object-caches-and-fast-enough.jpg",
+		"query": "warehouse shelves",
+		"orientation": "wide",
+		"subject": "warehouse shelves",
+		"post": "transients-object-caches-and-fast-enough"
+	},
+	{
+		"file": "demo-php-85-readonly-classes.jpg",
+		"query": "typewriter desk",
+		"orientation": "wide",
+		"subject": "typewriter desk",
+		"post": "php-85-readonly-classes"
+	},
+	{
+		"file": "demo-composer-lockfiles-are-a-security-control.jpg",
+		"query": "padlock gate",
+		"orientation": "wide",
+		"subject": "padlock gate",
+		"post": "composer-lockfiles-are-a-security-control"
+	},
+	{
+		"file": "demo-nonces-are-not-csrf-tokens.jpg",
+		"query": "ticket stubs",
+		"orientation": "wide",
+		"subject": "ticket stubs",
+		"post": "nonces-are-not-csrf-tokens"
+	},
+	{
+		"file": "demo-password-manager-weakest-link.jpg",
+		"query": "chain link fence",
+		"orientation": "wide",
+		"subject": "chain link fence",
+		"post": "password-manager-weakest-link"
+	},
+	{
+		"file": "demo-about.jpg",
+		"query": "desk lamp still life",
+		"orientation": "tall",
+		"subject": "desk lamp still life",
+		"post": "about"
+	},
+	{
+		"file": "demo-story-uptime.jpg",
+		"query": "rain window",
+		"orientation": "square",
+		"subject": "rain window",
+		"post": "story-uptime"
+	}
+]
