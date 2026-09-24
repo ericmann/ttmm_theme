@@ -12,7 +12,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P0-07 SI-17 CodeColorer `<code lang>` pre-pass rule and audit flag
 - [x] P0-08 Owner screenshot set moves to docs/feedback/phase-5
 - [x] P0-09 Phase 0 screenshots and push
-- [ ] P1-01 images.json and the Openverse fetch script
+- [x] P1-01 images.json and the Openverse fetch script
 - [ ] P1-02 Seeder sideloads demo photographs (DemoImage, --no-demo-images)
 - [ ] P1-03 Fetch the 13 photographs; tune IMAGE_MAX_BYTES and IMAGE_BUDGET_BYTES
 - [ ] P1-04 Fixture photographs: featured_image, alt and caption values
@@ -88,3 +88,10 @@ Verified: foundry_verify ok:true 0 constraint fails; composer lint 0 errors, com
 Ran npx wp-env start, npm run env:seed -- --reset, npm run screenshots -- wrote all 6 §6.10 files (front.png, article.png, archive-technology.png, writing.png, about.png, front-390.png) to docs/feedback/phase-5/, committed. Full verify set green: composer lint (0 errors), composer test:unit 191/191, npm run lint clean, npm run test:unit 150/156 (6 pre-existing skips), npm run build, forbidden-patterns.sh clean, npm run test:integration 601/601, npm run test:e2e 494 passed/8 skipped/0 failed (confirmed real exit code 0 by redirecting to a file rather than piping through tail, since `cmd | tail` masks the pipe's real exit status; the one selectors.spec.mjs timeout seen in an earlier concurrent-verify run reproduced nowhere in this final pass).
 Pushed: git push -u origin HEAD succeeded (new branch refine/2026-09-24 on origin); git log origin/refine/2026-09-24..HEAD is empty.
 Manual check: NOT VERIFIED (human) -- optional: front.png/article.png masthead "by Eric Mann" and footer line unchanged.
+
+### P1-01 — ac71887
+scripts/demo/images.json: 13 rows in SPEC §6.1 order (11 wide, 1 tall demo-about.jpg, 1 square demo-story-uptime.jpg), each {file, query, orientation, subject, post}.
+scripts/demo/lib/openverse.mjs: pure exports validateRows (13-row/unique-name/orientation checks, failure-string array), searchUrl (exact SPEC §6.1 query string, commas literal not %2C), pickResult (first result >= minWidth, license in the allowed set case-insensitively, filetype or URL-extension fallback in jpg/jpeg/png, not already chosen/excluded/skipped), creditRow (rule 53 fields + attribution, creator_url passed through as-is incl. null), sortCredits (by file, fixed key order, attribution last).
+scripts/demo/fetch-images.mjs (real implementation, replacing the P0-01 stub): refuses to run when process.env.CI is set (exit 1, "human-run only" message) before touching images.json or the network; --only=<file> and --dry-run args; paces OPENVERSE_PACE_MS between row searches (skipped before the first); User-Agent set on every request; downloads + sharp (dynamic import) .rotate/.resize(1600 wide, withoutEnlargement)/.jpeg(quality 82, mozjpeg) re-encode; an over-IMAGE_MAX_BYTES result adds that id to a per-row skipIds set and retries pickResult against the same already-fetched results page (no re-search) until one fits or the page is exhausted (row fails); writes docs/fixtures/demo/images/<file> and a merged, sortCredits'd docs/fixtures/demo/CREDITS.json; lists every failed row and exits 1 if any, never silently skipping one.
+Tests: scripts/test/openverse.test.js (7 tests per the task's acceptance list) + scripts/test/fixtures/openverse-search.json (synthetic Openverse response covering narrow/wrong-license/wrong-type/excluded/chosen/skipped/qualifying results, incl. a null-filetype+uppercase-license case for the extension-fallback/case-insensitive-license paths).
+Verified: foundry_verify ok:true 0 constraint fails; composer lint 0 errors, composer test:unit 191/191, npm run lint clean, npm run test:unit 157/163 (6 pre-existing skips), npm run build, forbidden-patterns.sh clean; CI=1 node scripts/demo/fetch-images.mjs exits 1 with the expected message.
