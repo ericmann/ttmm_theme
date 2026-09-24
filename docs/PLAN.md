@@ -535,3 +535,14 @@ Derived from docs/SPEC.md v4.0 on 2026-09-22. SPEC.md wins over this file.
 **Out of scope:** Content cleanup; CodeColorer <code lang> conversion; beta deployment.
 **Verification:** npm run env:live; npm run test:live; npm run env:seed -- --reset && npm run test:e2e; bash scripts/forbidden-patterns.sh; git push
 **Depends on:** R3-01, R3-02
+
+## Review fixes (round 4)
+
+### R4-01: Pipeline-order test fails when autop runs before the shortcode pre-pass
+**Goal:** The prepareClassicHtml() Jest test actually fails if autoParagraphPlainText() is moved before preprocessShortcodes(), by asserting the exact code body instead of the absence of unescaped tags that codeMarkup() escapes anyway.
+**Files touched:** scripts/test/convert-classic.test.js
+**Design constraints:** SPEC §6.8, rule 47 (synthetic fixtures only), rule 49. Test-only change: no production code changes to scripts/lib/prepare-classic.mjs, shortcodes.mjs or autop.mjs. The test must keep running as a plain (not maybeIt) Jest test. Root cause: codeMarkup() HTML-escapes the shortcode body, so the swapped order yields `<p><pre class="wp-block-code"><code lang="php">a&lt;/p&gt;\n&lt;p&gt;b</code></pre></p>`, which passes the current `not.toContain('<p>')`/`not.toContain('<br')` assertions.
+**Acceptance tests:** In scripts/test/convert-classic.test.js 'prepareClassicHtml (R3-02...)': for 'Intro.\n\n[cc lang="php"]a\n\nb[/cc]\n\nOutro.' assert the captured <code> body toBe('a\n\nb') and that html contains neither '<p><pre' nor '</pre></p>'; add a second case 'Intro.\n\n[cc lang="php"]a\nb\n\nc[/cc]\n\nOutro.' asserting the body toBe('a\nb\n\nc') (pins the <br /> path). Mutation proof required in the commit's Tests line: swapping the calls in prepare-classic.mjs to preprocessShortcodes(autoParagraphPlainText(content), postId) makes both cases fail; restore with git checkout.
+**Out of scope:** Changing the pipeline itself; CodeColorer <code lang> tag syntax (spec issue); live re-run; any PHP/theme change.
+**Verification:** npm run test:unit; npm run lint; temporarily swap the order in scripts/lib/prepare-classic.mjs, confirm the prepareClassicHtml tests fail, then git checkout -- scripts/lib/prepare-classic.mjs
+**Depends on:** none
