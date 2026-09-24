@@ -9,7 +9,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P0-04 LICENSE, readme.txt, demo LICENSE.md, version 0.2.0, check-license
 - [x] P0-05 check-demo (rules 53 and 56) in npm run lint
 - [x] P0-06 SI-13 Photon rewrite to home_url(); SI-16 undated attribution in docs/01
-- [ ] P0-07 SI-17 CodeColorer `<code lang>` pre-pass rule and audit flag
+- [x] P0-07 SI-17 CodeColorer `<code lang>` pre-pass rule and audit flag
 - [ ] P0-08 Owner screenshot set moves to docs/feedback/phase-5
 - [ ] P0-09 Phase 0 screenshots and push
 - [ ] P1-01 images.json and the Openverse fetch script
@@ -70,3 +70,10 @@ Html::photon_origin_url() gained a third $home='' param: unchanged https://$matc
 docs/01-design-language.md §4.9: attribution sentence changed from "Meditation for {Mon D} from **dailymedtoday.com**" to "Meditation from **dailymedtoday.com**" (SI-16, undated). docs/MIGRATION.md §2.5a: added a sentence noting Photon URLs rewrite straight to home_url() with no sideload/fetch.
 Tests: HtmlTest::test_photon_origin_url_rewrites_to_home_when_given (stubs untrailingslashit via Brain\Monkey); MigrateCommandTest's one content-asserting Photon test now expects home_url('/wp-content/uploads/2020/photo.jpg') (the other two tests sharing that fixture URL don't inspect post_content, so were left unchanged).
 Verified: composer lint 0 errors, composer test:unit 191/191, npm run test:integration 598/598, grep -n "Meditation for" docs/01-design-language.md prints nothing, foundry_verify ok:true 0 constraint fails.
+
+### P0-07 — 6a798a2
+scripts/lib/shortcodes.mjs: new transformCodeColorerTags(html), called inside preprocessShortcodes() after transformShortCodeShortcodes and before autop (autop lives in a separate module, prepare-classic.mjs, already called after preprocessShortcodes -- ordering preserved, verified by a new pipeline-order test mirroring the existing R4-01 one). Regex captures optional wrapping <pre>...</pre>, a <code ...> tag's full attribute string (to find lang= anywhere in it, not just first), and content up to </code>; a lang-less <code> or single-line lang'd <code> returns the original match untouched; multi-line -> single <pre class="wp-block-code"><code lang="x">escaped</code></pre>, extra attrs (width/height) dropped by construction. escapeOnce() made entity-aware (ENTITY_OR_BARE_CHAR_RE: a full &name;/&#N;/&#xN; reference is left alone, only a bare &/</> gets escaped) so already-escaped bodies (shape 5) aren't double-escaped -- confirmed this doesn't touch existing [cci]/[cc]/[cc_x] fixtures (none contain entities).
+AuditCommand::shortcode_names() gains has_bare_codecolorer_tag(): PREG_OFFSET_CAPTURE over every <code ...lang="...".> open tag, checks the run up to the next </code> for a newline, and that the text immediately before the open tag (rtrim'd) doesn't end with <pre> or <pre class="wp-block-code">; appends 'codecolorer' to the shortcode list when true.
+docs/MIGRATION.md §2.6 gained a sentence naming the new rule and the audit flag.
+Tests: scripts/test/shortcodes.test.js describe('CodeColorer tag syntax') -- 5 shapes, inline-unchanged, no-lang-unchanged, idempotent, pipeline-order (20 total in file, was 11). tests/integration/Cli/AuditCommandTest.php: 3 new methods + a detail_for() helper.
+Verified: composer lint 0 errors, composer test:unit 191/191, npm run lint clean, npm run test:unit 154/160 (6 pre-existing skips), npm run build, forbidden-patterns.sh clean, npm run test:integration 601/601, foundry_verify ok:true 0 constraint fails (re-ran after an initial npm-run-lint prettier failure in the new test file, fixed via --fix and re-verified).
