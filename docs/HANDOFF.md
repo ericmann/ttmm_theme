@@ -555,3 +555,46 @@ regression (no PHP touched by any R3-* task). `npm run env:drill` also failed on
 of sandbox flakiness noted in prior `PROGRESS.md` entries (line 283/276), not reproduced by
 anything R3-01/R3-02/R3-03 actually changed (`env:drill` touches backup/restore/seed, none of
 which this round's commits modified).
+
+## Round 4
+
+Branch `refine/2026-09-23`, base `aa497b24c250`, head `c21552b`. Task counts: 1 R4-* fix task,
+done (0 blocked, 0 skipped). All 52 total plan tasks are `[x]`.
+
+### Tasks landed
+
+- **R4-01** — `scripts/test/convert-classic.test.js`'s `prepareClassicHtml` pipeline-order test
+  now asserts the exact `<code>` body text (`toBe('a\n\nb')`) instead of only checking the
+  absence of literal `<p>`/`<br` substrings. Root cause the reviewer found: `codeMarkup()`
+  (`scripts/lib/shortcodes.mjs`) HTML-escapes the shortcode body regardless of pipeline order, so
+  swapping `preprocessShortcodes`/`autoParagraphPlainText`'s order still produced a body with no
+  literal `<p>`/`<br` — just their escaped entities (`&lt;p&gt;`/`&lt;br /&gt;`) wrapping the
+  inner blank line — which the old, looser assertions couldn't see, silently defeating the test's
+  own stated purpose. Added a second case (`toBe('a\nb\n\nc')`) pinning the `<br />` path (single
+  newline inside the shortcode body, not a full blank line). Test-only change, exactly as scoped;
+  `scripts/lib/prepare-classic.mjs`/`shortcodes.mjs`/`autop.mjs` untouched.
+
+### Interpretation choices this round
+
+- **R4-01**: none — the task fully specified the exact assertions and mutation proof; no reading
+  of SPEC/PLAN was required.
+
+### Config keys
+
+No new `⚠️ ASSUMPTION` keys this round; no `Config.php` changes at all.
+
+### What a human must check by hand
+
+- None new this round (test-only change, mutation-proven in the implementer's own session — see
+  the task's log entry in `docs/PROGRESS.md` for the exact before/after failure text). Everything
+  already flagged in Round 1/2/3's "what a human must check" sections is still current.
+
+### Environment note (recurring)
+
+Same `/usr/local/bin/composer` binary issue as every prior round: `foundry_verify`'s `composer
+lint`/`composer test:unit` entries both fail with `Could not open input file:
+/usr/local/bin/composer` (the file exists, is executable, and `php -v` works fine standalone in
+this sandbox — some other part of the environment's PATH/shim setup breaks the composer phar
+specifically). Confirmed again this round; not caused by R4-01 (a pure JS test file, no PHP
+touched). `npm run lint`, `npm run test:unit`, `npm run build`, `bash scripts/forbidden-patterns.sh`
+and every `docs/foundry.json` constraint all pass clean.
