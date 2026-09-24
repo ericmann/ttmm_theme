@@ -42,7 +42,13 @@ async function login( page ) {
 	await page.goto( '/wp-login.php' );
 	await page.locator( '#user_login' ).fill( ADMIN.user );
 	await page.locator( '#user_pass' ).fill( ADMIN.pass );
-	await page.locator( '#wp-submit' ).click();
+	// Wait for the post-login redirect into wp-admin to actually land before returning, so
+	// callers never navigate to the editor while the session is still being established
+	// (the race observed in PR run 35990641981, where the editor screenshot was a login form).
+	await Promise.all( [
+		page.waitForURL( /\/wp-admin\// ),
+		page.locator( '#wp-submit' ).click(),
+	] );
 }
 
 /**
@@ -52,6 +58,11 @@ async function login( page ) {
  * @return {Promise<void>}
  */
 async function assertBlocksRegistered( page ) {
+	// A lost/never-established session lands here on wp-login.php instead of the editor screen;
+	// fail with that explicitly rather than the confusing "19 blocks missing" it would otherwise
+	// produce (P5-04, PR run 35990641981).
+	expect( page.url() ).not.toContain( 'wp-login.php' );
+
 	// `networkidle` never resolves on the Site Editor -- it keeps a persistent heartbeat/autosave
 	// connection open -- so wait for the block registry itself to settle instead: every `ttm/*`
 	// block name to either be registered or have given up waiting.

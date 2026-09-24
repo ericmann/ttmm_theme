@@ -546,19 +546,37 @@ class SeederTest extends TTM_IntegrationTestCase {
 	}
 
 	/**
-	 * R5-01: the per-row second offset is subtracted BEFORE the weekday walk-back, so a
+	 * R5-01/R6-01: the per-row second offset is subtracted BEFORE the weekday walk-back, so a
 	 * moment just after midnight must still walk back to the correct Sunday rather than the
-	 * offset nudging it across the day boundary first.
+	 * offset nudging it across the day boundary first. `now` is derived from journal-post-1's
+	 * own fixture index so the seconds subtracted are always smaller than the offset applied,
+	 * and never accidentally cross midnight before the weekday walk-back runs (which would
+	 * make this test pass even when the offset is wrongly applied after the walk-back).
 	 */
 	public function test_journal_post_one_stays_on_sunday_when_now_is_just_after_midnight(): void {
-		$this->set_now( '2026-09-24 00:00:30' );
+		$posts_json = Seeder::fixtures_dir() . '/posts.json';
+		$rows       = (array) json_decode( (string) file_get_contents( $posts_json ), true );
+
+		$index = null;
+		foreach ( $rows as $i => $row ) {
+			if ( 'journal-post-1' === ( $row['slug'] ?? null ) ) {
+				$index = $i;
+				break;
+			}
+		}
+		$this->assertNotNull( $index, 'journal-post-1 not found in posts.json fixture' );
+		$this->assertGreaterThan( 0, $index, 'journal-post-1 must have a non-zero fixture index for this test to be meaningful' );
+
+		$seconds = max( 0, $index - 20 );
+		$now     = sprintf( '2026-09-24 00:00:%02d', $seconds );
+		$this->set_now( $now );
 
 		$seeder = new Seeder();
 		$seeder->run( 'normal' );
 
 		$post = get_page_by_path( 'journal-post-1', OBJECT, 'post' );
 		$this->assertNotNull( $post );
-		$this->assertSame( 'Sunday', gmdate( 'l', strtotime( $post->post_date_gmt ) ) );
+		$this->assertSame( 'Sunday', ( new DateTimeImmutable( $post->post_date, wp_timezone() ) )->format( 'l' ) );
 	}
 
 	public function test_journal_word_counts_near_the_mock(): void {
