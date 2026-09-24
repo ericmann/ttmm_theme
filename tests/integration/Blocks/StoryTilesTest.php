@@ -68,6 +68,28 @@ class StoryTilesTest extends TTM_IntegrationTestCase {
 		$this->assertStringNotContainsString( 'ttm-tile__title', $html );
 	}
 
+	/**
+	 * P1-05, F19: the photographed tile fills with the image and carries `is-cover`
+	 * so `ttm.css` can drop the typographic tile's padding/background for it.
+	 */
+	public function test_story_with_featured_image_renders_an_is_cover_tile(): void {
+		$post_id = $this->story( 'Cover Story' );
+		set_post_thumbnail( $post_id, $this->attachment() );
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'class="ttm-tile is-cover"', $html );
+	}
+
+	public function test_story_without_featured_image_has_no_is_cover(): void {
+		$this->story( 'A Quiet Field' );
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'class="ttm-tile"', $html );
+		$this->assertStringNotContainsString( 'is-cover', $html );
+	}
+
 	public function test_limit_and_columns_class(): void {
 		add_filter(
 			'ttm_config',
