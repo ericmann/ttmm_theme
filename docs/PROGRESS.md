@@ -38,7 +38,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] P5-03 Close-out guards, CSS budget record, HANDOFF
 - [x] P5-04 Final seed reset, screenshots and push
 - [x] R1-01 Primary category survives the WordPress importer; --from-yoast works on imported posts
-- [ ] R1-02 Restore the §6.10 single-screen kicker and masthead checks against each post's real primary category
+- [x] R1-02 Restore the §6.10 single-screen kicker and masthead checks against each post's real primary category
 - [ ] R1-03 env:live runs end to end: text mismatches do not abort the plan; footnotes verified exactly once in the list
 - [ ] R1-04 migration.image_hosts default per SPEC §5; docs match
 - [ ] R1-05 Verse attribution without a date (SPEC §6.1.1)
@@ -215,3 +215,9 @@ Updated MaintenanceCommandsTest::test_primary_assign_fills_only_empty_meta and P
 New tests: PrimaryCategoryTest::test_id_falls_back_to_nav_order_when_stored_term_is_stale, ::test_id_returns_stored_when_still_assigned, ::test_is_import_save_is_true_when_wp_importing_defined; SaveHooksTest::test_import_save_does_not_store_default_category_primary; PrimaryCommandTest::test_from_yoast_after_importer_order_uses_yoast, ::test_plain_assign_replaces_a_stale_stored_primary.
 docs/MIGRATION.md §2.3 updated to note both behaviours.
 Full test:integration (576 tests) and composer test:unit/lint green.
+
+### R1-02 — a890f88
+Added `primary` (display name string|null) to the screens.json ScreenPost/screen shape (PLAN Decision "screens.json shape"). scripts/live/screens.mjs's new primaryCategoryName(postId) reads `wp post meta get ttm_primary_category` then `wp term get category <id> --field=name` (host side, never re-derives nav-order fallback), wired into toPost() and classicShortcodePosts(). buildScreens()/addSingle() pass it through to every single-kind screen.
+live.spec.mjs: masthead check now compares against screen.primary for single-kind screens (screen.section for archive-kind, unchanged); kicker check splits the post-terms text on ' · ' and compares the first term to screen.primary (was: non-empty check only). Reverted the P4-04 relaxation comments describing why these were loosened.
+New tests: scripts/test/live-screens.test.js "carries each single post's primary category name (R1-02)" and "defaults primary to null when a single post has none".
+Verified: npm run lint, npm run test:unit, full npm run test:e2e (491 passed), npm run env:drill all green; npm run test:live skips cleanly (no docs/fixtures/live/screens.json present).
