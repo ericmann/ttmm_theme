@@ -85,11 +85,17 @@ class PrimaryCommandTest extends TTM_IntegrationTestCase {
 		update_post_meta( $post, '_yoast_wpseo_primary_category', 9999 );
 
 		$map_path = wp_tempnam( 'ttm-term-map' );
-		file_put_contents( $map_path, wp_json_encode( [ '9999' => 'security' ] ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- test fixture file, not production code.
+		file_put_contents( $map_path, wp_json_encode( [ '9999' => 'security' ] ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents, WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_file_put_contents -- test fixture file, not production code.
 
-		$result = ( new PrimaryCommand() )->run( [], [ 'from-yoast' => true, 'term-map' => $map_path ] );
+		$result = ( new PrimaryCommand() )->run(
+			[],
+			[
+				'from-yoast' => true,
+				'term-map'   => $map_path,
+			]
+		);
 
-		unlink( $map_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- test fixture cleanup.
+		unlink( $map_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink, WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_unlink -- test fixture cleanup.
 
 		$this->assertTrue( $result['ok'] );
 		$this->assertSame( $security, (int) get_post_meta( $post, 'ttm_primary_category', true ) );
@@ -108,11 +114,17 @@ class PrimaryCommandTest extends TTM_IntegrationTestCase {
 		update_post_meta( $post, '_yoast_wpseo_primary_category', 9999 );
 
 		$map_path = wp_tempnam( 'ttm-term-map' );
-		file_put_contents( $map_path, wp_json_encode( [ '9999' => 'security' ] ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- test fixture file, not production code.
+		file_put_contents( $map_path, wp_json_encode( [ '9999' => 'security' ] ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents, WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_file_put_contents -- test fixture file, not production code.
 
-		$result = ( new PrimaryCommand() )->run( [], [ 'from-yoast' => true, 'term-map' => $map_path ] );
+		$result = ( new PrimaryCommand() )->run(
+			[],
+			[
+				'from-yoast' => true,
+				'term-map'   => $map_path,
+			]
+		);
 
-		unlink( $map_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- test fixture cleanup.
+		unlink( $map_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink, WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_unlink -- test fixture cleanup.
 
 		$this->assertTrue( $result['ok'] );
 		$this->assertSame( 0, (int) get_post_meta( $post, 'ttm_primary_category', true ) );
