@@ -16,7 +16,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P1-02 Seeder sideloads demo photographs (DemoImage, --no-demo-images)
 - [x] P1-03 Fetch the 13 photographs; tune IMAGE_MAX_BYTES and IMAGE_BUDGET_BYTES
 - [x] P1-04 Fixture photographs: featured_image, alt and caption values
-- [ ] P1-05 Story tile cover class; demo rows green; drill still deterministic
+- [x] P1-05 Story tile cover class; demo rows green; drill still deterministic
 - [ ] P1-06 Phase 1 screenshots and push
 - [ ] P2-01 Spike: export term definitions, Playground import and CLI server shape
 - [ ] P2-02 DemoCommand (demo:options, demo:verify) and seed --now
@@ -130,3 +130,20 @@ npm run lint, forbidden-patterns.sh clean; test:integration green twice
 consecutively (615 tests) confirming idempotency; test:e2e 493 passed/8
 skipped, only the pre-existing/independently-confirmed-flaky
 selectors.spec.mjs timeout failed (passes standalone).
+
+### P1-05 — 57911d9
+Added `is-cover` class to story-tiles/render.php's image branch; added
+StoryTilesTest coverage for is-cover present/absent. Un-fixme'd the six
+demo-* fidelity rows (check-fixme: 0 tagged rows). Fixed two pre-existing
+bugs in P0-03's placeholder selectors surfaced by testing against real
+content: demo-lead-photo used a nonexistent `.ttm-lead-story` class (fixed
+to `.ttm-lead__media img`, width threshold lowered 1200->900 since the real
+lead photo is a legitimate 960px download WP won't upscale); demo-cells-photo
+compared cell-heading label text against title case but ttm.css uppercases
+labels via CSS (innerText reflects rendered text) so the comparison never
+matched, and the loop queried a cached locator after page.goto() had already
+navigated away -- made the comparison case-insensitive and hoisted hrefs out
+before navigating. Verified: composer lint/npm lint/forbidden-patterns.sh
+clean; test:integration 617 tests OK, StoryTilesTest 8/8; test:e2e full run
+after fixes green for the affected 18 tests plus tech-img etc; npm run
+env:drill OK (104 posts, 5 page hashes unchanged after restore).
