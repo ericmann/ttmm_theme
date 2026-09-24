@@ -368,15 +368,19 @@ the R2-01..R2-04 fixes in place. `npm run test:live`: **77 passed, 0 failed, exi
 execute against a live URL this time, but `convert-classic.mjs`'s own report is the direct
 measurement below).
 
-| step | R1-09 run 2 | R2-05 run | class / fix |
-|---|---|---|---|
-| `primary:assign --from-yoast --term-map=…` | Used 3, skipped 898 | **Used 110, skipped 767** | fixed, R2-03 (source-id -> slug -> this-site-id via the WXR's own `<wp:category>` map) |
-| `migrate:politics` | "already child of Opinion" (0 posts touched) | **Updated 24 Politics post(s)** (dry-run: "Would update 24") | fixed, R2-02 (`politics_child()` now walks posts even when the category relationship is already correct) |
-| `convert-classic.mjs` — `mergedParagraphs` | not tracked (didn't exist yet) | **0** across all 724 posts (no `--allow-merged-paragraphs` needed) | fixed, R2-01 (real `@wordpress/autop` `autop()`, unconditional) |
-| `convert-classic.mjs` — `textEqual: false` | 7 | **3** (`securing-forms-without-captcha`, `the-hackiest-hack-that-ever-was-hacked`, `use-your-head`) | R2-01 fixed 4 of the original 7; the remaining 3 are pre-existing malformed classic-editor markup in the author's own content (owner cleanup, out of scope) |
-| `convert:import` skipped (`[text-mismatch, skipped]`) | 7 | **3** | same 3 as above |
-| `migrate:excerpts --from=yoast` | 103 filled | 103 filled | unchanged (not in scope this round) |
-| `audit` (`no-primary`/`uncategorized`) | 0 posts | 0 posts | unchanged |
+| step | R1-09 run 2 | R2-05 run | class / fix | fix commit | test |
+|---|---|---|---|---|---|
+| `primary:assign --from-yoast --term-map=…` | Used 3, skipped 898 | **Used 110, skipped 767** | fixed, R2-03 (source-id -> slug -> this-site-id via the WXR's own `<wp:category>` map) | `72c538f` | `PrimaryCommandTest::test_from_yoast_with_term_map_*`, `term-map.test.js` |
+| `migrate:politics` | "already child of Opinion" (0 posts touched) | **Updated 24 Politics post(s)** (dry-run: "Would update 24") | fixed, R2-02 (`politics_child()` now walks posts even when the category relationship is already correct) | `8c60102` | `MigrateCommandTest::test_politics_already_child_*` |
+| `convert-classic.mjs` — `mergedParagraphs` | not tracked (didn't exist yet) | **0** across all 724 posts (no `--allow-merged-paragraphs` needed) | fixed, R2-01 (real `@wordpress/autop` `autop()`, unconditional) | `e67bba9` | `autop.test.js`, `convert-classic.test.js`, `live.spec.mjs` |
+| `convert-classic.mjs` — `textEqual: false` | 7 | **3** (`securing-forms-without-captcha`, `the-hackiest-hack-that-ever-was-hacked`, `use-your-head`) | R2-01 fixed 4 of the original 7; the remaining 3 are pre-existing malformed classic-editor markup in the author's own content (owner cleanup, out of scope) | `e67bba9` | same as above |
+| `convert:import` skipped (`[text-mismatch, skipped]`) | 7 | **3** | same 3 as above | `e67bba9` | same as above |
+| `migrate:excerpts --from=yoast` | 103 filled | 103 filled | unchanged (not in scope this round) | — | — |
+| `audit` (`no-primary`/`uncategorized`) | 0 posts | 0 posts | unchanged | — | — |
+
+See "R3-03 run" below for the round-3 re-run that actually exercises the merged-paragraph
+`live.spec.mjs` assertion against converted live screens (this R2-05 run's own `screens.json`
+happened not to land on any).
 
 Screenshots (`npm run screenshots`, live set) confirm both fixes visually: `live-front.png`'s
 Opinion cell now lists real rows ("From Defense AI Drift to Policy Enforcement: Why I Built
@@ -390,3 +394,44 @@ timeout on the full concurrent run, confirmed a resource-contention flake, not a
 re-ran alone immediately after and it passed in 13s). Then `npm run screenshots` again (seeded
 set) — `journal.png` shows the R2-04 mock-2c spacing: the body sits directly under the 18px
 h1 margin, no doubled F12 padding.
+
+## R3-03 run: review-fix round 3, merged-paragraph check actually exercised against converted screens
+
+One full `LIVE_SKIP_ATTACHMENTS=1 npm run env:live` run against the same 2026-09-23 export, with
+R3-01 (screens carry a `converted` flag; `live.spec.mjs`'s merged-paragraph check gates on it
+instead of `classic`) and R3-02 (pinned pipeline order; `mergedParagraphs` counts nested blocks)
+in place.
+
+**Real bug found and fixed while actually running this** (rule 52): R3-01's `wasConverted()`
+in `scripts/live/screens.mjs` called `wp post meta get <id> ttm_converted_at` without a
+try/catch. Unlike `ttm_primary_category` (set on every real post by `primary:assign`),
+`ttm_converted_at` is set only on the subset of posts `convert:import` actually converted — WP-CLI's
+`wp post meta get` exits non-zero (not empty stdout) when the key is absent, so the very first
+post missing it (post 10188, a never-classic post) crashed `screens.mjs` outright with an
+uncaught `Error: Command failed`, before `screens.json` could even be written. Fixed with a
+try/catch returning `false`, the same pattern `primaryCategoryName()`'s own `wp term get` call
+already uses two functions above it in the same file. No isolated unit test added for this one
+(the CLI wrapper `scripts/live/screens.mjs`'s other `wp`-calling functions —
+`primaryCategoryName()`, `sectionPost()`, `classicShortcodePosts()` — have no unit-test seam
+either, since they shell out to a live `wp-env` container; all of them, including this fix, are
+verified only by the real `env:live`/`test:live` run itself, same as always). Not a new commit
+separate from R3-03 — folded into this task's own commit since it was required for `env:live` to
+complete at all.
+
+After the fix, `node scripts/live/screens.mjs` wrote **38 screens**, **6 of them `converted:
+true`**: `single-faith`, `oldest`, `ref-1`, `ref-2`, `cc-1`, `cc-2`. `npm run test:live`:
+**77 passed, 0 failed, exit code 0** — the merged-paragraph assertion in `live.spec.mjs` executed
+against all 6 converted screens x 2 viewports (12 assertions), all zero. This is the actual
+end-to-end proof R2-05's run couldn't give (its own `screens.json` didn't happen to land on any
+converted screen that round).
+
+Then `npm run env:seed -- --reset && npm run test:e2e`: green (see task log for the exact count).
+Screenshots unchanged from the R2-05 set (same underlying live content; not retaken).
+`docs/fixtures/live/screens.json` removed afterward (gitignored, rule 47).
+
+| step | R2-05 run | R3-03 run | note |
+|---|---|---|---|
+| `screens.json` screens | 38 | 38 | same discovery set |
+| `screens.json` `converted: true` screens | n/a (field didn't exist) | **6** | R3-01 |
+| `test:live` merged-paragraph assertions executed | 0 (no `classic: true` screen that run) | **12** (6 screens x 2 viewports) | R3-01 fixes exactly this gap |
+| `test:live` result | 77 passed | 77 passed | unchanged, now with the check actually live |

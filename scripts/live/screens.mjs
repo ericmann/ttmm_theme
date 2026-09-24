@@ -113,15 +113,28 @@ function primaryCategoryName( postId ) {
  * `ConvertCommand::import_one()`, so its presence means "this post went through classic->block
  * conversion" regardless of what its *current* `post_content` looks like (a converted post's
  * content is block markup by the time this script runs, so `classic` alone can't tell "was
- * converted" from "was always a block post").
+ * converted" from "was always a block post"). Unlike `ttm_primary_category` (set on every real
+ * post by `primary:assign`), most posts never carry `ttm_converted_at` at all -- `wp post meta
+ * get` exits non-zero (not empty stdout) when the key is absent, so this must catch that, the
+ * same way `primaryCategoryName()`'s `wp term get` call does below.
  *
  * @param {number} postId Post ID.
  * @return {boolean} True when `ttm_converted_at` meta exists.
  */
 function wasConverted( postId ) {
-	return Boolean(
-		wp( [ 'post', 'meta', 'get', String( postId ), 'ttm_converted_at' ] )
-	);
+	try {
+		return Boolean(
+			wp( [
+				'post',
+				'meta',
+				'get',
+				String( postId ),
+				'ttm_converted_at',
+			] )
+		);
+	} catch {
+		return false;
+	}
 }
 
 /**

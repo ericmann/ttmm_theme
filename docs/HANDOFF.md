@@ -318,14 +318,18 @@ all done (0 blocked, 0 skipped).
   `Templates\Hierarchy`, `route_writing_page()` now sets `posts_per_page` itself — smaller,
   more localized fix, per the task's own suggested approach.
 - **R1-09**: `primary:assign --from-yoast`'s real yield (3 used, not the reviewer's ~424
-  estimate) is a structural WordPress-importer limitation (postmeta term-ID references are
-  never remapped on import) — documented as a migration-runbook note, not treated as a defect
-  to fix, since guessing a stale Yoast term ID's intended new-site category risks assigning the
-  wrong section. The bare-URL-audio fix was deliberately kept narrow (only auto-paragraphs
-  content with *no* block-level HTML anywhere) rather than a full `wpautop()` port, leaving one
-  real post (`character-quest-service`, mixed tagged/untagged content) and one unrelated,
-  genuinely malformed original shortcode (`hyper-vvv-windows`'s `[cc]…[/cci]`) as documented,
-  out-of-scope remaining cases.
+  estimate) was recorded here as a structural WordPress-importer limitation (postmeta term-ID
+  references are never remapped on import), not treated as a defect to fix.
+  **Superseded by R2-03** (kept for history, not current advice): it was not a permanent
+  limitation — `scripts/live/term-map.mjs` extracts the WXR's own source-id -> slug map and
+  `--term-map=<path>` translates through it, raising the real yield to 110 used / 767 skipped.
+  See R3-03's "Round 3" section below for the R3-01-onward-current numbers. The bare-URL-audio
+  fix was deliberately kept narrow (only auto-paragraphs content with *no* block-level HTML
+  anywhere) rather than a full `wpautop()` port, leaving one real post
+  (`character-quest-service`, mixed tagged/untagged content) and one unrelated, genuinely
+  malformed original shortcode (`hyper-vvv-windows`'s `[cc]…[/cci]`) as documented, out-of-scope
+  remaining cases — this part is still current (R2-01's real `autop()` port only changed the
+  merged-paragraph signal, not these two specific content-authoring cases).
 
 ### Config keys
 
@@ -340,10 +344,13 @@ literal transcription of SPEC §5), and `--hosts` still overrides it.
   Journal post, `/category/security/` — and confirm every kicker/section cell shows a real
   category, never "Uncategorized." Screenshots already show this; a human eyeball is still the
   final word per SPEC §6.14.
-- **`primary:assign --from-yoast`'s real-world yield**: if this migration is ever re-run against
-  production for real (not just this test import), confirm whether the destination site's
-  category term IDs will actually match the source's own numbering before expecting
-  `--from-yoast` to do meaningful work — see the LIVE-TRIAGE.md note.
+- ~~**`primary:assign --from-yoast`'s real-world yield**: if this migration is ever re-run
+  against production for real (not just this test import), confirm whether the destination
+  site's category term IDs will actually match the source's own numbering before expecting
+  `--from-yoast` to do meaningful work — see the LIVE-TRIAGE.md note.~~ **Dropped, R3-03**:
+  stale — R2-03's `--term-map=<path>` already solves this by translating through the WXR's own
+  source-id -> slug map, not by requiring matching term IDs at all; nothing for a human to check
+  here any longer.
 - **`character-quest-service` and `hyper-vvv-windows`**: two specific real posts with a
   documented-not-fixed shortcode-conversion/content-authoring edge case each (see
   LIVE-TRIAGE.md) — an owner content pass, not a code fix.
@@ -463,3 +470,88 @@ shows 2 failures in tests unrelated to R2-02's own new tests (both of which pass
 assertions, when run alone after a fresh `wp-env clean tests`). Not caused by this round; a
 reviewer re-running the full integration suite should expect this and not read it as a R2-02
 regression.
+
+## Round 3
+
+Branch `refine/2026-09-23`, base `aa497b24c250`, head `79a862f` (as of R3-02; R3-03's own commit
+follows this document). Task counts: 3 R3-* fix tasks, all done (0 blocked, 0 skipped). All 51
+total plan tasks are `[x]`.
+
+### Tasks landed
+
+- **R3-01** — `screens.json` gained a `converted: boolean` field (R3-01 review finding: R2-01's
+  merged-paragraph guard only ran on screens where `screen.classic === true`, but the
+  `ref-*`/`cc-*`/`mfn-*` screens P4-01 built specifically to exercise conversion are *already*
+  block markup by the time `screens.mjs` inspects them — `classic: false` — so the guard never
+  actually ran against the population it exists for). `scripts/live/lib/screens.mjs`'s
+  `buildScreens()` now passes `converted` through (default `false`) and exports a pure
+  `checksMergedParagraphs(screen)` predicate; `scripts/live/screens.mjs`'s `toPost()` reads
+  `ttm_converted_at` post meta existence via a new `wasConverted()`; `classicShortcodePosts()`
+  candidates are already filtered to that meta key, so they set `converted: true` directly.
+  `tests/e2e/live.spec.mjs`'s merged-paragraph block now gates on `checksMergedParagraphs(screen)`
+  instead of `screen.classic`.
+- **R3-02** — Pinned the classic pre-`rawHandler()` pipeline order (shortcode pre-pass -> autop ->
+  footnote transform) with a real, running Jest test (not `maybeIt`), and made
+  `buildBlockReport()`'s `mergedParagraphs` count recurse into `innerBlocks` (a merged paragraph
+  nested inside `core/quote`/`core/list`/`core/group` was previously invisible to the R2-01
+  signal). `prepareClassicHtml()` extracted into a new `scripts/lib/prepare-classic.mjs` rather
+  than staying in `convert-classic.mjs` — see Interpretation below.
+- **R3-03** — Re-ran `env:live`/`test:live` end to end against the same 2026-09-23 export with
+  R3-01/R3-02 in place. Found and fixed a real bug surfaced only by actually running it (rule
+  52): R3-01's `wasConverted()` had no try/catch around `wp post meta get`, which WP-CLI exits
+  non-zero (not empty stdout) for when the key is absent — the very first post without
+  `ttm_converted_at` crashed `screens.mjs` outright before `screens.json` could be written. Fixed
+  with a try/catch, mirroring `primaryCategoryName()`'s own `wp term get` pattern two functions
+  above it in the same file. After the fix: 38 screens, 6 `converted: true`
+  (`single-faith`/`oldest`/`ref-1`/`ref-2`/`cc-1`/`cc-2`); `npm run test:live` 77 passed, 0
+  failed, exit 0 — the merged-paragraph assertion actually executed 12 times (6 screens x 2
+  viewports), all zero. `npm run env:seed -- --reset && npm run test:e2e`: 519 passed (the live
+  project ran too since `screens.json` was still present at that point; removed after per rule
+  47). Updated `docs/feedback/phase-4/LIVE-TRIAGE.md`'s R2-05 table with fix-commit/test columns
+  and a new "R3-03 run" section; dropped the stale Round 1 `--from-yoast`-needs-matching-term-IDs
+  advice below (superseded by R2-03's term-map, which this document's Round 1 section didn't
+  originally get corrected to say).
+
+### Interpretation choices this round
+
+- **R3-01**: `converted` is read from `ttm_converted_at` post-meta *existence*, not any value
+  comparison — that meta is written only by `ConvertCommand::import_one()`, so presence alone
+  means "this post went through conversion," independent of what its current `post_content` looks
+  like afterward.
+- **R3-02**: `prepareClassicHtml()` lives in a new `scripts/lib/prepare-classic.mjs`, not in
+  `scripts/convert-classic.mjs` itself, even though the task text allowed either. Dynamically
+  importing `convert-classic.mjs` from Jest fails outright in this project's Jest environment even
+  for a pure export with no jsdom/block-library dependency (confirmed directly: `Must use import
+  to load ES Module`) — the same limitation `scripts/lib/summarize.mjs`'s own docblock already
+  documents for `convertPost`/the CLI entry. The task's own "running (not `maybeIt`)" acceptance
+  requirement was only satisfiable from a plain lib module, so `report.mjs`/`summarize.mjs`'s
+  existing split precedent was extended the same way.
+- **R3-03**: folded the `wasConverted()` try/catch bugfix into this task's own commit rather than
+  reopening R3-01 or creating a fourth fix task — it was required for `env:live` to complete at
+  all, discovered only by actually running the task's own required verification command, which is
+  exactly what rule 52 asks for.
+
+### Config keys
+
+No new `⚠️ ASSUMPTION` keys this round; no `Config.php` changes at all.
+
+### What a human must check by hand
+
+- **Merged-paragraph coverage on real converted content** (R3-01/R3-03): the 6 converted-live
+  screens (`single-faith`/`oldest`/`ref-1`/`ref-2`/`cc-1`/`cc-2`) all passed with 0 merged
+  paragraphs this run; a human re-running `env:live`/`test:live` against a future export should
+  expect the manifest's `converted: true` set to change as more posts pick up
+  `ttm_converted_at`, and should confirm the assertion count in the run's own output grows with
+  it (not stay pinned at 6).
+- **Everything already flagged in Round 1/Round 2's "what a human must check" sections** is still
+  current except the one item explicitly dropped above.
+
+### Environment note (recurring)
+
+Same `/usr/local/bin/composer` binary issue as prior rounds: `Could not open input file:
+/usr/local/bin/composer`, confirmed again this round — an environment artifact, not a code
+regression (no PHP touched by any R3-* task). `npm run env:drill` also failed once mid-round
+("backup/restore lost or changed data") on an unrelated JS-only commit (R3-02) — the same class
+of sandbox flakiness noted in prior `PROGRESS.md` entries (line 283/276), not reproduced by
+anything R3-01/R3-02/R3-03 actually changed (`env:drill` touches backup/restore/seed, none of
+which this round's commits modified).
