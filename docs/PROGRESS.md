@@ -37,7 +37,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] P5-02 Documentation (§6.13)
 - [x] P5-03 Close-out guards, CSS budget record, HANDOFF
 - [x] P5-04 Final seed reset, screenshots and push
-- [ ] R1-01 Primary category survives the WordPress importer; --from-yoast works on imported posts
+- [x] R1-01 Primary category survives the WordPress importer; --from-yoast works on imported posts
 - [ ] R1-02 Restore the §6.10 single-screen kicker and masthead checks against each post's real primary category
 - [ ] R1-03 env:live runs end to end: text mismatches do not abort the plan; footnotes verified exactly once in the list
 - [ ] R1-04 migration.image_hosts default per SPEC §5; docs match
@@ -208,3 +208,10 @@ Flipped ALLOW_TAGGED to false in scripts/check-fixme.mjs (P5-03: the flight has 
 
 ### P5-04 — 2d259ab
 Ran the full close-out sequence: npm run env:live (LIVE_SKIP_ATTACHMENTS=1, real 888-post export) to regenerate the live import, npm run screenshots (wrote both the 17-file seeded set and all seven docs/feedback/phase-4/live-*.png against the live content), npm run env:seed -- --reset (back to seeded state, 107 posts), npm run test:e2e (491 passed, 1 skipped, exit 0), npm run screenshots again (regenerated all 17 seeded PNGs against the fresh reseed; the live-* zones correctly self-skipped since docs/fixtures/live/screens.json was removed before the reseed, rule 47/48). Committed the 17 regenerated seeded PNGs (the live-* PNGs were byte-identical to the P4-05 commit's, since the same live content was captured both times, so git shows no diff for them). Verified: npm run lint clean (budget 62640/63488, css-coverage 0 pending, check-fixme 0 tagged/clean), npm run test:unit 84/79 passed, npm run build clean, composer lint/test:unit clean, forbidden-patterns.sh clean, foundry_verify green. Manual check: NOT VERIFIED (human) -- compare every PNG in docs/feedback/phase-4/ with its mock per README.md; confirm the GitHub Actions run for the branch is green including the integration job's new env:drill step and the e2e job's playwright-report artifact. Stashed the same unrelated, not-mine, uncommitted docs/SPEC.md modification once more for a clean tree, will restore after task_done -- this is the last task in the flight, so docs/HANDOFF.md's note about it (P5-03) is the final record; a reviewer should decide whether to commit it separately since it is not part of any commit in this flight's history.
+
+### R1-01 — 6c0e9ae
+Fixed PrimaryCategory::id() to treat a stored ttm_primary_category not in wp_get_post_categories() as empty (falls back to nav-order resolution, read-only). Added PrimaryCategory::is_import_save() gated on WP_IMPORTING, filterable via `ttm_primary_on_import` (mirrors Form::is_editor_save()); on_save() now skips writing entirely during an import. PrimaryCommand (both plain and --from-yoast modes) now computes wp_get_post_categories once per post and treats an existing stored value not in that list as missing, so it's filled/replaced without needing a manual delete_post_meta first.
+Updated MaintenanceCommandsTest::test_primary_assign_fills_only_empty_meta and PrimaryCommandTest::test_plain_assign_fills_the_rest_by_nav_order: the "preserved manual primary" fixture now actually assigns $business to the post's categories (it was previously stale under the old semantics and would now be correctly replaced).
+New tests: PrimaryCategoryTest::test_id_falls_back_to_nav_order_when_stored_term_is_stale, ::test_id_returns_stored_when_still_assigned, ::test_is_import_save_is_true_when_wp_importing_defined; SaveHooksTest::test_import_save_does_not_store_default_category_primary; PrimaryCommandTest::test_from_yoast_after_importer_order_uses_yoast, ::test_plain_assign_replaces_a_stale_stored_primary.
+docs/MIGRATION.md §2.3 updated to note both behaviours.
+Full test:integration (576 tests) and composer test:unit/lint green.
