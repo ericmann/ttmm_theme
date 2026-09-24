@@ -44,7 +44,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] R1-05 Verse attribution without a date (SPEC §6.1.1)
 - [x] R1-06 F28 /writing/ archive uses archive.per_page
 - [x] R1-07 Rule 47 check catches private files directly under docs/
-- [ ] R1-08 Seeder::reset() removes every post type after a live import
+- [x] R1-08 Seeder::reset() removes every post type after a live import
 - [ ] R1-09 Re-run env:live and test:live on the export; correct LIVE-TRIAGE; retake live and seeded screenshots; push
 
 ## Log
@@ -250,3 +250,8 @@ Verified: full test:integration (580 tests) and composer lint green.
 Extracted the rule-47 git ls-files check from forbidden-patterns.sh into new scripts/check-private-data.sh (set -euo pipefail, shellcheck clean, runs against the cwd's repo). Fixed the pathspec bug: top-level docs/*.ext was only present for .xml; .sql/.sql.gz/.tar.gz/.csv had nested-only pathspecs (docs/**/*.ext), so a tracked docs/dump.sql etc. slipped through. Now every extension has both docs/*.ext and docs/**/*.ext. forbidden-patterns.sh calls the new script via bash "$(dirname "${BASH_SOURCE[0]}")/check-private-data.sh" and folds a non-zero exit into its existing hit().
 New test: scripts/test/private-data.test.js -- makeRepo()/addFile() build a throwaway git repo per case (mkdtempSync + git init/add -f), asserting exit 0 + "clean" for a plain docs/notes.md, and non-zero + the offending path named in output for top-level .sql/.csv/.tar.gz/.sql.gz/.xml, nested .sql, and a nested docs/fixtures/live/ file.
 Verified: bash scripts/forbidden-patterns.sh clean against this repo; npm run test:unit (97 tests) and npm run lint green; shellcheck clean on check-private-data.sh (forbidden-patterns.sh has one pre-existing SC2016 info notice, unrelated to this change).
+
+### R1-08 — 89df613
+Seeder::reset() now iterates get_post_types([], 'names') (was hardcoded [post, page, attachment]), so wp_block, wp_navigation, nav_menu_item, wp_template, wp_global_styles, custom_css and any other registered post type (e.g. a live import's feedback rows) get cleared too; attachment keeps its explicit inherit/private/publish/draft/pending/future/trash status list, everything else stays 'any'. Added a batched comment-deletion pass (get_comments()/wp_delete_comment(), cli.batch). Bounded the category/post_tag/series term-deletion loop by cli.batch (was unbounded get_terms()), with a "stop once a whole pass deletes nothing" guard so the default category -- which wp_delete_term() always refuses to delete -- can't make the loop spin forever when it's the only term left in a full-size batch.
+New test: SeedStatesTest::test_reset_removes_inert_imported_post_types (registers a throwaway 'feedback' post type, creates wp_block/wp_navigation/feedback posts plus a real nav_menu_item via wp_create_nav_menu()/wp_update_nav_menu_item(), asserts none survive reset(); unregisters 'feedback' after).
+Verified: full test:integration (581 tests) and full npm run test:e2e (491 passed) and composer lint all green. reset() is measurably slower now (iterates every registered post type each call) but stays within cli.batch-bounded queries throughout (rule 12).
