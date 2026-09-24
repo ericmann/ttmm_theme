@@ -26,6 +26,7 @@ import {
 	debugLogLineCount,
 	phpErrorMarkers,
 } from './lib/live.mjs';
+import { checksMergedParagraphs } from '../../scripts/live/lib/screens.mjs';
 
 const __dirname = dirname( fileURLToPath( import.meta.url ) );
 const ROOT = join( __dirname, '..', '..' );
@@ -337,11 +338,14 @@ for ( const screen of manifest.screens ) {
 						.toBe( 0 );
 				}
 
-				if ( screen.classic ) {
-					// R2-01, SPEC §6.8: real wpautop() on every classic post keeps one
-					// core/paragraph block per source paragraph; a paragraph whose innerHTML
-					// still contains a blank line is the merged-paragraph regression this
-					// fixes (report.mergedParagraphs on the converter side).
+				if ( checksMergedParagraphs( screen ) ) {
+					// R2-01/R3-01, SPEC §6.8: real wpautop() on every classic-converted post
+					// keeps one core/paragraph block per source paragraph; a paragraph whose
+					// innerHTML still contains a blank line is the merged-paragraph regression
+					// this fixes (report.mergedParagraphs on the converter side). Gated on
+					// `converted`, not `classic`: a `ref-*`/`cc-*`/`mfn-*` screen's content is
+					// already block markup (classic: false) by the time this runs, but it's
+					// exactly the population this check exists for.
 					const mergedParagraphCount = await page
 						.locator( '.ttm-entry p' )
 						.evaluateAll(

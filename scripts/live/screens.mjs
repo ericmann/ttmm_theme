@@ -109,10 +109,26 @@ function primaryCategoryName( postId ) {
 }
 
 /**
+ * Whether a post carries `ttm_converted_at` post meta (R3-01): set only by
+ * `ConvertCommand::import_one()`, so its presence means "this post went through classic->block
+ * conversion" regardless of what its *current* `post_content` looks like (a converted post's
+ * content is block markup by the time this script runs, so `classic` alone can't tell "was
+ * converted" from "was always a block post").
+ *
+ * @param {number} postId Post ID.
+ * @return {boolean} True when `ttm_converted_at` meta exists.
+ */
+function wasConverted( postId ) {
+	return Boolean(
+		wp( [ 'post', 'meta', 'get', String( postId ), 'ttm_converted_at' ] )
+	);
+}
+
+/**
  * A raw `wp post list` row -> the pure builder's `ScreenPost` shape, or null.
  *
  * @param {object|undefined} row `{ID, post_name, post_content, post_date}`.
- * @return {{id: number, slug: string, classic: boolean, freeform: boolean, date: string|null, primary: string|null}|null} The screen post, or null.
+ * @return {{id: number, slug: string, classic: boolean, freeform: boolean, converted: boolean, date: string|null, primary: string|null}|null} The screen post, or null.
  */
 function toPost( row ) {
 	if ( ! row ) {
@@ -126,6 +142,7 @@ function toPost( row ) {
 		classic: ! content.includes( '<!-- wp:' ),
 		freeform:
 			content.includes( 'wp:freeform' ) || content.includes( 'wp:html' ),
+		converted: wasConverted( Number( row.ID ) ),
 		date: row.post_date ?? null,
 		primary: primary || null,
 	};
@@ -216,6 +233,7 @@ function classicShortcodePosts( pattern, limit ) {
 				slug: row.post_name,
 				classic: false,
 				freeform: false,
+				converted: true,
 				date: row.post_date ?? null,
 				primary: primaryCategoryName( Number( row.ID ) ) || null,
 			} );

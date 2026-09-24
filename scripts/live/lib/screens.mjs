@@ -8,8 +8,15 @@
  *   { generated: "<ISO>", host: "<LIVE_HOST>",
  *     screens: [{ id, path, kind: "front|single|archive|page|search|404",
  *                 expectStatus: 200|404, section: "<slug>"|null,
- *                 classic: boolean, freeform: boolean, date: string|null,
- *                 primary: "<display name>"|null }] }
+ *                 classic: boolean, freeform: boolean, converted: boolean,
+ *                 date: string|null, primary: "<display name>"|null }] }
+ *
+ * `converted` (R3-01) is distinct from `classic`: `classic` means "still has no `<!-- wp:`
+ * block markup" (the shortcode-residue gate's signal); `converted` means "this post carries
+ * `ttm_converted_at` post meta", i.e. it went through `ConvertCommand::import_one()` at some
+ * point and is exactly the population the merged-paragraph (R2-01) check must run against --
+ * including the `ref-*`/`cc-*`/`mfn-*` screens, which are converted but no longer `classic`
+ * once conversion has replaced their content with block markup.
  */
 
 /**
@@ -40,14 +47,17 @@ const KIND = {
 
 /**
  * @typedef {Object} ScreenPost
- * @property {number}      id        Post ID (informational only; not written to the manifest).
- * @property {string}      slug      `post_name`.
- * @property {boolean}     classic   Still has no `<!-- wp:` block markup.
- * @property {boolean}     freeform  Contains a `core/freeform`/`core/html` fallback block.
- * @property {string|null} [date]    `post_date` (P4-01: `live.spec.mjs`'s byline-date check).
- * @property {string|null} [primary] The primary category's display name (R1-02: `live.spec.mjs`'s
- *                                   single-screen kicker/masthead checks, SPEC §6.10), read host
- *                                   side via `wp post meta get ttm_primary_category` + `wp term get`.
+ * @property {number}      id          Post ID (informational only; not written to the manifest).
+ * @property {string}      slug        `post_name`.
+ * @property {boolean}     classic     Still has no `<!-- wp:` block markup.
+ * @property {boolean}     freeform    Contains a `core/freeform`/`core/html` fallback block.
+ * @property {boolean}     [converted] Carries `ttm_converted_at` post meta (R3-01: gates the
+ *                                     merged-paragraph check in `live.spec.mjs` onto every
+ *                                     classic-converted screen, not just still-classic ones).
+ * @property {string|null} [date]      `post_date` (P4-01: `live.spec.mjs`'s byline-date check).
+ * @property {string|null} [primary]   The primary category's display name (R1-02: `live.spec.mjs`'s
+ *                                     single-screen kicker/masthead checks, SPEC §6.10), read host
+ *                                     side via `wp post meta get ttm_primary_category` + `wp term get`.
  */
 
 /**
@@ -103,6 +113,7 @@ export function buildScreens( inputs ) {
 			section: options.section ?? null,
 			classic: options.classic ?? false,
 			freeform: options.freeform ?? false,
+			converted: options.converted ?? false,
 			date: options.date ?? null,
 			primary: options.primary ?? null,
 		} );
@@ -116,6 +127,7 @@ export function buildScreens( inputs ) {
 			section,
 			classic: Boolean( post.classic ),
 			freeform: Boolean( post.freeform ),
+			converted: Boolean( post.converted ),
 			date: post.date ?? null,
 			primary: post.primary ?? null,
 		} );
@@ -190,4 +202,17 @@ export function buildScreens( inputs ) {
 		host,
 		screens,
 	};
+}
+
+/**
+ * Whether `live.spec.mjs`'s merged-paragraph (R2-01, SPEC §6.8) check should run against a
+ * screen: any screen that went through conversion, not just screens still `classic` today --
+ * a converted `ref-*`/`cc-*`/`mfn-*` screen's content is now block markup (`classic: false`)
+ * but its paragraphs are exactly what the wpautop() merge regression would have broken.
+ *
+ * @param {{converted?: boolean}} screen A `screens.json` entry.
+ * @return {boolean} True when the merged-paragraph check applies.
+ */
+export function checksMergedParagraphs( screen ) {
+	return Boolean( screen && screen.converted );
 }

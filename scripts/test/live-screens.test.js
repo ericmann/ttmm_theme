@@ -6,12 +6,13 @@ const path = require( 'path' );
 
 let buildScreens;
 let sectionCategoryArgs;
+let checksMergedParagraphs;
 
 beforeAll( async () => {
 	const mod = await import(
 		path.join( __dirname, '..', 'live', 'lib', 'screens.mjs' )
 	);
-	( { buildScreens, sectionCategoryArgs } = mod );
+	( { buildScreens, sectionCategoryArgs, checksMergedParagraphs } = mod );
 } );
 
 const SECTIONS = [
@@ -194,6 +195,60 @@ describe( 'buildScreens', () => {
 		);
 
 		expect( oldest.primary ).toBeNull();
+	} );
+
+	it( 'carries converted through ref-* screens even though they are no longer classic (R3-01)', () => {
+		const { screens } = buildScreens(
+			baseInputs( {
+				refPosts: [
+					post( 'ref-converted', {
+						classic: false,
+						converted: true,
+					} ),
+				],
+			} )
+		);
+
+		const refScreen = screens.find(
+			( screen ) => screen.path === '/ref-converted/'
+		);
+
+		expect( refScreen.classic ).toBe( false );
+		expect( refScreen.converted ).toBe( true );
+		expect( checksMergedParagraphs( refScreen ) ).toBe( true );
+	} );
+
+	it( 'defaults converted to false when a post omits the field', () => {
+		const { screens } = buildScreens(
+			baseInputs( {
+				oldest: post( 'no-converted-field', { classic: true } ),
+			} )
+		);
+
+		const oldest = screens.find(
+			( screen ) => screen.path === '/no-converted-field/'
+		);
+
+		expect( oldest.converted ).toBe( false );
+		expect( checksMergedParagraphs( oldest ) ).toBe( false );
+	} );
+} );
+
+describe( 'checksMergedParagraphs (R3-01)', () => {
+	it( 'returns false for a classic:true, converted:false screen', () => {
+		expect(
+			checksMergedParagraphs( { classic: true, converted: false } )
+		).toBe( false );
+	} );
+
+	it( 'returns true for a converted:true screen regardless of classic', () => {
+		expect(
+			checksMergedParagraphs( { classic: false, converted: true } )
+		).toBe( true );
+	} );
+
+	it( 'returns false when converted is absent', () => {
+		expect( checksMergedParagraphs( { classic: false } ) ).toBe( false );
 	} );
 } );
 
