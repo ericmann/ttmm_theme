@@ -46,7 +46,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] R1-07 Rule 47 check catches private files directly under docs/
 - [x] R1-08 Seeder::reset() removes every post type after a live import
 - [x] R1-09 Re-run env:live and test:live on the export; correct LIVE-TRIAGE; retake live and seeded screenshots; push
-- [ ] R2-01 Classic conversion keeps paragraph breaks: real autop on every classic post, merged-paragraph signal
+- [x] R2-01 Classic conversion keeps paragraph breaks: real autop on every classic post, merged-paragraph signal
 - [ ] R2-02 migrate:politics is idempotent per post: Politics posts get Opinion and primary Opinion even when Politics is already under Opinion
 - [ ] R2-03 primary:assign --from-yoast maps source term IDs through the WXR's own category map
 - [ ] R2-04 Journal single: keep .ttm-entry identity but no F12 padding; jr-entry asserts mock 2c spacing
@@ -272,3 +272,9 @@ Tests: scripts/test/shortcodes.test.js, scripts/test/autop.test.js (new), script
 Also ran: npm run screenshots (live set, docs/feedback/phase-4/live-*.png -- confirms real per-post kickers/categories and the undated verse attribution against the live import), removed docs/fixtures/live/screens.json before reseeding (prevents the live Playwright project from running against demo content with stale live URLs), npm run env:seed -- --reset && npm run test:e2e (492 passed), npm run screenshots again (seeded set, front-1920.png confirms the undated verse attribution on seeded content too).
 Environment note: mid-session ~/.local/bin/php (ahead of /usr/bin/php on PATH) was rewritten by something outside this repo into a shim routing to an unrelated project's docker container, breaking composer lint/test:unit; worked around by invoking /usr/bin/php vendor/bin/phpcs and vendor/bin/phpunit directly (both green, 0 errors). Logged via foundry_feedback_log.
 Manual check: NOT VERIFIED (human) -- open live-front.png and /, a Journal post, /category/security/ on the live import: kicker/section cells show real categories, never Uncategorized.
+
+### R2-01 — e67bba9
+Real @wordpress/autop autop() replaces the narrow autoParagraphPlainText guard, applied unconditionally to every classic post. Order: preprocessShortcodes -> autop -> transformFootnotes -> rawHandler (so [cc]/[cci]-derived <pre> blocks are protected before autop runs). buildBlockReport now returns mergedParagraphs (core/paragraph blocks whose content has a blank line); summarizeResults fails on mergedParagraphs > 0 unless --allow-merged-paragraphs (plan.sh does not pass it). Added @wordpress/autop to devDependencies (was already transitive).
+Real export measurement (724 classic posts): posts with a merged <p> in serialized output (regex scan, covers both core/paragraph and the few core/html fallbacks) 552 -> 4; report.textEqual:false 7 -> 3 (remaining 3 are pre-existing malformed classic posts, out of scope per task).
+Tests: scripts/test/autop.test.js rewritten (heading+paragraph split, <pre> protection, empty input); scripts/test/convert-classic.test.js adds mergedParagraphs coverage for buildBlockReport and summarizeResults; tests/e2e/live.spec.mjs asserts no .ttm-entry p with a blank line in innerHTML on classic screens.
+Verify: npm run lint, npm run test:unit, npm run build, forbidden-patterns, npm run test:e2e all green. composer lint/test:unit fail in this sandbox because /usr/local/bin/composer is not a working binary here (pre-existing environment issue, no PHP touched). npm run env:drill also fails (backup/restore hash mismatch) -- unrelated to this JS-only task.
