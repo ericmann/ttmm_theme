@@ -60,7 +60,12 @@ dry_then_run "migrate:excerpts --from=yoast" ttm migrate:excerpts --from=yoast
 dry_then_run "migrate:images" ttm migrate:images
 
 step "convert:export --all-classic" "${WP[@]}" ttm convert:export --all-classic --out=wp-content/ttm-fixtures/live/classic.ndjson
-step "convert-classic.mjs" node scripts/convert-classic.mjs docs/fixtures/live/classic.ndjson docs/fixtures/live/blocks.ndjson --allow-freeform
+# --allow-text-mismatch (R1-03, SPEC §1.3 "Done", §6.6): a handful of real classic posts don't
+# round-trip a perfect text match (pre-existing content-quality issues, not conversion bugs --
+# see docs/feedback/phase-4/LIVE-TRIAGE.md); the whole plan must still run non-interactively, so
+# this step reports every mismatch but exits 0, and `convert:import` (next) skips converting
+# those specific records rather than the run aborting.
+step "convert-classic.mjs" node scripts/convert-classic.mjs docs/fixtures/live/classic.ndjson docs/fixtures/live/blocks.ndjson --allow-freeform --allow-text-mismatch
 dry_then_run "convert:import" ttm convert:import wp-content/ttm-fixtures/live/blocks.ndjson --allow-freeform
 
 dry_then_run "migrate:close-comments" ttm migrate:close-comments

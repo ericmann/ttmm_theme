@@ -396,9 +396,16 @@ class ConvertCommandTest extends TTM_IntegrationTestCase {
 		$this->assertStringNotContainsString( 'text-mismatch', $result['messages'][0] );
 	}
 
-	public function test_text_equality_reports_a_real_mismatch(): void {
-		$post_id = $this->classic_post();
-		$file    = $this->ndjson_file(
+	/**
+	 * R1-03, SPEC §1.3 "Done"/§6.6: a record whose `report.textEqual` is false (`scripts/
+	 * convert-classic.mjs --allow-text-mismatch` still emits it, rather than aborting the whole
+	 * plan) is skipped entirely -- never converted, never given a `ttm_classic_backup` -- so the
+	 * post stays classic and shows up in the owner's cleanup worklist.
+	 */
+	public function test_import_skips_text_mismatch_records_and_keeps_them_classic(): void {
+		$original = '<p>Some classic content.</p>';
+		$post_id  = $this->classic_post( $original );
+		$file     = $this->ndjson_file(
 			[
 				[
 					'id'        => $post_id,
@@ -413,6 +420,45 @@ class ConvertCommandTest extends TTM_IntegrationTestCase {
 		$result = ( new ConvertCommand() )->import( [ $file ], [] );
 
 		$this->assertTrue( $result['ok'] );
-		$this->assertStringContainsString( 'text-mismatch', $result['messages'][0] );
+		$this->assertStringContainsString( 'text-mismatch, skipped', $result['messages'][0] );
+		$this->assertStringContainsString( 'Skipped 1 post(s) with a text mismatch', end( $result['messages'] ) );
+
+		$post = get_post( $post_id );
+		$this->assertSame( $original, $post->post_content );
+		$this->assertSame( '', (string) get_post_meta( $post_id, 'ttm_classic_backup', true ) );
+	}
+
+	/**
+	 * R1-03, SPEC §6.8: `footnotes_verified()` counts each note's text inside the rendered
+	 * `core/footnotes` list only (not the whole body), and requires exactly one occurrence --
+	 * two identical `core/footnotes` blocks (a duplicated list) makes every note's text appear
+	 * twice there, which must fail verification even though the note also "appears" (twice) in
+	 * the rendered page.
+	 */
+	public function test_footnote_list_duplicated_fails_verification(): void {
+		$post_id = $this->classic_post();
+		$file    = $this->ndjson_file(
+			[
+				[
+					'id'        => $post_id,
+					'slug'      => 'x',
+					// Two wp:footnotes blocks already present -- import_one()'s "already has
+					// one" guard (`strpos($blocks, 'wp:footnotes')`) sees the first and doesn't
+					// append a third, so the post renders exactly two footnote lists.
+					'blocks'    => '<!-- wp:paragraph --><p>Signed off<sup data-fn="ref-1-1" class="fn"><a href="#ref-1-1" id="ref-1-1-link">1</a></sup> on the draft.</p><!-- /wp:paragraph -->' . "\n\n<!-- wp:footnotes /-->\n\n<!-- wp:footnotes /-->\n",
+					'footnotes' => [
+						[
+							'id'      => 'ref-1-1',
+							'content' => 'A clarifying note.',
+						],
+					],
+				],
+			]
+		);
+
+		$result = ( new ConvertCommand() )->import( [ $file ], [] );
+
+		$this->assertTrue( $result['ok'] );
+		$this->assertStringContainsString( 'footnotes-mismatch', $result['messages'][0] );
 	}
 }

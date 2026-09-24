@@ -128,6 +128,61 @@ describe( 'buildBlockReport (no jsdom/block-library needed)', () => {
 	} );
 } );
 
+describe( 'summarizeResults (no jsdom/block-library needed, R1-03)', () => {
+	// The CLI's exit-decision logic, extracted so it's testable without setUpBlockEditorEnvironment()
+	// (jsdom + @wordpress/block-library -- unavailable under this Jest environment, spike Outcome B).
+	function fakeResult( id, overrides = {} ) {
+		return {
+			id,
+			slug: `post-${ id }`,
+			report: { textEqual: true, freeform: 0, html: 0, ...overrides },
+		};
+	}
+
+	it( '--allow-text-mismatch reports mismatches and exits 0', async () => {
+		const { summarizeResults } = await import( '../lib/summarize.mjs' );
+
+		const results = [
+			fakeResult( 1, { textEqual: false } ),
+			fakeResult( 2 ),
+		];
+
+		const { failed, messages } = summarizeResults( results, {
+			allowTextMismatch: true,
+		} );
+
+		expect( failed ).toBe( false );
+		expect( messages ).toEqual( [
+			'post 1 (post-1): text content changed',
+		] );
+	} );
+
+	it( 'without --allow-text-mismatch, a mismatch still fails', async () => {
+		const { summarizeResults } = await import( '../lib/summarize.mjs' );
+
+		const results = [ fakeResult( 1, { textEqual: false } ) ];
+
+		const { failed, messages } = summarizeResults( results );
+
+		expect( failed ).toBe( true );
+		expect( messages ).toEqual( [
+			'post 1 (post-1): text content changed',
+		] );
+	} );
+
+	it( '--allow-freeform still lets a freeform/html fallback through, independent of text-mismatch handling', async () => {
+		const { summarizeResults } = await import( '../lib/summarize.mjs' );
+
+		const results = [ fakeResult( 1, { freeform: 1 } ) ];
+
+		const allowed = summarizeResults( results, { allowFreeform: true } );
+		expect( allowed.failed ).toBe( false );
+
+		const disallowed = summarizeResults( results );
+		expect( disallowed.failed ).toBe( true );
+	} );
+} );
+
 describe( 'convert-classic (rawHandler under jsdom)', () => {
 	const editor = loadEditor();
 	const maybeIt = editor ? it : it.skip;

@@ -9,7 +9,7 @@
  * text loss. See docs/spikes/P8-01.md for the write-up; this file is the tool that write-up is
  * based on.
  *
- * Usage: node scripts/convert-classic.mjs <in.ndjson> <out.ndjson> [--allow-freeform]
+ * Usage: node scripts/convert-classic.mjs <in.ndjson> <out.ndjson> [--allow-freeform] [--allow-text-mismatch]
  *   in.ndjson lines:  {"id":6917,"slug":"...","content_raw":"<p>...</p>","footnotes_meta":null}
  *   out.ndjson lines: {"id":...,"slug":...,"blocks":"<!-- wp:paragraph -->...","footnotes":[...],
  *                      "report":{"blockCounts":{...},"freeform":0,"html":0,"textEqual":true,
@@ -22,7 +22,12 @@
  *   count.
  *
  * Exit 1 if any post has report.textEqual === false, or (without --allow-freeform) any post has
- * report.freeform > 0 or report.html > 0.
+ * report.freeform > 0 or report.html > 0. `--allow-text-mismatch` (R1-03, SPEC §1.3 "Done",
+ * §6.6: the whole live plan must run non-interactively) still prints every text-mismatch line
+ * and still writes report.textEqual: false for each such record in the output ndjson, but exits
+ * 0 -- `ConvertCommand::import()` reads that flag off the record and skips converting it (SPEC
+ * §6.6, rule 49: non-destructive), rather than the whole `plan.sh` run aborting on real,
+ * pre-existing classic content the export can't perfectly round-trip.
  */
 
 import { createRequire } from 'node:module';
@@ -30,6 +35,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { transformFootnotes } from './lib/footnotes.mjs';
 import { preprocessShortcodes } from './lib/shortcodes.mjs';
 import { buildBlockReport } from './lib/report.mjs';
+import { summarizeResults } from './lib/summarize.mjs';
 
 /**
  * jsdom + a real DOM global setup, then load @wordpress/blocks and @wordpress/block-library via
@@ -190,13 +196,16 @@ function readNdjson( path ) {
 function main() {
 	const args = process.argv
 		.slice( 2 )
-		.filter( ( a ) => a !== '--allow-freeform' );
+		.filter(
+			( a ) => a !== '--allow-freeform' && a !== '--allow-text-mismatch'
+		);
 	const allowFreeform = process.argv.includes( '--allow-freeform' );
+	const allowTextMismatch = process.argv.includes( '--allow-text-mismatch' );
 	const [ inputPath, outputPath ] = args;
 
 	if ( ! inputPath || ! outputPath ) {
 		console.error(
-			'Usage: node scripts/convert-classic.mjs <in.ndjson> <out.ndjson> [--allow-freeform]'
+			'Usage: node scripts/convert-classic.mjs <in.ndjson> <out.ndjson> [--allow-freeform] [--allow-text-mismatch]'
 		);
 		process.exit( 1 );
 	}
@@ -210,22 +219,11 @@ function main() {
 		results.map( ( r ) => JSON.stringify( r ) ).join( '\n' ) + '\n'
 	);
 
-	let failed = false;
-	for ( const result of results ) {
-		if ( ! result.report.textEqual ) {
-			console.error(
-				`post ${ result.id } (${ result.slug }): text content changed`
-			);
-			failed = true;
-		}
-		const fallbackCount = result.report.freeform + result.report.html;
-		if ( ! allowFreeform && fallbackCount > 0 ) {
-			console.error(
-				`post ${ result.id } (${ result.slug }): ${ fallbackCount } freeform/html block(s)`
-			);
-			failed = true;
-		}
-	}
+	const { failed, messages } = summarizeResults( results, {
+		allowFreeform,
+		allowTextMismatch,
+	} );
+	messages.forEach( ( message ) => console.error( message ) );
 
 	if ( failed ) {
 		process.exit( 1 );

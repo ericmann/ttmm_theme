@@ -111,9 +111,10 @@ class ConvertCommand extends Command {
 		$allow_freeform = ! empty( $assoc['allow-freeform'] );
 		$only_post      = isset( $assoc['post'] ) ? (int) $assoc['post'] : 0;
 
-		$rows     = [];
-		$messages = [];
-		$ok       = true;
+		$rows            = [];
+		$messages        = [];
+		$ok              = true;
+		$text_mismatches = 0;
 
 		foreach ( $this->read_ndjson( $file ) as $record ) {
 			$post_id = (int) ( $record['id'] ?? 0 );
@@ -125,6 +126,18 @@ class ConvertCommand extends Command {
 			if ( ! $post ) {
 				$messages[] = "post {$post_id}: not found, skipped.";
 				$ok         = false;
+				continue;
+			}
+
+			// R1-03, SPEC §1.3 "Done"/§6.6: `scripts/convert-classic.mjs --allow-text-mismatch`
+			// still emits a record for a post whose before/after text didn't round-trip exactly
+			// (a real, pre-existing content-quality issue, not a conversion bug -- see
+			// docs/feedback/phase-4/LIVE-TRIAGE.md); that record is never converted here (rule
+			// 49: non-destructive) and never gets a `ttm_classic_backup`, so the post stays
+			// classic and the owner's cleanup worklist (`wp ttm audit`) still finds it.
+			if ( isset( $record['report']['textEqual'] ) && ! $record['report']['textEqual'] ) {
+				$messages[] = "post {$post_id} ({$post->post_name}): [text-mismatch, skipped]";
+				++$text_mismatches;
 				continue;
 			}
 
@@ -172,19 +185,12 @@ class ConvertCommand extends Command {
 			if ( ! $this->footnotes_verified( $post_id, $footnotes ) ) {
 				$note .= ' [footnotes-mismatch]';
 			}
-			// `report.textEqual` is `scripts/convert-classic.mjs`'s own before/after comparison
-			// (SPEC §6.8's "extended" text-equality check, incl. stripping [caption]/[gallery]/
-			// [audio]'s own bracket syntax): it already accounts for every substitution the
-			// pre-pass makes (a [ref] note's text moving out of the body into the footnotes
-			// list, a shortcode becoming a block, etc). Re-deriving an independent comparison in
-			// PHP against the raw classic content -- tried initially -- can't reproduce that and
-			// produced false mismatches on nearly every post; surfacing the JS-computed value is
-			// correct and simpler.
-			if ( isset( $record['report']['textEqual'] ) && ! $record['report']['textEqual'] ) {
-				$note .= ' [text-mismatch]';
-			}
 			$messages[] = $note;
 		}//end foreach
+
+		if ( $text_mismatches > 0 ) {
+			$messages[] = sprintf( 'Skipped %d post(s) with a text mismatch (still classic).', $text_mismatches );
+		}
 
 		return [
 			'ok'       => $ok,
@@ -250,13 +256,15 @@ class ConvertCommand extends Command {
 	}
 
 	/**
-	 * Whether every footnote's text appears at least once in the post's rendered content
-	 * (`the_content`, SPEC §6.8) -- catches a marker that never resolved (no matching
-	 * `core/footnotes` block or meta) as well as a note whose text got mangled in transit.
-	 * Vacuously true when there are no footnotes. "At least once", not "exactly once": a short
-	 * footnote's own text (e.g. a proper noun) legitimately also appears verbatim earlier in
-	 * the body prose that led up to the reference, which isn't a real mismatch -- found via a
-	 * real false positive on the export; see docs/feedback/phase-4/LIVE-TRIAGE.md.
+	 * Whether every footnote's text appears exactly once inside the rendered `core/footnotes`
+	 * list (`ol.wp-block-footnotes`, SPEC §6.8) -- not the whole rendered body. Catches both a
+	 * marker that never resolved (no matching `core/footnotes` block or meta -> the list is
+	 * missing/empty, count 0) and a footnotes list rendered twice (a duplicated block -> count
+	 * 2), while a short footnote's own text (e.g. a proper noun) legitimately also appearing
+	 * verbatim in the body *prose* no longer matters, because prose is outside the scope this
+	 * now searches (found via a real false positive on the export when the search covered the
+	 * whole body; see docs/feedback/phase-4/LIVE-TRIAGE.md). Vacuously true when there are no
+	 * footnotes.
 	 *
 	 * @param int                                          $post_id   Post id (already updated).
 	 * @param array<int, array{id:string, content:string}> $footnotes Footnotes, WP core's own shape.
@@ -286,7 +294,7 @@ class ConvertCommand extends Command {
 		$post = $outer_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- restoring the caller's global.
 		wp_reset_postdata();
 
-		$plain = $this->normalized_text( $rendered );
+		$list_text = $this->footnotes_list_text( $rendered );
 
 		foreach ( $footnotes as $footnote ) {
 			// `wptexturize()` and `convert_smilies()` both also run on `the_content` (after the
@@ -302,12 +310,29 @@ class ConvertCommand extends Command {
 			if ( '' === $text ) {
 				continue;
 			}
-			if ( 0 === substr_count( $plain, $text ) ) {
+			if ( 1 !== substr_count( $list_text, $text ) ) {
 				return false;
 			}
 		}
 
 		return true;
+	}
+
+	/**
+	 * The normalized, concatenated text of every rendered `core/footnotes` list
+	 * (`<ol class="…wp-block-footnotes…">…</ol>`, WP core's own `render_block_core_footnotes()`
+	 * markup) in `$html` -- every match, not just the first, so a duplicated footnotes block
+	 * (SPEC §6.8) shows each note's text twice rather than once.
+	 *
+	 * @param string $html Rendered `the_content` output.
+	 * @return string
+	 */
+	private function footnotes_list_text( string $html ): string {
+		if ( ! preg_match_all( '/<ol\b[^>]*\bclass="[^"]*wp-block-footnotes[^"]*"[^>]*>(.*?)<\/ol>/s', $html, $matches ) ) {
+			return '';
+		}
+
+		return $this->normalized_text( implode( ' ', $matches[1] ) );
 	}
 
 	/**
