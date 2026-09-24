@@ -193,3 +193,117 @@ describe( 'preprocessShortcodes', () => {
 		expect( transformed ).toBe( html );
 	} );
 } );
+
+// SI-17: CodeColorer's block-level <code lang="x">…</code> HTML tag syntax, distinct from the
+// [cci]/[cc]/[cc_x] bracket shortcodes above. All fixture bodies here are synthetic (rule 47).
+describe( 'CodeColorer tag syntax', () => {
+	it( 'shape 1: converts a block-level multi-line <code lang> to core/code', () => {
+		const html =
+			'<p>Before.</p>\n' +
+			'<code lang="php">$a = 1;\n$b = 2;</code>\n' +
+			'<p>After.</p>';
+
+		const { html: transformed } = preprocessShortcodes( html, 300 );
+
+		expect( transformed ).toContain(
+			'<pre class="wp-block-code"><code lang="php">$a = 1;\n$b = 2;</code></pre>'
+		);
+		expect( transformed ).toContain( '<p>Before.</p>' );
+		expect( transformed ).toContain( '<p>After.</p>' );
+	} );
+
+	it( 'shape 2: drops extra width/height attributes', () => {
+		const html =
+			'<code lang="php" width="570px" height="840">$a = 1;\n$b = 2;</code>';
+
+		const { html: transformed } = preprocessShortcodes( html, 301 );
+
+		expect( transformed ).toBe(
+			'<pre class="wp-block-code"><code lang="php">$a = 1;\n$b = 2;</code></pre>'
+		);
+		expect( transformed ).not.toContain( 'width' );
+		expect( transformed ).not.toContain( 'height' );
+	} );
+
+	it( 'shape 3: an already <pre>-wrapped <code lang> stays a single, non-nested <pre>', () => {
+		const html = '<pre><code lang="bash">echo one\necho two</code></pre>';
+
+		const { html: transformed } = preprocessShortcodes( html, 302 );
+
+		expect( transformed ).toBe(
+			'<pre class="wp-block-code"><code lang="bash">echo one\necho two</code></pre>'
+		);
+		expect( transformed ).not.toContain( '<pre><pre' );
+		expect( transformed ).not.toContain( '</pre></pre>' );
+	} );
+
+	it( 'shape 4: escapes a raw <?php line and < / > comparisons, nothing swallowed into a comment', () => {
+		const html =
+			'<code lang="php"><?php\nif ( $a < $b && $b > 0 ) {\n\treturn $a->value;\n}</code>';
+
+		const { html: transformed } = preprocessShortcodes( html, 303 );
+
+		expect( transformed ).toContain( '&lt;?php' );
+		expect( transformed ).toContain( '$a &lt; $b &amp;&amp; $b &gt; 0' );
+		expect( transformed ).toContain( '$a-&gt;value' );
+		expect( transformed ).not.toContain( '<!--' );
+		expect( transformed ).not.toContain( '<?php\nif' );
+	} );
+
+	it( 'shape 5: preserves existing entities instead of double-escaping them', () => {
+		const html =
+			'<code lang="html">&lt;div&gt;\nif ( $a &amp;&amp; $b ) {}</code>';
+
+		const { html: transformed } = preprocessShortcodes( html, 304 );
+
+		expect( transformed ).toContain( '&lt;div&gt;' );
+		expect( transformed ).toContain( '$a &amp;&amp; $b' );
+		expect( transformed ).not.toContain( '&amp;lt;' );
+		expect( transformed ).not.toContain( '&amp;amp;' );
+	} );
+
+	it( 'leaves a single-line inline <code lang> unchanged', () => {
+		const html = '<p>Set the <code lang="php">$post</code> variable.</p>';
+
+		const { html: transformed } = preprocessShortcodes( html, 305 );
+
+		expect( transformed ).toBe( html );
+	} );
+
+	it( 'leaves <code> without lang unchanged', () => {
+		const html = '<code>$a = 1;\n$b = 2;</code>';
+
+		const { html: transformed } = preprocessShortcodes( html, 306 );
+
+		expect( transformed ).toBe( html );
+	} );
+
+	it( 'is idempotent', () => {
+		const html = '<code lang="php" width="570px">$a = 1;\n$b = 2;</code>';
+
+		const once = preprocessShortcodes( html, 307 ).html;
+		const twice = preprocessShortcodes( once, 307 ).html;
+
+		expect( twice ).toBe( once );
+	} );
+
+	it( 'runs inside preprocessShortcodes before autop', async () => {
+		const { prepareClassicHtml } =
+			await import( '../lib/prepare-classic.mjs' );
+
+		const { html } = prepareClassicHtml(
+			'Intro.\n\n<code lang="php">a\n\nb</code>\n\nOutro.',
+			308
+		);
+
+		const codeMatch = html.match(
+			/<pre class="wp-block-code"><code lang="php">([\s\S]*?)<\/code><\/pre>/
+		);
+		expect( codeMatch ).not.toBeNull();
+		expect( codeMatch[ 1 ] ).toBe( 'a\n\nb' );
+		expect( html ).not.toContain( '<p><pre' );
+		expect( html ).not.toContain( '</pre></p>' );
+		expect( html ).toContain( '<p>Intro.</p>' );
+		expect( html ).toContain( '<p>Outro.</p>' );
+	} );
+} );

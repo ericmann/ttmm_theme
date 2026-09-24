@@ -217,7 +217,7 @@ wp ttm convert:import /tmp/blocks.ndjson --dry-run      # per-post block summary
 wp ttm convert:import /tmp/blocks.ndjson
 ```
 
-What the converter does (`docs/SPEC.md §6.7`): the editor's own `rawHandler` from `@wordpress/blocks` under jsdom, so the result is what "Convert to blocks" in the editor would produce, batch. Legacy `modern-footnotes` markup is transformed into core footnotes first. The import keeps the original HTML in post meta `ttm_classic_backup` (written once, never overwritten), creates a revision, sets `ttm_converted_at`, and verifies that the visible text is unchanged.
+What the converter does (`docs/SPEC.md §6.7`): the editor's own `rawHandler` from `@wordpress/blocks` under jsdom, so the result is what "Convert to blocks" in the editor would produce, batch. Legacy `modern-footnotes` markup is transformed into core footnotes first. A CodeColorer block-level `<code lang="x">…</code>` HTML tag (SI-17, not a `[shortcode]`) whose content spans multiple lines is also rewritten to `<pre class="wp-block-code"><code lang="x">…</code></pre>` before `rawHandler` runs, so it becomes a real `core/code` block; `wp ttm audit --only=shortcode` flags `codecolorer` for anything that slipped through unconverted. The import keeps the original HTML in post meta `ttm_classic_backup` (written once, never overwritten), creates a revision, sets `ttm_converted_at`, and verifies that the visible text is unchanged.
 
 Review: `wp ttm audit --only=classic` should return zero rows. Spot-check the oldest posts in the editor; anything ugly can be reverted per post:
 
