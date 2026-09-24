@@ -43,12 +43,12 @@ describe( 'taggedFixmeHits', () => {
 } );
 
 describe( 'check-fixme.mjs', () => {
-	it( 'ALLOW_TAGGED is false now that the flight has landed (P5-03)', () => {
+	it( 'ALLOW_TAGGED is true while phase 5 is in flight', () => {
 		const source = fs.readFileSync(
 			path.join( __dirname, '..', 'check-fixme.mjs' ),
 			'utf8'
 		);
 
-		expect( source ).toMatch( /export const ALLOW_TAGGED = false;/ );
+		expect( source ).toMatch( /export const ALLOW_TAGGED = true;/ );
 	} );
 } );
