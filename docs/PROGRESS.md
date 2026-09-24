@@ -11,7 +11,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P0-06 SI-13 Photon rewrite to home_url(); SI-16 undated attribution in docs/01
 - [x] P0-07 SI-17 CodeColorer `<code lang>` pre-pass rule and audit flag
 - [x] P0-08 Owner screenshot set moves to docs/feedback/phase-5
-- [ ] P0-09 Phase 0 screenshots and push
+- [x] P0-09 Phase 0 screenshots and push
 - [ ] P1-01 images.json and the Openverse fetch script
 - [ ] P1-02 Seeder sideloads demo photographs (DemoImage, --no-demo-images)
 - [ ] P1-03 Fetch the 13 photographs; tune IMAGE_MAX_BYTES and IMAGE_BUDGET_BYTES
@@ -83,3 +83,8 @@ Rewrote scripts/screenshots.mjs: SETS = { owner: { outDir: 'docs/feedback/phase-
 New docs/feedback/phase-5/README.md: table of the six files with what to look at (photo fit/crop, editorial captions not credits, no red, no placeholder bands, masthead/footer name via Config::author_name()).
 Tests: scripts/test/screenshots.test.js rewritten -- SETS.owner shape/six files/fullPage-everywhere, no-live-zones (source doesn't mention LIVE_ZONES or screens.json), front-390 viewport; pendingImages/unionClip tests kept unchanged.
 Verified: foundry_verify ok:true 0 constraint fails; composer lint 0 errors, composer test:unit 191/191, npm run lint clean, npm run test:unit 150/156 (6 pre-existing skips), npm run build, forbidden-patterns.sh clean.
+
+### P0-09 — ddd1c4a
+Ran npx wp-env start, npm run env:seed -- --reset, npm run screenshots -- wrote all 6 §6.10 files (front.png, article.png, archive-technology.png, writing.png, about.png, front-390.png) to docs/feedback/phase-5/, committed. Full verify set green: composer lint (0 errors), composer test:unit 191/191, npm run lint clean, npm run test:unit 150/156 (6 pre-existing skips), npm run build, forbidden-patterns.sh clean, npm run test:integration 601/601, npm run test:e2e 494 passed/8 skipped/0 failed (confirmed real exit code 0 by redirecting to a file rather than piping through tail, since `cmd | tail` masks the pipe's real exit status; the one selectors.spec.mjs timeout seen in an earlier concurrent-verify run reproduced nowhere in this final pass).
+Pushed: git push -u origin HEAD succeeded (new branch refine/2026-09-24 on origin); git log origin/refine/2026-09-24..HEAD is empty.
+Manual check: NOT VERIFIED (human) -- optional: front.png/article.png masthead "by Eric Mann" and footer line unchanged.
