@@ -76,6 +76,14 @@ class Hierarchy {
 		$query->set( 'pagename', '' );
 		$query->set( 'page_id', 0 );
 		$query->set( 'category_name', $writing_slug );
+		// F28 (PLAN Decision "F28 routing"): Query\Archive::shape() also runs on pre_get_posts
+		// and would normally set this from Config::get('archive.per_page') for a category
+		// archive, but it's registered (and so runs) before Hierarchy -- at the point it ran,
+		// this was still a page query, so is_category() was false and it never touched
+		// posts_per_page, leaving the site's default `posts_per_page` option (rule 8: a
+		// per-request query shape, no page.php/wp-admin option write). Set it here instead;
+		// Writing is never Journal, so this is always the plain archive.per_page rate.
+		$query->set( 'posts_per_page', (int) Config::get( 'archive.per_page', 12 ) );
 		$query->is_page          = false;
 		$query->is_singular      = false;
 		$query->is_category      = true;

@@ -117,6 +117,37 @@ class HierarchyTest extends TTM_IntegrationTestCase {
 	}
 
 	/**
+	 * R1-06, PLAN Decision "F28 routing": `/writing/` in the F28 state paginates exactly like
+	 * `/category/writing/` -- `archive.per_page`, not the site's own `posts_per_page` option.
+	 * `Query\Archive::shape()` also runs on `pre_get_posts` but is registered (and so runs)
+	 * before `Hierarchy`, so at the point it ran this was still a page query and it never set
+	 * `posts_per_page`; `route_writing_page()` must set it itself.
+	 */
+	public function test_writing_page_in_f28_state_uses_archive_per_page(): void {
+		$this->category_id( 'writing', 'Writing' );
+
+		$page = self::factory()->post->create(
+			[
+				'post_type'   => 'page',
+				'post_name'   => 'writing',
+				'post_status' => 'publish',
+			]
+		);
+		update_post_meta( $page, '_wp_page_template', 'page-writing' );
+
+		update_option( 'posts_per_page', 10 );
+
+		$this->set_permalink_structure( '/%postname%/' );
+		$this->go_to( home_url( '/writing/' ) );
+
+		global $wp_query;
+		$this->assertSame(
+			(int) \TTM\Core\Config::get( 'archive.per_page', 12 ),
+			(int) $wp_query->get( 'posts_per_page' )
+		);
+	}
+
+	/**
 	 * P1-04, F28: `/category/writing/` stays the plain section-archive layout (no page-writing
 	 * prepended) while there is no fiction.
 	 */
