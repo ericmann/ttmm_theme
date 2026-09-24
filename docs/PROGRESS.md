@@ -10,7 +10,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P0-05 check-demo (rules 53 and 56) in npm run lint
 - [x] P0-06 SI-13 Photon rewrite to home_url(); SI-16 undated attribution in docs/01
 - [x] P0-07 SI-17 CodeColorer `<code lang>` pre-pass rule and audit flag
-- [ ] P0-08 Owner screenshot set moves to docs/feedback/phase-5
+- [x] P0-08 Owner screenshot set moves to docs/feedback/phase-5
 - [ ] P0-09 Phase 0 screenshots and push
 - [ ] P1-01 images.json and the Openverse fetch script
 - [ ] P1-02 Seeder sideloads demo photographs (DemoImage, --no-demo-images)
@@ -77,3 +77,9 @@ AuditCommand::shortcode_names() gains has_bare_codecolorer_tag(): PREG_OFFSET_CA
 docs/MIGRATION.md §2.6 gained a sentence naming the new rule and the audit flag.
 Tests: scripts/test/shortcodes.test.js describe('CodeColorer tag syntax') -- 5 shapes, inline-unchanged, no-lang-unchanged, idempotent, pipeline-order (20 total in file, was 11). tests/integration/Cli/AuditCommandTest.php: 3 new methods + a detail_for() helper.
 Verified: composer lint 0 errors, composer test:unit 191/191, npm run lint clean, npm run test:unit 154/160 (6 pre-existing skips), npm run build, forbidden-patterns.sh clean, npm run test:integration 601/601, foundry_verify ok:true 0 constraint fails (re-ran after an initial npm-run-lint prettier failure in the new test file, fixed via --fix and re-verified).
+
+### P0-08 — 5218344
+Rewrote scripts/screenshots.mjs: SETS = { owner: { outDir: 'docs/feedback/phase-5', zones: OWNER_ZONES } } replaces the old flat SEEDED_ZONES/LIVE_ZONES/PHASE_3_ZONES/PHASE_4_ZONES/resolveLiveZones/OUT_DIR. OWNER_ZONES is the six §6.10 files (front, article, archive-technology, writing, about all 1280x900 full-page; front-390 at 390x844 full-page). Removed all live-zone/screens.json handling entirely (nothing else in the repo imports those symbols). run() now iterates Object.values(SETS), mkdir'ing each set's own outDir; capture logic factored into captureZone() (still supports selector/range crops for a future set, per the task's "so P3-01 can add readme"). Replaced the old scroll-the-page lazy-load trick with the task's exact phase-3 REVIEW F3 approach: force every img[loading="lazy"] to eager, then wait for img.complete && img.naturalWidth > 0 before checking pendingImages() and taking the shot.
+New docs/feedback/phase-5/README.md: table of the six files with what to look at (photo fit/crop, editorial captions not credits, no red, no placeholder bands, masthead/footer name via Config::author_name()).
+Tests: scripts/test/screenshots.test.js rewritten -- SETS.owner shape/six files/fullPage-everywhere, no-live-zones (source doesn't mention LIVE_ZONES or screens.json), front-390 viewport; pendingImages/unionClip tests kept unchanged.
+Verified: foundry_verify ok:true 0 constraint fails; composer lint 0 errors, composer test:unit 191/191, npm run lint clean, npm run test:unit 150/156 (6 pre-existing skips), npm run build, forbidden-patterns.sh clean.
