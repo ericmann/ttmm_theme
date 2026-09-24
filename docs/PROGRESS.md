@@ -39,7 +39,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] P5-04 Final seed reset, screenshots and push
 - [x] R1-01 Primary category survives the WordPress importer; --from-yoast works on imported posts
 - [x] R1-02 Restore the §6.10 single-screen kicker and masthead checks against each post's real primary category
-- [ ] R1-03 env:live runs end to end: text mismatches do not abort the plan; footnotes verified exactly once in the list
+- [x] R1-03 env:live runs end to end: text mismatches do not abort the plan; footnotes verified exactly once in the list
 - [ ] R1-04 migration.image_hosts default per SPEC §5; docs match
 - [ ] R1-05 Verse attribution without a date (SPEC §6.1.1)
 - [ ] R1-06 F28 /writing/ archive uses archive.per_page
@@ -221,3 +221,10 @@ Added `primary` (display name string|null) to the screens.json ScreenPost/screen
 live.spec.mjs: masthead check now compares against screen.primary for single-kind screens (screen.section for archive-kind, unchanged); kicker check splits the post-terms text on ' · ' and compares the first term to screen.primary (was: non-empty check only). Reverted the P4-04 relaxation comments describing why these were loosened.
 New tests: scripts/test/live-screens.test.js "carries each single post's primary category name (R1-02)" and "defaults primary to null when a single post has none".
 Verified: npm run lint, npm run test:unit, full npm run test:e2e (491 passed), npm run env:drill all green; npm run test:live skips cleanly (no docs/fixtures/live/screens.json present).
+
+### R1-03 — 74f5130
+scripts/convert-classic.mjs: new --allow-text-mismatch flag; still prints every text-mismatch line and writes report.textEqual:false, but exits 0 (exit logic extracted to new scripts/lib/summarize.mjs, mirroring lib/report.mjs's split -- dynamically importing convert-classic.mjs itself doesn't load under Jest, so the pure exit-decision function needed its own lib file to be testable). scripts/live/plan.sh's convert-classic.mjs step now passes --allow-text-mismatch (kept --allow-freeform); convert:import step unchanged (--allow-freeform only).
+ConvertCommand::import(): a record with report.textEqual===false is now skipped entirely before any conversion work (no wp_update_post, no ttm_classic_backup) -- message "[text-mismatch, skipped]" per post, plus a summary line "Skipped N post(s) with a text mismatch (still classic)." Removed the old post-conversion "[text-mismatch]" tag since those records are no longer converted at all.
+footnotes_verified(): now scopes its substr_count to the concatenated text of every rendered `<ol class="…wp-block-footnotes…">` list only (new footnotes_list_text() helper, regex against WP core's own render_block_core_footnotes() markup) and requires exactly 1 occurrence there (was: >=1 anywhere in the whole rendered body) -- so two footnotes blocks (a duplicate) now correctly fails verification.
+New/updated tests: scripts/test/convert-classic.test.js "summarizeResults (no jsdom/block-library needed, R1-03)"; ConvertCommandTest::test_import_skips_text_mismatch_records_and_keeps_them_classic, ::test_footnote_list_duplicated_fails_verification (replaced test_text_equality_reports_a_real_mismatch's old assertions).
+Verified: bash -n + shellcheck on plan.sh clean; full test:integration (577 tests) and composer test:unit/lint green.
