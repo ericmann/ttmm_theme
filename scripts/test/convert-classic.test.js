@@ -116,13 +116,40 @@ describe( 'prepareClassicHtml (R3-02, no jsdom/block-library needed)', () => {
 			1
 		);
 
+		// Asserts the exact code body, not merely the absence of unescaped tags: codeMarkup()
+		// HTML-escapes the shortcode body regardless of pipeline order, so a swapped order
+		// (autop before the shortcode pre-pass) still yields a body with no literal `<p>`/`<br`
+		// substrings -- it instead contains the *escaped* entities `&lt;p&gt;`/`&lt;br` wrapping
+		// the inner blank line, which the old assertions couldn't see. Pinning the exact string
+		// forces the swapped order to fail for the right reason.
 		const codeMatch = html.match(
 			/<pre class="wp-block-code"><code[^>]*>([\s\S]*?)<\/code><\/pre>/
 		);
 		expect( codeMatch ).not.toBeNull();
-		const codeBody = codeMatch[ 1 ];
-		expect( codeBody ).not.toContain( '<p>' );
-		expect( codeBody ).not.toContain( '<br' );
+		expect( codeMatch[ 1 ] ).toBe( 'a\n\nb' );
+		expect( html ).not.toContain( '<p><pre' );
+		expect( html ).not.toContain( '</pre></p>' );
+
+		expect( html ).toContain( '<p>Intro.</p>' );
+		expect( html ).toContain( '<p>Outro.</p>' );
+	} );
+
+	it( 'pins the <br /> path for a single-newline-separated [cc] body', async () => {
+		const { prepareClassicHtml } =
+			await import( '../lib/prepare-classic.mjs' );
+
+		const { html } = prepareClassicHtml(
+			'Intro.\n\n[cc lang="php"]a\nb\n\nc[/cc]\n\nOutro.',
+			1
+		);
+
+		const codeMatch = html.match(
+			/<pre class="wp-block-code"><code[^>]*>([\s\S]*?)<\/code><\/pre>/
+		);
+		expect( codeMatch ).not.toBeNull();
+		expect( codeMatch[ 1 ] ).toBe( 'a\nb\n\nc' );
+		expect( html ).not.toContain( '<p><pre' );
+		expect( html ).not.toContain( '</pre></p>' );
 
 		expect( html ).toContain( '<p>Intro.</p>' );
 		expect( html ).toContain( '<p>Outro.</p>' );
