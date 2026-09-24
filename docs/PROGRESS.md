@@ -51,6 +51,9 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] R2-03 primary:assign --from-yoast maps source term IDs through the WXR's own category map
 - [x] R2-04 Journal single: keep .ttm-entry identity but no F12 padding; jr-entry asserts mock 2c spacing
 - [x] R2-05 Re-run env:live and test:live after the round 2 fixes; correct LIVE-TRIAGE; retake live and seeded screenshots; push
+- [ ] R3-01 live.spec merged-paragraph check runs on converted screens (screens carry a converted flag)
+- [ ] R3-02 Pure, tested classic pre-rawHandler pipeline order; mergedParagraphs counts nested blocks
+- [ ] R3-03 Re-run env:live and test:live with the merged-paragraph check live; complete LIVE-TRIAGE rows; push
 
 ## Log
 (one entry per task, appended by implement)

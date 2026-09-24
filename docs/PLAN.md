@@ -506,3 +506,32 @@ Derived from docs/SPEC.md v4.0 on 2026-09-22. SPEC.md wins over this file.
 **Out of scope:** Content cleanup; beta deployment.
 **Verification:** npm run env:live; npm run test:live; npm run env:seed -- --reset && npm run test:e2e; bash scripts/forbidden-patterns.sh; git push; log Manual check: NOT VERIFIED (human) -- open live-article-classic.png and live-front.png: paragraphs separate, Opinion cell populated, multi-category posts in their Yoast section.
 **Depends on:** R2-01, R2-02, R2-03, R2-04
+
+## Review fixes (round 3)
+
+### R3-01: live.spec merged-paragraph check runs on converted screens (screens carry a converted flag)
+**Goal:** The R2-01 end-to-end guard (no .ttm-entry p whose innerHTML has a blank line) actually runs on every classic-converted live screen instead of only on never-converted posts.
+**Files touched:** scripts/live/screens.mjs, scripts/live/lib/screens.mjs, tests/e2e/live.spec.mjs, scripts/test/live-screens.test.js
+**Design constraints:** SPEC §6.10, §6.8, rule 47 (synthetic fixtures only), rule 48 (test:live still skips cleanly without screens.json), rule 52. Keep `classic` meaning 'no <!-- wp: markup' (the shortcode-residue gate uses it). Add `converted: boolean` to the ScreenPost/screen shape: true when the post has `ttm_converted_at` meta (toPost() and classicShortcodePosts() in scripts/live/screens.mjs, which today hard-codes classic:false for ref-/cc-/mfn- screens); buildScreens() passes it through (default false). Export a pure predicate from scripts/live/lib/screens.mjs (e.g. `checksMergedParagraphs(screen)` returning screen.converted) and gate the live.spec.mjs merged-paragraph block on it instead of `screen.classic`.
+**Acceptance tests:** scripts/test/live-screens.test.js (or live-lib.test.js): buildScreens() with a refPosts entry {converted:true} yields a ref-* screen with converted:true and the predicate returns true; a single built from {classic:true, converted:false} returns false; a post without the field defaults to converted:false. This fails today (no converted field; live.spec gates on classic).
+**Out of scope:** Running the live import (R3-03); converter changes (R3-02); changing the shortcode-residue gate.
+**Verification:** npm run test:unit; npm run lint; with no screens.json, npm run test:live still reports skipped and exits 0
+**Depends on:** none
+
+### R3-02: Pure, tested classic pre-rawHandler pipeline order; mergedParagraphs counts nested blocks
+**Goal:** The order shortcode pre-pass -> autop -> footnotes is pinned by a running Jest test, and the merged-paragraph gate sees paragraphs inside quote/list/group inner blocks.
+**Files touched:** scripts/convert-classic.mjs, scripts/lib/report.mjs, scripts/test/convert-classic.test.js, scripts/test/autop.test.js
+**Design constraints:** SPEC §6.8, rule 49, rule 52, rule 47 (synthetic fixtures). Extract the steps before rawHandler in convertPost() into a pure exported function (e.g. prepareClassicHtml(content, postId) -> { html, footnotes, remaining }) in scripts/convert-classic.mjs or a scripts/lib/*.mjs module that imports no block-library/jsdom, and have convertPost() call it (behaviour unchanged). buildBlockReport() recurses into block.innerBlocks for mergedParagraphs (blockCounts/freeform/html semantics may stay top-level; document which).
+**Acceptance tests:** Running (not maybeIt) Jest: prepareClassicHtml('Intro.\n\n[cc lang="php"]a\n\nb[/cc]\n\nOutro.', 1) -> the <pre class="wp-block-code"> body contains no <p> and no <br>, and 'Intro.'/'Outro.' are each wrapped in their own <p> (fails if autop runs before preprocessShortcodes). buildBlockReport([{name:'core/quote', innerBlocks:[{name:'core/paragraph', attributes:{content:'a\n\nb'}}]}]).mergedParagraphs === 1 (fails today: 0).
+**Out of scope:** CodeColorer <code lang> tag syntax (spec issue, not this task); making @wordpress/block-library load under Jest; live re-run (R3-03).
+**Verification:** npm run test:unit; npm run lint; node scripts/convert-classic.mjs docs/fixtures/live/classic.ndjson <scratch>/out.ndjson --allow-freeform --allow-text-mismatch (if the gitignored file exists) still reports 0 merged-paragraph failures
+**Depends on:** none
+
+### R3-03: Re-run env:live and test:live with the merged-paragraph check live; complete LIVE-TRIAGE rows; push
+**Goal:** Prove on the real export that converted screens pass the now-active merged-paragraph check, and record every round-2 class with its fix commit and test per rule 52.
+**Files touched:** docs/feedback/phase-4/LIVE-TRIAGE.md, docs/HANDOFF.md, docs/PROGRESS.md
+**Design constraints:** SPEC §1.3, §6.6, §6.10, rules 47, 48, 52. LIVE_SKIP_ATTACHMENTS=1 npm run env:live (no manual steps), npm run test:live exit 0 with the merged-paragraph assertion executing on the ref-*/cc-*/mfn-* screens (state the count of screens it ran on). If it fails on a converted screen, triage per rule 52 (class fix with a synthetic test, or owner cleanup with reason). In LIVE-TRIAGE's R2-05 table add fix commit and test columns for the paragraph-merge (e67bba9; autop.test.js, convert-classic.test.js, live.spec.mjs), Politics->Opinion (8c60102; MigrateCommandTest::test_politics_already_child_*) and Yoast term-map (72c538f; PrimaryCommandTest::test_from_yoast_with_term_map_*, term-map.test.js) rows, plus this task's run. Drop the stale round-1 HANDOFF advice that --from-yoast needs matching term IDs. Retake live screenshots only if they change. Then npm run env:seed -- --reset && npm run test:e2e green. Nothing under docs/fixtures/live/ staged. If the export is absent, log blocked: no export.
+**Acceptance tests:** npm run test:live: 0 failures with the merged-paragraph check executed on >= 1 converted screen; npm run test:e2e green after reset.
+**Out of scope:** Content cleanup; CodeColorer <code lang> conversion; beta deployment.
+**Verification:** npm run env:live; npm run test:live; npm run env:seed -- --reset && npm run test:e2e; bash scripts/forbidden-patterns.sh; git push
+**Depends on:** R3-01, R3-02
