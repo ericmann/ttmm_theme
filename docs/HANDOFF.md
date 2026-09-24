@@ -260,3 +260,101 @@ Measurements; it was last raised to 63488 in phase 3's R4-01 and stays there.
 - **`git stash list`** — worth a glance; the `docs/SPEC.md` stash mentioned above was always
   popped back immediately after each `task_done` call in this session, so it should currently be
   empty, but a reviewer picking this up mid-flight should confirm.
+
+## Round 1
+
+Branch `refine/2026-09-23`, base `aa497b24c250`, head `cb57579`. Task counts: 9 R1-* fix tasks,
+all done (0 blocked, 0 skipped).
+
+### Tasks landed
+
+- **R1-01** — `PrimaryCategory::id()`/`on_save()` now treat a stored `ttm_primary_category` not
+  in `wp_get_post_categories()` as empty (stale-value fallback); `on_save()` gated on
+  `WP_IMPORTING` (filterable `ttm_primary_on_import`) so a WordPress importer's insert-then-
+  set-terms order never sticks a stale "Uncategorized" primary; `PrimaryCommand` (both modes)
+  treats an existing-but-stale stored value as missing.
+- **R1-02** — `scripts/live/screens.mjs`/`live.spec.mjs` restored the single-screen kicker/
+  masthead checks against each post's real primary category (`primary` field added to the
+  `screens.json` shape), reverting the P4-04 relaxation now that R1-01 fixed the underlying
+  defect.
+- **R1-03** — `scripts/convert-classic.mjs --allow-text-mismatch` lets the whole `env:live` plan
+  run non-interactively; `ConvertCommand::import()` skips (never converts) a text-mismatched
+  record instead of aborting; `footnotes_verified()` now scopes its check to the rendered
+  `core/footnotes` list only (catches a duplicated list).
+- **R1-04** — `Config::defaults()['migration.image_hosts']` is now the real SPEC §5 host list
+  (was `[]`), so `migrate:images` with no `--hosts` actually sideloads.
+- **R1-05** — Verse attribution is undated everywhere ("Meditation from dailymedtoday.com"),
+  including the F6 stale fallback, per an owner request recorded in SPEC §6.1.1.
+- **R1-06** — `/writing/`'s F28 fallback route now sets `posts_per_page` itself
+  (`archive.per_page`), since `Query\Archive::shape()` runs before `Hierarchy` on
+  `pre_get_posts` and never saw the rewritten query in time.
+- **R1-07** — `scripts/check-private-data.sh` (extracted from `forbidden-patterns.sh`) now
+  checks top-level `docs/*.ext` pathspecs for every private-data extension, not only nested
+  ones.
+- **R1-08** — `Seeder::reset()` iterates every registered post type (was a hardcoded
+  `[post, page, attachment]` list), plus a batched comment-deletion pass and a bounded,
+  loop-safe term-deletion pass — a `wp ttm seed --reset` after a live import now actually
+  returns the site to empty.
+- **R1-09** — Full `env:live`/`test:live` re-run against the real 889-post export (twice: once
+  to surface, once to verify) confirmed R1-01/R1-02 on real content and turned up two more real
+  defects, both fixed: a bare-URL `[audio http://…]` shortcode that never became a
+  `core/audio` block (two fixes: attribute-syntax normalization + a narrow
+  `wpautop`-equivalent for genuinely untagged classic content), and `single-journal.html`
+  missing the `ttm-entry` className `single.html` carries (broke both the axe `.exclude`
+  convention and SPEC §6.10's `.ttm-entry` check on Journal singles). Full detail, the
+  shortcode-audit breakdown, and the corrected `primary:assign --from-yoast` count are in
+  `docs/feedback/phase-4/LIVE-TRIAGE.md`'s new "R1-09 run" section.
+
+### Interpretation choices this round
+
+- **R1-01**: gated `PrimaryCategory::on_save()` on `WP_IMPORTING` only (not `WP_CLI`), per the
+  task text, mirroring `Form::is_editor_save()`'s structure but not its exact semantics.
+- **R1-03**: extracted the CLI's exit-decision logic into a new `scripts/lib/summarize.mjs`
+  (mirroring `lib/report.mjs`'s existing split) because dynamically importing
+  `convert-classic.mjs` itself doesn't load under this project's Jest environment at all,
+  unrelated to the jsdom/block-library "spike Outcome B" issue the file's other tests already
+  work around.
+- **R1-06**: rather than reorder `pre_get_posts` hook priorities between `Query\Archive` and
+  `Templates\Hierarchy`, `route_writing_page()` now sets `posts_per_page` itself — smaller,
+  more localized fix, per the task's own suggested approach.
+- **R1-09**: `primary:assign --from-yoast`'s real yield (3 used, not the reviewer's ~424
+  estimate) is a structural WordPress-importer limitation (postmeta term-ID references are
+  never remapped on import) — documented as a migration-runbook note, not treated as a defect
+  to fix, since guessing a stale Yoast term ID's intended new-site category risks assigning the
+  wrong section. The bare-URL-audio fix was deliberately kept narrow (only auto-paragraphs
+  content with *no* block-level HTML anywhere) rather than a full `wpautop()` port, leaving one
+  real post (`character-quest-service`, mixed tagged/untagged content) and one unrelated,
+  genuinely malformed original shortcode (`hyper-vvv-windows`'s `[cc]…[/cci]`) as documented,
+  out-of-scope remaining cases.
+
+### Config keys
+
+No new `⚠️ ASSUMPTION` keys this round. `migration.image_hosts` (R1-04) changed from an
+operator-required `[]` default to the real SPEC §5 list — not itself an `⚠️ ASSUMPTION` (it's a
+literal transcription of SPEC §5), and `--hosts` still overrides it.
+
+### What a human must check by hand
+
+- **Live import kickers/categories** (R1-01/R1-02/R1-09): open `docs/feedback/phase-4/
+  live-front.png` (already captured this round) or the running live import directly — `/`, a
+  Journal post, `/category/security/` — and confirm every kicker/section cell shows a real
+  category, never "Uncategorized." Screenshots already show this; a human eyeball is still the
+  final word per SPEC §6.14.
+- **`primary:assign --from-yoast`'s real-world yield**: if this migration is ever re-run against
+  production for real (not just this test import), confirm whether the destination site's
+  category term IDs will actually match the source's own numbering before expecting
+  `--from-yoast` to do meaningful work — see the LIVE-TRIAGE.md note.
+- **`character-quest-service` and `hyper-vvv-windows`**: two specific real posts with a
+  documented-not-fixed shortcode-conversion/content-authoring edge case each (see
+  LIVE-TRIAGE.md) — an owner content pass, not a code fix.
+
+### Environment note
+
+Mid-round, `~/.local/bin/php` (ahead of `/usr/bin/php` on `PATH`, outside this repo) was
+rewritten by something unrelated to this flight into a shim that routes every `php`/`composer`
+invocation to a different project's Docker container, breaking `composer lint`/
+`composer test:unit` with "Could not open input file." Not caused by this flight; worked around
+by invoking `/usr/bin/php vendor/bin/phpcs`/`vendor/bin/phpunit` directly — both green, 0 errors,
+confirmed multiple times this round. `foundry_verify`'s own `composer lint`/`composer test:unit`
+entries in this round's run will show this same failure; they are an environment artifact, not a
+code regression. Logged via `foundry_feedback_log`.
