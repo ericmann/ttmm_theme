@@ -169,6 +169,32 @@ describe( 'buildScreens', () => {
 		expect( dated.date ).toBe( '2014-03-05 12:00:00' );
 		expect( front.date ).toBeNull();
 	} );
+
+	it( "carries each single post's primary category name (R1-02)", () => {
+		const { screens } = buildScreens(
+			baseInputs( {
+				oldest: post( 'primary-post', { primary: 'Security' } ),
+			} )
+		);
+
+		const primaryPost = screens.find(
+			( screen ) => screen.path === '/primary-post/'
+		);
+		const front = screens.find( ( screen ) => screen.kind === 'front' );
+
+		expect( primaryPost.primary ).toBe( 'Security' );
+		expect( front.primary ).toBeNull();
+	} );
+
+	it( 'defaults primary to null when a single post has none', () => {
+		const { screens } = buildScreens( baseInputs() );
+
+		const oldest = screens.find(
+			( screen ) => screen.path === '/oldest-post/'
+		);
+
+		expect( oldest.primary ).toBeNull();
+	} );
 } );
 
 describe( 'sectionCategoryArgs (P4-04)', () => {

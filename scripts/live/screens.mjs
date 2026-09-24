@@ -72,16 +72,54 @@ function wpJson( args ) {
 }
 
 /**
+ * The display name of a post's primary category (SPEC §6.10, R1-02): `ttm_primary_category`
+ * post meta (falling back to nothing when unset/0, same as `PrimaryCategory::id()` -- this
+ * script never re-derives the nav-order fallback, it only reads what's actually stored) ->
+ * `wp term get` for that term's `name`. Empty string (not an error) when either step misses,
+ * so a post that legitimately has no primary yet (e.g. `--from-yoast` hasn't run) just yields
+ * `primary: null` rather than failing the whole manifest build.
+ *
+ * @param {number} postId Post ID.
+ * @return {string} Display name, or '' when unset/not found.
+ */
+function primaryCategoryName( postId ) {
+	const termId = Number(
+		wp( [
+			'post',
+			'meta',
+			'get',
+			String( postId ),
+			'ttm_primary_category',
+		] ) || '0'
+	);
+	if ( ! termId ) {
+		return '';
+	}
+	try {
+		return wp( [
+			'term',
+			'get',
+			'category',
+			String( termId ),
+			'--field=name',
+		] );
+	} catch {
+		return '';
+	}
+}
+
+/**
  * A raw `wp post list` row -> the pure builder's `ScreenPost` shape, or null.
  *
  * @param {object|undefined} row `{ID, post_name, post_content, post_date}`.
- * @return {{id: number, slug: string, classic: boolean, freeform: boolean, date: string|null}|null} The screen post, or null.
+ * @return {{id: number, slug: string, classic: boolean, freeform: boolean, date: string|null, primary: string|null}|null} The screen post, or null.
  */
 function toPost( row ) {
 	if ( ! row ) {
 		return null;
 	}
 	const content = String( row.post_content ?? '' );
+	const primary = primaryCategoryName( Number( row.ID ) );
 	return {
 		id: Number( row.ID ),
 		slug: row.post_name,
@@ -89,6 +127,7 @@ function toPost( row ) {
 		freeform:
 			content.includes( 'wp:freeform' ) || content.includes( 'wp:html' ),
 		date: row.post_date ?? null,
+		primary: primary || null,
 	};
 }
 
@@ -171,6 +210,7 @@ function classicShortcodePosts( pattern, limit ) {
 				classic: false,
 				freeform: false,
 				date: row.post_date ?? null,
+				primary: primaryCategoryName( Number( row.ID ) ) || null,
 			} );
 		}
 	}

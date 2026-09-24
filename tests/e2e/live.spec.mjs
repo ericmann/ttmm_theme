@@ -229,15 +229,14 @@ for ( const screen of manifest.screens ) {
 				.soft( emptyBlocks, 'no empty [data-ttm-block] wrapper' )
 				.toEqual( [] );
 
-			// Masthead current item equals the screen's section, when it has one. Reliable for
-			// archive-kind screens (the URL's own category is unambiguous); for single-kind
-			// screens, `Nav/CurrentSection.php` highlights the post's *primary* category (first
-			// assigned section in nav order, `PrimaryCategory::id()`), which can legitimately
-			// differ from `screen.section` -- `sectionCategoryArgs()` in `scripts/live/lib/
-			// screens.mjs` only guarantees the picked post *carries* that category term, not
-			// that it wins as primary, for a multi-category post (P4-04, SPEC §6.10 finding;
-			// `multi-category` is an already-tracked, expected `content` audit flag).
-			if ( screen.section && 'single' !== screen.kind ) {
+			// Masthead current item equals the screen's section (archive-kind screens: the
+			// URL's own category is unambiguous) or the post's primary category display name
+			// (single-kind screens: `Nav/CurrentSection.php` highlights `PrimaryCategory::id()`,
+			// the first assigned section in nav order, which is exactly `screen.primary` --
+			// R1-02, SPEC §6.10).
+			const expectedCurrent =
+				'single' === screen.kind ? screen.primary : screen.section;
+			if ( expectedCurrent ) {
 				const current = page
 					.locator(
 						':is(.ttm-masthead-front__nav, .ttm-masthead-inner__nav) .current-menu-item > a'
@@ -252,7 +251,7 @@ for ( const screen of manifest.screens ) {
 							currentText,
 							'masthead current item matches the section'
 						)
-						.toBe( screen.section.toLowerCase() );
+						.toBe( expectedCurrent.toLowerCase() );
 				}
 			}
 
@@ -281,22 +280,20 @@ for ( const screen of manifest.screens ) {
 						':is(.ttm-article-head, .ttm-journal-head) .is-style-kicker'
 					)
 					.first();
-				if ( screen.section && ( await kicker.count() ) ) {
+				if ( screen.primary && ( await kicker.count() ) ) {
 					const kickerText = (
 						await kicker.evaluate( ( el ) => el.textContent )
 					).trim();
-					// `patterns/article-header.php` renders `core/post-terms` (`separator: " · "`,
-					// `WP_Query`'s own `category_name` -- what `scripts/live/lib/screens.mjs`'s
-					// `sectionCategoryArgs()` uses to pick each section's "newest post" -- matches
-					// a category's *descendants* too (e.g. `politics`, a child of `opinion`), so
-					// a picked post can legitimately carry only child-category terms and never the
-					// ancestor `screen.section` slug itself in its own `post-terms` listing; this
-					// is real category-hierarchy/`content` territory (P4-04, SPEC §6.10 finding),
-					// not a render defect, so this only checks the kicker actually rendered
-					// something, not which category names it names.
+					// `patterns/article-header.php` renders `core/post-terms` (`separator: " · "`),
+					// primary first (`PrimaryCategory::order_terms()`), so the text before the first
+					// separator is the primary category's own display name (R1-02, SPEC §6.10).
+					const firstTerm = kickerText.split( ' · ' )[ 0 ].trim();
 					expect
-						.soft( kickerText, 'kicker is non-empty' )
-						.not.toBe( '' );
+						.soft(
+							firstTerm,
+							'kicker first term equals the primary category'
+						)
+						.toBe( screen.primary );
 				}
 
 				if ( screen.date ) {
