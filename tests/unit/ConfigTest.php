@@ -182,4 +182,24 @@ class ConfigTest extends TestCase {
 	public function test_seed_image_band_angle_default_is_thirty(): void {
 		$this->assertSame( 30, Config::get( 'seed.image_band_angle' ) );
 	}
+
+	/**
+	 * R1-04, SPEC §5: `migrate:images` with no `--hosts` must actually sideload the real
+	 * export's image hosts, not silently no-op against an empty default list.
+	 */
+	public function test_migration_image_hosts_default_matches_spec(): void {
+		$this->assertSame(
+			[
+				'eamann.com',
+				'www.eamann.com',
+				'ttmm.io',
+				'www.ttmm.io',
+				'ttmm.wpengine.com',
+				'i0.wp.com',
+				'i1.wp.com',
+				'i2.wp.com',
+			],
+			Config::get( 'migration.image_hosts' )
+		);
+	}
 }

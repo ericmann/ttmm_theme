@@ -448,6 +448,60 @@ class MigrateCommandTest extends TTM_IntegrationTestCase {
 		$this->assertSame( $original, get_post_meta( $post_id, 'ttm_classic_backup', true ) );
 	}
 
+	/**
+	 * R1-04, SPEC §5: with no `--hosts`, `migrate:images` must use the real
+	 * `migration.image_hosts` default (SPEC §5's list) -- not an empty list that silently
+	 * sideloads nothing.
+	 */
+	public function test_images_without_hosts_uses_configured_default_hosts(): void {
+		$original = '<p><img src="https://eamann.com/photo.png" alt=""></p>';
+		$post_id  = self::factory()->post->create(
+			[
+				'post_status'  => 'publish',
+				'post_content' => $original,
+			]
+		);
+
+		$png = base64_decode( 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=' );
+		add_filter(
+			'pre_http_request',
+			static function ( $preempt, array $args ) use ( $png ) {
+				if ( ! empty( $args['filename'] ) ) {
+					file_put_contents( $args['filename'], $png ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_file_put_contents -- test fixture, mocking the HTTP transport's own stream-to-file.
+				}
+
+				return [
+					'headers'  => [ 'content-type' => 'image/png' ],
+					'body'     => $png,
+					'response' => [
+						'code'    => 200,
+						'message' => 'OK',
+					],
+					'cookies'  => [],
+					'filename' => $args['filename'] ?? null,
+				];
+			},
+			10,
+			3
+		);
+
+		$result = ( new MigrateCommand() )->images( [], [] );
+
+		$this->assertTrue( $result['ok'] );
+
+		$attachments = get_posts(
+			[
+				'post_type'      => 'attachment',
+				'post_parent'    => $post_id,
+				'posts_per_page' => 5,
+			]
+		);
+		$this->assertCount( 1, $attachments );
+
+		$new_content = get_post( $post_id )->post_content;
+		$this->assertStringNotContainsString( 'eamann.com/photo.png', $new_content );
+	}
+
 	public function test_images_leaves_src_on_fetch_failure(): void {
 		$original = '<p><img src="https://cdn.example.com/broken.jpg" alt=""></p>';
 		$post_id  = self::factory()->post->create(

@@ -124,7 +124,7 @@ wp ttm audit --format=csv > audit.csv
 wp ttm audit --summary                  # one row per flag with its count across every flagged post
 ```
 
-One row per post with flags: `classic`, `no-excerpt`, `no-featured-image`, `missing-alt`, `multi-category` (lists them), `no-primary`, `uncategorized`, `politics`, `series-tag-candidate`, `legacy-footnotes`, `broken-internal-link`. This is the cleanup worklist. Nothing in later steps needs the audit to be clean; it tells you what the design's fallbacks will be doing on day one (a post without an excerpt shows no dek; a post without a featured image shows the text-only lead, and so on). `docs/feedback/phase-4/LIVE-TRIAGE.md` is the finding-by-finding record of every gap the live suite (§1.0) actually found and how each was classed/fixed.
+One row per post with flags: `classic`, `no-excerpt`, `no-featured-image`, `missing-alt`, `multi-category` (lists them), `no-primary`, `uncategorized`, `politics`, `series-tag-candidate`, `legacy-footnotes`, `broken-internal-link`, `remote-image` (which external host, R1-04), `shortcode`, `post-format-aside`, `no-tags`, `writing-no-form`. This is the cleanup worklist. Nothing in later steps needs the audit to be clean; it tells you what the design's fallbacks will be doing on day one (a post without an excerpt shows no dek; a post without a featured image shows the text-only lead, and so on). `docs/feedback/phase-4/LIVE-TRIAGE.md` is the finding-by-finding record of every gap the live suite (§1.0) actually found and how each was classed/fixed.
 
 ### 2.2 Categories
 
@@ -187,14 +187,17 @@ wp ttm recount --all
 ```bash
 wp ttm migrate:excerpts --from=yoast --dry-run
 wp ttm migrate:excerpts --from=yoast    # fills the WordPress excerpt from Yoast's meta description where one is missing
-wp ttm migrate:images --hosts=<comma-separated-dead-domains> --dry-run
-wp ttm migrate:images --hosts=<comma-separated-dead-domains>   # sideloads images on the named hosts into uploads, rewrites post_content
+wp ttm migrate:images --dry-run
+wp ttm migrate:images   # sideloads images on migration.image_hosts into uploads, rewrites post_content
 ```
 
-`--hosts` is required and operator-supplied (`migration.image_hosts` defaults to `[]`) — `wp ttm
-audit --only=remote-image` lists which external hosts a post's images actually live on today, so
-you know what to pass. Both commands report sideload/fill counts and never touch a post that
-already has an excerpt/local image; re-running is safe.
+`--hosts=<comma-separated-domains>` is optional — with no `--hosts`, `migrate:images` uses
+`migration.image_hosts` (SPEC §5's default list: `eamann.com`, `www.eamann.com`, `ttmm.io`,
+`www.ttmm.io`, `ttmm.wpengine.com`, `i0.wp.com`, `i1.wp.com`, `i2.wp.com`), which covers the real
+export's own domains. Pass `--hosts` to sideload from a different/additional host instead; `wp ttm
+audit --only=remote-image` lists which external hosts a post's images actually live on today if
+you need to check. Both commands report sideload/fill counts and never touch a post that already
+has an excerpt/local image; re-running is safe.
 
 ### 2.6 Classic content → blocks
 

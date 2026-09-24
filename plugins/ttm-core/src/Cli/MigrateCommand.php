@@ -297,7 +297,7 @@ class MigrateCommand extends Command {
 		$dry_run = ! empty( $assoc['dry-run'] );
 		$hosts   = isset( $assoc['hosts'] )
 			? array_values( array_filter( array_map( 'trim', explode( ',', (string) $assoc['hosts'] ) ) ) )
-			: (array) Config::get( 'migration.image_hosts', [] );
+			: (array) Config::get( 'migration.image_hosts', [ 'eamann.com', 'www.eamann.com', 'ttmm.io', 'www.ttmm.io', 'ttmm.wpengine.com', 'i0.wp.com', 'i1.wp.com', 'i2.wp.com' ] );
 		$origin  = (string) Config::get( 'migration.photon_origin', 'eric.mann.blog' );
 		$timeout = isset( $assoc['timeout'] ) ? (int) $assoc['timeout'] : (int) Config::get( 'migration.image_timeout', 20 );
 

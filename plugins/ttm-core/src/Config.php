@@ -103,7 +103,7 @@ class Config {
 
 			// `migrate:images`'s sideload host allow-list (SPEC §6.7); operator-supplied per
 			// live migration via `--hosts` or this key, empty until then.
-			'migration.image_hosts'            => [],
+			'migration.image_hosts'            => [ 'eamann.com', 'www.eamann.com', 'ttmm.io', 'www.ttmm.io', 'ttmm.wpengine.com', 'i0.wp.com', 'i1.wp.com', 'i2.wp.com' ],
 			// `migrate:images`'s sideload fetch timeout, seconds — ⚠️ ASSUMPTION.
 			'migration.image_timeout'          => 20,
 			// `migrate:images`'s Photon rewrite target: this site's own origin host.
