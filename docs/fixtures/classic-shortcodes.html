@@ -1,0 +1,58 @@
+<!--
+Synthetic fixtures for scripts/test/shortcodes.test.js (P3-01, SPEC §6.8, rule 47).
+Every sentence below is invented for this fixture; none is copied from live content. Each
+<article data-post-id="N"> wraps one classic-editor shortcode shape the pre-pass must handle.
+-->
+<article data-post-id="100">
+<p>The architect reviewed the blueprint twice before signing off[ref]Names in this account have been changed for clarity.[/ref] on the final draft.</p>
+</article>
+
+<article data-post-id="101">
+<p>The first crew member[mfn]A pseudonym chosen by the narrator, not their real name.[/mfn] arrived before dawn, and the second[ref]Confirmed later by the ship's log.[/ref] arrived just after.</p>
+</article>
+
+<article data-post-id="102">
+<p>Here is the query we used:</p>
+[cci lang="php"]$rows = $wpdb->get_results(
+	"SELECT * FROM wp_posts WHERE post_status = 'publish'"
+);[/cci]
+<p>And here is the equivalent in another language:</p>
+[cc lang="js"]const rows = await db.query(
+	'SELECT * FROM posts WHERE status = $1',
+	['publish']
+);[/cc]
+<p>Both return the same rows.</p>
+</article>
+
+<article data-post-id="103">
+<p>The short form looks like this:</p>
+[cc_php]function is_valid( $a, $b ) {
+	return $a < $b && $b > 0;
+}[/cc_php]
+<p>when the language is named directly in the tag.</p>
+</article>
+
+<article data-post-id="108">
+<p>They live in the global scope without using the already abused/overused [cci]global[/cci] keyword, and the [cci]$post[/cci] object is a common example.</p>
+</article>
+
+<article data-post-id="104">
+<p>Listen to the recording below.</p>
+[audio src="https://example.com/recordings/episode-one.mp3"]
+<p>It runs about twelve minutes.</p>
+</article>
+
+<article data-post-id="105">
+[caption id="attachment_1" align="aligncenter" width="600"]<img src="https://example.com/photo.jpg" alt="" width="600" height="400" /> A photo from the trip.[/caption]
+<p>The caption above should be left exactly as it was.</p>
+</article>
+
+<article data-post-id="106">
+<p>The old presentation embed is below.</p>
+[seoslides id="42" width="600" height="400"]
+<p>It no longer renders in most browsers.</p>
+</article>
+
+<article data-post-id="107">
+<p>[architect] was the code name the team used for the project, not a shortcode at all.</p>
+</article>

@@ -97,6 +97,17 @@ class Config {
 			'books.link_rows'                  => 2,
 			'cli.batch'                        => 200,
 			'cli.series_tag_min'               => 3,
+			// `migrate:excerpts --from=yoast`'s truncation cap (SPEC §5 Decision Q3);
+			// coupled to core `post-excerpt`'s default `excerptLength` (55) — ⚠️ ASSUMPTION.
+			'excerpt_length'                   => 55,
+
+			// `migrate:images`'s sideload host allow-list (SPEC §6.7); operator-supplied per
+			// live migration via `--hosts` or this key, empty until then.
+			'migration.image_hosts'            => [ 'eamann.com', 'www.eamann.com', 'ttmm.io', 'www.ttmm.io', 'ttmm.wpengine.com', 'i0.wp.com', 'i1.wp.com', 'i2.wp.com' ],
+			// `migrate:images`'s sideload fetch timeout, seconds — ⚠️ ASSUMPTION.
+			'migration.image_timeout'          => 20,
+			// `migrate:images`'s Photon rewrite target: this site's own origin host.
+			'migration.photon_origin'          => 'eric.mann.blog',
 
 			'archive.per_page'                 => 12,
 			'archive.tag_filter_limit'         => 5,
@@ -113,8 +124,6 @@ class Config {
 			'verse.user_agent'                 => 'TTM-Core/{version} (+https://eric.mann.blog)',
 			'verse.history_size'               => 30,
 			'verse.log_size'                   => 20,
-			// Where the NIV copyright notice appears: 'footer' | 'box' | 'none' (§6.4).
-			'verse.copyright_placement'        => 'footer',
 
 			'cache.verse_boundary_hour'        => 6,
 			'cache.max_age_cap_seconds'        => 86400,

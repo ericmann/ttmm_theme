@@ -114,4 +114,20 @@ class ArchiveByYearTest extends TTM_IntegrationTestCase {
 
 		$this->assertSame( 0, Helpers::$archive_scope );
 	}
+
+	/**
+	 * P1-05, rule 50: this block has no context of its own -- it only wraps an inner query's
+	 * rendered rows. With no inner blocks at all (nothing to wrap), it returns '', not an
+	 * empty shell, even though other content exists.
+	 */
+	public function test_rule_50_no_context_with_other_content(): void {
+		self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		$term = wp_insert_term( 'A Series', 'series' );
+		self::factory()->term->create( [ 'taxonomy' => 'post_tag' ] );
+		$this->assertIsArray( $term );
+
+		$html = (string) do_blocks( '<!-- wp:ttm/archive-by-year /-->' );
+
+		$this->assertSame( '', trim( $html ) );
+	}
 }

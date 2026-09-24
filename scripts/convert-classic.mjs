@@ -9,22 +9,32 @@
  * text loss. See docs/spikes/P8-01.md for the write-up; this file is the tool that write-up is
  * based on.
  *
- * Usage: node scripts/convert-classic.mjs <in.ndjson> <out.ndjson> [--allow-freeform]
+ * Usage: node scripts/convert-classic.mjs <in.ndjson> <out.ndjson> [--allow-freeform] [--allow-text-mismatch]
  *   in.ndjson lines:  {"id":6917,"slug":"...","content_raw":"<p>...</p>","footnotes_meta":null}
  *   out.ndjson lines: {"id":...,"slug":...,"blocks":"<!-- wp:paragraph -->...","footnotes":[...],
- *                      "report":{"blockCounts":{...},"freeform":0,"html":0,"textEqual":true}}
+ *                      "report":{"blockCounts":{...},"freeform":0,"html":0,"textEqual":true,
+ *                                "shortcodes":[{"name":"seoslides","count":1}],"footnotes":2}}
  *   report.freeform/report.html are the `core/freeform`/`core/html` counts respectively (PLAN
  *   P8-01's contract), each also present individually in report.blockCounts; kept as their own
  *   fields because they're the two block names `--allow-freeform` treats as a decision to make.
+ *   report.shortcodes (P3-01, SPEC §6.8) lists any shortcode the pre-pass deliberately left in
+ *   place (today: `seoslides`); report.footnotes is the merged shortcode + modern-footnotes
+ *   count.
  *
  * Exit 1 if any post has report.textEqual === false, or (without --allow-freeform) any post has
- * report.freeform > 0 or report.html > 0.
+ * report.freeform > 0 or report.html > 0. `--allow-text-mismatch` (R1-03, SPEC §1.3 "Done",
+ * §6.6: the whole live plan must run non-interactively) still prints every text-mismatch line
+ * and still writes report.textEqual: false for each such record in the output ndjson, but exits
+ * 0 -- `ConvertCommand::import()` reads that flag off the record and skips converting it (SPEC
+ * §6.6, rule 49: non-destructive), rather than the whole `plan.sh` run aborting on real,
+ * pre-existing classic content the export can't perfectly round-trip.
  */
 
 import { createRequire } from 'node:module';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { transformFootnotes } from './lib/footnotes.mjs';
 import { buildBlockReport } from './lib/report.mjs';
+import { summarizeResults } from './lib/summarize.mjs';
+import { prepareClassicHtml } from './lib/prepare-classic.mjs';
 
 /**
  * jsdom + a real DOM global setup, then load @wordpress/blocks and @wordpress/block-library via
@@ -92,11 +102,31 @@ function setUpBlockEditorEnvironment() {
  * after decoding equally on both sides is what makes this a real equality check rather than a
  * false "regression" from the DOM round-trip decoding entities the *raw* string never did.
  *
+ * `[caption]`, `[gallery]` and `[audio]` are deliberately left for `rawHandler` itself to
+ * convert (their own native shortcode-type transforms -- see `preprocessShortcodes`'s
+ * docblock; `preprocessShortcodes` does rewrite the legacy bare-URL `[audio http://…]` form to
+ * the attribute syntax first, R1-09, but that's still an `[audio …]` shortcode at this point, not
+ * yet a block), so their own bracket/attribute syntax (`[caption id="…" …]`/`[/caption]`,
+ * `[gallery ids="…"]`, `[audio src="…"]`) survives into the "old" side of a `textEqual`
+ * comparison as literal text with no `<`/`>` characters for the tag strip below to catch, even
+ * though it was never meant to be visible content and `rawHandler`'s own conversion correctly
+ * drops it. Stripped here (comparison only -- this never touches the HTML actually passed to
+ * `rawHandler`) so a converted post doesn't read as a false `textEqual: false`. Discovered via
+ * real failures on the export; see docs/feedback/phase-4/LIVE-TRIAGE.md, which also records the
+ * residual failure class this doesn't fix: legacy `<code>`/`<blockquote>` markup in the classic
+ * content itself containing unescaped nested HTML, a pre-existing content-quality issue
+ * unrelated to shortcodes.
+ *
  * @param {string} html
  * @return {string} The normalized text.
  */
 function normalizedText( html ) {
-	const withoutTags = html.replace( /<[^>]+>/g, ' ' );
+	const withoutShortcodeWrappers = html
+		.replace( /\[caption[^\]]*\]/g, '' )
+		.replace( /\[\/caption\]/g, '' )
+		.replace( /\[gallery[^\]]*\]/g, '' )
+		.replace( /\[audio[^\]]*\]/g, '' );
+	const withoutTags = withoutShortcodeWrappers.replace( /<[^>]+>/g, ' ' );
 	const withoutEntities = document.createElement( 'div' );
 	withoutEntities.innerHTML = withoutTags;
 
@@ -111,15 +141,17 @@ function normalizedText( html ) {
  * @return {{ id, slug, blocks: string, footnotes: Array, report: object }} The converted post record.
  */
 export function convertPost( post, editor ) {
-	const { html: transformedHtml, footnotes } = transformFootnotes(
-		post.content_raw,
-		post.id
-	);
+	const {
+		html: transformedHtml,
+		footnotes,
+		remaining,
+	} = prepareClassicHtml( post.content_raw, post.id );
 
 	const blockList = editor.rawHandler( { HTML: transformedHtml } );
 	const serialized = editor.serialize( blockList );
 
-	const { blockCounts, freeform, html } = buildBlockReport( blockList );
+	const { blockCounts, freeform, html, mergedParagraphs } =
+		buildBlockReport( blockList );
 
 	const textEqual =
 		normalizedText( transformedHtml ) === normalizedText( serialized );
@@ -129,7 +161,15 @@ export function convertPost( post, editor ) {
 		slug: post.slug,
 		blocks: serialized,
 		footnotes,
-		report: { blockCounts, freeform, html, textEqual },
+		report: {
+			blockCounts,
+			freeform,
+			html,
+			mergedParagraphs,
+			textEqual,
+			shortcodes: remaining,
+			footnotes: footnotes.length,
+		},
 	};
 }
 
@@ -148,15 +188,24 @@ function readNdjson( path ) {
 }
 
 function main() {
+	const flags = [
+		'--allow-freeform',
+		'--allow-text-mismatch',
+		'--allow-merged-paragraphs',
+	];
 	const args = process.argv
 		.slice( 2 )
-		.filter( ( a ) => a !== '--allow-freeform' );
+		.filter( ( a ) => ! flags.includes( a ) );
 	const allowFreeform = process.argv.includes( '--allow-freeform' );
+	const allowTextMismatch = process.argv.includes( '--allow-text-mismatch' );
+	const allowMergedParagraphs = process.argv.includes(
+		'--allow-merged-paragraphs'
+	);
 	const [ inputPath, outputPath ] = args;
 
 	if ( ! inputPath || ! outputPath ) {
 		console.error(
-			'Usage: node scripts/convert-classic.mjs <in.ndjson> <out.ndjson> [--allow-freeform]'
+			'Usage: node scripts/convert-classic.mjs <in.ndjson> <out.ndjson> [--allow-freeform] [--allow-text-mismatch] [--allow-merged-paragraphs]'
 		);
 		process.exit( 1 );
 	}
@@ -170,22 +219,12 @@ function main() {
 		results.map( ( r ) => JSON.stringify( r ) ).join( '\n' ) + '\n'
 	);
 
-	let failed = false;
-	for ( const result of results ) {
-		if ( ! result.report.textEqual ) {
-			console.error(
-				`post ${ result.id } (${ result.slug }): text content changed`
-			);
-			failed = true;
-		}
-		const fallbackCount = result.report.freeform + result.report.html;
-		if ( ! allowFreeform && fallbackCount > 0 ) {
-			console.error(
-				`post ${ result.id } (${ result.slug }): ${ fallbackCount } freeform/html block(s)`
-			);
-			failed = true;
-		}
-	}
+	const { failed, messages } = summarizeResults( results, {
+		allowFreeform,
+		allowTextMismatch,
+		allowMergedParagraphs,
+	} );
+	messages.forEach( ( message ) => console.error( message ) );
 
 	if ( failed ) {
 		process.exit( 1 );

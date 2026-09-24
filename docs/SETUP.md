@@ -68,8 +68,13 @@ These are the commands the Foundry pipeline runs after every task (`docs/foundry
 | `npm run build` | `wp-scripts build` for the plugin | no |
 | `npm run test:integration` | starts wp-env if needed, then PHPUnit with the WordPress test suite inside the `tests-cli` container (`tests/integration`) | yes |
 | `npm run test:e2e` | starts wp-env, reseeds it (`wp ttm seed --reset`), then Playwright + axe against the thirteen seeded screens at 1280×900 and 390×844, plus the `fidelity`/`editors`/`phone`/`selectors` projects (`tests/e2e`) | yes |
-| `npm run screenshots` | against a running, seeded wp-env, writes the fourteen `docs/feedback/phase-3/*.png` zone crops (`scripts/screenshots.mjs`); does not reseed | yes |
+| `npm run screenshots` | against a running, seeded wp-env, writes the fourteen `docs/feedback/phase-3/*.png` zone crops plus, when a live import is present, the phase-4 `live-*.png` set (`scripts/screenshots.mjs`); does not reseed | yes |
 | `bash scripts/forbidden-patterns.sh` | greps for the mechanical rules in `SPEC.md §3` | no |
+| `npm run env:live` | imports a WXR export (`LIVE_WXR=<path>` or the newest `docs/*.xml`) and runs the whole migration plan against it (`MIGRATION.md §1.0`); skips cleanly (exit 0) with no export present | yes |
+| `npm run test:live` | Playwright's `live` project against every URL `env:live` discovered (`docs/fixtures/live/screens.json`, SPEC §6.10); skips cleanly with no live import | yes |
+| `npm run env:backup [-- <dir>]` | `scripts/live/backup.sh`: db export + uploads tar + `manifest.json` into `docs/fixtures/live/backups/<UTC stamp>/` | yes |
+| `npm run env:restore -- <dir> [--host=<url>]` | `scripts/live/restore.sh`: the inverse of `env:backup` | yes |
+| `npm run env:drill` | `scripts/live/drill.sh`: seeds, backs up, wipes, restores, and compares post counts + five page hashes — proves the backup/restore round-trip; runs in CI's `integration` job after `test:integration` | yes |
 
 Fix formatting automatically with `composer lint:fix` (phpcbf) and `npx wp-scripts format`.
 

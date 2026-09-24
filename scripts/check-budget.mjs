@@ -35,6 +35,11 @@
 // series-row count `grid-row` placement fix and the Writing body flex-column
 // fix (rule 36). Raised to 63488 (the next 1024 multiple) to restore real
 // headroom. The number lives only here and in CLAUDE.md.
+// P5-03: end-of-flight measurement (SPEC §5 tuning task): 62568 bytes before
+// this phase's CSS changes (coverage-exemption/live-check work added none),
+// 62640 after -- a 72-byte growth, nowhere near the 1024-byte shrink this
+// task's own rule requires before lowering the budget. Kept at 63488
+// unchanged.
 import { statSync, existsSync } from 'node:fs';
 const cssBudgetBytes = 63488;
 const file = 'themes/ttm-theme/assets/css/ttm.css';

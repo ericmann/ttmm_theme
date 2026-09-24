@@ -29,6 +29,22 @@ class SaveHooksTest extends TTM_IntegrationTestCase {
 		$this->assertSame( $technology, (int) get_post_meta( $post_id, 'ttm_primary_category', true ) );
 	}
 
+	/**
+	 * R1-01: the WordPress importer inserts the post (no categories -> default category)
+	 * before it assigns the real terms; `on_save` must not persist a primary category during
+	 * that import save, or a later `primary:assign --from-yoast` pass would see it as already
+	 * set and skip the post.
+	 */
+	public function test_import_save_does_not_store_default_category_primary(): void {
+		add_filter( 'ttm_primary_on_import', '__return_true' );
+
+		$post_id = self::factory()->post->create();
+
+		remove_filter( 'ttm_primary_on_import', '__return_true' );
+
+		$this->assertFalse( metadata_exists( 'post', $post_id, 'ttm_primary_category' ) );
+	}
+
 	public function test_save_does_not_overwrite_manual_primary(): void {
 		$technology = $this->category_id( 'technology', 'Technology' );
 		$business   = $this->category_id( 'business', 'Business' );
@@ -52,6 +68,67 @@ class SaveHooksTest extends TTM_IntegrationTestCase {
 		$post_id = self::factory()->post->create( [ 'post_category' => [ $writing ] ] );
 
 		$this->assertSame( 'story', get_post_meta( $post_id, 'ttm_form', true ) );
+	}
+
+	/**
+	 * P1-04, Decision "Editor-only story derivation": a non-editor save (WP-CLI/import) never
+	 * writes `story` -- a Writing post with no series simply leaves `ttm_form` unset.
+	 */
+	public function test_non_editor_save_never_writes_story(): void {
+		add_filter( 'ttm_form_editor_save', '__return_false' );
+
+		$writing = $this->category_id( 'writing', 'Writing' );
+		$post_id = self::factory()->post->create( [ 'post_category' => [ $writing ] ] );
+
+		remove_filter( 'ttm_form_editor_save', '__return_false' );
+
+		// No meta row is written at all (`register_post_meta()`'s own schema default,
+		// 'article', is what `get_post_meta()` falls back to -- it's not evidence a
+		// non-editor save wrote 'story' or anything else).
+		$this->assertFalse( metadata_exists( 'post', $post_id, 'ttm_form' ) );
+	}
+
+	/**
+	 * P1-04: an editor save still writes `story` for the same Writing-with-no-series shape.
+	 */
+	public function test_editor_save_writes_story(): void {
+		add_filter( 'ttm_form_editor_save', '__return_true' );
+
+		$writing = $this->category_id( 'writing', 'Writing' );
+		$post_id = self::factory()->post->create( [ 'post_category' => [ $writing ] ] );
+
+		remove_filter( 'ttm_form_editor_save', '__return_true' );
+
+		$this->assertSame( 'story', get_post_meta( $post_id, 'ttm_form', true ) );
+	}
+
+	/**
+	 * P1-04: the editor-only gate is specific to the `story` derivation -- `chapter` (series
+	 * form fiction) and `article` (everything else) are always written, editor save or not.
+	 */
+	public function test_non_editor_save_still_writes_chapter_and_article(): void {
+		add_filter( 'ttm_form_editor_save', '__return_false' );
+
+		$term      = wp_insert_term( 'A Novel', 'series', [ 'slug' => 'a-novel-savehooks' ] );
+		$series_id = (int) $term['term_id'];
+		update_term_meta( $series_id, 'ttm_form', 'novel' );
+
+		$chapter_id = self::factory()->post->create();
+		wp_set_object_terms( $chapter_id, [ $series_id ], 'series' );
+		wp_update_post(
+			[
+				'ID'         => $chapter_id,
+				'post_title' => 'Re-save',
+			] 
+		);
+
+		$technology = $this->category_id( 'technology', 'Technology' );
+		$article_id = self::factory()->post->create( [ 'post_category' => [ $technology ] ] );
+
+		remove_filter( 'ttm_form_editor_save', '__return_false' );
+
+		$this->assertSame( 'chapter', get_post_meta( $chapter_id, 'ttm_form', true ) );
+		$this->assertSame( 'article', get_post_meta( $article_id, 'ttm_form', true ) );
 	}
 
 	public function test_locked_form_is_kept(): void {

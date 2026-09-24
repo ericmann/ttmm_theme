@@ -10,9 +10,7 @@
 declare( strict_types=1 );
 
 use TTM\Core\Blocks\Helpers;
-use TTM\Core\Config;
 use TTM\Core\Support\Clock;
-use TTM\Core\Support\Dates;
 use TTM\Core\Support\Text;
 
 if ( 'empty' === Helpers::preview_state( $attributes ) ) {
@@ -42,8 +40,6 @@ if ( empty( $ttm_verse ) ) {
 	return '';
 }
 
-$ttm_verse_date = Clock::at( $ttm_verse['date'] );
-$ttm_date_label = $ttm_verse_date ? Dates::short_month( $ttm_verse_date ) . ' ' . $ttm_verse_date->format( 'j' ) : '';
 $ttm_url        = ! empty( $ttm_verse['url'] ) ? $ttm_verse['url'] : 'https://dailymedtoday.com/';
 $ttm_kses_rules = [
 	'em'     => [],
@@ -65,14 +61,10 @@ if ( ! empty( $attributes['compact'] ) ) {
 	<p class="ttm-verse__attribution">
 		<?php
 		printf(
-			/* translators: 1: date, 2: linked domain */
-			esc_html__( 'Meditation for %1$s from %2$s', 'ttm-core' ),
-			esc_html( $ttm_date_label ),
+			/* translators: %s: linked domain */
+			esc_html__( 'Meditation from %s', 'ttm-core' ),
 			'<a href="' . esc_url( $ttm_url ) . '">dailymedtoday.com</a>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_url()'d above.
 		);
 		?>
 	</p>
-	<?php if ( ! empty( $ttm_verse['copyright'] ) && 'box' === Config::get( 'verse.copyright_placement', 'footer' ) ) : ?>
-		<small class="ttm-verse__copyright"><?php echo esc_html( $ttm_verse['copyright'] ); ?></small>
-	<?php endif; ?>
 </div>

@@ -77,4 +77,21 @@ class SeriesStatsTest extends TTM_IntegrationTestCase {
 
 		$this->assertSame( '', trim( $html ) );
 	}
+
+	/**
+	 * P1-05, rule 50: `ttm/series-stats` is a sanctioned site-wide-default block -- it counts
+	 * `SeriesIndex::all()` with no post/term context to read at all.
+	 */
+	public function test_rule_50_no_context_with_other_content(): void {
+		$this->make_series( 'hardening-wp', 'Hardening WordPress', 'technology', 'Technology', 'in-progress' );
+		self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		self::factory()->term->create( [ 'taxonomy' => 'post_tag' ] );
+
+		$GLOBALS['post'] = null;
+		wp_reset_query(); // phpcs:ignore WordPress.WP.DiscouragedFunctions.wp_reset_query_wp_reset_query -- rule 50 sweep: proving no-context behaviour.
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( '1 series', $html );
+	}
 }

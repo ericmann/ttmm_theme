@@ -27,4 +27,16 @@ class FormTest extends TestCase {
 		$this->assertSame( 'article', Form::derive( 'nonfiction', false ) );
 		$this->assertSame( 'article', Form::derive( 'nonfiction', true ) );
 	}
+
+	/**
+	 * P1-04, Decision "Editor-only story derivation": `derive()` itself is unchanged by the
+	 * editor-only gate in `on_save()` -- it's still a pure function of (series form, in Writing).
+	 */
+	public function test_derive_is_unchanged(): void {
+		$this->assertSame( 'chapter', Form::derive( 'novel', false ) );
+		$this->assertSame( 'chapter', Form::derive( 'novel', true ) );
+		$this->assertSame( 'story', Form::derive( null, true ) );
+		$this->assertSame( 'article', Form::derive( null, false ) );
+		$this->assertSame( 'article', Form::derive( 'nonfiction', true ) );
+	}
 }

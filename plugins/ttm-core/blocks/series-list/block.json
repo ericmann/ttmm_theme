@@ -25,6 +25,15 @@
 			"type": "boolean",
 			"default": false
 		},
+		"relatedTo": {
+			"type": "string",
+			"enum": [ "", "current" ],
+			"default": ""
+		},
+		"heading": {
+			"type": "string",
+			"default": ""
+		},
 		"limit": {
 			"type": "number",
 			"default": 0

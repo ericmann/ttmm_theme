@@ -23,6 +23,7 @@ class Loader {
 		}
 
 		\WP_CLI::add_command( 'ttm seed', self::wrap( new SeedCommand() ) );
+		\WP_CLI::add_command( 'ttm stats:flush', self::wrap( new StatsCommand() ) );
 		\WP_CLI::add_command( 'ttm verse', self::wrap( new VerseCommand() ) );
 		\WP_CLI::add_command( 'ttm recount', self::wrap( new RecountCommand() ) );
 		\WP_CLI::add_command( 'ttm primary:assign', self::wrap( new PrimaryCommand() ) );
@@ -66,6 +67,18 @@ class Loader {
 			}
 		);
 		\WP_CLI::add_command( 'ttm migrate:syndication', self::wrap( new SyndicationCommand() ) );
+		\WP_CLI::add_command(
+			'ttm migrate:excerpts',
+			static function ( array $args, array $assoc ): void {
+				self::output( ( new MigrateCommand() )->excerpts( $args, $assoc ) );
+			}
+		);
+		\WP_CLI::add_command(
+			'ttm migrate:images',
+			static function ( array $args, array $assoc ): void {
+				self::output( ( new MigrateCommand() )->images( $args, $assoc ) );
+			}
+		);
 	}
 
 	/**
@@ -136,13 +149,28 @@ class Loader {
 	/**
 	 * `ttm audit`'s own formatter: its rows carry a `flags` array and a `detail` array, which
 	 * `--format=table|csv` render as a joined string / JSON string, and `--format=json` keeps as-is.
+	 * `--summary` rows are `{flag, count}` and always render as a `| flag | count |` markdown
+	 * table (SPEC §6.7), regardless of `--format`.
 	 *
 	 * @param array{ok: bool, rows: array<int, array<string, mixed>>, messages: string[]} $result Command result.
-	 * @param array<string, mixed>                                                        $assoc  --format=table|csv|json.
+	 * @param array<string, mixed>                                                        $assoc  --format=table|csv|json, --summary.
 	 */
 	private static function output_audit( array $result, array $assoc ): void {
 		foreach ( $result['messages'] as $message ) {
 			\WP_CLI::log( $message );
+		}
+
+		if ( ! empty( $assoc['summary'] ) ) {
+			\WP_CLI::log( '| flag | count |' );
+			\WP_CLI::log( '| --- | --- |' );
+			foreach ( $result['rows'] as $row ) {
+				\WP_CLI::log( sprintf( '| %s | %d |', $row['flag'], $row['count'] ) );
+			}
+
+			if ( ! $result['ok'] ) {
+				\WP_CLI::halt( 1 );
+			}
+			return;
 		}
 
 		$format = (string) ( $assoc['format'] ?? 'table' );

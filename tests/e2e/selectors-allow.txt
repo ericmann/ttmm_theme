@@ -25,7 +25,6 @@ blockquote.is-style-pull cite # editor block style (04 §3)
 .entry-content blockquote:not(.is-style-pull) # editor block style (04 §3)
 .ttm-newsletter-form__statement # state: only the None provider renders the statement; the seeded site never does
 .ttm-lead__media.is-ratio-4-3 # state: lead-story imageRatio 4-3; the front page uses 16-9
-.ttm-verse__copyright # editor block style (04 §3)
 .ttm-series-strip:not(:has(.ttm-series-list)) # state: strip with no series list rendered
 .ttm-series-strip:has(.ttm-series-list.is-complete) .ttm-series-strip__heading # state: strip heading when the listed series are all complete
 .ttm-series-strip:has(.ttm-series-list.is-complete) .ttm-series-strip__heading-fallback # state: fallback heading when the listed series are all complete

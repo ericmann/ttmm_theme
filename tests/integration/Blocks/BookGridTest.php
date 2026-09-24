@@ -121,4 +121,34 @@ class BookGridTest extends TTM_IntegrationTestCase {
 
 		$this->assertSame( '', trim( $html ) );
 	}
+
+	/**
+	 * P1-05, rule 50: `ttm/book-grid` is one of the sanctioned site-wide-default blocks --
+	 * `Fiction\Books::all()` has no post/term context to read in the first place, so it
+	 * renders normally regardless of the current post or queried object.
+	 */
+	public function test_rule_50_no_context_with_other_content(): void {
+		self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		wp_insert_term( 'A Series', 'series' );
+
+		update_option(
+			'ttm_books',
+			[
+				[
+					'title'   => 'Salt and Iron',
+					'form'    => 'novel',
+					'year'    => 2022,
+					'formats' => [ 'ebook' ],
+					'links'   => [],
+				],
+			]
+		);
+
+		$GLOBALS['post'] = null;
+		wp_reset_query(); // phpcs:ignore WordPress.WP.DiscouragedFunctions.wp_reset_query_wp_reset_query -- rule 50 sweep: proving no-context behaviour, not a front-end render path.
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'Salt and Iron', $html );
+	}
 }

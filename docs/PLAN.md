@@ -376,3 +376,233 @@ Derived from docs/SPEC.md v4.0 on 2026-09-22. SPEC.md wins over this file.
 10. **§3.1 rule 34 wording** still says "check-fixme.mjs is held to the same standard" while §8 Phase 0 asks for tagged `fixme` rows. Resolution: `ALLOW_TAGGED = true` during the flight (P0-01), `false` at close-out (P5-03), mirroring phase 3.
 11. **§6.6 step 1 "re-run the theme's starter content"** through a plugin command. The plugin cannot call `TTM\Theme\create_starter_content()` (the §4 arrow). Resolution: `seed --starter-only` runs the Seeder's own categories/pages/navigation (same slugs, idempotent), Decision "seed --starter-only".
 12. **Rule 50 vs front-page blocks.** `lead-story`, `verse-of-the-day`, `series-list` (strip), `most-read` on tag archives read site-wide by contract; the rule names only the Writing-page exceptions. Resolution: Decision "Rule 50 sweep" documents the sanctioned set in each block's test docblock.
+
+## Review fixes (round 1)
+
+### R1-01: Primary category survives the WordPress importer; --from-yoast works on imported posts
+**Goal:** Imported posts end up with their Yoast primary category (else nav order), never a stale Uncategorized from the importer's insert-then-set-terms order.
+**Files touched:** plugins/ttm-core/src/Meta/PrimaryCategory.php, plugins/ttm-core/src/Cli/PrimaryCommand.php, tests/integration/Cli/PrimaryCommandTest.php, tests/integration/Meta/SaveHooksTest.php, tests/unit/Meta/PrimaryCategoryTest.php, docs/MIGRATION.md
+**Design constraints:** SPEC §6.7 primary:assign --from-yoast ('for posts without ttm_primary_category'), §9 Q2, rule 49 (dry-run, counts, non-destructive), rule 12 (batched), rule 24. PrimaryCategory::on_save must not persist a primary category during an import (gate on WP_IMPORTING via a filter, e.g. `ttm_primary_on_import`, mirroring Form::is_editor_save()); PrimaryCategory::id() and on_save treat a stored term the post no longer carries as empty (fall back to nav-order resolution on read, never write on read); PrimaryCommand (both modes) treats a stale stored value (not in wp_get_post_categories) as missing. Editor saves keep today's behaviour. No per-visitor branching; Cli imports Meta only.
+**Acceptance tests:** PrimaryCommandTest::test_from_yoast_after_importer_order_uses_yoast() — WITHOUT delete_post_meta: with the import filter on, wp_insert_post (no categories → default category), then wp_set_post_terms([security, technology]), Yoast meta = security → primary:assign --from-yoast writes security and reports used=1; PrimaryCommandTest::test_plain_assign_replaces_a_stale_stored_primary(); SaveHooksTest::test_import_save_does_not_store_default_category_primary(); an id()-level test that a stale stored term resolves to the post's current nav-order category (integration or unit). Each must fail on the current code (the reviewer's probe: stored=uncategorized, --from-yoast 'Would use 0').
+**Out of scope:** Live re-run and screenshots (separate task); live.spec changes; editor sidebar UI.
+**Verification:** npm run test:integration; composer test:unit; composer lint
+**Depends on:** none
+
+### R1-02: Restore the §6.10 single-screen kicker and masthead checks against each post's real primary category
+**Goal:** test:live asserts the masthead current item and the kicker's first term equal the post's primary category name on every single screen, instead of only 'non-empty'.
+**Files touched:** tests/e2e/live.spec.mjs, scripts/live/lib/screens.mjs, scripts/live/screens.mjs, scripts/test/live-screens.test.js
+**Design constraints:** SPEC §6.10 (Singles: kicker equals the primary category name; masthead current item equals the page's section), rule 47 (screens.json stays gitignored, no titles), Decision 'screens.json shape' (add a `primary` field: the primary category's display name read via wp post meta get ttm_primary_category + wp term get, host side). Kicker is core/post-terms (all categories, primary first), so compare its first term (text before the first ' · '). Masthead check runs on single screens against `screen.primary`. Revert the P4-04 relaxation comments.
+**Acceptance tests:** scripts/test/live-screens.test.js: it('carries each single post\'s primary category name') for buildScreens; live.spec.mjs single-kind block asserts kicker first term === screen.primary and masthead current === screen.primary (would fail on the current live import where primary is Uncategorized).
+**Out of scope:** Running the live import (R1-09); PHP changes.
+**Verification:** npm run lint; npm run test:unit; npm run test:live (skips cleanly without screens.json)
+**Depends on:** R1-01
+
+### R1-03: env:live runs end to end: text mismatches do not abort the plan; footnotes verified exactly once in the list
+**Goal:** `npm run env:live` completes on the real export without manual steps, leaving text-mismatched posts classic and listed, and the footnote check catches duplicated notes.
+**Files touched:** scripts/convert-classic.mjs, scripts/live/plan.sh, plugins/ttm-core/src/Cli/ConvertCommand.php, scripts/test/convert-classic.test.js, tests/integration/Cli/ConvertCommandTest.php
+**Design constraints:** SPEC §1.3 'Done', §6.6 (whole plan non-interactive, each step aborts on a real non-zero exit), §6.8 (footnote texts appear in the rendered page exactly once each), rule 49 (non-destructive; backup once). convert-classic.mjs gains a flag (e.g. --allow-text-mismatch) under which textEqual:false is still printed but exit is 0; plan.sh passes it. convert:import skips (does not convert, writes no ttm_classic_backup) any record whose report.textEqual is false, with a '[text-mismatch, skipped]' message, and counts them in its summary. footnotes_verified() counts each note's text exactly once inside the rendered core/footnotes list (ol.wp-block-footnotes or equivalent), not the whole body.
+**Acceptance tests:** convert-classic.test.js: it('--allow-text-mismatch reports mismatches and exits 0') via the exported main/exit helper (no block-library needed); ConvertCommandTest::test_import_skips_text_mismatch_records_and_keeps_them_classic(); ConvertCommandTest::test_footnote_list_duplicated_fails_verification() (a footnotes block rendered twice → [footnotes-mismatch]) and the existing 'body also contains the text' case still passes.
+**Out of scope:** Fixing the 7 malformed classic posts (owner cleanup); running the live import (R1-09).
+**Verification:** npm run test:unit; npm run test:integration; bash -n scripts/live/plan.sh; command -v shellcheck && shellcheck scripts/live/*.sh || true
+**Depends on:** none
+
+### R1-04: migration.image_hosts default per SPEC §5; docs match
+**Goal:** `wp ttm migrate:images` with no --hosts sideloads from the SPEC §5 host list, so plan.sh actually brings images home.
+**Files touched:** plugins/ttm-core/src/Config.php, tests/unit/ConfigTest.php, tests/integration/Cli/MigrateCommandTest.php, docs/MIGRATION.md, docs/05-plugin-spec.md
+**Design constraints:** SPEC §5: migration.image_hosts = [eamann.com, www.eamann.com, ttmm.io, www.ttmm.io, ttmm.wpengine.com, i0.wp.com, i1.wp.com, i2.wp.com]; read only via Config::get('migration.image_hosts', <same list>) (ConfigFallbacksTest). --hosts still overrides. Docs: MIGRATION §2.5a and 05 §10 say --hosts is optional (defaults to the key); MIGRATION §2.1 flag list gains remote-image, shortcode, post-format-aside, no-tags, writing-no-form. Tests never hit the network (pre_http_request).
+**Acceptance tests:** ConfigTest asserts the exact default list; MigrateCommandTest::test_images_without_hosts_uses_configured_default_hosts() (pre_http_request PNG for an eamann.com src, no --hosts → attachment created, src rewritten).
+**Out of scope:** Running the live import; timeout tuning.
+**Verification:** composer test:unit; npm run test:integration; bash scripts/forbidden-patterns.sh
+**Depends on:** none
+
+### R1-05: Verse attribution without a date (SPEC §6.1.1)
+**Goal:** The verse block's attribution reads 'Meditation from dailymedtoday.com' (linked), undated, including the F6 stale fallback.
+**Files touched:** plugins/ttm-core/blocks/verse-of-the-day/render.php, tests/integration/Blocks/VerseOfTheDayTest.php, tests/e2e/fidelity.spec.mjs, docs/03-content-model.md, docs/06-fallbacks.md
+**Design constraints:** SPEC §6.1.1: string translatable (e.g. __( 'Meditation from %s', 'ttm-core' ) with the linked domain), link to the item URL or the site root, no date anywhere in the attribution; F6 amended the same way (last good verse, undated attribution); 03 §6 and 06 F6 text updated. Wrapper shape unchanged (rule 46); no new ttm-* class. Remove now-unused imports.
+**Acceptance tests:** VerseOfTheDayTest: replace the 'Meditation for Sept 18'/'Sept 5' assertions with test_attribution_is_undated() and test_stale_fallback_attribution_is_undated() (text 'Meditation from dailymedtoday.com', no month name); fidelity row verse-attr asserts normalised text === 'Meditation from dailymedtoday.com' in addition to its colour/underline.
+**Out of scope:** Verse fetching, cache boundary, other front-page rows.
+**Verification:** npm run test:integration; npm run test:e2e; npm run lint
+**Depends on:** none
+
+### R1-06: F28 /writing/ archive uses archive.per_page
+**Goal:** In the F28 state, /writing/ paginates exactly like /category/writing/ (archive.per_page).
+**Files touched:** plugins/ttm-core/src/Templates/Hierarchy.php, tests/integration/Templates/HierarchyTest.php
+**Design constraints:** PLAN Decision 'F28 routing' (posts_per_page = archive.per_page, read via Config::get('archive.per_page', 12)); Query\Archive::shape runs before Hierarchy on pre_get_posts, so the rewrite must set it itself (or run earlier); rule 8, rule 24; no per-request WP_Query added.
+**Acceptance tests:** HierarchyTest::test_writing_page_in_f28_state_uses_archive_per_page() — go_to('/writing/') in the F28 state, assert $wp_query->get('posts_per_page') === Config::get('archive.per_page', 12) (fails today: site option 10).
+**Out of scope:** Template/CSS changes; the seeded fiction state.
+**Verification:** npm run test:integration
+**Depends on:** none
+
+### R1-07: Rule 47 check catches private files directly under docs/
+**Goal:** forbidden-patterns.sh fails for a tracked docs/dump.sql, docs/x.csv, docs/b.tar.gz or docs/e.sql.gz, not only nested ones.
+**Files touched:** scripts/forbidden-patterns.sh, scripts/check-private-data.sh, scripts/test/private-data.test.js
+**Design constraints:** SPEC rule 47 (any *.xml, *.sql, *.sql.gz, *.tar.gz, *.csv under docs/, or anything under docs/fixtures/live/). Extract the git ls-files check into scripts/check-private-data.sh (runs against the cwd's repo), called from forbidden-patterns.sh; use top-level and nested pathspecs (or :(glob) magic). Shell: set -euo pipefail, shellcheck clean when installed.
+**Acceptance tests:** scripts/test/private-data.test.js: creates a temp git repo, force-adds docs/dump.sql (and csv, tar.gz, sql.gz, nested docs/a/c.sql, docs/fixtures/live/s.json) and asserts the script exits non-zero naming each; a clean temp repo exits 0. The top-level cases fail against today's pathspecs.
+**Out of scope:** Other forbidden-pattern checks.
+**Verification:** npm run test:unit; bash scripts/forbidden-patterns.sh
+**Depends on:** none
+
+### R1-08: Seeder::reset() removes every post type after a live import
+**Goal:** `wp ttm seed --reset` after env:live leaves no imported feedback/custom_css/wp_block/wp_navigation/nav_menu_item/wp_template/wp_global_styles rows, per the PLAN decision.
+**Files touched:** plugins/ttm-core/src/Cli/Seeder.php, tests/integration/Cli/SeedStatesTest.php
+**Design constraints:** PLAN Decision 'Seeder::reset() from a live state' (every remaining post of every post type, batched by cli.batch; comments; guarded by may_wipe); rule 12 (bounded batches, also bound the get_terms() term deletion by cli.batch); rule 48. The seeder's own navigation is recreated by run(); the default category survives.
+**Acceptance tests:** SeedStatesTest::test_reset_removes_inert_imported_post_types() — create a wp_block, a wp_navigation, a nav_menu_item and a registered-for-test 'feedback' post, reset(), assert none remain; existing reset tests stay green.
+**Out of scope:** Live import changes.
+**Verification:** npm run test:integration; npm run test:e2e
+**Depends on:** none
+
+### R1-09: Re-run env:live and test:live on the export; correct LIVE-TRIAGE; retake live and seeded screenshots; push
+**Goal:** Prove the fixes on the real 889 posts end to end from one command and record the corrected triage.
+**Files touched:** docs/feedback/phase-4/LIVE-TRIAGE.md, docs/feedback/phase-4/*.png, docs/HANDOFF.md, docs/PROGRESS.md
+**Design constraints:** SPEC §1.3, §6.6, §6.10, §6.14, rules 47, 48, 52. Run `npm run env:live` (full or LIVE_SKIP_ATTACHMENTS=1, say which) with no manual steps; record per-step counts including primary:assign --from-yoast used/skipped (expect ~424 used), migrate:images attempts/successes/failures, convert:import skipped-mismatch count. Reclassify the P4-04 'kicker/masthead not a defect' row as the primary-category defect (fix R1-01, test R1-01/R1-02). Break the audit 'shortcode' 51 down by name from detail.shortcodes; if [caption]/[audio] remain in converted post_content, that is a render-class finding to fix with a synthetic test in this task, else document which posts/names they are. `npm run test:live` exit 0. Then `npm run screenshots` (live set), `npm run env:seed -- --reset`, `npm run test:e2e`, `npm run screenshots` (seeded set, front.png shows the undated verse), commit, push. Nothing under docs/fixtures/live/ staged. If the export is absent, log blocked: no export.
+**Acceptance tests:** npm run test:live 0 failures with the R1-02 checks active; npm run test:e2e green after reset; any new rule-52 fix carries its synthetic test.
+**Out of scope:** Content cleanup; beta deployment.
+**Verification:** npm run env:live; npm run test:live; npm run env:seed -- --reset && npm run test:e2e; bash scripts/forbidden-patterns.sh; git push; log Manual check: NOT VERIFIED (human) — open live-front.png and /, a Journal post, /category/security/ on the live import: kicker/section cells show real categories, never Uncategorized.
+**Depends on:** R1-01, R1-02, R1-03, R1-04, R1-05, R1-08
+
+## Review fixes (round 2)
+
+### R2-01: Classic conversion keeps paragraph breaks: real autop on every classic post, merged-paragraph signal
+**Goal:** Converted classic posts keep one core/paragraph block per source paragraph (blank-line-separated), instead of 553 of 724 posts collapsing paragraphs into walls of text.
+**Files touched:** scripts/lib/autop.mjs, scripts/convert-classic.mjs, scripts/lib/report.mjs, scripts/lib/summarize.mjs, scripts/test/autop.test.js, scripts/test/convert-classic.test.js, tests/e2e/live.spec.mjs, package.json, package-lock.json
+**Design constraints:** SPEC §6.8 (pre-pass then rawHandler; text preserved), rule 49 (non-destructive), rule 52 (class fix with a synthetic test), rule 47 (fixtures synthetic, never live text). Use autop() from @wordpress/autop (already in package-lock via @wordpress/blocks; add it to devDependencies only, package.json dependencies stays {}) -- the same function the block parser runs on core/freeform content before 'Convert to blocks'. Apply it to EVERY classic post, not only posts without block-level tags; order: preprocessShortcodes (so [cc]/[cci] bodies are already <pre>, which autop leaves intact) -> autop -> transformFootnotes -> rawHandler. Replace or remove the narrow autoParagraphPlainText guard. Add report.mergedParagraphs (count of core/paragraph blocks whose content contains a blank line) via buildBlockReport; summarizeResults fails on mergedParagraphs > 0 unless --allow-merged-paragraphs is passed (plan.sh must NOT pass it). The reviewer's measurement on the real export with autop swapped in: merged posts 553 -> 5, textEqual:false 7 -> 3; record the real numbers in the commit's Measurement line.
+**Acceptance tests:** scripts/test/autop.test.js (runs, not maybeIt): '<h2>H</h2>\n\nPara one.\n\nPara two.' yields two separate <p> after the heading (fails on today's guard, which returns it unchanged); a multi-line <pre class="wp-block-code"><code>a\n\nb</code></pre> gets no <p>/<br> inside. scripts/test/convert-classic.test.js summarizeResults: mergedParagraphs > 0 fails without the allow flag, passes with it; buildBlockReport counts a paragraph block with an internal blank line. tests/e2e/live.spec.mjs: on classic-converted screens, no .ttm-entry p whose innerHTML contains a blank line (\n\s*\n).
+**Out of scope:** Running the live import and screenshots (separate task); the 3-7 known malformed classic posts (owner cleanup); making @wordpress/block-library load under Jest.
+**Verification:** npm run test:unit; npm run lint; node scripts/convert-classic.mjs docs/fixtures/live/classic.ndjson /tmp/out.ndjson --allow-freeform --allow-text-mismatch (if the gitignored export-derived file exists) reports mergedParagraphs near 0
+**Depends on:** none
+
+### R2-02: migrate:politics is idempotent per post: Politics posts get Opinion and primary Opinion even when Politics is already under Opinion
+**Goal:** After env:live (starter content creates politics under opinion first), every Politics post carries Opinion and has ttm_primary_category = Opinion, so the front-page Opinion cell, kicker and masthead are right.
+**Files touched:** plugins/ttm-core/src/Cli/MigrateCommand.php, tests/integration/Cli/MigrateCommandTest.php
+**Design constraints:** SPEC §6.6 step 4 (migrate:politics in plan.sh), §1.2 (politics 24 posts), rule 49 (dry-run first, counts, idempotent, never deletes), rule 12 (batched), rule 24. politics_child(): when Politics is already a child of Opinion, still iterate Politics posts (batched) and, for any post lacking Opinion or whose stored primary is not Opinion, add Opinion and set ttm_primary_category = Opinion; report 'Updated N Politics post(s)'; a second run reports 0. Dry-run lists the same count. Do not change PrimaryCategory's resolver.
+**Acceptance tests:** MigrateCommandTest::test_politics_already_child_still_updates_posts(): seed_categories() (politics under opinion), wp_insert_post + wp_set_post_terms([politics]) only, run migrate:politics -> post has opinion and politics, ttm_primary_category = opinion id, PrimaryCategory::slug() === 'opinion' (fails today: 'already a child; nothing to do', slug 'politics'); a second run updates 0; dry-run writes nothing.
+**Out of scope:** Live re-run (separate task); PrimaryCategory resolver changes; redirects.
+**Verification:** npm run test:integration; composer lint; composer test:unit
+**Depends on:** none
+
+### R2-03: primary:assign --from-yoast maps source term IDs through the WXR's own category map
+**Goal:** On a WXR import, Yoast primary categories are honoured (expect roughly 110 used, not 3), so multi-category posts get the owner's chosen section instead of nav order.
+**Files touched:** plugins/ttm-core/src/Cli/PrimaryCommand.php, scripts/live/import.sh, scripts/live/plan.sh, tests/integration/Cli/PrimaryCommandTest.php, docs/MIGRATION.md
+**Design constraints:** SPEC §6.7 (--from-yoast: use Yoast only when it names a category the post has), §9 Q2, rule 47 (the map file is under the gitignored live fixtures dir, never committed), rule 49 (dry-run, counts), rule 12. import.sh (or plan.sh) extracts every <wp:category> <wp:term_id>/<wp:category_nicename> pair from the WXR into a JSON object {"<old id>": "<slug>"} at a container-visible path (same convention as the classic/blocks ndjson files), and plan.sh passes primary:assign --from-yoast --term-map=<path>. PrimaryCommand: with --term-map, translate the Yoast value through the map to a slug -> current term id, then apply the existing 'post carries it' check; without --term-map, behaviour unchanged (existing tests stay green). Invalid/missing map file -> error, non-zero exit. CLI only; file path from CLI args, never request input.
+**Acceptance tests:** PrimaryCommandTest::test_from_yoast_with_term_map_translates_source_ids(): post in [technology, security], Yoast meta = 9999 (a foreign id), map {"9999":"security"} written to a temp file -> --from-yoast --term-map=<file> stores security, reports used=1 (fails today: skipped); a map naming a category the post lacks -> skipped; missing file -> ok=false. A shell/Jest-level test of the extraction if it is a Node helper (scripts/live/lib/*.mjs with scripts/test/*), on a synthetic WXR snippet.
+**Out of scope:** Running the live import (separate task); other Yoast meta; remapping any other postmeta.
+**Verification:** npm run test:integration; npm run test:unit; bash -n scripts/live/import.sh scripts/live/plan.sh; bash scripts/forbidden-patterns.sh
+**Depends on:** none
+
+### R2-04: Journal single: keep .ttm-entry identity but no F12 padding; jr-entry asserts mock 2c spacing
+**Goal:** single-journal.html's body sits 18px under the title as in mock 2c, while still carrying .ttm-entry for the axe exclusion and the §6.10 check.
+**Files touched:** themes/ttm-theme/assets/css/ttm.css, tests/e2e/fidelity.spec.mjs
+**Design constraints:** Mock 2c (docs/Eric Mann Newspaper.dc.html lines 431-432: h1 margin 0 0 18px, body directly after, no padding); F12 applies to articles only; rule 38 (inner CSS change carries its fidelity row); rule 34/41 (selector matches a seeded screen); cssBudgetBytes 63488; ttm.css organised by component headers -- put the rule in the Journal component section. Add .ttm-journal-head .ttm-entry { padding-top: 0; }. Keep className ttm-entry on single-journal.html.
+**Acceptance tests:** fidelity.spec.mjs jr-entry: count 1, padding-top 0px, and the gap between the h1's bottom edge and .ttm-entry's top edge equals 18px (bounding boxes) -- fails today (28px padding, 46px gap).
+**Out of scope:** Article (single.html) spacing; other journal rows.
+**Verification:** npm run lint; npm run test:e2e
+**Depends on:** none
+
+### R2-05: Re-run env:live and test:live after the round 2 fixes; correct LIVE-TRIAGE; retake live and seeded screenshots; push
+**Goal:** Prove paragraph-preserving conversion, Politics -> Opinion and mapped Yoast primaries on the real export from one command, and record them.
+**Files touched:** docs/feedback/phase-4/LIVE-TRIAGE.md, docs/feedback/phase-4/*.png, docs/MIGRATION.md, docs/HANDOFF.md, docs/PROGRESS.md
+**Design constraints:** SPEC §1.3, §6.6, §6.10, §6.14, rules 47, 48, 52. npm run env:live (say full or LIVE_SKIP_ATTACHMENTS=1) with no manual steps; record per-step counts: primary:assign --from-yoast used/skipped (expect ~110 used), migrate:politics updated count (~24), convert-classic mergedParagraphs and textEqual:false counts, convert:import skipped count. Correct the R1-09 section's 'structural limitation' text for --from-yoast, add rows for the paragraph-merge and politics findings (class, fix commit, test). Confirm live-front.png's Opinion cell has rows and live-article-classic.png shows separate paragraphs. npm run test:live exit 0; then screenshots (live set), npm run env:seed -- --reset, npm run test:e2e, npm run screenshots (seeded set, journal.png with the 2c spacing), commit, push. Nothing under docs/fixtures/live/ staged. If the export is absent, log blocked: no export.
+**Acceptance tests:** npm run test:live 0 failures with the new merged-paragraph check active; npm run test:e2e green after reset (jr-entry at 0px).
+**Out of scope:** Content cleanup; beta deployment.
+**Verification:** npm run env:live; npm run test:live; npm run env:seed -- --reset && npm run test:e2e; bash scripts/forbidden-patterns.sh; git push; log Manual check: NOT VERIFIED (human) -- open live-article-classic.png and live-front.png: paragraphs separate, Opinion cell populated, multi-category posts in their Yoast section.
+**Depends on:** R2-01, R2-02, R2-03, R2-04
+
+## Review fixes (round 3)
+
+### R3-01: live.spec merged-paragraph check runs on converted screens (screens carry a converted flag)
+**Goal:** The R2-01 end-to-end guard (no .ttm-entry p whose innerHTML has a blank line) actually runs on every classic-converted live screen instead of only on never-converted posts.
+**Files touched:** scripts/live/screens.mjs, scripts/live/lib/screens.mjs, tests/e2e/live.spec.mjs, scripts/test/live-screens.test.js
+**Design constraints:** SPEC §6.10, §6.8, rule 47 (synthetic fixtures only), rule 48 (test:live still skips cleanly without screens.json), rule 52. Keep `classic` meaning 'no <!-- wp: markup' (the shortcode-residue gate uses it). Add `converted: boolean` to the ScreenPost/screen shape: true when the post has `ttm_converted_at` meta (toPost() and classicShortcodePosts() in scripts/live/screens.mjs, which today hard-codes classic:false for ref-/cc-/mfn- screens); buildScreens() passes it through (default false). Export a pure predicate from scripts/live/lib/screens.mjs (e.g. `checksMergedParagraphs(screen)` returning screen.converted) and gate the live.spec.mjs merged-paragraph block on it instead of `screen.classic`.
+**Acceptance tests:** scripts/test/live-screens.test.js (or live-lib.test.js): buildScreens() with a refPosts entry {converted:true} yields a ref-* screen with converted:true and the predicate returns true; a single built from {classic:true, converted:false} returns false; a post without the field defaults to converted:false. This fails today (no converted field; live.spec gates on classic).
+**Out of scope:** Running the live import (R3-03); converter changes (R3-02); changing the shortcode-residue gate.
+**Verification:** npm run test:unit; npm run lint; with no screens.json, npm run test:live still reports skipped and exits 0
+**Depends on:** none
+
+### R3-02: Pure, tested classic pre-rawHandler pipeline order; mergedParagraphs counts nested blocks
+**Goal:** The order shortcode pre-pass -> autop -> footnotes is pinned by a running Jest test, and the merged-paragraph gate sees paragraphs inside quote/list/group inner blocks.
+**Files touched:** scripts/convert-classic.mjs, scripts/lib/report.mjs, scripts/test/convert-classic.test.js, scripts/test/autop.test.js
+**Design constraints:** SPEC §6.8, rule 49, rule 52, rule 47 (synthetic fixtures). Extract the steps before rawHandler in convertPost() into a pure exported function (e.g. prepareClassicHtml(content, postId) -> { html, footnotes, remaining }) in scripts/convert-classic.mjs or a scripts/lib/*.mjs module that imports no block-library/jsdom, and have convertPost() call it (behaviour unchanged). buildBlockReport() recurses into block.innerBlocks for mergedParagraphs (blockCounts/freeform/html semantics may stay top-level; document which).
+**Acceptance tests:** Running (not maybeIt) Jest: prepareClassicHtml('Intro.\n\n[cc lang="php"]a\n\nb[/cc]\n\nOutro.', 1) -> the <pre class="wp-block-code"> body contains no <p> and no <br>, and 'Intro.'/'Outro.' are each wrapped in their own <p> (fails if autop runs before preprocessShortcodes). buildBlockReport([{name:'core/quote', innerBlocks:[{name:'core/paragraph', attributes:{content:'a\n\nb'}}]}]).mergedParagraphs === 1 (fails today: 0).
+**Out of scope:** CodeColorer <code lang> tag syntax (spec issue, not this task); making @wordpress/block-library load under Jest; live re-run (R3-03).
+**Verification:** npm run test:unit; npm run lint; node scripts/convert-classic.mjs docs/fixtures/live/classic.ndjson <scratch>/out.ndjson --allow-freeform --allow-text-mismatch (if the gitignored file exists) still reports 0 merged-paragraph failures
+**Depends on:** none
+
+### R3-03: Re-run env:live and test:live with the merged-paragraph check live; complete LIVE-TRIAGE rows; push
+**Goal:** Prove on the real export that converted screens pass the now-active merged-paragraph check, and record every round-2 class with its fix commit and test per rule 52.
+**Files touched:** docs/feedback/phase-4/LIVE-TRIAGE.md, docs/HANDOFF.md, docs/PROGRESS.md
+**Design constraints:** SPEC §1.3, §6.6, §6.10, rules 47, 48, 52. LIVE_SKIP_ATTACHMENTS=1 npm run env:live (no manual steps), npm run test:live exit 0 with the merged-paragraph assertion executing on the ref-*/cc-*/mfn-* screens (state the count of screens it ran on). If it fails on a converted screen, triage per rule 52 (class fix with a synthetic test, or owner cleanup with reason). In LIVE-TRIAGE's R2-05 table add fix commit and test columns for the paragraph-merge (e67bba9; autop.test.js, convert-classic.test.js, live.spec.mjs), Politics->Opinion (8c60102; MigrateCommandTest::test_politics_already_child_*) and Yoast term-map (72c538f; PrimaryCommandTest::test_from_yoast_with_term_map_*, term-map.test.js) rows, plus this task's run. Drop the stale round-1 HANDOFF advice that --from-yoast needs matching term IDs. Retake live screenshots only if they change. Then npm run env:seed -- --reset && npm run test:e2e green. Nothing under docs/fixtures/live/ staged. If the export is absent, log blocked: no export.
+**Acceptance tests:** npm run test:live: 0 failures with the merged-paragraph check executed on >= 1 converted screen; npm run test:e2e green after reset.
+**Out of scope:** Content cleanup; CodeColorer <code lang> conversion; beta deployment.
+**Verification:** npm run env:live; npm run test:live; npm run env:seed -- --reset && npm run test:e2e; bash scripts/forbidden-patterns.sh; git push
+**Depends on:** R3-01, R3-02
+
+## Review fixes (round 4)
+
+### R4-01: Pipeline-order test fails when autop runs before the shortcode pre-pass
+**Goal:** The prepareClassicHtml() Jest test actually fails if autoParagraphPlainText() is moved before preprocessShortcodes(), by asserting the exact code body instead of the absence of unescaped tags that codeMarkup() escapes anyway.
+**Files touched:** scripts/test/convert-classic.test.js
+**Design constraints:** SPEC §6.8, rule 47 (synthetic fixtures only), rule 49. Test-only change: no production code changes to scripts/lib/prepare-classic.mjs, shortcodes.mjs or autop.mjs. The test must keep running as a plain (not maybeIt) Jest test. Root cause: codeMarkup() HTML-escapes the shortcode body, so the swapped order yields `<p><pre class="wp-block-code"><code lang="php">a&lt;/p&gt;\n&lt;p&gt;b</code></pre></p>`, which passes the current `not.toContain('<p>')`/`not.toContain('<br')` assertions.
+**Acceptance tests:** In scripts/test/convert-classic.test.js 'prepareClassicHtml (R3-02...)': for 'Intro.\n\n[cc lang="php"]a\n\nb[/cc]\n\nOutro.' assert the captured <code> body toBe('a\n\nb') and that html contains neither '<p><pre' nor '</pre></p>'; add a second case 'Intro.\n\n[cc lang="php"]a\nb\n\nc[/cc]\n\nOutro.' asserting the body toBe('a\nb\n\nc') (pins the <br /> path). Mutation proof required in the commit's Tests line: swapping the calls in prepare-classic.mjs to preprocessShortcodes(autoParagraphPlainText(content), postId) makes both cases fail; restore with git checkout.
+**Out of scope:** Changing the pipeline itself; CodeColorer <code lang> tag syntax (spec issue); live re-run; any PHP/theme change.
+**Verification:** npm run test:unit; npm run lint; temporarily swap the order in scripts/lib/prepare-classic.mjs, confirm the prepareClassicHtml tests fail, then git checkout -- scripts/lib/prepare-classic.mjs
+**Depends on:** none
+
+## Review fixes (round 5)
+
+### R5-01: Deterministic seed post dates so env:drill is green in CI; drill detects nondeterminism; CI log step terminates
+**Goal:** Every seeded post gets a distinct, deterministic post_date on every weekday, so seeded pages are byte-stable across requests and `npm run env:drill` passes in CI (SPEC §1.3 Done, §6.9); the drill reports page nondeterminism separately from restore data loss; the CI failure-log step no longer hangs until the 6-hour timeout.
+**Files touched:** plugins/ttm-core/src/Cli/Seeder.php, tests/integration/Cli/SeederTest.php, scripts/live/drill.sh, .github/workflows/ci.yml
+**Design constraints:** Root cause, reproduced by the reviewer on 2026-09-24 (a Thursday): `Seeder::seed_posts()` reads `Clock::now()` separately for each row (Seeder.php:428), and the P0-08 `weekday` walk-back moves `journal-post-1` (`days_ago` 0, weekday Sunday) onto the same day as `journal-post-4` (`days_ago` 4) on Thursdays, and onto the same day as `journal-post-3` on Wednesdays. The rows are inserted within the same second, so they get the same `post_date` (`2026-09-20 01:57:20` for both). The seed has two other ties: `salt-water-wires-ch-24`/`reading-cves-part-4` and `classic-post`/`what-coordinated-disclosure-costs`. `ORDER BY post_date DESC` has no tiebreaker, so the front page's journal column flips between requests (8 of 12 curls vs 4 of 12), and drill.sh's `/` hash differs before and after the restore. The fix:
+- Read `Clock::now()` once per `seed_posts()` run.
+- Subtract the row's fixture index in seconds (structural arithmetic, not a Config tunable, rule 24) BEFORE the weekday walk-back, so the weekday pin still lands on the right weekday even if the offset crosses midnight.
+- Keep the date/time rule (rule 9): only Clock is used, with no `time()`, `date(` or `new DateTime`.
+- Do not change the fixture JSON day offsets.
+- Existing SeederTest expectations (the Sunday journal post, the Security year groups, the lead, the Hardening series part counts) must still pass unchanged.
+
+drill.sh must hash each of the five URLs twice before `wp site empty`. If the two hashes differ, it prints `drill.sh: FAIL <url> is not deterministic before the wipe` and exits 1 without wiping, so seed nondeterminism is never reported as backup/restore data loss. In `.github/workflows/ci.yml`, the `Container logs on failure` step must not watch: use `npx wp-env logs all --watch=false || true`. Do not touch any other CI step.
+**Acceptance tests:** In tests/integration/Cli/SeederTest.php, add `test_seeded_post_dates_are_unique_on_every_weekday`:
+- Use a data provider covering seven consecutive days, `2026-09-20 12:00:00` through `2026-09-26 12:00:00`, via `set_now()`.
+- For each day, seed the normal state.
+- Assert that `SELECT post_date FROM wp_posts WHERE post_type = 'post' AND post_status IN ('publish','future') GROUP BY post_date HAVING COUNT(*) > 1` returns no rows.
+
+With a frozen clock this fails today on the Wednesday and Thursday cases (the `journal-post-1` tie) and on the `reading-cves-part-4`/`salt-water-wires-ch-24` tie.
+
+Also add `test_journal_post_one_stays_on_sunday_when_now_is_just_after_midnight`: call `set_now( '2026-09-24 00:00:30' )` and assert that `journal-post-1`'s `post_date` is a Sunday.
+
+The existing `test_journal_post_one_is_on_a_sunday_with_location_and_syndication` must still pass.
+**Out of scope:** Adding an ID tiebreaker to core/query ordering or any template/theme change; fixture JSON changes; Stats/series index logic; live import scripts; the other CI jobs; the HANDOFF/LIVE-TRIAGE history beyond noting in this task's log that the round-3 'sandbox flakiness' diagnosis was the seed tie.
+**Verification:** - `composer lint`; `composer test:unit`; `npm run lint`; `npm run test:unit`.
+- `npm run test:integration`, including the new SeederTest cases. Mutation check: revert the Seeder change, confirm the new unique-date test fails for the Thursday case, then restore it with `git checkout`.
+- `npm run env:drill` exits 0 locally, run twice.
+- `for i in $(seq 1 12); do curl -s http://localhost:8888/ | md5sum; done | sort -u | wc -l` prints 1 after `npm run env:seed -- --reset`.
+- `npm run test:e2e` stays green.
+- Push and confirm the GitHub Actions integration job's `npm run env:drill` step passes. If it fails, the job must end in minutes, not hang in the logs step.
+**Depends on:** none
+
+## Review fixes (round 6)
+
+### R6-01: Make the after-midnight Seeder test and the editor-registration login actually test what they claim
+**Goal:** The R5-01 'just after midnight' test fails when the seconds offset is applied after the weekday walk-back, and editors.spec.mjs waits for the login to complete before opening the Site Editor or the Customizer, so HEAD's CI (push and PR runs) is green without a login race (SPEC §1.3 Done, P5-04).
+**Files touched:** tests/integration/Cli/SeederTest.php, tests/e2e/editors.spec.mjs
+**Design constraints:** Test-only change. Do not touch Seeder.php or any production code.
+
+SeederTest, `test_journal_post_one_stays_on_sunday_when_now_is_just_after_midnight`:
+- `journal-post-1` is fixture index 30, so today's `set_now( '2026-09-24 00:00:30' )` subtracts exactly 30 s and never crosses midnight.
+- Use a `now` whose seconds are strictly smaller than that index, e.g. `2026-09-24 00:00:10`. Preferably derive the index from `docs/fixtures/seed/posts.json` in the test and build `now` from it, e.g. midnight plus `max( 0, index - 20 )` seconds, asserting that the index is > 0.
+- Assert the weekday on the site-local `post_date`, using `( new DateTimeImmutable( $post->post_date, wp_timezone() ) )->format( 'l' )`, not `gmdate()` on `post_date_gmt`.
+- Keep `test_seeded_post_dates_are_unique_on_every_weekday` and the existing Sunday test unchanged.
+
+editors.spec.mjs:
+- In `login()`, wait for the post-login navigation: `await Promise.all( [ page.waitForURL( /\/wp-admin\// ), page.locator( '#wp-submit' ).click() ] )` or equivalent.
+- In `assertBlocksRegistered()`, before the registry wait, assert that `page.url()` does not contain `wp-login.php`, so a lost session fails with a login message instead of '19 blocks missing'.
+- No `test.fixme(`, and keep both rows as plain `test()` (check-fixme).
+- The ADMIN credentials stay in `tests/e2e/lib/urls.mjs`.
+**Acceptance tests:** SeederTest::test_journal_post_one_stays_on_sunday_when_now_is_just_after_midnight: after the change, a mutation that moves `->modify( '-' . (int) $index . ' seconds' )` in Seeder::seed_posts() to after the weekday loop (just before `$date = ...`) must make this test FAIL, because the post lands on Saturday. Today it passes under that mutation. In editors.spec.mjs, the new not-on-wp-login.php assertion in both rows (editor-sed, editor-customizer) turns the race observed in PR run 35990641981 (page snapshot = Log In form) into an explicit login failure. The waitForURL in login() removes the race.
+**Out of scope:** Seeder.php and any production code; fixture JSON; drill.sh; ci.yml; other e2e specs; fidelity rows; HANDOFF history beyond this task's log.
+**Verification:** - `composer lint` (via /usr/bin/php if the host composer shim is broken); `npm run lint`; `npm run test:unit`.
+- Integration: `npx wp-env run tests-cli --env-cwd=wp-content/ttm-tests php ../ttm-vendor/bin/phpunit -c integration/phpunit.xml.dist --filter 'SeederTest'` is green.
+- Mutation: move the seconds offset after the weekday loop in Seeder.php. Confirm the after-midnight test fails, then `git checkout -- plugins/ttm-core/src/Cli/Seeder.php`.
+- `npx wp-scripts test-playwright --config tests/e2e/playwright.config.mjs --project fidelity tests/e2e/editors.spec.mjs --repeat-each=10` is green.
+- `npm run test:e2e` is green.
+- Push, and confirm that both the push and the pull_request GitHub Actions runs for the new head are green, including the integration job's `env:drill` step and the e2e job.
+**Depends on:** none

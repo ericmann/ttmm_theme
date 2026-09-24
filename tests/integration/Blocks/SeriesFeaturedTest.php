@@ -322,4 +322,23 @@ class SeriesFeaturedTest extends TTM_IntegrationTestCase {
 
 		$this->assertSame( '', trim( $html ) );
 	}
+
+	/**
+	 * P1-05, rule 50: `ttm/series-featured` is a sanctioned site-wide-default block -- with no
+	 * seriesId attribute and no queried series term it auto-picks (03 §3: `ttm_featured` term
+	 * meta, else newest in-progress, else most recently completed), regardless of the current
+	 * post/queried object.
+	 */
+	public function test_rule_50_no_context_with_other_content(): void {
+		$this->make_series( 'the-quiet-ledger', 'The Quiet Ledger', 2, [ [ 'part' => 1 ] ] );
+		self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		self::factory()->term->create( [ 'taxonomy' => 'post_tag' ] );
+
+		$GLOBALS['post'] = null;
+		wp_reset_query(); // phpcs:ignore WordPress.WP.DiscouragedFunctions.wp_reset_query_wp_reset_query -- rule 50 sweep: proving no-context behaviour.
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'The Quiet Ledger', $html );
+	}
 }

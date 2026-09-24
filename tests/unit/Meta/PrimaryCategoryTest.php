@@ -57,6 +57,7 @@ class PrimaryCategoryTest extends TestCase {
 		// first in nav order; then technology (index 0) before politics, whose top-level
 		// ancestor opinion (index 6) is last; get_term() resolves politics' parent.
 		Functions\when( 'get_post_meta' )->justReturn( 6 );
+		Functions\when( 'wp_get_post_categories' )->justReturn( [ 1, 6, 8 ] );
 		$opinion = $this->term( 7, 'opinion', 'Opinion' );
 		Functions\when( 'get_term' )->alias(
 			static function ( int $id ) use ( $opinion ) {
@@ -79,5 +80,37 @@ class PrimaryCategoryTest extends TestCase {
 		$terms = [ $this->term( 3, 'wordpress', 'wordpress' ), $this->term( 2, 'php', 'php' ) ];
 
 		$this->assertSame( $terms, PrimaryCategory::order_terms( $terms, 42, 'post_tag' ) );
+	}
+
+	/**
+	 * R1-01: a stored primary the post no longer carries (e.g. after re-categorising, or a
+	 * stale value left by the importer's insert-then-set-terms order) is treated as empty and
+	 * resolved fresh from the post's current terms and nav order -- id() never trusts a
+	 * stored value that isn't in wp_get_post_categories().
+	 */
+	public function test_id_falls_back_to_nav_order_when_stored_term_is_stale(): void {
+		Functions\when( 'get_post_meta' )->justReturn( 99 );
+		Functions\when( 'wp_get_post_categories' )->justReturn( [ 6 ] );
+		Functions\when( 'is_wp_error' )->justReturn( false );
+		$security = $this->term( 6, 'security', 'Security' );
+		Functions\when( 'get_term' )->justReturn( $security );
+		Functions\when( 'get_term_by' )->justReturn( $security );
+
+		$this->assertSame( 6, PrimaryCategory::id( 42 ) );
+	}
+
+	public function test_id_returns_stored_when_still_assigned(): void {
+		Functions\when( 'get_post_meta' )->justReturn( 6 );
+		Functions\when( 'wp_get_post_categories' )->justReturn( [ 1, 6 ] );
+
+		$this->assertSame( 6, PrimaryCategory::id( 42 ) );
+	}
+
+	public function test_is_import_save_is_true_when_wp_importing_defined(): void {
+		if ( ! defined( 'WP_IMPORTING' ) ) {
+			define( 'WP_IMPORTING', true );
+		}
+
+		$this->assertTrue( PrimaryCategory::is_import_save() );
 	}
 }

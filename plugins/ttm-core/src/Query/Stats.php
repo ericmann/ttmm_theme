@@ -12,6 +12,7 @@ namespace TTM\Core\Query;
 use TTM\Core\Config;
 use TTM\Core\Support\Clock;
 use WP_Post;
+use WP_Query;
 
 /**
  * Reads/caches ttm_category_stats_{id} and ttm_top_tags_{id} transients.
@@ -23,6 +24,78 @@ class Stats {
 	 */
 	public static function register(): void {
 		add_action( 'transition_post_status', [ self::class, 'on_transition' ], 10, 3 );
+		add_action( 'set_object_terms', [ self::class, 'on_set_object_terms' ], 10, 6 );
+		add_action( 'added_post_meta', [ self::class, 'on_meta_change' ], 10, 3 );
+		add_action( 'updated_post_meta', [ self::class, 'on_meta_change' ], 10, 3 );
+		add_action( 'deleted_post_meta', [ self::class, 'on_meta_change' ], 10, 3 );
+	}
+
+	/**
+	 * Flush the cached story count when `ttm_form` changes (F28, SPEC §6.5). `$meta_id` is a
+	 * single id on `added_post_meta`/`updated_post_meta` and an array of ids on
+	 * `deleted_post_meta`, so it's left untyped/unused rather than narrowed.
+	 *
+	 * @param mixed  $meta_id  Meta row id(s); unused.
+	 * @param int    $post_id  Post id; unused.
+	 * @param string $meta_key Meta key.
+	 */
+	public static function on_meta_change( $meta_id, int $post_id, string $meta_key ): void {
+		unset( $meta_id, $post_id );
+
+		if ( 'ttm_form' === $meta_key ) {
+			delete_transient( 'ttm_stats_story_count' );
+		}
+	}
+
+	/**
+	 * Flush the affected category's stats/top-tags transients when a post's terms change
+	 * (SPEC §4, Decision "Stats invalidation"). `post_tag` changes flush every category the
+	 * post belongs to (its top tags moved); `category` changes flush both the categories it
+	 * is leaving (`$old_tt_ids`) and the ones it is joining (`$tt_ids`).
+	 *
+	 * @param int      $object_id  Post id.
+	 * @param string[] $terms      Term slugs or ids as passed to `wp_set_object_terms()`.
+	 * @param int[]    $tt_ids     Term taxonomy ids now set.
+	 * @param string   $taxonomy   Taxonomy slug.
+	 * @param bool     $append     Whether terms were appended.
+	 * @param int[]    $old_tt_ids Term taxonomy ids that were set before this change.
+	 */
+	public static function on_set_object_terms( int $object_id, array $terms, array $tt_ids, string $taxonomy, bool $append, array $old_tt_ids ): void {
+		if ( 'post_tag' === $taxonomy ) {
+			self::flush_for_post( $object_id );
+			return;
+		}
+
+		if ( 'category' !== $taxonomy ) {
+			return;
+		}
+
+		foreach ( array_unique( array_map( 'intval', array_merge( $tt_ids, $old_tt_ids ) ) ) as $tt_id ) {
+			$term_id = self::term_id_for_term_taxonomy_id( $tt_id );
+			if ( $term_id > 0 ) {
+				self::flush( $term_id );
+			}
+		}
+	}
+
+	/**
+	 * A category's `term_id` from its `term_taxonomy_id` (the ids `set_object_terms` passes),
+	 * which are equal for non-shared taxonomies but not guaranteed to be.
+	 *
+	 * @param int $term_taxonomy_id Term taxonomy id.
+	 * @return int Term id, or 0 if not found.
+	 */
+	private static function term_id_for_term_taxonomy_id( int $term_taxonomy_id ): int {
+		global $wpdb;
+
+		$term_id = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT term_id FROM {$wpdb->term_taxonomy} WHERE term_taxonomy_id = %d AND taxonomy = 'category'",
+				$term_taxonomy_id
+			)
+		);
+
+		return (int) $term_id;
 	}
 
 	/**
@@ -143,7 +216,7 @@ class Stats {
 				)
 				AND tr.object_id IN ( SELECT ID FROM {$wpdb->posts} WHERE post_type = 'post' AND post_status = 'publish' )
 				GROUP BY t.term_id, t.slug, t.name
-				ORDER BY cnt DESC
+				ORDER BY cnt DESC, t.slug ASC
 				LIMIT %d",
 				$term_id,
 				$limit
@@ -161,9 +234,48 @@ class Stats {
 			(array) $rows
 		);
 
-		set_transient( $key, $tags, (int) Config::get( 'stats.tags_cache_seconds', 43200 ) );
+		// Rule 24 / SPEC §4: an empty result (no tagged posts yet) is cached for the shorter
+		// stats.cache_seconds so a newly tagged post shows up sooner than the full
+		// stats.tags_cache_seconds window a populated result gets.
+		$ttl = [] === $tags
+			? (int) Config::get( 'stats.cache_seconds', 3600 )
+			: (int) Config::get( 'stats.tags_cache_seconds', 43200 );
+
+		set_transient( $key, $tags, $ttl );
 
 		return $tags;
+	}
+
+	/**
+	 * Count of published posts with `ttm_form = story`, cached. `Fiction\Serials::has_any_fiction()`
+	 * reads this instead of `stories( 1 )` (F28, SPEC §6.5) so the F28 gate is a cheap cached
+	 * count, not a bounded `WP_Query` re-run on every request.
+	 *
+	 * @return int
+	 */
+	public static function story_count(): int {
+		$key    = 'ttm_stats_story_count';
+		$cached = get_transient( $key );
+		if ( false !== $cached ) {
+			return (int) $cached;
+		}
+
+		$query = new WP_Query(
+			[
+				'post_type'      => 'post',
+				'post_status'    => 'publish',
+				'meta_key'       => 'ttm_form', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- bounded (fields=ids, posts_per_page=1); found_posts gives the real total.
+				'meta_value'     => 'story', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				'fields'         => 'ids',
+				'posts_per_page' => 1,
+			]
+		);
+
+		$count = (int) $query->found_posts;
+
+		set_transient( $key, $count, (int) Config::get( 'stats.cache_seconds', 3600 ) );
+
+		return $count;
 	}
 
 	/**
@@ -185,5 +297,36 @@ class Stats {
 		foreach ( wp_get_post_categories( $post_id ) as $term_id ) {
 			self::flush( (int) $term_id );
 		}
+	}
+
+	/**
+	 * Delete every `ttm_category_stats_*`/`ttm_top_tags_*` transient outright (SPEC §4,
+	 * Decision "Stats invalidation"), used by the seeder before a fresh run/reset and by the
+	 * `wp ttm stats:flush` CLI command (P2-01). There is no bulk `delete_transient()` by
+	 * pattern, so the value rows (never the `_transient_timeout_*` rows -- the LIKE pattern
+	 * below doesn't match their name) are found by a direct `$wpdb->options` query and each
+	 * key is then deleted through `delete_transient()`, which removes both the value and
+	 * timeout options through core's normal option-cache invalidation (an `$wpdb->query()`
+	 * `DELETE` alone would leave a stale `alloptions` cache entry behind).
+	 */
+	public static function flush_all(): int {
+		global $wpdb;
+
+		$names = $wpdb->get_col(
+			"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_ttm\\_category\\_stats\\_%' OR option_name LIKE '\\_transient\\_ttm\\_top\\_tags\\_%'"
+		);
+
+		foreach ( (array) $names as $name ) {
+			delete_transient( substr( (string) $name, strlen( '_transient_' ) ) );
+		}
+
+		$count = count( (array) $names );
+
+		if ( false !== get_transient( 'ttm_stats_story_count' ) ) {
+			++$count;
+		}
+		delete_transient( 'ttm_stats_story_count' );
+
+		return $count;
 	}
 }

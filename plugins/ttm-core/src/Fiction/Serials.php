@@ -11,6 +11,7 @@ namespace TTM\Core\Fiction;
 
 use TTM\Core\Config;
 use TTM\Core\Query\SeriesIndex;
+use TTM\Core\Query\Stats;
 use WP_Query;
 
 /**
@@ -63,7 +64,7 @@ class Serials {
 			return true;
 		}
 
-		return ! empty( self::stories( 1 ) );
+		return Stats::story_count() > 0;
 	}
 
 	/**

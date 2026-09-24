@@ -109,4 +109,49 @@ class TagFilterTest extends TTM_IntegrationTestCase {
 
 		$this->assertSame( '', trim( $this->render() ) );
 	}
+
+	/**
+	 * P0-05: SPEC §4/§6.2 -- an importer that sets `post_status` before `tags_input` (WXR
+	 * import order) must still produce the filter row once the tags land, not leave it
+	 * permanently empty behind a stale cached-empty top_tags transient.
+	 */
+	public function test_import_order_terms_after_status_produces_the_row(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+		$post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+			]
+		);
+
+		$this->go_to( (string) get_category_link( $tech ) );
+		$this->assertSame( '', trim( $this->render() ) );
+
+		wp_set_post_tags( $post, [ 'imported-late' ] );
+
+		$this->go_to( (string) get_category_link( $tech ) );
+		$html = $this->render();
+		$this->assertStringContainsString( 'ttm-filter-row', $html );
+		$this->assertStringContainsString( 'imported-late', $html );
+	}
+
+	/**
+	 * P1-05, rule 50: no queried category term, other content exists -> ''.
+	 */
+	public function test_rule_50_no_context_with_other_content(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+		self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $tech ],
+				'tags_input'    => [ 'php' ],
+			]
+		);
+		wp_insert_term( 'A Series', 'series' );
+
+		$GLOBALS['post'] = null;
+		wp_reset_query(); // phpcs:ignore WordPress.WP.DiscouragedFunctions.wp_reset_query_wp_reset_query -- rule 50 sweep: proving no-context behaviour.
+
+		$this->assertSame( '', trim( $this->render() ) );
+	}
 }

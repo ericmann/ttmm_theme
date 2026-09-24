@@ -1,0 +1,16 @@
+[
+	{
+		"slug": "boundless-summer-challenge",
+		"name": "Boundless Summer Challenge",
+		"tags": [ "boundless-summer-challenge", "boundless" ],
+		"form": "nonfiction",
+		"status": "complete"
+	},
+	{
+		"slug": "cryptopals",
+		"name": "Cryptopals",
+		"tags": [ "cryptopals" ],
+		"form": "nonfiction",
+		"status": "complete"
+	}
+]

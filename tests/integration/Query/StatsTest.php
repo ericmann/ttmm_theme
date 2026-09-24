@@ -134,7 +134,7 @@ class StatsTest extends TTM_IntegrationTestCase {
 			[
 				'post_status'   => 'publish',
 				'post_category' => [ $cat ],
-			] 
+			]
 		);
 
 		Stats::category( $cat );
@@ -142,5 +142,156 @@ class StatsTest extends TTM_IntegrationTestCase {
 		Stats::category( $cat );
 
 		$this->assertSame( $queries_before, $wpdb->num_queries );
+	}
+
+	/**
+	 * P0-05: SPEC rule 24 -- ties are broken deterministically (count desc, then slug asc), not
+	 * left to whatever order MySQL happens to return.
+	 */
+	public function test_top_tags_tiebreak_is_count_desc_then_slug_asc(): void {
+		$cat = $this->category_id( 'tiebreak', 'Tiebreak' );
+
+		self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $cat ],
+				'tags_input'    => [ 'zeta' ],
+			]
+		);
+		self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $cat ],
+				'tags_input'    => [ 'alpha' ],
+			]
+		);
+		self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $cat ],
+				'tags_input'    => [ 'mid' ],
+			]
+		);
+
+		$tags = Stats::top_tags( $cat );
+
+		$this->assertSame( [ 'alpha', 'mid', 'zeta' ], array_column( $tags, 'slug' ) );
+	}
+
+	/**
+	 * P0-05: SPEC §4 -- attaching a tag to an already-published post refreshes top_tags for
+	 * every category the post belongs to (the `post_tag` branch of `on_set_object_terms`).
+	 */
+	public function test_attaching_a_tag_to_a_published_post_refreshes_top_tags(): void {
+		$cat  = $this->category_id( 'refresh-tags', 'Refresh Tags' );
+		$post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $cat ],
+			]
+		);
+
+		$this->assertSame( [], Stats::top_tags( $cat ) );
+
+		wp_set_post_tags( $post, [ 'late-tag' ] );
+
+		$tags = Stats::top_tags( $cat );
+		$this->assertSame( [ 'late-tag' ], array_column( $tags, 'slug' ) );
+	}
+
+	/**
+	 * P0-05: SPEC §4 -- moving a post between categories flushes both the category it left and
+	 * the one it joined (the `category` branch of `on_set_object_terms`).
+	 */
+	public function test_changing_categories_flushes_old_and_new_category(): void {
+		$from = $this->category_id( 'move-from', 'Move From' );
+		$to   = $this->category_id( 'move-to', 'Move To' );
+		$post = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $from ],
+			]
+		);
+
+		Stats::category( $from );
+		Stats::category( $to );
+		$this->assertNotFalse( get_transient( "ttm_category_stats_{$from}" ) );
+		$this->assertNotFalse( get_transient( "ttm_category_stats_{$to}" ) );
+
+		wp_set_post_categories( $post, [ $to ] );
+
+		$this->assertFalse( get_transient( "ttm_category_stats_{$from}" ) );
+		$this->assertFalse( get_transient( "ttm_category_stats_{$to}" ) );
+	}
+
+	/**
+	 * P0-05: SPEC §4 -- an empty top_tags result is cached for the shorter
+	 * stats.cache_seconds (3600), not the full stats.tags_cache_seconds (43200).
+	 */
+	public function test_empty_top_tags_result_is_cached_for_stats_cache_seconds(): void {
+		$cat = $this->category_id( 'no-tagged-posts', 'No Tagged Posts' );
+		self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $cat ],
+			]
+		);
+
+		$this->assertSame( [], Stats::top_tags( $cat ) );
+
+		$timeout = (int) get_option( "_transient_timeout_ttm_top_tags_{$cat}" );
+		$this->assertEqualsWithDelta( time() + 3600, $timeout, 5 );
+	}
+
+	/**
+	 * P0-05: SPEC §4 -- `Stats::flush_all()` deletes every stats/top-tags transient outright,
+	 * used by the seeder before a fresh run/reset.
+	 */
+	public function test_flush_all_deletes_every_stats_transient(): void {
+		$one = $this->category_id( 'flush-all-one', 'Flush All One' );
+		$two = $this->category_id( 'flush-all-two', 'Flush All Two' );
+		self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $one ],
+				'tags_input'    => [ 'flush-tag' ],
+			]
+		);
+
+		Stats::category( $one );
+		Stats::top_tags( $one );
+		Stats::category( $two );
+		Stats::top_tags( $two );
+
+		Stats::flush_all();
+
+		$this->assertFalse( get_transient( "ttm_category_stats_{$one}" ) );
+		$this->assertFalse( get_transient( "ttm_top_tags_{$one}" ) );
+		$this->assertFalse( get_transient( "ttm_category_stats_{$two}" ) );
+		$this->assertFalse( get_transient( "ttm_top_tags_{$two}" ) );
+	}
+
+	/**
+	 * P1-04, F28: story_count() is cached and invalidated when a post's ttm_form meta changes
+	 * (added/updated/deleted), so the F28 gate sees a newly-story'd or un-story'd post.
+	 */
+	public function test_story_count_is_cached_and_flushed_on_form_meta_change(): void {
+		$this->assertSame( 0, Stats::story_count() );
+		$this->assertNotFalse( get_transient( 'ttm_stats_story_count' ) );
+
+		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		update_post_meta( $post_id, 'ttm_form', 'story' );
+
+		$this->assertSame( 1, Stats::story_count() );
+
+		update_post_meta( $post_id, 'ttm_form', 'article' );
+
+		$this->assertSame( 0, Stats::story_count() );
+
+		update_post_meta( $post_id, 'ttm_form', 'story' );
+		$this->assertSame( 1, Stats::story_count() );
+
+		delete_post_meta( $post_id, 'ttm_form' );
+		$this->assertSame( 0, Stats::story_count() );
 	}
 }

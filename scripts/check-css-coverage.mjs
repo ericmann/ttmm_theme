@@ -11,6 +11,7 @@ import {
 	parseAllowList,
 	filterSrcFiles,
 	report,
+	UNSTYLED_WRAPPERS,
 } from './lib/css-coverage.mjs';
 
 const MARKUP_ROOTS = [
@@ -86,15 +87,6 @@ const srcFiles = filterSrcFiles(
 );
 
 const allMarkupFiles = [ ...markupFiles, ...renderFiles, ...srcFiles ];
-
-// Block wrapper classes with no dedicated rule by design (R1-10): `archive-by-year`
-// and `most-read` apply no layout of their own beyond their children's own
-// selectors (`.ttm-archive-year`, `.ttm-numbered__row`, …), so `ttm-archive`/
-// `ttm-most-read` never need a CSS rule. A prior `.ttm-archive, .ttm-most-read
-// { display: block }` rule existed only to satisfy this scanner and has been
-// removed as a self-admitted no-op; this is the scanner-level exemption in
-// its place, not a decorative CSS rule.
-const UNSTYLED_WRAPPERS = new Set( [ 'ttm-archive', 'ttm-most-read' ] );
 
 const markup = new Set(
 	[ ...collectMarkupClasses( readAll( allMarkupFiles ) ) ].filter(

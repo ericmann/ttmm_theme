@@ -1,6 +1,7 @@
 <?php
 /**
- * `wp ttm migrate:politics|migrate:redirects|migrate:close-comments` (SPEC §6.7, Q3).
+ * `wp ttm migrate:politics|migrate:redirects|migrate:close-comments|migrate:excerpts|migrate:images`
+ * (SPEC §6.7, Q3).
  *
  * @package TTM\Core\Cli
  */
@@ -10,6 +11,9 @@ declare( strict_types=1 );
 namespace TTM\Core\Cli;
 
 use TTM\Core\Config;
+use TTM\Core\Meta\PrimaryCategory;
+use TTM\Core\Support\Html;
+use TTM\Core\Support\Text;
 use WP_Query;
 use WP_Term;
 
@@ -178,26 +182,316 @@ class MigrateCommand extends Command {
 	}
 
 	/**
+	 * `migrate:excerpts --from=yoast [--dry-run] [--words=<n>]` (SPEC §6.7): posts with an empty
+	 * `post_excerpt` and a non-empty `_yoast_wpseo_metadesc` get it as the excerpt, truncated
+	 * at a sentence boundary within `excerpt_length` words. Never overwrites an existing
+	 * excerpt; Journal-primary posts are excluded (their excerpt is derived, not migrated).
+	 * `--words=` overrides `excerpt_length` for one run, measurement only (P2-08 tuning); the
+	 * `Config` default is what every other run (and production) actually uses.
+	 *
+	 * {@inheritDoc}
+	 *
+	 * @param string[]             $args  Positional args (unused).
+	 * @param array<string, mixed> $assoc --from=yoast, --dry-run, --words=<n>.
+	 */
+	public function excerpts( array $args, array $assoc ): array {
+		unset( $args );
+
+		$from = (string) ( $assoc['from'] ?? '' );
+		if ( 'yoast' !== $from ) {
+			return [
+				'ok'       => false,
+				'rows'     => [],
+				'messages' => [ 'Usage: migrate:excerpts --from=yoast [--dry-run] [--words=<n>]' ],
+			];
+		}
+
+		$dry_run      = ! empty( $assoc['dry-run'] );
+		$batch        = (int) Config::get( 'cli.batch', 200 );
+		$max_words    = isset( $assoc['words'] ) ? (int) $assoc['words'] : (int) Config::get( 'excerpt_length', 55 );
+		$journal_slug = (string) Config::get( 'sections.journal_slug', 'journal' );
+		$rows         = [];
+		$paged        = 1;
+
+		do {
+			$query = new WP_Query(
+				[
+					'post_type'      => 'post',
+					'post_status'    => 'any',
+					'posts_per_page' => $batch,
+					'paged'          => $paged,
+					'fields'         => 'ids',
+				]
+			);
+
+			foreach ( $query->posts as $post_id ) {
+				$post_id = (int) $post_id;
+				$post    = get_post( $post_id );
+
+				if ( ! $post || '' !== trim( (string) $post->post_excerpt ) ) {
+					continue;
+				}
+
+				if ( PrimaryCategory::slug( $post_id ) === $journal_slug ) {
+					continue;
+				}
+
+				$meta_desc = (string) get_post_meta( $post_id, '_yoast_wpseo_metadesc', true );
+				if ( '' === trim( $meta_desc ) ) {
+					continue;
+				}
+
+				$excerpt = Text::truncate_sentences( $meta_desc, $max_words );
+
+				if ( ! $dry_run ) {
+					wp_update_post(
+						[
+							'ID'           => $post_id,
+							'post_excerpt' => $excerpt,
+						]
+					);
+				}
+
+				$rows[] = [
+					'post_id' => $post_id,
+					'excerpt' => $excerpt,
+				];
+			}//end foreach
+
+			$found = count( $query->posts );
+			++$paged;
+		} while ( $found === $batch );
+
+		return [
+			'ok'       => true,
+			'rows'     => $rows,
+			'messages' => [
+				$dry_run
+					? sprintf( 'Would fill %d excerpt(s) from Yoast.', count( $rows ) )
+					: sprintf( 'Filled %d excerpt(s) from Yoast.', count( $rows ) ),
+			],
+		];
+	}
+
+	/**
+	 * `migrate:images [--hosts=<comma-list>] [--post=<id>] [--dry-run] [--timeout=<seconds>]`
+	 * (SPEC §6.7): for every published post (or just `--post`), Photon (`iN.wp.com/<host>/<path>`)
+	 * `<img src>` URLs whose `<host>` equals `migration.photon_origin` are rewritten to
+	 * `https://<host>/<path>` with no network fetch; `<img src>` URLs on any other host in
+	 * `--hosts`/`migration.image_hosts` are sideloaded into the media library and both the `src`
+	 * and any wrapping `<a href>` to the same URL are rewritten to the new attachment URL. A
+	 * fetch failure leaves that `src` untouched. `ttm_classic_backup` is written once, first
+	 * writer wins (shared with convert:import/revert, rule 49); `ttm_images_rewritten` records
+	 * the per-post count. `--timeout=` overrides `migration.image_timeout` for one run,
+	 * measurement only (P2-08 tuning); the `Config` default is what every other run (and
+	 * production) actually uses. The summary message reports sideload attempts/successes/
+	 * timeouts/other-failures, also for measurement.
+	 *
+	 * @param string[]             $args  Positional args (unused).
+	 * @param array<string, mixed> $assoc --hosts, --post, --dry-run, --timeout=<seconds>.
+	 * @return array{ok: bool, rows: array<int, array<string, mixed>>, messages: string[]}
+	 */
+	public function images( array $args, array $assoc ): array {
+		unset( $args );
+
+		$dry_run = ! empty( $assoc['dry-run'] );
+		$hosts   = isset( $assoc['hosts'] )
+			? array_values( array_filter( array_map( 'trim', explode( ',', (string) $assoc['hosts'] ) ) ) )
+			: (array) Config::get( 'migration.image_hosts', [ 'eamann.com', 'www.eamann.com', 'ttmm.io', 'www.ttmm.io', 'ttmm.wpengine.com', 'i0.wp.com', 'i1.wp.com', 'i2.wp.com' ] );
+		$origin  = (string) Config::get( 'migration.photon_origin', 'eric.mann.blog' );
+		$timeout = isset( $assoc['timeout'] ) ? (int) $assoc['timeout'] : (int) Config::get( 'migration.image_timeout', 20 );
+
+		$post_ids = isset( $assoc['post'] )
+			? [ (int) $assoc['post'] ]
+			: $this->published_posts();
+
+		$rows      = [];
+		$attempts  = 0;
+		$successes = 0;
+		$timeouts  = 0;
+		$failures  = 0;
+
+		foreach ( $post_ids as $post_id ) {
+			$post = get_post( $post_id );
+			if ( ! $post ) {
+				continue;
+			}
+
+			$content   = $post->post_content;
+			$rewritten = 0;
+
+			foreach ( Html::image_srcs( $content ) as $src ) {
+				$photon_url = Html::photon_origin_url( $src, $origin );
+				if ( null !== $photon_url ) {
+					$content = Html::replace_url( $content, $src, $photon_url );
+					++$rewritten;
+					continue;
+				}
+
+				$host = (string) wp_parse_url( $src, PHP_URL_HOST );
+				if ( '' === $host || ! in_array( $host, $hosts, true ) ) {
+					continue;
+				}
+
+				if ( $dry_run ) {
+					++$rewritten;
+					continue;
+				}
+
+				++$attempts;
+				$sideloaded = $this->sideload( $src, $post_id, $timeout );
+				if ( $sideloaded['timed_out'] ) {
+					++$timeouts;
+				} elseif ( null === $sideloaded['url'] ) {
+					++$failures;
+				} else {
+					++$successes;
+				}
+
+				if ( null === $sideloaded['url'] ) {
+					continue;
+				}
+
+				$content = Html::replace_url( $content, $src, $sideloaded['url'] );
+				++$rewritten;
+			}//end foreach
+
+			if ( 0 === $rewritten ) {
+				continue;
+			}
+
+			$rows[] = [
+				'post_id'   => $post_id,
+				'rewritten' => $rewritten,
+			];
+
+			if ( $dry_run ) {
+				continue;
+			}
+
+			if ( '' === (string) get_post_meta( $post_id, 'ttm_classic_backup', true ) ) {
+				update_post_meta( $post_id, 'ttm_classic_backup', $post->post_content );
+			}
+
+			wp_update_post(
+				[
+					'ID'           => $post_id,
+					'post_content' => $content,
+				]
+			);
+			update_post_meta( $post_id, 'ttm_images_rewritten', $rewritten );
+		}//end foreach
+
+		return [
+			'ok'       => true,
+			'rows'     => $rows,
+			'messages' => [
+				$dry_run
+					? sprintf( 'Would rewrite images on %d post(s).', count( $rows ) )
+					: sprintf( 'Rewrote images on %d post(s).', count( $rows ) ),
+				sprintf(
+					'Sideload attempts: %d, successes: %d, timeouts: %d, other failures: %d.',
+					$attempts,
+					$successes,
+					$timeouts,
+					$failures
+				),
+			],
+		];
+	}
+
+	/**
+	 * Sideload a remote image into the media library, with `http_request_timeout` overridden
+	 * only for the duration of this call (SPEC §6.7). `url` is null on failure -- the caller
+	 * leaves the original `src` untouched; `timed_out` distinguishes a timeout from any other
+	 * failure, for `migrate:images`' own attempt/success/timeout/failure summary (P2-08 tuning).
+	 *
+	 * @param string $url     Remote image URL.
+	 * @param int    $post_id Post to attach the sideloaded image to.
+	 * @param int    $timeout Request timeout, seconds.
+	 * @return array{url: string|null, timed_out: bool}
+	 */
+	private function sideload( string $url, int $post_id, int $timeout ): array {
+		require_once ABSPATH . 'wp-admin/includes/media.php';
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+
+		$set_timeout = static fn (): int => $timeout;
+
+		add_filter( 'http_request_timeout', $set_timeout );
+		$attachment_id = media_sideload_image( $url, $post_id, null, 'id' ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_media_sideload_image -- CLI-only migration, see class docblock.
+		remove_filter( 'http_request_timeout', $set_timeout );
+
+		if ( is_wp_error( $attachment_id ) ) {
+			$timed_out = in_array( $attachment_id->get_error_code(), [ 'http_request_failed', 'http_no_file' ], true )
+				&& false !== stripos( $attachment_id->get_error_message(), 'timed out' );
+
+			return [
+				'url'       => null,
+				'timed_out' => $timed_out,
+			];
+		}
+
+		$attachment_url = wp_get_attachment_url( (int) $attachment_id );
+
+		return [
+			'url'       => is_string( $attachment_url ) ? $attachment_url : null,
+			'timed_out' => false,
+		];
+	}
+
+	/**
+	 * Batched ids of every published post.
+	 *
+	 * @return int[]
+	 */
+	private function published_posts(): array {
+		$batch = (int) Config::get( 'cli.batch', 200 );
+		$ids   = [];
+		$paged = 1;
+
+		do {
+			$query = new WP_Query(
+				[
+					'post_type'      => 'post',
+					'post_status'    => 'publish',
+					'posts_per_page' => $batch,
+					'paged'          => $paged,
+					'fields'         => 'ids',
+				]
+			);
+			$ids   = array_merge( $ids, $query->posts );
+			$found = count( $query->posts );
+			++$paged;
+		} while ( $found === $batch );
+
+		return $ids;
+	}
+
+	/**
 	 * `--to=child`: reparent Politics under Opinion (creating Opinion if needed), add Opinion
 	 * to every Politics post (they keep Politics too -- it's a child now, not a replacement),
 	 * and set each post's `ttm_primary_category` to Opinion so `PrimaryCategory::slug()`
 	 * resolves to `'opinion'` (SPEC Q3: Politics posts are Opinion posts, kicker-wise; only
 	 * `Bindings\Sources::in_politics()`'s any-position check still finds "politics" on them).
-	 * Idempotent: a second run sees Politics already parented under Opinion and does nothing
-	 * further (including to individual posts).
+	 * Idempotent per post, not just per category: env:live's starter content already creates
+	 * Politics as a child of Opinion (R2-02), so a bare "Politics is already parented" check
+	 * would report "nothing to do" while individual posts -- assigned to Politics by
+	 * `convert:import` afterward -- never actually got Opinion added or set as their primary.
+	 * Once Politics is already parented, this still walks every Politics post (batched) and
+	 * fixes any that are missing Opinion or whose stored primary isn't Opinion yet; a second
+	 * run after that finds none left and reports 0.
 	 *
 	 * @param WP_Term $politics The Politics category term.
 	 * @param bool    $dry_run  Whether to only report the plan.
 	 * @return array{ok: bool, rows: array<int, array<string, mixed>>, messages: string[]}
 	 */
 	private function politics_child( WP_Term $politics, bool $dry_run ): array {
-		$opinion = get_term_by( 'slug', 'opinion', 'category' );
-		if ( $opinion && (int) $politics->parent === (int) $opinion->term_id ) {
-			return [
-				'ok'       => true,
-				'rows'     => [],
-				'messages' => [ 'Politics is already a child of Opinion; nothing to do.' ],
-			];
+		$opinion          = get_term_by( 'slug', 'opinion', 'category' );
+		$already_parented = $opinion instanceof WP_Term && (int) $politics->parent === (int) $opinion->term_id;
+
+		if ( $already_parented ) {
+			return $this->politics_child_fixup( $politics, (int) $opinion->term_id, $dry_run );
 		}
 
 		$posts = $this->posts_in_category( $politics->term_id );
@@ -255,6 +549,69 @@ class MigrateCommand extends Command {
 			'ok'       => true,
 			'rows'     => $rows,
 			'messages' => [ sprintf( 'Politics is now a child of Opinion (%d post(s) updated).', count( $rows ) ) ],
+		];
+	}
+
+	/**
+	 * Politics is already parented under Opinion (R2-02): walk every Politics post (batched)
+	 * and fix any that are missing Opinion in their categories or whose stored
+	 * `ttm_primary_category` isn't Opinion yet, without touching the term relationship itself
+	 * or posts that are already correct. Dry-run reports the same count it would update.
+	 *
+	 * @param WP_Term $politics   The Politics category term (already a child of Opinion).
+	 * @param int     $opinion_id The Opinion category term id.
+	 * @param bool    $dry_run    Whether to only report the plan.
+	 * @return array{ok: bool, rows: array<int, array<string, mixed>>, messages: string[]}
+	 */
+	private function politics_child_fixup( WP_Term $politics, int $opinion_id, bool $dry_run ): array {
+		$posts = array_values(
+			array_filter(
+				$this->posts_in_category( $politics->term_id ),
+				function ( int $post_id ) use ( $opinion_id ): bool {
+					$categories = wp_get_post_categories( $post_id, [ 'fields' => 'ids' ] );
+					$primary    = (int) get_post_meta( $post_id, 'ttm_primary_category', true );
+
+					return ! in_array( $opinion_id, $categories, true ) || $primary !== $opinion_id;
+				}
+			)
+		);
+
+		if ( $dry_run ) {
+			return [
+				'ok'       => true,
+				'rows'     => array_map( static fn ( int $id ): array => [ 'post_id' => $id ], $posts ),
+				'messages' => [ sprintf( 'Would update %d Politics post(s) (add Opinion / set primary Opinion).', count( $posts ) ) ],
+			];
+		}
+
+		$rows = [];
+		foreach ( $posts as $post_id ) {
+			$categories = wp_get_post_categories( $post_id, [ 'fields' => 'ids' ] );
+			if ( ! in_array( $opinion_id, $categories, true ) ) {
+				$categories[] = $opinion_id;
+				wp_set_post_categories( $post_id, array_values( array_unique( $categories ) ) );
+			}
+			update_post_meta( $post_id, 'ttm_primary_category', $opinion_id );
+
+			$rows[] = [ 'post_id' => $post_id ];
+		}
+
+		if ( ! empty( $rows ) ) {
+			$this->purge(
+				array_filter(
+					[
+						home_url( '/' ),
+						$this->category_link_or_null( $opinion_id ),
+						$this->category_link_or_null( $politics->term_id ),
+					]
+				)
+			);
+		}
+
+		return [
+			'ok'       => true,
+			'rows'     => $rows,
+			'messages' => [ sprintf( 'Updated %d Politics post(s).', count( $rows ) ) ],
 		];
 	}
 

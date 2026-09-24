@@ -52,5 +52,21 @@ export default defineConfig( {
 				...devices[ 'Desktop Chrome' ],
 			},
 		},
+		{
+			// P4-01, SPEC §6.10: the live check suite, run only by `npm run test:live`
+			// (`scripts/live/test-live.sh` already guards it at the shell level when
+			// `docs/fixtures/live/screens.json` is absent; `live.spec.mjs`'s own `test.skip()`
+			// guards it a second time here). Its own testMatch keeps `fidelity`'s project from
+			// ever picking it up, and vice versa. A single spec file naturally runs single-
+			// worker/in declaration order (needed for the one-beforeAll/one-final-test
+			// `wp-content/debug.log` line-count comparison), so no explicit `workers` override
+			// is needed (that's a top-level Playwright option, not a per-project one anyway).
+			name: 'live',
+			testDir: '.',
+			testMatch: /live\.spec\.mjs$/,
+			use: {
+				...devices[ 'Desktop Chrome' ],
+			},
+		},
 	],
 } );

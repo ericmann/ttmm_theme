@@ -11,6 +11,7 @@ namespace TTM\Core\Cli;
 
 use TTM\Core\Config;
 use TTM\Core\Meta\PostMeta;
+use TTM\Core\Query\Stats;
 use TTM\Core\Support\Clock;
 use TTM\Core\Verse\Fetcher;
 
@@ -143,6 +144,9 @@ class Seeder {
 		$this->state       = $state;
 		$this->days_offset = 'quiet' === $state ? (int) Config::get( 'seed.quiet_offset_days', 120 ) : 0;
 
+		// P0-05: a previous run's stats/top-tags transients must never leak into this one.
+		Stats::flush_all();
+
 		$categories = $this->seed_categories();
 		$pages      = $this->seed_pages();
 		$navigation = $this->seed_navigation();
@@ -172,6 +176,38 @@ class Seeder {
 			'series'     => count( $series ),
 			'books'      => count( $books ),
 		];
+	}
+
+	/**
+	 * `wp ttm seed --starter-only` (SPEC §6.6 step 1, §6.7): the theme's starter content only
+	 * -- categories, the Series/Writing/Newsletter/About pages, and the Sections navigation.
+	 * No posts, series, books, verse, or newsletter settings. Idempotent by slug, same as
+	 * every `seed_*()` method it calls.
+	 *
+	 * @return array{categories:int, pages:int, navigation:int}
+	 */
+	public function run_starter(): array {
+		$categories = $this->seed_categories();
+		$pages      = $this->seed_pages();
+		$navigation = $this->seed_navigation();
+
+		return [
+			'categories' => count( $categories ),
+			'pages'      => count( $pages ),
+			'navigation' => $navigation ? 1 : 0,
+		];
+	}
+
+	/**
+	 * Whether destructive seed operations (`reset()`, `--starter-only` re-running over live
+	 * content) are allowed for a given `WP_ENVIRONMENT_TYPE` value (rule 49: `seed --reset` is
+	 * the one sanctioned wipe, guarded by environment). Pure: no WordPress calls.
+	 *
+	 * @param string $environment_type `wp_get_environment_type()` value.
+	 * @return bool
+	 */
+	public static function may_wipe( string $environment_type ): bool {
+		return 'production' !== $environment_type;
 	}
 
 	/**
@@ -363,6 +399,12 @@ class Seeder {
 		$rows     = $this->load( 'posts.json' );
 		$ids      = [];
 		$excluded = 'empty' === $this->state ? $this->empty_state_excluded_slugs() : [];
+		// R5-01: read the clock once for the whole run and offset every row by its fixture
+		// index in seconds (structural arithmetic, not a Config tunable, rule 24) so rows
+		// inserted within the same wall-clock second still get distinct post_date values.
+		// The offset is applied BEFORE the weekday walk-back below so a pin still lands on
+		// the right weekday even when the offset crosses midnight.
+		$now = Clock::now();
 
 		foreach ( $rows as $index => $row ) {
 			if ( 'empty' === $this->state ) {
@@ -389,7 +431,8 @@ class Seeder {
 
 			$is_future = ! empty( $row['future'] );
 			$days_ago  = $is_future ? (int) $row['days_ago'] : (int) $row['days_ago'] + $this->days_offset;
-			$moment    = Clock::now()->modify( ( $days_ago >= 0 ? '-' : '+' ) . abs( $days_ago ) . ' days' );
+			$moment    = $now->modify( ( $days_ago >= 0 ? '-' : '+' ) . abs( $days_ago ) . ' days' )
+				->modify( '-' . (int) $index . ' seconds' );
 
 			// P0-08: pin a post to a specific weekday (e.g. the Journal's Sunday post),
 			// walking back at most a week -- never forward, so a "future" post stays future.
@@ -444,7 +487,7 @@ class Seeder {
 				// fresh resolve of both now that the post's real categories are in place.
 				delete_post_meta( $post_id, 'ttm_primary_category' );
 				\TTM\Core\Meta\PrimaryCategory::on_save( $post_id, get_post( $post_id ) );
-				\TTM\Core\Meta\Form::on_save( $post_id, get_post( $post_id ) );
+				\TTM\Core\Meta\Form::on_save( $post_id, get_post( $post_id ), true );
 			}
 
 			// A fixture `form` override wins over the re-derive above and is locked so a later
@@ -555,7 +598,7 @@ class Seeder {
 				// the Writing cell's "Also running" list showed the featured serial's own latest
 				// chapter a second time, labelled "Story", because Serials::stories() matches
 				// ttm_form=story. Re-derive now that the real series membership is in place.
-				\TTM\Core\Meta\Form::on_save( $post->ID, get_post( $post->ID ) );
+				\TTM\Core\Meta\Form::on_save( $post->ID, get_post( $post->ID ), true );
 			}
 
 			$ids[] = $term_id;
@@ -815,21 +858,88 @@ class Seeder {
 	/**
 	 * Delete every object carrying the seed meta.
 	 */
+	/**
+	 * `wp ttm seed --reset` (SPEC §6.6 last paragraph, rule 49): return the site to empty,
+	 * `wp site empty`-equivalent -- every post of every registered post type (not just post/
+	 * page/attachment: `wp_block`, `wp_navigation`, `nav_menu_item`, `wp_template`,
+	 * `wp_global_styles`, `custom_css` and anything else registered, e.g. a live import's own
+	 * `feedback` rows), every comment, and every non-default category/tag/series term -- not
+	 * only rows this seeder itself wrote (Decision "Seeder::reset() from a live state": after a
+	 * live import, non-seed content must go too). Guarded by `may_wipe()`; a no-op when the
+	 * environment doesn't allow it. `wp_delete_term()` already refuses to delete the default
+	 * category on its own, so no special case is needed here; `run()` recreates the seeder's
+	 * own navigation afterward. Batched by `cli.batch` throughout (rule 12).
+	 */
 	public function reset(): void {
-		global $wpdb;
-
-		$post_ids = $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s", self::SEED_META ) );
-		foreach ( $post_ids as $post_id ) {
-			wp_delete_post( (int) $post_id, true );
+		$environment = function_exists( 'wp_get_environment_type' ) ? wp_get_environment_type() : 'production';
+		if ( ! self::may_wipe( $environment ) ) {
+			return;
 		}
 
-		$term_ids = $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM {$wpdb->termmeta} WHERE meta_key = %s", self::SEED_META ) );
-		foreach ( $term_ids as $term_id ) {
-			$term = get_term( (int) $term_id );
-			if ( $term && ! is_wp_error( $term ) ) {
-				wp_delete_term( (int) $term_id, $term->taxonomy );
+		// P0-05: clear stats/top-tags transients before the deleted posts can leave stale data
+		// behind for whatever content (seeded or not) remains.
+		Stats::flush_all();
+
+		$batch = (int) Config::get( 'cli.batch', 200 );
+
+		foreach ( get_post_types( [], 'names' ) as $post_type ) {
+			// 'any' does not include attachments' 'inherit' status (rule 12: still a bounded,
+			// explicit status list, not an unlimited page size).
+			$status = 'attachment' === $post_type
+				? [ 'inherit', 'private', 'publish', 'draft', 'pending', 'future', 'trash' ]
+				: 'any';
+
+			do {
+				$query = new \WP_Query(
+					[
+						'post_type'      => $post_type,
+						'post_status'    => $status,
+						'posts_per_page' => $batch,
+						'fields'         => 'ids',
+					]
+				);
+				foreach ( $query->posts as $post_id ) {
+					wp_delete_post( (int) $post_id, true );
+				}
+				$found = count( $query->posts );
+			} while ( $found === $batch );
+		}//end foreach
+
+		do {
+			$comment_ids = get_comments(
+				[
+					'number' => $batch,
+					'fields' => 'ids',
+				]
+			);
+			foreach ( $comment_ids as $comment_id ) {
+				wp_delete_comment( (int) $comment_id, true );
 			}
-		}
+			$found = count( $comment_ids );
+		} while ( $found === $batch );
+
+		foreach ( [ 'category', 'post_tag', 'series' ] as $taxonomy ) {
+			// Batched (rule 12): a term this loop can't delete (the default category) would
+			// otherwise reappear in every page and never let the loop terminate, so it also
+			// stops once a whole pass deletes nothing.
+			do {
+				$term_ids = get_terms(
+					[
+						'taxonomy'   => $taxonomy,
+						'hide_empty' => false,
+						'fields'     => 'ids',
+						'number'     => $batch,
+					]
+				);
+				$found    = count( (array) $term_ids );
+				$deleted  = 0;
+				foreach ( (array) $term_ids as $term_id ) {
+					if ( wp_delete_term( (int) $term_id, $taxonomy ) ) {
+						++$deleted;
+					}
+				}
+			} while ( $found === $batch && $deleted > 0 );
+		}//end foreach
 
 		delete_option( 'ttm_books' );
 		delete_option( 'ttm_verse' );

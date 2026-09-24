@@ -268,17 +268,18 @@ test.describe( 'verse', () => {
 
 	test( 'verse-attr: .ttm-verse__attribution a @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
-		const attr = page.locator( '.ttm-verse__attribution a' );
+		const attribution = page.locator( '.ttm-verse__attribution' );
+		// R1-05, SPEC §6.1.1: the attribution never carries a date, however stale the verse
+		// (F6) -- "Meditation from dailymedtoday.com" only, linked.
+		const attributionText = ( await attribution.innerText() )
+			.replace( /\s+/g, ' ' )
+			.trim();
+		expect( attributionText ).toBe( 'Meditation from dailymedtoday.com' );
+
+		const attr = attribution.locator( 'a' );
 		expect( await computed( attr, 'color' ) ).toBe( color( 'accent-700' ) );
 		expect( await computed( attr, 'text-decoration-line' ) ).toBe(
 			'underline'
-		);
-	} );
-
-	test( 'verse-nocopy: .ttm-verse__copyright @1280', async ( { page } ) => {
-		await gotoFront( page, 1280 );
-		expect( await page.locator( '.ttm-verse__copyright' ).count() ).toBe(
-			0
 		);
 	} );
 } );
@@ -812,22 +813,80 @@ test.describe( 'footer', () => {
 		);
 	} );
 
-	test( 'footer-copy: .ttm-footer__copyright @1280', async ( { page } ) => {
+	// P1-01, SPEC §6.11 (changed): footer-copy targets `.ttm-footer__left p` (the old
+	// Scripture-copyright slot is gone -- Decision "Scripture copyright").
+	test( 'footer-copy: .ttm-footer__left p @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
-		const copyright = page.locator( '.ttm-footer__copyright' );
-		expect( await copyright.count() ).toBe( 1 );
-		expect( await computed( copyright, 'font-size' ) ).toBe( px( 12 ) );
+		const el = page.locator( '.ttm-footer__left p' );
+		expect( await el.count() ).toBe( 1 );
+		expect( await text( el ) ).toMatch(
+			/^These Things Matter · © \d{4} Eric Mann · Built on WordPress$/
+		);
 	} );
 
-	test( 'footer-nav: .ttm-footer .wp-block-navigation-item @1280', async ( {
+	// P1-01, SPEC §6.11.
+	test( 'footer-nocopyright: .ttm-footer @1280', async ( { page } ) => {
+		for ( const path of [ SCREENS.article, '/' ] ) {
+			await gotoScreen( page, path, 1280 );
+			const footerText = await text( page.locator( '.ttm-footer' ) );
+			for ( const forbidden of [
+				'Scripture',
+				'Copyright ©',
+				'Biblica',
+				'Zondervan',
+			] ) {
+				expect( footerText ).not.toContain( forbidden );
+			}
+		}
+	} );
+
+	// P1-01, SPEC §6.11 (changed): eight nav items, no /feed/ link.
+	test( 'footer-nav: .ttm-footer__nav .wp-block-navigation-item @1280', async ( {
+		page,
+	} ) => {
+		for ( const path of [ SCREENS.article, '/' ] ) {
+			await gotoScreen( page, path, 1280 );
+			const items = page.locator(
+				'.ttm-footer__nav .wp-block-navigation-item'
+			);
+			expect( await items.count() ).toBe( 8 );
+			expect( await text( items.last() ) ).toBe( 'Series' );
+			const feedLinks = page.locator(
+				'.ttm-footer__nav a[href$="/feed/"]'
+			);
+			expect( await feedLinks.count() ).toBe( 0 );
+		}
+	} );
+
+	// P1-01, SPEC §6.11.
+	test( 'footer-one-line: .ttm-footer__nav ul @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const ul = page.locator( '.ttm-footer__nav ul' );
+		const ulBox = await ul.boundingBox();
+		expect( ulBox.height ).toBeLessThanOrEqual( 20 );
+		const footerBox = await page.locator( '.ttm-footer' ).boundingBox();
+		expect( footerBox.height ).toBeLessThanOrEqual( 48 );
+	} );
+
+	// P1-01, SPEC §6.11.
+	test( 'footer-font: .ttm-footer__nav a (first) @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-footer__nav a' ).first();
+		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
+		expect( await computed( el, 'font-weight' ) ).toBe( '400' );
+		expect( await computed( el, 'color' ) ).toBe( color( 'neutral-700' ) );
+	} );
+
+	// P1-01, SPEC §6.11.
+	test( 'footer-front-nors: .ttm-footer__nav a[href$="/feed/"] @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
 		expect(
-			await page
-				.locator( '.ttm-footer .wp-block-navigation-item' )
-				.count()
-		).toBe( 9 );
+			await page.locator( '.ttm-footer__nav a[href$="/feed/"]' ).count()
+		).toBe( 0 );
 	} );
 
 	test( 'footer-nav-sep: .ttm-footer .wp-block-navigation-item:nth-child(2)::before @1280', async ( {
@@ -1326,6 +1385,46 @@ test.describe( 'prev/next', () => {
 		const t = await tracks( el );
 		expect( t.length ).toBe( 1 );
 	} );
+
+	// P1-02, SPEC §6.11: outside any series, prev/next falls back to the primary category's
+	// chronology.
+	test( 'prevnext-auto-label: .ttm-prevnext__label @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.articleNoSeries, 1280 );
+		const labels = page.locator( '.ttm-prevnext__label' );
+		const texts = [];
+		const count = await labels.count();
+		for ( let i = 0; i < count; i++ ) {
+			const source = await labels
+				.nth( i )
+				.evaluate( ( node ) => node.textContent );
+			texts.push( source.replace( /\s+/g, ' ' ).trim() );
+		}
+		expect( texts ).toEqual( [ '← Previously in Technology', 'Next →' ] );
+	} );
+
+	// P1-02, SPEC §6.11.
+	test( 'prevnext-auto-title: .ttm-prevnext__title @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.articleNoSeries, 1280 );
+		const titles = page.locator( '.ttm-prevnext__title' );
+		expect( await titles.count() ).toBe( 2 );
+		expect( await computed( titles.first(), 'font-size' ) ).toBe(
+			px( 18 )
+		);
+		const origin = new URL( page.url() ).origin;
+		const count = await titles.count();
+		for ( let i = 0; i < count; i++ ) {
+			const href = await titles
+				.nth( i )
+				.locator( 'xpath=ancestor::a[1]' )
+				.getAttribute( 'href' );
+			expect( href ).not.toBeNull();
+			expect( href.startsWith( origin ) ).toBe( true );
+		}
+	} );
 } );
 
 test.describe( 'aside', () => {
@@ -1487,6 +1586,39 @@ test.describe( 'aside', () => {
 			lastY = box.y;
 		}
 	} );
+
+	// P1-02, SPEC §6.11: outside any series, the TOC/bar don't render at all.
+	test( 'toc-absent: .ttm-series-toc @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.articleNoSeries, 1280 );
+		expect( await page.locator( '.ttm-series-toc' ).count() ).toBe( 0 );
+	} );
+
+	// P1-02, SPEC §6.11.
+	test( 'bar-absent: .ttm-series-bar @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.articleNoSeries, 1280 );
+		expect( await page.locator( '.ttm-series-bar' ).count() ).toBe( 0 );
+	} );
+
+	// P1-02, SPEC §6.11: with no TOC, "More in <section>" moves to the top of the aside.
+	test( 'aside-noseries-order: .ttm-article aside > * @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.articleNoSeries, 1280 );
+		const children = page.locator( '.ttm-article aside > *' );
+		const first = await children.nth( 0 ).getAttribute( 'class' );
+		const second = await children.nth( 1 ).getAttribute( 'class' );
+		expect( first ).toMatch( /\bttm-more-in\b/ );
+		expect( second ).toMatch( /\bttm-newsletter-box\b/ );
+	} );
+
+	// P1-02, SPEC §6.11.
+	test( 'box-noseries: .ttm-newsletter-box__title @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.articleNoSeries, 1280 );
+		const el = page.locator( '.ttm-newsletter-box__title' );
+		expect( await text( el ) ).toBe( 'The weekly issue.' );
+	} );
 } );
 
 test.describe( 'journal', () => {
@@ -1542,6 +1674,30 @@ test.describe( 'journal', () => {
 		const el = page.locator( '.ttm-journal-head main' );
 		// getComputedStyle resolves em to px: 36em at the 18px body size.
 		expect( await computed( el, 'max-width' ) ).toBe( px( 36 * 18 ) );
+	} );
+
+	// R1-09, SPEC §6.10 ("Singles: … .ttm-entry present and non-empty"): single-journal.html's
+	// wp:post-content lacked the ttm-entry className single.html's carries -- found on the live
+	// import, where it silently broke live.spec.mjs's axe `.exclude('.ttm-entry')` convention on
+	// a Journal-primary post (a raw legacy `<a><img></a>` with no alt/aria-label in the post body
+	// then failed the axe check instead of being excluded as content, same as every other
+	// single). ttm-entry stays on the markup for that reason; R2-04 (mock 2c) zeroes F12's
+	// byline-to-body padding-top on it here, since a journal single's h1 already carries the
+	// 18px gap itself (h1 margin-bottom) with no byline between the two -- F12's padding would
+	// double it.
+	test( 'jr-entry: .ttm-journal-head main .ttm-entry @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.journalPost, 1280 );
+		const el = page.locator( '.ttm-journal-head main .ttm-entry' );
+		expect( await el.count() ).toBe( 1 );
+		expect( await computed( el, 'padding-top' ) ).toBe( px( 0 ) );
+
+		const h1Box = await page
+			.locator( '.ttm-journal-head h1' )
+			.boundingBox();
+		const entryBox = await el.boundingBox();
+		expect( entryBox.y - ( h1Box.y + h1Box.height ) ).toBe( 18 );
 	} );
 
 	test( 'jr-body-p: .ttm-journal-head main .entry-content p (first) @1280', async ( {
@@ -1962,7 +2118,10 @@ test.describe( 'writing', () => {
 		const el = page
 			.locator( '.ttm-series-list.is-list .ttm-series-row__meta' )
 			.first();
-		expect( await text( el ) ).toMatch( /^Novel · .+ · monthly$/i );
+		// P0-06, SI-23: tightened to the seed's literal text (the-quiet-ledger).
+		expect( await text( el ) ).toBe(
+			'Novel · literary thriller · monthly'
+		);
 	} );
 
 	test( 'wr-serial-count: .ttm-series-list.is-list .ttm-series-row__count (first) @1280', async ( {
@@ -2404,6 +2563,41 @@ test.describe( 'archive', () => {
 		expect(
 			Math.abs( sort.x + sort.width - ( row.x + row.width ) )
 		).toBeLessThan( 1 );
+	} );
+
+	// P0-05, SPEC §6.11: Business has six tags (five plus "All"), a second seeded section
+	// exercising the filter row beyond Security.
+	test( 'ar-filter-business: .ttm-filter-row .tag @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.businessArchive, 1280 );
+		const tags = page.locator( '.ttm-filter-row .tag' );
+		expect( await tags.count() ).toBe( 6 );
+		expect( await text( tags.first() ) ).toBe( 'All' );
+	} );
+
+	// P0-05, SPEC §6.11.
+	test( 'ar-filter-business-pos: .ttm-filter-row @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.businessArchive, 1280 );
+		const head = await page.locator( '.ttm-archive-head' ).boundingBox();
+		const filter = await page.locator( '.ttm-filter-row' ).boundingBox();
+		const body = await page.locator( '.ttm-archive-body' ).boundingBox();
+		expect( filter.y ).toBeGreaterThanOrEqual( head.y + head.height );
+		expect( filter.y + filter.height ).toBeLessThanOrEqual( body.y );
+		const el = page.locator( '.ttm-filter-row' );
+		expect( await computed( el, 'border-top-width' ) ).toBe( px( 2 ) );
+		expect( await computed( el, 'border-bottom-width' ) ).toBe( px( 1 ) );
+	} );
+
+	// P0-05, SPEC §6.11.
+	test( 'ar-filter-sort-business: .ttm-filter-row__sort @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.businessArchive, 1280 );
+		const el = page.locator( '.ttm-filter-row__sort' );
+		expect( await text( el ) ).toBe( 'Newest first' );
 	} );
 
 	test( 'ar-body: .ttm-archive-body @1280', async ( { page } ) => {
@@ -3019,8 +3213,10 @@ test.describe( 'hub', () => {
 			.locator( '.ttm-series-list.is-grid-2 .ttm-series-row__categories' )
 			.first();
 		expect( await computed( el, 'font-size' ) ).toBe( px( 12 ) );
-		const t = await text( el );
-		expect( t ).toContain( ' · ' );
+		// P0-06, SI-23: tightened to the seed's literal text. "All series" is sorted by
+		// last_update desc; hardening-wordpress's hardening-part-4-keys-in-the-environment
+		// (days_ago 0) is the most recent published part across every seeded series.
+		expect( await text( el ) ).toBe( 'Technology · Security' );
 	} );
 
 	test( 'hub-grid-dek: .ttm-series-list.is-grid-2 .ttm-series-row__dek (first) @1280', async ( {
@@ -3159,14 +3355,33 @@ test.describe( 'single series', () => {
 		expect( await computed( date, 'grid-column-start' ) ).toBe( '2' );
 	} );
 
+	// P1-03, SPEC §6.11 (changed): "Other series" excludes the three fiction series and
+	// includes the new Reading CVEs. SPEC's row states a count of 4 (up to
+	// series.related_limit), but that is the cap, not a guarantee: hardening-wordpress has
+	// only three other nonfiction series to rank (the-consultants-ledger, ordinary-time,
+	// reading-cves) once the three fiction series are excluded by form, so the real count is 3.
 	test( 'single-other: .ttm-series-single__other .ttm-series-row @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.seriesHardening, 1280 );
 		const els = page.locator( '.ttm-series-single__other .ttm-series-row' );
 		const count = await els.count();
-		expect( count ).toBeLessThanOrEqual( 4 );
-		expect( count ).toBeGreaterThanOrEqual( 1 );
+		expect( count ).toBe( 3 );
+
+		const titles = [];
+		for ( let i = 0; i < count; i++ ) {
+			titles.push(
+				await text( els.nth( i ).locator( '.ttm-series-row__title' ) )
+			);
+		}
+		expect( titles[ 0 ] ).toBe( 'Reading CVEs' );
+		for ( const excluded of [
+			'The Quiet Ledger',
+			'Failover',
+			'Salt Water Wires',
+		] ) {
+			expect( titles ).not.toContain( excluded );
+		}
 
 		// Rule 36 / SPEC §6.9: the count-and-status cell sits beside the
 		// title, not dropped to the row's last grid row.
@@ -3184,6 +3399,52 @@ test.describe( 'single series', () => {
 				1
 			);
 		}
+	} );
+
+	// P1-03, SPEC §6.11.
+	test( 'single-other-cats: .ttm-series-single__other .ttm-series-row__categories @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.seriesHardening, 1280 );
+		const first = page
+			.locator(
+				'.ttm-series-single__other .ttm-series-row__categories, .ttm-series-single__other .ttm-series-row__meta'
+			)
+			.first();
+		expect( await text( first ) ).toContain( 'Security' );
+	} );
+
+	// P1-03, SPEC §6.11: on a fiction series hub, "Other series" ranks by last update -- read
+	// the newest-chapter dates from docs/fixtures/seed/posts.json: Failover's newest chapter
+	// (failover-ch-9) is more recent (days_ago 250) than Salt Water Wires' newest chapter
+	// (salt-water-wires-ch-24, days_ago 400).
+	test( 'single-other-fiction: .ttm-series-single__other .ttm-series-row__title @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.seriesEntry, 1280 );
+		const titles = page.locator(
+			'.ttm-series-single__other .ttm-series-row__title'
+		);
+		const count = await titles.count();
+		const texts = [];
+		for ( let i = 0; i < count; i++ ) {
+			texts.push( await text( titles.nth( i ) ) );
+		}
+		expect( texts ).toEqual( [ 'Failover', 'Salt Water Wires' ] );
+	} );
+
+	// P1-03, SPEC §6.11.
+	test( 'single-other-heading: .ttm-series-single__other .ttm-cell-heading__label @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.seriesHardening, 1280 );
+		const el = page.locator(
+			'.ttm-series-single__other .ttm-cell-heading__label'
+		);
+		// innerText reflects the label's text-transform; assert the source text.
+		const source = await el.evaluate( ( node ) => node.textContent );
+		expect( source ).toBe( 'Other series' );
+		expect( await el.count() ).toBe( 1 );
 	} );
 
 	test( 'single-nav: .ttm-masthead-inner__nav .current-menu-item > a @1280', async ( {

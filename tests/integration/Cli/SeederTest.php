@@ -61,17 +61,22 @@ class SeederTest extends TTM_IntegrationTestCase {
 		$this->assertGreaterThan( 0, (int) get_post_meta( $post_id, 'ttm_word_count', true ) );
 	}
 
-	public function test_reset_removes_only_seeded_content(): void {
+	/**
+	 * P2-01, Decision "Seeder::reset() from a live state": reset() now wipes every post, not
+	 * only rows this seeder itself wrote -- a manually-created post is gone too, the way a
+	 * live import's content would be.
+	 */
+	public function test_reset_removes_every_post_not_only_seeded_content(): void {
 		$manual_post = self::factory()->post->create( [ 'post_title' => 'Not seeded' ] );
 
 		$seeder = new Seeder();
 		$seeder->run( 'normal' );
 		$seeder->reset();
 
-		$this->assertNotNull( get_post( $manual_post ) );
+		$this->assertNull( get_post( $manual_post ) );
 
 		$count = wp_count_posts( 'post' )->publish;
-		$this->assertSame( 1, (int) $count );
+		$this->assertSame( 0, (int) $count );
 	}
 
 	public function test_generated_image_is_an_attachment_with_alt(): void {
@@ -500,6 +505,80 @@ class SeederTest extends TTM_IntegrationTestCase {
 		$this->assertNotEmpty( $syndication['mastodon'] ?? '' );
 	}
 
+	/**
+	 * R5-01: reproduced live on 2026-09-24 (a Thursday) -- `journal-post-1`'s ("days_ago": 0,
+	 * "weekday": "Sunday") walk-back landed on the same calendar day as `journal-post-4`
+	 * ("days_ago": 4), and the rows were inserted within the same wall-clock second, so they
+	 * got the same post_date and `ORDER BY post_date DESC` (no tiebreaker) made the front
+	 * page's journal column flip between requests.
+	 *
+	 * @dataProvider provide_seven_consecutive_days
+	 */
+	public function test_seeded_post_dates_are_unique_on_every_weekday( string $now ): void {
+		$this->set_now( $now );
+
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		global $wpdb;
+		$dupes = $wpdb->get_col(
+			"SELECT post_date FROM {$wpdb->posts}
+			WHERE post_type = 'post' AND post_status IN ('publish','future')
+			GROUP BY post_date HAVING COUNT(*) > 1"
+		);
+
+		$this->assertSame( [], $dupes, "Duplicate post_date values seeded for now={$now}: " . implode( ', ', $dupes ) );
+	}
+
+	/**
+	 * @return array<string, array{0: string}>
+	 */
+	public function provide_seven_consecutive_days(): array {
+		return [
+			'2026-09-20 (Sunday)'    => [ '2026-09-20 12:00:00' ],
+			'2026-09-21 (Monday)'    => [ '2026-09-21 12:00:00' ],
+			'2026-09-22 (Tuesday)'   => [ '2026-09-22 12:00:00' ],
+			'2026-09-23 (Wednesday)' => [ '2026-09-23 12:00:00' ],
+			'2026-09-24 (Thursday)'  => [ '2026-09-24 12:00:00' ],
+			'2026-09-25 (Friday)'    => [ '2026-09-25 12:00:00' ],
+			'2026-09-26 (Saturday)'  => [ '2026-09-26 12:00:00' ],
+		];
+	}
+
+	/**
+	 * R5-01/R6-01: the per-row second offset is subtracted BEFORE the weekday walk-back, so a
+	 * moment just after midnight must still walk back to the correct Sunday rather than the
+	 * offset nudging it across the day boundary first. `now` is derived from journal-post-1's
+	 * own fixture index so the seconds subtracted are always smaller than the offset applied,
+	 * and never accidentally cross midnight before the weekday walk-back runs (which would
+	 * make this test pass even when the offset is wrongly applied after the walk-back).
+	 */
+	public function test_journal_post_one_stays_on_sunday_when_now_is_just_after_midnight(): void {
+		$posts_json = Seeder::fixtures_dir() . '/posts.json';
+		$rows       = (array) json_decode( (string) file_get_contents( $posts_json ), true );
+
+		$index = null;
+		foreach ( $rows as $i => $row ) {
+			if ( 'journal-post-1' === ( $row['slug'] ?? null ) ) {
+				$index = $i;
+				break;
+			}
+		}
+		$this->assertNotNull( $index, 'journal-post-1 not found in posts.json fixture' );
+		$this->assertGreaterThan( 0, $index, 'journal-post-1 must have a non-zero fixture index for this test to be meaningful' );
+
+		$seconds = max( 0, $index - 20 );
+		$now     = sprintf( '2026-09-24 00:00:%02d', $seconds );
+		$this->set_now( $now );
+
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$post = get_page_by_path( 'journal-post-1', OBJECT, 'post' );
+		$this->assertNotNull( $post );
+		$this->assertSame( 'Sunday', ( new DateTimeImmutable( $post->post_date, wp_timezone() ) )->format( 'l' ) );
+	}
+
 	public function test_journal_word_counts_near_the_mock(): void {
 		$seeder = new Seeder();
 		$seeder->run( 'normal' );
@@ -628,6 +707,132 @@ class SeederTest extends TTM_IntegrationTestCase {
 				$this->assertSame( 'collection', $book['form'] );
 				$this->assertSame( 2019, $book['year'] );
 			}
+		}
+	}
+
+	/**
+	 * P0-02: every section but Journal has at least five distinct tags spread across its
+	 * seeded posts (SPEC §6.12). Stats::top_tags() invalidation lands in P0-05, so this counts
+	 * distinct tag slugs directly off wp_get_post_tags() instead.
+	 */
+	public function test_every_section_except_journal_has_at_least_five_distinct_tags(): void {
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$sections = [ 'technology', 'business', 'faith', 'writing', 'security', 'opinion' ];
+
+		foreach ( $sections as $slug ) {
+			$term  = get_term_by( 'slug', $slug, 'category' );
+			$posts = get_posts(
+				[
+					'category'       => $term->term_id,
+					'post_status'    => 'publish',
+					'posts_per_page' => 200,
+				]
+			);
+
+			$slugs = [];
+			foreach ( $posts as $post ) {
+				foreach ( wp_get_post_tags( $post->ID ) as $tag ) {
+					$slugs[ $tag->slug ] = true;
+				}
+			}
+
+			$this->assertGreaterThanOrEqual(
+				5,
+				count( $slugs ),
+				"expected at least five distinct tags in {$slug}"
+			);
+		}
+
+		$journal = get_term_by( 'slug', 'journal', 'category' );
+		$posts   = get_posts(
+			[
+				'category'       => $journal->term_id,
+				'post_status'    => 'publish',
+				'posts_per_page' => 200,
+			]
+		);
+		$slugs = [];
+		foreach ( $posts as $post ) {
+			foreach ( wp_get_post_tags( $post->ID ) as $tag ) {
+				$slugs[ $tag->slug ] = true;
+			}
+		}
+		$this->assertCount( 0, $slugs, 'Journal should stay untagged' );
+	}
+
+	/**
+	 * P0-02: SPEC §6.3 -- the transients post gets an older Technology neighbour so both
+	 * prev/next cells render, and that neighbour is not in any series.
+	 */
+	public function test_transients_post_has_an_older_technology_neighbour(): void {
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$transients = get_page_by_path( 'transients-object-caches-and-fast-enough', OBJECT, 'post' );
+		$this->assertNotNull( $transients );
+
+		$neighbour = get_page_by_path( 'why-i-still-read-the-wordpress-changelog', OBJECT, 'post' );
+		$this->assertNotNull( $neighbour );
+		$this->assertSame( 'publish', $neighbour->post_status );
+
+		$categories = get_the_terms( $neighbour->ID, 'category' );
+		$this->assertIsArray( $categories );
+		$this->assertContains( 'technology', wp_list_pluck( $categories, 'slug' ) );
+
+		$this->assertLessThan(
+			strtotime( $transients->post_date_gmt ),
+			strtotime( $neighbour->post_date_gmt ),
+			'the neighbour should be older than the transients post'
+		);
+
+		$this->assertSame( [], wp_get_post_terms( $neighbour->ID, 'series' ) );
+	}
+
+	/**
+	 * P0-02: the older Technology neighbour is sized to ~600 words (SPEC §6.3).
+	 */
+	public function test_changelog_post_is_about_six_hundred_words(): void {
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$post = get_page_by_path( 'why-i-still-read-the-wordpress-changelog', OBJECT, 'post' );
+		$this->assertNotNull( $post );
+
+		$words = (int) get_post_meta( $post->ID, 'ttm_word_count', true );
+		$this->assertGreaterThanOrEqual( 500, $words );
+		$this->assertLessThanOrEqual( 700, $words );
+	}
+
+	/**
+	 * P0-03: SPEC §6.12 -- Reading CVEs is a complete, four-part nonfiction series entirely in
+	 * Security, giving the related-series ranking a same-section candidate.
+	 */
+	public function test_reading_cves_is_a_complete_security_series_of_four(): void {
+		$seeder = new Seeder();
+		$seeder->run( 'normal' );
+
+		$row = \TTM\Core\Query\SeriesIndex::by_slug( 'reading-cves' );
+		$this->assertNotNull( $row );
+
+		$this->assertSame( 'complete', $row['status'] );
+		$this->assertSame( 'nonfiction', $row['form'] );
+		$this->assertSame( 4, $row['published'] );
+
+		$term = get_term_by( 'slug', 'reading-cves', 'series' );
+		$this->assertSame( 4, (int) get_term_meta( $term->term_id, 'ttm_total_parts', true ) );
+
+		$security = get_term_by( 'slug', 'security', 'category' );
+		$this->assertSame( [ $security->term_id ], $row['categories'] );
+
+		foreach ( [ 'reading-cves-part-1', 'reading-cves-part-2', 'reading-cves-part-3', 'reading-cves-part-4' ] as $slug ) {
+			$post = get_page_by_path( $slug, OBJECT, 'post' );
+			$this->assertNotNull( $post, "missing post: {$slug}" );
+			$this->assertSame( 'publish', $post->post_status );
+			$year = (int) gmdate( 'Y', strtotime( $post->post_date_gmt ) );
+			$this->assertGreaterThanOrEqual( 2024, $year );
+			$this->assertLessThanOrEqual( 2025, $year );
 		}
 	}
 }

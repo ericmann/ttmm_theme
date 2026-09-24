@@ -22,6 +22,10 @@
  * - `search`: a search results page (`search.html`).
  * - `about`: the seeded "About" page (`page.html`), the eighth screen (P4-03, SPEC §8 Phase 4).
  * - `notFound`: the 404 template (`404.html`).
+ * - `articleNoSeries`: the seeded Technology post `transients-object-caches-and-fast-enough`,
+ *   which carries no series term (P0-04, SPEC §6.11).
+ * - `businessArchive`: the Business category archive, used for the tag-filter row fidelity
+ *   checks (P0-04, SPEC §6.11).
  */
 export const SCREENS = {
 	front: '/',
@@ -37,6 +41,8 @@ export const SCREENS = {
 	search: '/?s=ledger',
 	about: '/about/',
 	notFound: '/this-page-does-not-exist/',
+	articleNoSeries: '/transients-object-caches-and-fast-enough/',
+	businessArchive: '/category/business/',
 };
 
 export const SCREEN_URLS = Object.values( SCREENS );

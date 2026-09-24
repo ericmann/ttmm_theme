@@ -93,4 +93,11 @@ class PostMetaRestTest extends TTM_IntegrationTestCase {
 
 		$this->assertTrue( $response->is_error() || '' === get_post_meta( $post_id, 'ttm_location', true ) );
 	}
+
+	public function test_ttm_images_rewritten_is_registered_and_hidden_from_rest(): void {
+		$registered = get_registered_meta_keys( 'post', 'post' );
+
+		$this->assertArrayHasKey( 'ttm_images_rewritten', $registered );
+		$this->assertFalse( $registered['ttm_images_rewritten']['show_in_rest'] );
+	}
 }

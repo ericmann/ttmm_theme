@@ -66,7 +66,7 @@ Rules:
 - Source: `GET https://dailymedtoday.com/api/v1/meditations/` (most recent meditations indexed by day). The plugin must inspect the real payload shape during build; assume each item has at least a date, a verse text, a scripture reference, and a URL/slug.
 - Stored as option `ttm_verse` `{ date, text, reference, url, fetched_at }` plus `ttm_verse_history` (last 30, for the fallback).
 - Fetch daily via WP-Cron at 05:00 site time with a retry at 07:00 on failure; also refresh on demand via WP-CLI `wp ttm verse fetch`.
-- Attribution is mandatory: “Meditation for {date} from dailymedtoday.com” linking to the item URL (or site root).
+- Attribution is mandatory: “Meditation from dailymedtoday.com” linking to the item URL (or site root) -- undated (R1-05, SPEC §6.1.1: the source never reliably surfaces the date the meditation is *for*, only when it was fetched, so a date in the attribution would be misleading, including for the F6 stale fallback).
 - Never rendered blank; see F6.
 
 ## 7. Lead selection (front page)

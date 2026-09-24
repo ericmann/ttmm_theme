@@ -246,4 +246,22 @@ class WritingCellTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'From the shelf', $html );
 		$this->assertStringNotContainsString( 'Ch. 2:', $html );
 	}
+
+	/**
+	 * P1-05, rule 50: `ttm/writing-cell` is a site-wide-by-design block -- with no
+	 * `alsoRunningLimit`/context of its own it falls back to `Serials::active()`, regardless
+	 * of the current post/queried object (it is only ever placed once, on the front page).
+	 */
+	public function test_rule_50_no_context_with_other_content(): void {
+		$writing = $this->category_id( 'writing', 'Writing' );
+		$this->make_serial( 'active-novel', 'Active Novel', 'novel', 'in-progress', $writing, 2 );
+		self::factory()->term->create( [ 'taxonomy' => 'post_tag' ] );
+
+		$GLOBALS['post'] = null;
+		wp_reset_query(); // phpcs:ignore WordPress.WP.DiscouragedFunctions.wp_reset_query_wp_reset_query -- rule 50 sweep: proving no-context behaviour.
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'Active Novel', $html );
+	}
 }

@@ -165,4 +165,22 @@ class NewsletterFormTest extends TTM_IntegrationTestCase {
 		$third = $this->render();
 		$this->assertStringContainsString( 'id="ttm-nl-email-1"', $third );
 	}
+
+	/**
+	 * P1-05, rule 50: `ttm/newsletter-form` is a site-wide-by-design block -- it has no
+	 * post/term context to read at all (`Newsletter\Providers::current()` is a settings-driven
+	 * singleton); it renders normally with no current post/queried object.
+	 */
+	public function test_rule_50_no_context_with_other_content(): void {
+		self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		wp_insert_term( 'A Series', 'series' );
+		self::factory()->term->create( [ 'taxonomy' => 'post_tag' ] );
+
+		$GLOBALS['post'] = null;
+		wp_reset_query(); // phpcs:ignore WordPress.WP.DiscouragedFunctions.wp_reset_query_wp_reset_query -- rule 50 sweep: proving no-context behaviour.
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'ttm-newsletter-form', $html );
+	}
 }

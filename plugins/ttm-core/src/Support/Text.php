@@ -84,6 +84,37 @@ class Text {
 	}
 
 	/**
+	 * Truncate to at most `$max_words` words, cutting at the longest sentence boundary (`.`,
+	 * `!`, `?`) within that cap when one exists; otherwise a hard word cut with a trailing "…"
+	 * (SPEC §6.7 `migrate:excerpts --from=yoast`).
+	 *
+	 * @param string $text      Raw content (may include tags).
+	 * @param int    $max_words Hard word cap.
+	 * @return string
+	 */
+	public static function truncate_sentences( string $text, int $max_words ): string {
+		$plain = trim( html_entity_decode( wp_strip_all_tags( $text ), ENT_QUOTES, 'UTF-8' ) );
+
+		preg_match_all( '/\S+/u', $plain, $matches, PREG_OFFSET_CAPTURE );
+		$tokens = $matches[0];
+
+		if ( count( $tokens ) <= $max_words ) {
+			return $plain;
+		}
+
+		$terminator = '/[.!?]$/u';
+
+		for ( $i = $max_words; $i >= 1; $i-- ) {
+			$candidate = self::join_tokens( $tokens, 0, $i );
+			if ( preg_match( $terminator, $candidate ) ) {
+				return $candidate;
+			}
+		}
+
+		return self::join_tokens( $tokens, 0, $max_words ) . '…';
+	}
+
+	/**
 	 * Join a token slice (from preg_match_all with PREG_OFFSET_CAPTURE) back into text.
 	 *
 	 * @param array<int, array{0:string,1:int}> $tokens Captured tokens.

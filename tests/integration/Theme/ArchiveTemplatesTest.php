@@ -380,4 +380,29 @@ class ArchiveTemplatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'Flagged Post', $aside );
 		$this->assertStringNotContainsString( 'ttm-most-read__item', $aside );
 	}
+
+	/**
+	 * P1-04, F28: with no fiction at all, /category/writing/ renders the plain section-archive
+	 * layout (category.html), not the serial hub.
+	 */
+	public function test_writing_archive_renders_section_layout_in_f28_state(): void {
+		$writing = $this->category_id( 'writing', 'Writing' );
+		$post    = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $writing ],
+				'tags_input'    => [ 'craft' ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $writing );
+
+		$this->go_to( (string) get_category_link( $writing ) );
+
+		$html = $this->render_template( 'category' );
+
+		$this->assertMatchesRegularExpression( '/<p class="is-style-kicker[^"]*">Section<\/p>/', $html );
+		$this->assertStringContainsString( 'Writing', $html );
+		$this->assertStringContainsString( 'ttm-filter-row', $html );
+		$this->assertStringNotContainsString( 'ttm-serial-hero', $html );
+	}
 }

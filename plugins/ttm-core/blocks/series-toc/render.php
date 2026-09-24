@@ -27,20 +27,25 @@ if ( 'empty' === Helpers::preview_state( $attributes ) ) {
 
 $ttm_post_id   = (int) ( $block->context['postId'] ?? get_the_ID() );
 $ttm_series_id = (int) ( $attributes['seriesId'] ?? 0 );
+$ttm_variant   = (string) ( $attributes['variant'] ?? 'series' );
 
+// SPEC §6.3, rule 50: the `series` variant is scoped to an explicit seriesId or the current
+// post's own series -- it never falls back to the active serial (that fallback is the
+// `chapters` variant's alone, for the Writing page).
 if ( $ttm_series_id ) {
 	$ttm_row = SeriesIndex::get( $ttm_series_id );
 } elseif ( $ttm_post_id && SeriesIndex::for_post( $ttm_post_id ) ) {
 	$ttm_row = SeriesIndex::for_post( $ttm_post_id );
-} else {
+} elseif ( 'chapters' === $ttm_variant ) {
 	$ttm_row = Serials::active();
+} else {
+	$ttm_row = null;
 }
 
 if ( ! $ttm_row ) {
 	return '';
 }
 
-$ttm_variant  = (string) ( $attributes['variant'] ?? 'series' );
 $ttm_order    = 'desc' === ( $attributes['order'] ?? 'asc' ) ? 'desc' : 'asc';
 $ttm_limit    = (int) ( $attributes['limit'] ?? 0 );
 $ttm_show_dek = ! empty( $attributes['showDek'] );

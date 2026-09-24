@@ -164,6 +164,22 @@ class SeriesBarTest extends TTM_IntegrationTestCase {
 		$this->assertSame( '', trim( $html ) );
 	}
 
+	/**
+	 * P1-05, rule 50: no postId context at all, other content exists -> ''.
+	 */
+	public function test_rule_50_no_context_with_other_content(): void {
+		$this->make_series( 'hardening-wp', 'Hardening WordPress', 6, [ [ 'part' => 1 ] ] );
+		self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		self::factory()->term->create( [ 'taxonomy' => 'post_tag' ] );
+
+		$GLOBALS['post'] = null;
+		wp_reset_query(); // phpcs:ignore WordPress.WP.DiscouragedFunctions.wp_reset_query_wp_reset_query -- rule 50 sweep: proving no-context behaviour.
+
+		$html = (string) do_blocks( '<!-- wp:ttm/series-bar /-->' );
+
+		$this->assertSame( '', trim( $html ) );
+	}
+
 	public function test_preview_state_empty_renders_nothing_in_editor(): void {
 		$ids = $this->make_series( 'hardening-wp', 'Hardening WordPress', 6, [ [ 'part' => 1 ] ] );
 

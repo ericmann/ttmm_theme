@@ -111,9 +111,10 @@ class ConvertCommand extends Command {
 		$allow_freeform = ! empty( $assoc['allow-freeform'] );
 		$only_post      = isset( $assoc['post'] ) ? (int) $assoc['post'] : 0;
 
-		$rows     = [];
-		$messages = [];
-		$ok       = true;
+		$rows            = [];
+		$messages        = [];
+		$ok              = true;
+		$text_mismatches = 0;
 
 		foreach ( $this->read_ndjson( $file ) as $record ) {
 			$post_id = (int) ( $record['id'] ?? 0 );
@@ -125,6 +126,18 @@ class ConvertCommand extends Command {
 			if ( ! $post ) {
 				$messages[] = "post {$post_id}: not found, skipped.";
 				$ok         = false;
+				continue;
+			}
+
+			// R1-03, SPEC §1.3 "Done"/§6.6: `scripts/convert-classic.mjs --allow-text-mismatch`
+			// still emits a record for a post whose before/after text didn't round-trip exactly
+			// (a real, pre-existing content-quality issue, not a conversion bug -- see
+			// docs/feedback/phase-4/LIVE-TRIAGE.md); that record is never converted here (rule
+			// 49: non-destructive) and never gets a `ttm_classic_backup`, so the post stays
+			// classic and the owner's cleanup worklist (`wp ttm audit`) still finds it.
+			if ( isset( $record['report']['textEqual'] ) && ! $record['report']['textEqual'] ) {
+				$messages[] = "post {$post_id} ({$post->post_name}): [text-mismatch, skipped]";
+				++$text_mismatches;
 				continue;
 			}
 
@@ -154,17 +167,30 @@ class ConvertCommand extends Command {
 					'id'   => $post_id,
 					'slug' => $post->post_name,
 				],
-				$counts 
+				$counts
 			);
 
+			$remaining_shortcodes = (array) ( $record['report']['shortcodes'] ?? [] );
+			$shortcodes_note      = $this->shortcodes_note( $remaining_shortcodes );
+
 			if ( $dry_run ) {
-				$messages[] = "post {$post_id} ({$post->post_name}): dry run, " . wp_json_encode( $counts );
+				$messages[] = "post {$post_id} ({$post->post_name}): dry run, " . wp_json_encode( $counts ) . $shortcodes_note;
 				continue;
 			}
 
-			$this->import_one( $post, $blocks, (array) ( $record['footnotes'] ?? [] ) );
-			$messages[] = "post {$post_id} ({$post->post_name}): converted, " . wp_json_encode( $counts );
+			$footnotes = (array) ( $record['footnotes'] ?? [] );
+			$this->import_one( $post, $blocks, $footnotes );
+
+			$note = "post {$post_id} ({$post->post_name}): converted, " . wp_json_encode( $counts ) . $shortcodes_note;
+			if ( ! $this->footnotes_verified( $post_id, $footnotes ) ) {
+				$note .= ' [footnotes-mismatch]';
+			}
+			$messages[] = $note;
 		}//end foreach
+
+		if ( $text_mismatches > 0 ) {
+			$messages[] = sprintf( 'Skipped %d post(s) with a text mismatch (still classic).', $text_mismatches );
+		}
 
 		return [
 			'ok'       => $ok,
@@ -186,10 +212,14 @@ class ConvertCommand extends Command {
 		}
 
 		if ( ! empty( $footnotes ) ) {
-			// `footnotes` is WordPress core's own post-meta key for the core/footnotes block
-			// (registered by WP core itself, not by this plugin) - stored as a JSON string,
-			// exactly the shape core's own editor writes: [{id, content}, ...].
-			update_post_meta( $post->ID, 'footnotes', wp_json_encode( $footnotes ) );
+			// `rawHandler`'s own `<sup data-fn>` marker recognition is editor-only (a RichText
+			// format, applied by a human typing a footnote); it never inserts the accompanying
+			// `core/footnotes` block that actually reads the `footnotes` meta and renders the
+			// note list (SPEC §6.8). Append it once here so the markers convert-classic.mjs
+			// already wrote have somewhere to resolve to.
+			if ( false === strpos( $blocks, 'wp:footnotes' ) ) {
+				$blocks = rtrim( $blocks ) . "\n\n<!-- wp:footnotes /-->\n";
+			}
 		}
 
 		wp_save_post_revision( $post->ID );
@@ -205,7 +235,139 @@ class ConvertCommand extends Command {
 		);
 		kses_init_filters();
 
+		if ( ! empty( $footnotes ) ) {
+			// `footnotes` is WordPress core's own post-meta key for the core/footnotes block
+			// (registered by WP core itself, not by this plugin) - stored as a JSON string,
+			// exactly the shape core's own editor writes: [{id, content}, ...]. WP core hooks
+			// its own `sanitize_post_meta_footnotes` filter (`_wp_filter_post_meta_footnotes()`,
+			// wp-includes/blocks.php) unconditionally, which `json_decode()`s the incoming
+			// string and returns `''` outright if that fails -- and `update_metadata()` itself
+			// unslashes the value before that filter ever runs. `wp_json_encode()`'s own
+			// backslash-escaped quotes (`\"` around an href, say) are exactly what
+			// `wp_unslash()` (a plain `stripslashes()`) strips, breaking the JSON and silently
+			// discarding every footnote whose content has an escaped character in it (found via
+			// a real, near-total mismatch on the export; see docs/feedback/phase-4/LIVE-TRIAGE.md).
+			// `wp_slash()` first cancels that out, the same way WP core's own REST meta
+			// controller does before every `update_metadata()` call.
+			update_post_meta( $post->ID, 'footnotes', wp_slash( wp_json_encode( $footnotes ) ) );
+		}
+
 		update_post_meta( $post->ID, 'ttm_converted_at', Clock::now()->format( 'Y-m-d H:i:s' ) );
+	}
+
+	/**
+	 * Whether every footnote's text appears exactly once inside the rendered `core/footnotes`
+	 * list (`ol.wp-block-footnotes`, SPEC §6.8) -- not the whole rendered body. Catches both a
+	 * marker that never resolved (no matching `core/footnotes` block or meta -> the list is
+	 * missing/empty, count 0) and a footnotes list rendered twice (a duplicated block -> count
+	 * 2), while a short footnote's own text (e.g. a proper noun) legitimately also appearing
+	 * verbatim in the body *prose* no longer matters, because prose is outside the scope this
+	 * now searches (found via a real false positive on the export when the search covered the
+	 * whole body; see docs/feedback/phase-4/LIVE-TRIAGE.md). Vacuously true when there are no
+	 * footnotes.
+	 *
+	 * @param int                                          $post_id   Post id (already updated).
+	 * @param array<int, array{id:string, content:string}> $footnotes Footnotes, WP core's own shape.
+	 * @return bool
+	 */
+	private function footnotes_verified( int $post_id, array $footnotes ): bool {
+		if ( empty( $footnotes ) ) {
+			return true;
+		}
+
+		$post = get_post( $post_id );
+		if ( ! $post ) {
+			return false;
+		}
+
+		// `core/footnotes`' render callback only receives `postId` block context when a real
+		// "current post" is set up (WP core's own context provider reads `get_the_ID()`) --
+		// without this, `apply_filters( 'the_content', … )` alone renders it as empty (verified
+		// against this project's WP core version).
+		global $post;
+		$outer_post = $post;
+		$post       = get_post( $post_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- setup_postdata() requires the global, restored below.
+		setup_postdata( $post );
+
+		$rendered = (string) apply_filters( 'the_content', $post->post_content );
+
+		$post = $outer_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- restoring the caller's global.
+		wp_reset_postdata();
+
+		$list_text = $this->footnotes_list_text( $rendered );
+
+		foreach ( $footnotes as $footnote ) {
+			// `wptexturize()` and `convert_smilies()` both also run on `the_content` (after the
+			// footnotes block renders the raw meta text) -- e.g. a literal "..." becomes a
+			// single "…" character, and ":-)" becomes an `<img class="wp-smiley">` with no
+			// matching visible text at all -- so the expected text needs the same two passes:
+			// wptexturize's rewrites still compare as plain text either way, and a smiley
+			// disappearing from *both* sides equally (`normalized_text()` strips the `<img>`
+			// same as any other tag) still means the two sides agree, rather than the raw ":-)"
+			// searching for literal text that can now never appear (found via a real mismatch
+			// on the export; see docs/feedback/phase-4/LIVE-TRIAGE.md).
+			$text = $this->normalized_text( convert_smilies( wptexturize( (string) ( $footnote['content'] ?? '' ) ) ) );
+			if ( '' === $text ) {
+				continue;
+			}
+			if ( 1 !== substr_count( $list_text, $text ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * The normalized, concatenated text of every rendered `core/footnotes` list
+	 * (`<ol class="…wp-block-footnotes…">…</ol>`, WP core's own `render_block_core_footnotes()`
+	 * markup) in `$html` -- every match, not just the first, so a duplicated footnotes block
+	 * (SPEC §6.8) shows each note's text twice rather than once.
+	 *
+	 * @param string $html Rendered `the_content` output.
+	 * @return string
+	 */
+	private function footnotes_list_text( string $html ): string {
+		if ( ! preg_match_all( '/<ol\b[^>]*\bclass="[^"]*wp-block-footnotes[^"]*"[^>]*>(.*?)<\/ol>/s', $html, $matches ) ) {
+			return '';
+		}
+
+		return $this->normalized_text( implode( ' ', $matches[1] ) );
+	}
+
+	/**
+	 * Plain, entity-decoded, whitespace-collapsed text for a loose content comparison --
+	 * `wptexturize()` (part of `the_content`) rewrites plain `...` to a typographic ellipsis
+	 * entity, so without decoding, a footnote's own raw content never matches its own rendered
+	 * text (found via a real mismatch on the export; see docs/feedback/phase-4/LIVE-TRIAGE.md).
+	 *
+	 * @param string $html HTML fragment.
+	 * @return string
+	 */
+	private function normalized_text( string $html ): string {
+		$decoded = html_entity_decode( wp_strip_all_tags( $html ), ENT_QUOTES, 'UTF-8' );
+
+		return trim( (string) preg_replace( '/\s+/', ' ', $decoded ) );
+	}
+
+	/**
+	 * The dry-run/converted message suffix listing any shortcode the pre-pass deliberately left
+	 * in place (SPEC §6.8, `report.shortcodes`), or `''` when none.
+	 *
+	 * @param array<int, array{name: string, count: int}> $remaining Remaining shortcode names/counts.
+	 * @return string
+	 */
+	private function shortcodes_note( array $remaining ): string {
+		if ( empty( $remaining ) ) {
+			return '';
+		}
+
+		$parts = array_map(
+			static fn ( array $entry ): string => sprintf( '%s(%d)', $entry['name'], $entry['count'] ),
+			$remaining
+		);
+
+		return ', remaining shortcodes: ' . implode( ', ', $parts );
 	}
 
 	/**
