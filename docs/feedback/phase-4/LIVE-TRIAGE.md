@@ -242,25 +242,27 @@ fresh import). `npm run test:live` after run 2: **77 passed, 0 failed, exit code
 | `audit --only=shortcode` | 58 posts flagged | 52 posts flagged (see breakdown below) |
 | `audit` (`no-primary`/`uncategorized`) | 0 posts (R1-01 fix confirmed against the real import) | 0 posts |
 
-### `primary:assign --from-yoast`: 3 used, not ~424
+### `primary:assign --from-yoast`: 3 used, not ~424 — ~~structural limitation~~ fixed in R2-03
 
-The reviewer's own estimate for this row was "~424 used." The real number is 3, and the gap is
-structural, not a bug in `PrimaryCommand`/`PrimaryCategory` (R1-01 already fixed the actual defect
-those covered — a stale stored value blocking the fallback). 175 imported posts carry
-`_yoast_wpseo_primary_category` at all; of those, only 3 have a value that is a term ID **currently
-present in `wp_get_post_categories()` for that post**. The other 172 name a category term ID that
-existed on the *source* site but was never re-created with that same numeric ID on this fresh
-install — WordPress's core WXR importer only remaps the *object-term relationships* it recognizes
-(`wp_set_object_terms()`), never arbitrary third-party postmeta that happens to store an old term
-ID, because it has no way to know `_yoast_wpseo_primary_category` means "category term ID." This is
-a property of using the stock XML importer for a plugin-specific meta reference, not something
-`primary:assign` can safely correct (guessing which new-site category a stale Yoast ID "must have
-meant" risks assigning the wrong section entirely). The nav-order fallback (`primary:assign`, no
-`--from-yoast`) already covers effectively the whole site regardless (898/901 posts; the remaining
-3 already got their primary from Yoast). Recorded here for whoever runs the real production
-migration: `--from-yoast` is only worth running when the destination site's category term IDs are
-known to match the source's own numbering (e.g. a migration that pre-creates categories with
-matching IDs first), not a plain WXR import into a fresh install.
+**Superseded by R2-03; kept for history, corrected below.** This section originally called the
+gap between 3 used and the reviewer's ~424 estimate a permanent structural limitation of using
+the stock WXR importer with plugin-specific postmeta. It wasn't: 175 imported posts carry
+`_yoast_wpseo_primary_category` at all, and the value is always a term ID from the *source*
+site, which the core WXR importer never remaps (it only remaps recognized object-term
+relationships via `wp_set_object_terms()`, not arbitrary postmeta). But the WXR itself already
+carries everything needed to remap it: every one of the source site's categories is listed once,
+at the top of the file, as a `<wp:category>` block pairing that same source `<wp:term_id>` with
+its `<wp:category_nicename>` (slug) — a slug survives the import unchanged regardless of whether
+the destination category is reused (existing slug match) or freshly created (new id, same slug).
+R2-03 added `scripts/live/term-map.mjs` (`import.sh` runs it automatically into
+`docs/fixtures/live/term-map.json`) to extract that map, and `primary:assign --from-yoast
+--term-map=<path>` (`plan.sh`) to translate the source id through it to a slug, then resolve
+that slug to whatever id it has on *this* site, before the existing "post actually carries this
+category" check. Re-run against the same 2026-09-23 export with the fix in place:
+**Used 110 post(s) from Yoast, skipped 767** (was 3 used, 898 skipped) — see the R2-05 run below.
+The nav-order fallback still exists for the remainder, but ~110 posts now get the *owner's own*
+section choice instead of nav order's first-match guess, exactly SPEC §6.7's intent for
+`--from-yoast`.
 
 ### Shortcode audit breakdown (52 posts after this task's fixes, was 58)
 
@@ -356,3 +358,35 @@ against the seeded demo site if `test:e2e` picked the `live` project back up by 
 Then `npm run env:seed -- --reset && npm run test:e2e`: **492 passed, exit code 0**. Then
 `npm run screenshots` again (seeded set) — `front-1920.png` shows the same undated verse
 attribution on the seeded fixture content.
+
+## R2-05 run: review-fix round 2, re-verified end to end after R2-01..R2-04
+
+One full `LIVE_SKIP_ATTACHMENTS=1 npm run env:live` run against the same 2026-09-23 export, with
+the R2-01..R2-04 fixes in place. `npm run test:live`: **77 passed, 0 failed, exit code 0**
+(including the new merged-paragraph check in `live.spec.mjs`, R2-01 — no screen in this run's
+`screens.json` happened to land on a `classic: true` post, so that specific assertion didn't
+execute against a live URL this time, but `convert-classic.mjs`'s own report is the direct
+measurement below).
+
+| step | R1-09 run 2 | R2-05 run | class / fix |
+|---|---|---|---|
+| `primary:assign --from-yoast --term-map=…` | Used 3, skipped 898 | **Used 110, skipped 767** | fixed, R2-03 (source-id -> slug -> this-site-id via the WXR's own `<wp:category>` map) |
+| `migrate:politics` | "already child of Opinion" (0 posts touched) | **Updated 24 Politics post(s)** (dry-run: "Would update 24") | fixed, R2-02 (`politics_child()` now walks posts even when the category relationship is already correct) |
+| `convert-classic.mjs` — `mergedParagraphs` | not tracked (didn't exist yet) | **0** across all 724 posts (no `--allow-merged-paragraphs` needed) | fixed, R2-01 (real `@wordpress/autop` `autop()`, unconditional) |
+| `convert-classic.mjs` — `textEqual: false` | 7 | **3** (`securing-forms-without-captcha`, `the-hackiest-hack-that-ever-was-hacked`, `use-your-head`) | R2-01 fixed 4 of the original 7; the remaining 3 are pre-existing malformed classic-editor markup in the author's own content (owner cleanup, out of scope) |
+| `convert:import` skipped (`[text-mismatch, skipped]`) | 7 | **3** | same 3 as above |
+| `migrate:excerpts --from=yoast` | 103 filled | 103 filled | unchanged (not in scope this round) |
+| `audit` (`no-primary`/`uncategorized`) | 0 posts | 0 posts | unchanged |
+
+Screenshots (`npm run screenshots`, live set) confirm both fixes visually: `live-front.png`'s
+Opinion cell now lists real rows ("From Defense AI Drift to Policy Enforcement: Why I Built
+Firebreak", "One Man's Unsolicited Opinion on the WordPress 5.6 All-Women Release Squad") instead
+of being empty/nav-order-only, and `live-article-classic.png` (`keeping-fresh`) shows normal
+paragraph breaks throughout — no merged walls of text. `docs/fixtures/live/screens.json` removed
+afterward (gitignored, rule 47), same reason as the R1-09 run.
+
+Then `npm run env:seed -- --reset && npm run test:e2e`: **492 passed** (one `selectors.spec.mjs`
+timeout on the full concurrent run, confirmed a resource-contention flake, not a real failure —
+re-ran alone immediately after and it passed in 13s). Then `npm run screenshots` again (seeded
+set) — `journal.png` shows the R2-04 mock-2c spacing: the body sits directly under the 18px
+h1 margin, no doubled F12 padding.
