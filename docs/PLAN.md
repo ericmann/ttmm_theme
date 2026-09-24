@@ -578,3 +578,31 @@ The existing `test_journal_post_one_is_on_a_sunday_with_location_and_syndication
 - `npm run test:e2e` stays green.
 - Push and confirm the GitHub Actions integration job's `npm run env:drill` step passes. If it fails, the job must end in minutes, not hang in the logs step.
 **Depends on:** none
+
+## Review fixes (round 6)
+
+### R6-01: Make the after-midnight Seeder test and the editor-registration login actually test what they claim
+**Goal:** The R5-01 'just after midnight' test fails when the seconds offset is applied after the weekday walk-back, and editors.spec.mjs waits for the login to complete before opening the Site Editor or the Customizer, so HEAD's CI (push and PR runs) is green without a login race (SPEC §1.3 Done, P5-04).
+**Files touched:** tests/integration/Cli/SeederTest.php, tests/e2e/editors.spec.mjs
+**Design constraints:** Test-only change. Do not touch Seeder.php or any production code.
+
+SeederTest, `test_journal_post_one_stays_on_sunday_when_now_is_just_after_midnight`:
+- `journal-post-1` is fixture index 30, so today's `set_now( '2026-09-24 00:00:30' )` subtracts exactly 30 s and never crosses midnight.
+- Use a `now` whose seconds are strictly smaller than that index, e.g. `2026-09-24 00:00:10`. Preferably derive the index from `docs/fixtures/seed/posts.json` in the test and build `now` from it, e.g. midnight plus `max( 0, index - 20 )` seconds, asserting that the index is > 0.
+- Assert the weekday on the site-local `post_date`, using `( new DateTimeImmutable( $post->post_date, wp_timezone() ) )->format( 'l' )`, not `gmdate()` on `post_date_gmt`.
+- Keep `test_seeded_post_dates_are_unique_on_every_weekday` and the existing Sunday test unchanged.
+
+editors.spec.mjs:
+- In `login()`, wait for the post-login navigation: `await Promise.all( [ page.waitForURL( /\/wp-admin\// ), page.locator( '#wp-submit' ).click() ] )` or equivalent.
+- In `assertBlocksRegistered()`, before the registry wait, assert that `page.url()` does not contain `wp-login.php`, so a lost session fails with a login message instead of '19 blocks missing'.
+- No `test.fixme(`, and keep both rows as plain `test()` (check-fixme).
+- The ADMIN credentials stay in `tests/e2e/lib/urls.mjs`.
+**Acceptance tests:** SeederTest::test_journal_post_one_stays_on_sunday_when_now_is_just_after_midnight: after the change, a mutation that moves `->modify( '-' . (int) $index . ' seconds' )` in Seeder::seed_posts() to after the weekday loop (just before `$date = ...`) must make this test FAIL, because the post lands on Saturday. Today it passes under that mutation. In editors.spec.mjs, the new not-on-wp-login.php assertion in both rows (editor-sed, editor-customizer) turns the race observed in PR run 35990641981 (page snapshot = Log In form) into an explicit login failure. The waitForURL in login() removes the race.
+**Out of scope:** Seeder.php and any production code; fixture JSON; drill.sh; ci.yml; other e2e specs; fidelity rows; HANDOFF history beyond this task's log.
+**Verification:** - `composer lint` (via /usr/bin/php if the host composer shim is broken); `npm run lint`; `npm run test:unit`.
+- Integration: `npx wp-env run tests-cli --env-cwd=wp-content/ttm-tests php ../ttm-vendor/bin/phpunit -c integration/phpunit.xml.dist --filter 'SeederTest'` is green.
+- Mutation: move the seconds offset after the weekday loop in Seeder.php. Confirm the after-midnight test fails, then `git checkout -- plugins/ttm-core/src/Cli/Seeder.php`.
+- `npx wp-scripts test-playwright --config tests/e2e/playwright.config.mjs --project fidelity tests/e2e/editors.spec.mjs --repeat-each=10` is green.
+- `npm run test:e2e` is green.
+- Push, and confirm that both the push and the pull_request GitHub Actions runs for the new head are green, including the integration job's `env:drill` step and the e2e job.
+**Depends on:** none
