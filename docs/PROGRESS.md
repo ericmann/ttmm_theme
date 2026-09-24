@@ -8,7 +8,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P0-03 §6.9 demo rows as tagged fixme
 - [x] P0-04 LICENSE, readme.txt, demo LICENSE.md, version 0.2.0, check-license
 - [x] P0-05 check-demo (rules 53 and 56) in npm run lint
-- [ ] P0-06 SI-13 Photon rewrite to home_url(); SI-16 undated attribution in docs/01
+- [x] P0-06 SI-13 Photon rewrite to home_url(); SI-16 undated attribution in docs/01
 - [ ] P0-07 SI-17 CodeColorer `<code lang>` pre-pass rule and audit flag
 - [ ] P0-08 Owner screenshot set moves to docs/feedback/phase-5
 - [ ] P0-09 Phase 0 screenshots and push
@@ -64,3 +64,9 @@ scripts/lib/demo-checks.mjs: 3 pure functions over already-read data. checkCredi
 scripts/check-demo.mjs wires these to docs/fixtures/demo/images/ (sha256'd via node:crypto), docs/fixtures/demo/CREDITS.json, docs/fixtures/seed/{posts,pages}.json, README.md, .github/screenshots/; prints check-demo: clean or exits 1. Added check:demo npm script, appended to the lint chain (after check:license).
 Tests: scripts/test/check-demo.test.js, 15 tests per the task's acceptance list.
 Verified: foundry_verify ok:true, 0 constraint fails; composer lint 0 errors, composer test:unit 190/190, npm run lint (incl. check:demo clean on the real empty-demo tree), npm run test:unit 145/151 (6 pre-existing skips), npm run build, forbidden-patterns.sh clean.
+
+### P0-06 — 50bf0bc
+Html::photon_origin_url() gained a third $home='' param: unchanged https://$match_host/... behaviour when $home is '', else scheme+host replaced by untrailingslashit($home) with path+query kept (matches[2] already includes the query string). MigrateCommand::images() now calls Html::photon_origin_url($src, $origin, home_url()), so a rewritten Photon image points at wherever this WordPress install actually is, not the live production domain -- SI-13.
+docs/01-design-language.md §4.9: attribution sentence changed from "Meditation for {Mon D} from **dailymedtoday.com**" to "Meditation from **dailymedtoday.com**" (SI-16, undated). docs/MIGRATION.md §2.5a: added a sentence noting Photon URLs rewrite straight to home_url() with no sideload/fetch.
+Tests: HtmlTest::test_photon_origin_url_rewrites_to_home_when_given (stubs untrailingslashit via Brain\Monkey); MigrateCommandTest's one content-asserting Photon test now expects home_url('/wp-content/uploads/2020/photo.jpg') (the other two tests sharing that fixture URL don't inspect post_content, so were left unchanged).
+Verified: composer lint 0 errors, composer test:unit 191/191, npm run test:integration 598/598, grep -n "Meditation for" docs/01-design-language.md prints nothing, foundry_verify ok:true 0 constraint fails.
