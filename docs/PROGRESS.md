@@ -55,7 +55,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] R3-02 Pure, tested classic pre-rawHandler pipeline order; mergedParagraphs counts nested blocks
 - [x] R3-03 Re-run env:live and test:live with the merged-paragraph check live; complete LIVE-TRIAGE rows; push
 - [x] R4-01 Pipeline-order test fails when autop runs before the shortcode pre-pass
-- [ ] R5-01 Deterministic seed post dates so env:drill is green in CI; drill detects nondeterminism; CI log step terminates
+- [x] R5-01 Deterministic seed post dates so env:drill is green in CI; drill detects nondeterminism; CI log step terminates
 
 ## Log
 (one entry per task, appended by implement)
@@ -323,3 +323,12 @@ LIVE_SKIP_ATTACHMENTS=1 npm run env:live against the same 2026-09-23 export -> n
 Replaced the loose not.toContain('<p>')/('<br') assertions in the prepareClassicHtml 'runs the shortcode pre-pass before autop' test with an exact toBe('a\n\nb') on the captured <code> body plus not.toContain('<p><pre')/('</pre></p>') checks, and added a second case pinning the <br /> path with toBe('a\nb\n\nc'). Root cause confirmed: codeMarkup() HTML-escapes the shortcode body so the old assertions passed even with the pipeline order swapped (escaped entities, not literal tags).
 Mutation proof performed and reverted: temporarily changed prepare-classic.mjs to preprocessShortcodes(autoParagraphPlainText(content), postId); both new assertions failed as expected (received 'a&lt;br /&gt;\nb&lt;/p&gt;\n&lt;p&gt;c' etc.); git checkout -- scripts/lib/prepare-classic.mjs restored it, confirmed no diff remained.
 Test-only change: no production code touched. npm run test:unit and npm run lint both green; foundry_verify green except composer lint/test:unit (composer binary missing from this sandbox - pre-existing environment gap, unrelated to this JS-only task).
+
+### R5-01 — 998388f
+Fixed Seeder::seed_posts() same-second post_date ties: reads Clock::now() once per run, subtracts each row's fixture index in seconds BEFORE the weekday walk-back (structural arithmetic, rule 24), so a weekday pin still lands correctly across midnight.
+Tests added in SeederTest.php: test_seeded_post_dates_are_unique_on_every_weekday (7-day data provider) and test_journal_post_one_stays_on_sunday_when_now_is_just_after_midnight. Both pass; mutation check (reverted fix) reproduced the reported Wed/Thu/Fri/Sat ties, failing all 7 dataset cases, then restored.
+drill.sh: hashes each URL twice before backup/wipe, fails fast with "is not deterministic before the wipe" (exit 1, no wipe) if they differ, so a seed bug is never misreported as restore data loss.
+ci.yml: "Container logs on failure" step now `npx wp-env logs all --watch=false || true`.
+Verified locally: composer lint/test:unit, npm lint/test:unit/build, forbidden-patterns all clean; SeederTest isolated run 47/47 green; npm run env:drill green x2; 12x curl of / identical hash after reseed; npm run test:e2e green (491 passed/1 skipped/0 failed).
+Could NOT complete a full npm run test:integration run in this sandbox: this shared dev box's wp-env docker state was destroyed/OOM-killed three times in a row by unrelated projects' containers on the same host (mysql exited 137, docker-compose.yml vanished, then a WordPress-core git clone itself failed) -- host resource contention, not a regression, since isolated Seeder/e2e suites stayed green throughout. Logged as pipeline friction; flagged in HANDOFF for human re-run on a quieter box or CI.
+Also logged (feedback): ~/.local/bin/php is a stale shim from an unrelated project that silently breaks `php -l`/composer lint on this repo; worked around with /usr/bin/php8.3 directly, did not touch the shim.
