@@ -1,0 +1,777 @@
+{
+  "verify": [
+    "composer lint",
+    "composer test:unit",
+    "npm run lint",
+    "npm run test:unit",
+    "npm run build",
+    "bash scripts/forbidden-patterns.sh"
+  ],
+  "extraVerify": {
+    "plugins/ttm-core/": [
+      "npm run test:integration"
+    ],
+    "plugins/ttm-core/blocks/": [
+      "npm run test:e2e"
+    ],
+    "themes/ttm-theme/": [
+      "npm run test:integration",
+      "npm run test:e2e"
+    ],
+    "themes/ttm-theme/theme.json": [
+      "npm run check:theme-json"
+    ],
+    "tests/integration/": [
+      "npm run test:integration"
+    ],
+    "tests/e2e/": [
+      "npm run test:e2e"
+    ],
+    "scripts/demo/": [
+      "npm run demo:build -- --out dist/demo",
+      "npm run demo:check -- --from dist/demo"
+    ],
+    ".github/blueprint": [
+      "npm run demo:build -- --out dist/demo",
+      "npm run demo:check -- --from dist/demo"
+    ],
+    ".github/demo-": [
+      "npm run demo:build -- --out dist/demo",
+      "npm run demo:check -- --from dist/demo"
+    ],
+    "scripts/release/": [
+      "npm run release:pack",
+      "npm run test:unit"
+    ],
+    ".github/workflows/release.yml": [
+      "npm run release:pack",
+      "npm run test:unit"
+    ],
+    "docs/fixtures/demo/": [
+      "npm run test:integration",
+      "npm run test:e2e"
+    ],
+    "docs/fixtures/seed/": [
+      "npm run test:integration",
+      "npm run test:e2e"
+    ]
+  },
+  "build": [
+    "npm run build"
+  ],
+  "baseBranch": "main",
+  "branchPrefix": "refine/",
+  "maxRounds": 4,
+  "maxRoundsHard": 6,
+  "commandTimeoutMs": 1800000,
+  "constraints": [
+    {
+      "id": "theme-owns-no-data",
+      "description": "Rule 1: the theme never registers or queries data",
+      "paths": [
+        "themes/ttm-theme/"
+      ],
+      "pattern": "register_taxonomy|register_post_type|register_post_meta|register_term_meta|\\badd_option\\(|\\bupdate_option\\(|get_term_meta|get_post_meta|new WP_Query|\\bget_posts\\(|\\bget_terms\\(|wp_remote_",
+      "shouldMatch": [
+        "register_post_meta( 'post', 'ttm_x', [] );",
+        "$q = new WP_Query( $args );",
+        "$ids = get_posts( $args );",
+        "update_option( 'ttm_x', 1 );"
+      ],
+      "shouldNotMatch": [
+        "get_category_by_slug( 'technology' );",
+        "get_the_terms( $post, 'category' );",
+        "$link = get_feed_link();"
+      ]
+    },
+    {
+      "id": "theme-core-refs",
+      "description": "Theme PHP references only TTM\\Core\\Config and TTM\\Core\\Compat\\Theme",
+      "paths": [
+        "themes/ttm-theme/"
+      ],
+      "pattern": "TTM\\\\Core\\\\(?!Config\\b|Compat\\\\Theme\\b)",
+      "shouldMatch": [
+        "\\TTM\\Core\\Query\\Stats::top_tags( 1 );",
+        "use TTM\\Core\\Blocks\\Helpers;"
+      ],
+      "shouldNotMatch": [
+        "\\TTM\\Core\\Config::get( 'x', 1 );",
+        "class_exists( 'TTM\\Core\\Compat\\Theme' )"
+      ]
+    },
+    {
+      "id": "plugin-inline-style",
+      "description": "Rule 2: plugin inline styles limited to grid-column, aspect-ratio, --ttm-*",
+      "paths": [
+        "plugins/ttm-core/"
+      ],
+      "exclude": [
+        "plugins/ttm-core/build/",
+        "plugins/ttm-core/vendor/"
+      ],
+      "pattern": "style=\"(?!(grid-column|aspect-ratio|--ttm-)[^\"]*\")",
+      "shouldMatch": [
+        "<div style=\"color: red\">",
+        "echo '<span style=\"display:none\">';"
+      ],
+      "shouldNotMatch": [
+        "<div style=\"grid-column: 1 / span 2\">",
+        "<img style=\"aspect-ratio: 16 / 9\">",
+        "<div style=\"--ttm-progress: 40%\">"
+      ]
+    },
+    {
+      "id": "plugin-style-tag",
+      "description": "Rule 2: no <style> element from the plugin",
+      "paths": [
+        "plugins/ttm-core/src/",
+        "plugins/ttm-core/blocks/"
+      ],
+      "pattern": "<style\\b",
+      "shouldMatch": [
+        "echo '<style>.x{}</style>';",
+        "<style type=\"text/css\">"
+      ],
+      "shouldNotMatch": [
+        "// styles live in ttm.css",
+        "$style = 'is-style-lead';"
+      ]
+    },
+    {
+      "id": "nonce-in-cacheable-output",
+      "description": "Rule 7: no nonces in render.php, patterns, parts or templates",
+      "paths": [
+        "plugins/ttm-core/blocks/",
+        "themes/ttm-theme/patterns/",
+        "themes/ttm-theme/parts/",
+        "themes/ttm-theme/templates/"
+      ],
+      "pattern": "wp_create_nonce|wp_nonce_field|wp_nonce_url",
+      "shouldMatch": [
+        "wp_nonce_field( 'ttm_subscribe' );",
+        "$url = wp_nonce_url( $u, 'a' );",
+        "'nonce' => wp_create_nonce( 'x' ),"
+      ],
+      "shouldNotMatch": [
+        "// the HMAC token replaces the nonce",
+        "check_admin_referer( 'ttm_settings' );"
+      ]
+    },
+    {
+      "id": "per-visitor-markup",
+      "description": "Rule 8: no per-visitor branches outside Cache/Headers.php",
+      "paths": [
+        "themes/ttm-theme/",
+        "plugins/ttm-core/blocks/",
+        "plugins/ttm-core/src/Bindings/",
+        "plugins/ttm-core/src/Query/",
+        "plugins/ttm-core/src/Blocks/",
+        "plugins/ttm-core/src/Templates/",
+        "plugins/ttm-core/src/Nav/"
+      ],
+      "pattern": "is_user_logged_in|wp_get_current_user|get_current_user_id|\\$_COOKIE|\\$_SESSION",
+      "shouldMatch": [
+        "if ( is_user_logged_in() ) {",
+        "$user = wp_get_current_user();",
+        "$id = get_current_user_id();",
+        "$c = $_COOKIE['x'];"
+      ],
+      "shouldNotMatch": [
+        "$author = get_the_author();",
+        "$cookie_free = true;"
+      ]
+    },
+    {
+      "id": "one-clock",
+      "description": "Rule 9: no clock reads outside Support/Clock.php",
+      "paths": [
+        "plugins/ttm-core/src/",
+        "plugins/ttm-core/blocks/",
+        "themes/ttm-theme/"
+      ],
+      "exclude": [
+        "plugins/ttm-core/src/Support/Clock.php"
+      ],
+      "pattern": "\\btime\\(\\)|\\bdate\\(|wp_date\\(|current_time\\(|current_datetime\\(|new \\\\?DateTime",
+      "shouldMatch": [
+        "$now = time();",
+        "$d = date( 'Y' );",
+        "$d = wp_date( 'Y' );",
+        "$t = current_time( 'mysql' );",
+        "$n = new DateTimeImmutable();",
+        "$n = new \\DateTime( 'now' );"
+      ],
+      "shouldNotMatch": [
+        "$d = gmdate( 'Y', $ts );",
+        "$d = get_the_date( 'Y', $post );",
+        "$now = Clock::now();",
+        "$pd = $post->post_date;"
+      ]
+    },
+    {
+      "id": "bounded-queries",
+      "description": "Rule 12: no unbounded queries",
+      "paths": [
+        "plugins/ttm-core/src/",
+        "plugins/ttm-core/blocks/"
+      ],
+      "pattern": "posts_per_page'?\\s*=>\\s*-1|nopaging'?\\s*=>\\s*true|numberposts'?\\s*=>\\s*-1|number'?\\s*=>\\s*0\\b",
+      "shouldMatch": [
+        "'posts_per_page' => -1,",
+        "'nopaging' => true,",
+        "'numberposts' => -1,",
+        "'number' => 0,"
+      ],
+      "shouldNotMatch": [
+        "'posts_per_page' => $batch,",
+        "'number' => 10,",
+        "'posts_per_page' => 1,"
+      ]
+    },
+    {
+      "id": "dangerous-php",
+      "description": "Rule 15: no eval/unserialize/exec family or remote file reads",
+      "paths": [
+        "plugins/ttm-core/",
+        "themes/ttm-theme/"
+      ],
+      "exclude": [
+        "plugins/ttm-core/build/",
+        "plugins/ttm-core/vendor/"
+      ],
+      "pattern": "\\beval\\(|\\bunserialize\\(|\\bextract\\(|create_function\\(|\\bassert\\(|\\bsystem\\(|\\bexec\\(|shell_exec\\(|passthru\\(|proc_open\\(|curl_[a-z_]+\\(|file_get_contents\\(\\s*['\"]http|fopen\\(\\s*['\"]http",
+      "shouldMatch": [
+        "eval( $code );",
+        "$d = unserialize( $raw );",
+        "exec( 'ls' );",
+        "$ch = curl_init( $url );",
+        "file_get_contents( 'https://example.com' );"
+      ],
+      "shouldNotMatch": [
+        "maybe_unserialize( $v );",
+        "file_get_contents( $path );",
+        "wp_json_encode( $rows );",
+        "$this->assertSame( 1, $n );"
+      ]
+    },
+    {
+      "id": "remote-calls-confined",
+      "description": "Rule 16: wp_safe_remote_* only in Verse/Fetcher, Cache/Cloudflare, Newsletter/Provider/CustomUrl",
+      "paths": [
+        "plugins/ttm-core/src/",
+        "plugins/ttm-core/blocks/",
+        "themes/ttm-theme/"
+      ],
+      "exclude": [
+        "plugins/ttm-core/src/Verse/Fetcher.php",
+        "plugins/ttm-core/src/Cache/Cloudflare.php",
+        "plugins/ttm-core/src/Newsletter/Provider/CustomUrl.php"
+      ],
+      "pattern": "wp_safe_remote_(get|post|request|head)\\(",
+      "shouldMatch": [
+        "$r = wp_safe_remote_get( $url );",
+        "wp_safe_remote_post( $endpoint, $args );"
+      ],
+      "shouldNotMatch": [
+        "// wp_safe_remote_* lives in Fetcher",
+        "wp_remote_retrieve_body( $r );"
+      ]
+    },
+    {
+      "id": "unsafe-remote",
+      "description": "Rule 16: never the unsafe wp_remote_* request functions",
+      "paths": [
+        "plugins/ttm-core/",
+        "themes/ttm-theme/"
+      ],
+      "exclude": [
+        "plugins/ttm-core/build/",
+        "plugins/ttm-core/vendor/"
+      ],
+      "pattern": "\\bwp_remote_(get|post|request|head)\\(",
+      "shouldMatch": [
+        "wp_remote_get( $url );",
+        "$r = wp_remote_post( $u, [] );"
+      ],
+      "shouldNotMatch": [
+        "wp_safe_remote_get( $url );",
+        "wp_remote_retrieve_response_code( $r );"
+      ]
+    },
+    {
+      "id": "sideload-confined",
+      "description": "SPEC phase 4 §4: media_sideload_image()/download_url() only in Cli/MigrateCommand.php (remote hosts from --hosts or Config, never request input)",
+      "paths": [
+        "plugins/ttm-core/",
+        "themes/ttm-theme/"
+      ],
+      "exclude": [
+        "plugins/ttm-core/src/Cli/MigrateCommand.php",
+        "plugins/ttm-core/build/",
+        "plugins/ttm-core/vendor/"
+      ],
+      "pattern": "media_sideload_image\\(|download_url\\(",
+      "shouldMatch": [
+        "$id = media_sideload_image( $url, $post_id, null, 'id' );",
+        "$tmp = download_url( $url );"
+      ],
+      "shouldNotMatch": [
+        "// images are sideloaded by migrate:images",
+        "media_handle_sideload_done();"
+      ]
+    },
+    {
+      "id": "front-end-network",
+      "description": "Rule 6: no front-end network requests from theme JS or block view scripts",
+      "paths": [
+        "themes/ttm-theme/assets/js/",
+        "plugins/ttm-core/blocks/"
+      ],
+      "pattern": "fetch\\(|XMLHttpRequest|apiFetch|admin-ajax\\.php|/wp-json/",
+      "shouldMatch": [
+        "fetch( '/wp-json/ttm/v1/verse' );",
+        "const xhr = new XMLHttpRequest();",
+        "apiFetch( { path: '/ttm/v1/lead' } );",
+        "form.action = '/wp-admin/admin-ajax.php';"
+      ],
+      "shouldNotMatch": [
+        "button.addEventListener( 'click', toggle );",
+        "document.querySelector( '.ttm-nav-open' );"
+      ]
+    },
+    {
+      "id": "hard-coded-tunable-arrow",
+      "description": "Rule 24: numeric literal >= 2 as an array value outside Config.php (HTTP status allowed)",
+      "paths": [
+        "plugins/ttm-core/src/",
+        "plugins/ttm-core/blocks/"
+      ],
+      "exclude": [
+        "plugins/ttm-core/src/Config.php"
+      ],
+      "pattern": "^(?!.*'status'\\s*=>\\s*\\d{3}\\b).*=>\\s*([2-9]\\d*|\\d{2,})\\b",
+      "shouldMatch": [
+        "'posts_per_page' => 5,",
+        "'limit' => 12,",
+        "'timeout' => 20,"
+      ],
+      "shouldNotMatch": [
+        "'status' => 404,",
+        "'posts_per_page' => $batch,",
+        "'limit' => (int) Config::get( 'series.related_limit', 4 ),",
+        "'part' => 1,"
+      ]
+    },
+    {
+      "id": "hard-coded-tunable-assign",
+      "description": "Rule 24: numeric literal >= 2 assigned to a variable outside Config.php (HTTP status allowed)",
+      "paths": [
+        "plugins/ttm-core/src/",
+        "plugins/ttm-core/blocks/"
+      ],
+      "exclude": [
+        "plugins/ttm-core/src/Config.php"
+      ],
+      "pattern": "^(?!.*status\\s*=\\s*\\d{3}\\s*;).*=\\s*([2-9]\\d*|\\d{2,})\\s*;",
+      "shouldMatch": [
+        "$limit = 5;",
+        "$ttm_timeout = 20;",
+        "$x = 100;"
+      ],
+      "shouldNotMatch": [
+        "$status = 404;",
+        "$limit = (int) Config::get( 'archive.per_page', 12 );",
+        "$part = 1;",
+        "$i = 0;"
+      ]
+    },
+    {
+      "id": "pending-allow-list",
+      "description": "Rule 34: the CSS coverage allow-list is empty (no pending line)",
+      "paths": [
+        "scripts/css-coverage-allow.txt"
+      ],
+      "pattern": "\\S",
+      "shouldMatch": [
+        "ttm-foo # P1-03 pending",
+        "ttm-bar"
+      ],
+      "shouldNotMatch": [
+        "",
+        "   "
+      ]
+    },
+    {
+      "id": "selectors-no-pending",
+      "description": "Rule 41: no pending line in the selectors allow-list",
+      "paths": [
+        "tests/e2e/selectors-allow.txt"
+      ],
+      "pattern": "#\\s*P\\d-\\d\\d\\s+pending",
+      "shouldMatch": [
+        ".ttm-foo # P1-03 pending",
+        ".ttm-bar  #P2-01 pending"
+      ],
+      "shouldNotMatch": [
+        ".is-style-rule-1 # editor block style (04 §3)",
+        ".ttm-series-mark.is-hiatus # state: no seeded series has ttm_status \"hiatus\""
+      ]
+    },
+    {
+      "id": "css-hex-literal",
+      "description": "Rule 44/theme.json presets: no hex colour literal in ttm.css",
+      "paths": [
+        "themes/ttm-theme/assets/css/ttm.css"
+      ],
+      "pattern": "#[0-9a-fA-F]{3,8}(?![\\w-])",
+      "shouldMatch": [
+        "color: #c8301f;",
+        "background: #fff;",
+        "border: 1px solid #d7d3d3;"
+      ],
+      "shouldNotMatch": [
+        "color: var(--wp--preset--color--accent-700);",
+        "#main { display: block; }",
+        "#newsletter { scroll-margin-top: 20px; }"
+      ]
+    },
+    {
+      "id": "no-dark-mode",
+      "description": "Non-goal: no dark mode",
+      "paths": [
+        "themes/ttm-theme/",
+        "plugins/ttm-core/src/",
+        "plugins/ttm-core/blocks/"
+      ],
+      "pattern": "prefers-color-scheme|data-theme=\"dark\"",
+      "shouldMatch": [
+        "@media (prefers-color-scheme: dark) {",
+        "<html data-theme=\"dark\">"
+      ],
+      "shouldNotMatch": [
+        "@media (max-width: 720px) {",
+        "color-scheme: light;"
+      ]
+    },
+    {
+      "id": "seed-no-red",
+      "description": "Rule 45: seed images never use the accent red",
+      "paths": [
+        "plugins/ttm-core/src/Cli/Seeder.php"
+      ],
+      "pattern": "210,\\s*48,\\s*19|#c8301f",
+      "shouldMatch": [
+        "private const BAND = [ 210, 48, 19 ];",
+        "imagecolorallocate( $im, 210,48,19 );"
+      ],
+      "shouldNotMatch": [
+        "private const FIELD = [ 186, 182, 182 ];",
+        "private const COVER = [ 96, 93, 93 ];"
+      ]
+    },
+    {
+      "id": "seed-no-lorem",
+      "description": "Rule 39: no lorem ipsum in seed fixtures",
+      "paths": [
+        "docs/fixtures/seed/"
+      ],
+      "pattern": "lorem",
+      "flags": "i",
+      "shouldMatch": [
+        "\"excerpt\": \"Lorem ipsum dolor sit amet\"",
+        "lorem ipsum"
+      ],
+      "shouldNotMatch": [
+        "\"excerpt\": \"A compromised admin account can rewrite wp_options.\"",
+        "\"title\": \"Ordinary Time, week 4\""
+      ]
+    },
+    {
+      "id": "footer-no-rss",
+      "description": "Phase 4 §6.1 regression guard: no RSS item in the footer navigation",
+      "paths": [
+        "themes/ttm-theme/parts/footer.html"
+      ],
+      "pattern": "\"label\":\"RSS\"|/feed/",
+      "shouldMatch": [
+        "<!-- wp:navigation-link {\"label\":\"RSS\",\"url\":\"/feed/\",\"kind\":\"custom\"} /-->",
+        "<a href=\"/feed/\">RSS</a>"
+      ],
+      "shouldNotMatch": [
+        "<!-- wp:navigation-link {\"label\":\"Series\",\"url\":\"/series/\",\"kind\":\"custom\"} /-->"
+      ]
+    },
+    {
+      "id": "verse-copyright-removed",
+      "description": "Phase 4 §6.1 regression guard: the verse-copyright binding, key and classes stay gone",
+      "paths": [
+        "plugins/ttm-core/",
+        "themes/ttm-theme/",
+        "tests/"
+      ],
+      "exclude": [
+        "plugins/ttm-core/build/",
+        "plugins/ttm-core/vendor/"
+      ],
+      "pattern": "verse-copyright|verse_copyright|copyright_placement|ttm-footer__copyright|ttm-verse__copyright",
+      "shouldMatch": [
+        "\"source\":\"ttm/verse-copyright\"",
+        "'verse.copyright_placement' => 'footer',",
+        ".ttm-footer__copyright { margin: 0; }"
+      ],
+      "shouldNotMatch": [
+        "'copyright' => sanitize_text_field( (string) ( $item['copyright_notice'] ?? '' ) ),",
+        "<p class=\"ttm-footer__meta\"></p>"
+      ]
+    },
+    {
+      "id": "serials-active-confined",
+      "description": "Rule 50: Serials::active() is read only by the sanctioned Writing-page/front-page blocks (series-toc chapters variant checked by reading)",
+      "paths": [
+        "plugins/ttm-core/src/",
+        "plugins/ttm-core/blocks/"
+      ],
+      "exclude": [
+        "plugins/ttm-core/src/Fiction/Serials.php",
+        "plugins/ttm-core/blocks/serial-hero/render.php",
+        "plugins/ttm-core/blocks/writing-cell/render.php",
+        "plugins/ttm-core/blocks/series-toc/render.php",
+        "plugins/ttm-core/blocks/story-tiles/render.php",
+        "plugins/ttm-core/blocks/book-grid/render.php"
+      ],
+      "pattern": "Serials::active\\(",
+      "shouldMatch": [
+        "$ttm_row = Serials::active();",
+        "} elseif ( Serials::active() ) {"
+      ],
+      "shouldNotMatch": [
+        "$ttm_row = SeriesIndex::for_post( $ttm_post_id );",
+        "use TTM\\Core\\Fiction\\Serials;"
+      ]
+    },
+    {
+      "id": "grid-group-not-constrained",
+      "description": "Rule 36: no is-style-grid-* group declares a constrained or flow layout on the same line",
+      "paths": [
+        "themes/ttm-theme/templates/",
+        "themes/ttm-theme/patterns/",
+        "themes/ttm-theme/parts/"
+      ],
+      "pattern": "is-style-grid-[^\"]*\"[^>]*\"layout\":\\{\"type\":\"(constrained|flow|flex)\"",
+      "shouldMatch": [
+        "<!-- wp:group {\"className\":\"is-style-grid-8-4 ttm-article\",\"layout\":{\"type\":\"constrained\"}} -->",
+        "<!-- wp:group {\"className\":\"is-style-grid-7-5\",\"layout\":{\"type\":\"flex\"}} -->"
+      ],
+      "shouldNotMatch": [
+        "<!-- wp:group {\"className\":\"is-style-grid-8-4 ttm-article\",\"layout\":{\"type\":\"default\"}} -->"
+      ]
+    },
+    {
+      "id": "untagged-fixme",
+      "description": "Rule 34/38: a test.fixme( row must carry its owning task tag (none at all after P4-01)",
+      "paths": [
+        "tests/e2e/fidelity.spec.mjs",
+        "tests/e2e/editors.spec.mjs"
+      ],
+      "pattern": "^(?!.*//\\s*P\\d-\\d\\d\\b).*test\\.fixme\\(",
+      "shouldMatch": [
+        "\ttest.fixme( 'demo-lead-photo: .ttm-lead-story img @1280', async ( { page } ) => {",
+        "test.fixme( 'x', fn ); // later"
+      ],
+      "shouldNotMatch": [
+        "\ttest.fixme( 'demo-lead-photo: .ttm-lead-story img @1280', async ( { page } ) => { // P1-05",
+        "\ttest( 'name-footer: .ttm-footer__meta @1280', async ( { page } ) => {"
+      ]
+    },
+    {
+      "id": "owner-name-confined",
+      "description": "Rule 55/§6.7: the owner's name appears in plugins/ and themes/ only in Config::defaults(), header Author: lines and readme.txt",
+      "paths": [
+        "plugins/ttm-core/",
+        "themes/ttm-theme/"
+      ],
+      "exclude": [
+        "plugins/ttm-core/src/Config.php",
+        "plugins/ttm-core/readme.txt",
+        "themes/ttm-theme/readme.txt",
+        "plugins/ttm-core/build/",
+        "plugins/ttm-core/vendor/"
+      ],
+      "pattern": "^(?!\\s*\\*?\\s*Author:).*Eric\\s+Mann",
+      "flags": "i",
+      "shouldMatch": [
+        "\t\t<p class=\"ttm-masthead-inner__by\"><?php esc_html_e( 'by Eric Mann', 'ttm-theme' ); ?></p>",
+        "\t\t\t\t'display_name' => __( 'Eric Mann', 'ttm-core' ),",
+        "\t * \"These Things Matter · © 2026 Eric Mann · Built on WordPress\" (SPEC §6.1.8): the"
+      ],
+      "shouldNotMatch": [
+        "Author:            Eric Mann",
+        " * Author:            Eric Mann",
+        "\t\t\t\t'display_name' => Config::author_name(),",
+        " * Plugin URI:        https://github.com/ericmann/ttmm_theme"
+      ]
+    },
+    {
+      "id": "local-sideload-confined",
+      "description": "SPEC §4/§6.2: media_handle_sideload() only in Cli/DemoImage.php (a copy of a demo-*.jpg from the mounted fixtures dir, never a URL or request input)",
+      "paths": [
+        "plugins/ttm-core/src/",
+        "plugins/ttm-core/blocks/",
+        "themes/ttm-theme/"
+      ],
+      "exclude": [
+        "plugins/ttm-core/src/Cli/DemoImage.php"
+      ],
+      "pattern": "media_handle_sideload\\(",
+      "shouldMatch": [
+        "$id = media_handle_sideload( $file_array, $post_id, null, $post_data );",
+        "\t\t$attachment_id = \\media_handle_sideload( $f, 0 );"
+      ],
+      "shouldNotMatch": [
+        "// the copy is handed to media_handle_sideload by DemoImage",
+        "$id = DemoImage::attach( $file, $post_id, $alt, $caption );"
+      ]
+    },
+    {
+      "id": "demo-license-set",
+      "description": "Rule 53: every CREDITS.json licence is cc0 or pdm",
+      "paths": [
+        "docs/fixtures/demo/CREDITS.json"
+      ],
+      "pattern": "\"license\"\\s*:\\s*\"(?!(?:cc0|pdm)\")",
+      "shouldMatch": [
+        "    \"license\": \"by\",",
+        "    \"license\": \"by-sa\",",
+        "\"license\":\"CC0\""
+      ],
+      "shouldNotMatch": [
+        "    \"license\": \"cc0\",",
+        "    \"license\": \"pdm\",",
+        "    \"license_url\": \"https://creativecommons.org/publicdomain/zero/1.0/\","
+      ]
+    },
+    {
+      "id": "demo-image-name",
+      "description": "SPEC §5/§6.8: a string featured_image in the seed fixtures names a demo-<slug>.jpg file",
+      "paths": [
+        "docs/fixtures/seed/"
+      ],
+      "pattern": "\"featured_image\"\\s*:\\s*\"(?!demo-[a-z0-9-]+\\.jpg\")",
+      "shouldMatch": [
+        "      \"featured_image\": \"photo.jpg\",",
+        "      \"featured_image\": \"demo-Signing.JPG\",",
+        "\"featured_image\": \"../demo-x.jpg\""
+      ],
+      "shouldNotMatch": [
+        "      \"featured_image\": \"demo-signing-your-options-table.jpg\",",
+        "      \"featured_image\": true,"
+      ]
+    },
+    {
+      "id": "demo-build-offline",
+      "description": "Rule 54: demo:build, the pure script libs and release:pack make no network request",
+      "paths": [
+        "scripts/demo/build.mjs",
+        "scripts/demo/lib/",
+        "scripts/lib/",
+        "scripts/release/"
+      ],
+      "pattern": "\\bfetch\\(|\\bhttps?\\.(?:get|request)\\(|XMLHttpRequest|from\\s+['\"]node:https?['\"]|require\\(\\s*['\"](?:node:)?https?['\"]\\s*\\)",
+      "shouldMatch": [
+        "const res = await fetch( url );",
+        "https.get( url, onResponse );",
+        "import https from 'node:https';",
+        "const http = require( 'http' );"
+      ],
+      "shouldNotMatch": [
+        "const url = searchUrl( row, { pageSize: OPENVERSE_PAGE_SIZE } );",
+        "export function rebaseAttachmentUrls( xml, fromBase, toBase ) {",
+        "import { spawnSync } from 'node:child_process';"
+      ]
+    },
+    {
+      "id": "sharp-confined",
+      "description": "SPEC §9 Q7: sharp is imported only by scripts/demo/fetch-images.mjs and scripts/screenshots.mjs",
+      "paths": [
+        "plugins/ttm-core/",
+        "themes/ttm-theme/",
+        "scripts/lib/",
+        "scripts/demo/lib/",
+        "scripts/demo/build.mjs",
+        "scripts/demo/check.mjs",
+        "scripts/release/",
+        "scripts/check-demo.mjs",
+        "scripts/check-license.mjs"
+      ],
+      "exclude": [
+        "plugins/ttm-core/build/",
+        "plugins/ttm-core/vendor/"
+      ],
+      "pattern": "from\\s+['\"]sharp['\"]|import\\(\\s*['\"]sharp['\"]\\s*\\)|require\\(\\s*['\"]sharp['\"]\\s*\\)",
+      "shouldMatch": [
+        "import sharp from 'sharp';",
+        "const { default: sharp } = await import( 'sharp' );",
+        "const sharp = require( 'sharp' );"
+      ],
+      "shouldNotMatch": [
+        "// re-encoded with sharp by fetch-images.mjs",
+        "const sharpness = 1;"
+      ]
+    },
+    {
+      "id": "fetch-not-in-ci",
+      "description": "Rule 54: the Openverse fetch is human-run and never appears in a workflow",
+      "paths": [
+        ".github/workflows/"
+      ],
+      "pattern": "demo:fetch-images|fetch-images\\.mjs",
+      "shouldMatch": [
+        "      - run: npm run demo:fetch-images",
+        "        run: node scripts/demo/fetch-images.mjs --only=demo-about.jpg"
+      ],
+      "shouldNotMatch": [
+        "      - run: npm run demo:build -- --out dist/demo --check-determinism",
+        "      - run: npm run demo:check -- --from dist/demo"
+      ]
+    },
+    {
+      "id": "demo-no-localhost",
+      "description": "SPEC §6.3 step 5: the committed demo outputs never point at a local host",
+      "paths": [
+        ".github/blueprint.json",
+        ".github/demo-content.xml",
+        ".github/demo-options.json"
+      ],
+      "pattern": "localhost|127\\.0\\.0\\.1|:8888\\b",
+      "shouldMatch": [
+        "\t<wp:base_site_url>http://localhost:8888</wp:base_site_url>",
+        "\"url\": \"http://127.0.0.1:9400/ttm-core.zip\"",
+        "<link>http://example.test:8888/about/</link>"
+      ],
+      "shouldNotMatch": [
+        "\t<wp:base_site_url>https://example.com</wp:base_site_url>",
+        "\"url\": \"https://github-proxy.com/proxy/?repo=ericmann/ttmm_theme&release=v0.2.0&asset=ttm-core.zip\""
+      ]
+    },
+    {
+      "id": "demo-no-email",
+      "description": "SPEC §6.3 step 2/5: the committed demo outputs contain no e-mail address",
+      "paths": [
+        ".github/blueprint.json",
+        ".github/demo-content.xml",
+        ".github/demo-options.json"
+      ],
+      "pattern": "[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\\.[A-Za-z0-9-]+)*\\.[A-Za-z]{2,}",
+      "shouldMatch": [
+        "<wp:author_email><![CDATA[someone@example.org]]></wp:author_email>",
+        "\"fallback_email\": \"hello@example.com\""
+      ],
+      "shouldNotMatch": [
+        "<wp:author_login><![CDATA[demo]]></wp:author_login>",
+        "@media (max-width: 720px) {",
+        "\"url\": \"https://raw.githubusercontent.com/ericmann/ttmm_theme/main/.github/demo-content.xml\""
+      ]
+    }
+  ]
+}
