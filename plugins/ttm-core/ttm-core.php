@@ -3,7 +3,7 @@
  * Plugin Name:       These Things Matter — Core
  * Plugin URI:        https://github.com/ericmann/ttmm_theme
  * Description:       Data, blocks, bindings, cron, CLI and migration tooling for eric.mann.blog. Owns everything that must survive a theme switch.
- * Version:           0.1.0
+ * Version:           0.2.0
  * Requires at least: 6.7
  * Requires PHP:      8.1
  * Author:            Eric Mann
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 define( 'TTM_CORE_API', 1 );
-define( 'TTM_CORE_VERSION', '0.1.0' );
+define( 'TTM_CORE_VERSION', '0.2.0' );
 define( 'TTM_CORE_FILE', __FILE__ );
 define( 'TTM_CORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'TTM_CORE_URL', plugin_dir_url( __FILE__ ) );
