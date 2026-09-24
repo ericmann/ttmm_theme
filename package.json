@@ -10,7 +10,7 @@
   "scripts": {
     "build": "wp-scripts build",
     "start": "wp-scripts start",
-    "lint": "npm run lint:js && npm run lint:css && npm run check:theme-json && npm run check:block-json && npm run check:budget && npm run check:css-coverage && npm run check:fixme && npm run check:license",
+    "lint": "npm run lint:js && npm run lint:css && npm run check:theme-json && npm run check:block-json && npm run check:budget && npm run check:css-coverage && npm run check:fixme && npm run check:license && npm run check:demo",
     "lint:js": "wp-scripts lint-js plugins/ttm-core/src themes/ttm-theme/assets/js scripts tests/e2e --no-error-on-unmatched-pattern",
     "lint:css": "wp-scripts lint-style 'themes/ttm-theme/assets/css/**/*.css' --allow-empty-input",
     "check:theme-json": "node scripts/check-theme-json.mjs",
@@ -18,6 +18,7 @@
     "check:budget": "node scripts/check-budget.mjs",
     "check:css-coverage": "node scripts/check-css-coverage.mjs",
     "check:license": "node scripts/check-license.mjs",
+    "check:demo": "node scripts/check-demo.mjs",
     "check:fixme": "node scripts/check-fixme.mjs",
     "screenshots": "node scripts/screenshots.mjs",
     "test:unit": "wp-scripts test-unit-js --passWithNoTests",
