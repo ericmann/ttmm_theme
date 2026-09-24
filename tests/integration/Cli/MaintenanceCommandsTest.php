@@ -65,7 +65,9 @@ class MaintenanceCommandsTest extends TTM_IntegrationTestCase {
 		$empty_post = self::factory()->post->create( [ 'post_category' => [ $tech ] ] );
 		delete_post_meta( $empty_post, 'ttm_primary_category' );
 
-		$set_post = self::factory()->post->create( [ 'post_category' => [ $tech ] ] );
+		// $business must still be an assigned category, else it's a stale stored primary and
+		// R1-01 replaces it -- this test is about an already-valid stored primary surviving.
+		$set_post = self::factory()->post->create( [ 'post_category' => [ $tech, $business ] ] );
 		update_post_meta( $set_post, 'ttm_primary_category', $business );
 
 		( new PrimaryCommand() )->run( [], [] );

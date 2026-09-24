@@ -149,7 +149,9 @@ wp ttm primary:assign --dry-run    # then: nav-order fallback for every post sti
 wp ttm primary:assign
 ```
 
-The resolver picks the first assigned section in nav order (Technology, Business, Faith, Journal, Writing, Security, Opinion). Two rules of thumb from the live data:
+The resolver picks the first assigned section in nav order (Technology, Business, Faith, Journal, Writing, Security, Opinion). Both `primary:assign` modes treat a *stale* stored `ttm_primary_category` -- one naming a category the post no longer carries -- as missing and replace it; you never need to `delete_post_meta` before re-running either mode. If you imported via the WordPress importer, `PrimaryCategory::on_save()` does not store a primary category during that import (it gates on `WP_IMPORTING`), because the importer inserts the post before it assigns the real categories; run step 2.3 after the import finishes.
+
+Two rules of thumb from the live data:
 
 - A post in `journal` **and** `technology` (there are several) resolves to Technology by nav order, which makes it an article, not a journal entry. If it *is* a journal entry, set Primary section = Journal in the post sidebar; `audit --only=multi-category` lists these.
 - Posts in `technology` + `security` resolve to Technology. The Security cell and archive still show them (archives use any-category membership; only front-page cells are primary-only).

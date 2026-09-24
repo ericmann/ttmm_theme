@@ -29,6 +29,22 @@ class SaveHooksTest extends TTM_IntegrationTestCase {
 		$this->assertSame( $technology, (int) get_post_meta( $post_id, 'ttm_primary_category', true ) );
 	}
 
+	/**
+	 * R1-01: the WordPress importer inserts the post (no categories -> default category)
+	 * before it assigns the real terms; `on_save` must not persist a primary category during
+	 * that import save, or a later `primary:assign --from-yoast` pass would see it as already
+	 * set and skip the post.
+	 */
+	public function test_import_save_does_not_store_default_category_primary(): void {
+		add_filter( 'ttm_primary_on_import', '__return_true' );
+
+		$post_id = self::factory()->post->create();
+
+		remove_filter( 'ttm_primary_on_import', '__return_true' );
+
+		$this->assertFalse( metadata_exists( 'post', $post_id, 'ttm_primary_category' ) );
+	}
+
 	public function test_save_does_not_overwrite_manual_primary(): void {
 		$technology = $this->category_id( 'technology', 'Technology' );
 		$business   = $this->category_id( 'business', 'Business' );

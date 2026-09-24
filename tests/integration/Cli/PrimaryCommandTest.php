@@ -70,6 +70,48 @@ class PrimaryCommandTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'Would use 1 post(s) from Yoast, skipped 0.', $result['messages'][0] );
 	}
 
+	/**
+	 * R1-01: the WordPress importer inserts the post (no categories -> default category),
+	 * then assigns the real terms. `on_save` no longer stores a primary during that import
+	 * save, so `--from-yoast` finds the post still missing a primary and uses Yoast's,
+	 * without needing a manual delete_post_meta() first.
+	 */
+	public function test_from_yoast_after_importer_order_uses_yoast(): void {
+		add_filter( 'ttm_primary_on_import', '__return_true' );
+
+		$security   = $this->category_id( 'security', 'Security' );
+		$technology = $this->category_id( 'technology', 'Technology' );
+
+		$post_id = self::factory()->post->create();
+		wp_set_post_terms( $post_id, [ $security, $technology ], 'category' );
+		update_post_meta( $post_id, '_yoast_wpseo_primary_category', $security );
+
+		remove_filter( 'ttm_primary_on_import', '__return_true' );
+
+		$result = ( new PrimaryCommand() )->run( [], [ 'from-yoast' => true ] );
+
+		$this->assertTrue( $result['ok'] );
+		$this->assertSame( $security, (int) get_post_meta( $post_id, 'ttm_primary_category', true ) );
+		$this->assertStringContainsString( 'Used 1 post(s) from Yoast, skipped 0.', $result['messages'][0] );
+	}
+
+	/**
+	 * R1-01: a plain `primary:assign` pass treats a stored primary the post no longer carries
+	 * (e.g. after re-categorising) as missing, and replaces it by nav order.
+	 */
+	public function test_plain_assign_replaces_a_stale_stored_primary(): void {
+		$tech     = $this->category_id( 'technology', 'Technology' );
+		$business = $this->category_id( 'business', 'Business' );
+
+		$post = self::factory()->post->create( [ 'post_category' => [ $tech ] ] );
+		update_post_meta( $post, 'ttm_primary_category', $business );
+
+		$result = ( new PrimaryCommand() )->run( [], [] );
+
+		$this->assertTrue( $result['ok'] );
+		$this->assertSame( $tech, (int) get_post_meta( $post, 'ttm_primary_category', true ) );
+	}
+
 	public function test_plain_assign_fills_the_rest_by_nav_order(): void {
 		$tech     = $this->category_id( 'technology', 'Technology' );
 		$business = $this->category_id( 'business', 'Business' );
@@ -77,7 +119,9 @@ class PrimaryCommandTest extends TTM_IntegrationTestCase {
 		$empty_post = self::factory()->post->create( [ 'post_category' => [ $tech, $business ] ] );
 		delete_post_meta( $empty_post, 'ttm_primary_category' );
 
-		$set_post = self::factory()->post->create( [ 'post_category' => [ $tech ] ] );
+		// $business must still be an assigned category, else it's a stale stored primary and
+		// R1-01 replaces it -- this test is about an already-valid stored primary surviving.
+		$set_post = self::factory()->post->create( [ 'post_category' => [ $tech, $business ] ] );
 		update_post_meta( $set_post, 'ttm_primary_category', $business );
 
 		$result = ( new PrimaryCommand() )->run( [], [] );

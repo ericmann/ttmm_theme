@@ -109,13 +109,35 @@ class PrimaryCategory {
 	}
 
 	/**
+	 * Whether this save happens while an import is running -- the WordPress importer inserts
+	 * the post (no categories, so the default category applies) before it assigns the real
+	 * terms, so a `save_post_post` fired at insert time would otherwise stick a stale
+	 * "Uncategorized" primary that a later `primary:assign --from-yoast` pass would then treat
+	 * as already set (Decision mirrors Form::is_editor_save()). `true` only when `WP_IMPORTING`
+	 * is defined and set; filterable so tests and other write paths can force either answer.
+	 *
+	 * @return bool
+	 */
+	public static function is_import_save(): bool {
+		$default = ( defined( 'WP_IMPORTING' ) && WP_IMPORTING );
+
+		return (bool) apply_filters( 'ttm_primary_on_import', $default );
+	}
+
+	/**
 	 * Write ttm_primary_category only when empty or the stored term is no longer assigned.
+	 * Never writes during an import (see is_import_save()) -- `primary:assign --from-yoast`
+	 * or a plain `primary:assign` pass fills it in afterwards, once the real terms are set.
 	 *
 	 * @param int     $post_id Post ID.
 	 * @param WP_Post $post    Post object.
 	 */
 	public static function on_save( int $post_id, WP_Post $post ): void {
 		if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) || 'auto-draft' === $post->post_status ) {
+			return;
+		}
+
+		if ( self::is_import_save() ) {
 			return;
 		}
 
@@ -138,19 +160,22 @@ class PrimaryCategory {
 	}
 
 	/**
-	 * Read helper: the resolved primary category term id. Never writes.
+	 * Read helper: the resolved primary category term id. Never writes. A stored term the
+	 * post no longer carries (e.g. after re-categorising) is treated as empty and resolved
+	 * fresh from the post's current terms, same as on_save().
 	 *
 	 * @param int $post_id Post ID.
 	 * @return int
 	 */
 	public static function id( int $post_id ): int {
 		$stored = (int) get_post_meta( $post_id, 'ttm_primary_category', true );
-		if ( $stored ) {
+		$terms  = wp_get_post_categories( $post_id, [ 'fields' => 'ids' ] );
+
+		if ( $stored && in_array( $stored, $terms, true ) ) {
 			return $stored;
 		}
 
-		$terms = wp_get_post_categories( $post_id, [ 'fields' => 'ids' ] );
-		$slug  = self::resolve_from_terms( $terms );
+		$slug = self::resolve_from_terms( $terms );
 		if ( null === $slug ) {
 			return 0;
 		}

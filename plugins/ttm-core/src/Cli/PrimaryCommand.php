@@ -46,8 +46,12 @@ class PrimaryCommand extends Command {
 			);
 
 			foreach ( $query->posts as $post_id ) {
-				$existing = get_post_meta( $post_id, 'ttm_primary_category', true );
-				if ( $existing ) {
+				// A stored primary the post no longer carries (e.g. the importer's
+				// insert-then-set-terms order left a stale "Uncategorized") is treated as
+				// missing, same as PrimaryCategory::id() (R1-01).
+				$categories = wp_get_post_categories( (int) $post_id );
+				$existing   = (int) get_post_meta( $post_id, 'ttm_primary_category', true );
+				if ( $existing && in_array( $existing, $categories, true ) ) {
 					continue;
 				}
 
@@ -56,7 +60,7 @@ class PrimaryCommand extends Command {
 					// carries that category -- a stale/renamed Yoast value is skipped, not
 					// forced, and falls to a plain `primary:assign` pass instead.
 					$yoast_id = (int) get_post_meta( $post_id, '_yoast_wpseo_primary_category', true );
-					if ( ! $yoast_id || ! in_array( $yoast_id, wp_get_post_categories( (int) $post_id ), true ) ) {
+					if ( ! $yoast_id || ! in_array( $yoast_id, $categories, true ) ) {
 						++$skipped;
 						continue;
 					}
