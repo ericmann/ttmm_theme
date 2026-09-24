@@ -46,8 +46,8 @@ $ttm_nav_links .= sprintf(
 	<!-- wp:group {"className":"ttm-masthead-inner__title","layout":{"type":"default"}} -->
 	<div class="wp-block-group ttm-masthead-inner__title">
 		<!-- wp:site-title {"level":0} /-->
-		<!-- wp:paragraph {"className":"ttm-masthead-inner__by"} -->
-		<p class="ttm-masthead-inner__by"><?php esc_html_e( 'by Eric Mann', 'ttm-theme' ); ?></p>
+		<!-- wp:paragraph {"className":"ttm-masthead-inner__by","metadata":{"bindings":{"content":{"source":"ttm/author-name","args":{"format":"by"}}}}} -->
+		<p class="ttm-masthead-inner__by"></p>
 		<!-- /wp:paragraph -->
 	</div>
 	<!-- /wp:group -->

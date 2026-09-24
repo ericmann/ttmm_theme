@@ -55,3 +55,22 @@ export function color( slug ) {
 export function px( n ) {
 	return `${ n }px`;
 }
+
+const configPath = join( 'plugins', 'ttm-core', 'src', 'Config.php' );
+
+/**
+ * The owner's display name, read from `Config.php`'s `defaults()` (rule 55: the only place it
+ * lives), so the fidelity suite never hard-codes it.
+ *
+ * @return {string} The `site.author_name` default.
+ */
+export function authorName() {
+	const source = readFileSync( configPath, 'utf8' );
+	const match = source.match( /'site\.author_name'\s*=>\s*'([^']+)'/ );
+	if ( ! match ) {
+		throw new Error(
+			"Could not find 'site.author_name' default in Config.php"
+		);
+	}
+	return match[ 1 ];
+}

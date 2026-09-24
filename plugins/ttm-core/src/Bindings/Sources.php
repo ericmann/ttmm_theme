@@ -192,6 +192,14 @@ class Sources {
 				'get_value_callback' => [ self::class, 'search_summary' ],
 			]
 		);
+
+		register_block_bindings_source(
+			'ttm/author-name',
+			[
+				'label'              => __( 'TTM: Author name', 'ttm-core' ),
+				'get_value_callback' => [ self::class, 'author_name' ],
+			]
+		);
 	}
 
 	/**
@@ -327,8 +335,9 @@ class Sources {
 	}
 
 	/**
-	 * `ttm/meta-line`. The only source allowed to return HTML (a "Part N: {title}" link),
-	 * and only into `core/paragraph`'s `content` attribute.
+	 * `ttm/meta-line`. Along with `ttm/author-name`'s `byline-link` format, the only sources
+	 * allowed to return HTML (a "Part N: {title}" link here), and only into
+	 * `core/paragraph`'s `content` attribute.
 	 *
 	 * @param array{parts?: string[]} $source_args    `{parts: string[]}`.
 	 * @param WP_Block                $block_instance Consuming block.
@@ -467,11 +476,27 @@ class Sources {
 		$format = (string) ( $source_args['format'] ?? 'masthead' );
 
 		if ( 'footer' === $format ) {
-			$value = Values::footer_line( get_bloginfo( 'name' ), Clock::now()->format( 'Y' ) );
+			$value = Values::footer_line( get_bloginfo( 'name' ), Clock::now()->format( 'Y' ), Config::author_name() );
 			return self::finalize( $value, $block_instance, $attribute_name );
 		}
 
 		return self::finalize( Values::today( Clock::now(), $format ), $block_instance, $attribute_name );
+	}
+
+	/**
+	 * `ttm/author-name`. Formats: `by` (default), `name`, `byline-link` (HTML, only into
+	 * `core/paragraph`'s `content`), `url`.
+	 *
+	 * @param array{format?: string} $source_args    `{format: by|name|byline-link|url}`.
+	 * @param WP_Block               $block_instance Consuming block.
+	 * @param string                 $attribute_name Consuming attribute.
+	 * @return string
+	 */
+	public static function author_name( array $source_args, $block_instance, string $attribute_name ): string {
+		$format = (string) ( $source_args['format'] ?? 'by' );
+		$value  = Values::author_line( $format, Config::author_name(), home_url( '/about/' ), Config::author_url() );
+
+		return self::finalize( $value, $block_instance, $attribute_name, 'byline-link' === $format );
 	}
 
 	/**

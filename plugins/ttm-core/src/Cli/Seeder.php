@@ -164,7 +164,7 @@ class Seeder {
 		wp_update_user(
 			[
 				'ID'           => 1,
-				'display_name' => __( 'Eric Mann', 'ttm-core' ),
+				'display_name' => Config::author_name(),
 			]
 		);
 

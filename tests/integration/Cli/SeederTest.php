@@ -207,7 +207,7 @@ class SeederTest extends TTM_IntegrationTestCase {
 		$seeder->run( 'normal' );
 
 		$user = get_userdata( 1 );
-		$this->assertSame( 'Eric Mann', $user->display_name );
+		$this->assertSame( \TTM\Core\Config::author_name(), $user->display_name );
 	}
 
 	/**

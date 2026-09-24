@@ -218,16 +218,48 @@ class Values {
 	}
 
 	/**
-	 * "These Things Matter · © 2026 Eric Mann · Built on WordPress" (SPEC §6.1.8): the
+	 * "These Things Matter · © 2026 {author_name} · Built on WordPress" (SPEC §6.1.8): the
 	 * footer's single meta line, bound via `ttm/today format=footer`.
 	 *
-	 * @param string $site_name Site name (`get_bloginfo('name')`).
-	 * @param string $year      Four-digit year.
+	 * @param string $site_name   Site name (`get_bloginfo('name')`).
+	 * @param string $year        Four-digit year.
+	 * @param string $author_name Owner's display name (`Config::author_name()`).
 	 * @return string
 	 */
-	public static function footer_line( string $site_name, string $year ): string {
-		/* translators: 1: site name, 2: four-digit year. */
-		return sprintf( __( '%1$s · © %2$s Eric Mann · Built on WordPress', 'ttm-core' ), $site_name, $year );
+	public static function footer_line( string $site_name, string $year, string $author_name ): string {
+		/* translators: 1: site name, 2: four-digit year, 3: author name. */
+		return sprintf( __( '%1$s · © %2$s %3$s · Built on WordPress', 'ttm-core' ), $site_name, $year, $author_name );
+	}
+
+	/**
+	 * `ttm/author-name` formats: `by` (default) → "by {author_name}"; `name` → the name;
+	 * `byline-link` → `<span>by</span> <a href="{about_url}">{author_name}</a>` (HTML, only
+	 * into `core/paragraph`'s `content`, like `ttm/meta-line`); `url` → `$author_url`.
+	 * `''` name → `''` (the empty bound paragraph renders nothing).
+	 *
+	 * @param string $format     `by`, `name`, `byline-link` or `url`.
+	 * @param string $name       Owner's display name (`Config::author_name()`).
+	 * @param string $about_url  `/about/` URL for `byline-link`.
+	 * @param string $author_url `Config::author_url()`, for `url`.
+	 * @return string
+	 */
+	public static function author_line( string $format, string $name, string $about_url, string $author_url ): string {
+		if ( '' === $name ) {
+			return '';
+		}
+
+		switch ( $format ) {
+			case 'name':
+				return $name;
+			case 'byline-link':
+				return Html::el( 'span', [], Html::text( __( 'by', 'ttm-core' ) ) ) . ' ' . Html::link( $about_url, $name );
+			case 'url':
+				return $author_url;
+			case 'by':
+			default:
+				/* translators: %s: author name. */
+				return sprintf( __( 'by %s', 'ttm-core' ), $name );
+		}
 	}
 
 	/**

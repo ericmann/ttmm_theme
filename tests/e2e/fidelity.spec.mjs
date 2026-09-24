@@ -10,7 +10,7 @@
  */
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { color, px } from './lib/presets.mjs';
+import { color, px, authorName } from './lib/presets.mjs';
 import { computed, tracks, before, text, visibleCount } from './lib/style.mjs';
 import { SCREENS, SCREEN_URLS, securityFiltered } from './lib/urls.mjs';
 
@@ -41,6 +41,20 @@ async function gotoScreen( page, path, width ) {
 	await page.goto( path );
 	await page.evaluate( () => document.fonts.ready );
 }
+
+/**
+ * Escape regex metacharacters in a literal string (P0-02: `authorName()` feeds a `RegExp`).
+ *
+ * @param {string} value Literal text.
+ * @return {string} `value` with regex metacharacters escaped.
+ */
+function escapeRegExp( value ) {
+	return value.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
+}
+
+const FOOTER_COPY_RE = new RegExp(
+	`^These Things Matter · © \\d{4} ${ escapeRegExp( authorName() ) } · Built on WordPress$`
+);
 
 test.describe( 'rule', () => {
 	test( 'rule-2: main > hr.is-style-rule-2 (first) @1280', async ( {
@@ -808,9 +822,7 @@ test.describe( 'footer', () => {
 	test( 'footer-left: .ttm-footer__meta @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const meta = page.locator( '.ttm-footer__meta' );
-		expect( await meta.innerText() ).toMatch(
-			/^These Things Matter · © \d{4} Eric Mann · Built on WordPress$/
-		);
+		expect( await meta.innerText() ).toMatch( FOOTER_COPY_RE );
 	} );
 
 	// P1-01, SPEC §6.11 (changed): footer-copy targets `.ttm-footer__left p` (the old
@@ -819,9 +831,7 @@ test.describe( 'footer', () => {
 		await gotoFront( page, 1280 );
 		const el = page.locator( '.ttm-footer__left p' );
 		expect( await el.count() ).toBe( 1 );
-		expect( await text( el ) ).toMatch(
-			/^These Things Matter · © \d{4} Eric Mann · Built on WordPress$/
-		);
+		expect( await text( el ) ).toMatch( FOOTER_COPY_RE );
 	} );
 
 	// P1-01, SPEC §6.11.
@@ -904,6 +914,26 @@ test.describe( 'footer', () => {
 		const footer = page.locator( '.ttm-footer' );
 		expect( await computed( footer, 'flex-direction' ) ).toBe( 'column' );
 		expect( await computed( footer, 'font-size' ) ).toBe( px( 11 ) );
+	} );
+} );
+
+// P0-02, SPEC §6.7/§6.9 rows name-footer/name-masthead: the owner's name is bound from
+// `Config::author_name()`, not hard-coded in the templates.
+test.describe( 'name', () => {
+	test( 'name-footer: .ttm-footer__meta @1280', async ( { page } ) => {
+		for ( const path of [ SCREENS.article, '/' ] ) {
+			await gotoScreen( page, path, 1280 );
+			const meta = page.locator( '.ttm-footer__meta' );
+			expect( await meta.innerText() ).toContain( authorName() );
+		}
+	} );
+
+	test( 'name-masthead: .ttm-masthead-inner__by @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-masthead-inner__by' );
+		expect( await text( el ) ).toBe( `by ${ authorName() }` );
 	} );
 } );
 

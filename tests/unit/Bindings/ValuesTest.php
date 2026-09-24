@@ -171,11 +171,42 @@ class ValuesTest extends TestCase {
 		$this->assertSame( '2026', Values::today( $now, 'year' ) );
 	}
 
-	public function test_footer_line_joins_site_year_author_and_platform(): void {
+	public function test_footer_line_uses_the_author_name(): void {
 		$this->assertSame(
 			'These Things Matter · © 2026 Eric Mann · Built on WordPress',
-			Values::footer_line( 'These Things Matter', '2026' )
+			Values::footer_line( 'These Things Matter', '2026', 'Eric Mann' )
 		);
+		$this->assertSame(
+			'These Things Matter · © 2026 Ada Example · Built on WordPress',
+			Values::footer_line( 'These Things Matter', '2026', 'Ada Example' )
+		);
+	}
+
+	public function test_author_line_by(): void {
+		$this->assertSame( 'by Eric Mann', Values::author_line( 'by', 'Eric Mann', 'https://example.test/about/', 'https://example.test' ) );
+	}
+
+	public function test_author_line_name(): void {
+		$this->assertSame( 'Eric Mann', Values::author_line( 'name', 'Eric Mann', 'https://example.test/about/', 'https://example.test' ) );
+	}
+
+	public function test_author_line_byline_link_escapes_name_and_links_about(): void {
+		// Escaping itself is Html::el()/Html::link()'s job (esc_html()/esc_attr()/esc_url()
+		// stubs pass through in this WordPress-free suite); this asserts the shape: a plain
+		// "by" span followed by a link to the about URL wrapping the name.
+		$this->assertSame(
+			'<span>by</span> <a href="https://example.test/about/">Eric Mann</a>',
+			Values::author_line( 'byline-link', 'Eric Mann', 'https://example.test/about/', 'https://example.test' )
+		);
+	}
+
+	public function test_author_line_url(): void {
+		$this->assertSame( 'https://example.test', Values::author_line( 'url', 'Eric Mann', 'https://example.test/about/', 'https://example.test' ) );
+	}
+
+	public function test_author_line_empty_name_is_empty(): void {
+		$this->assertSame( '', Values::author_line( 'by', '', 'https://example.test/about/', 'https://example.test' ) );
+		$this->assertSame( '', Values::author_line( 'byline-link', '', 'https://example.test/about/', 'https://example.test' ) );
 	}
 
 	public function test_newsletter_title_by_context(): void {

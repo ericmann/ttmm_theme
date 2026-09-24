@@ -232,7 +232,7 @@ class FrontSourcesTest extends TTM_IntegrationTestCase {
 		$value = $this->source_value( 'ttm/today', [ 'format' => 'footer' ], $block, 'content' );
 
 		$this->assertMatchesRegularExpression(
-			'/^These Things Matter · © \d{4} Eric Mann · Built on WordPress$/',
+			'/^These Things Matter · © \d{4} ' . preg_quote( \TTM\Core\Config::author_name(), '/' ) . ' · Built on WordPress$/',
 			$value
 		);
 	}
