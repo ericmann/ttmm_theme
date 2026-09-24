@@ -3,7 +3,7 @@ Branch: refine/2026-09-24
 Started: 2026-09-24T16:34:49.705Z
 
 ## Tasks
-- [ ] P0-01 Flight harness: tagged-fixme window, devDependencies, entry points, demo constants
+- [x] P0-01 Flight harness: tagged-fixme window, devDependencies, entry points, demo constants
 - [ ] P0-02 Author name: Config keys, ttm/author-name, footer line and mastheads rewired
 - [ ] P0-03 §6.9 demo rows as tagged fixme
 - [ ] P0-04 LICENSE, readme.txt, demo LICENSE.md, version 0.2.0, check-license
@@ -36,3 +36,9 @@ Started: 2026-09-24T16:34:49.705Z
 
 ## Log
 (one entry per task, appended by implement)
+
+### P0-01 — 7a04a0a
+Added ALLOW_TAGGED=true to scripts/check-fixme.mjs (P0-01 comment, P4-01 flips back), updated its test. Added devDependencies @wp-playground/cli ^3.1.54 (matches @wordpress/env's resolved 3.1.54/3.1.55) and sharp ^0.35.4; npm audit clean, dependencies stays {}. New npm scripts demo:fetch-images, demo:build, demo:check, release:pack -> stub files in scripts/demo/{fetch-images,build,check}.mjs and scripts/release/pack.mjs, each printing the required stub line and exit 0. scripts/demo/lib/constants.mjs exports the six SPEC §5 constants (IMAGE_MAX_BYTES 350000, IMAGE_BUDGET_BYTES 8000000 both tagged ⚠️ ASSUMPTION tuned in P1-03; OPENVERSE_MIN_WIDTH 1600, OPENVERSE_PAGE_SIZE 20, OPENVERSE_PACE_MS 3500, OPENVERSE_LICENSES 'cc0,pdm'). .gitignore gained dist/ and docs/fixtures/.demo-build/.
+Interpretation: CLAUDE.md's module map (rewritten by the plan stage into condensed "unchanged" placeholders for Cache/Verse/Newsletter/Editor/Rest/Admin) already failed ScaffoldTest::test_claude_md_module_map_names_every_src_class before I touched anything -- confirmed via git stash. No later task in PLAN.md touches CLAUDE.md or ScaffoldTest, and this failure blocks composer test:unit globally for every subsequent task's foundry_verify, so I expanded those module-map lines to literally name every existing src class (kept the "(unchanged)" note) rather than leave a known-broken test in the tree.
+Tests: scripts/test/check-fixme.test.js, scripts/test/demo-constants.test.js; composer test:unit now green (184/184, was failing ScaffoldTest before this commit).
+Config keys: none (demo constants are script constants per rule 24 amendment, not Config keys).
