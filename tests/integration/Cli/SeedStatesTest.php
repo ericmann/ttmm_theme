@@ -165,6 +165,40 @@ class SeedStatesTest extends TTM_IntegrationTestCase {
 		$this->assertNotNull( get_term( $default_category, 'category' ), 'the default category must survive reset()' );
 	}
 
+	/**
+	 * R1-08, PLAN Decision "Seeder::reset() from a live state": reset() clears every post type,
+	 * not just post/page/attachment -- the inert rows a live import (or the editor itself)
+	 * leaves behind (wp_block, wp_navigation, nav_menu_item) and a post type only registered
+	 * for this test (simulating e.g. a `feedback` plugin's own type).
+	 */
+	public function test_reset_removes_inert_imported_post_types(): void {
+		register_post_type( 'feedback', [ 'public' => false ] );
+
+		$block    = self::factory()->post->create( [ 'post_type' => 'wp_block' ] );
+		$nav      = self::factory()->post->create( [ 'post_type' => 'wp_navigation' ] );
+		$feedback = self::factory()->post->create( [ 'post_type' => 'feedback' ] );
+
+		$menu_id       = wp_create_nav_menu( 'ttm-reset-test-menu' );
+		$nav_menu_item = wp_update_nav_menu_item(
+			$menu_id,
+			0,
+			[
+				'menu-item-title'  => 'Test item',
+				'menu-item-url'    => home_url( '/' ),
+				'menu-item-status' => 'publish',
+			]
+		);
+
+		( new Seeder() )->reset();
+
+		$this->assertNull( get_post( $block ) );
+		$this->assertNull( get_post( $nav ) );
+		$this->assertNull( get_post( $feedback ) );
+		$this->assertNull( get_post( $nav_menu_item ) );
+
+		unregister_post_type( 'feedback' );
+	}
+
 	public function test_reset_with_only_seed_content_behaves_as_before(): void {
 		( new Seeder() )->run( 'normal' );
 

@@ -853,12 +853,15 @@ class Seeder {
 	 */
 	/**
 	 * `wp ttm seed --reset` (SPEC §6.6 last paragraph, rule 49): return the site to empty,
-	 * `wp site empty`-equivalent -- every post/page/attachment and every non-default
-	 * category/tag/series term, not only rows this seeder itself wrote (Decision "Seeder::reset()
-	 * from a live state": after a live import, non-seed content must go too). Guarded by
-	 * `may_wipe()`; a no-op when the environment doesn't allow it. `wp_delete_term()` already
-	 * refuses to delete the default category on its own, so no special case is needed here.
-	 * Batched by `cli.batch` (rule 12).
+	 * `wp site empty`-equivalent -- every post of every registered post type (not just post/
+	 * page/attachment: `wp_block`, `wp_navigation`, `nav_menu_item`, `wp_template`,
+	 * `wp_global_styles`, `custom_css` and anything else registered, e.g. a live import's own
+	 * `feedback` rows), every comment, and every non-default category/tag/series term -- not
+	 * only rows this seeder itself wrote (Decision "Seeder::reset() from a live state": after a
+	 * live import, non-seed content must go too). Guarded by `may_wipe()`; a no-op when the
+	 * environment doesn't allow it. `wp_delete_term()` already refuses to delete the default
+	 * category on its own, so no special case is needed here; `run()` recreates the seeder's
+	 * own navigation afterward. Batched by `cli.batch` throughout (rule 12).
 	 */
 	public function reset(): void {
 		$environment = function_exists( 'wp_get_environment_type' ) ? wp_get_environment_type() : 'production';
@@ -872,7 +875,7 @@ class Seeder {
 
 		$batch = (int) Config::get( 'cli.batch', 200 );
 
-		foreach ( [ 'post', 'page', 'attachment' ] as $post_type ) {
+		foreach ( get_post_types( [], 'names' ) as $post_type ) {
 			// 'any' does not include attachments' 'inherit' status (rule 12: still a bounded,
 			// explicit status list, not an unlimited page size).
 			$status = 'attachment' === $post_type
@@ -895,18 +898,41 @@ class Seeder {
 			} while ( $found === $batch );
 		}//end foreach
 
-		foreach ( [ 'category', 'post_tag', 'series' ] as $taxonomy ) {
-			$term_ids = get_terms(
+		do {
+			$comment_ids = get_comments(
 				[
-					'taxonomy'   => $taxonomy,
-					'hide_empty' => false,
-					'fields'     => 'ids',
+					'number' => $batch,
+					'fields' => 'ids',
 				]
 			);
-			foreach ( (array) $term_ids as $term_id ) {
-				wp_delete_term( (int) $term_id, $taxonomy );
+			foreach ( $comment_ids as $comment_id ) {
+				wp_delete_comment( (int) $comment_id, true );
 			}
-		}
+			$found = count( $comment_ids );
+		} while ( $found === $batch );
+
+		foreach ( [ 'category', 'post_tag', 'series' ] as $taxonomy ) {
+			// Batched (rule 12): a term this loop can't delete (the default category) would
+			// otherwise reappear in every page and never let the loop terminate, so it also
+			// stops once a whole pass deletes nothing.
+			do {
+				$term_ids = get_terms(
+					[
+						'taxonomy'   => $taxonomy,
+						'hide_empty' => false,
+						'fields'     => 'ids',
+						'number'     => $batch,
+					]
+				);
+				$found    = count( (array) $term_ids );
+				$deleted  = 0;
+				foreach ( (array) $term_ids as $term_id ) {
+					if ( wp_delete_term( (int) $term_id, $taxonomy ) ) {
+						++$deleted;
+					}
+				}
+			} while ( $found === $batch && $deleted > 0 );
+		}//end foreach
 
 		delete_option( 'ttm_books' );
 		delete_option( 'ttm_verse' );
