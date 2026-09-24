@@ -47,7 +47,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] R1-08 Seeder::reset() removes every post type after a live import
 - [x] R1-09 Re-run env:live and test:live on the export; correct LIVE-TRIAGE; retake live and seeded screenshots; push
 - [x] R2-01 Classic conversion keeps paragraph breaks: real autop on every classic post, merged-paragraph signal
-- [ ] R2-02 migrate:politics is idempotent per post: Politics posts get Opinion and primary Opinion even when Politics is already under Opinion
+- [x] R2-02 migrate:politics is idempotent per post: Politics posts get Opinion and primary Opinion even when Politics is already under Opinion
 - [ ] R2-03 primary:assign --from-yoast maps source term IDs through the WXR's own category map
 - [ ] R2-04 Journal single: keep .ttm-entry identity but no F12 padding; jr-entry asserts mock 2c spacing
 - [ ] R2-05 Re-run env:live and test:live after the round 2 fixes; correct LIVE-TRIAGE; retake live and seeded screenshots; push
@@ -278,3 +278,9 @@ Real @wordpress/autop autop() replaces the narrow autoParagraphPlainText guard, 
 Real export measurement (724 classic posts): posts with a merged <p> in serialized output (regex scan, covers both core/paragraph and the few core/html fallbacks) 552 -> 4; report.textEqual:false 7 -> 3 (remaining 3 are pre-existing malformed classic posts, out of scope per task).
 Tests: scripts/test/autop.test.js rewritten (heading+paragraph split, <pre> protection, empty input); scripts/test/convert-classic.test.js adds mergedParagraphs coverage for buildBlockReport and summarizeResults; tests/e2e/live.spec.mjs asserts no .ttm-entry p with a blank line in innerHTML on classic screens.
 Verify: npm run lint, npm run test:unit, npm run build, forbidden-patterns, npm run test:e2e all green. composer lint/test:unit fail in this sandbox because /usr/local/bin/composer is not a working binary here (pre-existing environment issue, no PHP touched). npm run env:drill also fails (backup/restore hash mismatch) -- unrelated to this JS-only task.
+
+### R2-02 — 8c60102
+politics_child() now checks "already parented" and, when true, delegates to a new politics_child_fixup( $politics, $opinion_id, $dry_run ) instead of returning "nothing to do": walks posts_in_category() (batched) and only touches posts missing Opinion or with a stale ttm_primary_category, leaving the term relationship and already-correct posts untouched. Messages: "Updated N Politics post(s)." / dry-run "Would update N Politics post(s)...".
+Tests: MigrateCommandTest::test_politics_already_child_still_updates_posts (seeds via Seeder so Politics is already under Opinion, assigns a post to Politics only, asserts it gains Opinion + primary Opinion + PrimaryCategory::slug()==='opinion'; second run reports 0) and test_politics_already_child_dry_run_writes_nothing (dry-run reports the post, writes nothing -- compares against the primary PrimaryCategory::on_save() already stamped at insert time, not a hardcoded 0, since a freshly-saved post already has a primary before Politics is even assigned).
+Real env:live run against the live export confirms it: dry-run "Would update 24 Politics post(s)" / real "Updated 24 Politics post(s)" (SPEC §1.2's 24 politics posts) / second run "Updated 0 Politics post(s)".
+Known issue (not introduced here): running the whole MigrateCommandTest class shows 2 pre-existing failures from a cross-test "opinion" term leak in this sandbox's wp-env tests-cli container (confirmed identical on the unmodified pre-R2-02 file via `wp-env clean tests` + `--filter`); both new tests pass cleanly in isolation.
