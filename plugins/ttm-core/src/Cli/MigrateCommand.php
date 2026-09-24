@@ -321,7 +321,7 @@ class MigrateCommand extends Command {
 			$rewritten = 0;
 
 			foreach ( Html::image_srcs( $content ) as $src ) {
-				$photon_url = Html::photon_origin_url( $src, $origin );
+				$photon_url = Html::photon_origin_url( $src, $origin, home_url() );
 				if ( null !== $photon_url ) {
 					$content = Html::replace_url( $content, $src, $photon_url );
 					++$rewritten;

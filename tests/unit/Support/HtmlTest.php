@@ -76,6 +76,21 @@ class HtmlTest extends TestCase {
 		);
 	}
 
+	public function test_photon_origin_url_rewrites_to_home_when_given(): void {
+		\Brain\Monkey\Functions\when( 'untrailingslashit' )->alias(
+			static fn ( string $value ): string => rtrim( $value, '/' )
+		);
+
+		$this->assertSame(
+			'http://localhost:8888/wp-content/uploads/2020/01/photo.jpg?resize=800',
+			Html::photon_origin_url(
+				'https://i0.wp.com/eric.mann.blog/wp-content/uploads/2020/01/photo.jpg?resize=800',
+				'eric.mann.blog',
+				'http://localhost:8888/'
+			)
+		);
+	}
+
 	public function test_replace_url_rewrites_src_and_wrapping_href(): void {
 		$html = '<a href="https://example.com/old.jpg"><img src="https://example.com/old.jpg" alt=""></a>';
 

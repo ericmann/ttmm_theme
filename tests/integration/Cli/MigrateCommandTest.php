@@ -440,7 +440,7 @@ class MigrateCommandTest extends TTM_IntegrationTestCase {
 		$this->assertTrue( $result['ok'] );
 		$this->assertSame( 0, $fetched );
 		$this->assertStringContainsString(
-			'https://eric.mann.blog/wp-content/uploads/2020/photo.jpg',
+			home_url( '/wp-content/uploads/2020/photo.jpg' ),
 			get_post( $post_id )->post_content
 		);
 		$this->assertSame( 1, (int) get_post_meta( $post_id, 'ttm_images_rewritten', true ) );

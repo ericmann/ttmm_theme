@@ -163,7 +163,7 @@ Image 16:9 grayscale (4:3 on phone), 20px gap, kicker (“Technology · Series: 
 Flex column, gap 24. Contents in order: Verse of the day box (if available), Journal block. On phone the rail is a full-width zone between the lead and the cells.
 
 ### 4.9 Verse of the day (`ttm/verse-of-the-day` block; class `ttm-verse`)
-Surface box, padding 18 20. Kicker “Verse of the day” (11px). Verse text 19px/600/1.35 −0.01em ink in curly quotes. Reference 13px neutral-800 (“Psalm 46:10”). Attribution 12px neutral-700: “Meditation for {Mon D} from **dailymedtoday.com**” — the domain is a link (`accent-700`, underline, `text-underline-offset: 3px`) to the meditation’s own URL if the API provides one, else the site root. This is the only underlined link on the site.
+Surface box, padding 18 20. Kicker “Verse of the day” (11px). Verse text 19px/600/1.35 −0.01em ink in curly quotes. Reference 13px neutral-800 (“Psalm 46:10”). Attribution 12px neutral-700: “Meditation from **dailymedtoday.com**” — the domain is a link (`accent-700`, underline, `text-underline-offset: 3px`) to the meditation’s own URL if the API provides one, else the site root. This is the only underlined link on the site.
 
 ### 4.10 Journal excerpt (`ttm-journal-excerpt`, in pattern `ttm/journal-rail`)
 Per entry: date line 11px neutral-700 (“Today · Sept 20”, “Thursday · Sept 18” — relative day name for the last 6 days, else full date), title 16px/800/1.25, excerpt 14px/1.5 neutral-800 (~40 words, sentence-trimmed, no ellipsis if the sentence ends), “Continue →” 12px/600 accent-700 with 8px top margin. 16px vertical padding, 1px rules between. **No social links here.**
