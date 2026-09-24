@@ -17,7 +17,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P1-03 Fetch the 13 photographs; tune IMAGE_MAX_BYTES and IMAGE_BUDGET_BYTES
 - [x] P1-04 Fixture photographs: featured_image, alt and caption values
 - [x] P1-05 Story tile cover class; demo rows green; drill still deterministic
-- [ ] P1-06 Phase 1 screenshots and push
+- [x] P1-06 Phase 1 screenshots and push
 - [ ] P2-01 Spike: export term definitions, Playground import and CLI server shape
 - [ ] P2-02 DemoCommand (demo:options, demo:verify) and seed --now
 - [ ] P2-03 wxr.mjs: pure WXR normalisation
@@ -147,3 +147,16 @@ before navigating. Verified: composer lint/npm lint/forbidden-patterns.sh
 clean; test:integration 617 tests OK, StoryTilesTest 8/8; test:e2e full run
 after fixes green for the affected 18 tests plus tech-img etc; npm run
 env:drill OK (104 posts, 5 page hashes unchanged after restore).
+
+### P1-06 — eb710e1
+Re-ran `npm run env:seed -- --reset && npm run screenshots` after P1-05's
+is-cover change and the P1-04 fixture photos, refreshing all six
+docs/feedback/phase-5/*.png. Reviewed front.png, writing.png, about.png,
+article.png by eye: real photographs render correctly (no red, no
+placeholder bands, is-cover tile shows a real photo on "What the River
+Audits"). Full verify set green (composer lint/test:unit, npm run
+lint/test:unit/build, forbidden-patterns.sh); test:integration,
+test:e2e, and env:drill were re-confirmed green as part of P1-05.
+Committed and pushed refine/2026-09-24 to origin (eb710e1).
+Manual check: NOT VERIFIED (human) — owner reviews the 13 demo photos and
+the six phase-5 screenshots for fit/crop/taste per the task's own note.
