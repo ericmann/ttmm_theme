@@ -7,7 +7,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P0-02 Author name: Config keys, ttm/author-name, footer line and mastheads rewired
 - [x] P0-03 §6.9 demo rows as tagged fixme
 - [x] P0-04 LICENSE, readme.txt, demo LICENSE.md, version 0.2.0, check-license
-- [ ] P0-05 check-demo (rules 53 and 56) in npm run lint
+- [x] P0-05 check-demo (rules 53 and 56) in npm run lint
 - [ ] P0-06 SI-13 Photon rewrite to home_url(); SI-16 undated attribution in docs/01
 - [ ] P0-07 SI-17 CodeColorer `<code lang>` pre-pass rule and audit flag
 - [ ] P0-08 Owner screenshot set moves to docs/feedback/phase-5
@@ -58,3 +58,9 @@ New: LICENSE (FSF gpl-2.0.txt byte copy, sha256 8177f975...b880643 verified), pl
 scripts/lib/license-checks.mjs: 5 pure functions (checkLicenseFile/checkLicenseFields/checkVersions/checkRequiredFiles/checkOwnerName) over a {read,list} context, each returning a failure-string array. checkVersions compares every discovered version field to the first (package.json); checkOwnerName reads Config.php's site.author_name and scans list()'s plugins/+themes/ text files (skips png/jpg/jpeg/gif/webp/woff/woff2/zip), allowing the name only in Config.php, Author: header lines (style.css/ttm-core.php) and readme.txt Contributors:/Copyright lines. scripts/check-license.mjs wires these to git ls-files + fs, "check-license: clean" or exits 1. Added check:license npm script, appended to the lint chain.
 Tests: scripts/test/check-license.test.js, 15 tests incl. "the real repository passes" (runs the checks over the actual working tree via git ls-files).
 Verified: composer lint (0 errors), composer test:unit 190/190, npm run lint (incl. check:license clean), npm run test:unit 130/136 (6 pre-existing skips), npm run build, forbidden-patterns.sh clean, npm run test:integration 598/598, npm run test:e2e 494 passed/8 skipped/0 failed (re-ran after one flaky selectors.spec.mjs timeout that reproduced only under concurrent-verify load, passed both standalone and on a clean re-run), sha256sum LICENSE matches the FSF digest.
+
+### P0-05 — 23e589b
+scripts/lib/demo-checks.mjs: 3 pure functions over already-read data. checkCredits({files,credits},{maxBytes,budgetBytes}) -- both-absent passes; credits null with files present fails; per-row checks all 13 required fields (creator_url allowed null via hasOwnProperty), license in cc0/pdm, bytes/sha256 match the file, file name regex ^demo-[a-z0-9-]+\.jpg$, per-file maxBytes and summed budgetBytes, orphan file/orphan row both reported. checkFixtureImages(rows, fileNames) only inspects string featured_image values (the current fixtures use boolean true, so this is a no-op today but will bite once P1-xx sets real string filenames). checkReadmeScreenshots(readme, fileNames) parses markdown-image and <img src> refs to .github/screenshots/, checks existence both ways plus .png extension; no directory + no refs passes.
+scripts/check-demo.mjs wires these to docs/fixtures/demo/images/ (sha256'd via node:crypto), docs/fixtures/demo/CREDITS.json, docs/fixtures/seed/{posts,pages}.json, README.md, .github/screenshots/; prints check-demo: clean or exits 1. Added check:demo npm script, appended to the lint chain (after check:license).
+Tests: scripts/test/check-demo.test.js, 15 tests per the task's acceptance list.
+Verified: foundry_verify ok:true, 0 constraint fails; composer lint 0 errors, composer test:unit 190/190, npm run lint (incl. check:demo clean on the real empty-demo tree), npm run test:unit 145/151 (6 pre-existing skips), npm run build, forbidden-patterns.sh clean.
