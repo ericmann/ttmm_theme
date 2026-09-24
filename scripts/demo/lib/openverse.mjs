@@ -120,6 +120,12 @@ export function pickResult(
 		if ( ! allowedLicenses.has( ( result.license || '' ).toLowerCase() ) ) {
 			continue;
 		}
+		// Rule 53's CREDITS.json row needs a real `creator` and `title` (only `creator_url`
+		// may be null) -- some real Openverse results carry a null creator and/or title, so
+		// those can't be used even though every other field qualifies.
+		if ( ! result.creator || ! result.title ) {
+			continue;
+		}
 		const type = (
 			result.filetype || extensionFromUrl( result.url )
 		).toLowerCase();

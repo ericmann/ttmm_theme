@@ -1,7 +1,7 @@
 [
 	{
 		"file": "demo-signing-your-options-table.jpg",
-		"query": "server room cables",
+		"query": "network cables server",
 		"orientation": "wide",
 		"subject": "server room cables",
 		"post": "signing-your-options-table"
@@ -11,11 +11,12 @@
 		"query": "circuit board macro",
 		"orientation": "wide",
 		"subject": "circuit board macro",
-		"post": "technology-post-2"
+		"post": "technology-post-2",
+		"exclude": [ "a948fe61-83d3-471f-8267-a0f723e98ccd" ]
 	},
 	{
 		"file": "demo-charge-for-outcome-bill-for-hour.jpg",
-		"query": "notebook ledger",
+		"query": "accounting ledger",
 		"orientation": "wide",
 		"subject": "notebook ledger",
 		"post": "charge-for-outcome-bill-for-hour"
@@ -25,7 +26,8 @@
 		"query": "keys on table",
 		"orientation": "wide",
 		"subject": "keys on table",
-		"post": "hardening-part-4-keys-in-the-environment"
+		"post": "hardening-part-4-keys-in-the-environment",
+		"exclude": [ "81810309-b103-404c-9f77-383ff79f4175" ]
 	},
 	{
 		"file": "demo-praying-for-people-who-file-bug-reports.jpg",
@@ -39,7 +41,25 @@
 		"query": "harbor cranes",
 		"orientation": "wide",
 		"subject": "harbor cranes",
-		"post": "open-source-not-a-business-model"
+		"post": "open-source-not-a-business-model",
+		"exclude": [
+			"076503c5-3e87-47d8-8e57-23d9450869f8",
+			"a0a831cb-0692-48e0-9acb-e2b97100e612",
+			"081a953f-266d-4b0c-a606-b05f6e8c1c3b",
+			"97566860-9315-4d89-8672-1f8effcf2f07",
+			"74faa099-4d52-4c8e-98b3-b20045b474a1",
+			"c354e024-4dab-45c1-bf95-9e4b1cc2fb48",
+			"8178307f-ecf3-409c-b6e2-5f3cd57cfa22",
+			"31cd4bbf-bd7f-4853-b527-48220a4d2b93",
+			"cd26987f-c481-43e7-a58c-87a093066529",
+			"5ac23c27-b712-4a62-a17b-7574ca3acfaf",
+			"8ce306e3-55e0-46ab-a6b8-cac00da3639a",
+			"cbbc4d0c-b824-4401-8123-720331abc279",
+			"52c2347a-bbad-4148-933f-9cd00e0a81da",
+			"306cce9b-c026-4f6c-8762-80a86cb52a91",
+			"709c3f5a-67a0-425d-9b72-81923b6dcc3e",
+			"596fa43b-3388-46df-aa41-d7ae1eb092be"
+		]
 	},
 	{
 		"file": "demo-transients-object-caches-and-fast-enough.jpg",
@@ -60,14 +80,16 @@
 		"query": "padlock gate",
 		"orientation": "wide",
 		"subject": "padlock gate",
-		"post": "composer-lockfiles-are-a-security-control"
+		"post": "composer-lockfiles-are-a-security-control",
+		"exclude": [ "5392fe1a-cdd7-4532-9aec-3f21c8ee3b56" ]
 	},
 	{
 		"file": "demo-nonces-are-not-csrf-tokens.jpg",
 		"query": "ticket stubs",
 		"orientation": "wide",
 		"subject": "ticket stubs",
-		"post": "nonces-are-not-csrf-tokens"
+		"post": "nonces-are-not-csrf-tokens",
+		"exclude": [ "6a19062f-c092-4b12-a994-2c32087bbde1" ]
 	},
 	{
 		"file": "demo-password-manager-weakest-link.jpg",
@@ -78,16 +100,29 @@
 	},
 	{
 		"file": "demo-about.jpg",
-		"query": "desk lamp still life",
+		"query": "desk lamp",
 		"orientation": "tall",
 		"subject": "desk lamp still life",
-		"post": "about"
+		"post": "about",
+		"exclude": [
+			"bd90179b-622f-43fc-b4f7-566febfaad8a",
+			"72a9464c-f3ce-4189-bb78-0327e21e0a04",
+			"095674a1-bae6-465f-9ba6-6ff2489452c3",
+			"121b347a-06e8-4b85-a3f0-1f3a985154fe",
+			"58fa52c5-f5ff-4fd6-bcda-915d532f782c",
+			"970343f8-28a6-4a4a-a537-a8eabea9b3b2"
+		]
 	},
 	{
 		"file": "demo-story-uptime.jpg",
-		"query": "rain window",
+		"query": "rain",
 		"orientation": "square",
 		"subject": "rain window",
-		"post": "story-uptime"
+		"post": "story-uptime",
+		"exclude": [
+			"66449831-7290-4cb2-abbc-48fd0cbbbec9",
+			"0e727dc6-834c-4bc6-9267-43e68e86297f",
+			"7624c36f-cd90-4c6e-bc95-f6e3d874fb4a"
+		]
 	}
 ]
