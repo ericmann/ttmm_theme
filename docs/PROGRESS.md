@@ -51,7 +51,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] R2-03 primary:assign --from-yoast maps source term IDs through the WXR's own category map
 - [x] R2-04 Journal single: keep .ttm-entry identity but no F12 padding; jr-entry asserts mock 2c spacing
 - [x] R2-05 Re-run env:live and test:live after the round 2 fixes; correct LIVE-TRIAGE; retake live and seeded screenshots; push
-- [ ] R3-01 live.spec merged-paragraph check runs on converted screens (screens carry a converted flag)
+- [x] R3-01 live.spec merged-paragraph check runs on converted screens (screens carry a converted flag)
 - [ ] R3-02 Pure, tested classic pre-rawHandler pipeline order; mergedParagraphs counts nested blocks
 - [ ] R3-03 Re-run env:live and test:live with the merged-paragraph check live; complete LIVE-TRIAGE rows; push
 
@@ -307,3 +307,6 @@ docs/feedback/phase-4/LIVE-TRIAGE.md: corrected the R1-09 "3 used, not ~424 -- s
 Screenshots retaken: live set (docs/feedback/phase-4/live-*.png) against the live import -- live-front.png's Opinion cell now lists real rows, live-article-classic.png (keeping-fresh) shows clean separate paragraphs; then docs/fixtures/live/screens.json deleted (gitignored, rule 47) before npm run env:seed -- --reset && npm run test:e2e (492 passed; one selectors.spec.mjs timeout under full concurrent load, confirmed a resource-contention flake by re-running it alone: 13s, pass); then seeded set retaken, journal.png shows R2-04's 18px mock-2c spacing.
 Nothing under docs/fixtures/live/ staged or committed. Pushed via foundry_run_finish next.
 Manual check: NOT VERIFIED (human) -- open live-front.png, live-article-classic.png and journal.png to confirm visually.
+
+### R3-01 — 0be2d50
+Added `converted: boolean` to the screens.json shape (scripts/live/lib/screens.mjs's buildScreens()/ScreenPost typedef), defaulting false; scripts/live/screens.mjs's toPost() now sets it via a new wasConverted(postId) helper (`wp post meta get <id> ttm_converted_at`, non-empty = true); classicShortcodePosts() sets converted:true directly since its candidates are already filtered to posts carrying that meta key. Exported a pure predicate checksMergedParagraphs(screen) => Boolean(screen.converted) from lib/screens.mjs. tests/e2e/live.spec.mjs's merged-paragraph block now gates on checksMergedParagraphs(screen) instead of screen.classic, so ref-*/cc-*/mfn- screens (already block markup, classic:false, but converted:true) are covered. scripts/test/live-screens.test.js: 6 new tests (converted passthrough on addSingle/ref screens, default-false, and 3 checksMergedParagraphs unit tests) -- 14/14 pass. npm run lint (fixed one jsdoc/check-line-alignment via --fix), npm run test:unit, npm run build, forbidden-patterns.sh, npm run test:e2e (492 passed/1 skipped), npm run env:drill all green via foundry_verify. composer lint/test:unit fail in this sandbox (/usr/local/bin/composer not runnable, pre-existing env issue per PROGRESS.md line 283/276, no PHP touched by this task).
