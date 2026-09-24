@@ -32,11 +32,9 @@
 
 import { createRequire } from 'node:module';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { transformFootnotes } from './lib/footnotes.mjs';
-import { preprocessShortcodes } from './lib/shortcodes.mjs';
 import { buildBlockReport } from './lib/report.mjs';
 import { summarizeResults } from './lib/summarize.mjs';
-import { autoParagraphPlainText } from './lib/autop.mjs';
+import { prepareClassicHtml } from './lib/prepare-classic.mjs';
 
 /**
  * jsdom + a real DOM global setup, then load @wordpress/blocks and @wordpress/block-library via
@@ -144,17 +142,10 @@ function normalizedText( html ) {
  */
 export function convertPost( post, editor ) {
 	const {
-		html: afterShortcodes,
-		footnotes: shortcodeFootnotes,
+		html: transformedHtml,
+		footnotes,
 		remaining,
-	} = preprocessShortcodes( post.content_raw, post.id );
-
-	const autopped = autoParagraphPlainText( afterShortcodes );
-
-	const { html: transformedHtml, footnotes: mfnFootnotes } =
-		transformFootnotes( autopped, post.id, shortcodeFootnotes.length + 1 );
-
-	const footnotes = [ ...shortcodeFootnotes, ...mfnFootnotes ];
+	} = prepareClassicHtml( post.content_raw, post.id );
 
 	const blockList = editor.rawHandler( { HTML: transformedHtml } );
 	const serialized = editor.serialize( blockList );

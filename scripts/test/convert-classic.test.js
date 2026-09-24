@@ -100,6 +100,35 @@ describe( 'transformFootnotes', () => {
 	} );
 } );
 
+describe( 'prepareClassicHtml (R3-02, no jsdom/block-library needed)', () => {
+	// The pre-rawHandler pipeline (preprocessShortcodes -> autop -> transformFootnotes) pulled
+	// out of convertPost() so its ordering can be pinned by a real, running test: the shortcode
+	// pre-pass must replace a multi-line shortcode body with its final tag markup *before*
+	// autop() ever sees the blank line inside it, or autop() wraps that inner blank line in
+	// <p>/<br> as if it were prose, corrupting the code block. rule 49/52: this exercises the
+	// real pipeline functions, not a mock.
+	it( 'runs the shortcode pre-pass before autop, so a multi-line [cc] body is never autopped', async () => {
+		const { prepareClassicHtml } =
+			await import( '../lib/prepare-classic.mjs' );
+
+		const { html } = prepareClassicHtml(
+			'Intro.\n\n[cc lang="php"]a\n\nb[/cc]\n\nOutro.',
+			1
+		);
+
+		const codeMatch = html.match(
+			/<pre class="wp-block-code"><code[^>]*>([\s\S]*?)<\/code><\/pre>/
+		);
+		expect( codeMatch ).not.toBeNull();
+		const codeBody = codeMatch[ 1 ];
+		expect( codeBody ).not.toContain( '<p>' );
+		expect( codeBody ).not.toContain( '<br' );
+
+		expect( html ).toContain( '<p>Intro.</p>' );
+		expect( html ).toContain( '<p>Outro.</p>' );
+	} );
+} );
+
 describe( 'buildBlockReport (no jsdom/block-library needed)', () => {
 	// convert-classic.mjs's own report-counting logic, extracted to scripts/lib/report.mjs so
 	// this can be exercised without pulling in `jsdom` at all (convert-classic.mjs's top-level
@@ -141,6 +170,43 @@ describe( 'buildBlockReport (no jsdom/block-library needed)', () => {
 		const report = buildBlockReport( fakeBlocks );
 
 		expect( report.mergedParagraphs ).toBe( 1 );
+	} );
+
+	it( "counts a merged paragraph nested inside a container block's innerBlocks (R3-02)", async () => {
+		const { buildBlockReport } = await import( '../lib/report.mjs' );
+
+		const fakeBlocks = [
+			{
+				name: 'core/quote',
+				innerBlocks: [
+					{
+						name: 'core/paragraph',
+						attributes: { content: 'a\n\nb' },
+					},
+				],
+			},
+		];
+
+		const report = buildBlockReport( fakeBlocks );
+
+		expect( report.mergedParagraphs ).toBe( 1 );
+	} );
+
+	it( 'still counts top-level blockCounts/freeform/html only (not nested)', async () => {
+		const { buildBlockReport } = await import( '../lib/report.mjs' );
+
+		const fakeBlocks = [
+			{
+				name: 'core/group',
+				innerBlocks: [ { name: 'core/freeform' } ],
+			},
+		];
+
+		const report = buildBlockReport( fakeBlocks );
+
+		expect( report.blockCounts[ 'core/group' ] ).toBe( 1 );
+		expect( report.blockCounts[ 'core/freeform' ] ).toBeUndefined();
+		expect( report.freeform ).toBe( 0 );
 	} );
 } );
 
