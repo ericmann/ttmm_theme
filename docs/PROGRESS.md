@@ -48,7 +48,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] R1-09 Re-run env:live and test:live on the export; correct LIVE-TRIAGE; retake live and seeded screenshots; push
 - [x] R2-01 Classic conversion keeps paragraph breaks: real autop on every classic post, merged-paragraph signal
 - [x] R2-02 migrate:politics is idempotent per post: Politics posts get Opinion and primary Opinion even when Politics is already under Opinion
-- [ ] R2-03 primary:assign --from-yoast maps source term IDs through the WXR's own category map
+- [x] R2-03 primary:assign --from-yoast maps source term IDs through the WXR's own category map
 - [ ] R2-04 Journal single: keep .ttm-entry identity but no F12 padding; jr-entry asserts mock 2c spacing
 - [ ] R2-05 Re-run env:live and test:live after the round 2 fixes; correct LIVE-TRIAGE; retake live and seeded screenshots; push
 
@@ -284,3 +284,10 @@ politics_child() now checks "already parented" and, when true, delegates to a ne
 Tests: MigrateCommandTest::test_politics_already_child_still_updates_posts (seeds via Seeder so Politics is already under Opinion, assigns a post to Politics only, asserts it gains Opinion + primary Opinion + PrimaryCategory::slug()==='opinion'; second run reports 0) and test_politics_already_child_dry_run_writes_nothing (dry-run reports the post, writes nothing -- compares against the primary PrimaryCategory::on_save() already stamped at insert time, not a hardcoded 0, since a freshly-saved post already has a primary before Politics is even assigned).
 Real env:live run against the live export confirms it: dry-run "Would update 24 Politics post(s)" / real "Updated 24 Politics post(s)" (SPEC §1.2's 24 politics posts) / second run "Updated 0 Politics post(s)".
 Known issue (not introduced here): running the whole MigrateCommandTest class shows 2 pre-existing failures from a cross-test "opinion" term leak in this sandbox's wp-env tests-cli container (confirmed identical on the unmodified pre-R2-02 file via `wp-env clean tests` + `--filter`); both new tests pass cleanly in isolation.
+
+### R2-03 — 72c538f
+Added scripts/live/term-map.mjs (extractTermMap(xml): pure regex extraction of every WXR <wp:category> term_id -> nicename pair, same series-args.mjs pattern) plus scripts/test/term-map.test.js. import.sh writes docs/fixtures/live/term-map.json right after copying the WXR (gitignored, rule 47); plan.sh passes --term-map=wp-content/ttm-fixtures/live/term-map.json to the --from-yoast dry-run/real steps.
+PrimaryCommand::run() now accepts --term-map=<path>: load_term_map() reads/validates the JSON (null -> ok:false, non-zero exit, for missing/unreadable/invalid files); translate_yoast_id() maps the raw _yoast_wpseo_primary_category value through the map to a slug, then get_term_by('slug', ..., 'category') to this site's current term id, before the existing "post actually carries it" check. Without --term-map, behaviour is byte-for-byte unchanged (existing PrimaryCommandTest cases untouched, all still pass).
+Tests: PrimaryCommandTest::test_from_yoast_with_term_map_translates_source_ids (foreign id 9999 -> security via the map, used), test_from_yoast_with_term_map_skips_a_category_the_post_lacks, test_from_yoast_with_missing_term_map_file_fails (ok:false). Full PrimaryCommandTest class: 9 tests, 24 assertions, green (no cross-test leak here, unlike MigrateCommandTest's pre-existing "opinion" issue from R2-02 -- these tests don't touch that term).
+docs/MIGRATION.md step 2.3 documents the term-map.mjs step and why --term-map matters for a real WXR import.
+Verify: npm run test:unit, npm run lint, bash -n on both shell scripts, forbidden-patterns.sh all green. Live re-run against the real export deferred (task's own "out of scope: running the live import").
