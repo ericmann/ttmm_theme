@@ -49,7 +49,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] R2-01 Classic conversion keeps paragraph breaks: real autop on every classic post, merged-paragraph signal
 - [x] R2-02 migrate:politics is idempotent per post: Politics posts get Opinion and primary Opinion even when Politics is already under Opinion
 - [x] R2-03 primary:assign --from-yoast maps source term IDs through the WXR's own category map
-- [ ] R2-04 Journal single: keep .ttm-entry identity but no F12 padding; jr-entry asserts mock 2c spacing
+- [x] R2-04 Journal single: keep .ttm-entry identity but no F12 padding; jr-entry asserts mock 2c spacing
 - [ ] R2-05 Re-run env:live and test:live after the round 2 fixes; correct LIVE-TRIAGE; retake live and seeded screenshots; push
 
 ## Log
@@ -291,3 +291,8 @@ PrimaryCommand::run() now accepts --term-map=<path>: load_term_map() reads/valid
 Tests: PrimaryCommandTest::test_from_yoast_with_term_map_translates_source_ids (foreign id 9999 -> security via the map, used), test_from_yoast_with_term_map_skips_a_category_the_post_lacks, test_from_yoast_with_missing_term_map_file_fails (ok:false). Full PrimaryCommandTest class: 9 tests, 24 assertions, green (no cross-test leak here, unlike MigrateCommandTest's pre-existing "opinion" issue from R2-02 -- these tests don't touch that term).
 docs/MIGRATION.md step 2.3 documents the term-map.mjs step and why --term-map matters for a real WXR import.
 Verify: npm run test:unit, npm run lint, bash -n on both shell scripts, forbidden-patterns.sh all green. Live re-run against the real export deferred (task's own "out of scope: running the live import").
+
+### R2-04 — f2663c3
+Added `.ttm-journal-head .ttm-entry { padding-top: 0; }` in the 4.12 journal header component section of ttm.css: F12's article-only byline-to-body padding-top (28px) was doubling the 18px gap the journal single's h1 already provides via its own margin-bottom, since a journal single has no byline between h1 and .ttm-entry. .ttm-entry className stays on the markup (axe exclusion + SPEC §6.10 "present and non-empty" check, per R1-09).
+Tests: fidelity.spec.mjs jr-entry rewritten to assert padding-top: 0px and that the gap between the h1's bounding-box bottom and .ttm-entry's bounding-box top is exactly 18px, replacing the old 28px padding-top assertion.
+Verify: npm run lint green; CSS budget 63090/63488 bytes; ran the jr-entry and selectors.spec.mjs fidelity tests directly against the already-running wp-env dev site (WP_BASE_URL=http://localhost:8888 wp-scripts test-playwright --project fidelity -g "..."), both pass; css-coverage stays 0 pending since .ttm-entry already had coverage.
