@@ -71,6 +71,67 @@ class PrimaryCommandTest extends TTM_IntegrationTestCase {
 	}
 
 	/**
+	 * R2-03, SPEC §6.7, §9 Q2: a WXR-imported post's `_yoast_wpseo_primary_category` names a
+	 * term id on the *source* site, which doesn't exist (or means something else) on this one.
+	 * `--term-map=<path>` translates it through the WXR's own term-id -> slug map (written by
+	 * scripts/live/term-map.mjs) to a slug, then resolves *that* to this site's current term id.
+	 */
+	public function test_from_yoast_with_term_map_translates_source_ids(): void {
+		$technology = $this->category_id( 'technology', 'Technology' );
+		$security   = $this->category_id( 'security', 'Security' );
+		$post       = self::factory()->post->create( [ 'post_category' => [ $technology, $security ] ] );
+		delete_post_meta( $post, 'ttm_primary_category' );
+		// A foreign id: not a term id on this site at all.
+		update_post_meta( $post, '_yoast_wpseo_primary_category', 9999 );
+
+		$map_path = wp_tempnam( 'ttm-term-map' );
+		file_put_contents( $map_path, wp_json_encode( [ '9999' => 'security' ] ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- test fixture file, not production code.
+
+		$result = ( new PrimaryCommand() )->run( [], [ 'from-yoast' => true, 'term-map' => $map_path ] );
+
+		unlink( $map_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- test fixture cleanup.
+
+		$this->assertTrue( $result['ok'] );
+		$this->assertSame( $security, (int) get_post_meta( $post, 'ttm_primary_category', true ) );
+		$this->assertStringContainsString( 'Used 1 post(s) from Yoast, skipped 0.', $result['messages'][0] );
+	}
+
+	/**
+	 * The mapped slug is a real category, but this post doesn't carry it -- same "skip, don't
+	 * force" rule as an untranslated stale Yoast value.
+	 */
+	public function test_from_yoast_with_term_map_skips_a_category_the_post_lacks(): void {
+		$technology = $this->category_id( 'technology', 'Technology' );
+		$this->category_id( 'security', 'Security' );
+		$post = self::factory()->post->create( [ 'post_category' => [ $technology ] ] );
+		delete_post_meta( $post, 'ttm_primary_category' );
+		update_post_meta( $post, '_yoast_wpseo_primary_category', 9999 );
+
+		$map_path = wp_tempnam( 'ttm-term-map' );
+		file_put_contents( $map_path, wp_json_encode( [ '9999' => 'security' ] ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- test fixture file, not production code.
+
+		$result = ( new PrimaryCommand() )->run( [], [ 'from-yoast' => true, 'term-map' => $map_path ] );
+
+		unlink( $map_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- test fixture cleanup.
+
+		$this->assertTrue( $result['ok'] );
+		$this->assertSame( 0, (int) get_post_meta( $post, 'ttm_primary_category', true ) );
+		$this->assertStringContainsString( 'Used 0 post(s) from Yoast, skipped 1.', $result['messages'][0] );
+	}
+
+	public function test_from_yoast_with_missing_term_map_file_fails(): void {
+		$result = ( new PrimaryCommand() )->run(
+			[],
+			[
+				'from-yoast' => true,
+				'term-map'   => '/nonexistent/path/term-map.json',
+			]
+		);
+
+		$this->assertFalse( $result['ok'] );
+	}
+
+	/**
 	 * R1-01: the WordPress importer inserts the post (no categories -> default category),
 	 * then assigns the real terms. `on_save` no longer stores a primary during that import
 	 * save, so `--from-yoast` finds the post still missing a primary and uses Yoast's,

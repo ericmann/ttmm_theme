@@ -53,6 +53,13 @@ mkdir -p docs/fixtures/live
 cp "$wxr" docs/fixtures/live/import.xml
 echo "import.sh: using $wxr"
 
+# R2-03, SPEC §6.7, §9 Q2: the WXR's own <wp:category> term_id -> slug map, for
+# `primary:assign --from-yoast --term-map=` (plan.sh) to translate the *source* site's Yoast
+# primary-category id to a slug it can resolve on *this* site, whether that category was reused
+# or freshly created by `wp import`. Never committed (rule 47, already under
+# docs/fixtures/live/).
+node scripts/live/term-map.mjs docs/fixtures/live/import.xml docs/fixtures/live/term-map.json
+
 step "wp site empty" "${WP[@]}" site empty --uploads --yes
 step "wp ttm stats:flush" "${WP[@]}" ttm stats:flush
 step "wp ttm seed --starter-only" "${WP[@]}" ttm seed --starter-only

@@ -143,13 +143,16 @@ Optionally reparent or delete `uncategorized` (0 posts) in the admin.
 ### 2.3 Primary category
 
 ```bash
-wp ttm primary:assign --from-yoast --dry-run   # first: Yoast's own "Primary category" per post, where it set one
-wp ttm primary:assign --from-yoast
+node scripts/live/term-map.mjs <export.xml> <term-map.json>   # the WXR's own source term-id -> slug map (R2-03)
+wp ttm primary:assign --from-yoast --term-map=<term-map.json> --dry-run   # first: Yoast's own "Primary category" per post, where it set one
+wp ttm primary:assign --from-yoast --term-map=<term-map.json>
 wp ttm primary:assign --dry-run    # then: nav-order fallback for every post still without ttm_primary_category
 wp ttm primary:assign
 ```
 
 The resolver picks the first assigned section in nav order (Technology, Business, Faith, Journal, Writing, Security, Opinion). Both `primary:assign` modes treat a *stale* stored `ttm_primary_category` -- one naming a category the post no longer carries -- as missing and replace it; you never need to `delete_post_meta` before re-running either mode. If you imported via the WordPress importer, `PrimaryCategory::on_save()` does not store a primary category during that import (it gates on `WP_IMPORTING`), because the importer inserts the post before it assigns the real categories; run step 2.3 after the import finishes.
+
+`--term-map` is required to get real use out of `--from-yoast` on a WXR import: Yoast's `_yoast_wpseo_primary_category` meta stores a term id from the *source* site, which `wp import` never remaps (existing categories are matched and reused by slug, but the id in that meta value is untouched) -- without a map, `--from-yoast` is comparing a source-site id against this site's category ids and finds almost no matches (observed on the live export: ~3 posts). `--term-map=<path>` translates the source id through the WXR's own `<wp:category>` term-id -> slug pairs (extracted once via `scripts/live/term-map.mjs`, which `import.sh` already runs for you into `docs/fixtures/live/term-map.json`) to a slug, then resolves that slug to whatever term id it has on *this* site -- so it works whether that category was reused or freshly created. A missing/unreadable/invalid map file is a hard error (non-zero exit), never a silent no-op.
 
 Two rules of thumb from the live data:
 

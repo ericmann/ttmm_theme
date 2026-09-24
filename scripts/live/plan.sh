@@ -33,7 +33,7 @@ dry_then_run() {
 }
 
 dry_then_run "migrate:politics" ttm migrate:politics
-dry_then_run "primary:assign --from-yoast" ttm primary:assign --from-yoast
+dry_then_run "primary:assign --from-yoast" ttm primary:assign --from-yoast --term-map=wp-content/ttm-fixtures/live/term-map.json
 dry_then_run "primary:assign" ttm primary:assign
 
 # One `series:assign` per docs/migration/series.json entry (SPEC §6.6 step 4, §9 Q1).
