@@ -40,7 +40,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] R1-01 Primary category survives the WordPress importer; --from-yoast works on imported posts
 - [x] R1-02 Restore the §6.10 single-screen kicker and masthead checks against each post's real primary category
 - [x] R1-03 env:live runs end to end: text mismatches do not abort the plan; footnotes verified exactly once in the list
-- [ ] R1-04 migration.image_hosts default per SPEC §5; docs match
+- [x] R1-04 migration.image_hosts default per SPEC §5; docs match
 - [ ] R1-05 Verse attribution without a date (SPEC §6.1.1)
 - [ ] R1-06 F28 /writing/ archive uses archive.per_page
 - [ ] R1-07 Rule 47 check catches private files directly under docs/
@@ -228,3 +228,9 @@ ConvertCommand::import(): a record with report.textEqual===false is now skipped 
 footnotes_verified(): now scopes its substr_count to the concatenated text of every rendered `<ol class="…wp-block-footnotes…">` list only (new footnotes_list_text() helper, regex against WP core's own render_block_core_footnotes() markup) and requires exactly 1 occurrence there (was: >=1 anywhere in the whole rendered body) -- so two footnotes blocks (a duplicate) now correctly fails verification.
 New/updated tests: scripts/test/convert-classic.test.js "summarizeResults (no jsdom/block-library needed, R1-03)"; ConvertCommandTest::test_import_skips_text_mismatch_records_and_keeps_them_classic, ::test_footnote_list_duplicated_fails_verification (replaced test_text_equality_reports_a_real_mismatch's old assertions).
 Verified: bash -n + shellcheck on plan.sh clean; full test:integration (577 tests) and composer test:unit/lint green.
+
+### R1-04 — 6c19346
+Config::defaults()['migration.image_hosts'] now the SPEC §5 list (eamann.com, www.eamann.com, ttmm.io, www.ttmm.io, ttmm.wpengine.com, i0.wp.com, i1.wp.com, i2.wp.com), was []. Also fixed MigrateCommand::images()'s Config::get('migration.image_hosts', [] ) fallback literal to match (rule 24) -- --hosts still overrides.
+New tests: ConfigTest::test_migration_image_hosts_default_matches_spec (exact list); MigrateCommandTest::test_images_without_hosts_uses_configured_default_hosts (pre_http_request-mocked PNG from an eamann.com src, no --hosts arg -> attachment created, src rewritten out of post_content).
+docs/MIGRATION.md §2.5a: --hosts now documented as optional (defaults to migration.image_hosts); §2.1 audit flag list gained remote-image, shortcode, post-format-aside, no-tags, writing-no-form (already implemented in AuditCommand.php, just undocumented). docs/05-plugin-spec.md §10's migrate:images usage line updated to match.
+Noted for the record: MigrateCommandTest::test_politics_child_mode_dry_run_reports_post_count_and_writes_nothing and ::test_politics_dry_run_changes_nothing fail when run via `--filter MigrateCommandTest` alone (a pre-existing 'opinion' term/cache bleed between tests in that narrowed run, confirmed present on the pre-R1-04 commit too via git stash) -- not a regression; the full test:integration suite (578 tests) passes clean.
