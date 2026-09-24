@@ -42,7 +42,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] R1-03 env:live runs end to end: text mismatches do not abort the plan; footnotes verified exactly once in the list
 - [x] R1-04 migration.image_hosts default per SPEC §5; docs match
 - [x] R1-05 Verse attribution without a date (SPEC §6.1.1)
-- [ ] R1-06 F28 /writing/ archive uses archive.per_page
+- [x] R1-06 F28 /writing/ archive uses archive.per_page
 - [ ] R1-07 Rule 47 check catches private files directly under docs/
 - [ ] R1-08 Seeder::reset() removes every post type after a live import
 - [ ] R1-09 Re-run env:live and test:live on the export; correct LIVE-TRIAGE; retake live and seeded screenshots; push
@@ -240,3 +240,8 @@ plugins/ttm-core/blocks/verse-of-the-day/render.php: dropped $ttm_verse_date/$tt
 Tests: VerseOfTheDayTest::test_attribution_is_undated (today's verse, exact linked text, no "Meditation for"), ::test_stale_fallback_attribution_is_undated (F6 history fallback, same exact text, no date/month); renamed test_f6_falls_back_to_last_good_verse_with_its_own_date -> test_f6_falls_back_to_last_good_verse (dropped its 'Jan 1' assertion) and removed test_attribution_uses_sept_abbreviation (obsolete, no month formatting left in this render path). tests/e2e/fidelity.spec.mjs's verse-attr row now asserts .ttm-verse__attribution's normalised innerText === 'Meditation from dailymedtoday.com' before its existing colour/underline checks on the inner <a>.
 docs/03-content-model.md §6 and docs/06-fallbacks.md F6 updated to the undated wording (SPEC §6.1.1, owner request 2026-09-23, already present in SPEC.md).
 Verified: full npm run test:e2e (518 passed, incl. verse-attr and the live project) and composer test:unit/lint, npm run lint all green. Left docs/01-design-language.md's older wording untouched (visual mock text, not in this task's Files touched).
+
+### R1-06 — f784280
+Hierarchy::route_writing_page() now sets `posts_per_page` to Config::get('archive.per_page', 12) itself, right alongside its other query->set() rewrites. Root cause: Query\Archive::shape() (which normally sets this for a category archive) registers before Hierarchy and so runs first on pre_get_posts -- at that point /writing/ was still a page query (is_category() false), so it never touched posts_per_page, leaving the site's own posts_per_page option in effect. Writing is never Journal, so the fix always uses the plain archive.per_page rate, no branching needed.
+New test: HierarchyTest::test_writing_page_in_f28_state_uses_archive_per_page (site posts_per_page option forced to 10, go_to('/writing/') in the F28 state, asserts $wp_query->get('posts_per_page') === Config::get('archive.per_page', 12)).
+Verified: full test:integration (580 tests) and composer lint green.
