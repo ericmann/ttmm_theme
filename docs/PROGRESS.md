@@ -41,7 +41,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] R1-02 Restore the §6.10 single-screen kicker and masthead checks against each post's real primary category
 - [x] R1-03 env:live runs end to end: text mismatches do not abort the plan; footnotes verified exactly once in the list
 - [x] R1-04 migration.image_hosts default per SPEC §5; docs match
-- [ ] R1-05 Verse attribution without a date (SPEC §6.1.1)
+- [x] R1-05 Verse attribution without a date (SPEC §6.1.1)
 - [ ] R1-06 F28 /writing/ archive uses archive.per_page
 - [ ] R1-07 Rule 47 check catches private files directly under docs/
 - [ ] R1-08 Seeder::reset() removes every post type after a live import
@@ -234,3 +234,9 @@ Config::defaults()['migration.image_hosts'] now the SPEC §5 list (eamann.com, w
 New tests: ConfigTest::test_migration_image_hosts_default_matches_spec (exact list); MigrateCommandTest::test_images_without_hosts_uses_configured_default_hosts (pre_http_request-mocked PNG from an eamann.com src, no --hosts arg -> attachment created, src rewritten out of post_content).
 docs/MIGRATION.md §2.5a: --hosts now documented as optional (defaults to migration.image_hosts); §2.1 audit flag list gained remote-image, shortcode, post-format-aside, no-tags, writing-no-form (already implemented in AuditCommand.php, just undocumented). docs/05-plugin-spec.md §10's migrate:images usage line updated to match.
 Noted for the record: MigrateCommandTest::test_politics_child_mode_dry_run_reports_post_count_and_writes_nothing and ::test_politics_dry_run_changes_nothing fail when run via `--filter MigrateCommandTest` alone (a pre-existing 'opinion' term/cache bleed between tests in that narrowed run, confirmed present on the pre-R1-04 commit too via git stash) -- not a regression; the full test:integration suite (578 tests) passes clean.
+
+### R1-05 — 88ce385
+plugins/ttm-core/blocks/verse-of-the-day/render.php: dropped $ttm_verse_date/$ttm_date_label (and the now-unused Dates import); attribution printf changed from 'Meditation for %1$s from %2$s' to 'Meditation from %s' (translators comment updated). Applies to both the fresh verse and the F6 stale/history fallback, since both paths share this one render.
+Tests: VerseOfTheDayTest::test_attribution_is_undated (today's verse, exact linked text, no "Meditation for"), ::test_stale_fallback_attribution_is_undated (F6 history fallback, same exact text, no date/month); renamed test_f6_falls_back_to_last_good_verse_with_its_own_date -> test_f6_falls_back_to_last_good_verse (dropped its 'Jan 1' assertion) and removed test_attribution_uses_sept_abbreviation (obsolete, no month formatting left in this render path). tests/e2e/fidelity.spec.mjs's verse-attr row now asserts .ttm-verse__attribution's normalised innerText === 'Meditation from dailymedtoday.com' before its existing colour/underline checks on the inner <a>.
+docs/03-content-model.md §6 and docs/06-fallbacks.md F6 updated to the undated wording (SPEC §6.1.1, owner request 2026-09-23, already present in SPEC.md).
+Verified: full npm run test:e2e (518 passed, incl. verse-attr and the live project) and composer test:unit/lint, npm run lint all green. Left docs/01-design-language.md's older wording untouched (visual mock text, not in this task's Files touched).
