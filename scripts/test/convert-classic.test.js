@@ -318,4 +318,31 @@ describe( 'convert-classic (rawHandler under jsdom)', () => {
 			expect( result.report.textEqual ).toBe( true );
 		}
 	);
+
+	/**
+	 * R1-09, SPEC §6.8 finding: the pre-2016 bare-URL `[audio http://…]` form (no `src=`
+	 * attribute) survived conversion as literal paragraph text on several real posts
+	 * (`podcast-episode-*`) -- `rawHandler`'s native `core/audio` shortcode transform only
+	 * recognizes the attribute form. `transformBareUrlAudioShortcodes` (scripts/lib/
+	 * shortcodes.mjs) now normalizes it first, so it reaches `rawHandler` as something its
+	 * transform understands and becomes a real `core/audio` block, same as the attribute form.
+	 */
+	maybeIt(
+		'bare-URL [audio http://…] becomes a real core/audio block',
+		async () => {
+			const { convertPost } = await import( '../convert-classic.mjs' );
+
+			const html =
+				'<p>Today I start on my goal to produce a short, weekly audio broadcast.</p>' +
+				'[audio http://example.com/episode-one.mp3]';
+
+			const result = convertPost(
+				{ id: 903, slug: 'bare-url-audio', content_raw: html },
+				editor
+			);
+
+			expect( result.report.blockCounts[ 'core/audio' ] ).toBe( 1 );
+			expect( result.blocks ).not.toContain( '[audio' );
+		}
+	);
 } );

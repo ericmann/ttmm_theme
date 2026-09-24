@@ -36,6 +36,7 @@ import { transformFootnotes } from './lib/footnotes.mjs';
 import { preprocessShortcodes } from './lib/shortcodes.mjs';
 import { buildBlockReport } from './lib/report.mjs';
 import { summarizeResults } from './lib/summarize.mjs';
+import { autoParagraphPlainText } from './lib/autop.mjs';
 
 /**
  * jsdom + a real DOM global setup, then load @wordpress/blocks and @wordpress/block-library via
@@ -105,16 +106,18 @@ function setUpBlockEditorEnvironment() {
  *
  * `[caption]`, `[gallery]` and `[audio]` are deliberately left for `rawHandler` itself to
  * convert (their own native shortcode-type transforms -- see `preprocessShortcodes`'s
- * docblock), so their own bracket/attribute syntax (`[caption id="…" …]`/`[/caption]`,
- * `[gallery ids="…"]`, `[audio …]`/the legacy bare-URL `[audio http://…]` form) survives into
- * the "old" side of a `textEqual` comparison as literal text with no `<`/`>` characters for the
- * tag strip below to catch, even though it was never meant to be visible content and
- * `rawHandler`'s own conversion correctly drops it. Stripped here (comparison only -- this
- * never touches the HTML actually passed to `rawHandler`) so a converted post doesn't read as a
- * false `textEqual: false`. Discovered via real failures on the export; see
- * docs/feedback/phase-4/LIVE-TRIAGE.md, which also records the residual failure class this
- * doesn't fix: legacy `<code>`/`<blockquote>` markup in the classic content itself containing
- * unescaped nested HTML, a pre-existing content-quality issue unrelated to shortcodes.
+ * docblock; `preprocessShortcodes` does rewrite the legacy bare-URL `[audio http://…]` form to
+ * the attribute syntax first, R1-09, but that's still an `[audio …]` shortcode at this point, not
+ * yet a block), so their own bracket/attribute syntax (`[caption id="…" …]`/`[/caption]`,
+ * `[gallery ids="…"]`, `[audio src="…"]`) survives into the "old" side of a `textEqual`
+ * comparison as literal text with no `<`/`>` characters for the tag strip below to catch, even
+ * though it was never meant to be visible content and `rawHandler`'s own conversion correctly
+ * drops it. Stripped here (comparison only -- this never touches the HTML actually passed to
+ * `rawHandler`) so a converted post doesn't read as a false `textEqual: false`. Discovered via
+ * real failures on the export; see docs/feedback/phase-4/LIVE-TRIAGE.md, which also records the
+ * residual failure class this doesn't fix: legacy `<code>`/`<blockquote>` markup in the classic
+ * content itself containing unescaped nested HTML, a pre-existing content-quality issue
+ * unrelated to shortcodes.
  *
  * @param {string} html
  * @return {string} The normalized text.
@@ -140,11 +143,13 @@ function normalizedText( html ) {
  * @return {{ id, slug, blocks: string, footnotes: Array, report: object }} The converted post record.
  */
 export function convertPost( post, editor ) {
+	const plainTextParagraphed = autoParagraphPlainText( post.content_raw );
+
 	const {
 		html: afterShortcodes,
 		footnotes: shortcodeFootnotes,
 		remaining,
-	} = preprocessShortcodes( post.content_raw, post.id );
+	} = preprocessShortcodes( plainTextParagraphed, post.id );
 
 	const { html: transformedHtml, footnotes: mfnFootnotes } =
 		transformFootnotes(

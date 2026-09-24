@@ -226,3 +226,133 @@ unchanged, all `content`-class, counted only, per P4-02's scope.)
 render/single: no findings — P4-02's full `test:live` run against the live import produced zero
 `render`- or `single`-class failures (every finding was `archive` or `coverage`, both owed to
 P4-04). Nothing to fix here.
+
+## R1-09 run: review-fix round 1, re-verified end to end after R1-01..R1-08
+
+Two full `LIVE_SKIP_ATTACHMENTS=1 npm run env:live` runs against the same export (the R1-01..R1-08
+fixes landed first; run 1 caught the two findings below, run 2 re-verified the fixes against a
+fresh import). `npm run test:live` after run 2: **77 passed, 0 failed, exit code 0**.
+
+| step | run 1 | run 2 (after this task's own fixes) |
+|---|---|---|
+| `primary:assign --from-yoast` | Used 3 post(s) from Yoast, skipped 898 | same |
+| `primary:assign` (nav-order remainder) | Assigned 898 post(s) | same |
+| `migrate:images` (no `--hosts`, R1-04 default) | 133 attempts, 93 successes, 0 timeouts, 40 other failures | same |
+| `convert:import` | 7 posts skipped `[text-mismatch, skipped]` (still classic, R1-03) | same |
+| `audit --only=shortcode` | 58 posts flagged | 52 posts flagged (see breakdown below) |
+| `audit` (`no-primary`/`uncategorized`) | 0 posts (R1-01 fix confirmed against the real import) | 0 posts |
+
+### `primary:assign --from-yoast`: 3 used, not ~424
+
+The reviewer's own estimate for this row was "~424 used." The real number is 3, and the gap is
+structural, not a bug in `PrimaryCommand`/`PrimaryCategory` (R1-01 already fixed the actual defect
+those covered — a stale stored value blocking the fallback). 175 imported posts carry
+`_yoast_wpseo_primary_category` at all; of those, only 3 have a value that is a term ID **currently
+present in `wp_get_post_categories()` for that post**. The other 172 name a category term ID that
+existed on the *source* site but was never re-created with that same numeric ID on this fresh
+install — WordPress's core WXR importer only remaps the *object-term relationships* it recognizes
+(`wp_set_object_terms()`), never arbitrary third-party postmeta that happens to store an old term
+ID, because it has no way to know `_yoast_wpseo_primary_category` means "category term ID." This is
+a property of using the stock XML importer for a plugin-specific meta reference, not something
+`primary:assign` can safely correct (guessing which new-site category a stale Yoast ID "must have
+meant" risks assigning the wrong section entirely). The nav-order fallback (`primary:assign`, no
+`--from-yoast`) already covers effectively the whole site regardless (898/901 posts; the remaining
+3 already got their primary from Yoast). Recorded here for whoever runs the real production
+migration: `--from-yoast` is only worth running when the destination site's category term IDs are
+known to match the source's own numbering (e.g. a migration that pre-creates categories with
+matching IDs first), not a plain WXR import into a fresh install.
+
+### Shortcode audit breakdown (52 posts after this task's fixes, was 58)
+
+`audit --only=shortcode`'s `detail.shortcodes` by name, cross-referenced against whether the post
+has `ttm_converted_at` (i.e. `convert:import` actually ran the classic->block pipeline on it,
+versus the shortcode-shaped text just being present in a post that was never classic or was
+skipped):
+
+| name | count | `ttm_converted_at` set? | classification |
+|---|---|---|---|
+| `ref` | 20 | none | `content` — every one is either a modern (never-classic) post using `[ref]`-shaped brackets as the author's own informal footnote convention (pre-existing SPEC §6.10 finding, P4-05), or one of the 7 known text-mismatch-skipped classic posts (still classic by design, R1-03) |
+| `mfn` | 23 | none | `content` — same as `ref`: all modern, never-classic posts with the same informal-footnote habit |
+| `cci` | 4 | none | already accounted for by the 7 text-mismatch skips (R1-03) — these posts stay classic, so their un-transformed `[cci]` text is expected, not a defect |
+| `caption` | 1 | none | same — the 5th of the 7 text-mismatch skips whose classic backup happens to also contain `[caption]` |
+| `seoslides` | 3 | n/a | intentional — the pre-pass deliberately leaves `[seoslides …]` in place (SPEC §6.8, Q12); not a defect |
+| `audio` | was 7, now 1 | **yes**, real conversion defect | **fixed** (see below) — 6 of 7 real `[audio http://…]` bare-URL posts now convert to a real `core/audio` block; 1 (`character-quest-service`) still doesn't, documented below |
+| `cc` | 1 | **yes** | `content`, not fixed — `hyper-vvv-windows` has a genuinely malformed shortcode in the original author's own content, `[cc]v.customize[/cci]` (mismatched open/close names, a real typo predating this migration); safely un-automatable without guessing intent, same class as the existing "owner cleanup" unescaped-`<code>` rows above |
+
+### Fixed: bare-URL `[audio http://…]` never became a `core/audio` block (render defect)
+
+`podcast-episode-1/2/4-5-6/7/8` and `character-quest-service` all kept a literal
+`[audio http://eamann.com/…mp3]` line in their *converted* (`ttm_converted_at` set) post_content
+instead of a real `core/audio` block. Two independent causes, both fixed:
+
+1. The pre-2016 `[audio]` shortcode accepted a bare URL as its unnamed default attribute (WordPress
+   core's own `wp_audio_shortcode()` still does); `@wordpress/blocks`' `rawHandler` shortcode-type
+   transform for `core/audio` only recognizes the modern `src="…"` attribute form. Fixed:
+   `scripts/lib/shortcodes.mjs`'s new `transformBareUrlAudioShortcodes()` normalizes
+   `[audio http://…]` to `[audio src="http://…"]` before handing off to `rawHandler`.
+2. Several of these posts were authored via the classic editor's "Text" tab with **no HTML markup
+   at all** — plain prose and the shortcode separated only by blank lines, relying on WordPress's
+   own `wpautop` *content filter* (which only runs at render time, never touches `post_content`
+   itself) to wrap each block in `<p>`. `rawHandler({ HTML })` does not run that filter, so the
+   whole raw blob merged into one `core/paragraph` block regardless of the shortcode's own syntax.
+   Fixed: `scripts/convert-classic.mjs`'s new `autoParagraphPlainText()` (`scripts/lib/autop.mjs`)
+   wraps each blank-line-separated block in `<p>` first, but **only** when the raw content has no
+   block-level HTML tag anywhere (a strong, safe signal it's genuinely unformatted classic text,
+   not content the editor already structured) — deliberately narrow, not a full `wpautop()` port.
+
+Re-ran `node scripts/convert-classic.mjs docs/fixtures/live/classic.ndjson … --allow-freeform
+--allow-text-mismatch` against the real 724-post export after both fixes: still exactly 7
+`textEqual: false` posts (the same known set, R1-03) — no new mismatches introduced.
+
+`character-quest-service` still fails: its `[audio http://…]` line is the very first line, but a
+later `<h2>` further down the same post triggers `autoParagraphPlainText`'s "already has
+block-level markup, don't touch" guard for the *whole* post, so the audio line stays merged with
+the following prose into one paragraph. Fixing this fully would mean auto-paragraphing a
+plain-text *preamble* even in an otherwise-tagged post — a broader, riskier change than this task's
+scope (it would touch how every classic post's untagged runs are split, not just this one shape).
+Documented as a known remaining case (`content`/`render`, narrow), not fixed.
+
+### Fixed: `ref-*` screens picked false-positive "conversion" candidates
+
+`scripts/live/screens.mjs`'s `classicShortcodePosts()` selected candidates by `ttm_classic_backup`
+meta existing — but `MigrateCommand::images()` also writes that same meta key as a plain "before I
+touch this content" backup for *any* post whose images got rewritten, including modern,
+already-block posts that legitimately use `[ref]…[/ref]` as the author's own informal footnote
+convention (the same P4-05 finding, extended). This picked two such posts
+(`building-a-rarity-system-into-a-portfolio-site`, `slack-autoresponder-2`) as `ref-1`/`ref-2`
+screens and failed `live.spec.mjs`'s "no unconverted shortcode text" check on content that was
+never supposed to convert in the first place. Fixed: the candidate query now filters on
+`ttm_converted_at` (set only by `ConvertCommand::import_one()`, the real "this post went through
+the classic->block pipeline" signal) instead.
+
+### Fixed: `single-journal.html` was missing `.ttm-entry`, breaking the axe exclude and F12 spacing
+
+`/job-definitions/`'s primary category is Journal, so `single-journal.html` rendered it — and that
+template's `wp:post-content` block never carried `className: "ttm-entry"` the way `single.html`'s
+does. Two consequences, both real fidelity gaps, not test artifacts: (1) `live.spec.mjs`'s axe scan
+`.exclude('.ttm-entry')` (deliberately scoped to skip author-content a11y issues already tracked by
+`audit`'s `missing-alt` flag) silently failed to exclude anything on this template, so a raw
+`<a href="https://twitter.com/…"><img alt=""></a>` in the post body — already a known,
+already-flagged `missing-alt` content issue — surfaced as a hard axe failure instead of being
+correctly out of scope; (2) SPEC §6.10's own "Singles: `.ttm-entry` present and non-empty" line
+was silently never checked for Journal singles (`live.spec.mjs`'s own check no-ops when the
+locator finds nothing), and Journal posts never got F12's byline-to-body `padding-top: 28px`
+spacing `single.html` gives every other single. Fixed: added `className: "ttm-entry"` to
+`single-journal.html`'s `wp:post-content`; new fidelity test `jr-entry` (`fidelity.spec.mjs`)
+asserts it renders and carries the F12 padding.
+
+### Screenshots and final e2e pass
+
+`npm run screenshots` (live set, `docs/feedback/phase-4/live-*.png`) taken against the run-2
+import — `live-front.png` shows real per-post kickers/masthead sections (Technology, Journal,
+Business, Security, Faith, Opinion, Writing — never Uncategorized) and the undated verse
+attribution ("Meditation from dailymedtoday.com", R1-05). `docs/fixtures/live/screens.json`
+removed afterward (gitignored, never committed, rule 47) so the reseed below doesn't leave the
+`live` Playwright project running against demo content under a stale live URL manifest — the
+Journal-page-listing example above (`/category/journal/page/5/`, `/category/business/page/20/`,
+etc.) is exactly the kind of URL that only exists in the live import and would otherwise 404
+against the seeded demo site if `test:e2e` picked the `live` project back up by mistake.
+
+Then `npm run env:seed -- --reset && npm run test:e2e`: **492 passed, exit code 0**. Then
+`npm run screenshots` again (seeded set) — `front-1920.png` shows the same undated verse
+attribution on the seeded fixture content.

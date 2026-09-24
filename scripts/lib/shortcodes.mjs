@@ -103,6 +103,27 @@ function transformShortCodeShortcodes( html ) {
 }
 
 /**
+ * `[audio http://example.com/file.mp3]` -> `[audio src="http://example.com/file.mp3"]` (R1-09,
+ * SPEC §6.8 finding): the pre-2016 classic-editor `[audio]` shortcode accepted a bare URL as its
+ * unnamed default attribute (WordPress core's own `wp_audio_shortcode()` still does), but
+ * `@wordpress/blocks`' `rawHandler` shortcode-type transform for `core/audio` only recognizes
+ * the modern `src="…"` attribute form -- a bare URL left as-is survives conversion as ordinary
+ * paragraph text instead of becoming a `core/audio` block (found on the real export: several
+ * `podcast-episode-*` posts kept a literal `[audio http://…]` line in their published content;
+ * see docs/feedback/phase-4/LIVE-TRIAGE.md). Only the bare-URL form is rewritten; a shortcode
+ * that already names an attribute (`src=`/`mp3=`/etc., i.e. already contains `=`) is left alone.
+ *
+ * @param {string} html HTML to search.
+ * @return {string} Transformed HTML.
+ */
+function transformBareUrlAudioShortcodes( html ) {
+	return html.replace(
+		/\[audio\s+(https?:\/\/[^\]\s=]+)\s*\]/g,
+		( match, url ) => `[audio src="${ url }"]`
+	);
+}
+
+/**
  * `[seoslides …]` is left in place (SPEC §6.8, Q12) -- only counted, for `convert:import
  * --dry-run`/`audit --only=shortcode` to list later.
  *
@@ -120,12 +141,15 @@ function remainingShortcodes( html ) {
 
 /**
  * Run every known shortcode conversion, in order, over one post's raw classic content.
- * `[caption]` and `[audio]` are both left untouched: `rawHandler` already maps `[caption]` to
- * `core/image` with a caption, and `core/audio` registers a `type: "shortcode", tag: "audio"`
- * transform of its own (verified against this project's `@wordpress/blocks`/
- * `@wordpress/block-library` versions) -- pre-converting `[audio]` to a raw `<audio>` tag here
- * would instead leave it as ordinary inline phrasing content, folded into the surrounding
- * paragraph rather than recognized as its own block.
+ * `[caption]` and `[audio src="…"]` are both left untouched: `rawHandler` already maps
+ * `[caption]` to `core/image` with a caption, and `core/audio` registers a
+ * `type: "shortcode", tag: "audio"` transform of its own (verified against this project's
+ * `@wordpress/blocks`/`@wordpress/block-library` versions) -- pre-converting `[audio]` to a raw
+ * `<audio>` tag here would instead leave it as ordinary inline phrasing content, folded into the
+ * surrounding paragraph rather than recognized as its own block. The one exception is the
+ * pre-2016 bare-URL `[audio http://…]` form, which that native transform does *not* recognize
+ * (R1-09 finding) -- `transformBareUrlAudioShortcodes` normalizes it to the attribute form first
+ * so it still reaches `rawHandler` as something its transform understands.
  *
  * @param {string}        html   The post's raw classic content.
  * @param {number|string} postId Post id, for footnote marker ids.
@@ -136,8 +160,9 @@ function remainingShortcodes( html ) {
 export function preprocessShortcodes( html, postId ) {
 	const remaining = remainingShortcodes( html );
 
+	const afterAudio = transformBareUrlAudioShortcodes( html );
 	const { html: afterRef, footnotes } = transformRefShortcodes(
-		html,
+		afterAudio,
 		postId
 	);
 	const afterLongCode = transformLongCodeShortcodes( afterRef );

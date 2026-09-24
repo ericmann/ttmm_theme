@@ -168,9 +168,16 @@ function sectionPost( section ) {
 }
 
 /**
- * Up to `limit` posts whose `ttm_classic_backup` matches `pattern`, among posts that still carry
- * that meta key. Bounded (`cli.batch`-sized fetch, `--posts_per_page=500` -- rule 12) and
- * best-effort: an empty/absent backup (nothing converted yet) yields `[]`, never an error.
+ * Up to `limit` posts whose `ttm_classic_backup` matches `pattern`, among posts `convert:import`
+ * actually converted from classic content (R1-09, SPEC §6.10 finding: `ttm_classic_backup` is
+ * also written by `MigrateCommand::images()` as a plain "before I touch this content" backup
+ * for *any* post whose images got rewritten -- including a modern, already-block post that
+ * legitimately uses `[ref]…[/ref]` as the author's own informal footnote convention, P4-05 --
+ * so filtering on that meta key alone picked those up as false "conversion" screens and failed
+ * `live.spec.mjs`'s shortcode-residue check on content that was never supposed to convert.
+ * `ttm_converted_at` is set only by `ConvertCommand::import_one()`, the real signal). Bounded
+ * (`cli.batch`-sized fetch, `--posts_per_page=500` -- rule 12) and best-effort: an empty/absent
+ * backup (nothing converted yet) yields `[]`, never an error.
  *
  * @param {RegExp} pattern Matched against the raw classic backup text.
  * @param {number} limit   Stop once this many matches are found.
@@ -183,7 +190,7 @@ function classicShortcodePosts( pattern, limit ) {
 		'--post_type=post',
 		'--post_status=publish',
 		'--meta_compare=EXISTS',
-		'--meta_key=ttm_classic_backup',
+		'--meta_key=ttm_converted_at',
 		'--orderby=date',
 		'--order=DESC',
 		'--posts_per_page=500',

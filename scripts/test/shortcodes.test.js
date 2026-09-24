@@ -164,4 +164,32 @@ describe( 'preprocessShortcodes', () => {
 		expect( footnotes ).toEqual( [] );
 		expect( remaining ).toEqual( [] );
 	} );
+
+	/**
+	 * R1-09, SPEC §6.8 finding: the pre-2016 `[audio]` shortcode accepted a bare URL as its
+	 * unnamed default attribute; `rawHandler`'s native `core/audio` transform only recognizes
+	 * the `src="…"` attribute form, so a bare URL survived conversion as literal text on real
+	 * posts (`podcast-episode-*`). This normalizes it to the attribute form the transform
+	 * understands.
+	 */
+	it( 'normalizes a bare-URL [audio] shortcode to the src= attribute form', () => {
+		const html =
+			'Some intro text.\n\n' +
+			'[audio http://example.com/episode-one.mp3]';
+
+		const { html: transformed } = preprocessShortcodes( html, 200 );
+
+		expect( transformed ).toContain(
+			'[audio src="http://example.com/episode-one.mp3"]'
+		);
+		expect( transformed ).not.toContain( '[audio http' );
+	} );
+
+	it( 'leaves an already-attributed [audio] shortcode untouched', () => {
+		const html = '[audio src="https://example.com/a.mp3"]';
+
+		const { html: transformed } = preprocessShortcodes( html, 201 );
+
+		expect( transformed ).toBe( html );
+	} );
 } );
