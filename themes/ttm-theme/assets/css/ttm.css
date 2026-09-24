@@ -2145,6 +2145,15 @@ blockquote.is-style-pull cite,
 	margin: 0 0 18px;
 }
 
+/* R2-04, mock 2c: the journal single's h1 already carries the 18px gap via its own
+ * margin-bottom -- F12's .ttm-entry padding-top (byline meets body, article-only) would double
+ * it here, since a journal single's h1 sits directly above .ttm-entry with no byline between
+ * them. .ttm-entry itself stays on the markup (axe exclusion, §6.10 check); only this
+ * component's padding is zeroed. */
+.ttm-journal-head .ttm-entry {
+	padding-top: 0;
+}
+
 .ttm-journal-head main .entry-content p {
 	margin: 0 0 18px;
 }

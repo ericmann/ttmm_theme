@@ -1681,15 +1681,23 @@ test.describe( 'journal', () => {
 	// import, where it silently broke live.spec.mjs's axe `.exclude('.ttm-entry')` convention on
 	// a Journal-primary post (a raw legacy `<a><img></a>` with no alt/aria-label in the post body
 	// then failed the axe check instead of being excluded as content, same as every other
-	// single). ttm-entry also carries F12's byline-to-body spacing, so this is a real fidelity
-	// gap on Journal singles, not just a test-selector fix.
+	// single). ttm-entry stays on the markup for that reason; R2-04 (mock 2c) zeroes F12's
+	// byline-to-body padding-top on it here, since a journal single's h1 already carries the
+	// 18px gap itself (h1 margin-bottom) with no byline between the two -- F12's padding would
+	// double it.
 	test( 'jr-entry: .ttm-journal-head main .ttm-entry @1280', async ( {
 		page,
 	} ) => {
 		await gotoScreen( page, SCREENS.journalPost, 1280 );
 		const el = page.locator( '.ttm-journal-head main .ttm-entry' );
 		expect( await el.count() ).toBe( 1 );
-		expect( await computed( el, 'padding-top' ) ).toBe( px( 28 ) );
+		expect( await computed( el, 'padding-top' ) ).toBe( px( 0 ) );
+
+		const h1Box = await page
+			.locator( '.ttm-journal-head h1' )
+			.boundingBox();
+		const entryBox = await el.boundingBox();
+		expect( entryBox.y - ( h1Box.y + h1Box.height ) ).toBe( 18 );
 	} );
 
 	test( 'jr-body-p: .ttm-journal-head main .entry-content p (first) @1280', async ( {
