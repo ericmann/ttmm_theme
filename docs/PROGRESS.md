@@ -43,7 +43,7 @@ Started: 2026-09-23T05:03:31.529Z
 - [x] R1-04 migration.image_hosts default per SPEC §5; docs match
 - [x] R1-05 Verse attribution without a date (SPEC §6.1.1)
 - [x] R1-06 F28 /writing/ archive uses archive.per_page
-- [ ] R1-07 Rule 47 check catches private files directly under docs/
+- [x] R1-07 Rule 47 check catches private files directly under docs/
 - [ ] R1-08 Seeder::reset() removes every post type after a live import
 - [ ] R1-09 Re-run env:live and test:live on the export; correct LIVE-TRIAGE; retake live and seeded screenshots; push
 
@@ -245,3 +245,8 @@ Verified: full npm run test:e2e (518 passed, incl. verse-attr and the live proje
 Hierarchy::route_writing_page() now sets `posts_per_page` to Config::get('archive.per_page', 12) itself, right alongside its other query->set() rewrites. Root cause: Query\Archive::shape() (which normally sets this for a category archive) registers before Hierarchy and so runs first on pre_get_posts -- at that point /writing/ was still a page query (is_category() false), so it never touched posts_per_page, leaving the site's own posts_per_page option in effect. Writing is never Journal, so the fix always uses the plain archive.per_page rate, no branching needed.
 New test: HierarchyTest::test_writing_page_in_f28_state_uses_archive_per_page (site posts_per_page option forced to 10, go_to('/writing/') in the F28 state, asserts $wp_query->get('posts_per_page') === Config::get('archive.per_page', 12)).
 Verified: full test:integration (580 tests) and composer lint green.
+
+### R1-07 — 9b208ae
+Extracted the rule-47 git ls-files check from forbidden-patterns.sh into new scripts/check-private-data.sh (set -euo pipefail, shellcheck clean, runs against the cwd's repo). Fixed the pathspec bug: top-level docs/*.ext was only present for .xml; .sql/.sql.gz/.tar.gz/.csv had nested-only pathspecs (docs/**/*.ext), so a tracked docs/dump.sql etc. slipped through. Now every extension has both docs/*.ext and docs/**/*.ext. forbidden-patterns.sh calls the new script via bash "$(dirname "${BASH_SOURCE[0]}")/check-private-data.sh" and folds a non-zero exit into its existing hit().
+New test: scripts/test/private-data.test.js -- makeRepo()/addFile() build a throwaway git repo per case (mkdtempSync + git init/add -f), asserting exit 0 + "clean" for a plain docs/notes.md, and non-zero + the offending path named in output for top-level .sql/.csv/.tar.gz/.sql.gz/.xml, nested .sql, and a nested docs/fixtures/live/ file.
+Verified: bash scripts/forbidden-patterns.sh clean against this repo; npm run test:unit (97 tests) and npm run lint green; shellcheck clean on check-private-data.sh (forbidden-patterns.sh has one pre-existing SC2016 info notice, unrelated to this change).
