@@ -684,3 +684,87 @@ passed clean twice. A reviewer or the next round should re-run `npm run test:int
 quieter box, or rely on CI's own dedicated runner, to get a clean full-suite confirmation; this
 implementer's session ran out of ways to isolate the shared host's contention from within a
 sandboxed dev environment.
+
+## Round 6
+
+Branch `refine/2026-09-23`, base `aa497b24c250`, head `ec96d76`. Task counts: 1 R6-* fix task,
+done (0 blocked, 0 skipped). All 54 total plan tasks are `[x]`.
+
+### Tasks landed
+
+- **R6-01** — Test-only fix (no production code touched). The R5-01 "just after midnight"
+  `SeederTest` case hardcoded `now = 2026-09-24 00:00:30` against `journal-post-1`'s fixture
+  index of 30, so the per-row second offset (`-30s`) landed exactly on `00:00:00` and the test
+  passed even under the mutation it claimed to guard against (offset applied after the weekday
+  walk-back instead of before). It now derives `now` from `journal-post-1`'s own index in
+  `docs/fixtures/seed/posts.json` (`seconds = max(0, index - 20)`, giving `2026-09-24 00:00:10`,
+  strictly less than the 30s the offset subtracts) and asserts the weekday on the *site-local*
+  `post_date` via `(new DateTimeImmutable($post->post_date, wp_timezone()))->format('l')` rather
+  than `gmdate()` on `post_date_gmt` (SPEC §1.3 Done). Separately, `tests/e2e/editors.spec.mjs`'s
+  `login()` now awaits the post-login redirect (`Promise.all([page.waitForURL(/\/wp-admin\//),
+  #wp-submit click])`) instead of firing-and-forgetting the click, and `assertBlocksRegistered()`
+  asserts `page.url()` does not contain `wp-login.php` before waiting on the block registry, so a
+  lost session (the race behind PR run 35990641981's "Log In form" screenshot) now fails loudly
+  as a login problem instead of a confusing "19 blocks missing."
+
+### Interpretation choices this round
+
+- **R6-01**: none required beyond the task's own prescribed formula (`index - 20`, floored at 0)
+  and its prescribed `DateTimeImmutable(wp_timezone())` assertion — both used verbatim.
+
+### Config keys
+
+No new `⚠️ ASSUMPTION` keys this round; no `Config.php` changes at all.
+
+### What a human must check by hand
+
+- **CI green on the new head** (per the task's own Verification section): confirm both the push
+  and pull_request GitHub Actions runs for head `ec96d76`/`87d8795` are green, including the
+  integration job's `env:drill` step and the e2e job — this implementer's sandbox cannot observe
+  GitHub Actions directly (see environment note below) and could only verify locally.
+- Everything already flagged in Round 1-5's "what a human must check" sections is still current.
+
+### Verification performed this round
+
+- `composer lint`/`composer test:unit`, invoked via `/usr/bin/php /usr/local/bin/composer` (see
+  environment note): both green — lint exits 0 with only pre-existing warnings (none newly
+  introduced near the changed test lines), `test:unit` 184/184 green.
+- `npm run lint` (all sub-checks clean, css-coverage 0 pending, fixme 0 tagged in either
+  `fidelity.spec.mjs` or `editors.spec.mjs`), `npm run test:unit` (16 suites, 113 passed/6
+  skipped/0 failed), `npm run build` (clean), `bash scripts/forbidden-patterns.sh` (clean).
+- `wp-env`'s `tests-cli`, filtered to `SeederTest`: 47/47 green, 480 assertions.
+- **Mutation check** (exactly as the task specified): moved the
+  `->modify('-' . (int) $index . ' seconds')` call in `Seeder::seed_posts()` to after the
+  weekday walk-back loop, reran the single after-midnight test — it failed (`Sunday` expected,
+  `Saturday` got), confirming the rewritten test actually exercises the ordering bug; reverted
+  with `git checkout -- plugins/ttm-core/src/Cli/Seeder.php` (confirmed clean, no production
+  diff in the final commit).
+- `npx wp-scripts test-playwright --config tests/e2e/playwright.config.mjs
+  tests/e2e/editors.spec.mjs --project fidelity --repeat-each=10 --workers=1`: 20/20 green,
+  deterministic. The same command at this host's *default* (higher) worker count hit resource
+  contention unrelated to the fix — see environment note below; the new wp-login.php assertion
+  never fired in that run, which is itself evidence the failures were not a login race.
+- `npm run test:e2e`: 492 passed, 1 skipped, 0 failed (includes both `editors.spec.mjs` rows at
+  the default project/worker configuration, run twice).
+
+### Environment note (recurring, this round)
+
+Same `~/.local/bin/php` shim issue as every prior round (routes to an unrelated project's Docker
+container, not this repo): `foundry_verify`'s `composer lint`/`composer test:unit` entries fail
+with `Could not open input file: /usr/local/bin/composer`. Worked around, as the task itself
+anticipated ("via /usr/bin/php if the host composer shim is broken"), by prepending a
+scratchpad-only symlink of `/usr/bin/php` as `php` on `PATH` and invoking
+`/usr/bin/php /usr/local/bin/composer lint`/`test:unit` directly — both green, confirmed above.
+
+New this round: this sandboxed host's default Playwright worker count (its CPU count) is high
+enough, relative to `wp-env`'s single PHP dev-server container, that ten concurrent logins into
+the Site Editor/Customizer under `--repeat-each=10` produced real timeouts/missing-block failures
+purely from resource contention (the same "host system is missing dependencies" constrained
+environment noted by Playwright's own warning on every invocation this session) — not a login
+race, since the new wp-login.php guard added by this task never tripped in that run. Serializing
+with `--workers=1` reproduced the exact scenario the task describes (sequential logins, each
+waited on) and passed 20/20. A reviewer with a less contended CI runner (GitHub Actions' own,
+per the task's final verification step) should see this pass at default parallelism too; this
+sandbox's Docker-multi-tenant contention (noted in Round 5's environment note as well — several
+unrelated stacks sharing the host) is the most likely explanation for the difference, not a
+latent defect in the fix itself.
