@@ -598,3 +598,89 @@ this sandbox — some other part of the environment's PATH/shim setup breaks the
 specifically). Confirmed again this round; not caused by R4-01 (a pure JS test file, no PHP
 touched). `npm run lint`, `npm run test:unit`, `npm run build`, `bash scripts/forbidden-patterns.sh`
 and every `docs/foundry.json` constraint all pass clean.
+
+## Round 5
+
+Branch `refine/2026-09-23`, base `aa497b24c250`, head `5e368d1`. Task counts: 1 R5-* fix task,
+done (0 blocked, 0 skipped). All 53 total plan tasks are `[x]`.
+
+### Tasks landed
+
+- **R5-01** — Fixed the root cause the reviewer reproduced live on 2026-09-24 (a Thursday):
+  `Seeder::seed_posts()` read `Clock::now()` separately for every row, so `journal-post-1`
+  (`days_ago: 0`, `weekday: Sunday`)'s walk-back loop could land on the same calendar day as
+  `journal-post-4`/`journal-post-3` depending which day `now` fell on, and same-second inserts
+  then got an identical `post_date` — with no `ORDER BY` tiebreaker, the front page's journal
+  column flipped between requests. `seed_posts()` now reads `Clock::now()` once for the whole run
+  and subtracts each row's fixture index in seconds (structural arithmetic, rule 24) **before**
+  the weekday walk-back, so a weekday pin still lands on the correct day even when the offset
+  crosses midnight. `scripts/live/drill.sh` now hashes each of its five URLs twice before
+  backup/wipe and fails fast ("... is not deterministic before the wipe", exit 1, no wipe
+  performed) if they differ, so a future seed-nondeterminism bug is reported as what it is, never
+  misdiagnosed as backup/restore data loss. `.github/workflows/ci.yml`'s "Container logs on
+  failure" step now runs `npx wp-env logs all --watch=false || true` so it can't hang until the
+  6-hour job timeout.
+
+### Interpretation choices this round
+
+- **R5-01**: none required beyond what the task specified — the per-row second offset, applied
+  before the weekday walk-back, was the task's own prescribed fix.
+
+### Config keys
+
+No new `⚠️ ASSUMPTION` keys this round; no `Config.php` changes at all.
+
+### What a human must check by hand
+
+- **The GitHub Actions integration job specifically**: confirm `npm run env:drill` passes there
+  and that the "Container logs on failure" step, if it ever runs, finishes in minutes rather than
+  hanging — could not be observed directly from this sandbox (see environment note below).
+- Everything already flagged in Round 1-4's "what a human must check" sections is still current.
+
+### Verification performed this round
+
+- `composer lint` (0 errors, pre-existing warnings only), `composer test:unit` (184/184),
+  `npm run lint` (all sub-checks clean, css-coverage 0 pending, fixme 0 tagged), `npm run test:unit`
+  (16 suites, 113 passed/6 skipped/0 failed), `npm run build` (clean), `bash
+  scripts/forbidden-patterns.sh` (clean) — all green.
+- `tests/integration/Cli/SeederTest.php` run in isolation (`--filter=SeederTest`): 47/47 green,
+  478 assertions, including both new tests across all 7 weekday data-provider cases.
+- **Mutation check**: reverted `Seeder.php`'s fix only, reran the same filtered suite — all 7
+  `test_seeded_post_dates_are_unique_on_every_weekday` dataset cases failed with real duplicate
+  `post_date` lists (reproducing the reviewer's Wed/Thu/Fri/Sat ties exactly), confirming the new
+  tests actually exercise the bug; restored the fix (`git stash pop`) and reconfirmed green.
+- `npm run env:drill`: green twice in a row (`drill.sh: OK (104 posts, 5 page hash(es)
+  unchanged)`), including the new pre-wipe determinism check passing both times.
+- `for i in $(seq 1 12); do curl -s http://localhost:8888/ | md5sum; done | sort -u | wc -l` -> `1`
+  after `npm run env:seed -- --reset`, confirming the front page is now byte-stable across
+  requests.
+- `npm run test:e2e`: 491 passed, 1 skipped, 0 failed.
+
+### Environment note (this round, more severe than prior rounds)
+
+The `~/.local/bin/php` shim from prior rounds' notes is confirmed still present and still
+unrelated to this repo (it execs `docker compose -f
+/media/ericmann/Data/Projects/dailymedtoday/docker-compose.yml exec -T app php`, a different
+project); `php -l`/`composer lint` invoked through it fail with "Could not open input file" for
+any ttmm_theme path. Worked around throughout this round by invoking `/usr/bin/php8.3` /
+`/usr/bin/php` directly (present and correct on this box). Logged via `foundry_feedback_log`.
+
+More significantly this round: **the full `npm run test:integration` suite could not be completed
+end-to-end in this sandbox**, across three separate attempts, due to what appears to be resource
+contention from unrelated Docker workloads sharing this host (a `dailymedtoday` app/postgres/redis
+stack, a `rampart` stack, a `battlesnake` stack, and a `k3d` cluster were all running concurrently
+throughout). Symptoms, in order across the three attempts: (1) transient `WordPress database
+error: Table 'tests-wordpress.wp_options' doesn't exist` and lock-contention/deadlock errors
+scattered through an otherwise-progressing run; (2) the `wp-env`-managed `mysql` container itself
+exited with code 137 (OOM-killed) and `wp-env start` then failed with "dependency mysql failed to
+start"; (3) after that container set was destroyed and recreated, `wp-env`'s own cache directory
+(`~/.wp-env/wp-env-ttmm_theme-*/docker-compose.yml`) went missing entirely, and a subsequent
+`wp-env start` attempted a full fresh `git clone` of WordPress core, which itself failed
+mid-checkout. None of this points at the R5-01 change: the isolated `SeederTest` suite (which
+directly exercises the changed code, including a mutation-check proof) stayed green throughout,
+`npm run test:e2e` (which reseeds and runs the full Playwright suite against a real seeded site)
+passed clean at 491/1/0, and `npm run env:drill` (which also seeds, hashes, wipes and restores)
+passed clean twice. A reviewer or the next round should re-run `npm run test:integration` on a
+quieter box, or rely on CI's own dedicated runner, to get a clean full-suite confirmation; this
+implementer's session ran out of ways to isolate the shared host's contention from within a
+sandboxed dev environment.
