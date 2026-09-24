@@ -143,27 +143,24 @@ function normalizedText( html ) {
  * @return {{ id, slug, blocks: string, footnotes: Array, report: object }} The converted post record.
  */
 export function convertPost( post, editor ) {
-	const plainTextParagraphed = autoParagraphPlainText( post.content_raw );
-
 	const {
 		html: afterShortcodes,
 		footnotes: shortcodeFootnotes,
 		remaining,
-	} = preprocessShortcodes( plainTextParagraphed, post.id );
+	} = preprocessShortcodes( post.content_raw, post.id );
+
+	const autopped = autoParagraphPlainText( afterShortcodes );
 
 	const { html: transformedHtml, footnotes: mfnFootnotes } =
-		transformFootnotes(
-			afterShortcodes,
-			post.id,
-			shortcodeFootnotes.length + 1
-		);
+		transformFootnotes( autopped, post.id, shortcodeFootnotes.length + 1 );
 
 	const footnotes = [ ...shortcodeFootnotes, ...mfnFootnotes ];
 
 	const blockList = editor.rawHandler( { HTML: transformedHtml } );
 	const serialized = editor.serialize( blockList );
 
-	const { blockCounts, freeform, html } = buildBlockReport( blockList );
+	const { blockCounts, freeform, html, mergedParagraphs } =
+		buildBlockReport( blockList );
 
 	const textEqual =
 		normalizedText( transformedHtml ) === normalizedText( serialized );
@@ -177,6 +174,7 @@ export function convertPost( post, editor ) {
 			blockCounts,
 			freeform,
 			html,
+			mergedParagraphs,
 			textEqual,
 			shortcodes: remaining,
 			footnotes: footnotes.length,
@@ -199,18 +197,24 @@ function readNdjson( path ) {
 }
 
 function main() {
+	const flags = [
+		'--allow-freeform',
+		'--allow-text-mismatch',
+		'--allow-merged-paragraphs',
+	];
 	const args = process.argv
 		.slice( 2 )
-		.filter(
-			( a ) => a !== '--allow-freeform' && a !== '--allow-text-mismatch'
-		);
+		.filter( ( a ) => ! flags.includes( a ) );
 	const allowFreeform = process.argv.includes( '--allow-freeform' );
 	const allowTextMismatch = process.argv.includes( '--allow-text-mismatch' );
+	const allowMergedParagraphs = process.argv.includes(
+		'--allow-merged-paragraphs'
+	);
 	const [ inputPath, outputPath ] = args;
 
 	if ( ! inputPath || ! outputPath ) {
 		console.error(
-			'Usage: node scripts/convert-classic.mjs <in.ndjson> <out.ndjson> [--allow-freeform] [--allow-text-mismatch]'
+			'Usage: node scripts/convert-classic.mjs <in.ndjson> <out.ndjson> [--allow-freeform] [--allow-text-mismatch] [--allow-merged-paragraphs]'
 		);
 		process.exit( 1 );
 	}
@@ -227,6 +231,7 @@ function main() {
 	const { failed, messages } = summarizeResults( results, {
 		allowFreeform,
 		allowTextMismatch,
+		allowMergedParagraphs,
 	} );
 	messages.forEach( ( message ) => console.error( message ) );
 

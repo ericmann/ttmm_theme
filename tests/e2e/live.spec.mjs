@@ -336,6 +336,27 @@ for ( const screen of manifest.screens ) {
 						)
 						.toBe( 0 );
 				}
+
+				if ( screen.classic ) {
+					// R2-01, SPEC §6.8: real wpautop() on every classic post keeps one
+					// core/paragraph block per source paragraph; a paragraph whose innerHTML
+					// still contains a blank line is the merged-paragraph regression this
+					// fixes (report.mergedParagraphs on the converter side).
+					const mergedParagraphCount = await page
+						.locator( '.ttm-entry p' )
+						.evaluateAll(
+							( paragraphs ) =>
+								paragraphs.filter( ( p ) =>
+									/\n\s*\n/.test( p.innerHTML )
+								).length
+						);
+					expect
+						.soft(
+							mergedParagraphCount,
+							'no .ttm-entry p with a blank line in its innerHTML'
+						)
+						.toBe( 0 );
+				}
 			}
 
 			if ( 'archive' === screen.kind ) {

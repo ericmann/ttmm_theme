@@ -1,43 +1,40 @@
 /**
- * Minimal, scoped `wpautop()`-equivalent for one specific classic-content shape (R1-09, SPEC
- * §6.8 finding): a handful of real posts (`podcast-episode-*`, pre-2016) were authored via the
- * classic editor's "Text" tab with no HTML markup at all -- just plain prose and shortcodes
- * separated by blank lines, relying entirely on WordPress's own `wpautop` *content filter* to
- * wrap each blank-line-separated block in `<p>…</p>` at render time. `rawHandler({ HTML })`
- * (unlike `rawHandler({ plainText })`) does not run that filter itself, so without this step the
- * whole raw blob -- prose and a following `[audio …]` shortcode alike -- gets treated as one
- * unbroken paragraph and converted into a single `core/paragraph` block, leaving the shortcode
- * embedded as inline text instead of its own recognizable block (found on the real export: an
- * `[audio http://…]` line merged into the preceding sentence's paragraph never became a
- * `core/audio` block at all, regardless of `transformBareUrlAudioShortcodes`'s own fix).
+ * Real `wpautop()` for classic content (R2-01, SPEC §6.8): every classic post's paragraph
+ * breaks come from a blank line, relying on WordPress's `wpautop` *content filter* to wrap each
+ * blank-line-separated block in `<p>…</p>` at render time. `rawHandler({ HTML })` (unlike
+ * `rawHandler({ plainText })`) does not run that filter itself, so without running it first,
+ * `rawHandler` treats a run of blank-line-separated prose (with or without existing inline
+ * markup such as `<em>`/`<a>`) as one unbroken block and converts it into a single
+ * `core/paragraph` (or `core/freeform`) block instead of one block per source paragraph.
  *
- * Deliberately narrow, not a full `wpautop()` port: only runs when the raw content has *no*
- * block-level HTML tag anywhere (a strong, safe signal this is genuinely unformatted classic
- * text, not content the visual editor already wrapped in `<p>`/`<ul>`/etc. -- touching content
- * that already has real markup risks re-splitting paragraphs the editor deliberately kept
- * together, e.g. a `<br>`-joined address block). When it does run, it only splits on blank
- * lines and wraps each resulting block in `<p>`, same as `wpautop()`'s first pass; it does not
- * attempt list/heading/blockquote detection since none of the affected real posts use them.
+ * R1-09 found this on a handful of posts with *no* HTML markup at all (`podcast-episode-*`) and
+ * added a narrow guard scoped to that one shape. The real export shows the same collapse on the
+ * majority of classic posts -- 553 of 724 -- because plenty of classic-editor "Visual" tab
+ * content is itself just inline-tagged prose (`<em>`, `<a>`, `<strong>`) separated by blank
+ * lines with no *block-level* tag at all, which the old guard's regex treated as "already has
+ * real markup" and left completely alone. `@wordpress/autop`'s `autop()` is the actual function
+ * the block editor runs on `core/freeform` content before "Convert to blocks", including its
+ * own `<pre>`-tag protection (a `<pre>` block's content, including any blank lines a `<code>`
+ * snippet's source happens to contain, is filtered out before the blank-line split and restored
+ * unchanged afterward) -- so a `[cc]`/`[cci]` shortcode already rewritten by
+ * `preprocessShortcodes` into `<pre class="wp-block-code"><code>…</code></pre>` by the time this
+ * runs is left byte-for-byte alone, per rule 49 (non-destructive) and rule 52 (a synthetic test
+ * covers the class fix, not live text).
  *
- * @param {string} html Raw classic content.
- * @return {string} `html` unchanged if it already contains block-level HTML; otherwise each
- *   blank-line-separated block wrapped in `<p>…</p>`.
+ * Run on every classic post's HTML, unconditionally -- there is no longer a narrower guard to
+ * decide against: `autop()` itself already no-ops on content that has no bare blank-line
+ * paragraph breaks to fill in (SPEC §6.8, rule 49).
+ */
+
+import { autop } from '@wordpress/autop';
+
+/**
+ * Real wpautop, applied unconditionally.
+ *
+ * @param {string} html Raw classic content, after the shortcode pre-pass.
+ * @return {string} `html` with `<p>`/`<br>` inserted the way WordPress's `wpautop` filter would
+ *   at render time; `<pre>` block contents are left untouched.
  */
 export function autoParagraphPlainText( html ) {
-	if (
-		/<(p|div|ul|ol|li|blockquote|pre|h[1-6]|table|figure)\b/i.test( html )
-	) {
-		return html;
-	}
-
-	const blocks = html
-		.split( /\n\s*\n+/ )
-		.map( ( block ) => block.trim() )
-		.filter( Boolean );
-
-	if ( blocks.length === 0 ) {
-		return html;
-	}
-
-	return blocks.map( ( block ) => `<p>${ block }</p>` ).join( '\n\n' );
+	return autop( html );
 }

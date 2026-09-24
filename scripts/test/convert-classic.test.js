@@ -126,6 +126,22 @@ describe( 'buildBlockReport (no jsdom/block-library needed)', () => {
 		expect( report.blockCounts[ 'core/freeform' ] ).toBe( 1 );
 		expect( report.blockCounts[ 'core/paragraph' ] ).toBe( 1 );
 	} );
+
+	it( 'counts a core/paragraph block whose content has an internal blank line (R2-01)', async () => {
+		const { buildBlockReport } = await import( '../lib/report.mjs' );
+
+		const fakeBlocks = [
+			{
+				name: 'core/paragraph',
+				attributes: { content: 'Para one.\n\nPara two.' },
+			},
+			{ name: 'core/paragraph', attributes: { content: 'Fine.' } },
+		];
+
+		const report = buildBlockReport( fakeBlocks );
+
+		expect( report.mergedParagraphs ).toBe( 1 );
+	} );
 } );
 
 describe( 'summarizeResults (no jsdom/block-library needed, R1-03)', () => {
@@ -135,7 +151,13 @@ describe( 'summarizeResults (no jsdom/block-library needed, R1-03)', () => {
 		return {
 			id,
 			slug: `post-${ id }`,
-			report: { textEqual: true, freeform: 0, html: 0, ...overrides },
+			report: {
+				textEqual: true,
+				freeform: 0,
+				html: 0,
+				mergedParagraphs: 0,
+				...overrides,
+			},
 		};
 	}
 
@@ -180,6 +202,23 @@ describe( 'summarizeResults (no jsdom/block-library needed, R1-03)', () => {
 
 		const disallowed = summarizeResults( results );
 		expect( disallowed.failed ).toBe( true );
+	} );
+
+	it( 'mergedParagraphs > 0 fails without --allow-merged-paragraphs, passes with it (R2-01)', async () => {
+		const { summarizeResults } = await import( '../lib/summarize.mjs' );
+
+		const results = [ fakeResult( 1, { mergedParagraphs: 2 } ) ];
+
+		const disallowed = summarizeResults( results );
+		expect( disallowed.failed ).toBe( true );
+		expect( disallowed.messages ).toEqual( [
+			'post 1 (post-1): 2 merged paragraph block(s)',
+		] );
+
+		const allowed = summarizeResults( results, {
+			allowMergedParagraphs: true,
+		} );
+		expect( allowed.failed ).toBe( false );
 	} );
 } );
 
