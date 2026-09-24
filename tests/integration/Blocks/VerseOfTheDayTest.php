@@ -45,7 +45,31 @@ class VerseOfTheDayTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'dailymedtoday.com', $html );
 	}
 
-	public function test_f6_falls_back_to_last_good_verse_with_its_own_date(): void {
+	/**
+	 * R1-05, SPEC §6.1.1: the attribution never carries a date, even for today's own verse --
+	 * "Meditation from dailymedtoday.com" only, linked.
+	 */
+	public function test_attribution_is_undated(): void {
+		$today = \TTM\Core\Support\Clock::today();
+
+		update_option(
+			'ttm_verse',
+			[
+				'date'      => $today,
+				'text'      => 'We wait in hope.',
+				'reference' => 'Psalm 33:20',
+				'url'       => 'https://dailymedtoday.com/meditation/abc',
+				'copyright' => 'Copyright notice.',
+			]
+		);
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'Meditation from <a href="https://dailymedtoday.com/meditation/abc">dailymedtoday.com</a>', $html );
+		$this->assertStringNotContainsString( 'Meditation for', $html );
+	}
+
+	public function test_f6_falls_back_to_last_good_verse(): void {
 		update_option( 'ttm_verse', [] );
 		update_option(
 			'ttm_verse_history',
@@ -63,7 +87,6 @@ class VerseOfTheDayTest extends TTM_IntegrationTestCase {
 		$html = $this->render();
 
 		$this->assertStringContainsString( 'An older verse.', $html );
-		$this->assertStringContainsString( 'Jan 1', $html );
 	}
 
 	public function test_f6_shows_stored_verse_from_yesterday_not_history_head(): void {
@@ -96,27 +119,32 @@ class VerseOfTheDayTest extends TTM_IntegrationTestCase {
 
 		$this->assertStringContainsString( 'Yesterday’s verse.', $html );
 		$this->assertStringNotContainsString( 'An older history-head verse.', $html );
-		$this->assertStringContainsString( 'Meditation for Sept 18', $html );
 	}
 
-	public function test_attribution_uses_sept_abbreviation(): void {
-		$this->set_now( '2026-09-05 12:00:00' );
-
+	/**
+	 * R1-05, SPEC §6.1.1: the F6 stale/history fallback attribution is undated too -- the note
+	 * being from a past day never leaks a date into the linked "Meditation from …" text.
+	 */
+	public function test_stale_fallback_attribution_is_undated(): void {
+		update_option( 'ttm_verse', [] );
 		update_option(
-			'ttm_verse',
+			'ttm_verse_history',
 			[
-				'date'      => '2026-09-05',
-				'text'      => 'Text.',
-				'reference' => 'Ref.',
-				'copyright' => '',
-				'url'       => '',
+				[
+					'date'      => '2020-01-01',
+					'text'      => 'An older verse.',
+					'reference' => 'Genesis 1:1',
+					'copyright' => '',
+					'url'       => '',
+				],
 			]
 		);
 
 		$html = $this->render();
 
-		$this->assertStringContainsString( 'Meditation for Sept 5', $html );
-		$this->assertStringNotContainsString( 'Meditation for Sep ', $html );
+		$this->assertStringContainsString( 'Meditation from <a href="https://dailymedtoday.com/">dailymedtoday.com</a>', $html );
+		$this->assertStringNotContainsString( 'Meditation for', $html );
+		$this->assertStringNotContainsString( 'Jan 1', $html );
 	}
 
 	public function test_renders_nothing_without_any_verse(): void {

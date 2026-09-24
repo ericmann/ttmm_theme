@@ -268,7 +268,15 @@ test.describe( 'verse', () => {
 
 	test( 'verse-attr: .ttm-verse__attribution a @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
-		const attr = page.locator( '.ttm-verse__attribution a' );
+		const attribution = page.locator( '.ttm-verse__attribution' );
+		// R1-05, SPEC §6.1.1: the attribution never carries a date, however stale the verse
+		// (F6) -- "Meditation from dailymedtoday.com" only, linked.
+		const attributionText = ( await attribution.innerText() )
+			.replace( /\s+/g, ' ' )
+			.trim();
+		expect( attributionText ).toBe( 'Meditation from dailymedtoday.com' );
+
+		const attr = attribution.locator( 'a' );
 		expect( await computed( attr, 'color' ) ).toBe( color( 'accent-700' ) );
 		expect( await computed( attr, 'text-decoration-line' ) ).toBe(
 			'underline'
