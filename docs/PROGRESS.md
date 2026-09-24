@@ -15,7 +15,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P1-01 images.json and the Openverse fetch script
 - [x] P1-02 Seeder sideloads demo photographs (DemoImage, --no-demo-images)
 - [x] P1-03 Fetch the 13 photographs; tune IMAGE_MAX_BYTES and IMAGE_BUDGET_BYTES
-- [ ] P1-04 Fixture photographs: featured_image, alt and caption values
+- [x] P1-04 Fixture photographs: featured_image, alt and caption values
 - [ ] P1-05 Story tile cover class; demo rows green; drill still deterministic
 - [ ] P1-06 Phase 1 screenshots and push
 - [ ] P2-01 Spike: export term definitions, Playground import and CLI server shape
@@ -111,3 +111,22 @@ images.json: exclude arrays added per rejected id; three rows' query text change
 Tests: scripts/test/demo-credits.test.js (new, 2 tests); openverse.test.js still 7/7.
 Measurement: IMAGE_MAX_BYTES stays 350000 (every row's accepted candidate was under it on its own page; largest file 320,902 bytes), IMAGE_BUDGET_BYTES stays 8000000 (total 1,585,649 bytes) -- no tuning needed, both unchanged in constants.mjs.
 Verified: npm run check:demo clean on the real 13 files; foundry_verify ok:false only on npm run test:e2e's one selectors.spec.mjs timeout, confirmed pre-existing/flaky (reproduces only under concurrent-verify load; passes standalone) -- composer lint/test:unit, npm run lint/test:unit/build, forbidden-patterns.sh, demo:build/demo:check, npm run test:integration all green; 0 constraint fails.
+
+### P1-04 — dd376c1
+Set featured_image/alt/caption in posts.json (12 rows) and pages.json (about)
+to the 13 real committed demo photographs. Fixed Seeder::featured_image_for()
+to prefer $row['alt'] over the post title for attachment alt text. Discovered
+and fixed a filename-collision cascade: WP integration test uploads persist
+across test runs (DB rollback doesn't touch files), so every pre-existing
+bare `new Seeder()` call (39 in SeederTest.php, 12 in SeedStatesTest.php, 1
+fully-qualified in ArticleTemplatesTest.php) began doing real, uncleaned
+sideloads once fixtures named real files; switched all to
+`new Seeder( false )` plus one explicit cleanup in SeedCommandTest.php.
+Scoped fidelity.spec.mjs's tech-img selector to :first-child now that a
+second technology post also carries a real photo (Playwright strict-mode).
+Added 3 new SeederTest.php tests covering demo-image attach, placeholder
+fallback, and every fixture having alt+caption. Verified: composer lint,
+npm run lint, forbidden-patterns.sh clean; test:integration green twice
+consecutively (615 tests) confirming idempotency; test:e2e 493 passed/8
+skipped, only the pre-existing/independently-confirmed-flaky
+selectors.spec.mjs timeout failed (passes standalone).
