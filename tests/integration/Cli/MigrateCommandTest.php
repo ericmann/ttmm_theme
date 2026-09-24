@@ -82,6 +82,60 @@ class MigrateCommandTest extends TTM_IntegrationTestCase {
 		$this->assertSame( $politics, (int) get_post_meta( $post, 'ttm_primary_category', true ) );
 	}
 
+	/**
+	 * R2-02: env:live's starter content already creates Politics as a child of Opinion
+	 * (`Seeder::seed_categories()`), so `politics_child()`'s "already a child; nothing to do"
+	 * check must not skip posts that were assigned to Politics afterward (e.g. by
+	 * `convert:import`) and never got Opinion added or set as their primary.
+	 */
+	public function test_politics_already_child_still_updates_posts(): void {
+		$ids      = ( new \TTM\Core\Cli\Seeder() )->seed_categories();
+		$politics = $ids['politics'];
+		$opinion  = $ids['opinion'];
+
+		$post = self::factory()->post->create();
+		wp_set_post_terms( $post, [ $politics ], 'category' );
+
+		$result = ( new MigrateCommand() )->run( [], [] );
+
+		$this->assertTrue( $result['ok'] );
+		$this->assertStringContainsString( 'Updated 1 Politics post(s).', implode( "\n", $result['messages'] ) );
+
+		$categories = wp_get_post_categories( $post, [ 'fields' => 'slugs' ] );
+		$this->assertContains( 'politics', $categories );
+		$this->assertContains( 'opinion', $categories );
+		$this->assertSame( $opinion, (int) get_post_meta( $post, 'ttm_primary_category', true ) );
+		$this->assertSame( 'opinion', \TTM\Core\Meta\PrimaryCategory::slug( $post ) );
+
+		$second = ( new MigrateCommand() )->run( [], [] );
+		$this->assertTrue( $second['ok'] );
+		$this->assertStringContainsString( 'Updated 0 Politics post(s).', implode( "\n", $second['messages'] ) );
+		$this->assertCount( 0, $second['rows'] );
+	}
+
+	public function test_politics_already_child_dry_run_writes_nothing(): void {
+		$ids      = ( new \TTM\Core\Cli\Seeder() )->seed_categories();
+		$politics = $ids['politics'];
+
+		$post = self::factory()->post->create();
+		wp_set_post_terms( $post, [ $politics ], 'category' );
+
+		// PrimaryCategory::on_save() (save_post_post) already stamped a primary at insert time
+		// (before wp_set_post_terms() assigned Politics), same as any freshly-saved post; the
+		// point of a dry run is that it's still exactly this value afterward, not that it's 0.
+		$primary_before = (int) get_post_meta( $post, 'ttm_primary_category', true );
+
+		$result = ( new MigrateCommand() )->run( [], [ 'dry-run' => true ] );
+
+		$this->assertTrue( $result['ok'] );
+		$this->assertCount( 1, $result['rows'] );
+		$this->assertSame( $post, $result['rows'][0]['post_id'] );
+
+		$categories = wp_get_post_categories( $post, [ 'fields' => 'slugs' ] );
+		$this->assertNotContains( 'opinion', $categories );
+		$this->assertSame( $primary_before, (int) get_post_meta( $post, 'ttm_primary_category', true ) );
+	}
+
 	public function test_politics_dry_run_changes_nothing(): void {
 		$politics = $this->politics_id();
 

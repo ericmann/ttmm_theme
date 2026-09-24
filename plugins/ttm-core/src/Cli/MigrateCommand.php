@@ -474,21 +474,24 @@ class MigrateCommand extends Command {
 	 * and set each post's `ttm_primary_category` to Opinion so `PrimaryCategory::slug()`
 	 * resolves to `'opinion'` (SPEC Q3: Politics posts are Opinion posts, kicker-wise; only
 	 * `Bindings\Sources::in_politics()`'s any-position check still finds "politics" on them).
-	 * Idempotent: a second run sees Politics already parented under Opinion and does nothing
-	 * further (including to individual posts).
+	 * Idempotent per post, not just per category: env:live's starter content already creates
+	 * Politics as a child of Opinion (R2-02), so a bare "Politics is already parented" check
+	 * would report "nothing to do" while individual posts -- assigned to Politics by
+	 * `convert:import` afterward -- never actually got Opinion added or set as their primary.
+	 * Once Politics is already parented, this still walks every Politics post (batched) and
+	 * fixes any that are missing Opinion or whose stored primary isn't Opinion yet; a second
+	 * run after that finds none left and reports 0.
 	 *
 	 * @param WP_Term $politics The Politics category term.
 	 * @param bool    $dry_run  Whether to only report the plan.
 	 * @return array{ok: bool, rows: array<int, array<string, mixed>>, messages: string[]}
 	 */
 	private function politics_child( WP_Term $politics, bool $dry_run ): array {
-		$opinion = get_term_by( 'slug', 'opinion', 'category' );
-		if ( $opinion && (int) $politics->parent === (int) $opinion->term_id ) {
-			return [
-				'ok'       => true,
-				'rows'     => [],
-				'messages' => [ 'Politics is already a child of Opinion; nothing to do.' ],
-			];
+		$opinion          = get_term_by( 'slug', 'opinion', 'category' );
+		$already_parented = $opinion instanceof WP_Term && (int) $politics->parent === (int) $opinion->term_id;
+
+		if ( $already_parented ) {
+			return $this->politics_child_fixup( $politics, (int) $opinion->term_id, $dry_run );
 		}
 
 		$posts = $this->posts_in_category( $politics->term_id );
@@ -546,6 +549,69 @@ class MigrateCommand extends Command {
 			'ok'       => true,
 			'rows'     => $rows,
 			'messages' => [ sprintf( 'Politics is now a child of Opinion (%d post(s) updated).', count( $rows ) ) ],
+		];
+	}
+
+	/**
+	 * Politics is already parented under Opinion (R2-02): walk every Politics post (batched)
+	 * and fix any that are missing Opinion in their categories or whose stored
+	 * `ttm_primary_category` isn't Opinion yet, without touching the term relationship itself
+	 * or posts that are already correct. Dry-run reports the same count it would update.
+	 *
+	 * @param WP_Term $politics   The Politics category term (already a child of Opinion).
+	 * @param int     $opinion_id The Opinion category term id.
+	 * @param bool    $dry_run    Whether to only report the plan.
+	 * @return array{ok: bool, rows: array<int, array<string, mixed>>, messages: string[]}
+	 */
+	private function politics_child_fixup( WP_Term $politics, int $opinion_id, bool $dry_run ): array {
+		$posts = array_values(
+			array_filter(
+				$this->posts_in_category( $politics->term_id ),
+				function ( int $post_id ) use ( $opinion_id ): bool {
+					$categories = wp_get_post_categories( $post_id, [ 'fields' => 'ids' ] );
+					$primary    = (int) get_post_meta( $post_id, 'ttm_primary_category', true );
+
+					return ! in_array( $opinion_id, $categories, true ) || $primary !== $opinion_id;
+				}
+			)
+		);
+
+		if ( $dry_run ) {
+			return [
+				'ok'       => true,
+				'rows'     => array_map( static fn ( int $id ): array => [ 'post_id' => $id ], $posts ),
+				'messages' => [ sprintf( 'Would update %d Politics post(s) (add Opinion / set primary Opinion).', count( $posts ) ) ],
+			];
+		}
+
+		$rows = [];
+		foreach ( $posts as $post_id ) {
+			$categories = wp_get_post_categories( $post_id, [ 'fields' => 'ids' ] );
+			if ( ! in_array( $opinion_id, $categories, true ) ) {
+				$categories[] = $opinion_id;
+				wp_set_post_categories( $post_id, array_values( array_unique( $categories ) ) );
+			}
+			update_post_meta( $post_id, 'ttm_primary_category', $opinion_id );
+
+			$rows[] = [ 'post_id' => $post_id ];
+		}
+
+		if ( ! empty( $rows ) ) {
+			$this->purge(
+				array_filter(
+					[
+						home_url( '/' ),
+						$this->category_link_or_null( $opinion_id ),
+						$this->category_link_or_null( $politics->term_id ),
+					]
+				)
+			);
+		}
+
+		return [
+			'ok'       => true,
+			'rows'     => $rows,
+			'messages' => [ sprintf( 'Updated %d Politics post(s).', count( $rows ) ) ],
 		];
 	}
 
