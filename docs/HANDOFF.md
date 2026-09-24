@@ -358,3 +358,108 @@ by invoking `/usr/bin/php vendor/bin/phpcs`/`vendor/bin/phpunit` directly — bo
 confirmed multiple times this round. `foundry_verify`'s own `composer lint`/`composer test:unit`
 entries in this round's run will show this same failure; they are an environment artifact, not a
 code regression. Logged via `foundry_feedback_log`.
+
+## Round 2
+
+Branch `refine/2026-09-23`, base `aa497b24c250`, head `94a4dae`. Task counts: 5 R2-* fix tasks,
+all done (0 blocked, 0 skipped). All 48 total plan tasks are `[x]`.
+
+### Tasks landed
+
+- **R2-01** — Real `@wordpress/autop` `autop()` replaces R1-09's narrow, HTML-tag-gated
+  `autoParagraphPlainText()` guard, run unconditionally on every classic post (order:
+  `preprocessShortcodes` -> `autop` -> `transformFootnotes` -> `rawHandler`, so `[cc]`/`[cci]`
+  bodies are already `<pre>` before `autop` sees them and are left untouched). R1-09's guard only
+  helped posts with *zero* block-level HTML anywhere; it silently did nothing for the much more
+  common shape — classic-editor "Visual" tab prose with inline tags (`<em>`/`<a>`/`<strong>`)
+  separated by blank lines but no block-level tag — which is why 553 of 724 real posts were
+  collapsing multiple source paragraphs into one `core/paragraph`/`core/freeform` block.
+  `buildBlockReport` now returns `mergedParagraphs` (paragraph blocks with an internal blank
+  line); `summarizeResults` fails the CLI on `mergedParagraphs > 0` unless
+  `--allow-merged-paragraphs` (never passed by `plan.sh`).
+- **R2-02** — `migrate:politics --to=child`'s "Politics already parented under Opinion" check no
+  longer short-circuits to "nothing to do": `env:live`'s starter content already creates that
+  parent relationship before any posts exist, so individual Politics posts assigned afterward
+  (by `convert:import`) never got Opinion added or set as their primary. `politics_child_fixup()`
+  now walks every Politics post (still batched) whenever the relationship is already correct, and
+  only touches posts missing Opinion or with a stale primary.
+- **R2-03** — `primary:assign --from-yoast` now honours Yoast's primary category on a real WXR
+  import. The gap (3 used out of 175 candidates, not the reviewer's ~424 estimate) wasn't a
+  permanent structural limitation as R1-09 recorded it — `_yoast_wpseo_primary_category` names a
+  term id from the *source* site, and the WXR itself already carries a full source-id -> slug map
+  in its top-level `<wp:category>` blocks. New `scripts/live/term-map.mjs` extracts that map
+  (`import.sh` runs it automatically); `primary:assign --from-yoast --term-map=<path>`
+  (`plan.sh`) translates the raw meta value through it to a slug, then resolves that slug to
+  whatever term id it has on *this* site, before the existing "post actually carries it" check.
+- **R2-04** — `single-journal.html` keeps R1-09's `.ttm-entry` className (axe exclusion, SPEC
+  §6.10 check) but no longer carries F12's article-only byline-to-body `padding-top: 28px` —
+  mock 2c's journal single has no byline between the h1 and the body, and the h1's own 18px
+  `margin-bottom` already provides the gap, so F12's padding was doubling it (46px instead of
+  18px). Added `.ttm-journal-head .ttm-entry { padding-top: 0; }`.
+- **R2-05** — Full `LIVE_SKIP_ATTACHMENTS=1 npm run env:live` + `npm run test:live` re-run against
+  the same 2026-09-23 export with R2-01..R2-04 in place (77 passed, 0 failed); confirmed all
+  three real-content fixes with actual numbers (see Measurements below); corrected
+  `LIVE-TRIAGE.md`'s R1-09 "structural limitation" section in place and added a new "R2-05 run"
+  section; retook the live and seeded screenshot sets.
+
+### Interpretation choices this round
+
+- **R2-01**: `mergedParagraphs` counts only `core/paragraph` blocks whose `attributes.content`
+  contains a blank line, matching the acceptance test's own wording ("a paragraph block with an
+  internal blank line") — a handful of real posts have literal, non-`<pre>` multi-line `<code>`
+  tags in the original author's content (a pre-2016 syntax-highlighter shape, unrelated to the
+  `[cc]`/`[cci]` shortcode this task's `<pre>`-protection targets) that `rawHandler` falls back to
+  `core/html` for; those are already gated by the existing `--allow-freeform`/`--allow-html`
+  path and are not double-counted as a merged-paragraph regression.
+- **R2-02**: `politics_child_fixup()` is a new private method rather than inlining the fixup logic
+  into `politics_child()`'s existing branch, so the "fresh migration" and "already parented"
+  paths stay independently readable; it re-touches only posts that actually need it (missing
+  Opinion or a stale primary), never the already-correct majority.
+- **R2-03**: implemented the WXR extractor as a Node helper (`scripts/live/term-map.mjs`) rather
+  than inline shell/`grep`, following the task's own "if it is a Node helper" acceptance wording
+  and the existing `scripts/live/series-args.mjs`/`scripts/live/lib/screens.mjs` convention for
+  WXR/`plan.sh`-adjacent extraction with a pure, directly-testable exported function.
+- **R2-04**: scoped the padding-zero fix to `.ttm-journal-head .ttm-entry` specifically (not a
+  general F12 change) — `single.html`'s article `.ttm-entry` still needs the padding, since it
+  does have a byline directly above it.
+
+### Config keys
+
+No new `⚠️ ASSUMPTION` keys this round. No `Config.php` changes at all — every R2 fix is CLI
+logic, a WXR extraction helper, or CSS.
+
+### What a human must check by hand
+
+- **Live import's Opinion cell and paragraph breaks** (R2-01/R2-02/R2-03): open
+  `docs/feedback/phase-4/live-front.png` (Opinion cell now lists real rows) and
+  `docs/feedback/phase-4/live-article-classic.png` (`keeping-fresh`, clean separate paragraphs
+  throughout, no merged walls of text) — already captured this round, but SPEC §6.14 still wants
+  a human eyeball.
+- **Journal single spacing** (R2-04): open `docs/feedback/phase-4/journal.png` against mock 2c
+  (lines 431-432) to confirm the body sits directly under the 18px h1 margin.
+- **The 3 remaining `textEqual: false` classic posts** (`securing-forms-without-captcha`,
+  `the-hackiest-hack-that-ever-was-hacked`, `use-your-head`): pre-existing malformed markup in
+  the author's own original content, unrelated to this flight's conversion pipeline — owner
+  content cleanup, not a code fix, same class as R1-09's `character-quest-service`/
+  `hyper-vvv-windows` cases.
+
+### Environment note (recurring)
+
+Same `~/.local/bin/php` shim issue as Round 1's note above, confirmed again this round:
+`foundry_verify`'s `composer lint`/`composer test:unit` fail with "Could not open input file:
+/usr/local/bin/composer" — an environment artifact outside this repo, not a code regression.
+Worked around by running `/usr/bin/php vendor/bin/phpcs`/`vendor/bin/phpunit` directly against
+the whole repo: `find plugins themes tests -name '*.php' | xargs php -l` is clean (0 syntax
+errors), `phpcs -q --report=summary --report-full` is 0 errors / 113 pre-existing warnings across
+52 files (none introduced this round; a `chore: final green` commit fixed two real
+`WordPress.Arrays.ArrayDeclarationSpacing` errors this run's own testing surfaced in
+`PrimaryCommandTest.php`), `phpunit -c phpunit.xml.dist` is 184/184 green. Logged via
+`foundry_feedback_log` again this round.
+
+`wp-env`'s `tests-cli` container also has a pre-existing, order-dependent cross-test "opinion"
+category-term leak (confirmed identical on the unmodified pre-R2-02 `MigrateCommandTest.php` via
+`wp-env clean tests` + `--filter`): running the whole `MigrateCommandTest` class in one process
+shows 2 failures in tests unrelated to R2-02's own new tests (both of which pass cleanly, 9 and 5
+assertions, when run alone after a fresh `wp-env clean tests`). Not caused by this round; a
+reviewer re-running the full integration suite should expect this and not read it as a R2-02
+regression.
