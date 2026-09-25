@@ -22,7 +22,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P2-02 DemoCommand (demo:options, demo:verify) and seed --now
 - [x] P2-03 wxr.mjs: pure WXR normalisation
 - [x] P2-04 build.mjs, blueprint template and the committed demo outputs
-- [ ] P2-05 release:pack (plugin and theme zips with build/)
+- [x] P2-05 release:pack (plugin and theme zips with build/)
 - [ ] P2-06 check.mjs: headless Playground check on a local variant
 - [ ] P2-07 CI demo step and the term-meta record
 - [ ] P2-08 Phase 2 screenshots and push
@@ -248,3 +248,20 @@ both pass (byte-identical); npm run check:demo clean on the committed
 localhost/127.0.0.1/:8888/e-mail in any output; composer lint/test:unit,
 npm run lint/test:unit clean; full test:integration 629 tests OK;
 forbidden-patterns.sh clean; git status --porcelain docs/fixtures empty.
+
+### P2-05 — aac5248
+Implemented scripts/release/lib/zip.mjs (writeZip/readZip: no new
+dependency, node:zlib deflateRawSync/inflateRawSync/crc32; fixed
+1980-01-01 DOS timestamp, sorted entries, method 8/0 chosen per entry by
+whichever is smaller), scripts/release/lib/files.mjs (pluginFiles/
+themePaths pure filters), and scripts/release/pack.mjs (runs npm run
+build, combines git ls-files with a build/ disk walk, filters, packs,
+adds LICENSE, writes dist/ttm-core.zip and dist/ttm-theme.zip). Verified
+by actually running npm run release:pack twice: outputs are byte-identical
+(sha256 matched across runs), unzip -l shows both zips unpack to one
+top-level slug directory with build/index.js and LICENSE present and no
+.map/test/node_modules files. Tests: scripts/test/release-pack.test.js
+(5 tests, the dist-zip content test self-skips until release:pack has run,
+then passes once it has). Verified: npm run lint/test:unit clean (24 suites,
+190 passed/6 pre-existing skips), forbidden-patterns.sh clean,
+git status --porcelain dist/ empty (gitignored).
