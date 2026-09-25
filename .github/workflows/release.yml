@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Verify, pack and release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          coverage: none
+          tools: composer:v2
+      - uses: ramsey/composer-install@v4
+      - run: npm ci
+      - run: composer lint
+      - run: composer test:unit
+      - run: npm run lint
+      - run: npm run test:unit
+      - run: bash scripts/forbidden-patterns.sh
+      - name: Tag matches package.json version
+        run: |
+          expected="v$(node -p "require('./package.json').version")"
+          if [ "$expected" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version ($expected)" >&2
+            exit 1
+          fi
+      - run: npm run release:pack
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/ttm-core.zip
+            dist/ttm-theme.zip
+          draft: false
+          generate_release_notes: true
