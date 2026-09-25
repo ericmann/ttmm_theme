@@ -16,7 +16,7 @@
  * blueprint step has completed -- and only then makes one sanity-check GET of `/`. This removes
  * the race entirely; no `--workers` tuning or object-cache workaround is needed.
  */
-import { execFileSync, spawn } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import {
 	copyFileSync,
 	existsSync,
@@ -32,6 +32,11 @@ import { extname, join } from 'node:path';
 import { isReady } from './lib/boot.mjs';
 import { checkPages } from './lib/check-assertions.mjs';
 import { localBlueprint } from './lib/local-variant.mjs';
+import {
+	resolvePlaygroundCliBin,
+	startServer,
+	stopServer,
+} from './lib/server-process.mjs';
 import { rebaseAttachmentUrls } from './lib/wxr.mjs';
 
 const PLAYGROUND_BOOT_TIMEOUT_MS = 600000;
@@ -194,6 +199,8 @@ async function fetchWithCookies( url, jar ) {
 	throw new Error( `Too many redirects fetching ${ url }` );
 }
 
+const LOG_POLL_MS = 200;
+
 /**
  * Wait for the spawned Playground CLI process to print its own ready line (`isReady()`, R1-01)
  * -- which only happens after every blueprint step, including the final post-import rebuild, has
@@ -201,16 +208,36 @@ async function fetchWithCookies( url, jar ) {
  * Rejects if the process exits first or the ready line never appears within
  * `PLAYGROUND_BOOT_TIMEOUT_MS`.
  *
- * @param {string}                                    url  URL to sanity-check once ready.
- * @param {import('node:child_process').ChildProcess} proc Playground server process.
- * @param {ReturnType<createCookieJar>}               jar  Shared cookie jar.
+ * Non-`--keep` runs read the ready line off `proc`'s piped stdout/stderr, same as before R2-01.
+ * `--keep` runs (`logFile` given) route stdout/stderr straight to a file, never through a pipe
+ * held by this process (`server-process.mjs`'s `startServer()`), so readiness is instead read by
+ * polling that file's contents for the same marker -- the ready-line semantics (`isReady()`)
+ * don't change either way.
+ *
+ * @param {string}                                    url               URL to sanity-check once
+ *                                                                      ready.
+ * @param {import('node:child_process').ChildProcess} proc              Playground server process.
+ * @param {ReturnType<createCookieJar>}               jar               Shared cookie jar.
+ * @param {Object}                                    [options]
+ * @param {string}                                    [options.logFile] Log file to poll instead
+ *                                                                      of piped stdout/stderr (`--keep`).
  * @return {Promise<void>} Resolves once the ready line has appeared and the sanity GET succeeds;
  *   rejects on timeout, process exit, or a non-200 sanity GET.
  */
-function waitForBoot( url, proc, jar ) {
+function waitForBoot( url, proc, jar, { logFile } = {} ) {
 	return new Promise( ( resolve, reject ) => {
 		let output = '';
 		let settled = false;
+		let onData;
+		let pollHandle;
+
+		const cleanup = () => {
+			if ( onData ) {
+				proc.stdout.off( 'data', onData );
+				proc.stderr.off( 'data', onData );
+			}
+			clearTimeout( pollHandle );
+		};
 
 		const finish = ( fn, arg ) => {
 			if ( settled ) {
@@ -218,33 +245,53 @@ function waitForBoot( url, proc, jar ) {
 			}
 			settled = true;
 			clearTimeout( timeoutHandle );
+			cleanup();
 			fn( arg );
 		};
 
-		const onData = ( chunk ) => {
-			output += chunk.toString();
-			if ( isReady( output ) ) {
-				proc.stdout.off( 'data', onData );
-				proc.stderr.off( 'data', onData );
-				fetchWithCookies( url, jar )
-					.then( ( response ) => {
-						if ( 200 !== response.status ) {
-							finish(
-								reject,
-								new Error(
-									`Playground server answered ${ response.status } for ${ url } after reporting ready`
-								)
-							);
-							return;
-						}
-						finish( resolve );
-					} )
-					.catch( ( error ) => finish( reject, error ) );
-			}
+		const sanityCheck = () => {
+			fetchWithCookies( url, jar )
+				.then( ( response ) => {
+					if ( 200 !== response.status ) {
+						finish(
+							reject,
+							new Error(
+								`Playground server answered ${ response.status } for ${ url } after reporting ready`
+							)
+						);
+						return;
+					}
+					finish( resolve );
+				} )
+				.catch( ( error ) => finish( reject, error ) );
 		};
 
-		proc.stdout.on( 'data', onData );
-		proc.stderr.on( 'data', onData );
+		if ( logFile ) {
+			const poll = () => {
+				try {
+					output = readFileSync( logFile, 'utf8' );
+				} catch {
+					// Not written yet.
+				}
+				if ( isReady( output ) ) {
+					sanityCheck();
+					return;
+				}
+				pollHandle = setTimeout( poll, LOG_POLL_MS );
+			};
+			poll();
+		} else {
+			onData = ( chunk ) => {
+				output += chunk.toString();
+				if ( isReady( output ) ) {
+					cleanup();
+					sanityCheck();
+				}
+			};
+			proc.stdout.on( 'data', onData );
+			proc.stderr.on( 'data', onData );
+		}
+
 		proc.on( 'exit', ( code ) => {
 			finish(
 				reject,
@@ -353,38 +400,52 @@ async function checkAgainstPlayground( fromDir, keep ) {
 		);
 
 		const playgroundPort = await freePort();
+		// `--keep` writes the server's own stdout/stderr to a log file in the (also kept) temp
+		// dir rather than piping them to this process: a pipe whose read end lives here would
+		// either EPIPE the child the moment this process exits, or (if left open) be exactly the
+		// kind of dangling handle R1-04's `process.exit( 0 )` backstop had to paper over (R2-01).
+		const logFile = keep ? join( tempDir, 'playground.log' ) : undefined;
 		console.log(
-			`demo:check: booting Playground on 127.0.0.1:${ playgroundPort } (static server on ${ staticBase })`
+			`demo:check: booting Playground on 127.0.0.1:${ playgroundPort } (static server on ${ staticBase })` +
+				( logFile ? ` (log: ${ logFile })` : '' )
 		);
-		playgroundProc = spawn(
-			'npx',
+		// Run the CLI's own resolved bin script directly with `process.execPath` -- not through
+		// `npx`/`sh` -- and `detached: true`, so `stopServer()` can signal the whole process
+		// group (including the CLI's own `--experimental-wasm-jspi` respawn) in one call instead
+		// of only the immediate `npm exec` child, which used to leave the real server and its
+		// worker running, reparented to init, after a bare `.kill()` (review F1).
+		playgroundProc = startServer(
+			process.execPath,
 			[
-				'@wp-playground/cli',
+				resolvePlaygroundCliBin(),
 				'server',
 				`--blueprint=${ join( tempDir, 'blueprint.local.json' ) }`,
 				`--port=${ playgroundPort }`,
 				'--login',
 			],
-			{ stdio: [ 'ignore', 'pipe', 'pipe' ] }
+			{ logFile }
 		);
 
 		const siteUrl = `http://127.0.0.1:${ playgroundPort }`;
 		const jar = createCookieJar();
-		await waitForBoot( `${ siteUrl }/`, playgroundProc, jar );
+		await waitForBoot( `${ siteUrl }/`, playgroundProc, jar, { logFile } );
 
 		const failures = await checkAgainstUrl( siteUrl, jar );
 
 		if ( keep ) {
 			console.log(
-				`demo:check: --keep: leaving the server running at ${ siteUrl }`
+				`demo:check: --keep: leaving the server running at ${ siteUrl } ` +
+					`(pid/pgid ${ playgroundProc.pid }); stop it with: ` +
+					`kill -TERM -${ playgroundProc.pid }`
 			);
-			playgroundProc = null; // Don't kill it in `finally`.
+			playgroundProc.unref();
+			playgroundProc = null; // Don't stop it in `finally`.
 		}
 
 		return failures;
 	} finally {
 		if ( playgroundProc ) {
-			playgroundProc.kill();
+			await stopServer( playgroundProc );
 		}
 		if ( staticServer ) {
 			staticServer.close();
@@ -414,11 +475,14 @@ async function main() {
 	}
 
 	console.log( 'demo:check: ok' );
-	// Explicit exit, matching the failure paths above: a killed `npx`-spawned Playground
-	// child can leave the real `@wp-playground/cli` grandchild's stdio pipes or a pooled
-	// keep-alive `fetch()` connection open, which would otherwise keep this process's event
-	// loop alive indefinitely after a successful run (confirmed directly: CI hung on this
-	// exact step for over an hour with `demo:check: ok` already printed).
+	// Explicit exit, matching the failure paths above, kept as a backstop even now that
+	// `stopServer()` (R2-01) properly waits for the whole Playground process group to exit
+	// before this function returns: the real cause of the original hang was the orphaned
+	// grandchild (reparented to init by a bare `.kill()` on the old `npx`-spawned child) still
+	// holding its stdio pipes open, which kept this process's event loop alive indefinitely even
+	// after printing `demo:check: ok` (confirmed directly: CI hung on this exact step for over
+	// an hour). A pooled keep-alive `fetch()` connection could do the same on its own, hence
+	// keeping this as a backstop rather than removing it.
 	process.exit( 0 );
 }
 

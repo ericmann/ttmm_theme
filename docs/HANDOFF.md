@@ -217,13 +217,23 @@ tasks done, 0 blocked, 0 skipped.
 - **R1-04** (`5e36b1c`, `0079196`): close-out — regenerated `.github/` demo outputs (confirmed
   byte-identical via `--check-determinism`) and all screenshots from the R1-02 photographs,
   rewrote this document's stale "Known limitation"/Redis/`--workers=1` passages, and updated the
-  Measurements. Also found and fixed a real bug while verifying: `scripts/demo/check.mjs`'s
-  `main()` had no `process.exit(0)` on its success path, which let a killed npx-spawned Playground
-  child's lingering stdio/keep-alive handles keep the whole script alive indefinitely after
-  printing `demo:check: ok` — this hung CI's integration job for over an hour on the first R1-04
-  push (cancelled run 36134814876) before the fix. Both the push- and pull_request-triggered CI
-  runs for the final commit (`36141623788`, `36141626990`) are fully green, including
-  `wp-env integration`'s `demo:check` step and `Playwright + axe`.
+  Measurements. Also found and added a workaround for a real bug while verifying:
+  `scripts/demo/check.mjs`'s `main()` had no `process.exit(0)` on its success path, which let the
+  successful run hang indefinitely after printing `demo:check: ok`. **Correction (R2-01, review
+  F1): the wording above described the symptom, not the root cause.** The real cause was
+  `playgroundProc.kill()` signalling only the immediate `npx`-spawned `npm exec` child; the real
+  `@wp-playground/cli` server (and its own `--experimental-wasm-jspi` worker respawn) sit two-plus
+  levels deeper in that tree and were never signalled at all, so they kept running, reparented to
+  init, still holding their stdio pipes open into this process — which is what actually kept the
+  event loop alive. `process.exit(0)` was a working backstop for *this* script's own hang, but it
+  did nothing for the orphaned server itself (confirmed by the reviewer's follow-up run: 1.7 GB
+  RSS, 71% CPU, port still listening, long after `demo:check` had exited 0). R2-01 fixes the actual
+  tree (`scripts/demo/lib/server-process.mjs`: spawn detached + process-group kill, no `npx`/`sh`
+  in between) and keeps `process.exit(0)` only as a backstop, with its comment corrected to match.
+  Both the push- and pull_request-triggered CI runs for the R1-04 commit (`36141623788`,
+  `36141626990`) were green, including `wp-env integration`'s `demo:check` step and
+  `Playwright + axe` — that gate never actually proved the tree was clean, only that the script
+  itself exited promptly.
 
 **Interpretation choices this round** (all already noted inline above and in each task's own log
 entry in `docs/PROGRESS.md`): R1-01's readiness definition (the CLI's own ready line, plus one
