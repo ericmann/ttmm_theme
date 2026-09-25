@@ -29,7 +29,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P3-01 README screenshots (--readme); tune SCREENSHOT_MAX_BYTES
 - [x] P3-02 Public README; developer commands to SETUP.md; rule 56 strict
 - [x] P3-03 Release workflow
-- [ ] P3-04 Phase 3 screenshots and push
+- [x] P3-04 Phase 3 screenshots and push
 - [ ] P4-01 Guards back to strict; allow-lists; budget and audits recorded
 - [ ] P4-02 Documentation index, SETUP, plugin spec and HANDOFF
 - [ ] P4-03 Final demo refresh, seed reset, screenshots and push
@@ -416,3 +416,18 @@ Verified: YAML validated with python3 yaml.safe_load; npm run
 release:pack succeeds; npm run lint/test:unit clean (27 suites, 216
 passed/6 pre-existing skips); forbidden-patterns.sh clean.
 Manual check: none.
+
+### P3-04 — ad214cd
+Re-seeded and retook docs/feedback/phase-5/front-390.png (other five
+unchanged, not restaged). Verified: full verify set green (composer
+lint/test:unit, npm run lint/test:unit/build, forbidden-patterns.sh); npm
+run check:demo clean with the real README/screenshots live.
+
+Pushed refine/2026-09-24 (ad214cd, bundling P3-01 through P3-04). CI run
+36096655678: php/js/security jobs all green; integration job red on the
+same already-documented demo:check Playground gap (P2-06/P2-07/P2-08's
+docs/spikes/P2-01.md "Playground result" and P2-08's log) -- everything
+through env:drill and demo:build --check-determinism passed.
+Manual check: NOT VERIFIED (human) -- read README.md on GitHub (the
+branch view) as a stranger: screenshots render, links resolve, the
+Playground link works once v0.2.0 is released.
