@@ -103,6 +103,18 @@ describe( 'checkPages', () => {
 		expect( checkPages( conformingPages() ) ).toEqual( [] );
 	} );
 
+	it( 'skipAttachmentChecks skips both demo-photograph assertions (local Playground variant)', () => {
+		const pages = conformingPages( {
+			front: { html: frontHtml( { withLeadImage: false } ) },
+			article: { html: articleHtml( { withHeroImage: false } ) },
+		} );
+
+		expect( checkPages( pages, { skipAttachmentChecks: true } ) ).toEqual(
+			[]
+		);
+		expect( checkPages( pages ).length ).toBeGreaterThan( 0 );
+	} );
+
 	it( 'fails on a non-200 status', () => {
 		const failures = checkPages(
 			conformingPages( { front: { status: 500 } } )

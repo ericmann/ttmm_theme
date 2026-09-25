@@ -6,6 +6,18 @@
  * asserts the §6.4 pages. `--url` skips Playground entirely and asserts against a running site
  * (e.g. the seeded wp-env). Network only to the Playground CDN (for WordPress itself) and to
  * this script's own local static server (rule 54).
+ *
+ * Known limitation (P2-08, `docs/spikes/P2-01.md` "Playground result"): a headless boot against
+ * the real demo content sometimes serves query-driven content (the lead post, the series strip,
+ * individual post/page permalinks) from a stale, empty-looking state even after the front page's
+ * own readiness probe passes, apparently because the blueprint's own post-import `wp eval` step
+ * and the page-fetching HTTP requests that follow can land on *different* worker processes, each
+ * with its own copy of WordPress's default non-persistent object cache. `--workers=1` (forcing
+ * every request onto the same process) fixed this when it worked, but also reproduced the CLI's
+ * own documented deadlock risk ("may increase the likelihood of deadlock... blocking on file
+ * locks") as a real, several-times-reproduced indefinite hang -- worse than the content gap it
+ * fixes for a release gate, so it isn't used here. `--url` mode (a real site, no worker pool) is
+ * unaffected and remains the reliable path.
  */
 import { execFileSync, spawn } from 'node:child_process';
 import {
@@ -143,9 +155,19 @@ function createCookieJar() {
 
 const MAX_REDIRECTS = 10;
 
+// A single stuck request (e.g. the CLI's own documented worker/file-lock deadlock risk under a
+// small `--workers` count) must not hang this whole script forever: Node's `fetch()` has no
+// default timeout of its own, and a request that never resolves would block every later retry in
+// `waitForBoot()`'s poll loop -- confirmed directly (a run outlived even the 600000ms
+// `PLAYGROUND_BOOT_TIMEOUT_MS` with no timeout error ever printed, because the poll loop's own
+// `setTimeout` between attempts never got a turn while the first `await fetch()` was still
+// pending).
+const FETCH_TIMEOUT_MS = 15000;
+
 /**
  * Fetch a URL, following redirects manually (carrying `jar`'s cookies on every hop) rather than
- * relying on `fetch()`'s own automatic redirect-following -- see `createCookieJar()`'s note.
+ * relying on `fetch()`'s own automatic redirect-following -- see `createCookieJar()`'s note. Each
+ * hop is bounded by `FETCH_TIMEOUT_MS` so one stuck request can't hang the caller forever.
  *
  * @param {string}                      url URL to fetch.
  * @param {ReturnType<createCookieJar>} jar Cookie jar shared across a whole check run.
@@ -158,6 +180,7 @@ async function fetchWithCookies( url, jar ) {
 		const response = await fetch( currentUrl, {
 			redirect: 'manual',
 			headers: cookieHeader ? { Cookie: cookieHeader } : {},
+			signal: AbortSignal.timeout( FETCH_TIMEOUT_MS ),
 		} );
 		jar.store( response );
 
@@ -268,13 +291,18 @@ async function fetchPages( base, jar ) {
 /**
  * Run the checks against an already-running site (`--url`), no Playground involved.
  *
- * @param {string}                      url   Site base URL.
- * @param {ReturnType<createCookieJar>} [jar] Cookie jar (a fresh one when omitted).
+ * @param {string}                      url                    Site base URL.
+ * @param {ReturnType<createCookieJar>} [jar]                  Cookie jar (a fresh one when omitted).
+ * @param {boolean}                     [skipAttachmentChecks] Passed through to `checkPages()`.
  * @return {Promise<string[]>} Failures.
  */
-async function checkAgainstUrl( url, jar = createCookieJar() ) {
+async function checkAgainstUrl(
+	url,
+	jar = createCookieJar(),
+	skipAttachmentChecks = false
+) {
 	const pages = await fetchPages( url.replace( /\/$/, '' ), jar );
-	return checkPages( pages );
+	return checkPages( pages, { skipAttachmentChecks } );
 }
 
 /**
@@ -346,7 +374,7 @@ async function checkAgainstPlayground( fromDir, keep ) {
 		const jar = createCookieJar();
 		await waitForBoot( `${ siteUrl }/`, playgroundProc, jar );
 
-		const failures = await checkAgainstUrl( siteUrl, jar );
+		const failures = await checkAgainstUrl( siteUrl, jar, true );
 
 		if ( keep ) {
 			console.log(

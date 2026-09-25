@@ -93,14 +93,23 @@ function checkCommon( name, page ) {
  * SPEC §6.4's four page checks: `front`, `article`, `series`, `writing`, each
  * `{status, html}`.
  *
- * @param {Object}                         pages         Fetched pages.
- * @param {{status: number, html: string}} pages.front   Front page.
- * @param {{status: number, html: string}} pages.article Article page.
- * @param {{status: number, html: string}} pages.series  Series index page.
- * @param {{status: number, html: string}} pages.writing Writing page.
+ * @param {Object}                         pages                          Fetched pages.
+ * @param {{status: number, html: string}} pages.front                    Front page.
+ * @param {{status: number, html: string}} pages.article                  Article page.
+ * @param {{status: number, html: string}} pages.series                   Series index page.
+ * @param {{status: number, html: string}} pages.writing                  Writing page.
+ * @param {Object}                         [options]                      Options.
+ * @param {boolean}                        [options.skipAttachmentChecks] Skip the two "has a real demo photograph"
+ *                                                                        assertions -- P2-01's spike confirmed Playground's `importWxr` `fetchAttachments` never
+ *                                                                        downloads a binary from a bare `127.0.0.1` static server, so the local-variant check
+ *                                                                        (`check.mjs` without `--url`) genuinely never has one to find; `--url` mode (a real site)
+ *                                                                        keeps this check on.
  * @return {string[]} Every failure across all four pages (empty = pass).
  */
-export function checkPages( { front, article, series, writing } ) {
+export function checkPages(
+	{ front, article, series, writing },
+	{ skipAttachmentChecks = false } = {}
+) {
 	const failures = [
 		...checkCommon( 'front', front ),
 		...checkCommon( 'article', article ),
@@ -108,7 +117,10 @@ export function checkPages( { front, article, series, writing } ) {
 		...checkCommon( 'writing', writing ),
 	];
 
-	if ( ! hasDemoImageIn( front.html, 'ttm-lead__media' ) ) {
+	if (
+		! skipAttachmentChecks &&
+		! hasDemoImageIn( front.html, 'ttm-lead__media' )
+	) {
 		failures.push( 'front: no demo photograph in .ttm-lead__media img' );
 	}
 
@@ -130,7 +142,10 @@ export function checkPages( { front, article, series, writing } ) {
 		);
 	}
 
-	if ( ! hasDemoImageIn( article.html, 'wp-block-post-featured-image' ) ) {
+	if (
+		! skipAttachmentChecks &&
+		! hasDemoImageIn( article.html, 'wp-block-post-featured-image' )
+	) {
 		failures.push(
 			'article: no demo photograph in .wp-block-post-featured-image img'
 		);
