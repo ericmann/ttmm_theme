@@ -28,7 +28,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P2-08 Phase 2 screenshots and push
 - [x] P3-01 README screenshots (--readme); tune SCREENSHOT_MAX_BYTES
 - [x] P3-02 Public README; developer commands to SETUP.md; rule 56 strict
-- [ ] P3-03 Release workflow
+- [x] P3-03 Release workflow
 - [ ] P3-04 Phase 3 screenshots and push
 - [ ] P4-01 Guards back to strict; allow-lists; budget and audits recorded
 - [ ] P4-02 Documentation index, SETUP, plugin spec and HANDOFF
@@ -399,3 +399,20 @@ Verified: grep -c ".github/screenshots/" README.md = 8, grep -c
 README/screenshots; npm run lint/test:unit clean (26 suites, 211
 passed/6 pre-existing skips, 2 new + updated check-demo.test.js
 assertions); forbidden-patterns.sh clean.
+
+### P3-03 — 874038a
+Added .github/workflows/release.yml: triggers on push of v* tags only,
+contents: write permission, one job running the full verify set
+(composer lint/test:unit, npm run lint/test:unit, forbidden-patterns.sh)
+before a tag-vs-package.json version check (exits 1 on mismatch), then
+npm run release:pack, then softprops/action-gh-release@v2 attaching
+dist/ttm-core.zip and dist/ttm-theme.zip with draft:false and
+generate_release_notes:true.
+
+Tests: scripts/test/release-workflow.test.js (5 tests matching the
+acceptance list exactly).
+
+Verified: YAML validated with python3 yaml.safe_load; npm run
+release:pack succeeds; npm run lint/test:unit clean (27 suites, 216
+passed/6 pre-existing skips); forbidden-patterns.sh clean.
+Manual check: none.
