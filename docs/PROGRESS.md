@@ -19,7 +19,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P1-05 Story tile cover class; demo rows green; drill still deterministic
 - [x] P1-06 Phase 1 screenshots and push
 - [x] P2-01 Spike: export term definitions, Playground import and CLI server shape
-- [ ] P2-02 DemoCommand (demo:options, demo:verify) and seed --now
+- [x] P2-02 DemoCommand (demo:options, demo:verify) and seed --now
 - [ ] P2-03 wxr.mjs: pure WXR normalisation
 - [ ] P2-04 build.mjs, blueprint template and the committed demo outputs
 - [ ] P2-05 release:pack (plugin and theme zips with build/)
@@ -181,3 +181,18 @@ Method/Findings/Decision sections naming the export command (no-filter
 wp export + injected termmeta) and the server command line for check.mjs.
 Verified: forbidden-patterns.sh clean; git status --porcelain shows only
 the spike file; no scratch files (WXR/zips) committed under docs/.
+
+### P2-02 — 0bf7ece
+Added DemoCommand::options() (wp ttm demo:options -- one JSON line, fixed
+key order, books' cover_id zeroed, ttm_settings forced to
+newsletter:{provider:none,endpoint:""}) and DemoCommand::verify()
+(wp ttm demo:verify --posts/--pages/--series/--attachments, checking
+wp_count_posts, SeriesIndex::all() count, series term meta presence, and
+no published post left on the default/uncategorized primary category).
+Added Clock-based `--now` to SeedCommand (add_filter('ttm_now')/
+remove_filter in a try/finally, invalid input -> ok:false "invalid --now").
+forbidden-patterns.sh rule 5 allow-list gained permalink_structure/
+default_category. Verified: composer lint/test:unit clean; npm run lint
+clean; DemoCommandTest (8) + SeedCommandTest's 3 new tests all green;
+full test:integration 628 tests OK; forbidden-patterns.sh clean;
+`wp ttm demo:options` output parses as JSON.
