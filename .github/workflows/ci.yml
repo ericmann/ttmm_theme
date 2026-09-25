@@ -65,6 +65,8 @@ jobs:
       - run: npm run build
       - run: npm run test:integration
       - run: npm run env:drill
+      - run: npm run demo:build -- --out dist/demo --check-determinism
+      - run: npm run demo:check -- --from dist/demo
       - name: Container logs on failure
         if: failure()
         run: npx wp-env logs all --watch=false || true
