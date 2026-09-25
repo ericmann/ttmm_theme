@@ -25,6 +25,13 @@ class Loader {
 		// wp ttm seed [--reset] [--state=<normal|quiet|empty>] [--starter-only] [--no-demo-images].
 		\WP_CLI::add_command( 'ttm seed', self::wrap( new SeedCommand() ) );
 		\WP_CLI::add_command( 'ttm stats:flush', self::wrap( new StatsCommand() ) );
+		\WP_CLI::add_command( 'ttm demo:options', self::wrap( new DemoCommand() ) );
+		\WP_CLI::add_command(
+			'ttm demo:verify',
+			static function ( array $args, array $assoc ): void {
+				self::output_lines( ( new DemoCommand() )->verify( $args, $assoc ) );
+			}
+		);
 		\WP_CLI::add_command( 'ttm verse', self::wrap( new VerseCommand() ) );
 		\WP_CLI::add_command( 'ttm recount', self::wrap( new RecountCommand() ) );
 		\WP_CLI::add_command( 'ttm primary:assign', self::wrap( new PrimaryCommand() ) );

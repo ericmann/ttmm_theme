@@ -67,4 +67,47 @@ class SeedCommandTest extends TTM_IntegrationTestCase {
 			}
 		}
 	}
+
+	/**
+	 * P2-02: `--now` pins Clock::now() for the run, so the seed's `days_ago` arithmetic (SPEC
+	 * §6.4 "Demo dates") is reproducible from any wall-clock day.
+	 */
+	public function test_now_flag_pins_post_dates(): void {
+		( new SeedCommand() )->run(
+			[],
+			[
+				'now'            => '2026-01-15 12:00:00',
+				'no-demo-images' => true,
+			]
+		);
+
+		$post = get_page_by_path( 'signing-your-options-table', OBJECT, 'post' );
+		$this->assertNotNull( $post );
+		$this->assertSame( '2026-01-14 12:00:00', $post->post_date );
+	}
+
+	public function test_invalid_now_is_rejected(): void {
+		$result = ( new SeedCommand() )->run(
+			[],
+			[
+				'now'          => 'not a date',
+				'starter-only' => true,
+			]
+		);
+
+		$this->assertFalse( $result['ok'] );
+		$this->assertSame( [ 'invalid --now' ], $result['messages'] );
+	}
+
+	public function test_now_filter_is_removed_after_the_run(): void {
+		( new SeedCommand() )->run(
+			[],
+			[
+				'now'          => '2026-01-15 12:00:00',
+				'starter-only' => true,
+			]
+		);
+
+		$this->assertFalse( has_filter( 'ttm_now' ) );
+	}
 }
