@@ -258,3 +258,68 @@ real Playground CDN can legitimately take anywhere from ~90 seconds to over an h
 host CPU contention (confirmed directly, repeatedly, this round); this is environmental, not a
 regression, and is why `foundry_verify`'s own MCP call kept timing out during this round (logged
 via `foundry_feedback_log`) even after both fixes landed.
+
+## Round 2 (review fixes)
+
+Branch `refine/2026-09-24`, base commit `44d1e3a` (round start), head commit `dacafd2`. The single
+`R2-*` fix task is done, 0 blocked, 0 skipped. Task counts: 35 total, 35 done, 0 open.
+
+- **R2-01** (`14d86c4`): review F1 — `npm run demo:check`'s `playgroundProc.kill()` only
+  signalled the immediate `npx`-spawned `npm exec` child, not the real `@wp-playground/cli`
+  server or its own `--experimental-wasm-jspi` worker respawn two-plus levels deeper (`cli.js`
+  respawns itself under that flag on Node ≥23 — see `node_modules/@wp-playground/cli/cli.js`).
+  Every process below `npm exec` was reparented to init and kept running; the reviewer's run left
+  it holding 1.7 GB RSS, 71% CPU and the port. New `scripts/demo/lib/server-process.mjs`:
+  `startServer()` runs the CLI's real bin script directly via `process.execPath`
+  (`resolvePlaygroundCliBin()` resolves it from `node_modules`, no `npx`/`sh` layer at all) with
+  `detached: true`, making it the leader of its own process group; `stopServer()` signals that
+  whole group (`process.kill(-pid, signal)`) — SIGTERM, a bounded grace period, then SIGKILL —
+  and resolves only once no process remains in it. `check.mjs`'s `checkAgainstPlayground()` now
+  awaits `stopServer()` in `finally` on every path. `--keep`'s stdio is opened as a real file
+  descriptor on a log file in the kept temp dir (not a pipe held by this process, which would
+  either `EPIPE` the still-running child the moment this process exits, or keep this process's
+  event loop alive if left open); `waitForBoot()` gained a log-file-polling path for `--keep`
+  that shares the same `isReady()` ready-line semantics as the unchanged, piped, non-`--keep`
+  path. `--keep` now prints the pid/pgid and a `kill -TERM -<pgid>` stop command and `unref()`s
+  the kept process.
+  Tests: `scripts/test/demo-server-process.test.js` (`stopServer` kills a grandchild spawned
+  through `sh -c`; `stopServer` resolves after SIGKILL when the group ignores SIGTERM), fixture
+  `scripts/test/fixtures/spawn-tree.mjs`. Both were confirmed to fail (hang, with a real orphaned
+  process left behind) against the pre-fix bare `proc.kill()` approach before being fixed — the
+  exact F1 catch the task asked for.
+  Also corrected the R1-04 root-cause wording in `docs/HANDOFF.md`'s "Round 1" section and its
+  `docs/PROGRESS.md` log entry (both had attributed the hang to a vague "pipes or a pooled
+  fetch() connection", not the real process-tree reparenting), and removed the stale "persistent
+  Redis object cache enabled by default" line from `docs/spikes/P2-01.md` that R1-01 had already
+  flagged as wrong but never actually deleted.
+
+**Interpretation choices this round**: `resolvePlaygroundCliBin()` avoids both `node:module`'s
+`createRequire()` and `import.meta` (including `import.meta.resolve()`) entirely — either one,
+present anywhere in a `.mjs` module reached via a dynamic `import()` from a CommonJS Jest test,
+makes Jest's own transform of that `import()` throw "Must use import to load ES Module" even
+though Node itself loads the file fine (confirmed directly by bisecting the exact import that
+broke it). It resolves `@wp-playground/cli`'s bin path via `process.cwd()`-relative
+`node_modules` instead, consistent with every other script in this repo assuming a repo-root
+`cwd` (every npm script here already does, e.g. `check.mjs`'s own `dist/ttm-core.zip`).
+
+**⚠️ ASSUMPTION config keys**: none introduced or tuned this round. No `Config` keys touched;
+`server-process.mjs`'s `DEFAULT_GRACE_MS` (5000) and `POLL_MS` (25) are script constants, not
+`Config` keys, for the same reason `IMAGE_MAX_BYTES` etc. are (the demo/Playground pipeline runs
+entirely outside WordPress).
+
+**What a human must check by hand this round**: nothing new beyond what's already listed under
+"Manual checks owed" above — this task was a pure infrastructure fix to `demo:check`'s own
+process hygiene, with no visible/content change. If curious, running
+`npm run demo:check -- --keep` and then the printed `kill -TERM -<pgid>` command by hand confirms
+the fix live (verified directly during implementation: the printed URL answers while kept, and
+`pgrep -af 'wp-playground-cli|wasm-jspi'` is empty both immediately after a non-`--keep` run and
+after running the printed stop command for a `--keep` run).
+
+**Anything a reviewer who hasn't seen this code should know**: this was found by the reviewer
+actually watching process/port state after a run, not by reading the old code — `proc.kill()`
+looks correct at a glance because the *parent* process it was spawned from (`npm exec`) does
+exit. The bug only shows up once you check whether anything is still listening on the port
+afterward. The fix's core idea (spawn `detached: true`, kill by negative pgid) generalizes to any
+future case in this repo where a script shells out to something that might itself respawn or
+fork — it's worth reusing `server-process.mjs`'s `startServer`/`stopServer` rather than adding
+another bare `spawn()`/`.kill()` pair.
