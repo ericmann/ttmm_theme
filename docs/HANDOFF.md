@@ -192,3 +192,59 @@ pipeline runs entirely outside WordPress.
 7. Confirm the verse-sample licence note in `docs/fixtures/demo/LICENSE.md` (the sample verse is
    a `dailymedtoday.com` meditation quoting Scripture, reproduced with attribution and excluded
    from the CC0 grant).
+
+## Round 1 (review fixes)
+
+Branch `refine/2026-09-24`, base commit `272ec96d6a2b`, head commit `30f7963`. All 4 `R1-*` fix
+tasks done, 0 blocked, 0 skipped.
+
+- **R1-01** (`c9d0157`): `npm run demo:check` (no `--url`) was red in CI on a boot-readiness race,
+  not the per-worker object-cache split the phase-5 handoff had speculated — see the "Round 1"
+  paragraph under "What changed, by phase" above for the full mechanic. Fixed by waiting for the
+  `@wp-playground/cli` process's own ready line (`scripts/demo/lib/boot.mjs`) instead of probing
+  any page. Fixing the race also uncovered the real cause of the local variant's attachment gap
+  (WordPress's own SSRF guard, not a Playground limitation) and fixed it with a one-off mu-plugin.
+- **R1-02** (`07445b0`): review F3 — 8 of 13 demo photographs had shipped narrower than
+  `OPENVERSE_MIN_WIDTH` because Openverse's search-result `width` metadata disagreed with the file
+  its `url` actually serves for some providers. `acceptEncoded()` now judges the real decoded
+  width/bytes; all 8 were re-fetched and hand-reviewed for taste (several first-choice candidates
+  rejected for visible brand/product logos, one face, one dominant-red sunset — see the task log
+  for the full list of rejections and final choices).
+- **R1-03** (`8274de8`): review F4 — one targeted test added per survived mutation
+  (`demo:verify` term-meta OR/AND, `checkOwnerName`'s header-file guard, `pluginFiles`'
+  `src/editor/` exclusion), each manually confirmed to fail under its exact described mutation.
+  No source bugs found; test-only change.
+- **R1-04** (`5e36b1c`, `0079196`): close-out — regenerated `.github/` demo outputs (confirmed
+  byte-identical via `--check-determinism`) and all screenshots from the R1-02 photographs,
+  rewrote this document's stale "Known limitation"/Redis/`--workers=1` passages, and updated the
+  Measurements. Also found and fixed a real bug while verifying: `scripts/demo/check.mjs`'s
+  `main()` had no `process.exit(0)` on its success path, which let a killed npx-spawned Playground
+  child's lingering stdio/keep-alive handles keep the whole script alive indefinitely after
+  printing `demo:check: ok` — this hung CI's integration job for over an hour on the first R1-04
+  push (cancelled run 36134814876) before the fix. Both the push- and pull_request-triggered CI
+  runs for the final commit (`36141623788`, `36141626990`) are fully green, including
+  `wp-env integration`'s `demo:check` step and `Playwright + axe`.
+
+**Interpretation choices this round** (all already noted inline above and in each task's own log
+entry in `docs/PROGRESS.md`): R1-01's readiness definition (the CLI's own ready line, plus one
+sanity GET); R1-02's photograph replacements (8 new subjects, chosen and reviewed by hand, no
+automated taste check exists); R1-04's `process.exit(0)` fix, not in its original `Files touched`
+list but directly blocking the task's own "CI green including the demo step" goal.
+
+**⚠️ ASSUMPTION config keys**: none introduced or tuned this round. `OPENVERSE_MIN_WIDTH` (1600,
+existing script constant, not a `Config` key) was enforced more strictly (R1-02) but not changed.
+
+**What a human must check by hand this round**: everything already listed under "Manual checks
+owed" above, plus R1-02's specific photograph swaps (`docs/SETUP.md`'s "Replacing a demo
+photograph" section has the steps if any are still not to taste) and R1-04's
+`npm run demo:check -- --keep` click-through.
+
+**Anything a reviewer who hasn't seen this code should know**: the two Playground-related fixes
+(R1-01's readiness wait, R1-04's explicit exit) both stem from the same class of problem — the
+`@wp-playground/cli` process tree does not behave like a normal, promptly-exiting CLI tool under
+either racing reads or a killed parent — and both were only found by actually running the full
+pipeline repeatedly, not by reasoning about the code. A single local `demo:check` run against the
+real Playground CDN can legitimately take anywhere from ~90 seconds to over an hour depending on
+host CPU contention (confirmed directly, repeatedly, this round); this is environmental, not a
+regression, and is why `foundry_verify`'s own MCP call kept timing out during this round (logged
+via `foundry_feedback_log`) even after both fixes landed.
