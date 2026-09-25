@@ -33,6 +33,10 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P4-01 Guards back to strict; allow-lists; budget and audits recorded
 - [x] P4-02 Documentation index, SETUP, plugin spec and HANDOFF
 - [x] P4-03 Final demo refresh, seed reset, screenshots and push
+- [ ] R1-01 demo:check waits for the blueprint to finish; Playground photo assertions restored
+- [ ] R1-02 Demo photographs meet OPENVERSE_MIN_WIDTH; demo-lead-photo back to ≥ 1200
+- [ ] R1-03 Tests for three survived mutations (demo:verify term meta, owner-name Author scope, zip src/editor)
+- [ ] R1-04 Close-out: regenerate demo outputs and screenshots, fix HANDOFF, CI green including demo:check
 
 ## Log
 (one entry per task, appended by implement)
