@@ -8,14 +8,23 @@
 
 const ESCAPE_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;' };
 
+// A named (`&amp;`) or numeric (`&#39;`/`&#x27;`) character reference -- matched whole and left
+// untouched by escapeOnce() below, so a body that already carries entities (SI-17 shape 5) isn't
+// double-escaped; anything else matching `[&<>]` is a bare character and gets escaped.
+const ENTITY_OR_BARE_CHAR_RE =
+	/&(?:[a-zA-Z][a-zA-Z0-9]*|#[0-9]+|#x[0-9a-fA-F]+);|[&<>]/g;
+
 /**
- * Escape `&`, `<`, `>` exactly once each (SPEC §6.8: "entities preserved").
+ * Escape bare `&`, `<`, `>` exactly once each, leaving any already-valid entity reference alone
+ * (SPEC §6.8: "entities preserved").
  *
  * @param {string} text Raw shortcode inner content.
  * @return {string} Escaped text, safe inside a `<code>` element.
  */
 function escapeOnce( text ) {
-	return text.replace( /[&<>]/g, ( char ) => ESCAPE_MAP[ char ] );
+	return text.replace( ENTITY_OR_BARE_CHAR_RE, ( match ) =>
+		match.length > 1 ? match : ESCAPE_MAP[ match ]
+	);
 }
 
 /**
@@ -103,6 +112,36 @@ function transformShortCodeShortcodes( html ) {
 }
 
 /**
+ * CodeColorer's block-level tag syntax (SI-17, not a `[shortcode]` at all, but a real `<code
+ * lang="x" …>` HTML tag CodeColorer's own renderer emitted): a `<code lang="x">` whose content
+ * spans multiple lines becomes `<pre class="wp-block-code"><code lang="x">…</code></pre>`, the
+ * same shape `codeMarkup()` produces for a multi-line `[cci]`/`[cc]` body, so `rawHandler` maps
+ * it to `core/code` the same way. Extra attributes (`width`, `height`) are dropped. Already
+ * wrapped in `<pre>…</pre>`, the pair is replaced as a whole so the result is one `<pre
+ * class="wp-block-code">`, never nested. A single-line `<code lang="x">` inline in a sentence,
+ * and any `<code>` without a `lang` attribute at all, are left completely untouched.
+ *
+ * @param {string} html HTML to search.
+ * @return {string} Transformed HTML.
+ */
+function transformCodeColorerTags( html ) {
+	return html.replace(
+		/(?:<pre[^>]*>\s*)?<code\b([^>]*)>([\s\S]*?)<\/code>(?:\s*<\/pre>)?/g,
+		( match, attrs, content ) => {
+			const langMatch = attrs.match( /\blang="([^"]*)"/ );
+			if ( ! langMatch ) {
+				return match;
+			}
+			if ( ! content.includes( '\n' ) ) {
+				return match;
+			}
+
+			return `<pre class="wp-block-code"><code lang="${ langMatch[ 1 ] }">${ escapeOnce( content ) }</code></pre>`;
+		}
+	);
+}
+
+/**
  * `[audio http://example.com/file.mp3]` -> `[audio src="http://example.com/file.mp3"]` (R1-09,
  * SPEC §6.8 finding): the pre-2016 classic-editor `[audio]` shortcode accepted a bare URL as its
  * unnamed default attribute (WordPress core's own `wp_audio_shortcode()` still does), but
@@ -167,6 +206,7 @@ export function preprocessShortcodes( html, postId ) {
 	);
 	const afterLongCode = transformLongCodeShortcodes( afterRef );
 	const afterShortCode = transformShortCodeShortcodes( afterLongCode );
+	const afterCodeColorer = transformCodeColorerTags( afterShortCode );
 
-	return { html: afterShortCode, footnotes, remaining };
+	return { html: afterCodeColorer, footnotes, remaining };
 }

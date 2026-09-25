@@ -179,7 +179,7 @@ class Helpers {
 	/**
 	 * `render_block_core/post-author-name`: core has no prefix attribute, so the pattern's
 	 * declared `prefix` ("By ") is prepended to the name inside the wrapper (SPEC §6.2
-	 * byline "By Eric Mann"; the string stays in the pattern, translatable there).
+	 * byline "By {author_name}"; the string stays in the pattern, translatable there).
 	 *
 	 * @param string               $block_content Rendered block HTML.
 	 * @param array<string, mixed> $block         Parsed block.

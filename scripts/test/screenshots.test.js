@@ -1,88 +1,119 @@
 /**
  * Tests for the screenshot script's pure helpers (scripts/screenshots.mjs; P0-05, extended in
- * P0-12, P0-01). Importing the module does not launch Playwright -- the capture only runs when
- * the file is executed directly (see its own `import.meta.url` guard), so this is a safe,
- * plain import here.
+ * P0-12, P0-01, P0-08). Importing the module does not launch Playwright -- the capture only
+ * runs when the file is executed directly (see its own `import.meta.url` guard), so this is a
+ * safe, plain import here.
  */
 
-const fs = require( 'fs' );
 const path = require( 'path' );
 
-let ZONES;
-let SEEDED_ZONES;
-let LIVE_ZONES;
+let SETS;
+let OWNER_ZONES;
+let README_ZONES;
+let SCREENSHOT_MAX_BYTES;
 let unionClip;
 let pendingImages;
-let resolveLiveZones;
+let selectedSet;
 
 beforeAll( async () => {
 	const mod = await import( path.join( __dirname, '..', 'screenshots.mjs' ) );
 	( {
-		ZONES,
-		SEEDED_ZONES,
-		LIVE_ZONES,
+		SETS,
+		OWNER_ZONES,
+		README_ZONES,
+		SCREENSHOT_MAX_BYTES,
 		unionClip,
 		pendingImages,
-		resolveLiveZones,
+		selectedSet,
 	} = mod );
 } );
 
-describe( 'ZONES', () => {
-	it( 'ZONES has 17 seeded entries and 7 live entries', () => {
-		expect( ZONES ).toHaveLength( 24 );
-		expect( SEEDED_ZONES ).toHaveLength( 17 );
-		expect( LIVE_ZONES ).toHaveLength( 7 );
-	} );
-
-	it( 'lists the phase-3 fourteen plus the three phase-4 files with paths', () => {
+describe( 'SETS.owner', () => {
+	it( 'owner set writes the six §6.10 files to docs/feedback/phase-5', () => {
+		expect( SETS.owner.outDir ).toBe(
+			path.join( 'docs', 'feedback', 'phase-5' )
+		);
+		expect( SETS.owner.zones ).toBe( OWNER_ZONES );
 		expect(
-			SEEDED_ZONES.map( ( zone ) => [ zone.file, zone.path ] )
+			OWNER_ZONES.map( ( zone ) => [ zone.file, zone.path ] )
 		).toEqual( [
+			[ 'front.png', '/' ],
 			[ 'article.png', '/signing-your-options-table/' ],
-			[ 'journal.png', '/journal-post-1/' ],
+			[ 'archive-technology.png', '/category/technology/' ],
 			[ 'writing.png', '/writing/' ],
-			[ 'archive-security.png', '/category/security/' ],
-			[ 'series-hub.png', '/series/' ],
-			[ 'series-single.png', '/series/hardening-wordpress/' ],
-			[ 'search.png', '/?s=ledger' ],
-			[ '404.png', '/this-page-does-not-exist/' ],
-			[ 'article-390.png', '/signing-your-options-table/' ],
-			[ 'journal-390.png', '/journal-post-1/' ],
-			[ 'writing-390.png', '/writing/' ],
-			[ 'archive-390.png', '/category/security/' ],
-			[ 'front-1920.png', '/' ],
-			[ 'article-1920.png', '/signing-your-options-table/' ],
-			[
-				'article-noseries.png',
-				'/transients-object-caches-and-fast-enough/',
-			],
-			[ 'archive-business.png', '/category/business/' ],
-			[ 'footer.png', '/' ],
+			[ 'about.png', '/about/' ],
+			[ 'front-390.png', '/' ],
 		] );
+		expect( OWNER_ZONES.every( ( zone ) => zone.fullPage ) ).toBe( true );
 	} );
 
-	it( 'live zones are flagged live and seeded zones are not', () => {
-		expect( SEEDED_ZONES.every( ( zone ) => false === zone.live ) ).toBe(
-			true
-		);
-		expect( LIVE_ZONES.every( ( zone ) => true === zone.live ) ).toBe(
-			true
-		);
-		expect( ZONES.filter( ( zone ) => zone.live ) ).toEqual( LIVE_ZONES );
-		expect( ZONES.filter( ( zone ) => ! zone.live ) ).toEqual(
-			SEEDED_ZONES
-		);
-	} );
+	it( 'owner set has no live zones', () => {
+		expect( SETS.owner ).not.toHaveProperty( 'live' );
+		expect( OWNER_ZONES.some( ( zone ) => zone.live ) ).toBe( false );
+		expect( Object.keys( SETS ).sort() ).toEqual( [ 'owner', 'readme' ] );
 
-	it( 'OUT_DIR is docs/feedback/phase-4', () => {
 		const source = require( 'fs' ).readFileSync(
 			path.join( __dirname, '..', 'screenshots.mjs' ),
 			'utf8'
 		);
+		expect( source ).not.toMatch( /LIVE_ZONES/ );
+		expect( source ).not.toMatch( /screens\.json/ );
+	} );
 
-		expect( source ).toMatch(
-			/OUT_DIR = join\( 'docs', 'feedback', 'phase-4' \)/
+	it( 'front-390 uses a 390px viewport', () => {
+		const front390 = OWNER_ZONES.find(
+			( zone ) => 'front-390.png' === zone.file
 		);
+
+		expect( front390.viewport ).toEqual( { width: 390, height: 844 } );
+	} );
+} );
+
+describe( 'SETS.readme', () => {
+	it( 'readme set writes the eight §6.5 files to .github/screenshots', () => {
+		expect( SETS.readme.outDir ).toBe(
+			path.join( '.github', 'screenshots' )
+		);
+		expect( SETS.readme.zones ).toBe( README_ZONES );
+		expect(
+			README_ZONES.map( ( zone ) => [ zone.file, zone.path ] )
+		).toEqual( [
+			[ 'front-1280.png', '/' ],
+			[ 'article-1280.png', '/signing-your-options-table/' ],
+			[ 'journal-1280.png', '/journal-post-1/' ],
+			[ 'archive-1280.png', '/category/technology/' ],
+			[ 'series-hub-1280.png', '/series/' ],
+			[ 'writing-1280.png', '/writing/' ],
+			[ 'front-390.png', '/' ],
+			[ 'article-390.png', '/signing-your-options-table/' ],
+		] );
+	} );
+
+	it( 'phone shots are 390 wide and clipped to 2200px', () => {
+		const phoneZones = README_ZONES.filter(
+			( zone ) => 390 === zone.viewport.width
+		);
+
+		expect( phoneZones ).toHaveLength( 2 );
+		for ( const zone of phoneZones ) {
+			expect( zone.viewport.width ).toBe( 390 );
+			expect( zone.clipHeight ).toBe( 2200 );
+			expect( zone.fullPage ).toBeUndefined();
+		}
+	} );
+} );
+
+describe( 'selectedSet', () => {
+	it( '--readme selects the readme set and no flag the owner set', () => {
+		expect( selectedSet( [] ) ).toBe( 'owner' );
+		expect( selectedSet( [ '--readme' ] ) ).toBe( 'readme' );
+	} );
+} );
+
+describe( 'SCREENSHOT_MAX_BYTES', () => {
+	it( 'SCREENSHOT_MAX_BYTES is exported', () => {
+		expect( typeof SCREENSHOT_MAX_BYTES ).toBe( 'number' );
+		expect( SCREENSHOT_MAX_BYTES ).toBeGreaterThan( 0 );
 	} );
 } );
 
@@ -107,84 +138,6 @@ describe( 'pendingImages', () => {
 		];
 
 		expect( pendingImages( list ) ).toEqual( [] );
-	} );
-} );
-
-describe( 'resolveLiveZones', () => {
-	const screensPath = path.join(
-		__dirname,
-		'..',
-		'..',
-		'docs',
-		'fixtures',
-		'live',
-		'screens.json'
-	);
-
-	afterEach( () => {
-		fs.rmSync( screensPath, { force: true } );
-	} );
-
-	it( 'returns [] when docs/fixtures/live/screens.json is absent', () => {
-		fs.rmSync( screensPath, { force: true } );
-
-		expect( resolveLiveZones() ).toEqual( [] );
-	} );
-
-	it( 'reads the {screens: [...]} shape (P2-07) and resolves the classic post path', () => {
-		fs.mkdirSync( path.dirname( screensPath ), { recursive: true } );
-		fs.writeFileSync(
-			screensPath,
-			JSON.stringify( {
-				generated: '2026-01-01T00:00:00.000Z',
-				host: 'http://localhost:8888',
-				screens: [
-					{ id: 'front', path: '/', classic: false },
-					{
-						id: 'oldest',
-						path: '/an-old-classic-post/',
-						classic: true,
-					},
-				],
-			} )
-		);
-
-		const zones = resolveLiveZones();
-		const classicZone = zones.find(
-			( zone ) => 'live-article-classic.png' === zone.file
-		);
-
-		expect( zones ).toHaveLength( LIVE_ZONES.length );
-		expect( classicZone.path ).toBe( '/an-old-classic-post/' );
-	} );
-
-	it( 'falls back to a ref-* screen once no classic post remains (P3-03)', () => {
-		// After the shortcode pre-pass (P3-01/P3-02) converts every classic post, no
-		// `classic: true` screen exists any more -- live-article-classic.png's purpose becomes
-		// "a converted [ref] post with its footnotes intact" instead.
-		fs.mkdirSync( path.dirname( screensPath ), { recursive: true } );
-		fs.writeFileSync(
-			screensPath,
-			JSON.stringify( {
-				generated: '2026-01-01T00:00:00.000Z',
-				host: 'http://localhost:8888',
-				screens: [
-					{ id: 'front', path: '/', classic: false },
-					{
-						id: 'ref-1',
-						path: '/a-converted-footnote-post/',
-						classic: false,
-					},
-				],
-			} )
-		);
-
-		const zones = resolveLiveZones();
-		const classicZone = zones.find(
-			( zone ) => 'live-article-classic.png' === zone.file
-		);
-
-		expect( classicZone.path ).toBe( '/a-converted-footnote-post/' );
 	} );
 } );
 

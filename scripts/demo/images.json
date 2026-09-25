@@ -1,0 +1,120 @@
+[
+	{
+		"file": "demo-signing-your-options-table.jpg",
+		"query": "fiber optic cables",
+		"orientation": "wide",
+		"subject": "fiber optic cable light",
+		"post": "signing-your-options-table"
+	},
+	{
+		"file": "demo-technology-post-2.jpg",
+		"query": "mouse circuit board",
+		"orientation": "wide",
+		"subject": "circuit board macro",
+		"post": "technology-post-2",
+		"exclude": [ "a948fe61-83d3-471f-8267-a0f723e98ccd" ]
+	},
+	{
+		"file": "demo-charge-for-outcome-bill-for-hour.jpg",
+		"query": "accounting ledger",
+		"orientation": "wide",
+		"subject": "notebook ledger",
+		"post": "charge-for-outcome-bill-for-hour"
+	},
+	{
+		"file": "demo-hardening-part-4-keys-in-the-environment.jpg",
+		"query": "keys and lock",
+		"orientation": "wide",
+		"subject": "two blank keys studio shot",
+		"post": "hardening-part-4-keys-in-the-environment",
+		"exclude": [
+			"81810309-b103-404c-9f77-383ff79f4175",
+			"10eb82bf-3f33-43f1-95b8-bdb1baa96cc5",
+			"ba5efea4-60a0-4169-9e79-c531637b469e"
+		]
+	},
+	{
+		"file": "demo-praying-for-people-who-file-bug-reports.jpg",
+		"query": "cathedral light",
+		"orientation": "wide",
+		"subject": "cathedral light",
+		"post": "praying-for-people-who-file-bug-reports"
+	},
+	{
+		"file": "demo-open-source-not-a-business-model.jpg",
+		"query": "old door open",
+		"orientation": "wide",
+		"subject": "a pair of old white doors standing open in a field by the water",
+		"post": "open-source-not-a-business-model",
+		"exclude": [ "570c0f66-6c85-44b4-b3fe-4995660b2330" ]
+	},
+	{
+		"file": "demo-transients-object-caches-and-fast-enough.jpg",
+		"query": "empty wooden shelves",
+		"orientation": "wide",
+		"subject": "empty wooden bookshelf against a concrete wall",
+		"post": "transients-object-caches-and-fast-enough"
+	},
+	{
+		"file": "demo-php-85-readonly-classes.jpg",
+		"query": "rainbow typewriter keys",
+		"orientation": "wide",
+		"subject": "vintage typewriter keys over a rainbow fan",
+		"post": "php-85-readonly-classes"
+	},
+	{
+		"file": "demo-composer-lockfiles-are-a-security-control.jpg",
+		"query": "padlocked lock gates",
+		"orientation": "wide",
+		"subject": "chained and padlocked canal lock gate",
+		"post": "composer-lockfiles-are-a-security-control",
+		"exclude": [
+			"5392fe1a-cdd7-4532-9aec-3f21c8ee3b56",
+			"ad39e2af-414e-4769-b71c-b96850189b01",
+			"40a43d90-61c5-46fc-a727-41408f42b73f",
+			"feb6c8cd-aa7c-4d37-bad2-f8129991736b",
+			"09d8475a-ced9-4007-8253-4d685d9d9e33"
+		]
+	},
+	{
+		"file": "demo-nonces-are-not-csrf-tokens.jpg",
+		"query": "ticket stubs",
+		"orientation": "wide",
+		"subject": "ticket stubs",
+		"post": "nonces-are-not-csrf-tokens",
+		"exclude": [ "6a19062f-c092-4b12-a994-2c32087bbde1" ]
+	},
+	{
+		"file": "demo-password-manager-weakest-link.jpg",
+		"query": "chain link fence",
+		"orientation": "wide",
+		"subject": "chain link fence",
+		"post": "password-manager-weakest-link"
+	},
+	{
+		"file": "demo-about.jpg",
+		"query": "desk lamp",
+		"orientation": "tall",
+		"subject": "desk lamp still life",
+		"post": "about",
+		"exclude": [
+			"bd90179b-622f-43fc-b4f7-566febfaad8a",
+			"72a9464c-f3ce-4189-bb78-0327e21e0a04",
+			"095674a1-bae6-465f-9ba6-6ff2489452c3",
+			"121b347a-06e8-4b85-a3f0-1f3a985154fe",
+			"58fa52c5-f5ff-4fd6-bcda-915d532f782c",
+			"970343f8-28a6-4a4a-a537-a8eabea9b3b2"
+		]
+	},
+	{
+		"file": "demo-story-uptime.jpg",
+		"query": "sydney harbour rain clouds",
+		"orientation": "square",
+		"subject": "storm clouds over a harbor full of boats",
+		"post": "story-uptime",
+		"exclude": [
+			"0e727dc6-834c-4bc6-9267-43e68e86297f",
+			"7624c36f-cd90-4c6e-bc95-f6e3d874fb4a"
+		]
+	}
+]

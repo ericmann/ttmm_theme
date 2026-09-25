@@ -64,7 +64,7 @@ class ChromePartsTest extends TTM_IntegrationTestCase {
 		$this->assertMatchesRegularExpression( '/<p class="wp-block-site-title[^"]*"><a[^>]*>[^<]*<\/a><\/p>/', $html );
 		$this->assertStringNotContainsString( '<h1 class="wp-block-site-title', $html );
 		$this->assertStringNotContainsString( '<h2 class="wp-block-site-title', $html );
-		$this->assertMatchesRegularExpression( '/<p class="ttm-masthead-inner__by[^"]*">by Eric Mann<\/p>/', $html );
+		$this->assertMatchesRegularExpression( '/<p class="ttm-masthead-inner__by[^"]*">by ' . preg_quote( \TTM\Core\Config::author_name(), '/' ) . '<\/p>/', $html );
 	}
 
 	public function test_footer_after_poster_variant_has_class(): void {

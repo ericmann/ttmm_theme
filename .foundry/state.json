@@ -1,15 +1,41 @@
 {
-  "round": 0,
-  "implemented": false,
-  "reviewed": false,
-  "verdict": null,
-  "summarized": false,
+  "round": 2,
+  "implemented": true,
+  "reviewed": true,
+  "verdict": "APPROVED",
+  "summarized": true,
   "halted": null,
+  "preexistingUntracked": [],
   "policies": {
     "signing": "auto",
     "push": true,
     "pr": "draft",
     "feedback": true
   },
-  "signing": "none"
+  "signing": "none",
+  "rounds": [
+    {
+      "round": 1,
+      "fixTasks": 4,
+      "unblocked": 0,
+      "verdict": "CHANGES REQUESTED",
+      "nonConverging": false,
+      "at": "2026-09-25T06:13:09.110Z"
+    },
+    {
+      "round": 2,
+      "fixTasks": 1,
+      "unblocked": 0,
+      "verdict": "CHANGES REQUESTED",
+      "nonConverging": false,
+      "at": "2026-09-25T14:14:26.949Z"
+    },
+    {
+      "round": 3,
+      "fixTasks": 0,
+      "unblocked": 0,
+      "verdict": "APPROVED",
+      "at": "2026-09-25T19:00:33.402Z"
+    }
+  ]
 }

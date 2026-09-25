@@ -242,11 +242,54 @@ class AuditCommand extends Command {
 	 * @return string[]
 	 */
 	private function shortcode_names( string $content ): array {
-		if ( ! preg_match_all( self::KNOWN_SHORTCODES, $content, $matches ) ) {
-			return [];
+		$names = [];
+
+		if ( preg_match_all( self::KNOWN_SHORTCODES, $content, $matches ) ) {
+			$names = array_map( 'strtolower', $matches[1] );
 		}
 
-		return array_values( array_unique( array_map( 'strtolower', $matches[1] ) ) );
+		if ( $this->has_bare_codecolorer_tag( $content ) ) {
+			$names[] = 'codecolorer';
+		}
+
+		return empty( $names ) ? [] : array_values( array_unique( $names ) );
+	}
+
+	/**
+	 * SI-17: a CodeColorer `<code lang="x">` HTML tag (not a `[shortcode]`) whose content spans
+	 * multiple lines and was never converted to `<pre class="wp-block-code"><code lang="x">`
+	 * (SPEC §6.8) -- the same shape `scripts/lib/shortcodes.mjs`' `transformCodeColorerTags()`
+	 * produces at import time. A single-line `<code lang>` (left inline on purpose) never flags.
+	 *
+	 * @param string $content Post content.
+	 * @return bool
+	 */
+	private function has_bare_codecolorer_tag( string $content ): bool {
+		if ( ! preg_match_all( '/<code\b[^>]*\blang="[^"]*"[^>]*>/i', $content, $opens, PREG_OFFSET_CAPTURE ) ) {
+			return false;
+		}
+
+		foreach ( $opens[0] as [ $tag, $offset ] ) {
+			$close_pos = strpos( $content, '</code>', $offset );
+			if ( false === $close_pos ) {
+				continue;
+			}
+
+			$inner_start = $offset + strlen( $tag );
+			$inner       = substr( $content, $inner_start, $close_pos - $inner_start );
+			if ( false === strpos( $inner, "\n" ) ) {
+				continue;
+			}
+
+			$before = rtrim( substr( $content, 0, $offset ) );
+			if ( str_ends_with( $before, '<pre>' ) || str_ends_with( $before, '<pre class="wp-block-code">' ) ) {
+				continue;
+			}
+
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

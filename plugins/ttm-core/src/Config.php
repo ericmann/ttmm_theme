@@ -44,6 +44,10 @@ class Config {
 	 */
 	public static function defaults(): array {
 		return [
+			// Rule 55/§6.7: the owner's name exists only here (plus header `Author:` lines
+			// and readme.txt); every reader goes through the accessors below.
+			'site.author_name'                 => 'Eric Mann',
+			'site.author_url'                  => 'https://eric.mann.blog',
 			'sections.order'                   => [ 'technology', 'business', 'faith', 'journal', 'writing', 'security', 'opinion' ],
 			'sections.nav_hub_slug'            => 'series',
 			'sections.journal_slug'            => 'journal',
@@ -210,6 +214,24 @@ class Config {
 	 */
 	public static function reset(): void {
 		self::$cache = null;
+	}
+
+	/**
+	 * The owner's display name (rule 55: the only literal is in `defaults()` above).
+	 *
+	 * @return string
+	 */
+	public static function author_name(): string {
+		return (string) self::get( 'site.author_name', self::defaults()['site.author_name'] );
+	}
+
+	/**
+	 * The owner's about/author URL.
+	 *
+	 * @return string
+	 */
+	public static function author_url(): string {
+		return (string) self::get( 'site.author_url', self::defaults()['site.author_url'] );
 	}
 
 	/**

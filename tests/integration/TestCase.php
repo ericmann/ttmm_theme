@@ -62,11 +62,14 @@ abstract class TTM_IntegrationTestCase extends WP_UnitTestCase {
 	/**
 	 * Run the full seed and return the Seeder so tests can inspect/reuse it.
 	 *
-	 * @param string $state Seed state (e.g. "normal").
+	 * @param string $state       Seed state (e.g. "normal").
+	 * @param bool   $demo_images Whether to sideload real demo photographs (P1-02); default
+	 *                            `false` so most integration tests never touch the demo
+	 *                            fixtures directory or a mounted `ttm_demo_images_dir`.
 	 * @return Seeder
 	 */
-	protected function seed( string $state = 'normal' ): Seeder {
-		$seeder = new Seeder();
+	protected function seed( string $state = 'normal', bool $demo_images = false ): Seeder {
+		$seeder = new Seeder( $demo_images );
 		$seeder->run( $state );
 
 		return $seeder;

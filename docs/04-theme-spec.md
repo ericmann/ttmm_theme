@@ -157,10 +157,10 @@ Per `02 §F` and `02 §D`; all `ttm/*` blocks with theme Groups for rules and gr
 Per `02 §H`.
 
 ## 6. Template parts
-- `header-front` — pattern masthead-front (Site Title, Site Tagline, Navigation `ttm/sections-nav`, date via `ttm/today` binding).
-- `header-inner` — pattern masthead-inner. The theme adds `.current-section` to the nav item matching `ttm_primary_category` (plugin filter on `render_block_core/navigation-link`, or theme JS as a fallback).
+- `header-front` — pattern masthead-front (Site Title, Site Tagline, Navigation `ttm/sections-nav`, date via `ttm/today` binding, byline bound to `ttm/author-name` `format: byline-link`).
+- `header-inner` — pattern masthead-inner. The theme adds `.current-section` to the nav item matching `ttm_primary_category` (plugin filter on `render_block_core/navigation-link`, or theme JS as a fallback); its own byline is bound to `ttm/author-name` `format: by`.
 - `rail` — `ttm/verse-of-the-day` + pattern journal-rail.
-- `footer` — static links; `is-after-poster` variant drops the top rule.
+- `footer` — static links; `is-after-poster` variant drops the top rule; its own binding source calls `Values::footer_line()`, which reads `Config::author_name()` directly (not a separate `ttm/author-name` binding) — so the owner's name is a literal string in exactly one place, `Config.php`, not in either masthead pattern or the footer part.
 
 ## 7. Editor experience
 - `editor.css` loads `ttm.css` so patterns look identical in the Site Editor.

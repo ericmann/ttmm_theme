@@ -183,7 +183,7 @@ class ArticleTemplatesTest extends TTM_IntegrationTestCase {
 	 * reads "Technology · Security", not the alphabetical "Security, Technology".
 	 */
 	public function test_article_kicker_reads_primary_then_secondary_category(): void {
-		( new \TTM\Core\Cli\Seeder() )->run( 'normal' );
+		( new \TTM\Core\Cli\Seeder( false ) )->run( 'normal' );
 		$post = get_page_by_path( 'signing-your-options-table', OBJECT, 'post' );
 		$this->assertNotNull( $post );
 

@@ -93,23 +93,32 @@ class Html {
 
 	/**
 	 * Rewrite a Photon URL (`https://iN.wp.com/<host>/<path>`) to its origin
-	 * (`https://<host>/<path>`), only when `<host>` equals `$origin`. Returns null for anything
-	 * else (not a Photon URL, or a Photon URL for a different host) — P2-04, SPEC §6.7.
+	 * (`https://<host>/<path>`), only when `<host>` equals `$match_host`. Returns null for
+	 * anything else (not a Photon URL, or a Photon URL for a different host) — P2-04, SI-13,
+	 * SPEC §6.7. With `$home` given (SI-13: this site's own `home_url()`), the scheme and host
+	 * are replaced by `$home` instead of `$match_host`'s own scheme+host, so a rewritten image
+	 * points at wherever this WordPress install actually is (e.g. a local wp-env host), not
+	 * necessarily the live production domain.
 	 *
-	 * @param string $url    Candidate image URL.
-	 * @param string $origin Expected Photon origin host (`migration.photon_origin`).
+	 * @param string $src        Candidate image URL.
+	 * @param string $match_host Expected Photon origin host (`migration.photon_origin`).
+	 * @param string $home       This site's `home_url()`; `''` keeps the old `https://$match_host` behaviour.
 	 * @return string|null
 	 */
-	public static function photon_origin_url( string $url, string $origin ): ?string {
-		if ( ! preg_match( '#^https?://i[0-9]\.wp\.com/([^/]+)/(.+)$#i', $url, $matches ) ) {
+	public static function photon_origin_url( string $src, string $match_host, string $home = '' ): ?string {
+		if ( ! preg_match( '#^https?://i[0-9]\.wp\.com/([^/]+)/(.+)$#i', $src, $matches ) ) {
 			return null;
 		}
 
-		if ( $matches[1] !== $origin ) {
+		if ( $matches[1] !== $match_host ) {
 			return null;
 		}
 
-		return 'https://' . $origin . '/' . $matches[2];
+		if ( '' === $home ) {
+			return 'https://' . $match_host . '/' . $matches[2];
+		}
+
+		return untrailingslashit( $home ) . '/' . $matches[2];
 	}
 
 	/**

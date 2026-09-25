@@ -15,9 +15,9 @@
 		"excerpt": "A compromised admin account can rewrite <code>wp_options</code> without touching a single file. Here is how to detect it — and why your file-integrity scanner never will.",
 		"content": "<!-- wp:paragraph -->\n<p>Every WordPress hardening guide begins the same way: lock down file permissions, disable the theme editor, verify core checksums. Good advice. All of it protects the filesystem — and none of it protects the thing that actually runs your site.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>The options table is executable configuration. <code>active_plugins</code>, <code>siteurl</code>, cron schedules, rewrite rules — a hostile write to any one of these changes what your site does on the next request, and every scanner you own will report green.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading -->\n<h2>What a signature buys you</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>Not prevention. A signature does not stop the write; it makes the write <em>visible</em>. On every load, WordPress recomputes an HMAC over the sensitive keys and compares it to the stored one. Mismatch means someone changed the configuration through a path you did not sign.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:code -->\n<pre class=\"wp-block-code\"><code>add_action( 'init', function () {\n\t$keys = [ 'active_plugins', 'siteurl', 'home', 'template' ];\n\t$blob = wp_json_encode( array_map( 'get_option', $keys ) );\n\t$sig  = hash_hmac( 'sha256', $blob, OPTIONS_SIGNING_KEY );\n\n\tif ( ! hash_equals( get_option( '_options_sig', '' ), $sig ) ) {\n\t\tdo_action( 'options_tampered', $keys );\n\t}\n\n\t// Every other admin-side write is unaffected; this only guards the boot-critical keys.\n}\n);</code></pre>\n<!-- /wp:code -->\n\n<!-- wp:paragraph -->\n<p>Twelve lines. The interesting work is in <code>options_tampered</code>: what you do when the alarm fires is the actual security design, building on the rotation habits from <a href=\"/hardening-part-2-salts-and-keys/\">part 2</a>.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:quote {\"className\":\"is-style-pull\"} -->\n<blockquote class=\"wp-block-quote is-style-pull\"><p>“A file-integrity scanner watches the doors. The options table is a window that was never on the blueprint.”</p></blockquote>\n<!-- /wp:quote -->\n\n<!-- wp:heading -->\n<h2>Where to keep the key</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>Not in the database — obviously — and not in <code>wp-config.php</code> if you can avoid it. Part 2 covered rotation; the same discipline applies here. In part 4 we move the key to the environment and rotate it without downtime.</p>\n<!-- /wp:paragraph -->",
 		"paragraphs": 82,
-		"featured_image": true,
-		"caption": "Caption in the theme's meta type. Photographs are grayscale only on the front page and archives.",
-		"alt": "A padlock icon over a database table illustration",
+		"featured_image": "demo-signing-your-options-table.jpg",
+		"caption": "Every signed request still travels down a cable like this one — trust the signature, not the wire.",
+		"alt": "A macro photograph of illuminated blue and white fiber optic cable strands",
 		"most_read": false
 	},
 	{
@@ -33,8 +33,9 @@
 		"days_ago": 4,
 		"excerpt": "Forty minutes of CI a day is two working weeks a year. The math finally caught up with me.",
 		"paragraphs": 16,
-		"featured_image": true,
-		"alt": "A CI pipeline diagram illustration",
+		"featured_image": "demo-technology-post-2.jpg",
+		"alt": "The disassembled circuit board and shell of a computer mouse",
+		"caption": "A pipeline is just circuitry with better error messages, most days.",
 		"most_read": true
 	},
 	{
@@ -50,7 +51,10 @@
 		"days_ago": 8,
 		"excerpt": "A small language feature that quietly ends a whole category of bug report.",
 		"paragraphs": 12,
-		"most_read": true
+		"most_read": true,
+		"featured_image": "demo-php-85-readonly-classes.jpg",
+		"alt": "Close-up of vintage typewriter keys resting over a rainbow-colored fan",
+		"caption": "The old machine and the new one agree: once written, some things should stay that way."
 	},
 	{
 		"tags": [
@@ -78,7 +82,10 @@
 		],
 		"days_ago": 18,
 		"excerpt": "Pinning a version is not paranoia. It is the only part of the supply chain you actually control.",
-		"paragraphs": 10
+		"paragraphs": 10,
+		"featured_image": "demo-composer-lockfiles-are-a-security-control.jpg",
+		"alt": "A chain looped through two hooks securing a canal lock gate",
+		"caption": "A lockfile is exactly this: one specific thing, kept from changing without asking."
 	},
 	{
 		"tags": [
@@ -103,7 +110,10 @@
 		],
 		"days_ago": 30,
 		"excerpt": "Every cache layer is a promise you will eventually have to keep by hand.",
-		"paragraphs": 10
+		"paragraphs": 10,
+		"featured_image": "demo-transients-object-caches-and-fast-enough.jpg",
+		"alt": "Empty wooden bookshelves against a bare concrete wall",
+		"caption": "Somewhere in here is the thing you cached and never checked again."
 	},
 	{
 		"tags": [
@@ -117,7 +127,10 @@
 		],
 		"days_ago": 5,
 		"excerpt": "A consulting pricing model that survives contact with procurement.",
-		"paragraphs": 12
+		"paragraphs": 12,
+		"featured_image": "demo-charge-for-outcome-bill-for-hour.jpg",
+		"alt": "An open handwritten accounting ledger book filled with figures",
+		"caption": "Every column here used to answer a question an hourly invoice never could."
 	},
 	{
 		"tags": [
@@ -187,7 +200,10 @@
 		],
 		"days_ago": 10,
 		"excerpt": "Threat-modeling the thing we all installed without thinking.",
-		"paragraphs": 12
+		"paragraphs": 12,
+		"featured_image": "demo-password-manager-weakest-link.jpg",
+		"alt": "A fog-covered suspension bridge seen past a fence covered in padlocks",
+		"caption": "Hundreds of locks, one fence — the chain only holds as well as its worst link."
 	},
 	{
 		"tags": [
@@ -201,7 +217,10 @@
 		"days_ago": 21,
 		"excerpt": "They rhyme with CSRF tokens closely enough to get a lot of WordPress code quietly wrong.",
 		"paragraphs": 12,
-		"most_read": true
+		"most_read": true,
+		"featured_image": "demo-nonces-are-not-csrf-tokens.jpg",
+		"alt": "A vintage 1946 football game reserved-seat ticket stub",
+		"caption": "A ticket proves you paid once. It was never meant to prove who's asking now."
 	},
 	{
 		"tags": [
@@ -242,7 +261,10 @@
 		],
 		"days_ago": 6,
 		"excerpt": "Patience as an engineering discipline.",
-		"paragraphs": 10
+		"paragraphs": 10,
+		"featured_image": "demo-praying-for-people-who-file-bug-reports.jpg",
+		"alt": "The stone ruins of a medieval cathedral against a blue sky",
+		"caption": "Some structures outlast every maintainer who ever tended them."
 	},
 	{
 		"tags": [
@@ -378,7 +400,10 @@
 		],
 		"days_ago": 9,
 		"excerpt": "",
-		"paragraphs": 10
+		"paragraphs": 10,
+		"featured_image": "demo-open-source-not-a-business-model.jpg",
+		"alt": "A pair of old white doors standing open in a field beside the water",
+		"caption": "The door was open the whole time; nobody built a toll booth for it."
 	},
 	{
 		"tags": [
@@ -592,7 +617,10 @@
 		"days_ago": 0,
 		"excerpt": "Rotating a signing key without downtime means the old and new keys both have to verify for one deploy.",
 		"paragraphs": 12,
-		"part_title": "Keys in the environment, rotated live"
+		"part_title": "Keys in the environment, rotated live",
+		"featured_image": "demo-hardening-part-4-keys-in-the-environment.jpg",
+		"alt": "Two blank cut keys photographed in high-contrast black and white",
+		"caption": "The keys that matter for this post aren't the ones under your fingers."
 	},
 	{
 		"tags": [
@@ -1306,8 +1334,9 @@
 		],
 		"days_ago": 700,
 		"excerpt": "A short story: Uptime.",
-		"featured_image": true,
-		"alt": "Uptime cover",
+		"featured_image": "demo-story-uptime.jpg",
+		"alt": "Storm clouds gathering over a harbor full of sailboats",
+		"caption": "The server stayed up longer than the rain did, that week.",
 		"paragraphs": 15
 	},
 	{

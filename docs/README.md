@@ -16,6 +16,9 @@ A newspaper-style redesign of **eric.mann.blog** (currently the Powder block the
 | `07-open-questions.md` | Decisions deliberately left to the build team, with the design's default |
 | `Eric Mann Newspaper.dc.html` | The interactive prototype — all screens on one canvas |
 | `_ds/…/styles.css` | Token sheet (source of truth for hex/px values) |
+| `../.github/` | The generated, committed WordPress Playground demo: `demo-content.xml`/`demo-options.json`/`blueprint.json` (`npm run demo:build`), `screenshots/` (the eight public README images, `npm run screenshots -- --readme`) |
+| `fixtures/demo/` | The demo's real, licence-checked assets: `images/` (13 CC0/Public Domain photographs), `CREDITS.json` (creator/licence per photo), `LICENSE.md` |
+| `feedback/phase-5/` | This flight's owner screenshots (`npm run screenshots`), retaken at the end of every phase |
 
 ## The prototype
 Open `Eric Mann Newspaper.dc.html` in a browser. It is a pan/zoom canvas; each screen has a badge (`2a`, `3c`…). **Turns 2 and 3 are current.** Turn 1 is the first round — `1e` (Section archive) and `1f` (Series hub) are still current and were not re-drawn; everything else in turn 1 is superseded (`1b` is a rejected compact alternative, kept for reference).

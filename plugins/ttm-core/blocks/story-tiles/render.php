@@ -50,7 +50,7 @@ if ( empty( $ttm_story_ids ) ) {
 		);
 		?>
 		<?php if ( $ttm_thumb_id ) : ?>
-		<a class="ttm-tile" href="<?php echo esc_url( (string) get_permalink( $ttm_story_id ) ); ?>" aria-label="<?php echo esc_attr( $ttm_title ); ?>">
+		<a class="ttm-tile is-cover" href="<?php echo esc_url( (string) get_permalink( $ttm_story_id ) ); ?>" aria-label="<?php echo esc_attr( $ttm_title ); ?>">
 			<?php echo Helpers::image( $ttm_thumb_id, 'ttm-tile' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Helpers::image() escapes via wp_get_attachment_image(). ?>
 		</a>
 		<?php else : ?>

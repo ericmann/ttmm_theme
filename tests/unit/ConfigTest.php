@@ -21,6 +21,8 @@ class ConfigTest extends TestCase {
 
 	public function test_defaults_contain_every_spec_key(): void {
 		$expected = [
+			'site.author_name',
+			'site.author_url',
 			'sections.order',
 			'sections.nav_hub_slug',
 			'sections.journal_slug',
@@ -177,6 +179,11 @@ class ConfigTest extends TestCase {
 
 	public function test_series_related_limit_default_is_four(): void {
 		$this->assertSame( 4, Config::get( 'series.related_limit' ) );
+	}
+
+	public function test_author_accessors_return_defaults(): void {
+		$this->assertSame( 'Eric Mann', Config::author_name() );
+		$this->assertSame( 'https://eric.mann.blog', Config::author_url() );
 	}
 
 	public function test_seed_image_band_angle_default_is_thirty(): void {

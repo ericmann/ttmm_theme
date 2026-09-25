@@ -32,6 +32,16 @@ class AuditCommandTest extends TTM_IntegrationTestCase {
 		return [];
 	}
 
+	private function detail_for( array $result, int $post_id ): array {
+		foreach ( $result['rows'] as $row ) {
+			if ( $row['id'] === $post_id ) {
+				return $row['detail'];
+			}
+		}
+
+		return [];
+	}
+
 	public function test_classic_flag_on_the_seeded_classic_post(): void {
 		$classic = self::factory()->post->create( [ 'post_content' => '<p>Classic content.</p>' ] );
 		$block   = self::factory()->post->create( [ 'post_content' => "<!-- wp:paragraph -->\n<p>Block.</p>\n<!-- /wp:paragraph -->" ] );
@@ -242,6 +252,50 @@ class AuditCommandTest extends TTM_IntegrationTestCase {
 		$this->assertContains( 'ref', $row['detail']['shortcodes'] );
 		$this->assertContains( 'cc_by', $row['detail']['shortcodes'] );
 		$this->assertNotContains( 'shortcode', $this->flags_for( $result, $unflagged ) );
+	}
+
+	/**
+	 * SI-17: a bare `<code lang="x">` HTML tag (never converted to a `core/code` block) whose
+	 * content spans multiple lines flags `codecolorer`, distinct from the `[shortcode]` bracket
+	 * forms `KNOWN_SHORTCODES` matches.
+	 */
+	public function test_shortcode_flag_names_codecolorer_for_bare_multiline_code_lang(): void {
+		$flagged = self::factory()->post->create(
+			[ 'post_content' => "<p>Before.</p>\n<code lang=\"php\">\$a = 1;\n\$b = 2;</code>\n<p>After.</p>" ]
+		);
+
+		$result = ( new AuditCommand() )->run( [], [] );
+
+		$this->assertContains( 'shortcode', $this->flags_for( $result, $flagged ) );
+		$this->assertContains( 'codecolorer', $this->detail_for( $result, $flagged )['shortcodes'] );
+	}
+
+	/**
+	 * SI-17: once converted to the `<pre class="wp-block-code"><code lang="x">` block form the
+	 * audit no longer flags it -- the whole point of the pre-pass is to make this go away.
+	 */
+	public function test_shortcode_flag_ignores_converted_code_lang(): void {
+		$converted = self::factory()->post->create(
+			[ 'post_content' => "<pre class=\"wp-block-code\"><code lang=\"php\">\$a = 1;\n\$b = 2;</code></pre>" ]
+		);
+
+		$result = ( new AuditCommand() )->run( [], [] );
+
+		$this->assertNotContains( 'shortcode', $this->flags_for( $result, $converted ) );
+	}
+
+	/**
+	 * SI-17: a single-line inline `<code lang>` (left inline on purpose by the pre-pass) never
+	 * flags either.
+	 */
+	public function test_shortcode_flag_ignores_inline_code_lang(): void {
+		$inline = self::factory()->post->create(
+			[ 'post_content' => '<p>Set the <code lang="php">$post</code> variable.</p>' ]
+		);
+
+		$result = ( new AuditCommand() )->run( [], [] );
+
+		$this->assertNotContains( 'shortcode', $this->flags_for( $result, $inline ) );
 	}
 
 	public function test_post_format_aside_flag(): void {

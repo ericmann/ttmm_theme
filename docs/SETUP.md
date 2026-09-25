@@ -75,8 +75,37 @@ These are the commands the Foundry pipeline runs after every task (`docs/foundry
 | `npm run env:backup [-- <dir>]` | `scripts/live/backup.sh`: db export + uploads tar + `manifest.json` into `docs/fixtures/live/backups/<UTC stamp>/` | yes |
 | `npm run env:restore -- <dir> [--host=<url>]` | `scripts/live/restore.sh`: the inverse of `env:backup` | yes |
 | `npm run env:drill` | `scripts/live/drill.sh`: seeds, backs up, wipes, restores, and compares post counts + five page hashes — proves the backup/restore round-trip; runs in CI's `integration` job after `test:integration` | yes |
+| `npm run demo:fetch-images` | Human-run only (never in CI, rule 54): fetches CC0/Public Domain photographs from Openverse into `docs/fixtures/demo/images/` per `scripts/demo/images.json`, writing `docs/fixtures/demo/CREDITS.json` | no (network to Openverse) |
+| `npm run demo:build [-- --out <dir>] [--release <tag>] [--check-determinism]` | Seeds wp-env pinned to the UTC build day, exports and normalises the WXR, reads `wp ttm demo:options`, renders the blueprint, writes `<out>/demo-content.xml`/`demo-options.json`/`blueprint.json` (default `.github`); `--check-determinism` re-runs into a temp dir and byte-compares | yes |
+| `npm run demo:check [-- --from <dir>] [--url <site>] [--keep]` | Boots the blueprint headless in WordPress Playground (or asserts against a running site with `--url`, e.g. the seeded wp-env) and checks the SPEC §6.4 pages; `--keep` leaves the local server running for a manual look | yes (network to the Playground CDN) |
+| `npm run release:pack` | Builds `dist/ttm-core.zip` (with `build/`) and `dist/ttm-theme.zip`, deterministic, each unpacking to one top-level slug directory | no |
+| `npm run screenshots -- --readme` | Writes the eight public `.github/screenshots/*.png` files `README.md` references, optimised with `sharp` to stay under `SCREENSHOT_MAX_BYTES`; no flag writes the six owner comparison shots into `docs/feedback/phase-5/` instead | yes |
 
 Fix formatting automatically with `composer lint:fix` (phpcbf) and `npx wp-scripts format`.
+
+### Replacing a demo photograph
+
+The demo/Playground content and the README screenshots both come from `docs/fixtures/demo/images/`
+(picked by `scripts/demo/images.json`, an Openverse search query per file). To swap one out:
+
+1. Add the current Openverse result's id to that row's `exclude` array in `scripts/demo/images.json`
+   (so the next fetch skips it).
+2. `npm run demo:fetch-images -- --only=<file>` — re-searches just that one row and writes the new
+   image + `CREDITS.json` row.
+3. `npm run demo:build` (writes fresh `.github/` outputs) and `npm run screenshots -- --readme`
+   (re-renders the eight README images against the new photo).
+4. Commit the changed image, `CREDITS.json`, `.github/` outputs and `.github/screenshots/*.png`
+   together.
+
+### How the release works
+
+Pushing a `v*` tag (e.g. `git tag v0.2.0 && git push origin v0.2.0`) runs `.github/workflows/
+release.yml`: the full verify set, a check that the tag matches `package.json`'s version,
+`npm run release:pack`, then a GitHub Release (not a draft, with generated notes) carrying
+`dist/ttm-core.zip` and `dist/ttm-theme.zip`. The README's "Open in WordPress Playground" link
+and `.github/blueprint.json`'s `installPlugin`/`installTheme` steps both point at that release's
+assets via `github-proxy.com`, so the link only resolves once the tag has actually been pushed
+and the release job has finished.
 
 ### How the e2e suite works
 

@@ -43,7 +43,7 @@ describe( 'taggedFixmeHits', () => {
 } );
 
 describe( 'check-fixme.mjs', () => {
-	it( 'ALLOW_TAGGED is false now that the flight has landed (P5-03)', () => {
+	it( 'ALLOW_TAGGED is false now that every phase has landed', () => {
 		const source = fs.readFileSync(
 			path.join( __dirname, '..', 'check-fixme.mjs' ),
 			'utf8'

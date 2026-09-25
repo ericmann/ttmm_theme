@@ -48,6 +48,24 @@ class Seeder {
 	private string $state = 'normal';
 
 	/**
+	 * Whether featured_image_for() sideloads a real demo photograph when a fixture names one,
+	 * rather than always falling back to a rule 45 placeholder (`--no-demo-images`).
+	 *
+	 * @var bool
+	 */
+	private bool $demo_images;
+
+	/**
+	 * Construct a Seeder.
+	 *
+	 * @param bool $demo_images Whether to sideload real demo photographs (filterable:
+	 *                          `ttm_seed_demo_images`).
+	 */
+	public function __construct( bool $demo_images = true ) {
+		$this->demo_images = (bool) apply_filters( 'ttm_seed_demo_images', $demo_images );
+	}
+
+	/**
 	 * The fixtures directory: the wp-env mapping if present, else the repo path directly.
 	 *
 	 * @return string
@@ -164,7 +182,7 @@ class Seeder {
 		wp_update_user(
 			[
 				'ID'           => 1,
-				'display_name' => __( 'Eric Mann', 'ttm-core' ),
+				'display_name' => Config::author_name(),
 			]
 		);
 
@@ -298,7 +316,7 @@ class Seeder {
 			if ( $existing ) {
 				// The theme's starter content creates `about` without a portrait; add it.
 				if ( ! empty( $row['featured_image'] ) && ! has_post_thumbnail( $existing->ID ) ) {
-					$attachment_id = $this->image( $row['title'], 'ttm-thumb' );
+					$attachment_id = $this->featured_image_for( $row, $existing->ID, 'ttm-thumb' );
 					if ( $attachment_id ) {
 						set_post_thumbnail( $existing->ID, $attachment_id );
 					}
@@ -322,7 +340,7 @@ class Seeder {
 				update_post_meta( $post_id, self::SEED_META, 1 );
 
 				if ( ! empty( $row['featured_image'] ) ) {
-					$attachment_id = $this->image( $row['title'], 'ttm-thumb' );
+					$attachment_id = $this->featured_image_for( $row, $post_id, 'ttm-thumb' );
 					if ( $attachment_id ) {
 						set_post_thumbnail( $post_id, $attachment_id );
 					}
@@ -500,17 +518,9 @@ class Seeder {
 			}
 
 			if ( ! empty( $row['featured_image'] ) ) {
-				$attachment_id = $this->image( $row['title'], 'ttm-tile' );
+				$attachment_id = $this->featured_image_for( $row, $post_id, 'ttm-tile' );
 				if ( $attachment_id ) {
 					set_post_thumbnail( $post_id, $attachment_id );
-					if ( ! empty( $row['caption'] ) ) {
-						wp_update_post(
-							[
-								'ID'           => $attachment_id,
-								'post_excerpt' => $row['caption'],
-							]
-						);
-					}
 				}
 			}
 
@@ -703,6 +713,47 @@ class Seeder {
 		$verse['fetched_at'] = Clock::now()->format( 'Y-m-d H:i:s' );
 
 		return $verse;
+	}
+
+	/**
+	 * One row's featured image: a string `featured_image` demo file name, with demo images on,
+	 * sideloads it via `DemoImage::attach()`. Falls back to the rule 45 placeholder (`image()`)
+	 * when that returns 0 (invalid name, missing file, or failed sideload), when demo images
+	 * are off, or when `featured_image` is the legacy boolean `true` (P1-04's fixtures switch
+	 * every row to a demo file name; `true` only lingers for a row P1-04 hasn't touched yet).
+	 *
+	 * @param array<string, mixed> $row      The fixture row (`featured_image`, `title`, `alt`, `caption`).
+	 * @param int                  $post_id  Post to attach to.
+	 * @param string               $size_key Placeholder size key (`image()`'s `$size_key`, unused for a real demo photo).
+	 * @return int Attachment id, or 0.
+	 */
+	public function featured_image_for( array $row, int $post_id, string $size_key ): int {
+		$featured = $row['featured_image'] ?? false;
+		$title    = (string) ( $row['title'] ?? '' );
+		// P1-04: a demo photograph's alt text describes the photograph itself, which is not
+		// necessarily the post title -- falls back to the title when a row has no dedicated
+		// `alt` (e.g. before P1-04 named the real photographs).
+		$alt      = (string) ( $row['alt'] ?? $title );
+		$caption  = (string) ( $row['caption'] ?? '' );
+
+		if ( $this->demo_images && is_string( $featured ) ) {
+			$attachment_id = DemoImage::attach( $featured, $post_id, $alt, $caption );
+			if ( $attachment_id ) {
+				return $attachment_id;
+			}
+		}
+
+		$attachment_id = $this->image( $title, $size_key );
+		if ( $attachment_id && '' !== $caption ) {
+			wp_update_post(
+				[
+					'ID'           => $attachment_id,
+					'post_excerpt' => $caption,
+				]
+			);
+		}
+
+		return $attachment_id;
 	}
 
 	/**

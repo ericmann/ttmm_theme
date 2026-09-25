@@ -40,6 +40,9 @@
 // 62640 after -- a 72-byte growth, nowhere near the 1024-byte shrink this
 // task's own rule requires before lowering the budget. Kept at 63488
 // unchanged.
+// P4-01: end-of-flight measurement (SPEC §8 Phase 4 tuning task): 63090
+// bytes before this task (no CSS changes) and 63090 after -- no shrink, so
+// kept at 63488 unchanged.
 import { statSync, existsSync } from 'node:fs';
 const cssBudgetBytes = 63488;
 const file = 'themes/ttm-theme/assets/css/ttm.css';

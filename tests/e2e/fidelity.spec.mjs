@@ -10,7 +10,7 @@
  */
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { color, px } from './lib/presets.mjs';
+import { color, px, authorName, seedPost } from './lib/presets.mjs';
 import { computed, tracks, before, text, visibleCount } from './lib/style.mjs';
 import { SCREENS, SCREEN_URLS, securityFiltered } from './lib/urls.mjs';
 
@@ -41,6 +41,20 @@ async function gotoScreen( page, path, width ) {
 	await page.goto( path );
 	await page.evaluate( () => document.fonts.ready );
 }
+
+/**
+ * Escape regex metacharacters in a literal string (P0-02: `authorName()` feeds a `RegExp`).
+ *
+ * @param {string} value Literal text.
+ * @return {string} `value` with regex metacharacters escaped.
+ */
+function escapeRegExp( value ) {
+	return value.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
+}
+
+const FOOTER_COPY_RE = new RegExp(
+	`^These Things Matter · © \\d{4} ${ escapeRegExp( authorName() ) } · Built on WordPress$`
+);
 
 test.describe( 'rule', () => {
 	test( 'rule-2: main > hr.is-style-rule-2 (first) @1280', async ( {
@@ -575,12 +589,16 @@ test.describe( 'technology featured cell', () => {
 		expect( await computed( featured, 'grid-column' ) ).toBe( 'span 2' );
 	} );
 
-	test( 'tech-img: .ttm-cell.is-style-span-2 .ttm-item-featured__media @1280', async ( {
+	test( 'tech-img: .ttm-cell.is-style-span-2 .wp-block-post:first-child .ttm-item-featured__media @1280', async ( {
 		page,
 	} ) => {
 		await gotoFront( page, 1280 );
+		// P1-04: scoped to the first post -- once every seeded technology-category row has a
+		// real demo photograph (not just this cell's own featured item), the bare
+		// `.ttm-item-featured__media` selector matches every item in the query loop, not just
+		// the featured one this row means to check.
 		const media = page.locator(
-			'.ttm-cell.is-style-span-2 .ttm-item-featured__media'
+			'.ttm-cell.is-style-span-2 .wp-block-post:first-child .ttm-item-featured__media'
 		);
 		expect( await computed( media, 'aspect-ratio' ) ).toBe( '3 / 2' );
 		expect( await computed( media, 'filter' ) ).toContain( 'grayscale(1)' );
@@ -808,9 +826,7 @@ test.describe( 'footer', () => {
 	test( 'footer-left: .ttm-footer__meta @1280', async ( { page } ) => {
 		await gotoFront( page, 1280 );
 		const meta = page.locator( '.ttm-footer__meta' );
-		expect( await meta.innerText() ).toMatch(
-			/^These Things Matter · © \d{4} Eric Mann · Built on WordPress$/
-		);
+		expect( await meta.innerText() ).toMatch( FOOTER_COPY_RE );
 	} );
 
 	// P1-01, SPEC §6.11 (changed): footer-copy targets `.ttm-footer__left p` (the old
@@ -819,9 +835,7 @@ test.describe( 'footer', () => {
 		await gotoFront( page, 1280 );
 		const el = page.locator( '.ttm-footer__left p' );
 		expect( await el.count() ).toBe( 1 );
-		expect( await text( el ) ).toMatch(
-			/^These Things Matter · © \d{4} Eric Mann · Built on WordPress$/
-		);
+		expect( await text( el ) ).toMatch( FOOTER_COPY_RE );
 	} );
 
 	// P1-01, SPEC §6.11.
@@ -905,6 +919,176 @@ test.describe( 'footer', () => {
 		expect( await computed( footer, 'flex-direction' ) ).toBe( 'column' );
 		expect( await computed( footer, 'font-size' ) ).toBe( px( 11 ) );
 	} );
+} );
+
+// P0-02, SPEC §6.7/§6.9 rows name-footer/name-masthead: the owner's name is bound from
+// `Config::author_name()`, not hard-coded in the templates.
+test.describe( 'name', () => {
+	test( 'name-footer: .ttm-footer__meta @1280', async ( { page } ) => {
+		for ( const path of [ SCREENS.article, '/' ] ) {
+			await gotoScreen( page, path, 1280 );
+			const meta = page.locator( '.ttm-footer__meta' );
+			expect( await meta.innerText() ).toContain( authorName() );
+		}
+	} );
+
+	test( 'name-masthead: .ttm-masthead-inner__by @1280', async ( {
+		page,
+	} ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const el = page.locator( '.ttm-masthead-inner__by' );
+		expect( await text( el ) ).toBe( `by ${ authorName() }` );
+	} );
+} );
+
+/**
+ * Force a lazy image to load and wait until its natural dimensions are known (P0-03: several
+ * demo-* rows read `naturalWidth`/`naturalHeight`, which stay 0 for an unloaded `loading=lazy`
+ * image outside the viewport).
+ *
+ * @param {import('@playwright/test').Locator} locator Image locator.
+ * @return {Promise<void>}
+ */
+async function loadImage( locator ) {
+	await locator.evaluate( ( img ) => {
+		img.loading = 'eager';
+	} );
+	await locator.evaluate(
+		( img ) =>
+			new Promise( ( resolve ) => {
+				if ( img.complete && img.naturalWidth > 0 ) {
+					resolve();
+					return;
+				}
+				img.addEventListener( 'load', () => resolve(), {
+					once: true,
+				} );
+			} )
+	);
+}
+
+// P0-03, SPEC §6.9 demo-* rows: seeded posts get a real demo photo, not a placeholder. Made to
+// pass in P1-05, once the demo images actually land.
+test.describe( 'demo', () => {
+	// prettier-ignore
+	test( 'demo-lead-photo: .ttm-lead__media img @1280', async ( { page } ) => {
+		await gotoFront( page, 1280 );
+		const img = page.locator( '.ttm-lead__media img' );
+		expect( await img.count() ).toBe( 1 );
+		const src = await img.getAttribute( 'src' );
+		expect( src ).toMatch( /demo-[a-z0-9-]+\.jpg$/ );
+		// Every demo photograph is re-fetched at OPENVERSE_MIN_WIDTH (1600px) or wider and
+		// re-encoded no narrower than that (R1-02), so the lead photo -- however WordPress
+		// crops/serves it -- is always a real photograph, never a tiny placeholder.
+		const width = parseInt( await img.getAttribute( 'width' ), 10 );
+		expect( width ).toBeGreaterThanOrEqual( 1200 );
+	} );
+
+	// prettier-ignore
+	test( 'demo-cells-photo: .ttm-cell.is-style-span-2 .ttm-item-featured__media img @1280', async ( { page } ) => {
+		await gotoFront( page, 1280 );
+		const media = page.locator(
+			'.ttm-cell.is-style-span-2 .ttm-item-featured__media img[src*="demo-"]'
+		);
+		expect( await media.count() ).toBeGreaterThanOrEqual( 1 );
+
+		// Collect every matching cell's first-post href before navigating anywhere -- `ttm.css`
+		// renders the label text uppercase, so the comparison is case-insensitive, and the
+		// hrefs are gathered up front since navigating away invalidates the `.ttm-cell` locator.
+		const hrefs = [];
+		const cells = page.locator( '.ttm-cell' );
+		const cellCount = await cells.count();
+		for ( let i = 0; i < cellCount; i++ ) {
+			const cell = cells.nth( i );
+			const label = cell.locator( '.ttm-cell-heading__label' );
+			if ( ( await label.count() ) === 0 ) {
+				continue;
+			}
+			const labelText = ( await text( label ) ).trim().toLowerCase();
+			if (
+				! [ 'business', 'security', 'faith', 'opinion' ].includes(
+					labelText
+				)
+			) {
+				continue;
+			}
+			const href = await cell
+				.locator( '.wp-block-post-title a' )
+				.first()
+				.getAttribute( 'href' );
+			hrefs.push( href );
+		}
+		expect( hrefs ).toHaveLength( 4 );
+
+		let visited = 0;
+		for ( const href of hrefs ) {
+			await page.goto( href );
+			await page.setViewportSize( { width: 1280, height: 900 } );
+			const heroImg = page.locator(
+				'.ttm-article .wp-block-post-featured-image img'
+			);
+			const heroSrc = await heroImg.getAttribute( 'src' );
+			expect( heroSrc ).toContain( 'demo-' );
+			visited++;
+		}
+		expect( visited ).toBe( 4 );
+	} );
+
+	// prettier-ignore
+	test( 'demo-article-hero: .ttm-article .wp-block-post-featured-image @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.article, 1280 );
+		const img = page.locator(
+			'.ttm-article .wp-block-post-featured-image img'
+		);
+		expect( await img.getAttribute( 'src' ) ).toContain( 'demo-' );
+		const caption = page.locator(
+			'.ttm-article .wp-block-post-featured-image figcaption'
+		);
+		expect( await text( caption ) ).toBe(
+			seedPost( 'signing-your-options-table' ).caption
+		);
+	} );
+
+	// prettier-ignore
+	test( 'demo-about-portrait: .ttm-page__portrait @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.about, 1280 );
+		const img = page.locator( 'main img' ).first();
+		expect( await img.getAttribute( 'src' ) ).toContain( 'demo-' );
+		await loadImage( img );
+		const ratio = await img.evaluate(
+			( node ) => node.naturalHeight / node.naturalWidth
+		);
+		expect( ratio ).toBeGreaterThanOrEqual( 1.35 );
+		expect( ratio ).toBeLessThanOrEqual( 1.65 );
+		const portrait = page.locator( '.ttm-page__portrait' );
+		expect( await computed( portrait, 'aspect-ratio' ) ).toBe( '3 / 2' );
+	} );
+
+	// prettier-ignore
+	test( 'demo-tile-cover: .ttm-tile.is-cover img @1280', async ( { page } ) => {
+		await gotoScreen( page, SCREENS.writing, 1280 );
+		const img = page.locator( '.ttm-tile.is-cover img' );
+		expect( await img.count() ).toBe( 1 );
+		expect( await img.getAttribute( 'src' ) ).toContain( 'demo-' );
+	} );
+
+	for ( const width of [ 1280, 390 ] ) {
+		// prettier-ignore
+		test( `demo-alt: img[src*="demo-"] @${ width }`, async ( { page } ) => {
+			let seen = 0;
+			for ( const path of SCREEN_URLS ) {
+				await gotoScreen( page, path, width );
+				const images = page.locator( 'img[src*="demo-"]' );
+				const count = await images.count();
+				for ( let i = 0; i < count; i++ ) {
+					const alt = await images.nth( i ).getAttribute( 'alt' );
+					expect( ( alt ?? '' ).trim() ).not.toBe( '' );
+					seen++;
+				}
+			}
+			expect( seen ).toBeGreaterThan( 0 );
+		} );
+	}
 } );
 
 // P0-04: every remaining SPEC §6.9 row, transcribed in table order, tagged as a fixme test.

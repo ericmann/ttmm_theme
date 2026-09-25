@@ -55,3 +55,55 @@ export function color( slug ) {
 export function px( n ) {
 	return `${ n }px`;
 }
+
+const configPath = join( 'plugins', 'ttm-core', 'src', 'Config.php' );
+
+/**
+ * The owner's display name, read from `Config.php`'s `defaults()` (rule 55: the only place it
+ * lives), so the fidelity suite never hard-codes it.
+ *
+ * @return {string} The `site.author_name` default.
+ */
+export function authorName() {
+	const source = readFileSync( configPath, 'utf8' );
+	const match = source.match( /'site\.author_name'\s*=>\s*'([^']+)'/ );
+	if ( ! match ) {
+		throw new Error(
+			"Could not find 'site.author_name' default in Config.php"
+		);
+	}
+	return match[ 1 ];
+}
+
+const seedPostsPath = join( 'docs', 'fixtures', 'seed', 'posts.json' );
+const seedPagesPath = join( 'docs', 'fixtures', 'seed', 'pages.json' );
+
+/**
+ * The `docs/fixtures/seed/posts.json` row for `slug` (P0-03, SPEC §6.9 demo-* rows).
+ *
+ * @param {string} slug Post slug.
+ * @return {Object} The matching row.
+ */
+export function seedPost( slug ) {
+	const posts = JSON.parse( readFileSync( seedPostsPath, 'utf8' ) );
+	const post = posts.find( ( row ) => row.slug === slug );
+	if ( ! post ) {
+		throw new Error( `No seed post with slug ${ slug }` );
+	}
+	return post;
+}
+
+/**
+ * The `docs/fixtures/seed/pages.json` row for `slug`.
+ *
+ * @param {string} slug Page slug.
+ * @return {Object} The matching row.
+ */
+export function seedPage( slug ) {
+	const pages = JSON.parse( readFileSync( seedPagesPath, 'utf8' ) );
+	const page = pages.find( ( row ) => row.slug === slug );
+	if ( ! page ) {
+		throw new Error( `No seed page with slug ${ slug }` );
+	}
+	return page;
+}

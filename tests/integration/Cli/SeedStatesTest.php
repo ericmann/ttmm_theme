@@ -15,13 +15,13 @@ use TTM\Core\Support\Dates;
 class SeedStatesTest extends TTM_IntegrationTestCase {
 
 	public function test_normal_state_has_series_index_with_seven_rows(): void {
-		( new Seeder() )->run( 'normal' );
+		( new Seeder( false ) )->run( 'normal' );
 
 		$this->assertCount( 7, SeriesIndex::all() );
 	}
 
 	public function test_normal_state_has_active_serial_with_cover(): void {
-		( new Seeder() )->run( 'normal' );
+		( new Seeder( false ) )->run( 'normal' );
 
 		$row = SeriesIndex::by_slug( 'the-quiet-ledger' );
 
@@ -33,7 +33,7 @@ class SeedStatesTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_quiet_state_has_no_post_newer_than_90_days(): void {
-		( new Seeder() )->run( 'quiet' );
+		( new Seeder( false ) )->run( 'quiet' );
 
 		$now   = \TTM\Core\Support\Clock::now();
 		$posts = get_posts(
@@ -52,7 +52,7 @@ class SeedStatesTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_empty_state_has_zero_series_and_no_security_posts(): void {
-		( new Seeder() )->run( 'empty' );
+		( new Seeder( false ) )->run( 'empty' );
 
 		$this->assertCount( 0, SeriesIndex::all() );
 
@@ -63,7 +63,7 @@ class SeedStatesTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_seed_configures_custom_url_dev_accept(): void {
-		( new Seeder() )->run( 'normal' );
+		( new Seeder( false ) )->run( 'normal' );
 
 		$html = (string) do_blocks( '<!-- wp:ttm/newsletter-form /-->' );
 
@@ -77,7 +77,7 @@ class SeedStatesTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_verse_option_is_seeded_from_fixture_with_attribution_url(): void {
-		( new Seeder() )->seed_verse();
+		( new Seeder( false ) )->seed_verse();
 
 		$verse = get_option( 'ttm_verse' );
 
@@ -91,7 +91,7 @@ class SeedStatesTest extends TTM_IntegrationTestCase {
 	 * the Sections navigation only -- no posts, series, or books.
 	 */
 	public function test_starter_only_creates_sections_pages_and_navigation_and_no_posts(): void {
-		$summary = ( new Seeder() )->run_starter();
+		$summary = ( new Seeder( false ) )->run_starter();
 
 		$this->assertGreaterThan( 0, $summary['categories'] );
 		$this->assertGreaterThan( 0, $summary['pages'] );
@@ -114,7 +114,7 @@ class SeedStatesTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_starter_only_is_idempotent(): void {
-		$seeder = new Seeder();
+		$seeder = new Seeder( false );
 		$first  = $seeder->run_starter();
 		$second = $seeder->run_starter();
 
@@ -157,7 +157,7 @@ class SeedStatesTest extends TTM_IntegrationTestCase {
 		);
 		$default_category = (int) get_option( 'default_category' );
 
-		( new Seeder() )->reset();
+		( new Seeder( false ) )->reset();
 
 		$this->assertNull( get_post( $foreign_post ) );
 		$this->assertNull( get_post( $attachment_id ) );
@@ -189,7 +189,7 @@ class SeedStatesTest extends TTM_IntegrationTestCase {
 			]
 		);
 
-		( new Seeder() )->reset();
+		( new Seeder( false ) )->reset();
 
 		$this->assertNull( get_post( $block ) );
 		$this->assertNull( get_post( $nav ) );
@@ -200,9 +200,9 @@ class SeedStatesTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_reset_with_only_seed_content_behaves_as_before(): void {
-		( new Seeder() )->run( 'normal' );
+		( new Seeder( false ) )->run( 'normal' );
 
-		( new Seeder() )->reset();
+		( new Seeder( false ) )->reset();
 
 		$posts = get_posts(
 			[
