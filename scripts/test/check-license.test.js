@@ -209,6 +209,21 @@ describe( 'checkOwnerName', () => {
 		expect( failures.join( '\n' ) ).toMatch( /Helpers\.php/ );
 	} );
 
+	it( 'fails on an Author: line in a non-header plugin file', () => {
+		const broken = {
+			...CONFORMING_FILES,
+			'plugins/ttm-core/src/Blocks/Helpers.php': [
+				'<?php',
+				'/**',
+				' * Author:            Eric Mann',
+				' */',
+			].join( '\n' ),
+		};
+		const failures = checkOwnerName( fixture( broken ) );
+		expect( failures.length ).toBeGreaterThan( 0 );
+		expect( failures.join( '\n' ) ).toMatch( /Helpers\.php/ );
+	} );
+
 	it( 'allows the name on Author: header lines, readme Contributors/Copyright lines and Config.php', () => {
 		const withName = {
 			...CONFORMING_FILES,

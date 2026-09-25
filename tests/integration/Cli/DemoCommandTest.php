@@ -145,6 +145,30 @@ class DemoCommandTest extends TTM_IntegrationTestCase {
 		$this->assertTrue( $found );
 	}
 
+	/**
+	 * Review F4/R1-03: `! $has_form || ! $has_status` (either one missing fails) is the real
+	 * mechanic; a term missing only `ttm_status` (with `ttm_form` present) still has to be
+	 * caught -- a term missing *both* wouldn't distinguish this from a mutated `&&`.
+	 */
+	public function test_verify_fails_when_only_ttm_status_is_missing(): void {
+		$assoc = $this->seed_and_verify_args();
+
+		$term = wp_insert_term( 'Only Form Meta Series', 'series' );
+		$this->assertIsArray( $term );
+		update_term_meta( $term['term_id'], 'ttm_form', 'nonfiction' );
+
+		$result = ( new DemoCommand() )->verify( [], $assoc );
+
+		$this->assertFalse( $result['ok'] );
+		$found = false;
+		foreach ( $result['messages'] as $message ) {
+			if ( str_contains( $message, 'missing term meta' ) ) {
+				$found = true;
+			}
+		}
+		$this->assertTrue( $found );
+	}
+
 	public function test_verify_fails_on_an_uncategorized_primary(): void {
 		$assoc = $this->seed_and_verify_args();
 

@@ -125,6 +125,17 @@ describe( 'files', () => {
 		expect( kept.every( ( to ) => ! to.startsWith( '../' ) ) ).toBe( true );
 	} );
 
+	it( 'pluginFiles drops non-JS files under src/editor', () => {
+		const kept = pluginFiles( [
+			...SAMPLE_PATHS,
+			'plugins/ttm-core/src/editor/panel.json',
+			'plugins/ttm-core/src/editor/style.css',
+		] ).map( ( p ) => p.to );
+
+		expect( kept ).not.toContain( 'src/editor/panel.json' );
+		expect( kept ).not.toContain( 'src/editor/style.css' );
+	} );
+
 	it( 'themePaths keeps theme files and drops maps', () => {
 		const kept = themePaths( SAMPLE_PATHS ).map( ( p ) => p.to );
 
