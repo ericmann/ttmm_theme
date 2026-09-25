@@ -22,7 +22,7 @@ beforeAll( async () => {
 	} = mod );
 } );
 
-const LIMITS = { maxBytes: 350000, budgetBytes: 8000000 };
+const LIMITS = { maxBytes: 350000, budgetBytes: 8000000, minWidth: 1600 };
 
 /**
  * A complete, conforming CREDITS.json row for `demo-example.jpg`.
@@ -166,6 +166,19 @@ describe( 'checkCredits', () => {
 		);
 		expect( overBudget.join( '\n' ) ).toMatch(
 			/exceeds IMAGE_BUDGET_BYTES/
+		);
+	} );
+
+	it( 'fails on a file narrower than OPENVERSE_MIN_WIDTH', () => {
+		const failures = checkCredits(
+			{
+				files: [ FILE ],
+				credits: [ creditsRow( { width: 960 } ) ],
+			},
+			LIMITS
+		);
+		expect( failures.join( '\n' ) ).toMatch(
+			/width \(960\) is narrower than OPENVERSE_MIN_WIDTH \(1600\)/
 		);
 	} );
 

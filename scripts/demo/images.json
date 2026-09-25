@@ -1,14 +1,14 @@
 [
 	{
 		"file": "demo-signing-your-options-table.jpg",
-		"query": "network cables server",
+		"query": "fiber optic cables",
 		"orientation": "wide",
-		"subject": "server room cables",
+		"subject": "fiber optic cable light",
 		"post": "signing-your-options-table"
 	},
 	{
 		"file": "demo-technology-post-2.jpg",
-		"query": "circuit board macro",
+		"query": "mouse circuit board",
 		"orientation": "wide",
 		"subject": "circuit board macro",
 		"post": "technology-post-2",
@@ -23,11 +23,15 @@
 	},
 	{
 		"file": "demo-hardening-part-4-keys-in-the-environment.jpg",
-		"query": "keys on table",
+		"query": "keys and lock",
 		"orientation": "wide",
-		"subject": "keys on table",
+		"subject": "two blank keys studio shot",
 		"post": "hardening-part-4-keys-in-the-environment",
-		"exclude": [ "81810309-b103-404c-9f77-383ff79f4175" ]
+		"exclude": [
+			"81810309-b103-404c-9f77-383ff79f4175",
+			"10eb82bf-3f33-43f1-95b8-bdb1baa96cc5",
+			"ba5efea4-60a0-4169-9e79-c531637b469e"
+		]
 	},
 	{
 		"file": "demo-praying-for-people-who-file-bug-reports.jpg",
@@ -38,50 +42,39 @@
 	},
 	{
 		"file": "demo-open-source-not-a-business-model.jpg",
-		"query": "harbor cranes",
+		"query": "old door open",
 		"orientation": "wide",
-		"subject": "harbor cranes",
+		"subject": "a pair of old white doors standing open in a field by the water",
 		"post": "open-source-not-a-business-model",
-		"exclude": [
-			"076503c5-3e87-47d8-8e57-23d9450869f8",
-			"a0a831cb-0692-48e0-9acb-e2b97100e612",
-			"081a953f-266d-4b0c-a606-b05f6e8c1c3b",
-			"97566860-9315-4d89-8672-1f8effcf2f07",
-			"74faa099-4d52-4c8e-98b3-b20045b474a1",
-			"c354e024-4dab-45c1-bf95-9e4b1cc2fb48",
-			"8178307f-ecf3-409c-b6e2-5f3cd57cfa22",
-			"31cd4bbf-bd7f-4853-b527-48220a4d2b93",
-			"cd26987f-c481-43e7-a58c-87a093066529",
-			"5ac23c27-b712-4a62-a17b-7574ca3acfaf",
-			"8ce306e3-55e0-46ab-a6b8-cac00da3639a",
-			"cbbc4d0c-b824-4401-8123-720331abc279",
-			"52c2347a-bbad-4148-933f-9cd00e0a81da",
-			"306cce9b-c026-4f6c-8762-80a86cb52a91",
-			"709c3f5a-67a0-425d-9b72-81923b6dcc3e",
-			"596fa43b-3388-46df-aa41-d7ae1eb092be"
-		]
+		"exclude": [ "570c0f66-6c85-44b4-b3fe-4995660b2330" ]
 	},
 	{
 		"file": "demo-transients-object-caches-and-fast-enough.jpg",
-		"query": "warehouse shelves",
+		"query": "empty wooden shelves",
 		"orientation": "wide",
-		"subject": "warehouse shelves",
+		"subject": "empty wooden bookshelf against a concrete wall",
 		"post": "transients-object-caches-and-fast-enough"
 	},
 	{
 		"file": "demo-php-85-readonly-classes.jpg",
-		"query": "typewriter desk",
+		"query": "rainbow typewriter keys",
 		"orientation": "wide",
-		"subject": "typewriter desk",
+		"subject": "vintage typewriter keys over a rainbow fan",
 		"post": "php-85-readonly-classes"
 	},
 	{
 		"file": "demo-composer-lockfiles-are-a-security-control.jpg",
-		"query": "padlock gate",
+		"query": "padlocked lock gates",
 		"orientation": "wide",
-		"subject": "padlock gate",
+		"subject": "chained and padlocked canal lock gate",
 		"post": "composer-lockfiles-are-a-security-control",
-		"exclude": [ "5392fe1a-cdd7-4532-9aec-3f21c8ee3b56" ]
+		"exclude": [
+			"5392fe1a-cdd7-4532-9aec-3f21c8ee3b56",
+			"ad39e2af-414e-4769-b71c-b96850189b01",
+			"40a43d90-61c5-46fc-a727-41408f42b73f",
+			"feb6c8cd-aa7c-4d37-bad2-f8129991736b",
+			"09d8475a-ced9-4007-8253-4d685d9d9e33"
+		]
 	},
 	{
 		"file": "demo-nonces-are-not-csrf-tokens.jpg",
@@ -115,12 +108,11 @@
 	},
 	{
 		"file": "demo-story-uptime.jpg",
-		"query": "rain",
+		"query": "sydney harbour rain clouds",
 		"orientation": "square",
-		"subject": "rain window",
+		"subject": "storm clouds over a harbor full of boats",
 		"post": "story-uptime",
 		"exclude": [
-			"66449831-7290-4cb2-abbc-48fd0cbbbec9",
 			"0e727dc6-834c-4bc6-9267-43e68e86297f",
 			"7624c36f-cd90-4c6e-bc95-f6e3d874fb4a"
 		]

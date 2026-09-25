@@ -147,6 +147,21 @@ export function pickResult(
 }
 
 /**
+ * Whether a downloaded-and-re-encoded image is acceptable: wide enough (its *actual* decoded
+ * width, not the Openverse search result's own possibly-wrong metadata) and not over budget.
+ * `pickResult()` already filters candidates on the API's reported `width`, but real Openverse
+ * metadata sometimes disagrees with the file it actually serves (R1-02/review F3) -- this is the
+ * second, authoritative check against the bytes actually downloaded.
+ *
+ * @param {{width: number, bytes: number}}       encoded Decoded width and encoded byte size.
+ * @param {{minWidth: number, maxBytes: number}} limits  `OPENVERSE_MIN_WIDTH`/`IMAGE_MAX_BYTES`.
+ * @return {boolean} True when the encoded image qualifies.
+ */
+export function acceptEncoded( { width, bytes }, { minWidth, maxBytes } ) {
+	return width >= minWidth && bytes <= maxBytes;
+}
+
+/**
  * The rule 53 `CREDITS.json` row for a downloaded, re-encoded image.
  *
  * @param {Object}                                                         result  Chosen Openverse result.

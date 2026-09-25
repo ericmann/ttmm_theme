@@ -8,6 +8,7 @@ const path = require( 'path' );
 let validateRows;
 let searchUrl;
 let pickResult;
+let acceptEncoded;
 let creditRow;
 let sortCredits;
 
@@ -29,7 +30,14 @@ beforeAll( async () => {
 	const mod = await import(
 		path.join( __dirname, '..', 'demo', 'lib', 'openverse.mjs' )
 	);
-	( { validateRows, searchUrl, pickResult, creditRow, sortCredits } = mod );
+	( {
+		validateRows,
+		searchUrl,
+		pickResult,
+		acceptEncoded,
+		creditRow,
+		sortCredits,
+	} = mod );
 } );
 
 describe( 'images.json', () => {
@@ -116,6 +124,22 @@ describe( 'pickResult', () => {
 		const result = pickResult( noneQualify, options );
 
 		expect( result ).toBeNull();
+	} );
+} );
+
+describe( 'acceptEncoded', () => {
+	it( 'rejects a download narrower than minWidth and one over maxBytes', () => {
+		const limits = { minWidth: 1600, maxBytes: 350000 };
+
+		expect( acceptEncoded( { width: 1600, bytes: 200000 }, limits ) ).toBe(
+			true
+		);
+		expect( acceptEncoded( { width: 960, bytes: 200000 }, limits ) ).toBe(
+			false
+		);
+		expect( acceptEncoded( { width: 1600, bytes: 400000 }, limits ) ).toBe(
+			false
+		);
 	} );
 } );
 

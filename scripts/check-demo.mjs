@@ -12,7 +12,11 @@ import {
 	checkReadmeScreenshots,
 	checkDemoOutputs,
 } from './lib/demo-checks.mjs';
-import { IMAGE_MAX_BYTES, IMAGE_BUDGET_BYTES } from './demo/lib/constants.mjs';
+import {
+	IMAGE_MAX_BYTES,
+	IMAGE_BUDGET_BYTES,
+	OPENVERSE_MIN_WIDTH,
+} from './demo/lib/constants.mjs';
 
 const IMAGES_DIR = join( 'docs', 'fixtures', 'demo', 'images' );
 const CREDITS_PATH = join( 'docs', 'fixtures', 'demo', 'CREDITS.json' );
@@ -54,7 +58,11 @@ const credits = existsSync( CREDITS_PATH )
 const failures = [
 	...checkCredits(
 		{ files: imageFiles, credits },
-		{ maxBytes: IMAGE_MAX_BYTES, budgetBytes: IMAGE_BUDGET_BYTES }
+		{
+			maxBytes: IMAGE_MAX_BYTES,
+			budgetBytes: IMAGE_BUDGET_BYTES,
+			minWidth: OPENVERSE_MIN_WIDTH,
+		}
 	),
 ];
 

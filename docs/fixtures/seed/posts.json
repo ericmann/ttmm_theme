@@ -17,7 +17,7 @@
 		"paragraphs": 82,
 		"featured_image": "demo-signing-your-options-table.jpg",
 		"caption": "Every signed request still travels down a cable like this one — trust the signature, not the wire.",
-		"alt": "A yellow network cable with its RJ45 connector in close-up",
+		"alt": "A macro photograph of illuminated blue and white fiber optic cable strands",
 		"most_read": false
 	},
 	{
@@ -34,7 +34,7 @@
 		"excerpt": "Forty minutes of CI a day is two working weeks a year. The math finally caught up with me.",
 		"paragraphs": 16,
 		"featured_image": "demo-technology-post-2.jpg",
-		"alt": "A macro photograph of a circuit board's gold connector pins",
+		"alt": "The disassembled circuit board and shell of a computer mouse",
 		"caption": "A pipeline is just circuitry with better error messages, most days.",
 		"most_read": true
 	},
@@ -53,7 +53,7 @@
 		"paragraphs": 12,
 		"most_read": true,
 		"featured_image": "demo-php-85-readonly-classes.jpg",
-		"alt": "A desk with a laptop, a vintage typewriter and a reading lamp",
+		"alt": "Close-up of vintage typewriter keys resting over a rainbow-colored fan",
 		"caption": "The old machine and the new one agree: once written, some things should stay that way."
 	},
 	{
@@ -84,7 +84,7 @@
 		"excerpt": "Pinning a version is not paranoia. It is the only part of the supply chain you actually control.",
 		"paragraphs": 10,
 		"featured_image": "demo-composer-lockfiles-are-a-security-control.jpg",
-		"alt": "A padlock and chain securing a weathered green gate",
+		"alt": "A chain looped through two hooks securing a canal lock gate",
 		"caption": "A lockfile is exactly this: one specific thing, kept from changing without asking."
 	},
 	{
@@ -112,7 +112,7 @@
 		"excerpt": "Every cache layer is a promise you will eventually have to keep by hand.",
 		"paragraphs": 10,
 		"featured_image": "demo-transients-object-caches-and-fast-enough.jpg",
-		"alt": "A storage room lined with shelves, boxes and file cabinets",
+		"alt": "Empty wooden bookshelves against a bare concrete wall",
 		"caption": "Somewhere in here is the thing you cached and never checked again."
 	},
 	{
@@ -402,8 +402,8 @@
 		"excerpt": "",
 		"paragraphs": 10,
 		"featured_image": "demo-open-source-not-a-business-model.jpg",
-		"alt": "Industrial harbor cranes photographed at a shipping dock",
-		"caption": "Infrastructure nobody paid for directly, moving everything that did get paid for."
+		"alt": "A pair of old white doors standing open in a field beside the water",
+		"caption": "The door was open the whole time; nobody built a toll booth for it."
 	},
 	{
 		"tags": [
@@ -619,7 +619,7 @@
 		"paragraphs": 12,
 		"part_title": "Keys in the environment, rotated live",
 		"featured_image": "demo-hardening-part-4-keys-in-the-environment.jpg",
-		"alt": "A close-up of a computer keyboard's edge on a desk",
+		"alt": "Two blank cut keys photographed in high-contrast black and white",
 		"caption": "The keys that matter for this post aren't the ones under your fingers."
 	},
 	{
@@ -1335,7 +1335,7 @@
 		"days_ago": 700,
 		"excerpt": "A short story: Uptime.",
 		"featured_image": "demo-story-uptime.jpg",
-		"alt": "Rain streaked across a window overlooking a misty city street",
+		"alt": "Storm clouds gathering over a harbor full of sailboats",
 		"caption": "The server stayed up longer than the rain did, that week.",
 		"paragraphs": 15
 	},

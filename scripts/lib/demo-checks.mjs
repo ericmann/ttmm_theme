@@ -358,10 +358,13 @@ const CREDITS_FIELDS = [
  * `CREDITS.json` row under a CC0/PDM licence, and the total stays under budget.
  *
  * @param {{files: {name: string, bytes: number, sha256: string}[], credits: Array|null}} data   Image files and parsed CREDITS.json (null when absent).
- * @param {{maxBytes: number, budgetBytes: number}}                                       limits `IMAGE_MAX_BYTES`/`IMAGE_BUDGET_BYTES`.
+ * @param {{maxBytes: number, budgetBytes: number, minWidth: number}}                     limits `IMAGE_MAX_BYTES`/`IMAGE_BUDGET_BYTES`/`OPENVERSE_MIN_WIDTH`.
  * @return {string[]} Failures.
  */
-export function checkCredits( { files, credits }, { maxBytes, budgetBytes } ) {
+export function checkCredits(
+	{ files, credits },
+	{ maxBytes, budgetBytes, minWidth }
+) {
 	const failures = [];
 
 	if ( 0 === files.length && ( null === credits || 0 === credits.length ) ) {
@@ -414,6 +417,12 @@ export function checkCredits( { files, credits }, { maxBytes, budgetBytes } ) {
 		if ( row.license && ! [ 'cc0', 'pdm' ].includes( row.license ) ) {
 			failures.push(
 				`${ name }: license "${ row.license }" is not cc0/pdm`
+			);
+		}
+
+		if ( 'number' === typeof minWidth && row.width < minWidth ) {
+			failures.push(
+				`${ name }: width (${ row.width }) is narrower than OPENVERSE_MIN_WIDTH (${ minWidth })`
 			);
 		}
 

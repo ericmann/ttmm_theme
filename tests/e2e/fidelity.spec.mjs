@@ -977,11 +977,11 @@ test.describe( 'demo', () => {
 		expect( await img.count() ).toBe( 1 );
 		const src = await img.getAttribute( 'src' );
 		expect( src ).toMatch( /demo-[a-z0-9-]+\.jpg$/ );
-		// The real Openverse download for this post is 960px wide -- smaller than the
-		// full 1600px `ttm-lead` size, so WP serves it at its own width rather than
-		// upscaling; the assertion checks it's a real photo, not a tiny placeholder.
+		// Every demo photograph is re-fetched at OPENVERSE_MIN_WIDTH (1600px) or wider and
+		// re-encoded no narrower than that (R1-02), so the lead photo -- however WordPress
+		// crops/serves it -- is always a real photograph, never a tiny placeholder.
 		const width = parseInt( await img.getAttribute( 'width' ), 10 );
-		expect( width ).toBeGreaterThanOrEqual( 900 );
+		expect( width ).toBeGreaterThanOrEqual( 1200 );
 	} );
 
 	// prettier-ignore

@@ -13,6 +13,7 @@ import {
 	validateRows,
 	searchUrl,
 	pickResult,
+	acceptEncoded,
 	creditRow,
 	sortCredits,
 } from './lib/openverse.mjs';
@@ -71,11 +72,12 @@ async function search( url ) {
 
 /**
  * Download `url` and re-encode it with `sharp` (dynamic import: only this file and
- * screenshots.mjs pull it in) to a JPEG under `IMAGE_MAX_BYTES`, metadata stripped.
+ * screenshots.mjs pull it in) to a JPEG, metadata stripped. Does not itself judge whether the
+ * result is acceptable (size or width) -- see `acceptEncoded()`, called by the caller against
+ * the *actual* decoded width, since Openverse's own search-result metadata is sometimes wrong.
  *
  * @param {string} url Candidate result's `url`.
- * @return {Promise<{buffer: Buffer, width: number, height: number}|null>} The re-encoded image,
- *   or `null` when it's still over `IMAGE_MAX_BYTES` after re-encoding.
+ * @return {Promise<{buffer: Buffer, width: number, height: number}>} The re-encoded image.
  */
 async function downloadAndEncode( url ) {
 	const response = await fetch( url, {
@@ -95,10 +97,6 @@ async function downloadAndEncode( url ) {
 		.jpeg( { quality: 82, mozjpeg: true } );
 	const buffer = await pipeline.toBuffer();
 	const metadata = await sharp( buffer ).metadata();
-
-	if ( buffer.length > IMAGE_MAX_BYTES ) {
-		return null;
-	}
 
 	return { buffer, width: metadata.width, height: metadata.height };
 }
@@ -164,7 +162,12 @@ async function fetchRow( row, chosenIds, dryRun ) {
 			return { ok: false, error: error.message };
 		}
 
-		if ( ! encoded ) {
+		if (
+			! acceptEncoded(
+				{ width: encoded.width, bytes: encoded.buffer.length },
+				{ minWidth: OPENVERSE_MIN_WIDTH, maxBytes: IMAGE_MAX_BYTES }
+			)
+		) {
 			skipIds.add( result.id );
 			continue;
 		}
