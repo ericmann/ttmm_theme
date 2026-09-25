@@ -31,7 +31,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P3-03 Release workflow
 - [x] P3-04 Phase 3 screenshots and push
 - [x] P4-01 Guards back to strict; allow-lists; budget and audits recorded
-- [ ] P4-02 Documentation index, SETUP, plugin spec and HANDOFF
+- [x] P4-02 Documentation index, SETUP, plugin spec and HANDOFF
 - [ ] P4-03 Final demo refresh, seed reset, screenshots and push
 
 ## Log
@@ -449,3 +449,32 @@ vulnerabilities) and composer audit (no advisories) both pass, no
 override needed; npm run test:e2e 500 passed/1 skipped, the one failure
 (selectors.spec.mjs's known flaky test) reconfirmed passing standalone
 (13.7s), consistent with every prior occurrence this session.
+
+### P4-02 — 5e01ec1
+docs/05-plugin-spec.md: §4 gains the ttm/author-name binding row plus a
+note on the two new Config keys; §10 gains demo:options/demo:verify and
+seed --no-demo-images/--now. docs/04-theme-spec.md: masthead-front/inner
+bylines and the footer's copyright line documented as bound to
+ttm/author-name/Config::author_name() rather than a literal string.
+docs/README.md gains index rows for .github/ (demo build outputs +
+screenshots), docs/fixtures/demo/ and docs/feedback/phase-5/.
+docs/feedback/README.md gains a phase-5 row. docs/SETUP.md gains table
+rows for demo:fetch-images/demo:build/demo:check/release:pack/
+screenshots -- --readme, a "Replacing a demo photograph" how-to, and a
+"How the release works" section (no merge needed for the old README's
+commands -- SETUP.md already had them all).
+
+docs/HANDOFF.md (new): what changed per phase, every phase's Manual check
+line, the one known limitation (headless Playground content-rendering
+gap) with full diagnostic detail, measurements (image/screenshot bytes,
+CSS budget, audits, build/pack determinism), every Interpretation choice
+from the task log, the two Config keys added, the spike's six findings,
+and the owner's 7 steps (merge, tag v0.2.0, confirm release assets, open
+the Playground link, approve/swap photographs, confirm the verse licence
+note).
+
+Verified: npm run lint clean; node -e checking all 6 named SETUP.md
+commands exist in package.json scripts (demo:build, demo:check,
+demo:fetch-images, release:pack, check:demo, check:license) passes; npm
+run test:unit clean (27 suites, 216 passed/6 pre-existing skips);
+forbidden-patterns.sh clean. docs/phase-1/ through docs/phase-4/ untouched.
