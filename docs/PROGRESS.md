@@ -30,7 +30,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P3-02 Public README; developer commands to SETUP.md; rule 56 strict
 - [x] P3-03 Release workflow
 - [x] P3-04 Phase 3 screenshots and push
-- [ ] P4-01 Guards back to strict; allow-lists; budget and audits recorded
+- [x] P4-01 Guards back to strict; allow-lists; budget and audits recorded
 - [ ] P4-02 Documentation index, SETUP, plugin spec and HANDOFF
 - [ ] P4-03 Final demo refresh, seed reset, screenshots and push
 
@@ -431,3 +431,21 @@ through env:drill and demo:build --check-determinism passed.
 Manual check: NOT VERIFIED (human) -- read README.md on GitHub (the
 branch view) as a stranger: screenshots render, links resolve, the
 Playground link works once v0.2.0 is released.
+
+### P4-01 — 0546d00
+Flipped ALLOW_TAGGED to false in scripts/check-fixme.mjs (every phase has
+landed; already 0 tagged/untagged fixme rows in
+fidelity.spec.mjs/editors.spec.mjs, confirmed via grep -c = 0 in both
+before this task). scripts/css-coverage-allow.txt already empty,
+tests/e2e/selectors-allow.txt already has no pending line -- no changes
+needed there. Recorded the end-of-flight CSS budget measurement in
+check-budget.mjs's comment: 63090 bytes before and after (no CSS changes
+this task), kept at 63488 (no >1024-byte shrink to justify lowering).
+
+Verified: npm run lint clean (0 tagged fixme rows); npm run test:unit
+clean (27 suites, 216 passed/6 pre-existing skips, incl. the updated
+check-fixme.test.js assertion); npm audit --audit-level=high (0
+vulnerabilities) and composer audit (no advisories) both pass, no
+override needed; npm run test:e2e 500 passed/1 skipped, the one failure
+(selectors.spec.mjs's known flaky test) reconfirmed passing standalone
+(13.7s), consistent with every prior occurrence this session.
