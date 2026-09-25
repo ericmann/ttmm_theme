@@ -213,9 +213,51 @@ describe( 'checkFixtureImages', () => {
 	} );
 } );
 
+const REQUIRED_SCREENSHOT_NAMES = [
+	'front-1280.png',
+	'front-390.png',
+	'article-1280.png',
+	'article-390.png',
+	'journal-1280.png',
+	'archive-1280.png',
+	'series-hub-1280.png',
+	'writing-1280.png',
+];
+
+/**
+ * A minimal README referencing every required screenshot once.
+ *
+ * @return {string} README markdown.
+ */
+function conformingReadme() {
+	return REQUIRED_SCREENSHOT_NAMES.map(
+		( name ) => `![${ name }](.github/screenshots/${ name })`
+	).join( '\n' );
+}
+
 describe( 'checkReadmeScreenshots', () => {
-	it( 'README: passes with no screenshots directory and no references', () => {
-		expect( checkReadmeScreenshots( 'Hello, world.', [] ) ).toEqual( [] );
+	it( 'README: passes with exactly the eight referenced and present', () => {
+		expect(
+			checkReadmeScreenshots(
+				conformingReadme(),
+				REQUIRED_SCREENSHOT_NAMES
+			)
+		).toEqual( [] );
+	} );
+
+	it( 'README: fails when one of the eight required screenshots is not referenced', () => {
+		const withoutOne = REQUIRED_SCREENSHOT_NAMES.filter(
+			( name ) => 'writing-1280.png' !== name
+		);
+		const readme = withoutOne
+			.map( ( name ) => `![${ name }](.github/screenshots/${ name })` )
+			.join( '\n' );
+
+		const failures = checkReadmeScreenshots( readme, withoutOne );
+
+		expect( failures.join( '\n' ) ).toMatch(
+			/does not reference the required screenshot writing-1280\.png/
+		);
 	} );
 
 	it( 'README: fails on a referenced missing screenshot and on an unreferenced file', () => {

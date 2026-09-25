@@ -485,8 +485,25 @@ const SCREENSHOT_REF_RE =
 	/!\[[^\]]*\]\(\.github\/screenshots\/([^)]+)\)|<img[^>]+src=["']\.github\/screenshots\/([^"']+)["']/g;
 
 /**
+ * P3-01/P3-02's eight README screenshots (SPEC §6.5).
+ *
+ * @type {string[]}
+ */
+export const REQUIRED_SCREENSHOTS = [
+	'front-1280.png',
+	'front-390.png',
+	'article-1280.png',
+	'article-390.png',
+	'journal-1280.png',
+	'archive-1280.png',
+	'series-hub-1280.png',
+	'writing-1280.png',
+];
+
+/**
  * Rule 56: every `.github/screenshots/<name>` referenced from `README.md` exists, every file
- * in that directory is referenced and is a `.png`.
+ * in that directory is referenced and is a `.png`, and every `REQUIRED_SCREENSHOTS` name is
+ * referenced (P3-02: strict -- the eight names are non-negotiable, not just "whatever's there").
  *
  * @param {string}   readme    `README.md` contents.
  * @param {string[]} fileNames Actual `.github/screenshots/` file names (empty array = no directory).
@@ -514,6 +531,14 @@ export function checkReadmeScreenshots( readme, fileNames ) {
 		}
 		if ( ! referenced.has( name ) ) {
 			failures.push( `${ name }: not referenced from README.md` );
+		}
+	}
+
+	for ( const name of REQUIRED_SCREENSHOTS ) {
+		if ( ! referenced.has( name ) ) {
+			failures.push(
+				`README.md does not reference the required screenshot ${ name }`
+			);
 		}
 	}
 
