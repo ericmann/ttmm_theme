@@ -21,7 +21,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P2-01 Spike: export term definitions, Playground import and CLI server shape
 - [x] P2-02 DemoCommand (demo:options, demo:verify) and seed --now
 - [x] P2-03 wxr.mjs: pure WXR normalisation
-- [ ] P2-04 build.mjs, blueprint template and the committed demo outputs
+- [x] P2-04 build.mjs, blueprint template and the committed demo outputs
 - [ ] P2-05 release:pack (plugin and theme zips with build/)
 - [ ] P2-06 check.mjs: headless Playground check on a local variant
 - [ ] P2-07 CI demo step and the term-meta record
@@ -220,3 +220,31 @@ rather than "first pubDate in the document" (which would eat the first
 item's own pubDate on a second pass). Verified: npm run lint clean (incl.
 eslint --fix pass), npm run test:unit 172 passed/6 pre-existing skips,
 forbidden-patterns.sh clean.
+
+### P2-04 — 76975d0
+Implemented demo:build (scripts/demo/build.mjs): seeds wp-env pinned to the
+UTC build day, exports via wp export, normalizes through wxr.mjs, reads
+wp ttm demo:options and the series count, renders blueprint.template.json
+via the new blueprint.mjs (renderBlueprint/releaseFromPluginHeader/
+verifyArgs), writes the three .github/ outputs, runs checkDemoOutputs()
+(new in demo-checks.mjs), and supports --check-determinism (re-runs into
+a temp dir, byte-compares). check-demo.mjs now requires the three .github/
+outputs (REQUIRE_OUTPUTS=true).
+
+Found and fixed two real determinism bugs only visible by actually running
+the pipeline: page items' post_date/pubDate come from wall-clock (no
+explicit date on insert) -- wxr.mjs now flattens them to a fixed sentinel
+for post_type=page; ttm_books[].series_id is a raw unremapped term id like
+cover_id -- DemoCommand::options() now zeroes it too. Also discovered
+dynamically import()-ing an .mjs that itself statically imports
+node:module's createRequire breaks Jest ("Must use import to load ES
+Module") -- avoided jsdom in demo-checks.mjs entirely (dependency-free
+tag-balance well-formedness check) and duplicated wxr.mjs's small
+countItems/attachmentBasenames helpers locally rather than cross-importing.
+
+Verified: npm run demo:build and npm run demo:build -- --check-determinism
+both pass (byte-identical); npm run check:demo clean on the committed
+.github/ files; grep -c "<item>" .github/demo-content.xml = 124; no
+localhost/127.0.0.1/:8888/e-mail in any output; composer lint/test:unit,
+npm run lint/test:unit clean; full test:integration 629 tests OK;
+forbidden-patterns.sh clean; git status --porcelain docs/fixtures empty.
