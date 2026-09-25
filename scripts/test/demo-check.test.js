@@ -1,12 +1,13 @@
 /**
- * Tests for the P2-06 demo:check pure helpers (scripts/demo/lib/check-assertions.mjs,
- * scripts/demo/lib/local-variant.mjs).
+ * Tests for the P2-06/R1-01 demo:check pure helpers (scripts/demo/lib/check-assertions.mjs,
+ * scripts/demo/lib/local-variant.mjs, scripts/demo/lib/boot.mjs).
  */
 
 const path = require( 'path' );
 
 let checkPages;
 let localBlueprint;
+let isReady;
 
 beforeAll( async () => {
 	const assertions = await import(
@@ -18,6 +19,11 @@ beforeAll( async () => {
 		path.join( __dirname, '..', 'demo', 'lib', 'local-variant.mjs' )
 	);
 	localBlueprint = variant.localBlueprint;
+
+	const boot = await import(
+		path.join( __dirname, '..', 'demo', 'lib', 'boot.mjs' )
+	);
+	isReady = boot.isReady;
 } );
 
 const SECTIONS = [
@@ -103,16 +109,19 @@ describe( 'checkPages', () => {
 		expect( checkPages( conformingPages() ) ).toEqual( [] );
 	} );
 
-	it( 'skipAttachmentChecks skips both demo-photograph assertions (local Playground variant)', () => {
+	it( 'always asserts the lead and article demo photographs (no skip option)', () => {
 		const pages = conformingPages( {
 			front: { html: frontHtml( { withLeadImage: false } ) },
 			article: { html: articleHtml( { withHeroImage: false } ) },
 		} );
 
-		expect( checkPages( pages, { skipAttachmentChecks: true } ) ).toEqual(
-			[]
+		const failures = checkPages( pages );
+		expect( failures.join( '\n' ) ).toMatch(
+			/front: no demo photograph in \.ttm-lead__media img/
 		);
-		expect( checkPages( pages ).length ).toBeGreaterThan( 0 );
+		expect( failures.join( '\n' ) ).toMatch(
+			/article: no demo photograph in \.wp-block-post-featured-image img/
+		);
 	} );
 
 	it( 'fails on a non-200 status', () => {
@@ -272,10 +281,16 @@ describe( 'localBlueprint', () => {
 		);
 		expect( importWxr.fetchAttachments ).toBe( true );
 
-		// setSiteOptions and a wp-cli step with no --attachments mention are untouched.
-		expect( rewritten.steps[ 0 ] ).toEqual( blueprint.steps[ 0 ] );
-		expect( rewritten.steps[ 3 ] ).toEqual( blueprint.steps[ 3 ] );
-		expect( rewritten.steps[ 5 ] ).toEqual( blueprint.steps[ 5 ] );
+		// setSiteOptions and a wp-cli step with no --attachments mention are untouched
+		// (indices shift by two once the mkdir/writeFile steps are inserted before importWxr).
+		expect(
+			rewritten.steps.find( ( step ) => 'setSiteOptions' === step.step )
+		).toEqual( blueprint.steps[ 0 ] );
+		expect(
+			rewritten.steps.filter( ( step ) => 'wp-cli' === step.step )
+		).toEqual(
+			blueprint.steps.filter( ( step ) => 'wp-cli' === step.step )
+		);
 
 		// The original is not mutated.
 		expect( blueprint.steps[ 1 ].pluginData.url ).toContain(
@@ -283,7 +298,7 @@ describe( 'localBlueprint', () => {
 		);
 	} );
 
-	it( "zeroes demo:verify's --attachments count (fetchAttachments never works against the local server)", () => {
+	it( "keeps demo:verify's --attachments count unchanged", () => {
 		const stringForm = {
 			steps: [
 				{
@@ -298,7 +313,7 @@ describe( 'localBlueprint', () => {
 			'http://127.0.0.1:1'
 		);
 		expect( rewrittenString.steps[ 0 ].command ).toBe(
-			'wp ttm demo:verify --posts=107 --pages=4 --series=7 --attachments=0'
+			'wp ttm demo:verify --posts=107 --pages=4 --series=7 --attachments=13'
 		);
 
 		const arrayForm = {
@@ -318,11 +333,64 @@ describe( 'localBlueprint', () => {
 			'http://127.0.0.1:1'
 		);
 		expect( rewrittenArray.steps[ 0 ].command[ 2 ] ).toContain(
-			'--attachments=0'
-		);
-		expect( rewrittenArray.steps[ 0 ].command[ 2 ] ).not.toContain(
 			'--attachments=13'
 		);
-		expect( rewrittenArray.steps[ 0 ].command[ 0 ] ).toBe( 'wp' );
+	} );
+
+	it( 'adds the loopback-allow mu-plugin step before importWxr and only in the local variant', () => {
+		const blueprint = {
+			steps: [
+				{ step: 'setSiteOptions', options: {} },
+				{
+					step: 'importWxr',
+					file: { resource: 'url', url: 'https://example.com/x.xml' },
+					fetchAttachments: true,
+				},
+				{ step: 'wp-cli', command: 'wp ttm demo:verify --posts=1' },
+			],
+		};
+
+		const rewritten = localBlueprint( blueprint, 'http://127.0.0.1:54321' );
+
+		const stepNames = rewritten.steps.map( ( step ) => step.step );
+		expect( stepNames ).toEqual( [
+			'setSiteOptions',
+			'mkdir',
+			'writeFile',
+			'importWxr',
+			'wp-cli',
+		] );
+
+		const mkdirStep = rewritten.steps[ 1 ];
+		expect( mkdirStep.path ).toBe( '/wordpress/wp-content/mu-plugins' );
+
+		const writeFileStep = rewritten.steps[ 2 ];
+		expect( writeFileStep.path ).toContain(
+			'/wordpress/wp-content/mu-plugins/'
+		);
+		expect( writeFileStep.data ).toContain( '127.0.0.1' );
+		expect( writeFileStep.data ).toContain( '54321' );
+		expect( writeFileStep.data ).toContain(
+			'http_request_host_is_external'
+		);
+		expect( writeFileStep.data ).toContain( 'http_allowed_safe_ports' );
+
+		// The template/.github blueprint (no local rewrite) has no such step -- confirmed by
+		// asserting the original object passed in is untouched.
+		expect(
+			blueprint.steps.some( ( step ) => 'mkdir' === step.step )
+		).toBe( false );
+	} );
+} );
+
+describe( 'isReady', () => {
+	it( 'is false for output before the CLI ready line and true once it contains "WordPress is running on"', () => {
+		expect( isReady( '' ) ).toBe( false );
+		expect( isReady( 'Booting...\nInstalling plugin...\n' ) ).toBe( false );
+		expect(
+			isReady(
+				'Booting...\nWordPress is running on http://127.0.0.1:9400\n'
+			)
+		).toBe( true );
 	} );
 } );

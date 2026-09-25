@@ -2,22 +2,19 @@
 /* eslint-disable no-console */
 /**
  * `npm run demo:check [-- --from <dir>] [--url <site>] [--keep]` (SPEC §3.2 rule 57, §6.4,
- * P2-06). Boots the blueprint headless against zips and WXR built from the current tree and
- * asserts the §6.4 pages. `--url` skips Playground entirely and asserts against a running site
- * (e.g. the seeded wp-env). Network only to the Playground CDN (for WordPress itself) and to
+ * P2-06, R1-01). Boots the blueprint headless against zips and WXR built from the current tree
+ * and asserts the §6.4 pages. `--url` skips Playground entirely and asserts against a running
+ * site (e.g. the seeded wp-env). Network only to the Playground CDN (for WordPress itself) and to
  * this script's own local static server (rule 54).
  *
- * Known limitation (P2-08, `docs/spikes/P2-01.md` "Playground result"): a headless boot against
- * the real demo content sometimes serves query-driven content (the lead post, the series strip,
- * individual post/page permalinks) from a stale, empty-looking state even after the front page's
- * own readiness probe passes, apparently because the blueprint's own post-import `wp eval` step
- * and the page-fetching HTTP requests that follow can land on *different* worker processes, each
- * with its own copy of WordPress's default non-persistent object cache. `--workers=1` (forcing
- * every request onto the same process) fixed this when it worked, but also reproduced the CLI's
- * own documented deadlock risk ("may increase the likelihood of deadlock... blocking on file
- * locks") as a real, several-times-reproduced indefinite hang -- worse than the content gap it
- * fixes for a release gate, so it isn't used here. `--url` mode (a real site, no worker pool) is
- * unaffected and remains the reliable path.
+ * R1-01: the previous version resolved boot readiness by polling the front page's HTML for a
+ * marker class, which raced the blueprint's own last step (the post-import `wp eval` rebuild +
+ * `demo:verify`): the CLI's worker pool starts answering requests before that step finishes, so
+ * a page fetched too early can return 200 while still serving pre-import, empty-looking content.
+ * `waitForBoot()` now waits for the CLI process itself to print its own "WordPress is running on"
+ * ready line (`scripts/demo/lib/boot.mjs`'s `isReady()`) -- which the CLI only emits after every
+ * blueprint step has completed -- and only then makes one sanity-check GET of `/`. This removes
+ * the race entirely; no `--workers` tuning or object-cache workaround is needed.
  */
 import { execFileSync, spawn } from 'node:child_process';
 import {
@@ -32,12 +29,12 @@ import { createServer } from 'node:http';
 import { createServer as createNetServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { extname, join } from 'node:path';
+import { isReady } from './lib/boot.mjs';
 import { checkPages } from './lib/check-assertions.mjs';
 import { localBlueprint } from './lib/local-variant.mjs';
 import { rebaseAttachmentUrls } from './lib/wxr.mjs';
 
 const PLAYGROUND_BOOT_TIMEOUT_MS = 600000;
-const BOOT_POLL_INTERVAL_MS = 2000;
 
 const IMAGE_RAW_BASE =
 	'https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images';
@@ -198,67 +195,73 @@ async function fetchWithCookies( url, jar ) {
 }
 
 /**
- * Poll a URL until the *real* seeded front page renders (not just "the HTTP server answers") or
- * the process exits/times out. Playground's workers start accepting requests while the
- * blueprint's later steps (the `wp eval` importing/rebuilding content) may still be running --
- * confirmed directly: resolving on the first sub-500 response raced ahead of that step and
- * asserted against a still-empty site every time. `.ttm-cell-heading__label` only ever appears
- * once the theme's front-page template renders real section content, so it doubles as the
- * readiness probe.
+ * Wait for the spawned Playground CLI process to print its own ready line (`isReady()`, R1-01)
+ * -- which only happens after every blueprint step, including the final post-import rebuild, has
+ * completed -- then make one sanity-check GET of `url` to confirm the site actually answers.
+ * Rejects if the process exits first or the ready line never appears within
+ * `PLAYGROUND_BOOT_TIMEOUT_MS`.
  *
- * @param {string}                                    url  URL to poll.
+ * @param {string}                                    url  URL to sanity-check once ready.
  * @param {import('node:child_process').ChildProcess} proc Playground server process.
  * @param {ReturnType<createCookieJar>}               jar  Shared cookie jar.
- * @return {Promise<void>} Resolves once the front page has real content; rejects on timeout or
- *   process exit.
+ * @return {Promise<void>} Resolves once the ready line has appeared and the sanity GET succeeds;
+ *   rejects on timeout, process exit, or a non-200 sanity GET.
  */
 function waitForBoot( url, proc, jar ) {
 	return new Promise( ( resolve, reject ) => {
-		let exited = false;
-		let exitOutput = '';
-		proc.stdout.on( 'data', ( chunk ) => {
-			exitOutput += chunk.toString();
-		} );
-		proc.stderr.on( 'data', ( chunk ) => {
-			exitOutput += chunk.toString();
-		} );
+		let output = '';
+		let settled = false;
+
+		const finish = ( fn, arg ) => {
+			if ( settled ) {
+				return;
+			}
+			settled = true;
+			clearTimeout( timeoutHandle );
+			fn( arg );
+		};
+
+		const onData = ( chunk ) => {
+			output += chunk.toString();
+			if ( isReady( output ) ) {
+				proc.stdout.off( 'data', onData );
+				proc.stderr.off( 'data', onData );
+				fetchWithCookies( url, jar )
+					.then( ( response ) => {
+						if ( 200 !== response.status ) {
+							finish(
+								reject,
+								new Error(
+									`Playground server answered ${ response.status } for ${ url } after reporting ready`
+								)
+							);
+							return;
+						}
+						finish( resolve );
+					} )
+					.catch( ( error ) => finish( reject, error ) );
+			}
+		};
+
+		proc.stdout.on( 'data', onData );
+		proc.stderr.on( 'data', onData );
 		proc.on( 'exit', ( code ) => {
-			exited = true;
-			reject(
+			finish(
+				reject,
 				new Error(
-					`Playground server exited (code ${ code }) before booting:\n${ exitOutput }`
+					`Playground server exited (code ${ code }) before booting:\n${ output }`
 				)
 			);
 		} );
 
-		const start = Date.now();
-		const poll = async () => {
-			if ( exited ) {
-				return;
-			}
-			try {
-				const response = await fetchWithCookies( url, jar );
-				if ( 200 === response.status ) {
-					const html = await response.text();
-					if ( html.includes( 'ttm-cell-heading__label' ) ) {
-						resolve();
-						return;
-					}
-				}
-			} catch {
-				// Not up yet.
-			}
-			if ( Date.now() - start > PLAYGROUND_BOOT_TIMEOUT_MS ) {
-				reject(
-					new Error(
-						`Playground server did not boot within ${ PLAYGROUND_BOOT_TIMEOUT_MS }ms`
-					)
-				);
-				return;
-			}
-			setTimeout( poll, BOOT_POLL_INTERVAL_MS );
-		};
-		poll();
+		const timeoutHandle = setTimeout( () => {
+			finish(
+				reject,
+				new Error(
+					`Playground server did not print the ready line within ${ PLAYGROUND_BOOT_TIMEOUT_MS }ms:\n${ output }`
+				)
+			);
+		}, PLAYGROUND_BOOT_TIMEOUT_MS );
 	} );
 }
 
@@ -291,18 +294,13 @@ async function fetchPages( base, jar ) {
 /**
  * Run the checks against an already-running site (`--url`), no Playground involved.
  *
- * @param {string}                      url                    Site base URL.
- * @param {ReturnType<createCookieJar>} [jar]                  Cookie jar (a fresh one when omitted).
- * @param {boolean}                     [skipAttachmentChecks] Passed through to `checkPages()`.
+ * @param {string}                      url   Site base URL.
+ * @param {ReturnType<createCookieJar>} [jar] Cookie jar (a fresh one when omitted).
  * @return {Promise<string[]>} Failures.
  */
-async function checkAgainstUrl(
-	url,
-	jar = createCookieJar(),
-	skipAttachmentChecks = false
-) {
+async function checkAgainstUrl( url, jar = createCookieJar() ) {
 	const pages = await fetchPages( url.replace( /\/$/, '' ), jar );
-	return checkPages( pages, { skipAttachmentChecks } );
+	return checkPages( pages );
 }
 
 /**
@@ -374,7 +372,7 @@ async function checkAgainstPlayground( fromDir, keep ) {
 		const jar = createCookieJar();
 		await waitForBoot( `${ siteUrl }/`, playgroundProc, jar );
 
-		const failures = await checkAgainstUrl( siteUrl, jar, true );
+		const failures = await checkAgainstUrl( siteUrl, jar );
 
 		if ( keep ) {
 			console.log(

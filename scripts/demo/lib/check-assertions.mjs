@@ -91,25 +91,19 @@ function checkCommon( name, page ) {
 
 /**
  * SPEC §6.4's four page checks: `front`, `article`, `series`, `writing`, each
- * `{status, html}`.
+ * `{status, html}`. Every assertion, including the two "has a real demo photograph" checks,
+ * always runs: R1-01 gives the local Playground variant a loopback-allow mu-plugin so its
+ * `importWxr` step actually fetches attachment binaries, so there is no longer a variant where
+ * a demo photograph is expected to be absent.
  *
- * @param {Object}                         pages                          Fetched pages.
- * @param {{status: number, html: string}} pages.front                    Front page.
- * @param {{status: number, html: string}} pages.article                  Article page.
- * @param {{status: number, html: string}} pages.series                   Series index page.
- * @param {{status: number, html: string}} pages.writing                  Writing page.
- * @param {Object}                         [options]                      Options.
- * @param {boolean}                        [options.skipAttachmentChecks] Skip the two "has a real demo photograph"
- *                                                                        assertions -- P2-01's spike confirmed Playground's `importWxr` `fetchAttachments` never
- *                                                                        downloads a binary from a bare `127.0.0.1` static server, so the local-variant check
- *                                                                        (`check.mjs` without `--url`) genuinely never has one to find; `--url` mode (a real site)
- *                                                                        keeps this check on.
+ * @param {Object}                         pages         Fetched pages.
+ * @param {{status: number, html: string}} pages.front   Front page.
+ * @param {{status: number, html: string}} pages.article Article page.
+ * @param {{status: number, html: string}} pages.series  Series index page.
+ * @param {{status: number, html: string}} pages.writing Writing page.
  * @return {string[]} Every failure across all four pages (empty = pass).
  */
-export function checkPages(
-	{ front, article, series, writing },
-	{ skipAttachmentChecks = false } = {}
-) {
+export function checkPages( { front, article, series, writing } ) {
 	const failures = [
 		...checkCommon( 'front', front ),
 		...checkCommon( 'article', article ),
@@ -117,10 +111,7 @@ export function checkPages(
 		...checkCommon( 'writing', writing ),
 	];
 
-	if (
-		! skipAttachmentChecks &&
-		! hasDemoImageIn( front.html, 'ttm-lead__media' )
-	) {
+	if ( ! hasDemoImageIn( front.html, 'ttm-lead__media' ) ) {
 		failures.push( 'front: no demo photograph in .ttm-lead__media img' );
 	}
 
@@ -142,10 +133,7 @@ export function checkPages(
 		);
 	}
 
-	if (
-		! skipAttachmentChecks &&
-		! hasDemoImageIn( article.html, 'wp-block-post-featured-image' )
-	) {
+	if ( ! hasDemoImageIn( article.html, 'wp-block-post-featured-image' ) ) {
 		failures.push(
 			'article: no demo photograph in .wp-block-post-featured-image img'
 		);
