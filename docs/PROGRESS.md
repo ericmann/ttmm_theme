@@ -36,7 +36,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] R1-01 demo:check waits for the blueprint to finish; Playground photo assertions restored
 - [x] R1-02 Demo photographs meet OPENVERSE_MIN_WIDTH; demo-lead-photo back to ≥ 1200
 - [x] R1-03 Tests for three survived mutations (demo:verify term meta, owner-name Author scope, zip src/editor)
-- [ ] R1-04 Close-out: regenerate demo outputs and screenshots, fix HANDOFF, CI green including demo:check
+- [x] R1-04 Close-out: regenerate demo outputs and screenshots, fix HANDOFF, CI green including demo:check
 
 ## Log
 (one entry per task, appended by implement)
@@ -514,3 +514,14 @@ Added exactly one targeted test per survived mutation (review F4), each manually
 - release-pack.test.js "pluginFiles drops non-JS files under src/editor" -- src/editor/panel.json and src/editor/style.css; kills the src/editor/ -> src/editorX/ typo mutation (both files would otherwise slip through since neither ends in .js).
 
 No source bugs found; test-only change. Verified: composer lint, npm run lint, npm run test:unit, npm run test:integration (630/630, was 629).
+
+### R1-04 — 0079196
+Regenerated .github/demo-content.xml (npm run demo:build), confirmed byte-identical on a second run (--check-determinism ok). Ran npm run env:seed -- --reset, npm run screenshots -- --readme (8 README screenshots), npm run screenshots (6 owner phase-5 screenshots). npm run check:demo clean throughout.
+
+docs/HANDOFF.md rewritten per task spec: added a "Round 1 (review fixes)" section explaining the real boot-readiness-race cause (not per-worker/Redis) and the SSRF-guard attachment fix; deleted the "Known limitation"/"CI's one red step" section entirely; updated Measurements (demo images now 2,790,264 bytes total, every one 1600px wide; article-1280.png screenshot needed the palette fallback this run); removed stale Redis/`--workers=1` wording from spike findings and interpretation bullets, replacing with the real R1-01 cause; P2-06 manual-check line now reads plainly as `demo:check -- --keep` + click-through; owner step 5 no longer says the Playground link isn't CI-guaranteed.
+
+Found and fixed a real bug while verifying: `scripts/demo/check.mjs`'s `main()` had no `process.exit(0)` on its success path (only the failure paths did) -- a killed npx-spawned Playground child can leave the real CLI grandchild's stdio pipes or a pooled fetch() connection open, keeping the parent script alive indefinitely after printing "demo:check: ok". This is what made CI hang for over an hour on the first R1-04 push (cancelled it: run 36134814876). Added the explicit `process.exit(0)`, verified locally (~95s full run, exit 0, --keep still leaves the server running and reachable, --url mode unaffected), and pushed as a second commit. Not in R1-04's original Files touched list but directly blocks this task's own "CI green including the demo step" goal, so fixed here per standing instruction.
+
+Verified: full lint, test:unit, test:integration (630/630), test:e2e (501 passed/1 skipped) all green locally; npm run env:drill OK (104 posts, 5 page hashes unchanged); npm audit and composer audit both clean. Pushed twice; CI run 36141623788 (push) and 36141626990 (pull_request) both completed green, including wp-env integration's demo:check step and Playwright + axe. git status --porcelain is empty except docs/PROGRESS.md's own in-progress marker.
+
+Manual check: NOT VERIFIED (human) -- owner reviews the re-fetched photographs and regenerated screenshots, runs npm run demo:check -- --keep and clicks through the four SPEC §6.4 pages and the post editor.
