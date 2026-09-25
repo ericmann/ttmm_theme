@@ -18,7 +18,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P1-04 Fixture photographs: featured_image, alt and caption values
 - [x] P1-05 Story tile cover class; demo rows green; drill still deterministic
 - [x] P1-06 Phase 1 screenshots and push
-- [ ] P2-01 Spike: export term definitions, Playground import and CLI server shape
+- [x] P2-01 Spike: export term definitions, Playground import and CLI server shape
 - [ ] P2-02 DemoCommand (demo:options, demo:verify) and seed --now
 - [ ] P2-03 wxr.mjs: pure WXR normalisation
 - [ ] P2-04 build.mjs, blueprint template and the committed demo outputs
@@ -160,3 +160,24 @@ test:e2e, and env:drill were re-confirmed green as part of P1-05.
 Committed and pushed refine/2026-09-24 to origin (eb710e1).
 Manual check: NOT VERIFIED (human) — owner reviews the 13 demo photos and
 the six phase-5 screenshots for fit/crop/taste per the task's own note.
+
+### P2-01 — 6349703
+Ran the three wp export invocations against wp-env, and a hand-built
+two-item WXR against a local node:http server + @wp-playground/cli server
+(v3.1.55), to answer all four spike questions. Key findings, both
+correcting PLAN assumptions: (1) `wp export` never emits `<wp:termmeta>`
+in any invocation -- confirmed by grepping the bundled export-command
+phar itself, zero matches -- so series term meta cannot come from `wp
+export` alone; build.mjs must inject it post-export. (2) Playground's
+importWxr with fetchAttachments:true never fetched the attachment binary
+from a bare 127.0.0.1 static server (confirmed via server access log and
+/wp/v2/media returning []), while the WXR fetch itself and term-meta
+preservation (confirmed via mount + wp eval, since successful wp-cli step
+stdout isn't echoed) both worked correctly. Also noted a successful
+wp-cli blueprint step's output is silent at any verbosity (only failures
+print). Measured boot time ~46s warm / ~90s cold-ish, well inside the
+planned 600000ms timeout. Wrote docs/spikes/P2-01.md with Question/
+Method/Findings/Decision sections naming the export command (no-filter
+wp export + injected termmeta) and the server command line for check.mjs.
+Verified: forbidden-patterns.sh clean; git status --porcelain shows only
+the spike file; no scratch files (WXR/zips) committed under docs/.
