@@ -3,8 +3,8 @@
 Branch `refine/2026-09-24` from `main`. This flight fixed the four owner-reported defects from
 phase 4, then built a full demo/open-source pipeline: real committed photographs, a generated
 WordPress Playground blueprint, a public README, a tagged release workflow, and CI wiring for
-all of it. 28 of 30 planned tasks are done; this document and the final screenshot/seed refresh
-(P4-03) close the flight.
+all of it. All 30 originally planned tasks plus four review-fix (`R1-*`) tasks are done; this
+document and the final screenshot/seed refresh close the flight.
 
 ## What changed, by phase
 
@@ -34,7 +34,30 @@ writes the three committed `.github/` outputs; `scripts/release/pack.mjs` builds
 plugin/theme zips; `scripts/demo/check.mjs` boots the blueprint headless in Playground (or checks
 a real site with `--url`) and asserts the SPEC §6.4 pages. CI runs the build/determinism/check
 steps after the drill. Four real bugs were found and fixed only by actually running the full
-pipeline against real content (see below); one gap remains open (see "Known limitation").
+pipeline against real content (see below).
+
+**Round 1 (review fixes) — the headless boot race and the real F3 cause.** `npm run demo:check`
+(no `--url`) was red in CI: `waitForBoot()` resolved on the front page's own HTML looking
+populated, which raced the blueprint's own final `wp eval` rebuild step — the worker pool starts
+answering requests before that step finishes, so the article/series/writing pages fetched right
+after could still hit pre-import state even though the front page's own probe had already passed.
+`scripts/demo/lib/boot.mjs`'s `isReady()` now waits for the `@wp-playground/cli` process's own
+"WordPress is running on" line, which the CLI only prints after every blueprint step (including
+the rebuild) has completed; `check.mjs` then makes exactly one sanity GET of `/` before asserting
+any page. Fixing the race also exposed and fixed the local variant's real attachment gap: it
+was never actually a Playground limitation as first believed, but WordPress's own SSRF guard
+(`wp_http_validate_url()`) rejecting the loopback static server by default. The local variant now
+ships a one-off mu-plugin (written by a `mkdir`+`writeFile` step before `importWxr`) that allows
+that run's own host/port through `http_request_host_is_external`/`http_allowed_safe_ports`, so
+attachments import for real in both the local-variant and `--url` paths; the demo-photograph
+assertions in `check-assertions.mjs` now run unconditionally, with no skip option. Separately,
+review F3 found that 8 of the 13 demo photographs had shipped narrower than
+`OPENVERSE_MIN_WIDTH` — Openverse's own search-result `width` metadata disagreed with the file
+its `url` field actually serves for some providers (stocksnap/rawpixel proxy everything through a
+fixed 960w/1024px thumbnail regardless of the claimed width). `acceptEncoded()` now judges the
+real decoded width/bytes after `sharp` re-encoding, not the API's metadata; all 8 flagged photos
+were re-fetched and hand-reviewed for taste. See R1-01/R1-02's task log entries in
+`docs/PROGRESS.md` for the full detail.
 
 **Phase 3 — public-facing.** Eight optimised README screenshots (`npm run screenshots --
 --readme`, `sharp`-compressed under `SCREENSHOT_MAX_BYTES`); the public README (open-in-Playground
@@ -51,40 +74,23 @@ empty; the CSS budget and both security audits recorded; this handoff.
 - **P1-06**: owner reviews the 13 demo photos and the six phase-5 screenshots for fit/crop/taste;
   swap a photo by adding its Openverse id to `scripts/demo/images.json`'s `exclude` array and
   running `npm run demo:fetch-images -- --only=<file>` (documented in `docs/SETUP.md`).
-- **P2-06/P2-07/P2-08/P3-04**: `npm run demo:check` (no `--url`) fails against real headless
-  Playground on a content-rendering gap that does not reproduce against a real site. See "Known
-  limitation" below — this needs a dedicated follow-up before CI's `demo:check` step can be
-  treated as a real release gate.
+- **P2-06/P2-07/P2-08/R1-01**: owner runs `npm run demo:check -- --keep` and clicks through the
+  four §6.4 pages (front, article, series, writing) plus the post editor on the booted Playground
+  instance it leaves running, confirming what CI's automated assertions can't see (visual layout,
+  the lead photo's crop, the editor sidebar).
 - **P3-04**: read `README.md` on GitHub (the branch view) as a stranger — screenshots render,
   links resolve, the Playground link works once `v0.2.0` is tagged and released.
 
-## Known limitation: headless Playground content-rendering gap
-
-`npm run demo:check` (no `--url`) boots the real demo content in WordPress Playground
-successfully (no crash, no timeout — both real bugs fixed this flight, see below) and its own
-internal `wp ttm demo:verify` step passes, but four of the pages it then fetches still show
-incomplete content: the article permalink 404s, and the front page's series strip, the series
-hub, and the Writing page's serial hero all render empty. This **does not** reproduce against a
-real site (`npm run demo:check -- --url http://localhost:8888` is fully green, as is every
-Playwright/PHPUnit test against the real seeded wp-env). It is most likely a discrepancy between
-the blueprint's own `wp eval` step (which runs the post-import rebuild) and the worker process
-that later serves each page request, each with its own copy of WordPress's non-persistent
-per-process object cache — `--workers=1` fixed it when it worked, but reproduced
-`@wp-playground/cli`'s own documented worker/file-lock deadlock warning as a real, repeated,
-indefinite hang, which is worse for a release gate than the content gap. Recorded in
-`docs/spikes/P2-01.md`'s "Playground result" section and `scripts/demo/check.mjs`'s own docblock.
-**This is CI's one red step** (`wp-env integration`'s `npm run demo:check -- --from dist/demo`);
-every other job and every other step in that job is green.
-
 ## Measurements
 
-- **Demo images**: 13 photographs, 1,585,649 bytes total, largest 320,902 bytes — both well under
-  `IMAGE_MAX_BYTES` (350000) and `IMAGE_BUDGET_BYTES` (8000000); neither was tuned.
-- **README screenshots**: all eight fit under `SCREENSHOT_MAX_BYTES` (1500000) with the lossless
-  `sharp` re-compression step alone (no file needed the palette-reduction fallback).
-  `article-1280.png` (the longest page) is the closest to the ceiling, at ~99.8% of the limit —
-  a longer article than the seed's own could tip a future run into the palette fallback, which
-  is expected, not a bug.
+- **Demo images**: 13 photographs, 2,790,264 bytes total, largest 327,407 bytes, every one
+  exactly 1600px wide (R1-02: `OPENVERSE_MIN_WIDTH`, enforced against the real decoded width, not
+  Openverse's own metadata) — both the per-file and total figures stay well under
+  `IMAGE_MAX_BYTES` (350000) and `IMAGE_BUDGET_BYTES` (8000000); neither constant was tuned.
+- **README screenshots**: all eight fit under `SCREENSHOT_MAX_BYTES` (1500000);
+  `article-1280.png` (the longest page, already the closest to the ceiling at the end of the last
+  flight) needed the palette-reduction fallback this time (1,828,005 → 704,453 bytes, ~47% of the
+  limit); every other screenshot fit with the lossless re-compression step alone.
 - **CSS budget**: `ttm.css` is 63090 bytes against a 63488-byte budget at the end of this flight
   (unchanged by this flight's own CSS-free tasks); kept as-is (no >1024-byte shrink to justify
   lowering it).
@@ -119,16 +125,16 @@ every other job and every other step in that job is green.
   content (confirmed with 0/30/124 WXR items, and by removing/reordering steps). The six
   post-import `wp-cli` steps became one combined `wp eval` step calling the same command classes
   directly.
-- **P2-06**: Playground's `fetchAttachments` never downloads a binary from a bare `127.0.0.1`
-  static server (only the WXR file's own fetch works) — the local-variant blueprint's
-  `demo:verify --attachments=<n>` is zeroed, and `checkPages()` skips its "has a real demo
-  photograph" assertions for the local path only (`--url` mode keeps them).
+- **R1-01**: `P2-06`'s `fetchAttachments`-never-downloads finding was itself only half the story
+  — the real cause was WordPress's SSRF guard, not Playground (see spike finding 2 above). Once
+  the local variant's mu-plugin allows its own loopback host, attachments import for real, so the
+  `demo:verify --attachments=<n>` zeroing and `checkPages()`'s skip option were both removed; the
+  assertions run unconditionally in every path.
 - **P2-06**: Node's global `fetch()` doesn't persist cookies across its own automatic
   redirect-following; Playground's `--login` redirects `/` to itself with a `Set-Cookie`, and a
   bare `fetch()` hits "redirect count exceeded" forever. `check.mjs` carries a shared cookie jar
-  across manual redirect-following for every request, and boot-readiness polls for real front-page
-  content rather than any sub-500 response (Playground's workers start accepting requests before
-  the blueprint's own import/rebuild step finishes).
+  across manual redirect-following for every request (boot-readiness itself is R1-01's
+  `isReady()`, waiting for the CLI's own ready line rather than probing any page — see above).
 - **P3-01**: a `clip` screenshot only ever captures what the *current* viewport renders — the
   390×844 phone viewport had to grow to 390×2200 before the phone shots' clipped capture (the same
   technique the pre-existing `range` crop already used).
@@ -151,7 +157,9 @@ pipeline runs entirely outside WordPress.
 1. `wp export` never writes `<wp:termmeta>`, in any invocation — term meta has to be injected
    from a side-channel read of the live site, not carried through the export.
 2. Playground's `importWxr` `fetchAttachments` fetches the WXR file itself fine over a local
-   `127.0.0.1` server, but never actually downloads an attachment binary from one.
+   `127.0.0.1` server, but never actually downloads an attachment binary from one -- later traced
+   (R1-01) to WordPress's own SSRF guard rejecting the loopback host by default, not a Playground
+   limitation; a one-off mu-plugin allowing that host/port fixes it.
 3. Term meta *does* survive `importWxr` intact once it's present in the WXR.
 4. A successful `wp-cli` blueprint step's stdout is never echoed to the CLI's own console, at any
    verbosity — only a failing step's output prints.
@@ -159,8 +167,11 @@ pipeline runs entirely outside WordPress.
    `PLAYGROUND_BOOT_TIMEOUT_MS`.
 6. (P2-07 follow-up) Category descriptions survive `importWxr` unconditionally; the six
    post-import `wp-cli` steps had to become one combined `wp eval` step (a real `php.wasm` memory
-   limit, not content-volume-dependent); `wp_cache_flush()` was needed for some pages to serve
-   real content at all (Playground's default Redis object cache).
+   limit, not content-volume-dependent).
+7. (R1-01 follow-up) The real cause of the once-red `demo:check` step was a boot-readiness race,
+   not per-worker object-cache splitting: the CLI's worker pool starts answering requests before
+   the blueprint's own last step (the combined `wp eval` rebuild) finishes. Waiting for the CLI
+   process's own "WordPress is running on" ready line before fetching any page removes the race.
 
 ## Owner steps
 
@@ -174,8 +185,8 @@ pipeline runs entirely outside WordPress.
    GitHub Release (not a draft, with generated notes).
 4. Confirm the two release assets (`ttm-core.zip`, `ttm-theme.zip`) are attached and each unpacks
    to one top-level directory.
-5. Open the README's "Open in WordPress Playground" link and confirm it boots successfully — see
-   "Known limitation" above; this is not guaranteed by CI today.
+5. Open the README's "Open in WordPress Playground" link and confirm it boots successfully; CI's
+   integration job now runs `npm run demo:check` (no `--url`) as a real gate (R1-01).
 6. Approve or swap any of the 13 demo photographs (`docs/SETUP.md`'s "Replacing a demo
    photograph" section has the steps).
 7. Confirm the verse-sample licence note in `docs/fixtures/demo/LICENSE.md` (the sample verse is

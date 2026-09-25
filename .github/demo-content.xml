@@ -1017,13 +1017,13 @@
   </wp:postmeta>
 </item>
 <item>
-  <title><![CDATA[A yellow network cable with its RJ45 connector in close-up]]></title>
+  <title><![CDATA[A macro photograph of illuminated blue and white fiber optic cable strands]]></title>
   <link>https://example.com</link>
   <pubDate>Fri, 25 Sep 2026 19:00:00 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-signing-your-options-table.jpg</guid>
   <description/>
-  <content:encoded><![CDATA[Photograph: Network Cable by Lenharth Systems (CC0), via Openverse: https://stocksnap.io/photo/network-cable-QVKM5X26VN]]></content:encoded>
+  <content:encoded><![CDATA[Photograph: Fiber Optical Cable by chaitawat (CC0), via Openverse: https://commons.wikimedia.org/w/index.php?curid=79709434]]></content:encoded>
   <excerpt:encoded><![CDATA[Every signed request still travels down a cable like this one — trust the signature, not the wire.]]></excerpt:encoded>
   <wp:post_id>1007</wp:post_id>
   <wp:post_date>2026-09-25 12:00:00</wp:post_date>
@@ -1032,7 +1032,7 @@
   <wp:post_modified_gmt>2026-09-25 19:00:00</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
-  <wp:post_name>a-yellow-network-cable-with-its-rj45-connector-in-close-up</wp:post_name>
+  <wp:post_name>a-macro-photograph-of-illuminated-blue-and-white-fiber-optic-cable-strands</wp:post_name>
   <wp:status>inherit</wp:status>
   <wp:post_parent>1006</wp:post_parent>
   <wp:menu_order>0</wp:menu_order>
@@ -1042,7 +1042,7 @@
   <wp:attachment_url>https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-signing-your-options-table.jpg</wp:attachment_url>
       <wp:postmeta>
     <wp:meta_key>_wp_attachment_image_alt</wp:meta_key>
-    <wp:meta_value><![CDATA[A yellow network cable with its RJ45 connector in close-up]]></wp:meta_value>
+    <wp:meta_value><![CDATA[A macro photograph of illuminated blue and white fiber optic cable strands]]></wp:meta_value>
   </wp:postmeta>
   </item>
 <item>
@@ -1177,13 +1177,13 @@
   </wp:postmeta>
   </item>
 <item>
-  <title><![CDATA[A macro photograph of a circuit board's gold connector pins]]></title>
+  <title><![CDATA[The disassembled circuit board and shell of a computer mouse]]></title>
   <link>https://example.com</link>
   <pubDate>Fri, 25 Sep 2026 19:00:00 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-technology-post-2.jpg</guid>
   <description/>
-  <content:encoded><![CDATA[Photograph: Circuit Macro by Lenharth Systems (CC0), via Openverse: https://stocksnap.io/photo/circuit-macro-MADL8CN3KW]]></content:encoded>
+  <content:encoded><![CDATA[Photograph: File:Mouse printed circuit board both sides IMG 0959a.JPG by Own work (CC0), via Openverse: https://commons.wikimedia.org/w/index.php?curid=14366124]]></content:encoded>
   <excerpt:encoded><![CDATA[A pipeline is just circuitry with better error messages, most days.]]></excerpt:encoded>
   <wp:post_id>1009</wp:post_id>
   <wp:post_date>2026-09-25 12:00:00</wp:post_date>
@@ -1192,7 +1192,7 @@
   <wp:post_modified_gmt>2026-09-25 19:00:00</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
-  <wp:post_name>a-macro-photograph-of-a-circuit-boards-gold-connector-pins</wp:post_name>
+  <wp:post_name>the-disassembled-circuit-board-and-shell-of-a-computer-mouse</wp:post_name>
   <wp:status>inherit</wp:status>
   <wp:post_parent>1008</wp:post_parent>
   <wp:menu_order>0</wp:menu_order>
@@ -1202,7 +1202,7 @@
   <wp:attachment_url>https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-technology-post-2.jpg</wp:attachment_url>
       <wp:postmeta>
     <wp:meta_key>_wp_attachment_image_alt</wp:meta_key>
-    <wp:meta_value><![CDATA[A macro photograph of a circuit board's gold connector pins]]></wp:meta_value>
+    <wp:meta_value><![CDATA[The disassembled circuit board and shell of a computer mouse]]></wp:meta_value>
   </wp:postmeta>
   </item>
 <item>
@@ -1317,13 +1317,13 @@
   </wp:postmeta>
   </item>
 <item>
-  <title><![CDATA[A desk with a laptop, a vintage typewriter and a reading lamp]]></title>
+  <title><![CDATA[Close-up of vintage typewriter keys resting over a rainbow-colored fan]]></title>
   <link>https://example.com</link>
   <pubDate>Fri, 25 Sep 2026 19:00:00 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-php-85-readonly-classes.jpg</guid>
   <description/>
-  <content:encoded><![CDATA[Photograph: Digital Clock by Burst (CC0), via Openverse: https://stocksnap.io/photo/digital-clock-0NV2FAVPAX]]></content:encoded>
+  <content:encoded><![CDATA[Photograph: Rainbow fan sitting under black old fashioned typewriter keyboard keys. by Danielle Zarcaro (CC0), via Openverse: https://wordpress.org/photos/photo/90568630b0/]]></content:encoded>
   <excerpt:encoded><![CDATA[The old machine and the new one agree: once written, some things should stay that way.]]></excerpt:encoded>
   <wp:post_id>1011</wp:post_id>
   <wp:post_date>2026-09-25 12:00:00</wp:post_date>
@@ -1332,7 +1332,7 @@
   <wp:post_modified_gmt>2026-09-25 19:00:00</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
-  <wp:post_name>a-desk-with-a-laptop-a-vintage-typewriter-and-a-reading-lamp</wp:post_name>
+  <wp:post_name>close-up-of-vintage-typewriter-keys-resting-over-a-rainbow-colored-fan</wp:post_name>
   <wp:status>inherit</wp:status>
   <wp:post_parent>1010</wp:post_parent>
   <wp:menu_order>0</wp:menu_order>
@@ -1342,7 +1342,7 @@
   <wp:attachment_url>https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-php-85-readonly-classes.jpg</wp:attachment_url>
       <wp:postmeta>
     <wp:meta_key>_wp_attachment_image_alt</wp:meta_key>
-    <wp:meta_value><![CDATA[A desk with a laptop, a vintage typewriter and a reading lamp]]></wp:meta_value>
+    <wp:meta_value><![CDATA[Close-up of vintage typewriter keys resting over a rainbow-colored fan]]></wp:meta_value>
   </wp:postmeta>
   </item>
 <item>
@@ -1546,13 +1546,13 @@
   </wp:postmeta>
   </item>
 <item>
-  <title><![CDATA[A padlock and chain securing a weathered green gate]]></title>
+  <title><![CDATA[A chain looped through two hooks securing a canal lock gate]]></title>
   <link>https://example.com</link>
   <pubDate>Fri, 25 Sep 2026 19:00:00 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-composer-lockfiles-are-a-security-control.jpg</guid>
   <description/>
-  <content:encoded><![CDATA[Photograph: Chain Links by Leeroy (CC0), via Openverse: https://stocksnap.io/photo/chain-links-AD76394B17]]></content:encoded>
+  <content:encoded><![CDATA[Photograph: Padlocked lower gates, Claydon Top Lock, Oxford Canal, Claydon, Oxfordshire - August 2025 by Mertbiol (CC0), via Openverse: https://commons.wikimedia.org/w/index.php?curid=171819145]]></content:encoded>
   <excerpt:encoded><![CDATA[A lockfile is exactly this: one specific thing, kept from changing without asking.]]></excerpt:encoded>
   <wp:post_id>1014</wp:post_id>
   <wp:post_date>2026-09-25 12:00:00</wp:post_date>
@@ -1561,7 +1561,7 @@
   <wp:post_modified_gmt>2026-09-25 19:00:00</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
-  <wp:post_name>a-padlock-and-chain-securing-a-weathered-green-gate</wp:post_name>
+  <wp:post_name>a-chain-looped-through-two-hooks-securing-a-canal-lock-gate</wp:post_name>
   <wp:status>inherit</wp:status>
   <wp:post_parent>1013</wp:post_parent>
   <wp:menu_order>0</wp:menu_order>
@@ -1571,7 +1571,7 @@
   <wp:attachment_url>https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-composer-lockfiles-are-a-security-control.jpg</wp:attachment_url>
       <wp:postmeta>
     <wp:meta_key>_wp_attachment_image_alt</wp:meta_key>
-    <wp:meta_value><![CDATA[A padlock and chain securing a weathered green gate]]></wp:meta_value>
+    <wp:meta_value><![CDATA[A chain looped through two hooks securing a canal lock gate]]></wp:meta_value>
   </wp:postmeta>
   </item>
 <item>
@@ -1763,13 +1763,13 @@
   </wp:postmeta>
   </item>
 <item>
-  <title><![CDATA[A storage room lined with shelves, boxes and file cabinets]]></title>
+  <title><![CDATA[Empty wooden bookshelves against a bare concrete wall]]></title>
   <link>https://example.com</link>
   <pubDate>Fri, 25 Sep 2026 19:00:00 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-transients-object-caches-and-fast-enough.jpg</guid>
   <description/>
-  <content:encoded><![CDATA[Photograph: C & P Tel. Co by libraryofcongress (CC0), via Openverse: https://www.rawpixel.com/image/7002416/tel-co]]></content:encoded>
+  <content:encoded><![CDATA[Photograph: A wooden bookshelf with empty shelves, set against a textured concrete wall. by Nilo Velez (CC0), via Openverse: https://wordpress.org/photos/photo/583682723b/]]></content:encoded>
   <excerpt:encoded><![CDATA[Somewhere in here is the thing you cached and never checked again.]]></excerpt:encoded>
   <wp:post_id>1017</wp:post_id>
   <wp:post_date>2026-09-25 12:00:00</wp:post_date>
@@ -1778,7 +1778,7 @@
   <wp:post_modified_gmt>2026-09-25 19:00:00</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
-  <wp:post_name>a-storage-room-lined-with-shelves-boxes-and-file-cabinets</wp:post_name>
+  <wp:post_name>empty-wooden-bookshelves-against-a-bare-concrete-wall</wp:post_name>
   <wp:status>inherit</wp:status>
   <wp:post_parent>1016</wp:post_parent>
   <wp:menu_order>0</wp:menu_order>
@@ -1788,7 +1788,7 @@
   <wp:attachment_url>https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-transients-object-caches-and-fast-enough.jpg</wp:attachment_url>
       <wp:postmeta>
     <wp:meta_key>_wp_attachment_image_alt</wp:meta_key>
-    <wp:meta_value><![CDATA[A storage room lined with shelves, boxes and file cabinets]]></wp:meta_value>
+    <wp:meta_value><![CDATA[Empty wooden bookshelves against a bare concrete wall]]></wp:meta_value>
   </wp:postmeta>
   </item>
 <item>
@@ -3844,14 +3844,14 @@
   </wp:postmeta>
   </item>
 <item>
-  <title><![CDATA[Industrial harbor cranes photographed at a shipping dock]]></title>
+  <title><![CDATA[A pair of old white doors standing open in a field beside the water]]></title>
   <link>https://example.com</link>
   <pubDate>Fri, 25 Sep 2026 19:00:00 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-open-source-not-a-business-model.jpg</guid>
   <description/>
-  <content:encoded><![CDATA[Photograph: Industrial Cranes by Wyncliffe (CC0), via Openverse: https://stocksnap.io/photo/industrial-cranes-1XSV293YDK]]></content:encoded>
-  <excerpt:encoded><![CDATA[Infrastructure nobody paid for directly, moving everything that did get paid for.]]></excerpt:encoded>
+  <content:encoded><![CDATA[Photograph: A pair of old, white doors stands open in a grassy area, facing towards a body of water by Nick Krastev (CC0), via Openverse: https://wordpress.org/photos/photo/43963e3654/]]></content:encoded>
+  <excerpt:encoded><![CDATA[The door was open the whole time; nobody built a toll booth for it.]]></excerpt:encoded>
   <wp:post_id>1043</wp:post_id>
   <wp:post_date>2026-09-25 12:00:00</wp:post_date>
   <wp:post_date_gmt>2026-09-25 19:00:00</wp:post_date_gmt>
@@ -3859,7 +3859,7 @@
   <wp:post_modified_gmt>2026-09-25 19:00:00</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
-  <wp:post_name>industrial-harbor-cranes-photographed-at-a-shipping-dock</wp:post_name>
+  <wp:post_name>a-pair-of-old-white-doors-standing-open-in-a-field-beside-the-water</wp:post_name>
   <wp:status>inherit</wp:status>
   <wp:post_parent>1042</wp:post_parent>
   <wp:menu_order>0</wp:menu_order>
@@ -3869,7 +3869,7 @@
   <wp:attachment_url>https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-open-source-not-a-business-model.jpg</wp:attachment_url>
       <wp:postmeta>
     <wp:meta_key>_wp_attachment_image_alt</wp:meta_key>
-    <wp:meta_value><![CDATA[Industrial harbor cranes photographed at a shipping dock]]></wp:meta_value>
+    <wp:meta_value><![CDATA[A pair of old white doors standing open in a field beside the water]]></wp:meta_value>
   </wp:postmeta>
   </item>
 <item>
@@ -5050,13 +5050,13 @@
   </wp:postmeta>
 </item>
 <item>
-  <title><![CDATA[A close-up of a computer keyboard's edge on a desk]]></title>
+  <title><![CDATA[Two blank cut keys photographed in high-contrast black and white]]></title>
   <link>https://example.com</link>
   <pubDate>Fri, 25 Sep 2026 19:00:00 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-hardening-part-4-keys-in-the-environment.jpg</guid>
   <description/>
-  <content:encoded><![CDATA[Photograph: Keyboard Keys by FOCA Stock (CC0), via Openverse: https://stocksnap.io/photo/keyboard-keys-9EJ2TLEMN1]]></content:encoded>
+  <content:encoded><![CDATA[Photograph: Skeletonkey by Blenheimears (CC0), via Openverse: https://commons.wikimedia.org/w/index.php?curid=17390206]]></content:encoded>
   <excerpt:encoded><![CDATA[The keys that matter for this post aren't the ones under your fingers.]]></excerpt:encoded>
   <wp:post_id>1060</wp:post_id>
   <wp:post_date>2026-09-25 12:00:00</wp:post_date>
@@ -5065,7 +5065,7 @@
   <wp:post_modified_gmt>2026-09-25 19:00:00</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
-  <wp:post_name>a-close-up-of-a-computer-keyboards-edge-on-a-desk</wp:post_name>
+  <wp:post_name>two-blank-cut-keys-photographed-in-high-contrast-black-and-white</wp:post_name>
   <wp:status>inherit</wp:status>
   <wp:post_parent>1059</wp:post_parent>
   <wp:menu_order>0</wp:menu_order>
@@ -5075,7 +5075,7 @@
   <wp:attachment_url>https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-hardening-part-4-keys-in-the-environment.jpg</wp:attachment_url>
       <wp:postmeta>
     <wp:meta_key>_wp_attachment_image_alt</wp:meta_key>
-    <wp:meta_value><![CDATA[A close-up of a computer keyboard's edge on a desk]]></wp:meta_value>
+    <wp:meta_value><![CDATA[Two blank cut keys photographed in high-contrast black and white]]></wp:meta_value>
   </wp:postmeta>
   </item>
 <item>
@@ -14524,13 +14524,13 @@
   </wp:postmeta>
   </item>
 <item>
-  <title><![CDATA[Rain streaked across a window overlooking a misty city street]]></title>
+  <title><![CDATA[Storm clouds gathering over a harbor full of sailboats]]></title>
   <link>https://example.com</link>
   <pubDate>Fri, 25 Sep 2026 19:00:00 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-story-uptime.jpg</guid>
   <description/>
-  <content:encoded><![CDATA[Photograph: Raining Raindrops by Ryan Wilson (CC0), via Openverse: https://stocksnap.io/photo/raining-raindrops-5WONV3UTKT]]></content:encoded>
+  <content:encoded><![CDATA[Photograph: Sydney Harbour Rain clouds - 2026 by Xyxyzyz (CC0), via Openverse: https://commons.wikimedia.org/w/index.php?curid=184062070]]></content:encoded>
   <excerpt:encoded><![CDATA[The server stayed up longer than the rain did, that week.]]></excerpt:encoded>
   <wp:post_id>1118</wp:post_id>
   <wp:post_date>2026-09-25 12:00:00</wp:post_date>
@@ -14539,7 +14539,7 @@
   <wp:post_modified_gmt>2026-09-25 19:00:00</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
-  <wp:post_name>rain-streaked-across-a-window-overlooking-a-misty-city-street</wp:post_name>
+  <wp:post_name>storm-clouds-gathering-over-a-harbor-full-of-sailboats</wp:post_name>
   <wp:status>inherit</wp:status>
   <wp:post_parent>1117</wp:post_parent>
   <wp:menu_order>0</wp:menu_order>
@@ -14549,7 +14549,7 @@
   <wp:attachment_url>https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-story-uptime.jpg</wp:attachment_url>
       <wp:postmeta>
     <wp:meta_key>_wp_attachment_image_alt</wp:meta_key>
-    <wp:meta_value><![CDATA[Rain streaked across a window overlooking a misty city street]]></wp:meta_value>
+    <wp:meta_value><![CDATA[Storm clouds gathering over a harbor full of sailboats]]></wp:meta_value>
   </wp:postmeta>
   </item>
 <item>
