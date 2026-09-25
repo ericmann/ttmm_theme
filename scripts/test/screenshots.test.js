@@ -9,12 +9,23 @@ const path = require( 'path' );
 
 let SETS;
 let OWNER_ZONES;
+let README_ZONES;
+let SCREENSHOT_MAX_BYTES;
 let unionClip;
 let pendingImages;
+let selectedSet;
 
 beforeAll( async () => {
 	const mod = await import( path.join( __dirname, '..', 'screenshots.mjs' ) );
-	( { SETS, OWNER_ZONES, unionClip, pendingImages } = mod );
+	( {
+		SETS,
+		OWNER_ZONES,
+		README_ZONES,
+		SCREENSHOT_MAX_BYTES,
+		unionClip,
+		pendingImages,
+		selectedSet,
+	} = mod );
 } );
 
 describe( 'SETS.owner', () => {
@@ -39,7 +50,7 @@ describe( 'SETS.owner', () => {
 	it( 'owner set has no live zones', () => {
 		expect( SETS.owner ).not.toHaveProperty( 'live' );
 		expect( OWNER_ZONES.some( ( zone ) => zone.live ) ).toBe( false );
-		expect( Object.keys( SETS ) ).toEqual( [ 'owner' ] );
+		expect( Object.keys( SETS ).sort() ).toEqual( [ 'owner', 'readme' ] );
 
 		const source = require( 'fs' ).readFileSync(
 			path.join( __dirname, '..', 'screenshots.mjs' ),
@@ -55,6 +66,54 @@ describe( 'SETS.owner', () => {
 		);
 
 		expect( front390.viewport ).toEqual( { width: 390, height: 844 } );
+	} );
+} );
+
+describe( 'SETS.readme', () => {
+	it( 'readme set writes the eight §6.5 files to .github/screenshots', () => {
+		expect( SETS.readme.outDir ).toBe(
+			path.join( '.github', 'screenshots' )
+		);
+		expect( SETS.readme.zones ).toBe( README_ZONES );
+		expect(
+			README_ZONES.map( ( zone ) => [ zone.file, zone.path ] )
+		).toEqual( [
+			[ 'front-1280.png', '/' ],
+			[ 'article-1280.png', '/signing-your-options-table/' ],
+			[ 'journal-1280.png', '/journal-post-1/' ],
+			[ 'archive-1280.png', '/category/technology/' ],
+			[ 'series-hub-1280.png', '/series/' ],
+			[ 'writing-1280.png', '/writing/' ],
+			[ 'front-390.png', '/' ],
+			[ 'article-390.png', '/signing-your-options-table/' ],
+		] );
+	} );
+
+	it( 'phone shots are 390 wide and clipped to 2200px', () => {
+		const phoneZones = README_ZONES.filter(
+			( zone ) => 390 === zone.viewport.width
+		);
+
+		expect( phoneZones ).toHaveLength( 2 );
+		for ( const zone of phoneZones ) {
+			expect( zone.viewport.width ).toBe( 390 );
+			expect( zone.clipHeight ).toBe( 2200 );
+			expect( zone.fullPage ).toBeUndefined();
+		}
+	} );
+} );
+
+describe( 'selectedSet', () => {
+	it( '--readme selects the readme set and no flag the owner set', () => {
+		expect( selectedSet( [] ) ).toBe( 'owner' );
+		expect( selectedSet( [ '--readme' ] ) ).toBe( 'readme' );
+	} );
+} );
+
+describe( 'SCREENSHOT_MAX_BYTES', () => {
+	it( 'SCREENSHOT_MAX_BYTES is exported', () => {
+		expect( typeof SCREENSHOT_MAX_BYTES ).toBe( 'number' );
+		expect( SCREENSHOT_MAX_BYTES ).toBeGreaterThan( 0 );
 	} );
 } );
 
