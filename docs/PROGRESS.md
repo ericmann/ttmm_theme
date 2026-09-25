@@ -20,7 +20,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P1-06 Phase 1 screenshots and push
 - [x] P2-01 Spike: export term definitions, Playground import and CLI server shape
 - [x] P2-02 DemoCommand (demo:options, demo:verify) and seed --now
-- [ ] P2-03 wxr.mjs: pure WXR normalisation
+- [x] P2-03 wxr.mjs: pure WXR normalisation
 - [ ] P2-04 build.mjs, blueprint template and the committed demo outputs
 - [ ] P2-05 release:pack (plugin and theme zips with build/)
 - [ ] P2-06 check.mjs: headless Playground check on a local variant
@@ -196,3 +196,27 @@ default_category. Verified: composer lint/test:unit clean; npm run lint
 clean; DemoCommandTest (8) + SeedCommandTest's 3 new tests all green;
 full test:integration 628 tests OK; forbidden-patterns.sh clean;
 `wp ttm demo:options` output parses as JSON.
+
+### P2-03 — 0a090b6
+Implemented scripts/demo/lib/wxr.mjs (pure, regex-based, no XML parser
+dependency): normalizeWxr() filters items to post/page/demo-attachment,
+renumbers post ids ascending from 1001 (rewriting post_parent and
+surviving _thumbnail_id, dropping one pointing at a dropped attachment),
+drops the listed post meta and ttm_cover_id term meta, sets
+author/dc:creator to demo (email/first/last emptied, display name kept),
+flattens base_site_url/base_blog_url/link/non-attachment guid to
+placeholderHost, rewrites demo-image URLs (content+attachment) to the raw
+GitHub base with size suffix stripped, root-relatives every other origin
+occurrence, sets post_modified=post_date, drops the generator stamp and
+channel pubDate, sorts items by new id. Plus rebaseAttachmentUrls,
+countItems, attachmentBasenames. 13 Jest tests in scripts/test/wxr.test.js
+cover every Decision bullet plus determinism/idempotency/valid-XML.
+Confirmed against a real wp-env export that wp export emits three term
+block types (wp:category/wp:tag/wp:term) not just wp:term -- renumbering
+applies to all three uniformly since posts reference terms by
+nicename/slug, never id. Fixed a pubDate-removal idempotency bug by
+scoping the channel-pubDate strip to the region before wp:wxr_version
+rather than "first pubDate in the document" (which would eat the first
+item's own pubDate on a second pass). Verified: npm run lint clean (incl.
+eslint --fix pass), npm run test:unit 172 passed/6 pre-existing skips,
+forbidden-patterns.sh clean.
