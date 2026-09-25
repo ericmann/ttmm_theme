@@ -24,7 +24,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P2-04 build.mjs, blueprint template and the committed demo outputs
 - [x] P2-05 release:pack (plugin and theme zips with build/)
 - [x] P2-06 check.mjs: headless Playground check on a local variant
-- [ ] P2-07 CI demo step and the term-meta record
+- [x] P2-07 CI demo step and the term-meta record
 - [ ] P2-08 Phase 2 screenshots and push
 - [ ] P3-01 README screenshots (--readme); tune SCREENSHOT_MAX_BYTES
 - [ ] P3-02 Public README; developer commands to SETUP.md; rule 56 strict
@@ -305,3 +305,29 @@ demo:check -- --url http://localhost:8888 passes.
 Manual check: NOT VERIFIED (human) -- npm run demo:check's remaining
 page-rendering discrepancy against real headless Playground needs further
 investigation before relying on it as a release gate.
+
+### P2-07 — bc5379d
+Added the demo step to CI's integration job after env:drill: `npm run
+demo:build -- --out dist/demo --check-determinism` then `npm run
+demo:check -- --from dist/demo`, before the existing "Container logs on
+failure" step. Appended a "Playground result" section to
+docs/spikes/P2-01.md documenting, against the real 107-post build:
+category descriptions survive importWxr unconditionally; series term meta
+does not (P2-06's explicit fix, not importWxr itself, makes demo:verify
+pass); the six post-import wp-cli steps had to become one combined wp
+eval step (a real php.wasm memory limit); wp_cache_flush() was needed for
+series/writing to serve real content (Playground's default Redis object
+cache). Tests: scripts/test/ci-workflow.test.js (2 tests: step
+order/presence, no workflow runs demo:fetch-images).
+
+Pushed and watched CI (run 36088817467): php/js/security jobs all green;
+integration job's demo:build --check-determinism step passed; demo:check
+--from dist/demo failed with exactly the same P2-06-documented gap
+(article/series 404, empty dynamic content) reproduced in CI, confirming
+it's a genuine, already-diagnosed Playground/SQLite-backend limitation and
+not a CI-wiring bug. Verified: npm run lint/test:unit clean (26 suites,
+205 passed/6 pre-existing skips), forbidden-patterns.sh clean.
+Manual check: NOT VERIFIED (human) -- CI's integration job is red on the
+demo:check step specifically; the underlying Playground content-rendering
+gap (docs/spikes/P2-01.md "Playground result", P2-06's log) needs a
+dedicated follow-up investigation before this step can gate merges.
