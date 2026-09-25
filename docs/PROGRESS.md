@@ -33,7 +33,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P4-01 Guards back to strict; allow-lists; budget and audits recorded
 - [x] P4-02 Documentation index, SETUP, plugin spec and HANDOFF
 - [x] P4-03 Final demo refresh, seed reset, screenshots and push
-- [ ] R1-01 demo:check waits for the blueprint to finish; Playground photo assertions restored
+- [x] R1-01 demo:check waits for the blueprint to finish; Playground photo assertions restored
 - [ ] R1-02 Demo photographs meet OPENVERSE_MIN_WIDTH; demo-lead-photo back to ≥ 1200
 - [ ] R1-03 Tests for three survived mutations (demo:verify term meta, owner-name Author scope, zip src/editor)
 - [ ] R1-04 Close-out: regenerate demo outputs and screenshots, fix HANDOFF, CI green including demo:check
@@ -486,3 +486,14 @@ forbidden-patterns.sh clean. docs/phase-1/ through docs/phase-4/ untouched.
 ### P4-03 — 79977db
 Regenerated demo build (demo:build), ran demo:check (5 known Playground content-rendering failures per docs/spikes/P2-01.md / docs/HANDOFF.md "Known limitation": article/series 404, series-strip/series-row counts 0, serial-hero absent - everything else green), env:seed --reset (8 categories/4 pages/107 posts/1 nav/7 series/2 books), test:e2e (501 passed, 1 skipped, 0 failed), screenshots --readme and owner screenshots regenerated (only front-1280/front-390 + phase-5 front-390 changed; rest byte-identical), npm run lint clean, npm run test:unit (216 passed), npm run test:integration (629 tests/2597 assertions, OK), npm run env:drill (OK, 104 posts, 5 page hashes unchanged), forbidden-patterns.sh clean.
 Manual check: NOT VERIFIED (human) - owner: tag v0.2.0 after merge, confirm the release assets, open the README Playground link, approve or swap photographs (see docs/HANDOFF.md).
+
+### R1-01 — c9d0157
+Added scripts/demo/lib/boot.mjs (isReady(output)), pure, Jest-tested. check.mjs's waitForBoot() now waits for the CLI's own "WordPress is running on" line (printed only after every blueprint step incl. final rebuild+demo:verify), then makes one sanity GET of /. Removed the HTML-marker polling race entirely; no --workers tuning needed.
+
+local-variant.mjs: local variant now inserts mkdir+writeFile steps immediately before importWxr, writing a one-off mu-plugin that allows the run's own loopback static-server host/port through WP's SSRF guard (http_request_host_is_external / http_allowed_safe_ports). Removed the --attachments=0 rewrite -- P2-01's Q2 gap was the SSRF guard, not an unfixable Playground limitation. check-assertions.mjs's skipAttachmentChecks option removed; both demo-photograph assertions now always run.
+
+docs/spikes/P2-01.md "Playground result" section rewritten: the real cause was a boot-readiness race (worker pool answers before the blueprint's last step finishes), not per-worker object-cache splitting or Redis staleness; attachments recovered via the SSRF-guard fix above.
+
+Verified directly (not via foundry_verify, see below): npm run lint, npm run test:unit, npm run build, composer lint, composer test:unit, bash scripts/forbidden-patterns.sh, npm run demo:check (ok), npm run demo:check -- --from dist/demo (ok, after npm run demo:build -- --out dist/demo) -- all green.
+
+Friction: foundry_verify's MCP call has a ~1800s idle timeout; on this shared dev machine a single headless Playground boot inside the extraVerify chain took 25-50 min under CPU contention from unrelated processes, tripping the timeout three times even though the command was still running and later succeeded. Logged via foundry_feedback_log. Ran every verify/extraVerify command by hand instead, all passing.
