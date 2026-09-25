@@ -1,0 +1,65 @@
+{
+	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
+	"landingPage": "/",
+	"login": true,
+	"preferredVersions": { "php": "8.3", "wp": "latest" },
+	"features": { "networking": true },
+	"steps": [
+		{
+			"step": "setSiteOptions",
+			"options": "{{OPTIONS}}"
+		},
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "url",
+				"url": "https://github-proxy.com/proxy/?repo=ericmann/ttmm_theme&release={{RELEASE}}&asset=ttm-core.zip"
+			},
+			"options": { "activate": true }
+		},
+		{
+			"step": "installTheme",
+			"themeData": {
+				"resource": "url",
+				"url": "https://github-proxy.com/proxy/?repo=ericmann/ttmm_theme&release={{RELEASE}}&asset=ttm-theme.zip"
+			},
+			"options": { "activate": true }
+		},
+		{
+			"step": "wp-cli",
+			"command": "wp site empty --yes"
+		},
+		{
+			"step": "importWxr",
+			"file": {
+				"resource": "url",
+				"url": "https://raw.githubusercontent.com/ericmann/ttmm_theme/main/.github/demo-content.xml"
+			},
+			"fetchAttachments": true
+		},
+		{
+			"step": "wp-cli",
+			"command": "wp rewrite structure /%postname%/ --hard"
+		},
+		{
+			"step": "wp-cli",
+			"command": "wp ttm primary:assign"
+		},
+		{
+			"step": "wp-cli",
+			"command": "wp ttm recount --all"
+		},
+		{
+			"step": "wp-cli",
+			"command": "wp ttm series:rebuild"
+		},
+		{
+			"step": "wp-cli",
+			"command": "wp ttm stats:flush"
+		},
+		{
+			"step": "wp-cli",
+			"command": "wp ttm demo:verify {{VERIFY_ARGS}}"
+		}
+	]
+}

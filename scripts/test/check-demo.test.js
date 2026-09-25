@@ -2,17 +2,24 @@
  * Tests for the P0-05 demo-content checks (scripts/lib/demo-checks.mjs).
  */
 
+const fs = require( 'fs' );
 const path = require( 'path' );
 
 let checkCredits;
 let checkFixtureImages;
 let checkReadmeScreenshots;
+let checkDemoOutputs;
 
 beforeAll( async () => {
 	const mod = await import(
 		path.join( __dirname, '..', 'lib', 'demo-checks.mjs' )
 	);
-	( { checkCredits, checkFixtureImages, checkReadmeScreenshots } = mod );
+	( {
+		checkCredits,
+		checkFixtureImages,
+		checkReadmeScreenshots,
+		checkDemoOutputs,
+	} = mod );
 } );
 
 const LIMITS = { maxBytes: 350000, budgetBytes: 8000000 };
@@ -231,5 +238,178 @@ describe( 'checkReadmeScreenshots', () => {
 		const readme = '![Front page](.github/screenshots/front.jpg)';
 		const failures = checkReadmeScreenshots( readme, [ 'front.jpg' ] );
 		expect( failures.join( '\n' ) ).toMatch( /not a \.png file/ );
+	} );
+} );
+
+const IMAGE_RAW_BASE =
+	'https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images';
+const WXR_RAW_URL =
+	'https://raw.githubusercontent.com/ericmann/ttmm_theme/main/.github/demo-content.xml';
+
+function buildWxr() {
+	return `<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0" xmlns:wp="http://wordpress.org/export/1.2/">
+<channel>
+<title>Demo</title>
+<item>
+	<wp:post_id>1001</wp:post_id>
+	<wp:post_type><![CDATA[post]]></wp:post_type>
+</item>
+<item>
+	<wp:post_id>1002</wp:post_id>
+	<wp:post_type><![CDATA[page]]></wp:post_type>
+</item>
+<item>
+	<wp:post_id>1003</wp:post_id>
+	<wp:post_type><![CDATA[attachment]]></wp:post_type>
+	<wp:attachment_url>${ IMAGE_RAW_BASE }/demo-a.jpg</wp:attachment_url>
+</item>
+</channel>
+</rss>
+`;
+}
+
+function buildOptions( overrides = {} ) {
+	return {
+		blogname: 'These Things Matter',
+		blogdescription: '',
+		timezone_string: '',
+		permalink_structure: '/%postname%/',
+		ttm_books: [],
+		ttm_verse: null,
+		ttm_verse_history: null,
+		ttm_settings: { newsletter: { provider: 'none', endpoint: '' } },
+		...overrides,
+	};
+}
+
+function buildBlueprint( { options, pluginVersion = '1.2.3' } ) {
+	return {
+		steps: [
+			{ step: 'setSiteOptions', options },
+			{
+				step: 'installPlugin',
+				pluginData: {
+					resource: 'url',
+					url: `https://github-proxy.com/proxy/?repo=ericmann/ttmm_theme&release=v${ pluginVersion }&asset=ttm-core.zip`,
+				},
+			},
+			{
+				step: 'installTheme',
+				themeData: {
+					resource: 'url',
+					url: `https://github-proxy.com/proxy/?repo=ericmann/ttmm_theme&release=v${ pluginVersion }&asset=ttm-theme.zip`,
+				},
+			},
+			{ step: 'wp-cli', command: 'wp site empty --yes' },
+			{
+				step: 'importWxr',
+				file: { resource: 'url', url: WXR_RAW_URL },
+			},
+			{
+				step: 'wp-cli',
+				command: 'wp rewrite structure /%postname%/ --hard',
+			},
+			{ step: 'wp-cli', command: 'wp ttm primary:assign' },
+			{ step: 'wp-cli', command: 'wp ttm recount --all' },
+			{ step: 'wp-cli', command: 'wp ttm series:rebuild' },
+			{ step: 'wp-cli', command: 'wp ttm stats:flush' },
+			{
+				step: 'wp-cli',
+				command:
+					'wp ttm demo:verify --posts=1 --pages=1 --series=0 --attachments=1',
+			},
+		],
+	};
+}
+
+function conformingSet() {
+	const options = buildOptions();
+	return {
+		wxr: buildWxr(),
+		options,
+		blueprint: buildBlueprint( { options } ),
+		imageFiles: [ 'demo-a.jpg' ],
+		credits: [ { file: 'demo-a.jpg' } ],
+		fixtures: {
+			posts: [ { slug: 'p1', featured_image: 'demo-a.jpg' } ],
+			pages: [ { slug: 'about', featured_image: 'demo-a.jpg' } ],
+		},
+		pluginVersion: '1.2.3',
+	};
+}
+
+describe( 'checkDemoOutputs', () => {
+	it( 'outputs: passes on a conforming synthetic set', () => {
+		expect( checkDemoOutputs( conformingSet() ) ).toEqual( [] );
+	} );
+
+	it( 'outputs: fails on a count mismatch', () => {
+		const data = conformingSet();
+		data.fixtures.posts.push( { slug: 'p2', featured_image: null } );
+
+		const failures = checkDemoOutputs( data );
+		expect( failures.join( '\n' ) ).toMatch( /post item\(s\), expected 2/ );
+	} );
+
+	it( 'outputs: fails on a localhost URL', () => {
+		const data = conformingSet();
+		data.wxr = data.wxr.replace(
+			'<title>Demo</title>',
+			'<title>Demo</title><link>http://localhost:8888</link>'
+		);
+
+		const failures = checkDemoOutputs( data );
+		expect( failures.join( '\n' ) ).toMatch( /local host reference/ );
+	} );
+
+	it( 'outputs: fails on an e-mail', () => {
+		const data = conformingSet();
+		data.options = buildOptions( {
+			blogdescription: 'contact eric@example.com',
+		} );
+		data.blueprint = buildBlueprint( { options: data.options } );
+
+		const failures = checkDemoOutputs( data );
+		expect( failures.join( '\n' ) ).toMatch( /e-mail address/ );
+	} );
+
+	it( 'outputs: fails on a missing options key', () => {
+		const data = conformingSet();
+		delete data.options.ttm_verse_history;
+		data.blueprint = buildBlueprint( { options: data.options } );
+
+		const failures = checkDemoOutputs( data );
+		expect( failures.join( '\n' ) ).toMatch(
+			/demo-options\.json keys are/
+		);
+	} );
+
+	it( 'outputs: fails on a wrong release tag', () => {
+		const data = conformingSet();
+		data.pluginVersion = '9.9.9';
+
+		const failures = checkDemoOutputs( data );
+		expect( failures.join( '\n' ) ).toMatch( /release=v9\.9\.9/ );
+	} );
+
+	it( 'outputs: fails on a step out of order', () => {
+		const data = conformingSet();
+		const steps = data.blueprint.steps;
+		[ steps[ 1 ], steps[ 2 ] ] = [ steps[ 2 ], steps[ 1 ] ];
+
+		const failures = checkDemoOutputs( data );
+		expect( failures.join( '\n' ) ).toMatch(
+			/expected the SPEC §6\.4 order/
+		);
+	} );
+
+	it( 'outputs: required once REQUIRE_OUTPUTS is true', () => {
+		const source = fs.readFileSync(
+			path.join( __dirname, '..', 'check-demo.mjs' ),
+			'utf8'
+		);
+
+		expect( source ).toMatch( /const REQUIRE_OUTPUTS = true;/ );
 	} );
 } );

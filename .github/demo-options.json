@@ -1,0 +1,119 @@
+{
+  "blogname": "These Things Matter",
+  "blogdescription": "Technology, business, faith and the occasional story. One writer, several desks.",
+  "timezone_string": "America/Los_Angeles",
+  "permalink_structure": "/%postname%/",
+  "ttm_books": [
+    {
+      "title": "Salt Water Wires",
+      "form": "novel",
+      "year": 2022,
+      "cover_id": 0,
+      "formats": [
+        "paperback",
+        "ebook"
+      ],
+      "links": [
+        {
+          "label": "Amazon",
+          "url": "https://amazon.com/salt-water-wires"
+        }
+      ],
+      "series_id": 0
+    },
+    {
+      "title": "Eleven Small Doors",
+      "form": "collection",
+      "year": 2019,
+      "cover_id": 0,
+      "formats": [
+        "paperback"
+      ],
+      "links": [
+        {
+          "label": "Amazon",
+          "url": "https://amazon.com/eleven-small-doors"
+        }
+      ],
+      "series_id": 0
+    }
+  ],
+  "ttm_verse": {
+    "date": "2026-09-20",
+    "text": "We wait in hope for the LORD; he is our help and our shield. In him our hearts rejoice, for we trust in his holy name. May your unfailing love be with us, LORD, even as we put our hope in you.",
+    "reference": "Psalm 33:20-22",
+    "title": "Where Mercy and Hope Meet",
+    "url": "https://dailymedtoday.com/meditation/846bb2a9-9381-4b66-baf0-14eb024e4c7b",
+    "source_id": "846bb2a9-9381-4b66-baf0-14eb024e4c7b",
+    "copyright": "Scripture quotations taken from The Holy Bible, New International Version®, NIV®. Copyright © 1973, 1978, 1984, 2011 by Biblica, Inc. Used with permission of Zondervan. All rights reserved worldwide. www.zondervan.com",
+    "fetched_at": "2026-09-25 12:00:00"
+  },
+  "ttm_verse_history": [
+    {
+      "date": "2026-09-20",
+      "text": "We wait in hope for the LORD; he is our help and our shield. In him our hearts rejoice, for we trust in his holy name. May your unfailing love be with us, LORD, even as we put our hope in you.",
+      "reference": "Psalm 33:20-22",
+      "title": "Where Mercy and Hope Meet",
+      "url": "https://dailymedtoday.com/meditation/846bb2a9-9381-4b66-baf0-14eb024e4c7b",
+      "source_id": "846bb2a9-9381-4b66-baf0-14eb024e4c7b",
+      "copyright": "Scripture quotations taken from The Holy Bible, New International Version®, NIV®. Copyright © 1973, 1978, 1984, 2011 by Biblica, Inc. Used with permission of Zondervan. All rights reserved worldwide. www.zondervan.com",
+      "fetched_at": "2026-09-25 12:00:00"
+    },
+    {
+      "date": "2026-09-19",
+      "text": "No one has ever seen God; but if we love one another, God lives in us and his love is made complete in us. This is how we know that we live in him and he in us: He has given us of his Spirit.",
+      "reference": "1 John 4:12-13",
+      "title": "The Dwelling Place of Love",
+      "url": "https://dailymedtoday.com/meditation/7d45a79d-88cb-4162-a170-3e893937dbdd",
+      "source_id": "7d45a79d-88cb-4162-a170-3e893937dbdd",
+      "copyright": "Scripture quotations taken from The Holy Bible, New International Version®, NIV®. Copyright © 1973, 1978, 1984, 2011 by Biblica, Inc. Used with permission of Zondervan. All rights reserved worldwide. www.zondervan.com",
+      "fetched_at": "2026-09-25 12:00:00"
+    },
+    {
+      "date": "2026-09-18",
+      "text": "The Word became flesh and made his dwelling among us. We have seen his glory, the glory of the one and only Son, who came from the Father, full of grace and truth.",
+      "reference": "John 1:14",
+      "title": "Where Peace and Grace Meet",
+      "url": "https://dailymedtoday.com/meditation/f0193782-1863-4242-9efc-aee4ca530651",
+      "source_id": "f0193782-1863-4242-9efc-aee4ca530651",
+      "copyright": "Scripture quotations taken from The Holy Bible, New International Version®, NIV®. Copyright © 1973, 1978, 1984, 2011 by Biblica, Inc. Used with permission of Zondervan. All rights reserved worldwide. www.zondervan.com",
+      "fetched_at": "2026-09-25 12:00:00"
+    },
+    {
+      "date": "2026-09-17",
+      "text": "Whoever dwells in the shelter of the Most High will rest in the shadow of the Almighty. I will say of the LORD, 'He is my refuge and my fortress, my God, in whom I trust.'",
+      "reference": "Psalm 91:1-2",
+      "title": "The Safety of His Shadow",
+      "url": "https://dailymedtoday.com/meditation/e1a4e333-4ec6-4c08-80b7-3fe48e134d4b",
+      "source_id": "e1a4e333-4ec6-4c08-80b7-3fe48e134d4b",
+      "copyright": "Scripture quotations taken from The Holy Bible, New International Version®, NIV®. Copyright © 1973, 1978, 1984, 2011 by Biblica, Inc. Used with permission of Zondervan. All rights reserved worldwide. www.zondervan.com",
+      "fetched_at": "2026-09-25 12:00:00"
+    },
+    {
+      "date": "2026-09-16",
+      "text": "In peace I will lie down and sleep, for you alone, Lord, make me dwell in safety.",
+      "reference": "Psalm 4:8",
+      "title": "The Peace of Letting Go",
+      "url": "https://dailymedtoday.com/meditation/98a94492-5636-4f19-836a-4e7d42c8642a",
+      "source_id": "98a94492-5636-4f19-836a-4e7d42c8642a",
+      "copyright": "Scripture quotations taken from The Holy Bible, New International Version®, NIV®. Copyright © 1973, 1978, 1984, 2011 by Biblica, Inc. Used with permission of Zondervan. All rights reserved worldwide. www.zondervan.com",
+      "fetched_at": "2026-09-25 12:00:00"
+    },
+    {
+      "date": "2026-09-15",
+      "text": "Those who trust in the LORD are like Mount Zion, which cannot be shaken but endures forever. As the mountains surround Jerusalem, so the LORD surrounds his people both now and forevermore.",
+      "reference": "Psalm 125:1-2",
+      "title": "The Anchor That Holds",
+      "url": "https://dailymedtoday.com/meditation/0794b619-4503-46fc-835b-95ab63fec990",
+      "source_id": "0794b619-4503-46fc-835b-95ab63fec990",
+      "copyright": "Scripture quotations taken from The Holy Bible, New International Version®, NIV®. Copyright © 1973, 1978, 1984, 2011 by Biblica, Inc. Used with permission of Zondervan. All rights reserved worldwide. www.zondervan.com",
+      "fetched_at": "2026-09-25 12:00:00"
+    }
+  ],
+  "ttm_settings": {
+    "newsletter": {
+      "provider": "none",
+      "endpoint": ""
+    }
+  }
+}

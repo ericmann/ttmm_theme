@@ -43,6 +43,13 @@ class DemoCommand extends Command {
 		foreach ( $books as &$book ) {
 			if ( is_array( $book ) ) {
 				$book['cover_id'] = 0;
+				// P2-04: like cover_id, series_id is a raw source-site series term id the
+				// importer never remaps (book-grid doesn't read it today, but demo:build's
+				// own --check-determinism proved a live term id here breaks two-builds-
+				// same-day byte-identity, since it changes on every `seed --reset`).
+				if ( array_key_exists( 'series_id', $book ) ) {
+					$book['series_id'] = 0;
+				}
 			}
 		}
 		unset( $book );

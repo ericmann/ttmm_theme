@@ -406,6 +406,40 @@ describe( 'normalizeWxr', () => {
 		);
 	} );
 
+	it( 'flattens page post_date/post_date_gmt/pubDate to a fixed sentinel', () => {
+		// `wp_insert_post()` never sets an explicit post_date for a page (unlike posts, which
+		// carry a `days_ago`-derived date) -- WP defaults it to the real wall-clock moment of
+		// the seed run, which would otherwise break byte-for-byte determinism across two builds
+		// on the same day. The fixture's About page is given an arbitrary, non-sentinel date to
+		// prove it gets overwritten rather than merely coinciding.
+		const out = normalize( buildFixture() );
+
+		const aboutBlock = out.match(
+			/<item>\s*<title><!\[CDATA\[About\]\]>[\s\S]*?<\/item>/
+		)[ 0 ];
+
+		expect( aboutBlock ).toContain(
+			'<wp:post_date>2026-01-01 00:00:00</wp:post_date>'
+		);
+		expect( aboutBlock ).toContain(
+			'<wp:post_date_gmt>2026-01-01 00:00:00</wp:post_date_gmt>'
+		);
+		expect( aboutBlock ).toContain(
+			'<pubDate>Thu, 01 Jan 2026 00:00:00 +0000</pubDate>'
+		);
+		expect( aboutBlock ).toContain(
+			'<wp:post_modified>2026-01-01 00:00:00</wp:post_modified>'
+		);
+
+		// A post's real, days_ago-derived date is untouched.
+		const post1Block = out.match(
+			/<item>\s*<title><!\[CDATA\[Wired Post\]\]>[\s\S]*?<\/item>/
+		)[ 0 ];
+		expect( post1Block ).toContain(
+			'<wp:post_date>2026-01-01 09:00:00</wp:post_date>'
+		);
+	} );
+
 	it( 'is deterministic across different source ids and stamps', () => {
 		const a = normalize( buildFixture() );
 		const b = normalize(

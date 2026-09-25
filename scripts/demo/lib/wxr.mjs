@@ -136,6 +136,16 @@ function rewriteTagBody( raw, siteOrigin, imageBase, demoSet ) {
 	return isCdata ? `<![CDATA[${ rewritten }]]>` : rewritten;
 }
 
+// `page` items (the theme's starter-content Series/Writing/Newsletter/About pages, and the
+// fixture pages `Seeder::seed_pages()` inserts) never get an explicit `post_date` -- WP defaults
+// it to the real wall-clock moment of the seed run, which is fine for a normal site but breaks
+// the "two builds on the same day are identical" determinism the PLAN's "Demo dates" Decision
+// promises. Pages carry no meaningful chronological ordering the front end displays, so their
+// date/pubDate is flattened to this fixed sentinel rather than preserved.
+const PAGE_DATE = '2026-01-01 00:00:00';
+const PAGE_DATE_GMT = '2026-01-01 00:00:00';
+const PAGE_PUBDATE = 'Thu, 01 Jan 2026 00:00:00 +0000';
+
 const DROPPED_POST_META = new Set( [
 	'_edit_lock',
 	'_edit_last',
@@ -210,6 +220,17 @@ function normalizeItem( item, newId, idMap, opts ) {
 	out = setTag( out, 'wp:post_parent', String( newParent ), {
 		cdata: false,
 	} );
+
+	if ( 'page' === getTag( out, 'wp:post_type' ) ) {
+		out = setTag( out, 'wp:post_date', PAGE_DATE, { cdata: false } );
+		out = setTag( out, 'wp:post_date_gmt', PAGE_DATE_GMT, {
+			cdata: false,
+		} );
+		out = out.replace(
+			/<pubDate>[^<]*<\/pubDate>/,
+			`<pubDate>${ PAGE_PUBDATE }</pubDate>`
+		);
+	}
 
 	const postDate = getTag( out, 'wp:post_date' );
 	const postDateGmt = getTag( out, 'wp:post_date_gmt' );

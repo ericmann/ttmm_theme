@@ -42,6 +42,28 @@ class DemoCommandTest extends TTM_IntegrationTestCase {
 		$this->assertSame( 0, $map['ttm_books'][0]['cover_id'] );
 	}
 
+	/**
+	 * P2-04: a raw series term id, like cover_id, doesn't survive `importWxr` -- zeroed for the
+	 * same reason (and to keep two `demo:build` runs on the same day byte-identical).
+	 */
+	public function test_options_zeroes_book_series_ids(): void {
+		update_option(
+			'ttm_books',
+			[
+				[
+					'title'     => 'Salt Water Wires',
+					'cover_id'  => 42,
+					'series_id' => 607,
+				],
+			]
+		);
+
+		$result = ( new DemoCommand() )->options();
+		$map    = json_decode( $result['messages'][0], true );
+
+		$this->assertSame( 0, $map['ttm_books'][0]['series_id'] );
+	}
+
 	public function test_options_newsletter_provider_is_none(): void {
 		update_option(
 			'ttm_settings',
