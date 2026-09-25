@@ -27,7 +27,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P2-07 CI demo step and the term-meta record
 - [x] P2-08 Phase 2 screenshots and push
 - [x] P3-01 README screenshots (--readme); tune SCREENSHOT_MAX_BYTES
-- [ ] P3-02 Public README; developer commands to SETUP.md; rule 56 strict
+- [x] P3-02 Public README; developer commands to SETUP.md; rule 56 strict
 - [ ] P3-03 Release workflow
 - [ ] P3-04 Phase 3 screenshots and push
 - [ ] P4-01 Guards back to strict; allow-lists; budget and audits recorded
@@ -381,3 +381,21 @@ screenshot cross-reference); npm run screenshots (no flag) still writes
 only the owner set (unaffected, not restaged); npm run lint/test:unit
 clean (26 suites, 210 passed/6 pre-existing skips, 10 new
 screenshots.test.js assertions); forbidden-patterns.sh clean.
+
+### P3-02 — ba31646
+Replaced README.md with the public §6.7 version: intro paragraph, Open in
+WordPress Playground link, an HTML screenshot table (desktop/phone pairs,
+each `<img>` on its own line so the task's own `grep -c` verification
+counts all 8), Try it (Playground + local), Architecture (5 bullets),
+Status, Docs index, Credits (Archivo/OFL, Openverse CREDITS.json, demo
+LICENSE.md), Licence. docs/SETUP.md needed no changes -- its existing
+"First run"/"Everyday commands" sections already carried every command
+the old README had. demo-checks.mjs gains REQUIRED_SCREENSHOTS (the 8
+names) and checkReadmeScreenshots() now also fails when any required name
+isn't referenced.
+
+Verified: grep -c ".github/screenshots/" README.md = 8, grep -c
+"playground.wordpress.net" = 1; npm run check:demo clean against the real
+README/screenshots; npm run lint/test:unit clean (26 suites, 211
+passed/6 pre-existing skips, 2 new + updated check-demo.test.js
+assertions); forbidden-patterns.sh clean.
