@@ -37,7 +37,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] R1-02 Demo photographs meet OPENVERSE_MIN_WIDTH; demo-lead-photo back to ≥ 1200
 - [x] R1-03 Tests for three survived mutations (demo:verify term meta, owner-name Author scope, zip src/editor)
 - [x] R1-04 Close-out: regenerate demo outputs and screenshots, fix HANDOFF, CI green including demo:check
-- [~] R2-01 demo:check stops the whole Playground process tree; no orphaned server after exit
+- [x] R2-01 demo:check stops the whole Playground process tree; no orphaned server after exit
 
 ## Log
 (one entry per task, appended by implement)
@@ -528,3 +528,31 @@ Found and worked around a real bug while verifying: `scripts/demo/check.mjs`'s `
 Verified: full lint, test:unit, test:integration (630/630), test:e2e (501 passed/1 skipped) all green locally; npm run env:drill OK (104 posts, 5 page hashes unchanged); npm audit and composer audit both clean. Pushed twice; CI run 36141623788 (push) and 36141626990 (pull_request) both completed green, including wp-env integration's demo:check step and Playwright + axe. git status --porcelain is empty except docs/PROGRESS.md's own in-progress marker.
 
 Manual check: NOT VERIFIED (human) -- owner reviews the re-fetched photographs and regenerated screenshots, runs npm run demo:check -- --keep and clicks through the four SPEC §6.4 pages and the post editor.
+
+### R2-01 — 14d86c4
+Added scripts/demo/lib/server-process.mjs: startServer() spawns detached:true (own
+process group), no npx/sh layer (resolvePlaygroundCliBin() finds the real bin script
+via process.cwd()/node_modules); stopServer() SIGTERMs the whole group, waits graceMs,
+escalates to SIGKILL, resolves only once the group has no live members. check.mjs's
+checkAgainstPlayground now uses these; --keep opens the log file as a real fd (no pipe
+held by this process) and prints a kill -TERM -<pgid> stop command; unref()s the kept
+proc. waitForBoot() gained a logFile-poll path for --keep; non-keep path (piped
+stdout/stderr) is unchanged, same isReady() semantics.
+
+Interpretation: avoided both createRequire() and import.meta.resolve() in
+server-process.mjs -- either one in a .mjs reached via Jest's dynamic import() from a
+CJS test throws "Must use import to load ES Module" (confirmed directly); used
+process.cwd()-relative node_modules resolution instead, consistent with every other
+script here assuming repo-root cwd.
+
+Corrected R1-04's root-cause wording in docs/HANDOFF.md (Round 1 section) and its
+PROGRESS.md log entry: the real bug was proc.kill() only signalling npm exec, not the
+reparented CLI server/worker; process.exit(0) fixed this script's own hang but left the
+real server running. Removed the stale "persistent Redis object cache" line from
+docs/spikes/P2-01.md per R1-01.
+
+Verified by hand: demo:check exits 0, pgrep clean after. demo:check --keep prints the
+stop command; URL still answers after parent exit; running the printed command leaves
+pgrep clean. foundry_verify's own demo:build + demo:check extraVerify (real Playground
+boot) passed, no leftover processes. Lint/test:unit/composer lint/test:unit/
+forbidden-patterns all green.
