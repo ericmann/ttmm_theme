@@ -1,16 +1,16 @@
 /* eslint-disable no-console */
 // Zero-fixme guard (SPEC §6.2, §6.9, P4-02, P0-01). By the end of the flight every row in the
 // fidelity and editor-registration suites must be a real, passing test -- `test.fixme(` left in
-// either file means a row was never finished. During the flight, a `test.fixme(` line tagged
-// `// P<n>-<nn>` is tolerated (the task that will un-fixme it); an untagged one always fails.
-// Once every phase has landed (P5-02), flip ALLOW_TAGGED to false so no fixme survives at all.
+// either file means a row was never finished. `ALLOW_TAGGED` tolerated a `test.fixme(` line
+// tagged `// P<n>-<nn>` during the flight (the task that would un-fixme it); every phase has now
+// landed (P4-01) and no fixme survives at all, tagged or not.
 import { readFileSync } from 'node:fs';
 import { taggedFixmeHits } from './lib/fixme.mjs';
 
 const FILES = [ 'tests/e2e/fidelity.spec.mjs', 'tests/e2e/editors.spec.mjs' ];
 
-// P0-01: phase 5 in flight; P4-01 flips this back to false.
-export const ALLOW_TAGGED = true;
+// P4-01: every phase has landed; no fixme survives at all, tagged or not.
+export const ALLOW_TAGGED = false;
 
 let hits = 0;
 let tagged = 0;
