@@ -414,6 +414,12 @@ async function main() {
 	}
 
 	console.log( 'demo:check: ok' );
+	// Explicit exit, matching the failure paths above: a killed `npx`-spawned Playground
+	// child can leave the real `@wp-playground/cli` grandchild's stdio pipes or a pooled
+	// keep-alive `fetch()` connection open, which would otherwise keep this process's event
+	// loop alive indefinitely after a successful run (confirmed directly: CI hung on this
+	// exact step for over an hour with `demo:check: ok` already printed).
+	process.exit( 0 );
 }
 
 main().catch( ( error ) => {
