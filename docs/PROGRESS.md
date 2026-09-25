@@ -35,7 +35,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P4-03 Final demo refresh, seed reset, screenshots and push
 - [x] R1-01 demo:check waits for the blueprint to finish; Playground photo assertions restored
 - [x] R1-02 Demo photographs meet OPENVERSE_MIN_WIDTH; demo-lead-photo back to ≥ 1200
-- [ ] R1-03 Tests for three survived mutations (demo:verify term meta, owner-name Author scope, zip src/editor)
+- [x] R1-03 Tests for three survived mutations (demo:verify term meta, owner-name Author scope, zip src/editor)
 - [ ] R1-04 Close-out: regenerate demo outputs and screenshots, fix HANDOFF, CI green including demo:check
 
 ## Log
@@ -506,3 +506,11 @@ Re-fetched all 8 flagged files via demo:fetch-images --only=<file>, each hand-re
 fidelity.spec.mjs's demo-lead-photo now asserts width >= 1200 per PLAN, stale 960px comment removed.
 
 Verified: npm run lint (check:demo clean, all CREDITS widths >= 1600), npm run test:unit, npm run test:integration (629/629), npm run env:seed -- --reset && npm run test:e2e (501 passed/1 skipped). Total image bytes 2,790,264, well under IMAGE_BUDGET_BYTES. Did not get a full headless npm run demo:check (Playground) to finish in this environment (>60min boots under heavy host load, same friction as R1-01, logged via foundry_feedback_log) -- check:demo's own width/CREDITS validation is the mechanism that actually exercises this task's change and is green.
+
+### R1-03 — 8274de8
+Added exactly one targeted test per survived mutation (review F4), each manually confirmed to fail under its described mutation and pass on HEAD:
+- DemoCommandTest::test_verify_fails_when_only_ttm_status_is_missing -- a series term with ttm_form set but ttm_status genuinely absent (metadata_exists false); kills the `! $has_form || ! $has_status` -> `&&` mutation (the existing "missing both" test didn't distinguish OR from AND).
+- check-license.test.js "fails on an Author: line in a non-header plugin file" -- an `Author:` header line in plugins/ttm-core/src/Blocks/Helpers.php (not style.css/ttm-core.php); kills the isHeaderFile-guard-removal mutation.
+- release-pack.test.js "pluginFiles drops non-JS files under src/editor" -- src/editor/panel.json and src/editor/style.css; kills the src/editor/ -> src/editorX/ typo mutation (both files would otherwise slip through since neither ends in .js).
+
+No source bugs found; test-only change. Verified: composer lint, npm run lint, npm run test:unit, npm run test:integration (630/630, was 629).
