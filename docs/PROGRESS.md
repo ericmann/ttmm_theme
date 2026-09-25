@@ -26,7 +26,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P2-06 check.mjs: headless Playground check on a local variant
 - [x] P2-07 CI demo step and the term-meta record
 - [x] P2-08 Phase 2 screenshots and push
-- [ ] P3-01 README screenshots (--readme); tune SCREENSHOT_MAX_BYTES
+- [x] P3-01 README screenshots (--readme); tune SCREENSHOT_MAX_BYTES
 - [ ] P3-02 Public README; developer commands to SETUP.md; rule 56 strict
 - [ ] P3-03 Release workflow
 - [ ] P3-04 Phase 3 screenshots and push
@@ -360,3 +360,24 @@ Playground, no --url) remains red on the narrowed, now further-diagnosed
 Manual check: NOT VERIFIED (human) -- npm run demo:check -- --keep,
 click through the four §6.4 pages and the post editor manually; the
 remaining Playground-only content gap needs a dedicated follow-up.
+
+### P3-01 — ee2e205
+Added SETS.readme (8 zones: 6 desktop 1280x900 full-page, 2 phone
+390-wide clipped to 2200px) writing to .github/screenshots/, selectedSet()
+(--readme vs no flag = owner), and optimizeScreenshot() (sharp, lazy
+dynamic import: lossless recompress first, palette-reduce fallback if
+still over SCREENSHOT_MAX_BYTES, exported = 1500000, fails listing the
+file/size if still over). Fixed a real bug found while testing: `clip`
+screenshots only ever capture what the *current* viewport renders, so the
+390x844 phone viewport had to grow to 390x2200 before the clipped shot,
+same technique the existing `range` branch already used (without this,
+phone shots came out 390x844, not 2200 tall). Added a minimal "##
+Screenshots" table to README.md referencing all eight files (rule 56).
+
+Verified: npm run env:seed -- --reset && npm run screenshots -- --readme
+wrote all 8 files, all under SCREENSHOT_MAX_BYTES with the lossless step
+alone (measurements in the commit); npm run check:demo clean (README
+screenshot cross-reference); npm run screenshots (no flag) still writes
+only the owner set (unaffected, not restaged); npm run lint/test:unit
+clean (26 suites, 210 passed/6 pre-existing skips, 10 new
+screenshots.test.js assertions); forbidden-patterns.sh clean.
