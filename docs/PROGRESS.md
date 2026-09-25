@@ -32,7 +32,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P3-04 Phase 3 screenshots and push
 - [x] P4-01 Guards back to strict; allow-lists; budget and audits recorded
 - [x] P4-02 Documentation index, SETUP, plugin spec and HANDOFF
-- [ ] P4-03 Final demo refresh, seed reset, screenshots and push
+- [x] P4-03 Final demo refresh, seed reset, screenshots and push
 
 ## Log
 (one entry per task, appended by implement)
@@ -478,3 +478,7 @@ commands exist in package.json scripts (demo:build, demo:check,
 demo:fetch-images, release:pack, check:demo, check:license) passes; npm
 run test:unit clean (27 suites, 216 passed/6 pre-existing skips);
 forbidden-patterns.sh clean. docs/phase-1/ through docs/phase-4/ untouched.
+
+### P4-03 — 79977db
+Regenerated demo build (demo:build), ran demo:check (5 known Playground content-rendering failures per docs/spikes/P2-01.md / docs/HANDOFF.md "Known limitation": article/series 404, series-strip/series-row counts 0, serial-hero absent - everything else green), env:seed --reset (8 categories/4 pages/107 posts/1 nav/7 series/2 books), test:e2e (501 passed, 1 skipped, 0 failed), screenshots --readme and owner screenshots regenerated (only front-1280/front-390 + phase-5 front-390 changed; rest byte-identical), npm run lint clean, npm run test:unit (216 passed), npm run test:integration (629 tests/2597 assertions, OK), npm run env:drill (OK, 104 posts, 5 page hashes unchanged), forbidden-patterns.sh clean.
+Manual check: NOT VERIFIED (human) - owner: tag v0.2.0 after merge, confirm the release assets, open the README Playground link, approve or swap photographs (see docs/HANDOFF.md).
