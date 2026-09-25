@@ -34,8 +34,8 @@ import { checkPages } from './lib/check-assertions.mjs';
 import { localBlueprint } from './lib/local-variant.mjs';
 import {
 	resolvePlaygroundCliBin,
+	runWithServer,
 	startServer,
-	stopServer,
 } from './lib/server-process.mjs';
 import { rebaseAttachmentUrls } from './lib/wxr.mjs';
 
@@ -363,7 +363,6 @@ async function checkAgainstPlayground( fromDir, keep ) {
 
 	const tempDir = mkdtempSync( join( tmpdir(), 'ttm-demo-check-' ) );
 	let staticServer;
-	let playgroundProc;
 
 	try {
 		copyFileSync(
@@ -414,39 +413,52 @@ async function checkAgainstPlayground( fromDir, keep ) {
 		// group (including the CLI's own `--experimental-wasm-jspi` respawn) in one call instead
 		// of only the immediate `npm exec` child, which used to leave the real server and its
 		// worker running, reparented to init, after a bare `.kill()` (review F1).
-		playgroundProc = startServer(
-			process.execPath,
-			[
-				resolvePlaygroundCliBin(),
-				'server',
-				`--blueprint=${ join( tempDir, 'blueprint.local.json' ) }`,
-				`--port=${ playgroundPort }`,
-				'--login',
-			],
-			{ logFile }
-		);
-
 		const siteUrl = `http://127.0.0.1:${ playgroundPort }`;
-		const jar = createCookieJar();
-		await waitForBoot( `${ siteUrl }/`, playgroundProc, jar, { logFile } );
+		// `runWithServer()` stops the whole group when the checks finish or throw, and on
+		// SIGINT/SIGTERM: the group is detached, so a Ctrl-C never reaches it by itself.
+		return await runWithServer(
+			() =>
+				startServer(
+					process.execPath,
+					[
+						resolvePlaygroundCliBin(),
+						'server',
+						`--blueprint=${ join( tempDir, 'blueprint.local.json' ) }`,
+						`--port=${ playgroundPort }`,
+						'--login',
+					],
+					{ logFile }
+				),
+			async ( playgroundProc ) => {
+				const jar = createCookieJar();
+				await waitForBoot( `${ siteUrl }/`, playgroundProc, jar, {
+					logFile,
+				} );
 
-		const failures = await checkAgainstUrl( siteUrl, jar );
+				const failures = await checkAgainstUrl( siteUrl, jar );
 
-		if ( keep ) {
-			console.log(
-				`demo:check: --keep: leaving the server running at ${ siteUrl } ` +
-					`(pid/pgid ${ playgroundProc.pid }); stop it with: ` +
-					`kill -TERM -${ playgroundProc.pid }`
-			);
-			playgroundProc.unref();
-			playgroundProc = null; // Don't stop it in `finally`.
-		}
+				if ( keep ) {
+					console.log(
+						`demo:check: --keep: leaving the server running at ${ siteUrl } ` +
+							`(pid/pgid ${ playgroundProc.pid }); stop it with: ` +
+							`kill -TERM -${ playgroundProc.pid }`
+					);
+				}
 
-		return failures;
+				return failures;
+			},
+			{
+				keep,
+				// An interrupt skips the `finally` below, so clean up the temp dir here too.
+				exit: ( code ) => {
+					if ( ! keep ) {
+						rmSync( tempDir, { recursive: true, force: true } );
+					}
+					process.exit( code );
+				},
+			}
+		);
 	} finally {
-		if ( playgroundProc ) {
-			await stopServer( playgroundProc );
-		}
 		if ( staticServer ) {
 			staticServer.close();
 		}

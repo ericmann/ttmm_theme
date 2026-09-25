@@ -23,10 +23,13 @@
 
 import { spawn } from 'node:child_process';
 import { closeSync, openSync, readFileSync } from 'node:fs';
+import { constants } from 'node:os';
 import { join } from 'node:path';
 
 const DEFAULT_GRACE_MS = 5000;
 const POLL_MS = 25;
+const STOP_SIGNALS = [ 'SIGINT', 'SIGTERM' ];
+const SIGNAL_EXIT_BASE = 128;
 
 /**
  * Resolve `@wp-playground/cli`'s bin script (its package.json `bin` entry) to an absolute path,
@@ -178,4 +181,71 @@ export async function stopServer( proc, { graceMs = DEFAULT_GRACE_MS } = {} ) {
 	}
 
 	await waitForGroupGone( pgid, graceMs );
+}
+
+/**
+ * Run `body( proc )` against a server started by `start()`, and make sure the server's process
+ * group is stopped however `body` ends: on return, on throw, and on SIGINT/SIGTERM to this
+ * process. The group is detached (see `startServer()`), so a Ctrl-C in the terminal never
+ * reaches it on its own; without the signal handlers here, interrupting `demo:check` left the
+ * Playground server running under init.
+ *
+ * With `keep`, a server whose `body` returned normally is left running (and `unref()`d so it no
+ * longer holds this process open); an interrupt or a throw before that still stops it.
+ *
+ * @param {() => import('node:child_process').ChildProcess}                 start             Starts the server (normally via `startServer()`).
+ * @param {(proc: import('node:child_process').ChildProcess) => Promise<*>} body              Work to do while the server runs.
+ * @param {Object}                                                          [options]
+ * @param {boolean}                                                         [options.keep]    Leave the server running if `body` returns.
+ * @param {number}                                                          [options.graceMs] Passed to `stopServer()`.
+ * @param {import('node:events').EventEmitter}                              [options.emitter] Where signals arrive (tests pass their own).
+ * @param {(code: number) => void}                                          [options.exit]    Called with 128 + signal number after an interrupt.
+ * @return {Promise<*>} Whatever `body` resolves to.
+ */
+export async function runWithServer(
+	start,
+	body,
+	{
+		keep = false,
+		graceMs = DEFAULT_GRACE_MS,
+		emitter = process,
+		exit = ( code ) => process.exit( code ),
+	} = {}
+) {
+	const proc = start();
+	const handlers = new Map();
+	const removeHandlers = () => {
+		for ( const [ signal, handler ] of handlers ) {
+			emitter.off( signal, handler );
+		}
+		handlers.clear();
+	};
+
+	for ( const signal of STOP_SIGNALS ) {
+		const handler = async () => {
+			removeHandlers();
+			try {
+				await stopServer( proc, { graceMs } );
+			} finally {
+				exit( SIGNAL_EXIT_BASE + constants.signals[ signal ] );
+			}
+		};
+		handlers.set( signal, handler );
+		emitter.on( signal, handler );
+	}
+
+	let kept = false;
+	try {
+		const result = await body( proc );
+		if ( keep ) {
+			proc.unref();
+			kept = true;
+		}
+		return result;
+	} finally {
+		removeHandlers();
+		if ( ! kept ) {
+			await stopServer( proc, { graceMs } );
+		}
+	}
 }

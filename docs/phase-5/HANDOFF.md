@@ -3,7 +3,7 @@
 Branch `refine/2026-09-24` from `main`. This flight fixed the four owner-reported defects from
 phase 4, then built a full demo/open-source pipeline: real committed photographs, a generated
 WordPress Playground blueprint, a public README, a tagged release workflow, and CI wiring for
-all of it. All 30 originally planned tasks plus four review-fix (`R1-*`) tasks are done; this
+all of it. All 30 originally planned tasks plus five review-fix tasks (`R1-01`…`R1-04`, `R2-01`) are done; this
 document and the final screenshot/seed refresh close the flight.
 
 ## What changed, by phase
