@@ -37,6 +37,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] R1-02 Demo photographs meet OPENVERSE_MIN_WIDTH; demo-lead-photo back to ≥ 1200
 - [x] R1-03 Tests for three survived mutations (demo:verify term meta, owner-name Author scope, zip src/editor)
 - [x] R1-04 Close-out: regenerate demo outputs and screenshots, fix HANDOFF, CI green including demo:check
+- [ ] R2-01 demo:check stops the whole Playground process tree; no orphaned server after exit
 
 ## Log
 (one entry per task, appended by implement)

@@ -384,3 +384,25 @@ Derived from docs/SPEC.md v5.0 on 2026-09-24. SPEC.md wins over this file.
 **Out of scope:** Code changes; tagging `v0.2.0` (owner).
 **Verification:** `git status --porcelain` empty; pushed; CI green on the branch; full verify set plus `npm run test:integration`, `npm run test:e2e`, `npm run env:drill`, `npm run demo:check`. Log `Manual check: NOT VERIFIED (human)`: the owner reviews the re-fetched photographs and screenshots, runs `npm run demo:check -- --keep` and clicks through the four §6.4 pages and the post editor.
 **Depends on:** R1-01, R1-02, R1-03
+
+## Review fixes (round 2)
+
+### R2-01: demo:check stops the whole Playground process tree; no orphaned server after exit
+**Goal:** After `npm run demo:check` (no --keep) exits, no `@wp-playground/cli` server or worker process from that run is still alive or listening, and --keep leaves a server that is independent of the exited parent and stoppable by a printed command.
+**Files touched:** scripts/demo/check.mjs, scripts/demo/lib/server-process.mjs, scripts/test/demo-server-process.test.js, scripts/test/fixtures/spawn-tree.mjs, docs/HANDOFF.md, docs/PROGRESS.md, docs/spikes/P2-01.md
+**Design constraints:** SPEC §3.2 rules 54 and 57, §6.4. Review round 2 F1. Today `spawn( 'npx', [ '@wp-playground/cli', 'server', … ] )` builds a tree npm exec -> sh -> node wp-playground-cli -> node --experimental-wasm-jspi worker, and `playgroundProc.kill()` signals only npm exec, so the CLI server and its worker are reparented to init. In the reviewer's run they held 1.7 GB RSS, used 71 % CPU and kept listening on the port. Move spawning and stopping into a new `scripts/demo/lib/server-process.mjs`:
+- `startServer( command, args, { logFile? } )` spawns with `detached: true`, so the child leads its own process group. Prefer `process.execPath` + the resolved `@wp-playground/cli` bin (`wp-playground.js`) over `npx`/`sh`.
+- `stopServer( proc, { graceMs } )` sends SIGTERM to the whole group (`process.kill( -proc.pid, 'SIGTERM' )`), awaits `exit` up to a bounded grace, then sends SIGKILL to the group. It resolves only once the group is gone.
+- `check.mjs` awaits `stopServer()` in `finally` on both success and failure paths.
+- `--keep`: the server's stdout/stderr go to a log file in the kept temp dir, not pipes to the parent. Call `unref()` and print the PID/process group and a one-line stop command.
+- `waitForBoot()` still waits for `isReady()` (R1-01). With `--keep`, read the ready line by tailing the log file or via pipes that are closed and destroyed after readiness; the ready-line semantics must not change.
+- `process.exit( 0 )` may stay as a backstop, but its comment must state the real cause: the orphaned grandchild held the pipes.
+- No sleeps or retries in place of the ready line, no `--workers` flags, no change to `.github/blueprint.json` or the local-variant mu-plugin.
+- Correct the R1-04 root-cause wording in `docs/HANDOFF.md` and the R1-04 log entry. In `docs/spikes/P2-01.md`, remove the "persistent Redis object cache enabled by default" justification (lines ~176-179), which R1-01 already asked to remove.
+**Acceptance tests:** scripts/test/demo-server-process.test.js (Jest, no network):
+- `it( 'stopServer kills a grandchild spawned through sh -c' )`. `scripts/test/fixtures/spawn-tree.mjs` spawns `sh -c 'node -e "setInterval(()=>{},1000)" & echo $! ; wait'`, or an equivalent grandchild, and prints the grandchild PID. After `startServer()` + `stopServer()`, `process.kill( grandchildPid, 0 )` throws ESRCH. This test fails against the old `proc.kill()` approach, which is the F1 catch.
+- `it( 'stopServer resolves after SIGKILL when the group ignores SIGTERM' )`: a fixture that traps SIGTERM; the group is gone within `graceMs` + a margin.
+- The existing `isReady`/`localBlueprint`/`checkPages` tests stay green.
+**Out of scope:** Changing blocks, templates, fixtures, photographs, the committed .github outputs, the blueprint template, the local-variant mu-plugin, check-assertions, CI workflow files, or the --url path's behaviour beyond sharing the same exit handling.
+**Verification:** `npm run lint`, `npm run test:unit`. Then `npm run demo:check` exits 0, and immediately afterwards `pgrep -af 'wp-playground-cli|wasm-jspi'` prints nothing and `ss -ltn` shows the printed Playground port free. Then `npm run demo:check -- --keep` prints `demo:check: ok` and the stop command, the printed URL still answers 200 after the parent has exited, and running the printed stop command leaves `pgrep` empty. Also `npm run demo:build -- --out dist/demo && npm run demo:check -- --from dist/demo` ok. Push and confirm the CI integration job's demo:check step is green. `git status --porcelain` is empty.
+**Depends on:** none
