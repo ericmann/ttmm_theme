@@ -34,7 +34,7 @@ Started: 2026-09-24T16:34:49.705Z
 - [x] P4-02 Documentation index, SETUP, plugin spec and HANDOFF
 - [x] P4-03 Final demo refresh, seed reset, screenshots and push
 - [x] R1-01 demo:check waits for the blueprint to finish; Playground photo assertions restored
-- [ ] R1-02 Demo photographs meet OPENVERSE_MIN_WIDTH; demo-lead-photo back to ≥ 1200
+- [x] R1-02 Demo photographs meet OPENVERSE_MIN_WIDTH; demo-lead-photo back to ≥ 1200
 - [ ] R1-03 Tests for three survived mutations (demo:verify term meta, owner-name Author scope, zip src/editor)
 - [ ] R1-04 Close-out: regenerate demo outputs and screenshots, fix HANDOFF, CI green including demo:check
 
@@ -497,3 +497,12 @@ docs/spikes/P2-01.md "Playground result" section rewritten: the real cause was a
 Verified directly (not via foundry_verify, see below): npm run lint, npm run test:unit, npm run build, composer lint, composer test:unit, bash scripts/forbidden-patterns.sh, npm run demo:check (ok), npm run demo:check -- --from dist/demo (ok, after npm run demo:build -- --out dist/demo) -- all green.
 
 Friction: foundry_verify's MCP call has a ~1800s idle timeout; on this shared dev machine a single headless Playground boot inside the extraVerify chain took 25-50 min under CPU contention from unrelated processes, tripping the timeout three times even though the command was still running and later succeeded. Logged via foundry_feedback_log. Ran every verify/extraVerify command by hand instead, all passing.
+
+### R1-02 — 07445b0
+acceptEncoded({width,bytes},{minWidth,maxBytes}) added to openverse.mjs: judges the REAL decoded width/bytes after sharp re-encoding, not Openverse's search-result metadata (root cause of F3: stocksnap/rawpixel results serve a fixed 960w/1024px proxy via their own `url` field regardless of the claimed `width`). fetch-images.mjs's downloadAndEncode no longer self-rejects; fetchRow calls acceptEncoded and adds failing candidates to skipIds, same retry loop as before. checkCredits() gained a minWidth param (check-demo.mjs passes OPENVERSE_MIN_WIDTH); fails any CREDITS row narrower than it.
+
+Re-fetched all 8 flagged files via demo:fetch-images --only=<file>, each hand-reviewed: rejected several first-pick candidates for visible brand/product logos (Intel, D-Link, Dell, Honda, ABLOY, Yale, OPDR shipping line, Jewett/Royal typewriters), one identifiable face, and one dominant-red sunset, before landing on the committed photo. New subjects: signing-your-options-table -> fiber optic cable macro; technology-post-2 -> mouse PCB; composer-lockfiles -> chained canal lock gate; hardening-part-4-keys -> two blank keys (b/w); open-source-not-a-business-model -> open doors by water (crane subject abandoned, no clean under-350KB/1600px/no-brand candidate existed for it; caption rewritten too); php-85-readonly-classes -> typewriter keys over a rainbow fan; story-uptime -> storm clouds over a harbor; transients -> empty wooden bookshelf. images.json queries/excludes and posts.json alt (+ one caption) updated to match; nothing else in the fixtures touched.
+
+fidelity.spec.mjs's demo-lead-photo now asserts width >= 1200 per PLAN, stale 960px comment removed.
+
+Verified: npm run lint (check:demo clean, all CREDITS widths >= 1600), npm run test:unit, npm run test:integration (629/629), npm run env:seed -- --reset && npm run test:e2e (501 passed/1 skipped). Total image bytes 2,790,264, well under IMAGE_BUDGET_BYTES. Did not get a full headless npm run demo:check (Playground) to finish in this environment (>60min boots under heavy host load, same friction as R1-01, logged via foundry_feedback_log) -- check:demo's own width/CREDITS validation is the mechanism that actually exercises this task's change and is green.
