@@ -19,20 +19,21 @@ const OPTIONS_KEYS = [
 	'ttm_settings',
 ];
 
-// The SPEC §6.4 step sequence: each entry is either a bare step name, or `wp-cli:<command>`
-// for a `wp-cli` step (the final `demo:verify` command's dynamic args are matched by prefix).
+// The SPEC §6.4 step sequence: each entry is either a bare step name, or `wp-cli:<command>` for
+// a `wp-cli` step, matched by *prefix* (not equality) since the last step's dynamic
+// `--posts=… --pages=… --series=… --attachments=…` args vary per build. `wp rewrite structure`/
+// `wp ttm primary:assign`/`recount --all`/`series:rebuild`/`stats:flush`/`demo:verify` are one
+// combined `wp eval` step (not six separate `wp-cli` steps) -- confirmed empirically that
+// Playground's php.wasm hits a hard "memory access out of bounds" trap by roughly the ninth
+// separate `wp-cli` blueprint step in a boot regardless of which command or how much content,
+// so the post-import work runs as a single in-process PHP call instead.
 const STEP_SEQUENCE = [
 	'setSiteOptions',
 	'installPlugin',
 	'installTheme',
 	'wp-cli:wp site empty --yes',
 	'importWxr',
-	'wp-cli:wp rewrite structure /%postname%/ --hard',
-	'wp-cli:wp ttm primary:assign',
-	'wp-cli:wp ttm recount --all',
-	'wp-cli:wp ttm series:rebuild',
-	'wp-cli:wp ttm stats:flush',
-	'wp-cli:wp ttm demo:verify',
+	"wp-cli:wp eval update_option('permalink_structure','/%postname%/');",
 ];
 
 /**
@@ -163,7 +164,13 @@ function distinctFixtureImages( rows ) {
  * @return {string} `<step>` or `wp-cli:<command>`.
  */
 function stepSignature( step ) {
-	return 'wp-cli' === step.step ? `wp-cli:${ step.command }` : step.step;
+	if ( 'wp-cli' !== step.step ) {
+		return step.step;
+	}
+	const command = Array.isArray( step.command )
+		? step.command.join( ' ' )
+		: step.command;
+	return `wp-cli:${ command }`;
 }
 
 /**
@@ -279,9 +286,7 @@ export function checkDemoOutputs( {
 	const orderMatches =
 		signatures.length === STEP_SEQUENCE.length &&
 		STEP_SEQUENCE.every( ( expected, index ) =>
-			expected.endsWith( 'demo:verify' )
-				? ( signatures[ index ] || '' ).startsWith( expected )
-				: signatures[ index ] === expected
+			( signatures[ index ] || '' ).startsWith( expected )
 		);
 	if ( ! orderMatches ) {
 		failures.push(

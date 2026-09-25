@@ -41,6 +41,17 @@ const BLUEPRINT_TEMPLATE_PATH = join(
 const FIXTURE_BUILD_DIR = join( 'docs', 'fixtures', '.demo-build' );
 const CONTAINER_BUILD_DIR = 'wp-content/ttm-fixtures/.demo-build';
 
+// `wp eval` code dumping every `series` term's ttm_status/ttm_form as one JSON line, keyed by
+// slug -- the side channel normalizeWxr()'s `seriesTermMeta` option needs (see the call site).
+const SERIES_TERM_META_PHP =
+	'$out = []; ' +
+	'foreach ( get_terms( array( "taxonomy" => "series", "hide_empty" => false ) ) as $t ) { ' +
+	'$out[ $t->slug ] = array( ' +
+	'"ttm_status" => (string) get_term_meta( $t->term_id, "ttm_status", true ), ' +
+	'"ttm_form" => (string) get_term_meta( $t->term_id, "ttm_form", true ) ' +
+	'); } ' +
+	'echo wp_json_encode( $out );';
+
 /**
  * @param {string[]} args  Raw CLI args.
  * @param {string}   name  Flag name (without `--`).
@@ -133,10 +144,27 @@ function buildOnce( { nowDate, release } ) {
 		'utf8'
 	);
 	const demoFiles = existsSync( IMAGES_DIR ) ? readdirSync( IMAGES_DIR ) : [];
+
+	// `wp export` never emits `<wp:termmeta>` in any invocation (docs/spikes/P2-01.md) -- read
+	// every `series` term's ttm_status/ttm_form directly and hand them to normalizeWxr to inject.
+	const seriesMetaOutput = run( 'npx', [
+		'wp-env',
+		'run',
+		'cli',
+		'--',
+		'wp',
+		'eval',
+		SERIES_TERM_META_PHP,
+	] );
+	const seriesTermMeta = JSON.parse(
+		seriesMetaOutput.trim().split( '\n' ).pop()
+	);
+
 	const wxr = normalizeWxr( exportXml, {
 		siteOrigin: SITE_ORIGIN,
 		imageBase: IMAGE_BASE,
 		demoFiles,
+		seriesTermMeta,
 	} );
 
 	const optionsOutput = run( 'npx', [

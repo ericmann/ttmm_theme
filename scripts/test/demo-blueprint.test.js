@@ -53,13 +53,18 @@ describe( 'renderBlueprint', () => {
 		expect( installTheme.themeData.url ).toContain( 'release=v0.2.0' );
 		expect( installTheme.themeData.url ).toContain( 'asset=ttm-theme.zip' );
 
-		const verify = rendered.steps.find(
-			( step ) =>
-				'wp-cli' === step.step && step.command.includes( 'demo:verify' )
+		const evalStep = rendered.steps.find(
+			( step ) => 'wp-cli' === step.step && Array.isArray( step.command )
 		);
-		expect( verify.command ).toBe(
-			'wp ttm demo:verify --posts=107 --pages=4 --series=7 --attachments=13'
+		expect( evalStep.command ).toEqual( [
+			'wp',
+			'eval',
+			expect.any( String ),
+		] );
+		expect( evalStep.command[ 2 ] ).toContain(
+			"'--posts=107 --pages=4 --series=7 --attachments=13'"
 		);
+		expect( evalStep.command[ 2 ] ).toContain( 'DemoCommand()' );
 
 		// The original template is left untouched (no accidental in-place mutation).
 		expect( TEMPLATE.steps[ 0 ].options ).toBe( '{{OPTIONS}}' );
@@ -72,9 +77,18 @@ describe( 'renderBlueprint', () => {
 			verifyArgs: '--posts=0 --pages=0 --series=0 --attachments=0',
 		} );
 
-		const order = rendered.steps.map( ( step ) =>
-			'wp-cli' === step.step ? step.command : step.step
-		);
+		// The post-import work (rewrite/primary:assign/recount/series:rebuild/stats:flush/
+		// demo:verify) is one combined `wp eval` step, not six separate `wp-cli` steps --
+		// Playground's php.wasm hits a hard memory trap by roughly the ninth separate `wp-cli`
+		// blueprint step in a boot, confirmed empirically (docs/spikes/P2-01.md's own follow-up).
+		const order = rendered.steps.map( ( step ) => {
+			if ( 'wp-cli' !== step.step ) {
+				return step.step;
+			}
+			return Array.isArray( step.command )
+				? step.command.slice( 0, 2 ).join( ' ' )
+				: step.command;
+		} );
 
 		expect( order ).toEqual( [
 			'setSiteOptions',
@@ -82,17 +96,20 @@ describe( 'renderBlueprint', () => {
 			'installTheme',
 			'wp site empty --yes',
 			'importWxr',
-			'wp rewrite structure /%postname%/ --hard',
-			'wp ttm primary:assign',
-			'wp ttm recount --all',
-			'wp ttm series:rebuild',
-			'wp ttm stats:flush',
-			'wp ttm demo:verify --posts=0 --pages=0 --series=0 --attachments=0',
+			'wp eval',
 		] );
 
 		const importWxrIndex = order.indexOf( 'importWxr' );
 		const siteEmptyIndex = order.indexOf( 'wp site empty --yes' );
 		expect( siteEmptyIndex ).toBeLessThan( importWxrIndex );
+
+		const evalCode =
+			rendered.steps[ rendered.steps.length - 1 ].command[ 2 ];
+		expect( evalCode ).toContain( 'PrimaryCommand' );
+		expect( evalCode ).toContain( 'RecountCommand' );
+		expect( evalCode ).toContain( 'SeriesCommand' );
+		expect( evalCode ).toContain( 'Stats::flush_all' );
+		expect( evalCode ).toContain( 'DemoCommand' );
 	} );
 } );
 

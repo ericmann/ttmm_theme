@@ -308,16 +308,13 @@ function buildBlueprint( { options, pluginVersion = '1.2.3' } ) {
 			},
 			{
 				step: 'wp-cli',
-				command: 'wp rewrite structure /%postname%/ --hard',
-			},
-			{ step: 'wp-cli', command: 'wp ttm primary:assign' },
-			{ step: 'wp-cli', command: 'wp ttm recount --all' },
-			{ step: 'wp-cli', command: 'wp ttm series:rebuild' },
-			{ step: 'wp-cli', command: 'wp ttm stats:flush' },
-			{
-				step: 'wp-cli',
-				command:
-					'wp ttm demo:verify --posts=1 --pages=1 --series=0 --attachments=1',
+				command: [
+					'wp',
+					'eval',
+					"update_option('permalink_structure','/%postname%/');flush_rewrite_rules(true);" +
+						"parse_str(str_replace(['--',' '],['','&'],'--posts=1 --pages=1 --series=0 --attachments=1'),$a);" +
+						'$r=(new TTM\\Core\\Cli\\DemoCommand())->verify([],$a);',
+				],
 			},
 		],
 	};

@@ -338,6 +338,36 @@ describe( 'normalizeWxr', () => {
 		expect( out ).toContain( 'ttm_word_count' );
 	} );
 
+	it( 'injects seriesTermMeta since wp export never emits <wp:termmeta> itself', () => {
+		// The invented fixture's <wp:term> already carries wp:termmeta (matching the task's own
+		// described shape), but a real `wp export` never does (docs/spikes/P2-01.md) -- strip it
+		// out here to prove injection, not mere preservation, is what makes it reappear.
+		const xmlWithoutTermMeta = buildFixture().replace(
+			/<wp:termmeta>[\s\S]*?<\/wp:termmeta>\n?/g,
+			''
+		);
+		expect( xmlWithoutTermMeta ).not.toContain( 'wp:termmeta' );
+
+		const out = normalizeWxr( xmlWithoutTermMeta, {
+			siteOrigin: SITE_ORIGIN,
+			imageBase: IMAGE_BASE,
+			demoFiles: DEMO_FILES,
+			seriesTermMeta: {
+				'the-quiet-ledger': {
+					ttm_status: 'in-progress',
+					ttm_form: 'novel',
+				},
+			},
+		} );
+
+		expect( out ).toContain(
+			'<wp:meta_key><![CDATA[ttm_status]]></wp:meta_key>\n\t\t<wp:meta_value><![CDATA[in-progress]]></wp:meta_value>'
+		);
+		expect( out ).toContain(
+			'<wp:meta_key><![CDATA[ttm_form]]></wp:meta_key>\n\t\t<wp:meta_value><![CDATA[novel]]></wp:meta_value>'
+		);
+	} );
+
 	it( 'replaces the author with demo and removes e-mail and names', () => {
 		const out = normalize( buildFixture() );
 

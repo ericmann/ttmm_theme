@@ -258,6 +258,14 @@
   <wp:term_parent/>
   <wp:term_name><![CDATA[Failover]]></wp:term_name>
   <wp:term_description><![CDATA[Three engineers, one data center, and the night the generators did not start.]]></wp:term_description>
+	<wp:termmeta>
+		<wp:meta_key><![CDATA[ttm_status]]></wp:meta_key>
+		<wp:meta_value><![CDATA[complete]]></wp:meta_value>
+	</wp:termmeta>
+	<wp:termmeta>
+		<wp:meta_key><![CDATA[ttm_form]]></wp:meta_key>
+		<wp:meta_value><![CDATA[novella]]></wp:meta_value>
+	</wp:termmeta>
 </wp:term>
 <wp:term>
   <wp:term_id>41</wp:term_id>
@@ -266,6 +274,14 @@
   <wp:term_parent/>
   <wp:term_name><![CDATA[Hardening WordPress]]></wp:term_name>
   <wp:term_description><![CDATA[Six parts on defending the parts of a WordPress install that scanners ignore: configuration, keys, the database, and the people with logins.]]></wp:term_description>
+	<wp:termmeta>
+		<wp:meta_key><![CDATA[ttm_status]]></wp:meta_key>
+		<wp:meta_value><![CDATA[in-progress]]></wp:meta_value>
+	</wp:termmeta>
+	<wp:termmeta>
+		<wp:meta_key><![CDATA[ttm_form]]></wp:meta_key>
+		<wp:meta_value><![CDATA[nonfiction]]></wp:meta_value>
+	</wp:termmeta>
 </wp:term>
 <wp:term>
   <wp:term_id>43</wp:term_id>
@@ -273,6 +289,14 @@
   <wp:term_slug>ordinary-time</wp:term_slug>
   <wp:term_parent/>
   <wp:term_name><![CDATA[Ordinary Time]]></wp:term_name>
+	<wp:termmeta>
+		<wp:meta_key><![CDATA[ttm_status]]></wp:meta_key>
+		<wp:meta_value><![CDATA[in-progress]]></wp:meta_value>
+	</wp:termmeta>
+	<wp:termmeta>
+		<wp:meta_key><![CDATA[ttm_form]]></wp:meta_key>
+		<wp:meta_value><![CDATA[nonfiction]]></wp:meta_value>
+	</wp:termmeta>
 </wp:term>
 <wp:term>
   <wp:term_id>47</wp:term_id>
@@ -281,6 +305,14 @@
   <wp:term_parent/>
   <wp:term_name><![CDATA[Reading CVEs]]></wp:term_name>
   <wp:term_description><![CDATA[Four CVEs read the way an engineer reads them: what the advisory says, what the patch does, and what it would have taken to notice.]]></wp:term_description>
+	<wp:termmeta>
+		<wp:meta_key><![CDATA[ttm_status]]></wp:meta_key>
+		<wp:meta_value><![CDATA[complete]]></wp:meta_value>
+	</wp:termmeta>
+	<wp:termmeta>
+		<wp:meta_key><![CDATA[ttm_form]]></wp:meta_key>
+		<wp:meta_value><![CDATA[nonfiction]]></wp:meta_value>
+	</wp:termmeta>
 </wp:term>
 <wp:term>
   <wp:term_id>46</wp:term_id>
@@ -289,6 +321,14 @@
   <wp:term_parent/>
   <wp:term_name><![CDATA[Salt Water Wires]]></wp:term_name>
   <wp:term_description><![CDATA[A cable-landing station on the Oregon coast, and the family that has kept it running for sixty years.]]></wp:term_description>
+	<wp:termmeta>
+		<wp:meta_key><![CDATA[ttm_status]]></wp:meta_key>
+		<wp:meta_value><![CDATA[complete]]></wp:meta_value>
+	</wp:termmeta>
+	<wp:termmeta>
+		<wp:meta_key><![CDATA[ttm_form]]></wp:meta_key>
+		<wp:meta_value><![CDATA[novel]]></wp:meta_value>
+	</wp:termmeta>
 </wp:term>
 <wp:term>
   <wp:term_id>42</wp:term_id>
@@ -296,6 +336,14 @@
   <wp:term_slug>the-consultants-ledger</wp:term_slug>
   <wp:term_parent/>
   <wp:term_name><![CDATA[The Consultant's Ledger]]></wp:term_name>
+	<wp:termmeta>
+		<wp:meta_key><![CDATA[ttm_status]]></wp:meta_key>
+		<wp:meta_value><![CDATA[in-progress]]></wp:meta_value>
+	</wp:termmeta>
+	<wp:termmeta>
+		<wp:meta_key><![CDATA[ttm_form]]></wp:meta_key>
+		<wp:meta_value><![CDATA[nonfiction]]></wp:meta_value>
+	</wp:termmeta>
 </wp:term>
 <wp:term>
   <wp:term_id>44</wp:term_id>
@@ -304,6 +352,14 @@
   <wp:term_parent/>
   <wp:term_name><![CDATA[The Quiet Ledger]]></wp:term_name>
   <wp:term_description><![CDATA[A forensic accountant in a company town discovers that the books she was hired to audit are the honest ones. Literary thriller, serialized here first, one chapter a month.]]></wp:term_description>
+	<wp:termmeta>
+		<wp:meta_key><![CDATA[ttm_status]]></wp:meta_key>
+		<wp:meta_value><![CDATA[in-progress]]></wp:meta_value>
+	</wp:termmeta>
+	<wp:termmeta>
+		<wp:meta_key><![CDATA[ttm_form]]></wp:meta_key>
+		<wp:meta_value><![CDATA[novel]]></wp:meta_value>
+	</wp:termmeta>
 </wp:term>
 <generator>https://wordpress.org/?v=7.1.1</generator>
 <item>

@@ -303,6 +303,11 @@ function normalizeItem( item, newId, idMap, opts ) {
  * @param {string}   [options.placeholderHost='https://example.com'] Flattened host for
  *                                                                   base_site_url/base_blog_url/link/non-attachment guid.
  * @param {number}   [options.firstPostId=1001]                      First renumbered post id.
+ * @param {Object}   [options.seriesTermMeta={}]                     `series` term meta to inject,
+ *                                                                   keyed by slug (`wp export`
+ *                                                                   never emits `<wp:termmeta>`
+ *                                                                   itself -- see the inline note
+ *                                                                   below).
  * @return {string} Normalised WXR.
  */
 export function normalizeWxr(
@@ -313,6 +318,7 @@ export function normalizeWxr(
 		demoFiles,
 		placeholderHost = 'https://example.com',
 		firstPostId = 1001,
+		seriesTermMeta = {},
 	}
 ) {
 	const demoSet = new Set( demoFiles || [] );
@@ -380,6 +386,27 @@ export function normalizeWxr(
 			( whole, rawKey ) =>
 				'ttm_cover_id' === unwrapCdata( rawKey ) ? '' : whole
 		);
+
+		// `wp export` never emits `<wp:termmeta>` at all, in any invocation (confirmed against a
+		// real export, docs/spikes/P2-01.md) -- `series` term meta has to be injected from a
+		// side-channel read of the live site (`seriesTermMeta`, keyed by slug) rather than kept
+		// from the source XML. Any termmeta the block already carries for a slug present in the
+		// map is replaced wholesale (not merged) so re-running with the same input is idempotent.
+		if (
+			'series' === getTag( b, 'wp:term_taxonomy' ) &&
+			seriesTermMeta[ getTag( b, 'wp:term_slug' ) ]
+		) {
+			b = b.replace( /<wp:termmeta>[\s\S]*?<\/wp:termmeta>\n?/g, '' );
+			const meta = seriesTermMeta[ getTag( b, 'wp:term_slug' ) ];
+			const injected = Object.entries( meta )
+				.map(
+					( [ key, value ] ) =>
+						`\t<wp:termmeta>\n\t\t<wp:meta_key><![CDATA[${ key }]]></wp:meta_key>\n\t\t<wp:meta_value><![CDATA[${ value }]]></wp:meta_value>\n\t</wp:termmeta>\n`
+				)
+				.join( '' );
+			b = b.replace( /<\/wp:term>/, `${ injected }</wp:term>` );
+		}
+
 		return b;
 	} );
 
