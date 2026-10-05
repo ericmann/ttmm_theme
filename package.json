@@ -63,7 +63,7 @@
     "@wordpress/server-side-render": "^6.31.0",
     "@wp-playground/cli": "^3.1.54",
     "jsdom": "^30.1.0",
-    "sharp": "^0.35.4"
+    "sharp": "^0.35.5"
   },
   "overrides": {
     "linkify-it": "^5.0.2",
