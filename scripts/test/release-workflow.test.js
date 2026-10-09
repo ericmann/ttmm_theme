@@ -64,7 +64,7 @@ describe( 'release.yml', () => {
 		expect( workflow ).toMatch( /dist\/ttm-theme\.zip/ );
 		expect( workflow ).toMatch( /draft:\s*false/ );
 		expect( workflow ).toMatch( /generate_release_notes:\s*true/ );
-		expect( workflow ).toMatch( /softprops\/action-gh-release@v2/ );
+		expect( workflow ).toMatch( /softprops\/action-gh-release@v3/ );
 	} );
 
 	it( 'grants contents: write', () => {

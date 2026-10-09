@@ -116,7 +116,7 @@ jobs:
       - uses: ramsey/composer-install@v4
       - run: npm ci
       - run: composer audit
-      - run: npm audit --audit-level=high
+      - run: npm run check:audit
       - name: Secret scan
         uses: gitleaks/gitleaks-action@v3
         env:
