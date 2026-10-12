@@ -35,6 +35,25 @@ abstract class TTM_IntegrationTestCase extends WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
 		do_action( 'init' );
+		add_filter( 'wp_insert_post_data', [ $this, 'keep_requested_future_status' ], 10, 2 );
+	}
+
+	/**
+	 * Keep a fixture's requested `future` status. wp_insert_post() flips `future` to
+	 * `publish` when post_date_gmt is behind the real wall clock, which ttm_now cannot
+	 * pin -- so scheduled fixtures dated after the pinned "now" silently became
+	 * published once the real calendar passed them.
+	 *
+	 * @param array<string, mixed> $data    Sanitized post data about to be saved.
+	 * @param array<string, mixed> $postarr Post data as passed to wp_insert_post().
+	 * @return array<string, mixed>
+	 */
+	public function keep_requested_future_status( array $data, array $postarr ): array {
+		if ( 'future' === ( $postarr['post_status'] ?? '' ) && 'publish' === $data['post_status'] ) {
+			$data['post_status'] = 'future';
+		}
+
+		return $data;
 	}
 
 	/**
