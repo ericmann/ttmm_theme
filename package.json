@@ -44,7 +44,7 @@
   "dependencies": {},
   "devDependencies": {
     "@axe-core/playwright": "*",
-    "@babel/core": "^7.29.7",
+    "@babel/core": "^8.0.7",
     "@playwright/test": "*",
     "@wordpress/autop": "^4.56.0",
     "@wordpress/babel-preset-default": "^8.55.0",
