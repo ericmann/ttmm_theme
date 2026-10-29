@@ -114,6 +114,84 @@ class HeadersTest extends TestCase {
 		$this->assertNull( $value );
 	}
 
+	public function test_header_value_appends_both_stale_directives_by_default(): void {
+		$this->stub_config();
+
+		$this->assertSame(
+			'public, max-age=3600, s-maxage=3600, stale-while-revalidate=60, stale-if-error=604800',
+			Headers::header_value( 3600 )
+		);
+	}
+
+	public function test_header_value_uses_configured_stale_seconds(): void {
+		$this->stub_config(
+			[
+				'cache.stale_revalidate_seconds' => 30,
+				'cache.stale_if_error_seconds'   => 86400,
+			]
+		);
+
+		$this->assertSame(
+			'public, max-age=120, s-maxage=120, stale-while-revalidate=30, stale-if-error=86400',
+			Headers::header_value( 120 )
+		);
+	}
+
+	public function test_zero_omits_stale_while_revalidate(): void {
+		$this->stub_config( [ 'cache.stale_revalidate_seconds' => 0 ] );
+
+		$value = Headers::header_value( 120 );
+
+		$this->assertStringNotContainsString( 'stale-while-revalidate', $value );
+		$this->assertStringEndsWith( ', stale-if-error=604800', $value );
+	}
+
+	public function test_zero_omits_stale_if_error(): void {
+		$this->stub_config( [ 'cache.stale_if_error_seconds' => 0 ] );
+
+		$value = Headers::header_value( 120 );
+
+		$this->assertStringNotContainsString( 'stale-if-error', $value );
+		$this->assertStringEndsWith( ', stale-while-revalidate=60', $value );
+	}
+
+	public function test_both_zero_is_the_plain_header(): void {
+		$this->stub_config(
+			[
+				'cache.stale_revalidate_seconds' => 0,
+				'cache.stale_if_error_seconds'   => 0,
+			]
+		);
+
+		$this->assertSame( 'public, max-age=120, s-maxage=120', Headers::header_value( 120 ) );
+	}
+
+	public function test_feed_gets_stale_directives(): void {
+		$this->stub_config();
+
+		$value = Headers::for_request(
+			[
+				'admin'     => false,
+				'rest'      => false,
+				'feed'      => true,
+				'logged_in' => false,
+				'method'    => 'GET',
+			]
+		);
+
+		$this->assertSame( 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=60, stale-if-error=604800', $value );
+	}
+
+	public function test_no_store_never_carries_stale_directives(): void {
+		$this->stub_config();
+
+		foreach ( [ [ 'admin' => true ], [ 'logged_in' => true ] ] as $flags ) {
+			$value = Headers::for_request( array_merge( [ 'method' => 'GET' ], $flags ) );
+
+			$this->assertSame( 'no-store', $value );
+		}
+	}
+
 	public function test_ttm_cache_max_age_filter_overrides(): void {
 		Functions\when( 'apply_filters' )->alias(
 			static function ( string $tag, $value ) {

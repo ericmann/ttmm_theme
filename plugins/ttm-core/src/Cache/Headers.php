@@ -146,12 +146,27 @@ class Headers {
 	}
 
 	/**
-	 * `public, max-age=N, s-maxage=N`.
+	 * `public, max-age=N, s-maxage=N`, plus `stale-while-revalidate` and `stale-if-error` when
+	 * their Config values are positive. Used for every cacheable response (pages, feeds and
+	 * `ttm/v1`), never for `no-store`: the stale directives let the edge keep serving the last
+	 * good copy while it refetches, or while the origin is unreachable.
 	 *
 	 * @param int $seconds Seconds.
 	 * @return string
 	 */
 	public static function header_value( int $seconds ): string {
-		return sprintf( 'public, max-age=%1$d, s-maxage=%1$d', $seconds );
+		$value = sprintf( 'public, max-age=%1$d, s-maxage=%1$d', $seconds );
+
+		$revalidate = (int) Config::get( 'cache.stale_revalidate_seconds', 60 );
+		if ( $revalidate > 0 ) {
+			$value .= sprintf( ', stale-while-revalidate=%d', $revalidate );
+		}
+
+		$if_error = (int) Config::get( 'cache.stale_if_error_seconds', 604800 );
+		if ( $if_error > 0 ) {
+			$value .= sprintf( ', stale-if-error=%d', $if_error );
+		}
+
+		return $value;
 	}
 }

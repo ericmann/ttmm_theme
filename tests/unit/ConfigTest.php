@@ -80,6 +80,8 @@ class ConfigTest extends TestCase {
 			'cache.max_age_cap_seconds',
 			'cache.min_age_seconds',
 			'cache.feed_seconds',
+			'cache.stale_revalidate_seconds',
+			'cache.stale_if_error_seconds',
 			'cache.cloudflare.zone_id',
 			'cache.cloudflare.api_token',
 			'cache.cloudflare.batch',

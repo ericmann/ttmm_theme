@@ -36,7 +36,7 @@ class HeadersTest extends TTM_IntegrationTestCase {
 			]
 		);
 
-		$this->assertSame( 'public, max-age=43200, s-maxage=43200', $value );
+		$this->assertSame( 'public, max-age=43200, s-maxage=43200, stale-while-revalidate=60, stale-if-error=604800', $value );
 	}
 
 	public function test_feed_gets_3600(): void {
@@ -50,7 +50,7 @@ class HeadersTest extends TTM_IntegrationTestCase {
 			]
 		);
 
-		$this->assertSame( 'public, max-age=3600, s-maxage=3600', $value );
+		$this->assertSame( 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=60, stale-if-error=604800', $value );
 	}
 
 	public function test_logged_in_gets_no_store(): void {
@@ -80,7 +80,7 @@ class HeadersTest extends TTM_IntegrationTestCase {
 			]
 		);
 
-		$this->assertSame( 'public, max-age=43200, s-maxage=43200', $value );
+		$this->assertSame( 'public, max-age=43200, s-maxage=43200, stale-while-revalidate=60, stale-if-error=604800', $value );
 	}
 
 	public function test_post_request_gets_nothing(): void {
@@ -110,7 +110,7 @@ class HeadersTest extends TTM_IntegrationTestCase {
 		$headers = $response->get_headers();
 
 		$this->assertArrayHasKey( 'Cache-Control', $headers );
-		$this->assertSame( 'public, max-age=43200, s-maxage=43200', $headers['Cache-Control'] );
+		$this->assertSame( 'public, max-age=43200, s-maxage=43200, stale-while-revalidate=60, stale-if-error=604800', $headers['Cache-Control'] );
 	}
 
 	public function test_batcache_global_receives_max_age(): void {

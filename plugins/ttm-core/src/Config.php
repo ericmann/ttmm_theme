@@ -133,6 +133,11 @@ class Config {
 			'cache.max_age_cap_seconds'        => 86400,
 			'cache.min_age_seconds'            => 60,
 			'cache.feed_seconds'               => 3600,
+			// ⚠️ ASSUMPTION: `stale-while-revalidate`/`stale-if-error` seconds appended to every
+			// cacheable Cache-Control (0 omits the directive). A week of stale-if-error lets the
+			// edge keep serving pages through an origin outage; tune once real outages are seen.
+			'cache.stale_revalidate_seconds'   => 60,
+			'cache.stale_if_error_seconds'     => 604800,
 			'cache.cloudflare.zone_id'         => defined( 'TTM_CLOUDFLARE_ZONE_ID' ) ? TTM_CLOUDFLARE_ZONE_ID : '',
 			'cache.cloudflare.api_token'       => defined( 'TTM_CLOUDFLARE_API_TOKEN' ) ? TTM_CLOUDFLARE_API_TOKEN : '',
 			'cache.cloudflare.batch'           => 30,
