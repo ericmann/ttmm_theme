@@ -735,8 +735,8 @@ class Seeder {
 		// P1-04: a demo photograph's alt text describes the photograph itself, which is not
 		// necessarily the post title -- falls back to the title when a row has no dedicated
 		// `alt` (e.g. before P1-04 named the real photographs).
-		$alt      = (string) ( $row['alt'] ?? $title );
-		$caption  = (string) ( $row['caption'] ?? '' );
+		$alt     = (string) ( $row['alt'] ?? $title );
+		$caption = (string) ( $row['caption'] ?? '' );
 
 		if ( $this->demo_images && is_string( $featured ) ) {
 			$attachment_id = DemoImage::attach( $featured, $post_id, $alt, $caption );
@@ -870,7 +870,7 @@ class Seeder {
 	/**
 	 * Encode a GD image as PNG, upload it and attach it to the media library.
 	 *
-	 * @param \GdImage $image    Image to encode (destroyed by this call).
+	 * @param \GdImage $image    Image to encode.
 	 * @param string   $filename Upload filename.
 	 * @param string   $label    Alt text / attachment title.
 	 * @return int Attachment id, or 0 on failure.
@@ -879,7 +879,6 @@ class Seeder {
 		ob_start();
 		imagepng( $image );
 		$data = ob_get_clean();
-		imagedestroy( $image );
 
 		$upload = wp_upload_bits( $filename, null, $data );
 		if ( ! empty( $upload['error'] ) ) {

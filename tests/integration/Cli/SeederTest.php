@@ -117,8 +117,6 @@ class SeederTest extends TTM_IntegrationTestCase {
 			$this->assertLessThanOrEqual( 20, $color['red'] - $color['green'], "pixel ({$x},{$y}) is reddish" );
 			$this->assertLessThan( 200, $color['red'], "pixel ({$x},{$y}) is too bright to be neutral" );
 		}
-
-		imagedestroy( $image );
 	}
 
 	public function test_cover_is_two_by_three_and_darker_than_field(): void {
@@ -138,7 +136,6 @@ class SeederTest extends TTM_IntegrationTestCase {
 		// Sample a corner, away from the centred title text.
 		$rgb   = imagecolorat( $image, 10, 10 );
 		$color = imagecolorsforindex( $image, $rgb );
-		imagedestroy( $image );
 
 		// COVER (neutral-700, [96, 93, 93]) is darker than FIELD (neutral-400, [186, 182, 182]).
 		$this->assertLessThan( 150, $color['red'] );
@@ -855,7 +852,6 @@ class SeederTest extends TTM_IntegrationTestCase {
 		$grey  = imagecolorallocate( $image, 186, 182, 182 );
 		imagefill( $image, 0, 0, $grey );
 		imagejpeg( $image, $this->featured_image_images_dir . '/' . self::FEATURED_IMAGE_FILE ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_imagejpeg -- test-only fixture tree.
-		imagedestroy( $image );
 
 		add_filter( 'ttm_demo_images_dir', [ $this, 'filter_featured_image_dir' ] );
 	}
