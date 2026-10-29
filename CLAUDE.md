@@ -23,7 +23,7 @@ Block theme `themes/ttm-theme` (presentation only) + companion plugin `plugins/t
 - `npm run test:unit` — Jest (`scripts/test/*.test.js`: `scripts/lib`, `scripts/demo/lib`, `scripts/release/lib`, `scripts/live/lib`, plugin editor JS)
 - `npm run build` — wp-scripts build → `plugins/ttm-core/build/` (gitignored)
 - `bash scripts/forbidden-patterns.sh` — SPEC §3 greps incl. the rule 47 `git ls-files` check
-- `npm run test:integration` — wp-env (WP 7.1.4 / PHP 8.4) + PHPUnit `tests/integration` (Docker)
+- `npm run test:integration` — wp-env (WP 7.1.4 / PHP 8.5) + PHPUnit `tests/integration` (Docker)
 - `npm run test:e2e` — starts wp-env, reseeds, runs Playwright + axe (`specs/`, `fidelity`, `editors`, `selectors`)
 - `npm run demo:fetch-images [-- --only=<file> | --dry-run]` — human-run Openverse fetch → `docs/fixtures/demo/{images/,CREDITS.json}` (refuses under `CI`)
 - `npm run demo:build [-- --out <dir> --release <tag> --check-determinism]` — seed (`--now` pinned) → export → `.github/{demo-content.xml,demo-options.json,blueprint.json}` (verification uses `--out dist/demo`)

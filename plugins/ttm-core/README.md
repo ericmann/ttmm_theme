@@ -62,7 +62,7 @@ guarded with `function_exists()`/`class_exists()` (SPEC §3.1 rules 2–3).
 ## Requirements
 
 - WordPress ≥ 6.7 (developed and tested against the live site's 7.1.4).
-- PHP ≥ 8.1 (CI and `wp-env` run 8.3).
+- PHP ≥ 8.3 (CI runs 8.3, 8.4 and 8.5; `wp-env` runs 8.5).
 - `themes/ttm-theme` active for full presentation; the plugin degrades gracefully alone (no
   fatals) if a different theme is active — see `tests/integration/Separability/PluginAloneTest.php`.
 

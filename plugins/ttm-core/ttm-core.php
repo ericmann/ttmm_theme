@@ -5,7 +5,7 @@
  * Description:       Data, blocks, bindings, cron, CLI and migration tooling for eric.mann.blog. Owns everything that must survive a theme switch.
  * Version:           0.3.0
  * Requires at least: 6.7
- * Requires PHP:      8.1
+ * Requires PHP:      8.3
  * Author:            Eric Mann
  * Author URI:        https://eric.mann.blog
  * License:           GPL-2.0-or-later
