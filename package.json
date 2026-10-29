@@ -67,7 +67,7 @@
     "@wordpress/scripts": "*",
     "@wordpress/server-side-render": "^7.0.0",
     "@wp-playground/cli": "^3.1.57",
-    "babel-jest": "^30.5.0",
+    "babel-jest": "^30.5.2",
     "eslint-plugin-jest": "^29.17.0",
     "jest": "^30.5.0",
     "jest-environment-jsdom": "^30.5.2",
