@@ -8,7 +8,7 @@ This repository is a monorepo holding the block theme (`themes/ttm-theme`) and i
 |---|---|---|
 | Node.js | ≥ 22 (24 in CI) | `nvm use 24` |
 | npm | ≥ 10 | ships with Node |
-| PHP | ≥ 8.1 (8.3 in CI and wp-env) | needed on the host for `composer lint` / `composer test:unit`; not needed for wp-env itself |
+| PHP | ≥ 8.1 (8.1, 8.3 and 8.4 in CI; 8.4 in wp-env, matching production) | needed on the host for `composer lint` / `composer test:unit`; not needed for wp-env itself |
 | Composer | 2.x | |
 | Docker | any current Docker Engine or Docker Desktop | wp-env needs the daemon running |
 | gh CLI | optional | Foundry uses it to open the draft PR |
@@ -33,7 +33,7 @@ Then:
 | http://localhost:8888/wp-admin | `admin` / `password` |
 | http://localhost:8889 | the tests instance (used by integration tests; do not edit content here) |
 
-`.wp-env.json` pins WordPress `7.1.1` (the live site's version) and PHP `8.3`, sets pretty permalinks, the site title and tagline, the `America/Los_Angeles` timezone, and closes comments by default. Adjust locally with a gitignored `.wp-env.override.json`.
+`.wp-env.json` pins WordPress `7.1.1` (the live site's version) and PHP `8.4`, sets pretty permalinks, the site title and tagline, the `America/Los_Angeles` timezone, and closes comments by default. Adjust locally with a gitignored `.wp-env.override.json`.
 
 ## Everyday commands
 
