@@ -4,7 +4,7 @@ Tags: blocks, block-bindings, newspaper, series, block-theme
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 0.2.0
+Stable tag: 0.3.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -30,6 +30,14 @@ site owner's byline.
    publishing directly — every block and template degrades gracefully with no content.
 
 == Changelog ==
+
+= 0.3.0 =
+* Tested on PHP 8.4 and WordPress 7.1.4.
+* Cacheable responses add `stale-while-revalidate` and `stale-if-error` (new Config keys
+  `cache.stale_revalidate_seconds` and `cache.stale_if_error_seconds`; `0` omits a directive),
+  so a CDN can keep serving pages while the origin is unreachable.
+* `wp ttm seed` and its reset refuse to wipe content unless `WP_ENVIRONMENT_TYPE` is `local`
+  or `development` (staging is now refused, like production).
 
 = 0.2.0 =
 * Demo content: a full set of seeded posts, pages and series with CC0/PDM-licensed

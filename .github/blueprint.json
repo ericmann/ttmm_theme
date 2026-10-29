@@ -60,7 +60,7 @@
           "url": "https://dailymedtoday.com/meditation/846bb2a9-9381-4b66-baf0-14eb024e4c7b",
           "source_id": "846bb2a9-9381-4b66-baf0-14eb024e4c7b",
           "copyright": "Scripture quotations taken from The Holy Bible, New International Version®, NIV®. Copyright © 1973, 1978, 1984, 2011 by Biblica, Inc. Used with permission of Zondervan. All rights reserved worldwide. www.zondervan.com",
-          "fetched_at": "2026-09-25 12:00:00"
+          "fetched_at": "2026-10-29 12:00:00"
         },
         "ttm_verse_history": [
           {
@@ -71,7 +71,7 @@
             "url": "https://dailymedtoday.com/meditation/846bb2a9-9381-4b66-baf0-14eb024e4c7b",
             "source_id": "846bb2a9-9381-4b66-baf0-14eb024e4c7b",
             "copyright": "Scripture quotations taken from The Holy Bible, New International Version®, NIV®. Copyright © 1973, 1978, 1984, 2011 by Biblica, Inc. Used with permission of Zondervan. All rights reserved worldwide. www.zondervan.com",
-            "fetched_at": "2026-09-25 12:00:00"
+            "fetched_at": "2026-10-29 12:00:00"
           },
           {
             "date": "2026-09-19",
@@ -81,7 +81,7 @@
             "url": "https://dailymedtoday.com/meditation/7d45a79d-88cb-4162-a170-3e893937dbdd",
             "source_id": "7d45a79d-88cb-4162-a170-3e893937dbdd",
             "copyright": "Scripture quotations taken from The Holy Bible, New International Version®, NIV®. Copyright © 1973, 1978, 1984, 2011 by Biblica, Inc. Used with permission of Zondervan. All rights reserved worldwide. www.zondervan.com",
-            "fetched_at": "2026-09-25 12:00:00"
+            "fetched_at": "2026-10-29 12:00:00"
           },
           {
             "date": "2026-09-18",
@@ -91,7 +91,7 @@
             "url": "https://dailymedtoday.com/meditation/f0193782-1863-4242-9efc-aee4ca530651",
             "source_id": "f0193782-1863-4242-9efc-aee4ca530651",
             "copyright": "Scripture quotations taken from The Holy Bible, New International Version®, NIV®. Copyright © 1973, 1978, 1984, 2011 by Biblica, Inc. Used with permission of Zondervan. All rights reserved worldwide. www.zondervan.com",
-            "fetched_at": "2026-09-25 12:00:00"
+            "fetched_at": "2026-10-29 12:00:00"
           },
           {
             "date": "2026-09-17",
@@ -101,7 +101,7 @@
             "url": "https://dailymedtoday.com/meditation/e1a4e333-4ec6-4c08-80b7-3fe48e134d4b",
             "source_id": "e1a4e333-4ec6-4c08-80b7-3fe48e134d4b",
             "copyright": "Scripture quotations taken from The Holy Bible, New International Version®, NIV®. Copyright © 1973, 1978, 1984, 2011 by Biblica, Inc. Used with permission of Zondervan. All rights reserved worldwide. www.zondervan.com",
-            "fetched_at": "2026-09-25 12:00:00"
+            "fetched_at": "2026-10-29 12:00:00"
           },
           {
             "date": "2026-09-16",
@@ -111,7 +111,7 @@
             "url": "https://dailymedtoday.com/meditation/98a94492-5636-4f19-836a-4e7d42c8642a",
             "source_id": "98a94492-5636-4f19-836a-4e7d42c8642a",
             "copyright": "Scripture quotations taken from The Holy Bible, New International Version®, NIV®. Copyright © 1973, 1978, 1984, 2011 by Biblica, Inc. Used with permission of Zondervan. All rights reserved worldwide. www.zondervan.com",
-            "fetched_at": "2026-09-25 12:00:00"
+            "fetched_at": "2026-10-29 12:00:00"
           },
           {
             "date": "2026-09-15",
@@ -121,7 +121,7 @@
             "url": "https://dailymedtoday.com/meditation/0794b619-4503-46fc-835b-95ab63fec990",
             "source_id": "0794b619-4503-46fc-835b-95ab63fec990",
             "copyright": "Scripture quotations taken from The Holy Bible, New International Version®, NIV®. Copyright © 1973, 1978, 1984, 2011 by Biblica, Inc. Used with permission of Zondervan. All rights reserved worldwide. www.zondervan.com",
-            "fetched_at": "2026-09-25 12:00:00"
+            "fetched_at": "2026-10-29 12:00:00"
           }
         ],
         "ttm_settings": {
@@ -136,7 +136,7 @@
       "step": "installPlugin",
       "pluginData": {
         "resource": "url",
-        "url": "https://github-proxy.com/proxy/?repo=ericmann/ttmm_theme&release=v0.2.0&asset=ttm-core.zip"
+        "url": "https://github-proxy.com/proxy/?repo=ericmann/ttmm_theme&release=v0.3.0&asset=ttm-core.zip"
       },
       "options": {
         "activate": true
@@ -146,7 +146,7 @@
       "step": "installTheme",
       "themeData": {
         "resource": "url",
-        "url": "https://github-proxy.com/proxy/?repo=ericmann/ttmm_theme&release=v0.2.0&asset=ttm-theme.zip"
+        "url": "https://github-proxy.com/proxy/?repo=ericmann/ttmm_theme&release=v0.3.0&asset=ttm-theme.zip"
       },
       "options": {
         "activate": true
