@@ -71,9 +71,11 @@ class SeedStatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( '<form', $html );
 	}
 
-	public function test_seed_refuses_on_production(): void {
+	public function test_seed_refuses_on_staging_and_production(): void {
 		$this->assertFalse( SeedCommand::allowed( 'production' ) );
+		$this->assertFalse( SeedCommand::allowed( 'staging' ) );
 		$this->assertTrue( SeedCommand::allowed( 'local' ) );
+		$this->assertTrue( SeedCommand::allowed( 'development' ) );
 	}
 
 	public function test_verse_option_is_seeded_from_fixture_with_attribution_url(): void {

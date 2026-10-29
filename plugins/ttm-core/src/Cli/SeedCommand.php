@@ -31,7 +31,7 @@ class SeedCommand extends Command {
 			return [
 				'ok'       => false,
 				'rows'     => [],
-				'messages' => [ 'Refusing to seed: WP_ENVIRONMENT_TYPE is production.' ],
+				'messages' => [ sprintf( 'Refusing to seed: WP_ENVIRONMENT_TYPE is %s; only local and development sites may be seeded.', $environment ) ],
 			];
 		}
 
@@ -94,7 +94,7 @@ class SeedCommand extends Command {
 	}
 
 	/**
-	 * Whether seeding is allowed for a given WP_ENVIRONMENT_TYPE value.
+	 * Whether seeding is allowed for a given WP_ENVIRONMENT_TYPE value (`local`/`development` only).
 	 *
 	 * @param string $environment_type wp_get_environment_type() value.
 	 * @return bool

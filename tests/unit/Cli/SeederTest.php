@@ -28,12 +28,14 @@ class SeederTest extends TestCase {
 	}
 
 	/**
-	 * P2-01, rule 49: destructive seed operations are refused on production only.
+	 * P2-01, rule 49: destructive seed operations are allowed on local and development sites
+	 * only; staging (the beta restored from the live database) and production are refused.
 	 */
-	public function test_may_wipe_is_false_only_on_production(): void {
-		$this->assertFalse( Seeder::may_wipe( 'production' ) );
+	public function test_may_wipe_only_on_local_and_development(): void {
 		$this->assertTrue( Seeder::may_wipe( 'local' ) );
-		$this->assertTrue( Seeder::may_wipe( 'staging' ) );
 		$this->assertTrue( Seeder::may_wipe( 'development' ) );
+		$this->assertFalse( Seeder::may_wipe( 'staging' ) );
+		$this->assertFalse( Seeder::may_wipe( 'production' ) );
+		$this->assertFalse( Seeder::may_wipe( '' ) );
 	}
 }

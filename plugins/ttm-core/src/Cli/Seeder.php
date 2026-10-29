@@ -219,13 +219,15 @@ class Seeder {
 	/**
 	 * Whether destructive seed operations (`reset()`, `--starter-only` re-running over live
 	 * content) are allowed for a given `WP_ENVIRONMENT_TYPE` value (rule 49: `seed --reset` is
-	 * the one sanctioned wipe, guarded by environment). Pure: no WordPress calls.
+	 * the one sanctioned wipe, guarded by environment). Only `local` and `development` qualify:
+	 * a `staging` site holds real content (the k3s beta restored from the live database), so it
+	 * is refused along with `production`. Pure: no WordPress calls.
 	 *
 	 * @param string $environment_type `wp_get_environment_type()` value.
 	 * @return bool
 	 */
 	public static function may_wipe( string $environment_type ): bool {
-		return 'production' !== $environment_type;
+		return in_array( $environment_type, [ 'local', 'development' ], true );
 	}
 
 	/**
