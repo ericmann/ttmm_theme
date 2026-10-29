@@ -33,7 +33,7 @@ Then:
 | http://localhost:8888/wp-admin | `admin` / `password` |
 | http://localhost:8889 | the tests instance (used by integration tests; do not edit content here) |
 
-`.wp-env.json` pins WordPress `7.1.1` (the live site's version) and PHP `8.4`, sets pretty permalinks, the site title and tagline, the `America/Los_Angeles` timezone, and closes comments by default. Adjust locally with a gitignored `.wp-env.override.json`.
+`.wp-env.json` pins WordPress `7.1.4` (the live site's and the production image's version) and PHP `8.4`, sets pretty permalinks, the site title and tagline, the `America/Los_Angeles` timezone, and closes comments by default. Adjust locally with a gitignored `.wp-env.override.json`.
 
 ## Everyday commands
 

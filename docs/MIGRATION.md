@@ -1,6 +1,6 @@
 # Migrating eric.mann.blog to These Things Matter
 
-This is the runbook for moving the existing site (WordPress 7.1.1, Powder theme, Jetpack, 888 posts) onto `ttm-core` + `ttm-theme`. It is written to be rehearsed in wp-env against a real export first, then repeated on production. Every plugin command supports `--dry-run`; nothing here deletes content.
+This is the runbook for moving the existing site (WordPress 7.1.4, Powder theme, Jetpack, 888 posts) onto `ttm-core` + `ttm-theme`. It is written to be rehearsed in wp-env against a real export first, then repeated on production. Every plugin command supports `--dry-run`; nothing here deletes content.
 
 The CLI commands are specified in `docs/SPEC.md §6.7` and built in Phases 1 and 8. Flags in this document are updated by the build if they change.
 
