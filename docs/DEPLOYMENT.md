@@ -72,7 +72,7 @@ Verify: `curl -sI https://eric.mann.blog/ | grep -i -E 'cache-control|cf-cache-s
 
 ## 5. Web server
 
-- PHP 8.4 (CI also covers 8.1 and 8.3), OPcache on, `opcache.validate_timestamps=0` on production deploys that restart PHP-FPM.
+- PHP 8.5 (CI also covers 8.3 and 8.4; older branches are end-of-life and unsupported), OPcache on, `opcache.validate_timestamps=0` on production deploys that restart PHP-FPM.
 - `plugins/ttm-core/build/` must exist on the server (built by CI or on deploy). The theme needs no build step.
 - Redirect `/category/writing/` → `/writing/` (301) if you want a single canonical URL for the Writing page (both render the same template).
 - Serve `themes/ttm-theme/assets/fonts/*.woff2` with a long `Cache-Control: max-age=31536000, immutable`; Cloudflare's default for fonts is fine.
@@ -116,7 +116,7 @@ The live site is a Docker Compose stack on the `hive` NUC behind a Cloudflare Tu
 
 | Component | Choice | Notes |
 |---|---|---|
-| WordPress | Immutable image `FROM` the official `wordpress` PHP 8.4 Apache image, 1 replica | Plugins installed from `composer.json` at build time; `ttm-core.zip`/`ttm-theme.zip` from this repository's GitHub release pinned by tag (they already contain `build/`). `DISALLOW_FILE_MODS`; updates arrive as new images. Readiness/liveness on a lightweight `/healthz` mu-plugin. |
+| WordPress | Immutable image `FROM` the official `wordpress` PHP 8.5 Apache image, 1 replica | Plugins installed from `composer.json` at build time; `ttm-core.zip`/`ttm-theme.zip` from this repository's GitHub release pinned by tag (they already contain `build/`). `DISALLOW_FILE_MODS`; updates arrive as new images. Readiness/liveness on a lightweight `/healthz` mu-plugin. |
 | Rollout | Keel, semver policy, polling the registry | A tagged image build rolls the Deployment; rollback is pinning the previous tag and pausing Keel. No CI credentials into the cluster. |
 | Database | MySQL 8.4 LTS StatefulSet with a PVC | Same engine family as the live site's MySQL 8, so the dump imports without collation conversion; `utf8mb4`; buffer pool sized to the NUC. |
 | Media | Offloaded to an object-storage bucket served through a Cloudflare-proxied media hostname (WP Offload Media); a small uploads PVC is only the staging area | Images never touch the cluster or the home network, so they keep loading through an outage. The bucket is versioned; that is the media backup. |

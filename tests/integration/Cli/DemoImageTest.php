@@ -27,7 +27,6 @@ class DemoImageTest extends TTM_IntegrationTestCase {
 		$grey  = imagecolorallocate( $image, 186, 182, 182 );
 		imagefill( $image, 0, 0, $grey );
 		imagejpeg( $image, $this->images_dir . '/' . self::FILE ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_imagejpeg -- test-only fixture tree.
-		imagedestroy( $image );
 
 		file_put_contents( // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_file_put_contents -- test-only fixture tree.
 			$this->tmp_dir . '/CREDITS.json',
