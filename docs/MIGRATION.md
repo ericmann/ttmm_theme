@@ -263,37 +263,54 @@ The live `blog` and `speaking` pages keep working with `page.html`.
 
 ### 3.1 Stand up green, privately
 
-1. Deploy WordPress on k3s per `DEPLOYMENT.md §10` (MariaDB or MySQL with PVC, uploads PVC, S3 backup CronJobs, secrets for `wp-config.php` constants).
-2. Expose it as **`beta.mann.blog`** (working name). Three ways to do that, recommended first (SPEC §9 Q7):
-   - **Recommended: Cloudflare Tunnel + Cloudflare Access.** A Cloudflare Tunnel hostname (`beta.mann.blog`) not linked anywhere, with a **Cloudflare Access** policy in front (email one-time-code, listing the owner's and reviewers' addresses), and `wp option update blog_public 0` so it emits `noindex`. Do not add it to any sitemap or Jetpack site list.
-   - **Alternative: fully public.** Same Tunnel hostname, no Access policy, `blog_public 1`. Simpler, but the beta is crawlable and linkable before content cleanup is done — only worth it once the audit worklist (§5) is mostly clear.
-   - **Alternative: cluster-only.** No public ingress at all; reviewers add a hosts-file entry (`beta.mann.blog` → the ingress's ClusterIP/NodePort) or use `kubectl port-forward`. No Cloudflare configuration needed, but only the owner and anyone with cluster access can review it.
-   - This flight documents all three; the next flight implements the recommended one.
-3. Restore the archive from §1.1 exactly as in §1.2 (`scripts/live/restore.sh`), using `beta.mann.blog` as `--host`.
-4. Install `ttm-core`, `ttm-theme`, the Jetpack plugin (leave it **disconnected** until cut-over; connecting a second site to the same WordPress.com account would split stats and subscribers), and the Cloudflare plugin (also unconfigured for now).
+1. Deploy WordPress on k3s per `DEPLOYMENT.md §10` (MySQL 8.4 with a PVC, media offloaded to a bucket, nightly DB backup, cron CronJob, secrets for `wp-config.php` constants). The image, manifests and the step-by-step runbook live in the private site repo.
+2. Expose it as **`beta.mann.blog`** behind a maintenance-gate Worker that only lets the owner's IP through (route added, fail closed, *before* the tunnel hostname exists). Do not add it to any sitemap or Jetpack site list.
+3. **Restore the live database without rewriting URLs.** Import a `mysqldump` of the live database as-is: the database keeps `siteurl`/`home` = `https://eric.mann.blog` and every stored URL stays on the production host. Beta's address comes from constants in `WORDPRESS_CONFIG_EXTRA`:
+
+   ```php
+   define( 'WP_HOME', 'https://beta.mann.blog' );
+   define( 'WP_SITEURL', 'https://beta.mann.blog' );
+   define( 'WP_ENVIRONMENT_TYPE', 'staging' );   // `wp ttm seed` refuses here
+   define( 'JETPACK_DEV_DEBUG', true );          // Jetpack offline: never talks to WordPress.com as beta
+   ```
+
+   plus a beta-only host-rewrite mu-plugin that rewrites `eric.mann.blog` → `beta.mann.blog` in front-end output at render time and `beta` → `eric` in content before it is saved, suppresses mail and sends `noindex`. **Do not use `scripts/live/restore.sh` here**: it search-replaces to `--host`, which would break that invariant. Note that `wp option get siteurl` returns the constant on beta; read the stored value with `wp db query "SELECT option_value FROM wp_options WHERE option_name='siteurl'"`.
+4. Install `ttm-core`, `ttm-theme`, Jetpack (offline, keeping the live site's blog ID from the database), and the Cloudflare plugin (APO off).
 
 ### 3.2 Migrate and clean up
 
-Run §2 in order. Take a fresh archive from `hive` first if more than a day has passed since §1.1, because anything published on the live site after the archive will otherwise be lost. From this point on, **stop publishing on `hive`**; new posts go on green (they are invisible to the public until cut-over, which is fine for drafts and scheduled posts).
+Run §2 in order. On k3s, `scripts/live/plan.sh` runs the whole plan from a workstation:
 
-Content cleanup (§5) happens here, at leisure, with Access-protected previews. Nothing is public.
+```bash
+TTM_WP="kubectl -n blog exec -i deploy/wordpress -- wp --allow-root" \
+TTM_KUBECTL_TARGET=blog/deploy/wordpress \
+bash scripts/live/plan.sh
+```
+
+`TTM_KUBECTL_TARGET` switches file transfer (the classic-conversion export/import) from the wp-env mount to `kubectl exec`, drops the `import.xml` precondition, skips the wp-env-only screen discovery, and runs `primary:assign --from-yoast` without `--term-map` (a database restore keeps the live term IDs). `TTM_SKIP_TERM_MAP=0|1` overrides that last default either way.
+
+Rehearse once on a throwaway beta, wipe, and then do the real import. From the real import on, **stop publishing on `hive`**. Posts published on beta are not public until cut-over, and because Jetpack is offline there, **they never email subscribers**; anything that must go out during the freeze is published on `hive` and ported to beta by hand.
+
+Content cleanup (§5) happens on beta, at leisure, behind the gate. Nothing is public.
 
 ### 3.3 Cut over
 
 1. Final check on green: front page, one post per section, a journal post, a series hub, `/writing/`, `/category/opinion/politics/`, a tag archive, search, a 404; `wp ttm audit` shows what you expect; `wp cron event list` shows `ttm_verse_fetch`.
-2. `wp search-replace 'https://beta.mann.blog' 'https://eric.mann.blog' --all-tables --precise` on green, then `wp option update blog_public 1`.
-3. In Cloudflare Zero Trust → Tunnels, move the public hostname `eric.mann.blog` (and `www`) from the `hive` tunnel to the k3s tunnel/ingress. Remove the Access policy from the public hostname (keep it on `beta.mann.blog` if that hostname stays for staging).
-4. Connect Jetpack on green (it inherits the site by URL; use "Transfer connection" if Jetpack complains about a site already connected), configure the Cloudflare plugin, add the redirect rules from §2.2, then **Purge Everything** once.
-5. `wp ttm verse fetch`, `wp ttm series:rebuild` on green.
-6. Watch the tunnel logs and `cf-cache-status` for a few minutes. `hive` keeps running untouched.
+2. Confirm nothing leaked a beta URL into the database: `wp search-replace 'beta.mann.blog' 'eric.mann.blog' --all-tables --precise --dry-run --report-changed-only` should report zero rows (settings saved in the admin are the usual exceptions; running it for real is safe, beta → eric is the right direction).
+3. Remove the beta constants (`WP_HOME`, `WP_SITEURL`, `JETPACK_DEV_DEBUG` and the mu-plugin's switch), set `WP_ENVIRONMENT_TYPE` to `production`, roll out, then `wp option update blog_public 1`. That is the whole application-side cut-over: no search-replace, because the database never stopped saying `eric.mann.blog`.
+4. Move the public hostname `eric.mann.blog` (and `www`) from the `hive` tunnel to the k3s tunnel. Put the gate on the production hostname for the switch so only the owner sees it until the checks pass.
+5. **Stop `hive`'s WordPress and cron containers** (keep the volumes). Both sites share one Jetpack blog ID; if `hive` keeps running, its WP-cron and Jetpack sync keep talking to WordPress.com as the same site and can double-send. Then confirm `wp jetpack status` on green is connected with the same blog ID (reconnect in wp-admin only if it is not).
+6. Configure Cloudflare (cache rules, Access on `/wp-admin*` and `/wp-login.php`, the xmlrpc rule, the redirect rules from §2.2), then **Purge Everything** once.
+7. `wp ttm verse fetch`, `wp ttm series:rebuild` on green.
+8. Watch the tunnel logs and `cf-cache-status` for a few minutes, then remove the gate from the production hostname.
 
 ### 3.4 After a week
 
-Stop the `hive` Compose stack, keep its last archive in S3, and decommission.
+Keep `hive`'s final archive in S3 and decommission its blog stack.
 
 ## 4. Rollback
 
-- Cut-over: move the tunnel hostname back to `hive`. Anything published on green after cut-over must be exported and re-imported on `hive` (WXR of posts newer than the cut-over date), which is why `hive` is kept for a week and not longer.
+- Cut-over: start `hive`'s containers again and move the tunnel hostname back. Anything published on green after cut-over must be exported and re-imported on `hive` (WXR of posts newer than the cut-over date), which is why `hive` is kept for a week and not longer.
 - Theme: switch back to Powder. All content and the new taxonomy/meta remain and are simply not displayed.
 - Categories: `politics` can be reparented to top level in the admin; the redirect rules can be removed.
 - Conversion: `wp ttm convert:revert --all` restores every converted post's original HTML from `ttm_classic_backup`.
