@@ -76,7 +76,7 @@ Each line that can be a single-line pattern is also a `constraints` entry in `do
 - Seeder never uses the accent red [seed-no-red]; no lorem in seed fixtures [seed-no-lorem]; footer nav eight items, no RSS [footer-no-rss]; verse-copyright stays removed [verse-copyright-removed].
 - Landmarks per 04 §8; axe serious/critical = 0 on every seeded screen at 1280 and 390; every `img[src*="demo-"]` has non-empty alt (`fidelity.spec.mjs`).
 - `package.json` `dependencies` stays `{}`; `composer.lock`/`package-lock.json` committed; `npm run check:audit` (`npm audit` high/critical, minus the expiring `scripts/audit-allowlist.json`) and `composer audit` pass.
-- Never stage, move, delete or gitignore-edit `FOUNDRY_FEEDBACK.md`; never re-enable commit signing; never edit `docs/phase-1/` … `docs/phase-4/`; never copy, quote or commit the WXR export.
+- Never stage, move, delete or gitignore-edit `FOUNDRY_FEEDBACK.md`; commits and tags are GPG-signed (global git config, key 63F15A9B715376CA), so never disable signing or pass `--no-gpg-sign`; never edit `docs/phase-1/` … `docs/phase-4/`; never copy, quote or commit the WXR export.
 
 ## Commit template
 ```
