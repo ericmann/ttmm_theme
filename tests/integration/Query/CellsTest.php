@@ -224,7 +224,7 @@ class CellsTest extends TTM_IntegrationTestCase {
 		$this->assertSame( 1, $query['posts_per_page'] );
 	}
 
-	public function test_stale_section_query_renders_no_excerpt_block_and_is_stale_class(): void {
+	public function test_stale_section_query_keeps_its_dek_and_gets_is_stale_class(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
 		$security = $this->category_id( 'security', 'Security' );
 
@@ -233,7 +233,7 @@ class CellsTest extends TTM_IntegrationTestCase {
 				'post_status'   => 'publish',
 				'post_category' => [ $security ],
 				'post_title'    => 'Old Security Post',
-				'post_excerpt'  => 'A real excerpt that must not appear.',
+				'post_excerpt'  => 'An older excerpt that still appears.',
 				'post_date'     => '2024-01-01 09:00:00',
 			]
 		);
@@ -250,8 +250,8 @@ class CellsTest extends TTM_IntegrationTestCase {
 		);
 
 		$this->assertStringContainsString( 'is-stale', $html );
-		$this->assertStringNotContainsString( 'ttm-item__dek', $html );
-		$this->assertStringNotContainsString( 'A real excerpt', $html );
+		$this->assertStringContainsString( 'ttm-item__dek', $html );
+		$this->assertStringContainsString( 'An older excerpt that still appears.', $html );
 	}
 
 	public function test_fresh_section_after_stale_section_keeps_its_dek(): void {
@@ -264,7 +264,7 @@ class CellsTest extends TTM_IntegrationTestCase {
 				'post_status'   => 'publish',
 				'post_category' => [ $security ],
 				'post_title'    => 'Old Security Post',
-				'post_excerpt'  => 'A stale excerpt that must not appear.',
+				'post_excerpt'  => 'A stale excerpt that also appears.',
 				'post_date'     => '2024-01-01 09:00:00',
 			]
 		);
@@ -294,7 +294,8 @@ class CellsTest extends TTM_IntegrationTestCase {
 		$fresh_html = (string) do_blocks( $block( 'technology' ) );
 
 		$this->assertStringContainsString( 'is-stale', $stale_html );
-		$this->assertStringNotContainsString( 'ttm-item__dek', $stale_html );
+		$this->assertStringContainsString( 'A stale excerpt that also appears.', $stale_html );
+		$this->assertStringNotContainsString( 'is-stale', $fresh_html );
 
 		$this->assertStringContainsString( 'ttm-item__dek', $fresh_html );
 		$this->assertStringContainsString( 'A fresh excerpt that must appear.', $fresh_html );
