@@ -64,7 +64,7 @@ $ttm_nav_links .= sprintf(
 		<!-- wp:group {"layout":{"type":"constrained"}} -->
 		<div class="wp-block-group">
 			<!-- wp:site-title {"className":"is-style-display-l"} /-->
-			<!-- wp:paragraph {"className":"ttm-masthead-front__byline","metadata":{"bindings":{"content":{"source":"ttm/author-name","args":{"format":"byline-link"}}}}} -->
+			<!-- wp:paragraph {"className":"ttm-masthead-front__byline","metadata":{"bindings":{"content":{"source":"ttm/author-name","args":{"format":"byline-link","unlessInTitle":true}}}}} -->
 			<p class="ttm-masthead-front__byline"></p>
 			<!-- /wp:paragraph -->
 		</div>

@@ -154,3 +154,22 @@ test( 'poster stacks its form at 390', async ( { page } ) => {
 	// left/right padding) the poster's own content width.
 	expect( inputBox.width ).toBeGreaterThan( posterBox.width - 60 );
 } );
+
+test( 'long code lines and unbroken words stay inside the article at 390', async ( {
+	page,
+} ) => {
+	await page.goto( '/signing-your-options-table/' );
+	// Old classic posts carry 80-column code and long unbroken <tt>/<code> tokens; the seed
+	// doesn't, so add one of each to the rendered page.
+	await page.locator( '.ttm-entry' ).evaluate( ( entry ) => {
+		const token = 'x'.repeat( 120 );
+		entry.insertAdjacentHTML(
+			'afterbegin',
+			`<pre class="wp-block-code"><code>${ token }</code></pre><p><code>${ token }</code></p>`
+		);
+	} );
+	const scrollWidth = await page.evaluate(
+		() => document.documentElement.scrollWidth
+	);
+	expect( scrollWidth ).toBeLessThanOrEqual( 390 );
+} );

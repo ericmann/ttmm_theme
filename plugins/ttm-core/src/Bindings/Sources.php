@@ -485,16 +485,22 @@ class Sources {
 
 	/**
 	 * `ttm/author-name`. Formats: `by` (default), `name`, `byline-link` (HTML, only into
-	 * `core/paragraph`'s `content`), `url`.
+	 * `core/paragraph`'s `content`), `url`. `{"unlessInTitle": true}` -> '' when the site
+	 * title already names the author (the masthead bylines).
 	 *
-	 * @param array{format?: string} $source_args    `{format: by|name|byline-link|url}`.
-	 * @param WP_Block               $block_instance Consuming block.
-	 * @param string                 $attribute_name Consuming attribute.
+	 * @param array{format?: string, unlessInTitle?: bool} $source_args    `{format: by|name|byline-link|url, unlessInTitle?}`.
+	 * @param WP_Block                                     $block_instance Consuming block.
+	 * @param string                                       $attribute_name Consuming attribute.
 	 * @return string
 	 */
 	public static function author_name( array $source_args, $block_instance, string $attribute_name ): string {
 		$format = (string) ( $source_args['format'] ?? 'by' );
-		$value  = Values::author_line( $format, Config::author_name(), home_url( '/about/' ), Config::author_url() );
+		$name   = Config::author_name();
+		if ( ! empty( $source_args['unlessInTitle'] ) && Values::name_in_title( (string) get_bloginfo( 'name' ), $name ) ) {
+			return '';
+		}
+
+		$value = Values::author_line( $format, $name, home_url( '/about/' ), Config::author_url() );
 
 		return self::finalize( $value, $block_instance, $attribute_name, 'byline-link' === $format );
 	}

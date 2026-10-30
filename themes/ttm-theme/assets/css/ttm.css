@@ -4,6 +4,7 @@
 :root {
 	--ttm-rule-1: var(--wp--custom--rule--thin);
 	--ttm-rule-2: var(--wp--custom--rule--thick);
+	--ttm-pin: var(--wp-admin--admin-bar--height, 0px);
 }
 
 @media (max-width: 720px) {
@@ -155,7 +156,7 @@
 
 	.ttm-article aside {
 		position: sticky;
-		top: 24px;
+		top: calc(var(--ttm-pin) + 78px);
 	}
 }
 
@@ -194,7 +195,7 @@
 	.is-style-grid-5-7,
 	.is-style-grid-7-5,
 	.is-style-grid-3-7-2 {
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr);
 	}
 
 	/* §6.1.9: 2/row (grid-4). */
@@ -343,8 +344,10 @@ p.is-style-poster {
 	font-feature-settings: "tnum";
 }
 
-.is-style-grayscale img {
-	filter: grayscale(1) contrast(1.08);
+/* Washed: colour kept, mostly drained. Image only, so captions stay ink. */
+.is-style-grayscale img,
+.ttm-item-featured__media img {
+	filter: saturate(0.35) contrast(0.94) brightness(1.04);
 }
 
 .is-style-cover img,
@@ -410,6 +413,10 @@ a.tag {
 }
 
 @media (max-width: 720px) {
+
+	.is-style-tags {
+		flex-wrap: wrap;
+	}
 
 	.is-style-display-xl,
 	.is-style-display-l {
@@ -525,7 +532,7 @@ a.tag {
 .entry-content {
 	font-size: var(--wp--preset--font-size--body);
 	line-height: 1.65;
-	max-width: var(--wp--custom--measure--body);
+	max-width: var(--wp--custom--measure--body);	overflow-wrap: break-word;
 }
 
 .entry-content p {
@@ -775,7 +782,25 @@ blockquote.is-style-pull cite,
 	}
 }
 
-/* 4.2 masthead inner */
+/* 4.2 masthead inner; pinned under the admin bar, which scrolls away <601px. */
+@media (max-width: 600px) {
+
+	:root {
+		--ttm-pin: 0px;
+	}
+}
+
+html:has(.ttm-masthead-inner) {
+	scroll-padding-top: calc(var(--ttm-pin) + 72px);
+}
+
+.wp-site-blocks > :has(.ttm-masthead-inner) {
+	position: sticky;
+	top: var(--ttm-pin);
+	z-index: 10;
+	background: var(--wp--preset--color--bg);
+}
+
 .ttm-masthead-inner {
 	display: grid;
 	grid-template-columns: auto 1fr auto;
@@ -855,8 +880,7 @@ blockquote.is-style-pull cite,
 		display: none;
 	}
 
-	/* S2: core shows the list from 600px, but our breakpoint is 720; re-hide 600-720 and
-	 * re-show "Menu". Repeated classes match core's repeated-class rule. */
+	/* S2: core shows the list from 600px; re-hide to 720, re-show "Menu". */
 	.ttm-masthead-inner .ttm-masthead-inner__nav .wp-block-navigation__responsive-container:not(.is-menu-open) {
 		display: none;
 	}
@@ -1188,7 +1212,6 @@ blockquote.is-style-pull cite,
 	aspect-ratio: 16 / 9;
 	margin: 0 0 var(--wp--preset--spacing--40);
 	background: var(--wp--preset--color--surface);
-	filter: grayscale(1) contrast(1.08);
 }
 
 .ttm-lead__media.is-ratio-4-3 {
@@ -1196,6 +1219,7 @@ blockquote.is-style-pull cite,
 }
 
 .ttm-lead__media img {
+	display: block;
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
@@ -1293,8 +1317,7 @@ blockquote.is-style-pull cite,
 	gap: var(--wp--preset--spacing--60);
 }
 
-/* 02 §A: 901-1024px, the 8/4 lead row tracks get minmax(0, …) so neither overflows
-   before folding fully below 901px. */
+/* 02 §A: 901-1024px, minmax(0, …) tracks so neither overflows. */
 @media (max-width: 1024px) and (min-width: 901px) {
 
 	.ttm-lead-row {
@@ -1487,7 +1510,6 @@ blockquote.is-style-pull cite,
 .ttm-item-featured__media {
 	grid-row: 1 / span 3;
 	aspect-ratio: 3 / 2;
-	filter: grayscale(1) contrast(1.08);
 }
 
 .ttm-item-featured__media img {
@@ -1882,6 +1904,7 @@ blockquote.is-style-pull cite,
 .ttm-series-bar__right {
 	display: flex;
 	align-items: center;
+	justify-content: end;
 }
 
 .ttm-series-bar__segments {
@@ -1914,9 +1937,10 @@ blockquote.is-style-pull cite,
 
 @media (max-width: 720px) {
 
-	/* 3b: bar->mark,name,seg */
+	/* 3b: bar->mark,name,seg; long series shrink. */
 	.ttm-series-bar {
 		font-size: var(--wp--preset--font-size--caption);
+		grid-template-columns: 10px minmax(0, 1fr) minmax(0, 1fr);
 	}
 
 	.ttm-series-bar__label,
@@ -1926,6 +1950,11 @@ blockquote.is-style-pull cite,
 
 	.ttm-series-bar__segments {
 		gap: 3px;
+	}
+
+	.ttm-series-bar__right,
+	.ttm-series-bar__segments {
+		min-width: 0;
 	}
 
 	.ttm-series-bar__seg {
@@ -2145,11 +2174,7 @@ blockquote.is-style-pull cite,
 	margin: 0 0 18px;
 }
 
-/* R2-04, mock 2c: the journal single's h1 already carries the 18px gap via its own
- * margin-bottom -- F12's .ttm-entry padding-top (byline meets body, article-only) would double
- * it here, since a journal single's h1 sits directly above .ttm-entry with no byline between
- * them. .ttm-entry itself stays on the markup (axe exclusion, §6.10 check); only this
- * component's padding is zeroed. */
+/* R2-04: the journal h1's margin already gives the 18px gap; F12's padding would double it. */
 .ttm-journal-head .ttm-entry {
 	padding-top: 0;
 }
@@ -2251,7 +2276,7 @@ ul.modern-footnotes-list,
 
 	.ttm-article,
 	.ttm-journal-head {
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr);
 	}
 
 	/* §6.4: 1px footnote. */

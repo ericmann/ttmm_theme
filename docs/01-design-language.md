@@ -262,12 +262,13 @@ Not a site component. The dashed neutral-400 frame in `3c` is a documentation de
 - Focus: `:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px }` everywhere. Never remove focus; never leave the UA ring.
 - Selection: `::selection { background: color-mix(in oklch, var(--color-accent) 30%, transparent) }`.
 - Disabled controls 45% opacity.
-- Sticky aside on article: `top: 24px`, only ≥ 1024.
+- Inner masthead pinned (`position: sticky`) on every page except the front, under the admin bar where one shows (`--ttm-pin`).
+- Sticky aside on article: 24px below the pinned masthead, only ≥ 1024.
 - No scroll-driven or entrance animation. Images `loading="lazy"` except the lead and article hero (`fetchpriority="high"`).
 - Reduced motion: nothing to reduce; keep the 120ms transitions.
 
 ## 6. Imagery
-- Front page & archives: `.is-style-grayscale` → `filter: grayscale(1) contrast(1.08)`. Applied to the wrapper so captions stay ink.
+- Front page & archives: `.is-style-grayscale` (and the featured cell photo) → washed, `filter: saturate(0.35) contrast(0.94) brightness(1.04)`. Applied to the `img` only, once, so captions stay ink and the filter never compounds. (Was full `grayscale(1) contrast(1.08)`; the owner chose the washed treatment on 2026-10-30.)
 - Article pages: colour, full column, caption.
 - Covers: colour everywhere; shadow only on the Writing hero.
 - Placeholders: never shown on the live site. A missing image collapses per `06-fallbacks.md`.

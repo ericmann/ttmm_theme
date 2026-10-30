@@ -263,6 +263,19 @@ class Values {
 	}
 
 	/**
+	 * Whether the site title already names the author ("Ada Example's Blog"), so a masthead
+	 * byline under it would repeat the name (`ttm/author-name` `{"unlessInTitle": true}`).
+	 * Case-insensitive; an empty name never matches.
+	 *
+	 * @param string $site_name Site title (`get_bloginfo( 'name' )`).
+	 * @param string $name      Owner's display name (`Config::author_name()`).
+	 * @return bool
+	 */
+	public static function name_in_title( string $site_name, string $name ): bool {
+		return '' !== $name && false !== mb_stripos( $site_name, $name );
+	}
+
+	/**
 	 * "14 min read" / "14 min"; `''` for a Journal post (03 §10: not shown there).
 	 *
 	 * @param int    $words      Word count.

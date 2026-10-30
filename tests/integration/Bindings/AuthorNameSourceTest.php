@@ -13,6 +13,7 @@ class AuthorNameSourceTest extends TTM_IntegrationTestCase {
 
 	public function tear_down(): void {
 		remove_all_filters( 'ttm_config' );
+		remove_all_filters( 'pre_option_blogname' );
 		Config::reset();
 		parent::tear_down();
 	}
@@ -57,6 +58,58 @@ class AuthorNameSourceTest extends TTM_IntegrationTestCase {
 		$value = $this->source_value( [ 'format' => 'by' ], $this->make_block( 'core/paragraph' ), 'content' );
 
 		$this->assertSame( '', $value );
+	}
+
+	private function filter_title( string $title ): void {
+		add_filter(
+			'pre_option_blogname',
+			static function () use ( $title ): string {
+				return $title;
+			}
+		);
+	}
+
+	public function test_unless_in_title_hides_byline_when_title_names_author(): void {
+		$this->filter_name( 'Ada Example' );
+		$this->filter_title( 'Ada Example&#039;s Blog' );
+		$paragraph = $this->make_block( 'core/paragraph' );
+
+		foreach ( [ 'by', 'byline-link' ] as $format ) {
+			$args = [
+				'format'        => $format,
+				'unlessInTitle' => true,
+			];
+			$this->assertSame( '', $this->source_value( $args, $paragraph, 'content' ), $format );
+		}
+
+		// Without the arg the byline still renders.
+		$this->assertSame( 'by Ada Example', $this->source_value( [ 'format' => 'by' ], $paragraph, 'content' ) );
+	}
+
+	public function test_unless_in_title_keeps_byline_when_title_does_not_name_author(): void {
+		$this->filter_name( 'Ada Example' );
+		$this->filter_title( 'These Things Matter' );
+		$args = [
+			'format'        => 'by',
+			'unlessInTitle' => true,
+		];
+
+		$this->assertSame( 'by Ada Example', $this->source_value( $args, $this->make_block( 'core/paragraph' ), 'content' ) );
+	}
+
+	public function test_masthead_byline_hidden_when_title_names_author(): void {
+		$this->filter_name( 'Ada Example' );
+		$this->filter_title( 'Ada Example&#039;s Blog' );
+
+		ob_start();
+		require get_template_directory() . '/patterns/masthead-inner.php';
+		$inner_html = (string) do_blocks( (string) ob_get_clean() );
+		$this->assertStringNotContainsString( 'by Ada Example', $inner_html );
+
+		ob_start();
+		require get_template_directory() . '/patterns/masthead-front.php';
+		$front_html = (string) do_blocks( (string) ob_get_clean() );
+		$this->assertStringNotContainsString( '>Ada Example</a>', $front_html );
 	}
 
 	public function test_byline_link_keeps_html_only_in_paragraph_content(): void {
