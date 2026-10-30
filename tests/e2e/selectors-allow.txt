@@ -42,3 +42,7 @@ blockquote.is-style-pull cite # editor block style (04 §3)
 .ttm-writing-body:not(:has(.ttm-story-tiles)) .ttm-writing-body__stories # state: the Writing page's seed always has short fiction
 .ttm-writing-body:not(:has(.ttm-book-grid)) .ttm-writing-body__books # state: the Writing page's seed always has print books
 .ttm-writing-body:not(:has(.ttm-story-tiles, .ttm-book-grid)) # state: the Writing page's seed always has both
+.wp-block-group.is-style-note # editor block style (04 §3)
+.wp-block-group.is-style-update # editor block style (04 §3)
+.is-style-note > :last-child # editor block style (04 §3)
+.is-style-update > :last-child # editor block style (04 §3)

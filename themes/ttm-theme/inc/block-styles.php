@@ -71,6 +71,16 @@ function block_styles(): array {
 		],
 		[
 			'block' => 'core/group',
+			'name'  => 'note',
+			'label' => __( 'Note', 'ttm-theme' ),
+		],
+		[
+			'block' => 'core/group',
+			'name'  => 'update',
+			'label' => __( 'Update', 'ttm-theme' ),
+		],
+		[
+			'block' => 'core/group',
 			'name'  => 'tile',
 			'label' => __( 'Tile', 'ttm-theme' ),
 		],

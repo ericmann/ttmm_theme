@@ -180,6 +180,26 @@
 	padding: var(--wp--preset--spacing--40) var(--wp--preset--spacing--50);
 }
 
+/* Callouts on older posts: note = context, update = a correction (accent rule).
+   .wp-block-group outranks core's flow-layout margin reset in the editor. */
+.wp-block-group.is-style-note,
+.wp-block-group.is-style-update {
+	background: var(--wp--preset--color--surface);
+	border-left: 3px solid var(--wp--preset--color--neutral-700);
+	padding: var(--wp--preset--spacing--40) var(--wp--preset--spacing--50);
+	margin-bottom: var(--wp--preset--spacing--50);
+	font-size: var(--wp--preset--font-size--body-s);
+}
+
+.wp-block-group.is-style-update {
+	border-left-color: var(--wp--preset--color--accent-700);
+}
+
+.is-style-note > :last-child,
+.is-style-update > :last-child {
+	margin-bottom: 0;
+}
+
 .is-style-tile {
 	background: var(--wp--preset--color--surface);
 	aspect-ratio: 4 / 3;

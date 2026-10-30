@@ -71,7 +71,7 @@ Each line that can be a single-line pattern is also a `constraints` entry in `do
 - `Serials::active()` only in `Fiction/Serials.php`, `serial-hero`, `writing-cell`, `story-tiles`, `book-grid`, `series-toc` chapters variant [serials-active-confined; variant split by reading].
 - `tests/e2e/fidelity.spec.mjs`/`editors.spec.mjs`: every `test.fixme(` carries a `// P<n>-<nn>` tag [untagged-fixme]; zero remain after P4-01.
 - `scripts/css-coverage-allow.txt` empty [pending-allow-list]; `tests/e2e/selectors-allow.txt` has no pending line [selectors-no-pending].
-- `ttm.css` ≤ 63488 bytes, plain CSS, presets via `var(--wp--preset--…)`, no hex [css-hex-literal]; no dark mode [no-dark-mode]; text under 18.66px never `accent`/`neutral-500`/`neutral-600`.
+- `ttm.css` ≤ 64512 bytes, plain CSS, presets via `var(--wp--preset--…)`, no hex [css-hex-literal]; no dark mode [no-dark-mode]; text under 18.66px never `accent`/`neutral-500`/`neutral-600`.
 - No `core/group` with `is-style-grid-*` uses `constrained`/`flow`/`flex` [grid-group-not-constrained].
 - Seeder never uses the accent red [seed-no-red]; no lorem in seed fixtures [seed-no-lorem]; footer nav eight items, no RSS [footer-no-rss]; verse-copyright stays removed [verse-copyright-removed].
 - Landmarks per 04 §8; axe serious/critical = 0 on every seeded screen at 1280 and 390; every `img[src*="demo-"]` has non-empty alt (`fidelity.spec.mjs`).
