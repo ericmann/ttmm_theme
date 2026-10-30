@@ -4,7 +4,7 @@ Tags: blocks, block-bindings, newspaper, series, block-theme
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.3.2
+Stable tag: 0.3.3
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -30,6 +30,11 @@ site owner's byline.
    publishing directly — every block and template degrades gracefully with no content.
 
 == Changelog ==
+
+= 0.3.3 =
+* Series part lists: a draft or pending part shows "—" instead of its last-saved date and no
+  "Scheduled" label; private posts are never listed on public series pages; the featured-series
+  pick ignores parts without a real date.
 
 = 0.3.2 =
 * No plugin changes; version kept in step with the theme.
