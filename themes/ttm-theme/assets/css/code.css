@@ -1,0 +1,152 @@
+/*
+ * Syntax colours for code blocks highlighted server-side by the Syntax-highlighting Code Block
+ * plugin (hljs-* spans, no front-end script). Loaded only on pages that render core/code; the
+ * plugin's own stylesheet is switched off in inc/code-highlighting.php. Code blocks keep their
+ * ttm.css frame (neutral-900 ground, accent rule); this file only colours the tokens.
+ *
+ * Two tones, like the rest of the paper: language structure is bold near-white, data (strings,
+ * numbers, literals) is a light red mixed from the accent, commentary is grey italic. Every
+ * colour comes from a theme.json preset; color-mix() lightens the accent enough to read on the
+ * dark ground (the accent itself is under 4.5:1 there).
+ */
+
+.wp-block-code > span {
+	display: block;
+	overflow: auto;
+}
+
+.wp-block-code code.hljs {
+	white-space: pre;
+}
+
+.wp-block-code code.hljs.shcb-wrap-lines {
+	white-space: pre-wrap;
+}
+
+/* The plugin's "Code language: PHP (php)" note: kept for screen readers (aria-describedby), hidden on screen. */
+.shcb-language {
+	border: 0;
+	clip-path: inset(50%);
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	width: 1px;
+	white-space: nowrap;
+}
+
+.hljs-keyword,
+.hljs-built_in,
+.hljs-type,
+.hljs-selector-tag,
+.hljs-name,
+.hljs-meta .hljs-keyword,
+.hljs-doctag {
+	color: var(--wp--preset--color--neutral-100);
+	font-weight: 700;
+}
+
+.hljs-string,
+.hljs-number,
+.hljs-literal,
+.hljs-regexp,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-template-tag,
+.hljs-template-variable,
+.hljs-link,
+.hljs-selector-attr,
+.hljs-selector-pseudo {
+	color: color-mix(in oklab, var(--wp--preset--color--accent) 55%, var(--wp--preset--color--neutral-100));
+}
+
+.hljs-title,
+.hljs-title.class_,
+.hljs-title.function_,
+.hljs-section,
+.hljs-selector-id,
+.hljs-selector-class {
+	color: var(--wp--preset--color--accent-100);
+	font-weight: 600;
+}
+
+.hljs-variable,
+.hljs-params,
+.hljs-attr,
+.hljs-attribute,
+.hljs-property {
+	color: var(--wp--preset--color--neutral-300);
+}
+
+.hljs-comment,
+.hljs-quote,
+.hljs-meta {
+	color: var(--wp--preset--color--neutral-400);
+	font-style: italic;
+}
+
+.hljs-meta .hljs-string {
+	color: inherit;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: 700;
+}
+
+.hljs-addition {
+	background: color-mix(in oklab, var(--wp--preset--color--neutral-100) 12%, transparent);
+}
+
+.hljs-deletion {
+	background: color-mix(in oklab, var(--wp--preset--color--accent) 30%, transparent);
+}
+
+/* Highlighted lines and line numbers, when an author turns them on per block. */
+.hljs.shcb-code-table {
+	display: table;
+	width: 100%;
+}
+
+.hljs.shcb-code-table > .shcb-loc {
+	color: inherit;
+	display: table-row;
+}
+
+.hljs.shcb-code-table .shcb-loc > span {
+	display: table-cell;
+}
+
+.hljs > mark.shcb-loc {
+	background: color-mix(in oklab, var(--wp--preset--color--neutral-100) 10%, transparent);
+	color: inherit;
+}
+
+.hljs.shcb-line-numbers {
+	border-spacing: 0;
+	counter-reset: line;
+}
+
+.hljs.shcb-line-numbers > .shcb-loc {
+	counter-increment: line;
+}
+
+.hljs.shcb-line-numbers .shcb-loc > span {
+	padding-left: 0.75em;
+}
+
+.hljs.shcb-line-numbers .shcb-loc::before {
+	border-right: 1px solid var(--wp--preset--color--neutral-700);
+	color: var(--wp--preset--color--neutral-400);
+	content: counter(line);
+	display: table-cell;
+	padding: 0 0.75em;
+	text-align: right;
+	user-select: none;
+	white-space: nowrap;
+	width: 1%;
+}
