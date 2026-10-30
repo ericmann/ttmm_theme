@@ -4,7 +4,7 @@ Tags: block-theme, newspaper, one-column, custom-colors, editor-style
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.3.5
+Stable tag: 0.3.6
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,6 +25,11 @@ Install and activate both together.
    publishing directly.
 
 == Changelog ==
+
+= 0.3.6 =
+* Syntax colours for code blocks, from the theme palette, when the site runs the
+  Syntax-highlighting Code Block plugin (server-side; no front-end script). The stylesheet
+  loads only on pages with a code block.
 
 = 0.3.5 =
 * Cover images sit flush in their frame (no light band under the Writing-hero cover).
