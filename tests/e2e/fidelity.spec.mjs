@@ -274,6 +274,13 @@ test.describe( 'verse', () => {
 		const verseText = page.locator( '.ttm-verse__text' );
 		expect( await computed( verseText, 'font-size' ) ).toBe( px( 19 ) );
 		expect( await computed( verseText, 'font-weight' ) ).toBe( '600' );
+		// At most four lines; the clamp's "…" sits inside the link to the meditation.
+		expect( await computed( verseText, '-webkit-line-clamp' ) ).toBe( '4' );
+		expect(
+			await verseText
+				.locator( 'a.ttm-verse__link' )
+				.getAttribute( 'href' )
+		).toMatch( /^https:\/\/dailymedtoday\.com\// );
 	} );
 
 	test( 'verse-ref: .ttm-verse__reference @1280', async ( { page } ) => {

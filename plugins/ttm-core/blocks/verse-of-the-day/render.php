@@ -40,12 +40,14 @@ if ( empty( $ttm_verse ) ) {
 	return '';
 }
 
+// The verse text links here too: CSS clamps it to four lines, and the clamp's "…" is part of it.
 $ttm_url        = ! empty( $ttm_verse['url'] ) ? $ttm_verse['url'] : 'https://dailymedtoday.com/';
 $ttm_kses_rules = [
 	'em'     => [],
 	'strong' => [],
 ];
-$ttm_text       = wp_kses( Text::curly_quotes( $ttm_verse['text'] ?? '' ), $ttm_kses_rules );
+// The source often quotes the verse itself; the block adds its own “…”, so drop those first.
+$ttm_text       = wp_kses( Text::curly_quotes( Text::strip_outer_quotes( (string) ( $ttm_verse['text'] ?? '' ) ) ), $ttm_kses_rules );
 $ttm_reference  = wp_kses( $ttm_verse['reference'] ?? '', $ttm_kses_rules );
 
 $ttm_classes = [];
@@ -56,7 +58,7 @@ if ( ! empty( $attributes['compact'] ) ) {
 ?>
 <div <?php echo Helpers::wrapper( 'verse', $ttm_classes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_block_wrapper_attributes() output is already escaped. ?>>
 	<p class="is-style-kicker"><?php esc_html_e( 'Verse of the day', 'ttm-core' ); ?></p>
-	<p class="ttm-verse__text">“<?php echo $ttm_text; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_kses()'d above. ?>”</p>
+	<p class="ttm-verse__text"><a class="ttm-verse__link" href="<?php echo esc_url( $ttm_url ); ?>">“<?php echo $ttm_text; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_kses()'d above. ?>”</a></p>
 	<p class="ttm-verse__reference"><?php echo $ttm_reference; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_kses()'d above. ?></p>
 	<p class="ttm-verse__attribution">
 		<?php

@@ -9,7 +9,7 @@
 
 @media (max-width: 720px) {
 
-	/* Root-padding-aware alignment reads these off `body`: swap to the phone gutter below 720px. */
+	/* Phone gutter <720px; root-padding alignment reads these off body. */
 	body {
 		--wp--style--root--padding-left: var(--wp--custom--gutter--phone);
 		--wp--style--root--padding-right: var(--wp--custom--gutter--phone);
@@ -344,7 +344,7 @@ p.is-style-poster {
 	font-feature-settings: "tnum";
 }
 
-/* Washed: colour kept, mostly drained. Image only, so captions stay ink. */
+/* Washed, img only: captions stay ink. */
 .is-style-grayscale img,
 .ttm-item-featured__media img {
 	filter: saturate(0.35) contrast(0.94) brightness(1.04);
@@ -782,7 +782,7 @@ blockquote.is-style-pull cite,
 	}
 }
 
-/* 4.2 masthead inner; pinned under the admin bar, which scrolls away <601px. */
+/* 4.2 masthead inner; pinned under the admin bar (gone <601px). */
 @media (max-width: 600px) {
 
 	:root {
@@ -880,7 +880,7 @@ html:has(.ttm-masthead-inner) {
 		display: none;
 	}
 
-	/* S2: core shows the list from 600px; re-hide to 720, re-show "Menu". */
+	/* S2: re-hide core's list at 600-720px; show "Menu". */
 	.ttm-masthead-inner .ttm-masthead-inner__nav .wp-block-navigation__responsive-container:not(.is-menu-open) {
 		display: none;
 	}
@@ -953,7 +953,7 @@ html:has(.ttm-masthead-inner) {
 	font-feature-settings: "tnum";
 }
 
-/* §6.4/§6.7: journal + hub headings are caption size, not front-page micro. */
+/* §6.4/§6.7: journal + hub headings: caption, not micro. */
 .ttm-journal-stream .ttm-cell-heading__link,
 .ttm-hub-all .ttm-cell-heading__link {
 	font-size: var(--wp--preset--font-size--caption);
@@ -1343,6 +1343,19 @@ html:has(.ttm-masthead-inner) {
 	line-height: 1.35;
 	letter-spacing: -0.01em;
 	color: var(--wp--preset--color--text);
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 4;
+	overflow: hidden;
+}
+
+.ttm-verse__link {
+	color: inherit;
+	text-decoration: none;
+}
+
+.ttm-verse__link:hover {
+	text-decoration: underline;
 }
 
 .ttm-verse__reference {
@@ -1937,7 +1950,7 @@ html:has(.ttm-masthead-inner) {
 
 @media (max-width: 720px) {
 
-	/* 3b: bar->mark,name,seg; long series shrink. */
+	/* 3b: bar->mark,name,seg; segs shrink. */
 	.ttm-series-bar {
 		font-size: var(--wp--preset--font-size--caption);
 		grid-template-columns: 10px minmax(0, 1fr) minmax(0, 1fr);
@@ -2174,7 +2187,7 @@ html:has(.ttm-masthead-inner) {
 	margin: 0 0 18px;
 }
 
-/* R2-04: the journal h1's margin already gives the 18px gap; F12's padding would double it. */
+/* R2-04: h1 margin gives the 18px gap; F12's pad would double it. */
 .ttm-journal-head .ttm-entry {
 	padding-top: 0;
 }
