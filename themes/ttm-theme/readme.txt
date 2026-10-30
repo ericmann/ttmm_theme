@@ -4,7 +4,7 @@ Tags: block-theme, newspaper, one-column, custom-colors, editor-style
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.3.1
+Stable tag: 0.3.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,6 +25,11 @@ Install and activate both together.
    publishing directly.
 
 == Changelog ==
+
+= 0.3.2 =
+* The block editor shows posts with the published article styles (paragraph and heading
+  spacing, lists, quotes) instead of running blocks together.
+* Theme CSS and JS URLs carry the theme version, so a release always busts browser caches.
 
 = 0.3.1 =
 * The inner masthead stays pinned to the top while scrolling (below the admin bar), and the
