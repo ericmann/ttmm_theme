@@ -310,7 +310,7 @@ class SeriesTocTest extends TTM_IntegrationTestCase {
 			[
 				'variant' => 'chapters',
 				'order'   => 'desc',
-			] 
+			]
 		);
 
 		$this->assertStringContainsString( '<span class="ttm-cell-heading__label">The Quiet Ledger — recent chapters</span>', $html );
@@ -393,5 +393,30 @@ class SeriesTocTest extends TTM_IntegrationTestCase {
 		$html = $this->render( 0 );
 
 		$this->assertSame( '', trim( $html ) );
+	}
+
+	public function test_draft_part_has_no_scheduled_title_and_private_part_is_hidden(): void {
+		$series = $this->make_series(
+			'local-ai',
+			'Local AI',
+			3,
+			[
+				[ 'part' => 1 ],
+				[
+					'part'   => 2,
+					'status' => 'draft',
+				],
+				[
+					'part'   => 3,
+					'status' => 'private',
+				],
+			]
+		);
+
+		$html = $this->render( $series['post_ids'][1] );
+
+		$this->assertStringContainsString( 'Chapter 2', $html );
+		$this->assertStringNotContainsString( 'title="Scheduled', $html );
+		$this->assertStringNotContainsString( 'Chapter 3', $html );
 	}
 }

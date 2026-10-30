@@ -341,4 +341,52 @@ class SeriesFeaturedTest extends TTM_IntegrationTestCase {
 
 		$this->assertStringContainsString( 'The Quiet Ledger', $html );
 	}
+
+	public function test_draft_part_shows_a_dash_and_no_scheduled_label(): void {
+		$this->set_now( '2026-10-30 12:00:00' );
+		$this->make_series(
+			'local-ai',
+			'Local AI',
+			2,
+			[
+				[
+					'part' => 1,
+					'date' => '2026-09-08 09:00:00',
+				],
+				[
+					'part'   => 2,
+					'status' => 'draft',
+					'date'   => '2026-10-30 08:47:05',
+				],
+			]
+		);
+
+		$html = $this->render();
+
+		preg_match( '/<li class="ttm-series-featured__part is-scheduled">(.*?)<\/li>/s', $html, $m );
+		$this->assertNotEmpty( $m );
+		$this->assertStringContainsString( '<span class="ttm-series-featured__date">—</span>', $m[1] );
+		$this->assertStringNotContainsString( 'Scheduled', $m[1] );
+	}
+
+	public function test_private_part_is_not_listed(): void {
+		$series = $this->make_series(
+			'local-ai',
+			'Local AI',
+			2,
+			[
+				[ 'part' => 1 ],
+				[
+					'part'   => 2,
+					'status' => 'private',
+				],
+			]
+		);
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'Chapter 1', $html );
+		$this->assertStringNotContainsString( 'Chapter 2', $html );
+		$this->assertNotEmpty( $series['post_ids'][2] );
+	}
 }

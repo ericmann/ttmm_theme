@@ -54,7 +54,7 @@ $ttm_heading  = '' !== ( $attributes['heading'] ?? '' ) ? (string) $attributes['
 $ttm_open_ended  = (int) get_term_meta( $ttm_row['id'], 'ttm_total_parts', true ) <= 0;
 $ttm_is_chapters = 'chapters' === $ttm_variant;
 
-$ttm_rows = $ttm_row['parts'];
+$ttm_rows = Helpers::visible_parts( $ttm_row['parts'] );
 if ( $ttm_open_ended || $ttm_is_chapters ) {
 	$ttm_rows = array_values( array_filter( $ttm_rows, static fn ( array $part ): bool => 'publish' === $part['status'] ) );
 }
@@ -93,7 +93,8 @@ if ( $ttm_is_chapters && '' === ( $attributes['heading'] ?? '' ) ) {
  * @return string
  */
 $ttm_scheduled_label = static function ( array $ttm_part ): string {
-	$ttm_date = Clock::at( (string) $ttm_part['date'] );
+	// Only a scheduled part has a date to announce; a draft's is just its last save.
+	$ttm_date = 'future' === $ttm_part['status'] ? Clock::at( (string) $ttm_part['date'] ) : null;
 	if ( ! $ttm_date ) {
 		return '';
 	}
