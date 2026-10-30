@@ -34,7 +34,8 @@ if ( 'empty' === Helpers::preview_state( $attributes ) ) {
  * @return string
  */
 $ttm_latest_part_date = static function ( array $row ): string {
-	$parts = $row['parts'];
+	// Only parts with a real date: a draft's date is just its last save.
+	$parts = array_values( array_filter( $row['parts'], [ Helpers::class, 'part_has_date' ] ) );
 	if ( empty( $parts ) ) {
 		return '';
 	}
@@ -108,7 +109,7 @@ if ( ! $ttm_uncapped && $ttm_limit <= 0 ) {
 	$ttm_limit = (int) Config::get( 'series.hub_featured_parts', 12 );
 }
 
-$ttm_parts    = $ttm_row['parts'];
+$ttm_parts    = Helpers::visible_parts( $ttm_row['parts'] );
 $ttm_all_link = get_term_link( (int) $ttm_row['id'], 'series' );
 $ttm_all_link = is_string( $ttm_all_link ) ? $ttm_all_link : '';
 $ttm_has_more = ! $ttm_uncapped && count( $ttm_parts ) > $ttm_limit;
@@ -159,7 +160,7 @@ $ttm_grid_class        = $ttm_is_single ? [] : [ 'is-style-grid-5-7' ];
 				<?php endif; ?>
 				<?php else : ?>
 					<?php
-					$ttm_date       = \TTM\Core\Support\Clock::at( $ttm_part['date'] );
+					$ttm_date       = 'future' === $ttm_part['status'] ? \TTM\Core\Support\Clock::at( $ttm_part['date'] ) : null;
 					$ttm_title_attr = $ttm_date
 						? sprintf(
 							/* translators: %s: scheduled date (e.g. "Sept 26"). */
@@ -170,7 +171,7 @@ $ttm_grid_class        = $ttm_is_single ? [] : [ 'is-style-grid-5-7' ];
 					?>
 				<span class="ttm-series-featured__part-title"<?php echo $ttm_title_attr ? ' title="' . esc_attr( $ttm_title_attr ) . '"' : ''; ?>><?php echo esc_html( $ttm_title ); ?></span>
 				<?php endif; ?>
-				<span class="ttm-series-featured__date"><?php echo esc_html( Helpers::date_short( $ttm_part['date'] ) ); ?></span>
+				<span class="ttm-series-featured__date"><?php echo esc_html( Helpers::part_date( $ttm_part ) ); ?></span>
 			</li>
 		<?php endforeach; ?>
 	</ol>

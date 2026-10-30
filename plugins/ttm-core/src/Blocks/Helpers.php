@@ -464,6 +464,39 @@ class Helpers {
 	}
 
 	/**
+	 * Series parts a reader may see: the index minus private posts, whose titles must never
+	 * reach a cached public page.
+	 *
+	 * @param array<int, array<string, mixed>> $parts Series index parts.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public static function visible_parts( array $parts ): array {
+		return array_values( array_filter( $parts, static fn ( array $part ): bool => 'private' !== ( $part['status'] ?? '' ) ) );
+	}
+
+	/**
+	 * Whether a part's stored date means something to a reader: when it published or is
+	 * scheduled to. A draft's or pending part's date is only when it was last saved.
+	 *
+	 * @param array<string, mixed> $part Series index part.
+	 * @return bool
+	 */
+	public static function part_has_date( array $part ): bool {
+		return in_array( $part['status'] ?? '', [ 'publish', 'future' ], true );
+	}
+
+	/**
+	 * A series part's date as shown in a part list: Dates::short() for a published or
+	 * scheduled part, an em dash for one that isn't scheduled yet.
+	 *
+	 * @param array<string, mixed> $part Series index part.
+	 * @return string
+	 */
+	public static function part_date( array $part ): string {
+		return self::part_has_date( $part ) ? self::date_short( (string) ( $part['date'] ?? '' ) ) : '—';
+	}
+
+	/**
 	 * A MySQL datetime formatted with Dates::short() relative to now.
 	 *
 	 * @param string $mysql_date MySQL datetime string.

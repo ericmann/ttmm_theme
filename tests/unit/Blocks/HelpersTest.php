@@ -67,11 +67,11 @@ class HelpersTest extends TestCase {
 	}
 
 	public function test_style_tag_terms_adds_tag_classes_and_drops_separators(): void {
-		$html  = '<div class="taxonomy-post_tag is-style-tags wp-block-post-terms"><a href="/tag/wordpress/" rel="tag">wordpress</a><span class="wp-block-post-terms__separator">, </span><a href="/tag/php/" rel="tag">php</a></div>';
+		$html  = '<div class="taxonomy-post_tag is-style-tags wp-block-post-terms"><a href="/tag/wordpress/" rel="tag">WordPress</a><span class="wp-block-post-terms__separator">, </span><a href="/tag/php/" rel="tag">php</a></div>';
 		$block = [ 'attrs' => [ 'className' => 'is-style-tags' ] ];
 
 		$this->assertSame(
-			'<div class="taxonomy-post_tag is-style-tags wp-block-post-terms"><a class="tag tag-neutral" href="/tag/wordpress/" rel="tag">wordpress</a><a class="tag tag-neutral" href="/tag/php/" rel="tag">php</a></div>',
+			'<div class="taxonomy-post_tag is-style-tags wp-block-post-terms"><a class="tag tag-neutral" href="/tag/wordpress/" rel="tag">WordPress</a><a class="tag tag-neutral" href="/tag/php/" rel="tag">php</a></div>',
 			Helpers::style_tag_terms( $html, $block )
 		);
 
@@ -180,5 +180,44 @@ class HelpersTest extends TestCase {
 		$this->assertStringContainsString( 'class="wp-block-search__button wp-element-button btn btn-secondary"', $styled );
 		// The form's own class -- which also contains the substring "button" -- is untouched.
 		$this->assertStringContainsString( 'class="wp-block-search__button-outside wp-block-search__text-button ttm-search wp-block-search"', $styled );
+	}
+
+	public function test_visible_parts_drops_private_posts(): void {
+		$parts = [
+			[
+				'part'   => 1,
+				'status' => 'publish',
+			],
+			[
+				'part'   => 2,
+				'status' => 'private',
+			],
+			[
+				'part'   => 3,
+				'status' => 'draft',
+			],
+		];
+
+		$this->assertSame( [ 1, 3 ], array_column( Helpers::visible_parts( $parts ), 'part' ) );
+	}
+
+	public function test_part_has_date_only_for_published_and_scheduled(): void {
+		$this->assertTrue( Helpers::part_has_date( [ 'status' => 'publish' ] ) );
+		$this->assertTrue( Helpers::part_has_date( [ 'status' => 'future' ] ) );
+		$this->assertFalse( Helpers::part_has_date( [ 'status' => 'draft' ] ) );
+		$this->assertFalse( Helpers::part_has_date( [ 'status' => 'pending' ] ) );
+		$this->assertFalse( Helpers::part_has_date( [] ) );
+	}
+
+	public function test_part_date_is_a_dash_for_an_unscheduled_part(): void {
+		$this->assertSame(
+			'—',
+			Helpers::part_date(
+				[
+					'status' => 'draft',
+					'date'   => '2026-10-30 08:47:05',
+				]
+			)
+		);
 	}
 }
