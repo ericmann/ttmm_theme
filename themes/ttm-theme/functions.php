@@ -25,18 +25,37 @@ add_action(
 	}
 );
 
+// The editor's post-content wrapper is `.wp-block-post-content` (the front end adds
+// `.entry-content` too), so the editor copy of ttm.css targets that class: article spacing,
+// headings, lists and quotes then match the published page without a second stylesheet.
+add_filter(
+	'block_editor_settings_all',
+	static function ( array $settings ): array {
+		foreach ( $settings['styles'] ?? [] as $i => $style ) {
+			if ( isset( $style['css'], $style['baseURL'] ) && str_ends_with( (string) $style['baseURL'], '/assets/css/ttm.css' ) ) {
+				$settings['styles'][ $i ]['css'] = str_replace( '.entry-content', '.wp-block-post-content', (string) $style['css'] );
+			}
+		}
+
+		return $settings;
+	}
+);
+
 add_action(
 	'wp_enqueue_scripts',
 	static function (): void {
+		// Theme version + mtime: release zips stamp every file 1980-01-01 (deterministic), so
+		// mtime alone never changes between releases; locally the mtime still busts on save.
+		$ver = wp_get_theme()->get( 'Version' ) . '.';
 		$css = get_template_directory() . '/assets/css/ttm.css';
-		wp_enqueue_style( 'ttm-theme', get_template_directory_uri() . '/assets/css/ttm.css', [], (string) filemtime( $css ) );
+		wp_enqueue_style( 'ttm-theme', get_template_directory_uri() . '/assets/css/ttm.css', [], $ver . filemtime( $css ) );
 
 		$js = get_template_directory() . '/assets/js/nav.js';
 		wp_enqueue_script(
 			'ttm-nav',
 			get_template_directory_uri() . '/assets/js/nav.js',
 			[],
-			(string) filemtime( $js ),
+			$ver . filemtime( $js ),
 			[
 				'in_footer' => true,
 				'strategy'  => 'defer',
