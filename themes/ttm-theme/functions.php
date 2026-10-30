@@ -25,6 +25,22 @@ add_action(
 	}
 );
 
+// The editor's post-content wrapper is `.wp-block-post-content` (the front end adds
+// `.entry-content` too), so the editor copy of ttm.css targets that class: article spacing,
+// headings, lists and quotes then match the published page without a second stylesheet.
+add_filter(
+	'block_editor_settings_all',
+	static function ( array $settings ): array {
+		foreach ( $settings['styles'] ?? [] as $i => $style ) {
+			if ( isset( $style['css'], $style['baseURL'] ) && str_ends_with( (string) $style['baseURL'], '/assets/css/ttm.css' ) ) {
+				$settings['styles'][ $i ]['css'] = str_replace( '.entry-content', '.wp-block-post-content', (string) $style['css'] );
+			}
+		}
+
+		return $settings;
+	}
+);
+
 add_action(
 	'wp_enqueue_scripts',
 	static function (): void {
