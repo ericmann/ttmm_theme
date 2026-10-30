@@ -481,17 +481,17 @@
 <item>
   <title><![CDATA[A metal desk lamp above a tall stack of books]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 29 Oct 2026 19:00:00 +0000</pubDate>
+  <pubDate>Fri, 30 Oct 2026 19:00:00 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-about.jpg</guid>
   <description/>
   <content:encoded><![CDATA[Photograph: Metal desk lamp and books pile (42381074432) by freestocks.org from Olsztyn, Poland (CC0), via Openverse: https://commons.wikimedia.org/w/index.php?curid=131376731]]></content:encoded>
   <excerpt:encoded><![CDATA[The desk this site gets written from, most days, minus the coffee rings.]]></excerpt:encoded>
   <wp:post_id>1005</wp:post_id>
-  <wp:post_date>2026-10-29 12:00:00</wp:post_date>
-  <wp:post_date_gmt>2026-10-29 19:00:00</wp:post_date_gmt>
-  <wp:post_modified>2026-10-29 12:00:00</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-29 19:00:00</wp:post_modified_gmt>
+  <wp:post_date>2026-10-30 12:00:00</wp:post_date>
+  <wp:post_date_gmt>2026-10-30 19:00:00</wp:post_date_gmt>
+  <wp:post_modified>2026-10-30 12:00:00</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-30 19:00:00</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
   <wp:post_name>a-metal-desk-lamp-above-a-tall-stack-of-books</wp:post_name>
@@ -510,7 +510,7 @@
 <item>
   <title><![CDATA[Stop trusting the database: signing your options table]]></title>
   <link>https://example.com</link>
-  <pubDate>Wed, 28 Oct 2026 19:00:00 +0000</pubDate>
+  <pubDate>Thu, 29 Oct 2026 19:00:00 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -972,10 +972,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[A compromised admin account can rewrite <code>wp_options</code> without touching a single file. Here is how to detect it — and why your file-integrity scanner never will.]]></excerpt:encoded>
   <wp:post_id>1006</wp:post_id>
-  <wp:post_date>2026-10-28 12:00:00</wp:post_date>
-  <wp:post_date_gmt>2026-10-28 19:00:00</wp:post_date_gmt>
-  <wp:post_modified>2026-10-28 12:00:00</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-28 19:00:00</wp:post_modified_gmt>
+  <wp:post_date>2026-10-29 12:00:00</wp:post_date>
+  <wp:post_date_gmt>2026-10-29 19:00:00</wp:post_date_gmt>
+  <wp:post_modified>2026-10-29 12:00:00</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-29 19:00:00</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>signing-your-options-table</wp:post_name>
@@ -1019,17 +1019,17 @@
 <item>
   <title><![CDATA[A macro photograph of illuminated blue and white fiber optic cable strands]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 29 Oct 2026 19:00:00 +0000</pubDate>
+  <pubDate>Fri, 30 Oct 2026 19:00:00 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-signing-your-options-table.jpg</guid>
   <description/>
   <content:encoded><![CDATA[Photograph: Fiber Optical Cable by chaitawat (CC0), via Openverse: https://commons.wikimedia.org/w/index.php?curid=79709434]]></content:encoded>
   <excerpt:encoded><![CDATA[Every signed request still travels down a cable like this one — trust the signature, not the wire.]]></excerpt:encoded>
   <wp:post_id>1007</wp:post_id>
-  <wp:post_date>2026-10-29 12:00:00</wp:post_date>
-  <wp:post_date_gmt>2026-10-29 19:00:00</wp:post_date_gmt>
-  <wp:post_modified>2026-10-29 12:00:00</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-29 19:00:00</wp:post_modified_gmt>
+  <wp:post_date>2026-10-30 12:00:00</wp:post_date>
+  <wp:post_date_gmt>2026-10-30 19:00:00</wp:post_date_gmt>
+  <wp:post_modified>2026-10-30 12:00:00</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-30 19:00:00</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
   <wp:post_name>a-macro-photograph-of-illuminated-blue-and-white-fiber-optic-cable-strands</wp:post_name>
@@ -1048,7 +1048,7 @@
 <item>
   <title><![CDATA[Why I moved my build pipeline off GitHub Actions — and what it cost]]></title>
   <link>https://example.com</link>
-  <pubDate>Sun, 25 Oct 2026 18:59:59 +0000</pubDate>
+  <pubDate>Mon, 26 Oct 2026 18:59:59 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -1135,10 +1135,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Forty minutes of CI a day is two working weeks a year. The math finally caught up with me.]]></excerpt:encoded>
   <wp:post_id>1008</wp:post_id>
-  <wp:post_date>2026-10-25 11:59:59</wp:post_date>
-  <wp:post_date_gmt>2026-10-25 18:59:59</wp:post_date_gmt>
-  <wp:post_modified>2026-10-25 11:59:59</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-25 18:59:59</wp:post_modified_gmt>
+  <wp:post_date>2026-10-26 11:59:59</wp:post_date>
+  <wp:post_date_gmt>2026-10-26 18:59:59</wp:post_date_gmt>
+  <wp:post_modified>2026-10-26 11:59:59</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-26 18:59:59</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>technology-post-2</wp:post_name>
@@ -1179,17 +1179,17 @@
 <item>
   <title><![CDATA[The disassembled circuit board and shell of a computer mouse]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 29 Oct 2026 19:00:00 +0000</pubDate>
+  <pubDate>Fri, 30 Oct 2026 19:00:00 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-technology-post-2.jpg</guid>
   <description/>
   <content:encoded><![CDATA[Photograph: File:Mouse printed circuit board both sides IMG 0959a.JPG by Own work (CC0), via Openverse: https://commons.wikimedia.org/w/index.php?curid=14366124]]></content:encoded>
   <excerpt:encoded><![CDATA[A pipeline is just circuitry with better error messages, most days.]]></excerpt:encoded>
   <wp:post_id>1009</wp:post_id>
-  <wp:post_date>2026-10-29 12:00:00</wp:post_date>
-  <wp:post_date_gmt>2026-10-29 19:00:00</wp:post_date_gmt>
-  <wp:post_modified>2026-10-29 12:00:00</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-29 19:00:00</wp:post_modified_gmt>
+  <wp:post_date>2026-10-30 12:00:00</wp:post_date>
+  <wp:post_date_gmt>2026-10-30 19:00:00</wp:post_date_gmt>
+  <wp:post_modified>2026-10-30 12:00:00</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-30 19:00:00</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
   <wp:post_name>the-disassembled-circuit-board-and-shell-of-a-computer-mouse</wp:post_name>
@@ -1208,7 +1208,7 @@
 <item>
   <title><![CDATA[PHP 8.5 readonly classes are the feature nobody asked for and everybody needed]]></title>
   <link>https://example.com</link>
-  <pubDate>Wed, 21 Oct 2026 18:59:58 +0000</pubDate>
+  <pubDate>Thu, 22 Oct 2026 18:59:58 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -1275,10 +1275,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[A small language feature that quietly ends a whole category of bug report.]]></excerpt:encoded>
   <wp:post_id>1010</wp:post_id>
-  <wp:post_date>2026-10-21 11:59:58</wp:post_date>
-  <wp:post_date_gmt>2026-10-21 18:59:58</wp:post_date_gmt>
-  <wp:post_modified>2026-10-21 11:59:58</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-21 18:59:58</wp:post_modified_gmt>
+  <wp:post_date>2026-10-22 11:59:58</wp:post_date>
+  <wp:post_date_gmt>2026-10-22 18:59:58</wp:post_date_gmt>
+  <wp:post_modified>2026-10-22 11:59:58</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-22 18:59:58</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>php-85-readonly-classes</wp:post_name>
@@ -1319,17 +1319,17 @@
 <item>
   <title><![CDATA[Close-up of vintage typewriter keys resting over a rainbow-colored fan]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 29 Oct 2026 19:00:00 +0000</pubDate>
+  <pubDate>Fri, 30 Oct 2026 19:00:00 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-php-85-readonly-classes.jpg</guid>
   <description/>
   <content:encoded><![CDATA[Photograph: Rainbow fan sitting under black old fashioned typewriter keyboard keys. by Danielle Zarcaro (CC0), via Openverse: https://wordpress.org/photos/photo/90568630b0/]]></content:encoded>
   <excerpt:encoded><![CDATA[The old machine and the new one agree: once written, some things should stay that way.]]></excerpt:encoded>
   <wp:post_id>1011</wp:post_id>
-  <wp:post_date>2026-10-29 12:00:00</wp:post_date>
-  <wp:post_date_gmt>2026-10-29 19:00:00</wp:post_date_gmt>
-  <wp:post_modified>2026-10-29 12:00:00</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-29 19:00:00</wp:post_modified_gmt>
+  <wp:post_date>2026-10-30 12:00:00</wp:post_date>
+  <wp:post_date_gmt>2026-10-30 19:00:00</wp:post_date_gmt>
+  <wp:post_modified>2026-10-30 12:00:00</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-30 19:00:00</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
   <wp:post_name>close-up-of-vintage-typewriter-keys-resting-over-a-rainbow-colored-fan</wp:post_name>
@@ -1348,7 +1348,7 @@
 <item>
   <title><![CDATA[The block editor is a document model. Treat it like one.]]></title>
   <link>https://example.com</link>
-  <pubDate>Sat, 17 Oct 2026 18:59:57 +0000</pubDate>
+  <pubDate>Sun, 18 Oct 2026 18:59:57 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -1415,10 +1415,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Every editor bug I have fixed this year came from someone forgetting that block markup is data, not HTML.]]></excerpt:encoded>
   <wp:post_id>1012</wp:post_id>
-  <wp:post_date>2026-10-17 11:59:57</wp:post_date>
-  <wp:post_date_gmt>2026-10-17 18:59:57</wp:post_date_gmt>
-  <wp:post_modified>2026-10-17 11:59:57</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-17 18:59:57</wp:post_modified_gmt>
+  <wp:post_date>2026-10-18 11:59:57</wp:post_date>
+  <wp:post_date_gmt>2026-10-18 18:59:57</wp:post_date_gmt>
+  <wp:post_modified>2026-10-18 11:59:57</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-18 18:59:57</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>block-editor-document-model</wp:post_name>
@@ -1451,7 +1451,7 @@
 <item>
   <title><![CDATA[Composer lockfiles are a security control]]></title>
   <link>https://example.com</link>
-  <pubDate>Sun, 11 Oct 2026 18:59:56 +0000</pubDate>
+  <pubDate>Mon, 12 Oct 2026 18:59:56 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -1508,10 +1508,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Pinning a version is not paranoia. It is the only part of the supply chain you actually control.]]></excerpt:encoded>
   <wp:post_id>1013</wp:post_id>
-  <wp:post_date>2026-10-11 11:59:56</wp:post_date>
-  <wp:post_date_gmt>2026-10-11 18:59:56</wp:post_date_gmt>
-  <wp:post_modified>2026-10-11 11:59:56</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-11 18:59:56</wp:post_modified_gmt>
+  <wp:post_date>2026-10-12 11:59:56</wp:post_date>
+  <wp:post_date_gmt>2026-10-12 18:59:56</wp:post_date_gmt>
+  <wp:post_modified>2026-10-12 11:59:56</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-12 18:59:56</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>composer-lockfiles-are-a-security-control</wp:post_name>
@@ -1548,17 +1548,17 @@
 <item>
   <title><![CDATA[A chain looped through two hooks securing a canal lock gate]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 29 Oct 2026 19:00:00 +0000</pubDate>
+  <pubDate>Fri, 30 Oct 2026 19:00:00 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-composer-lockfiles-are-a-security-control.jpg</guid>
   <description/>
   <content:encoded><![CDATA[Photograph: Padlocked lower gates, Claydon Top Lock, Oxford Canal, Claydon, Oxfordshire - August 2025 by Mertbiol (CC0), via Openverse: https://commons.wikimedia.org/w/index.php?curid=171819145]]></content:encoded>
   <excerpt:encoded><![CDATA[A lockfile is exactly this: one specific thing, kept from changing without asking.]]></excerpt:encoded>
   <wp:post_id>1014</wp:post_id>
-  <wp:post_date>2026-10-29 12:00:00</wp:post_date>
-  <wp:post_date_gmt>2026-10-29 19:00:00</wp:post_date_gmt>
-  <wp:post_modified>2026-10-29 12:00:00</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-29 19:00:00</wp:post_modified_gmt>
+  <wp:post_date>2026-10-30 12:00:00</wp:post_date>
+  <wp:post_date_gmt>2026-10-30 19:00:00</wp:post_date_gmt>
+  <wp:post_modified>2026-10-30 12:00:00</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-30 19:00:00</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
   <wp:post_name>a-chain-looped-through-two-hooks-securing-a-canal-lock-gate</wp:post_name>
@@ -1577,7 +1577,7 @@
 <item>
   <title><![CDATA[On writing a WordPress theme in 2026]]></title>
   <link>https://example.com</link>
-  <pubDate>Tue, 06 Oct 2026 18:59:55 +0000</pubDate>
+  <pubDate>Wed, 07 Oct 2026 18:59:55 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -1634,10 +1634,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[The block theme finally feels like the platform the block editor always promised.]]></excerpt:encoded>
   <wp:post_id>1015</wp:post_id>
-  <wp:post_date>2026-10-06 11:59:55</wp:post_date>
-  <wp:post_date_gmt>2026-10-06 18:59:55</wp:post_date_gmt>
-  <wp:post_modified>2026-10-06 11:59:55</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-06 18:59:55</wp:post_modified_gmt>
+  <wp:post_date>2026-10-07 11:59:55</wp:post_date>
+  <wp:post_date_gmt>2026-10-07 18:59:55</wp:post_date_gmt>
+  <wp:post_modified>2026-10-07 11:59:55</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-07 18:59:55</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>on-writing-a-wordpress-theme-in-2026</wp:post_name>
@@ -1670,7 +1670,7 @@
 <item>
   <title><![CDATA[Transients, object caches and the lie of “fast enough”]]></title>
   <link>https://example.com</link>
-  <pubDate>Tue, 29 Sep 2026 18:59:54 +0000</pubDate>
+  <pubDate>Wed, 30 Sep 2026 18:59:54 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -1727,10 +1727,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Every cache layer is a promise you will eventually have to keep by hand.]]></excerpt:encoded>
   <wp:post_id>1016</wp:post_id>
-  <wp:post_date>2026-09-29 11:59:54</wp:post_date>
-  <wp:post_date_gmt>2026-09-29 18:59:54</wp:post_date_gmt>
-  <wp:post_modified>2026-09-29 11:59:54</wp:post_modified>
-  <wp:post_modified_gmt>2026-09-29 18:59:54</wp:post_modified_gmt>
+  <wp:post_date>2026-09-30 11:59:54</wp:post_date>
+  <wp:post_date_gmt>2026-09-30 18:59:54</wp:post_date_gmt>
+  <wp:post_modified>2026-09-30 11:59:54</wp:post_modified>
+  <wp:post_modified_gmt>2026-09-30 18:59:54</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>transients-object-caches-and-fast-enough</wp:post_name>
@@ -1765,17 +1765,17 @@
 <item>
   <title><![CDATA[Empty wooden bookshelves against a bare concrete wall]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 29 Oct 2026 19:00:00 +0000</pubDate>
+  <pubDate>Fri, 30 Oct 2026 19:00:00 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-transients-object-caches-and-fast-enough.jpg</guid>
   <description/>
   <content:encoded><![CDATA[Photograph: A wooden bookshelf with empty shelves, set against a textured concrete wall. by Nilo Velez (CC0), via Openverse: https://wordpress.org/photos/photo/583682723b/]]></content:encoded>
   <excerpt:encoded><![CDATA[Somewhere in here is the thing you cached and never checked again.]]></excerpt:encoded>
   <wp:post_id>1017</wp:post_id>
-  <wp:post_date>2026-10-29 12:00:00</wp:post_date>
-  <wp:post_date_gmt>2026-10-29 19:00:00</wp:post_date_gmt>
-  <wp:post_modified>2026-10-29 12:00:00</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-29 19:00:00</wp:post_modified_gmt>
+  <wp:post_date>2026-10-30 12:00:00</wp:post_date>
+  <wp:post_date_gmt>2026-10-30 19:00:00</wp:post_date_gmt>
+  <wp:post_modified>2026-10-30 12:00:00</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-30 19:00:00</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
   <wp:post_name>empty-wooden-bookshelves-against-a-bare-concrete-wall</wp:post_name>
@@ -1794,7 +1794,7 @@
 <item>
   <title><![CDATA[Charge for the outcome, bill for the hour]]></title>
   <link>https://example.com</link>
-  <pubDate>Sat, 24 Oct 2026 18:59:53 +0000</pubDate>
+  <pubDate>Sun, 25 Oct 2026 18:59:53 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -1861,10 +1861,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[A consulting pricing model that survives contact with procurement.]]></excerpt:encoded>
   <wp:post_id>1018</wp:post_id>
-  <wp:post_date>2026-10-24 11:59:53</wp:post_date>
-  <wp:post_date_gmt>2026-10-24 18:59:53</wp:post_date_gmt>
-  <wp:post_modified>2026-10-24 11:59:53</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-24 18:59:53</wp:post_modified_gmt>
+  <wp:post_date>2026-10-25 11:59:53</wp:post_date>
+  <wp:post_date_gmt>2026-10-25 18:59:53</wp:post_date_gmt>
+  <wp:post_modified>2026-10-25 11:59:53</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-25 18:59:53</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>charge-for-outcome-bill-for-hour</wp:post_name>
@@ -1906,17 +1906,17 @@
 <item>
   <title><![CDATA[An open handwritten accounting ledger book filled with figures]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 29 Oct 2026 19:00:00 +0000</pubDate>
+  <pubDate>Fri, 30 Oct 2026 19:00:00 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-charge-for-outcome-bill-for-hour.jpg</guid>
   <description/>
   <content:encoded><![CDATA[Photograph: Account Ledger of Haji Najaf bin Ghalib 1909 - 1916 ، ١٣٢٧ - ١٣٣٥ هـ دفتر حساب الحاج نجف بن غالب by Binghalib0 (CC0), via Openverse: https://commons.wikimedia.org/w/index.php?curid=172982925]]></content:encoded>
   <excerpt:encoded><![CDATA[Every column here used to answer a question an hourly invoice never could.]]></excerpt:encoded>
   <wp:post_id>1019</wp:post_id>
-  <wp:post_date>2026-10-29 12:00:00</wp:post_date>
-  <wp:post_date_gmt>2026-10-29 19:00:00</wp:post_date_gmt>
-  <wp:post_modified>2026-10-29 12:00:00</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-29 19:00:00</wp:post_modified_gmt>
+  <wp:post_date>2026-10-30 12:00:00</wp:post_date>
+  <wp:post_date_gmt>2026-10-30 19:00:00</wp:post_date_gmt>
+  <wp:post_modified>2026-10-30 12:00:00</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-30 19:00:00</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
   <wp:post_name>an-open-handwritten-accounting-ledger-book-filled-with-figures</wp:post_name>
@@ -1935,7 +1935,7 @@
 <item>
   <title><![CDATA[The one-page operating agreement]]></title>
   <link>https://example.com</link>
-  <pubDate>Mon, 12 Oct 2026 18:59:52 +0000</pubDate>
+  <pubDate>Tue, 13 Oct 2026 18:59:52 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -2002,10 +2002,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Everything a small consultancy actually needs in writing fits on one page, if you are honest about it.]]></excerpt:encoded>
   <wp:post_id>1020</wp:post_id>
-  <wp:post_date>2026-10-12 11:59:52</wp:post_date>
-  <wp:post_date_gmt>2026-10-12 18:59:52</wp:post_date_gmt>
-  <wp:post_modified>2026-10-12 11:59:52</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-12 18:59:52</wp:post_modified_gmt>
+  <wp:post_date>2026-10-13 11:59:52</wp:post_date>
+  <wp:post_date_gmt>2026-10-13 18:59:52</wp:post_date_gmt>
+  <wp:post_modified>2026-10-13 11:59:52</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-13 18:59:52</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>one-page-operating-agreement</wp:post_name>
@@ -2043,7 +2043,7 @@
 <item>
   <title><![CDATA[Fire the client who pays late twice]]></title>
   <link>https://example.com</link>
-  <pubDate>Mon, 05 Oct 2026 18:59:51 +0000</pubDate>
+  <pubDate>Tue, 06 Oct 2026 18:59:51 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -2110,10 +2110,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[The first late payment is an accident. The second one is a policy.]]></excerpt:encoded>
   <wp:post_id>1021</wp:post_id>
-  <wp:post_date>2026-10-05 11:59:51</wp:post_date>
-  <wp:post_date_gmt>2026-10-05 18:59:51</wp:post_date_gmt>
-  <wp:post_modified>2026-10-05 11:59:51</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-05 18:59:51</wp:post_modified_gmt>
+  <wp:post_date>2026-10-06 11:59:51</wp:post_date>
+  <wp:post_date_gmt>2026-10-06 18:59:51</wp:post_date_gmt>
+  <wp:post_modified>2026-10-06 11:59:51</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-06 18:59:51</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>fire-the-client-who-pays-late-twice</wp:post_name>
@@ -2151,7 +2151,7 @@
 <item>
   <title><![CDATA[Retainers are a promise about attention]]></title>
   <link>https://example.com</link>
-  <pubDate>Tue, 22 Sep 2026 18:59:50 +0000</pubDate>
+  <pubDate>Wed, 23 Sep 2026 18:59:50 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -2218,10 +2218,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[You are not selling hours. You are selling the fact that you already know the system.]]></excerpt:encoded>
   <wp:post_id>1022</wp:post_id>
-  <wp:post_date>2026-09-22 11:59:50</wp:post_date>
-  <wp:post_date_gmt>2026-09-22 18:59:50</wp:post_date_gmt>
-  <wp:post_modified>2026-09-22 11:59:50</wp:post_modified>
-  <wp:post_modified_gmt>2026-09-22 18:59:50</wp:post_modified_gmt>
+  <wp:post_date>2026-09-23 11:59:50</wp:post_date>
+  <wp:post_date_gmt>2026-09-23 18:59:50</wp:post_date_gmt>
+  <wp:post_modified>2026-09-23 11:59:50</wp:post_modified>
+  <wp:post_modified_gmt>2026-09-23 18:59:50</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>retainers-are-a-promise-about-attention</wp:post_name>
@@ -2259,7 +2259,7 @@
 <item>
   <title><![CDATA[What a CTO actually does all day]]></title>
   <link>https://example.com</link>
-  <pubDate>Mon, 14 Sep 2026 18:59:49 +0000</pubDate>
+  <pubDate>Tue, 15 Sep 2026 18:59:49 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -2326,10 +2326,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Fewer decisions than you would think, and far more translation between rooms that do not talk to each other.]]></excerpt:encoded>
   <wp:post_id>1023</wp:post_id>
-  <wp:post_date>2026-09-14 11:59:49</wp:post_date>
-  <wp:post_date_gmt>2026-09-14 18:59:49</wp:post_date_gmt>
-  <wp:post_modified>2026-09-14 11:59:49</wp:post_modified>
-  <wp:post_modified_gmt>2026-09-14 18:59:49</wp:post_modified_gmt>
+  <wp:post_date>2026-09-15 11:59:49</wp:post_date>
+  <wp:post_date_gmt>2026-09-15 18:59:49</wp:post_date_gmt>
+  <wp:post_modified>2026-09-15 11:59:49</wp:post_modified>
+  <wp:post_modified_gmt>2026-09-15 18:59:49</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>what-a-cto-actually-does-all-day</wp:post_name>
@@ -2367,7 +2367,7 @@
 <item>
   <title><![CDATA[Your password manager's weakest link is the browser extension]]></title>
   <link>https://example.com</link>
-  <pubDate>Mon, 19 Oct 2026 18:59:48 +0000</pubDate>
+  <pubDate>Tue, 20 Oct 2026 18:59:48 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -2434,10 +2434,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Threat-modeling the thing we all installed without thinking.]]></excerpt:encoded>
   <wp:post_id>1024</wp:post_id>
-  <wp:post_date>2026-10-19 11:59:48</wp:post_date>
-  <wp:post_date_gmt>2026-10-19 18:59:48</wp:post_date_gmt>
-  <wp:post_modified>2026-10-19 11:59:48</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-19 18:59:48</wp:post_modified_gmt>
+  <wp:post_date>2026-10-20 11:59:48</wp:post_date>
+  <wp:post_date_gmt>2026-10-20 18:59:48</wp:post_date_gmt>
+  <wp:post_modified>2026-10-20 11:59:48</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-20 18:59:48</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>password-manager-weakest-link</wp:post_name>
@@ -2474,17 +2474,17 @@
 <item>
   <title><![CDATA[A fog-covered suspension bridge seen past a fence covered in padlocks]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 29 Oct 2026 19:00:00 +0000</pubDate>
+  <pubDate>Fri, 30 Oct 2026 19:00:00 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-password-manager-weakest-link.jpg</guid>
   <description/>
   <content:encoded><![CDATA[Photograph: The San Fransisco bridge covered in a layer of fog in the background with a chain link fence covered in locks in the foreground. by Allie Nimmons (CC0), via Openverse: https://wordpress.org/photos/photo/46864e4dc4/]]></content:encoded>
   <excerpt:encoded><![CDATA[Hundreds of locks, one fence — the chain only holds as well as its worst link.]]></excerpt:encoded>
   <wp:post_id>1025</wp:post_id>
-  <wp:post_date>2026-10-29 12:00:00</wp:post_date>
-  <wp:post_date_gmt>2026-10-29 19:00:00</wp:post_date_gmt>
-  <wp:post_modified>2026-10-29 12:00:00</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-29 19:00:00</wp:post_modified_gmt>
+  <wp:post_date>2026-10-30 12:00:00</wp:post_date>
+  <wp:post_date_gmt>2026-10-30 19:00:00</wp:post_date_gmt>
+  <wp:post_modified>2026-10-30 12:00:00</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-30 19:00:00</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
   <wp:post_name>a-fog-covered-suspension-bridge-seen-past-a-fence-covered-in-padlocks</wp:post_name>
@@ -2503,7 +2503,7 @@
 <item>
   <title><![CDATA[Nonces are not CSRF tokens]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 08 Oct 2026 18:59:47 +0000</pubDate>
+  <pubDate>Fri, 09 Oct 2026 18:59:47 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -2570,10 +2570,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[They rhyme with CSRF tokens closely enough to get a lot of WordPress code quietly wrong.]]></excerpt:encoded>
   <wp:post_id>1026</wp:post_id>
-  <wp:post_date>2026-10-08 11:59:47</wp:post_date>
-  <wp:post_date_gmt>2026-10-08 18:59:47</wp:post_date_gmt>
-  <wp:post_modified>2026-10-08 11:59:47</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-08 18:59:47</wp:post_modified_gmt>
+  <wp:post_date>2026-10-09 11:59:47</wp:post_date>
+  <wp:post_date_gmt>2026-10-09 18:59:47</wp:post_date_gmt>
+  <wp:post_modified>2026-10-09 11:59:47</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-09 18:59:47</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>nonces-are-not-csrf-tokens</wp:post_name>
@@ -2613,17 +2613,17 @@
 <item>
   <title><![CDATA[A vintage 1946 football game reserved-seat ticket stub]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 29 Oct 2026 19:00:00 +0000</pubDate>
+  <pubDate>Fri, 30 Oct 2026 19:00:00 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-nonces-are-not-csrf-tokens.jpg</guid>
   <description/>
   <content:encoded><![CDATA[Photograph: October 12, 1946 Temple University versus University of Pittsburgh football game ticket stub by Pittalum (CC0), via Openverse: https://commons.wikimedia.org/w/index.php?curid=140739075]]></content:encoded>
   <excerpt:encoded><![CDATA[A ticket proves you paid once. It was never meant to prove who's asking now.]]></excerpt:encoded>
   <wp:post_id>1027</wp:post_id>
-  <wp:post_date>2026-10-29 12:00:00</wp:post_date>
-  <wp:post_date_gmt>2026-10-29 19:00:00</wp:post_date_gmt>
-  <wp:post_modified>2026-10-29 12:00:00</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-29 19:00:00</wp:post_modified_gmt>
+  <wp:post_date>2026-10-30 12:00:00</wp:post_date>
+  <wp:post_date_gmt>2026-10-30 19:00:00</wp:post_date_gmt>
+  <wp:post_modified>2026-10-30 12:00:00</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-30 19:00:00</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
   <wp:post_name>a-vintage-1946-football-game-reserved-seat-ticket-stub</wp:post_name>
@@ -2642,7 +2642,7 @@
 <item>
   <title><![CDATA[Reading a CVE like an engineer]]></title>
   <link>https://example.com</link>
-  <pubDate>Sun, 27 Sep 2026 18:59:46 +0000</pubDate>
+  <pubDate>Mon, 28 Sep 2026 18:59:46 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -2709,10 +2709,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Severity scores are for procurement. Here is what to read instead.]]></excerpt:encoded>
   <wp:post_id>1028</wp:post_id>
-  <wp:post_date>2026-09-27 11:59:46</wp:post_date>
-  <wp:post_date_gmt>2026-09-27 18:59:46</wp:post_date_gmt>
-  <wp:post_modified>2026-09-27 11:59:46</wp:post_modified>
-  <wp:post_modified_gmt>2026-09-27 18:59:46</wp:post_modified_gmt>
+  <wp:post_date>2026-09-28 11:59:46</wp:post_date>
+  <wp:post_date_gmt>2026-09-28 18:59:46</wp:post_date_gmt>
+  <wp:post_modified>2026-09-28 11:59:46</wp:post_modified>
+  <wp:post_modified_gmt>2026-09-28 18:59:46</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>reading-a-cve-like-an-engineer</wp:post_name>
@@ -2748,7 +2748,7 @@
 <item>
   <title><![CDATA[Disclosure timelines, from the other side of the inbox]]></title>
   <link>https://example.com</link>
-  <pubDate>Wed, 10 Jun 2026 18:59:45 +0000</pubDate>
+  <pubDate>Thu, 11 Jun 2026 18:59:45 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -2815,10 +2815,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Ninety days is a courtesy, not a contract.]]></excerpt:encoded>
   <wp:post_id>1029</wp:post_id>
-  <wp:post_date>2026-06-10 11:59:45</wp:post_date>
-  <wp:post_date_gmt>2026-06-10 18:59:45</wp:post_date_gmt>
-  <wp:post_modified>2026-06-10 11:59:45</wp:post_modified>
-  <wp:post_modified_gmt>2026-06-10 18:59:45</wp:post_modified_gmt>
+  <wp:post_date>2026-06-11 11:59:45</wp:post_date>
+  <wp:post_date_gmt>2026-06-11 18:59:45</wp:post_date_gmt>
+  <wp:post_modified>2026-06-11 11:59:45</wp:post_modified>
+  <wp:post_modified_gmt>2026-06-11 18:59:45</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>disclosure-timelines-from-the-other-side</wp:post_name>
@@ -2850,7 +2850,7 @@
 <item>
   <title><![CDATA[On praying for the people who file the bug reports]]></title>
   <link>https://example.com</link>
-  <pubDate>Fri, 23 Oct 2026 18:59:44 +0000</pubDate>
+  <pubDate>Sat, 24 Oct 2026 18:59:44 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -2907,10 +2907,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Patience as an engineering discipline.]]></excerpt:encoded>
   <wp:post_id>1030</wp:post_id>
-  <wp:post_date>2026-10-23 11:59:44</wp:post_date>
-  <wp:post_date_gmt>2026-10-23 18:59:44</wp:post_date_gmt>
-  <wp:post_modified>2026-10-23 11:59:44</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-23 18:59:44</wp:post_modified_gmt>
+  <wp:post_date>2026-10-24 11:59:44</wp:post_date>
+  <wp:post_date_gmt>2026-10-24 18:59:44</wp:post_date_gmt>
+  <wp:post_modified>2026-10-24 11:59:44</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-24 18:59:44</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>praying-for-people-who-file-bug-reports</wp:post_name>
@@ -2947,17 +2947,17 @@
 <item>
   <title><![CDATA[The stone ruins of a medieval cathedral against a blue sky]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 29 Oct 2026 19:00:00 +0000</pubDate>
+  <pubDate>Fri, 30 Oct 2026 19:00:00 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-praying-for-people-who-file-bug-reports.jpg</guid>
   <description/>
   <content:encoded><![CDATA[Photograph: Cashel Cathedral, Rock of Cashel, Caiseal, Éire (32717185898) by Warren LeMay from Covington, KY, United States (CC0), via Openverse: https://commons.wikimedia.org/w/index.php?curid=86110758]]></content:encoded>
   <excerpt:encoded><![CDATA[Some structures outlast every maintainer who ever tended them.]]></excerpt:encoded>
   <wp:post_id>1031</wp:post_id>
-  <wp:post_date>2026-10-29 12:00:00</wp:post_date>
-  <wp:post_date_gmt>2026-10-29 19:00:00</wp:post_date_gmt>
-  <wp:post_modified>2026-10-29 12:00:00</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-29 19:00:00</wp:post_modified_gmt>
+  <wp:post_date>2026-10-30 12:00:00</wp:post_date>
+  <wp:post_date_gmt>2026-10-30 19:00:00</wp:post_date_gmt>
+  <wp:post_modified>2026-10-30 12:00:00</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-30 19:00:00</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
   <wp:post_name>the-stone-ruins-of-a-medieval-cathedral-against-a-blue-sky</wp:post_name>
@@ -2976,7 +2976,7 @@
 <item>
   <title><![CDATA[Sabbath for people who ship on Fridays]]></title>
   <link>https://example.com</link>
-  <pubDate>Sat, 10 Oct 2026 18:59:43 +0000</pubDate>
+  <pubDate>Sun, 11 Oct 2026 18:59:43 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -3023,10 +3023,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Rest does not care whether the deploy went out clean.]]></excerpt:encoded>
   <wp:post_id>1032</wp:post_id>
-  <wp:post_date>2026-10-10 11:59:43</wp:post_date>
-  <wp:post_date_gmt>2026-10-10 18:59:43</wp:post_date_gmt>
-  <wp:post_modified>2026-10-10 11:59:43</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-10 18:59:43</wp:post_modified_gmt>
+  <wp:post_date>2026-10-11 11:59:43</wp:post_date>
+  <wp:post_date_gmt>2026-10-11 18:59:43</wp:post_date_gmt>
+  <wp:post_modified>2026-10-11 11:59:43</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-11 18:59:43</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>sabbath-for-people-who-ship-on-fridays</wp:post_name>
@@ -3059,7 +3059,7 @@
 <item>
   <title><![CDATA[Ordinary Time, week nine]]></title>
   <link>https://example.com</link>
-  <pubDate>Fri, 02 Oct 2026 18:59:42 +0000</pubDate>
+  <pubDate>Sat, 03 Oct 2026 18:59:42 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -3096,10 +3096,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Week 9 of the least dramatic season of the church calendar, which is exactly why it is worth writing about.]]></excerpt:encoded>
   <wp:post_id>1033</wp:post_id>
-  <wp:post_date>2026-10-02 11:59:42</wp:post_date>
-  <wp:post_date_gmt>2026-10-02 18:59:42</wp:post_date_gmt>
-  <wp:post_modified>2026-10-02 11:59:42</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-02 18:59:42</wp:post_modified_gmt>
+  <wp:post_date>2026-10-03 11:59:42</wp:post_date>
+  <wp:post_date_gmt>2026-10-03 18:59:42</wp:post_date_gmt>
+  <wp:post_modified>2026-10-03 11:59:42</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-03 18:59:42</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>ordinary-time-week-9</wp:post_name>
@@ -3137,7 +3137,7 @@
 <item>
   <title><![CDATA[Ordinary Time, week eight]]></title>
   <link>https://example.com</link>
-  <pubDate>Fri, 25 Sep 2026 18:59:41 +0000</pubDate>
+  <pubDate>Sat, 26 Sep 2026 18:59:41 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -3174,10 +3174,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Week 8 of the least dramatic season of the church calendar, which is exactly why it is worth writing about.]]></excerpt:encoded>
   <wp:post_id>1034</wp:post_id>
-  <wp:post_date>2026-09-25 11:59:41</wp:post_date>
-  <wp:post_date_gmt>2026-09-25 18:59:41</wp:post_date_gmt>
-  <wp:post_modified>2026-09-25 11:59:41</wp:post_modified>
-  <wp:post_modified_gmt>2026-09-25 18:59:41</wp:post_modified_gmt>
+  <wp:post_date>2026-09-26 11:59:41</wp:post_date>
+  <wp:post_date_gmt>2026-09-26 18:59:41</wp:post_date_gmt>
+  <wp:post_modified>2026-09-26 11:59:41</wp:post_modified>
+  <wp:post_modified_gmt>2026-09-26 18:59:41</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>ordinary-time-week-8</wp:post_name>
@@ -3215,7 +3215,7 @@
 <item>
   <title><![CDATA[Ordinary Time, week seven]]></title>
   <link>https://example.com</link>
-  <pubDate>Fri, 18 Sep 2026 18:59:40 +0000</pubDate>
+  <pubDate>Sat, 19 Sep 2026 18:59:40 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -3252,10 +3252,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Week 7 of the least dramatic season of the church calendar, which is exactly why it is worth writing about.]]></excerpt:encoded>
   <wp:post_id>1035</wp:post_id>
-  <wp:post_date>2026-09-18 11:59:40</wp:post_date>
-  <wp:post_date_gmt>2026-09-18 18:59:40</wp:post_date_gmt>
-  <wp:post_modified>2026-09-18 11:59:40</wp:post_modified>
-  <wp:post_modified_gmt>2026-09-18 18:59:40</wp:post_modified_gmt>
+  <wp:post_date>2026-09-19 11:59:40</wp:post_date>
+  <wp:post_date_gmt>2026-09-19 18:59:40</wp:post_date_gmt>
+  <wp:post_modified>2026-09-19 11:59:40</wp:post_modified>
+  <wp:post_modified_gmt>2026-09-19 18:59:40</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>ordinary-time-week-7</wp:post_name>
@@ -3293,7 +3293,7 @@
 <item>
   <title><![CDATA[Ordinary Time, week six]]></title>
   <link>https://example.com</link>
-  <pubDate>Fri, 11 Sep 2026 18:59:39 +0000</pubDate>
+  <pubDate>Sat, 12 Sep 2026 18:59:39 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -3330,10 +3330,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Week 6 of the least dramatic season of the church calendar, which is exactly why it is worth writing about.]]></excerpt:encoded>
   <wp:post_id>1036</wp:post_id>
-  <wp:post_date>2026-09-11 11:59:39</wp:post_date>
-  <wp:post_date_gmt>2026-09-11 18:59:39</wp:post_date_gmt>
-  <wp:post_modified>2026-09-11 11:59:39</wp:post_modified>
-  <wp:post_modified_gmt>2026-09-11 18:59:39</wp:post_modified_gmt>
+  <wp:post_date>2026-09-12 11:59:39</wp:post_date>
+  <wp:post_date_gmt>2026-09-12 18:59:39</wp:post_date_gmt>
+  <wp:post_modified>2026-09-12 11:59:39</wp:post_modified>
+  <wp:post_modified_gmt>2026-09-12 18:59:39</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>ordinary-time-week-6</wp:post_name>
@@ -3369,7 +3369,7 @@
 <item>
   <title><![CDATA[Ordinary Time, week five]]></title>
   <link>https://example.com</link>
-  <pubDate>Fri, 04 Sep 2026 18:59:38 +0000</pubDate>
+  <pubDate>Sat, 05 Sep 2026 18:59:38 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -3406,10 +3406,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Week 5 of the least dramatic season of the church calendar, which is exactly why it is worth writing about.]]></excerpt:encoded>
   <wp:post_id>1037</wp:post_id>
-  <wp:post_date>2026-09-04 11:59:38</wp:post_date>
-  <wp:post_date_gmt>2026-09-04 18:59:38</wp:post_date_gmt>
-  <wp:post_modified>2026-09-04 11:59:38</wp:post_modified>
-  <wp:post_modified_gmt>2026-09-04 18:59:38</wp:post_modified_gmt>
+  <wp:post_date>2026-09-05 11:59:38</wp:post_date>
+  <wp:post_date_gmt>2026-09-05 18:59:38</wp:post_date_gmt>
+  <wp:post_modified>2026-09-05 11:59:38</wp:post_modified>
+  <wp:post_modified_gmt>2026-09-05 18:59:38</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>ordinary-time-week-5</wp:post_name>
@@ -3445,7 +3445,7 @@
 <item>
   <title><![CDATA[Ordinary Time, week four]]></title>
   <link>https://example.com</link>
-  <pubDate>Fri, 28 Aug 2026 18:59:37 +0000</pubDate>
+  <pubDate>Sat, 29 Aug 2026 18:59:37 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -3482,10 +3482,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Week 4 of the least dramatic season of the church calendar, which is exactly why it is worth writing about.]]></excerpt:encoded>
   <wp:post_id>1038</wp:post_id>
-  <wp:post_date>2026-08-28 11:59:37</wp:post_date>
-  <wp:post_date_gmt>2026-08-28 18:59:37</wp:post_date_gmt>
-  <wp:post_modified>2026-08-28 11:59:37</wp:post_modified>
-  <wp:post_modified_gmt>2026-08-28 18:59:37</wp:post_modified_gmt>
+  <wp:post_date>2026-08-29 11:59:37</wp:post_date>
+  <wp:post_date_gmt>2026-08-29 18:59:37</wp:post_date_gmt>
+  <wp:post_modified>2026-08-29 11:59:37</wp:post_modified>
+  <wp:post_modified_gmt>2026-08-29 18:59:37</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>ordinary-time-week-4</wp:post_name>
@@ -3521,7 +3521,7 @@
 <item>
   <title><![CDATA[Ordinary Time, week three]]></title>
   <link>https://example.com</link>
-  <pubDate>Fri, 21 Aug 2026 18:59:36 +0000</pubDate>
+  <pubDate>Sat, 22 Aug 2026 18:59:36 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -3558,10 +3558,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Week 3 of the least dramatic season of the church calendar, which is exactly why it is worth writing about.]]></excerpt:encoded>
   <wp:post_id>1039</wp:post_id>
-  <wp:post_date>2026-08-21 11:59:36</wp:post_date>
-  <wp:post_date_gmt>2026-08-21 18:59:36</wp:post_date_gmt>
-  <wp:post_modified>2026-08-21 11:59:36</wp:post_modified>
-  <wp:post_modified_gmt>2026-08-21 18:59:36</wp:post_modified_gmt>
+  <wp:post_date>2026-08-22 11:59:36</wp:post_date>
+  <wp:post_date_gmt>2026-08-22 18:59:36</wp:post_date_gmt>
+  <wp:post_modified>2026-08-22 11:59:36</wp:post_modified>
+  <wp:post_modified_gmt>2026-08-22 18:59:36</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>ordinary-time-week-3</wp:post_name>
@@ -3597,7 +3597,7 @@
 <item>
   <title><![CDATA[Ordinary Time, week two]]></title>
   <link>https://example.com</link>
-  <pubDate>Fri, 14 Aug 2026 18:59:35 +0000</pubDate>
+  <pubDate>Sat, 15 Aug 2026 18:59:35 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -3634,10 +3634,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Week 2 of the least dramatic season of the church calendar, which is exactly why it is worth writing about.]]></excerpt:encoded>
   <wp:post_id>1040</wp:post_id>
-  <wp:post_date>2026-08-14 11:59:35</wp:post_date>
-  <wp:post_date_gmt>2026-08-14 18:59:35</wp:post_date_gmt>
-  <wp:post_modified>2026-08-14 11:59:35</wp:post_modified>
-  <wp:post_modified_gmt>2026-08-14 18:59:35</wp:post_modified_gmt>
+  <wp:post_date>2026-08-15 11:59:35</wp:post_date>
+  <wp:post_date_gmt>2026-08-15 18:59:35</wp:post_date_gmt>
+  <wp:post_modified>2026-08-15 11:59:35</wp:post_modified>
+  <wp:post_modified_gmt>2026-08-15 18:59:35</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>ordinary-time-week-2</wp:post_name>
@@ -3673,7 +3673,7 @@
 <item>
   <title><![CDATA[Ordinary Time, week one]]></title>
   <link>https://example.com</link>
-  <pubDate>Fri, 07 Aug 2026 18:59:34 +0000</pubDate>
+  <pubDate>Sat, 08 Aug 2026 18:59:34 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -3710,10 +3710,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Week 1 of the least dramatic season of the church calendar, which is exactly why it is worth writing about.]]></excerpt:encoded>
   <wp:post_id>1041</wp:post_id>
-  <wp:post_date>2026-08-07 11:59:34</wp:post_date>
-  <wp:post_date_gmt>2026-08-07 18:59:34</wp:post_date_gmt>
-  <wp:post_modified>2026-08-07 11:59:34</wp:post_modified>
-  <wp:post_modified_gmt>2026-08-07 18:59:34</wp:post_modified_gmt>
+  <wp:post_date>2026-08-08 11:59:34</wp:post_date>
+  <wp:post_date_gmt>2026-08-08 18:59:34</wp:post_date_gmt>
+  <wp:post_modified>2026-08-08 11:59:34</wp:post_modified>
+  <wp:post_modified_gmt>2026-08-08 18:59:34</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>ordinary-time-week-1</wp:post_name>
@@ -3749,7 +3749,7 @@
 <item>
   <title><![CDATA[Open source is not a business model. It is a distribution channel.]]></title>
   <link>https://example.com</link>
-  <pubDate>Tue, 20 Oct 2026 18:59:33 +0000</pubDate>
+  <pubDate>Wed, 21 Oct 2026 18:59:33 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -3806,10 +3806,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[]]></excerpt:encoded>
   <wp:post_id>1042</wp:post_id>
-  <wp:post_date>2026-10-20 11:59:33</wp:post_date>
-  <wp:post_date_gmt>2026-10-20 18:59:33</wp:post_date_gmt>
-  <wp:post_modified>2026-10-20 11:59:33</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-20 18:59:33</wp:post_modified_gmt>
+  <wp:post_date>2026-10-21 11:59:33</wp:post_date>
+  <wp:post_date_gmt>2026-10-21 18:59:33</wp:post_date_gmt>
+  <wp:post_modified>2026-10-21 11:59:33</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-21 18:59:33</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>open-source-not-a-business-model</wp:post_name>
@@ -3846,17 +3846,17 @@
 <item>
   <title><![CDATA[A pair of old white doors standing open in a field beside the water]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 29 Oct 2026 19:00:00 +0000</pubDate>
+  <pubDate>Fri, 30 Oct 2026 19:00:00 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-open-source-not-a-business-model.jpg</guid>
   <description/>
   <content:encoded><![CDATA[Photograph: A pair of old, white doors stands open in a grassy area, facing towards a body of water by Nick Krastev (CC0), via Openverse: https://wordpress.org/photos/photo/43963e3654/]]></content:encoded>
   <excerpt:encoded><![CDATA[The door was open the whole time; nobody built a toll booth for it.]]></excerpt:encoded>
   <wp:post_id>1043</wp:post_id>
-  <wp:post_date>2026-10-29 12:00:00</wp:post_date>
-  <wp:post_date_gmt>2026-10-29 19:00:00</wp:post_date_gmt>
-  <wp:post_modified>2026-10-29 12:00:00</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-29 19:00:00</wp:post_modified_gmt>
+  <wp:post_date>2026-10-30 12:00:00</wp:post_date>
+  <wp:post_date_gmt>2026-10-30 19:00:00</wp:post_date_gmt>
+  <wp:post_modified>2026-10-30 12:00:00</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-30 19:00:00</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
   <wp:post_name>a-pair-of-old-white-doors-standing-open-in-a-field-beside-the-water</wp:post_name>
@@ -3875,7 +3875,7 @@
 <item>
   <title><![CDATA[The city council meeting nobody attends]]></title>
   <link>https://example.com</link>
-  <pubDate>Wed, 30 Sep 2026 18:59:32 +0000</pubDate>
+  <pubDate>Thu, 01 Oct 2026 18:59:32 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -3922,10 +3922,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[The meeting where the actual budget gets decided has three people in the room, and none of them are reporters.]]></excerpt:encoded>
   <wp:post_id>1044</wp:post_id>
-  <wp:post_date>2026-09-30 11:59:32</wp:post_date>
-  <wp:post_date_gmt>2026-09-30 18:59:32</wp:post_date_gmt>
-  <wp:post_modified>2026-09-30 11:59:32</wp:post_modified>
-  <wp:post_modified_gmt>2026-09-30 18:59:32</wp:post_modified_gmt>
+  <wp:post_date>2026-10-01 11:59:32</wp:post_date>
+  <wp:post_date_gmt>2026-10-01 18:59:32</wp:post_date_gmt>
+  <wp:post_modified>2026-10-01 11:59:32</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-01 18:59:32</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>city-council-meeting-nobody-attends</wp:post_name>
@@ -3959,7 +3959,7 @@
 <item>
   <title><![CDATA[Local news is infrastructure]]></title>
   <link>https://example.com</link>
-  <pubDate>Sun, 07 Sep 2025 18:59:31 +0000</pubDate>
+  <pubDate>Mon, 08 Sep 2025 18:59:31 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -4006,10 +4006,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Nobody notices infrastructure until the week it stops working.]]></excerpt:encoded>
   <wp:post_id>1045</wp:post_id>
-  <wp:post_date>2025-09-07 11:59:31</wp:post_date>
-  <wp:post_date_gmt>2025-09-07 18:59:31</wp:post_date_gmt>
-  <wp:post_modified>2025-09-07 11:59:31</wp:post_modified>
-  <wp:post_modified_gmt>2025-09-07 18:59:31</wp:post_modified_gmt>
+  <wp:post_date>2025-09-08 11:59:31</wp:post_date>
+  <wp:post_date_gmt>2025-09-08 18:59:31</wp:post_date_gmt>
+  <wp:post_modified>2025-09-08 11:59:31</wp:post_modified>
+  <wp:post_modified_gmt>2025-09-08 18:59:31</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>local-news-is-infrastructure</wp:post_name>
@@ -4106,7 +4106,7 @@
 <item>
   <title><![CDATA[Two working weeks a year]]></title>
   <link>https://example.com</link>
-  <pubDate>Tue, 27 Oct 2026 18:59:29 +0000</pubDate>
+  <pubDate>Wed, 28 Oct 2026 18:59:29 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -4123,10 +4123,10 @@
 <!-- /wp:paragraph -->]]></content:encoded>
   <excerpt:encoded><![CDATA[Forty minutes of CI a day, every day, adds up to two working weeks a year if you do the math. I did the math out loud at dinner and nobody at the table was impressed, but I was, and now I have to do something about it.]]></excerpt:encoded>
   <wp:post_id>1047</wp:post_id>
-  <wp:post_date>2026-10-27 11:59:29</wp:post_date>
-  <wp:post_date_gmt>2026-10-27 18:59:29</wp:post_date_gmt>
-  <wp:post_modified>2026-10-27 11:59:29</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-27 18:59:29</wp:post_modified_gmt>
+  <wp:post_date>2026-10-28 11:59:29</wp:post_date>
+  <wp:post_date_gmt>2026-10-28 18:59:29</wp:post_date_gmt>
+  <wp:post_modified>2026-10-28 11:59:29</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-28 18:59:29</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>journal-post-2</wp:post_name>
@@ -4157,7 +4157,7 @@
 <item>
   <title><![CDATA[Rain, Psalm 46, a quiet build server]]></title>
   <link>https://example.com</link>
-  <pubDate>Mon, 26 Oct 2026 18:59:28 +0000</pubDate>
+  <pubDate>Tue, 27 Oct 2026 18:59:28 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -4174,10 +4174,10 @@
 <!-- /wp:paragraph -->]]></content:encoded>
   <excerpt:encoded><![CDATA[The kind of morning where nothing is broken and you almost distrust the quiet, waiting for the other shoe. Read the psalm twice, once for the words and once for the part of me that still does not believe it. Left the server alone.]]></excerpt:encoded>
   <wp:post_id>1048</wp:post_id>
-  <wp:post_date>2026-10-26 11:59:28</wp:post_date>
-  <wp:post_date_gmt>2026-10-26 18:59:28</wp:post_date_gmt>
-  <wp:post_modified>2026-10-26 11:59:28</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-26 18:59:28</wp:post_modified_gmt>
+  <wp:post_date>2026-10-27 11:59:28</wp:post_date>
+  <wp:post_date_gmt>2026-10-27 18:59:28</wp:post_date_gmt>
+  <wp:post_modified>2026-10-27 11:59:28</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-27 18:59:28</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>journal-post-3</wp:post_name>
@@ -4208,7 +4208,7 @@
 <item>
   <title><![CDATA[The CVE that was mostly marketing]]></title>
   <link>https://example.com</link>
-  <pubDate>Sun, 25 Oct 2026 18:59:27 +0000</pubDate>
+  <pubDate>Mon, 26 Oct 2026 18:59:27 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -4230,10 +4230,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Read a vulnerability write-up today that spent more words on the logo than on the patch, which tells you who it was written for. Wrote a grumpy draft, then deleted the whole thing before publishing. This is growth, apparently, or so I am choosing to call it.]]></excerpt:encoded>
   <wp:post_id>1049</wp:post_id>
-  <wp:post_date>2026-10-25 11:59:27</wp:post_date>
-  <wp:post_date_gmt>2026-10-25 18:59:27</wp:post_date_gmt>
-  <wp:post_modified>2026-10-25 11:59:27</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-25 18:59:27</wp:post_modified_gmt>
+  <wp:post_date>2026-10-26 11:59:27</wp:post_date>
+  <wp:post_date_gmt>2026-10-26 18:59:27</wp:post_date_gmt>
+  <wp:post_modified>2026-10-26 11:59:27</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-26 18:59:27</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>journal-post-4</wp:post_name>
@@ -4272,7 +4272,7 @@
 <item>
   <title><![CDATA[Marta finds the second ledger]]></title>
   <link>https://example.com</link>
-  <pubDate>Sat, 24 Oct 2026 18:59:26 +0000</pubDate>
+  <pubDate>Sun, 25 Oct 2026 18:59:26 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -4294,10 +4294,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter twelve is finally done, which means the reader learns what the first set of books was actually for. The second ledger only works if you believe the first one was the honest lie, and I had to decide, finally, which one I believed myself.]]></excerpt:encoded>
   <wp:post_id>1050</wp:post_id>
-  <wp:post_date>2026-10-24 11:59:26</wp:post_date>
-  <wp:post_date_gmt>2026-10-24 18:59:26</wp:post_date_gmt>
-  <wp:post_modified>2026-10-24 11:59:26</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-24 18:59:26</wp:post_modified_gmt>
+  <wp:post_date>2026-10-25 11:59:26</wp:post_date>
+  <wp:post_date_gmt>2026-10-25 18:59:26</wp:post_date_gmt>
+  <wp:post_modified>2026-10-25 11:59:26</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-25 18:59:26</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>journal-post-5</wp:post_name>
@@ -4328,7 +4328,7 @@
 <item>
   <title><![CDATA[The bug that only reproduced on one machine]]></title>
   <link>https://example.com</link>
-  <pubDate>Wed, 21 Oct 2026 18:59:25 +0000</pubDate>
+  <pubDate>Thu, 22 Oct 2026 18:59:25 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -4350,10 +4350,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Spent the morning fixing a bug that only reproduced on a coworker's machine, which is its own kind of humbling. Turned out to be a timezone assumption baked into a query I wrote two years ago and never once questioned since. Fixed it, wrote a test, moved on.]]></excerpt:encoded>
   <wp:post_id>1051</wp:post_id>
-  <wp:post_date>2026-10-21 11:59:25</wp:post_date>
-  <wp:post_date_gmt>2026-10-21 18:59:25</wp:post_date_gmt>
-  <wp:post_modified>2026-10-21 11:59:25</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-21 18:59:25</wp:post_modified_gmt>
+  <wp:post_date>2026-10-22 11:59:25</wp:post_date>
+  <wp:post_date_gmt>2026-10-22 18:59:25</wp:post_date_gmt>
+  <wp:post_modified>2026-10-22 11:59:25</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-22 18:59:25</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>journal-post-6</wp:post_name>
@@ -4384,7 +4384,7 @@
 <item>
   <title><![CDATA[The long way home]]></title>
   <link>https://example.com</link>
-  <pubDate>Wed, 14 Oct 2026 18:59:24 +0000</pubDate>
+  <pubDate>Thu, 15 Oct 2026 18:59:24 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -4406,10 +4406,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Took the long way home past the church tonight, mostly because the short way meant walking past the office again. The lights were still on up there, which used to bother me more than it does now. Some things get easier the longer you practice not answering.]]></excerpt:encoded>
   <wp:post_id>1052</wp:post_id>
-  <wp:post_date>2026-10-14 11:59:24</wp:post_date>
-  <wp:post_date_gmt>2026-10-14 18:59:24</wp:post_date_gmt>
-  <wp:post_modified>2026-10-14 11:59:24</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-14 18:59:24</wp:post_modified_gmt>
+  <wp:post_date>2026-10-15 11:59:24</wp:post_date>
+  <wp:post_date_gmt>2026-10-15 18:59:24</wp:post_date_gmt>
+  <wp:post_modified>2026-10-15 11:59:24</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-15 18:59:24</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>journal-post-7</wp:post_name>
@@ -4440,7 +4440,7 @@
 <item>
   <title><![CDATA[A reader wrote back]]></title>
   <link>https://example.com</link>
-  <pubDate>Mon, 14 Sep 2026 18:59:23 +0000</pubDate>
+  <pubDate>Tue, 15 Sep 2026 18:59:23 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -4462,10 +4462,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[A reader emailed to say the newsletter arrived exactly when she needed it, which is the kind of message that makes the habit worth keeping on the weeks it feels pointless. I do not know what to do with compliments, so I wrote back and said thank you.]]></excerpt:encoded>
   <wp:post_id>1053</wp:post_id>
-  <wp:post_date>2026-09-14 11:59:23</wp:post_date>
-  <wp:post_date_gmt>2026-09-14 18:59:23</wp:post_date_gmt>
-  <wp:post_modified>2026-09-14 11:59:23</wp:post_modified>
-  <wp:post_modified_gmt>2026-09-14 18:59:23</wp:post_modified_gmt>
+  <wp:post_date>2026-09-15 11:59:23</wp:post_date>
+  <wp:post_date_gmt>2026-09-15 18:59:23</wp:post_date_gmt>
+  <wp:post_modified>2026-09-15 11:59:23</wp:post_modified>
+  <wp:post_modified_gmt>2026-09-15 18:59:23</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>journal-post-8</wp:post_name>
@@ -4496,7 +4496,7 @@
 <item>
   <title><![CDATA[On finishing a draft you no longer believe in]]></title>
   <link>https://example.com</link>
-  <pubDate>Sun, 30 Aug 2026 18:59:22 +0000</pubDate>
+  <pubDate>Mon, 31 Aug 2026 18:59:22 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -4543,10 +4543,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Sometimes the honest move is to finish the book you started, not the book you would write today.]]></excerpt:encoded>
   <wp:post_id>1054</wp:post_id>
-  <wp:post_date>2026-08-30 11:59:22</wp:post_date>
-  <wp:post_date_gmt>2026-08-30 18:59:22</wp:post_date_gmt>
-  <wp:post_modified>2026-08-30 11:59:22</wp:post_modified>
-  <wp:post_modified_gmt>2026-08-30 18:59:22</wp:post_modified_gmt>
+  <wp:post_date>2026-08-31 11:59:22</wp:post_date>
+  <wp:post_date_gmt>2026-08-31 18:59:22</wp:post_date_gmt>
+  <wp:post_modified>2026-08-31 11:59:22</wp:post_modified>
+  <wp:post_modified_gmt>2026-08-31 18:59:22</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>finishing-a-draft-you-no-longer-believe-in</wp:post_name>
@@ -4583,7 +4583,7 @@
 <item>
   <title><![CDATA[Outlining for people who hate outlines]]></title>
   <link>https://example.com</link>
-  <pubDate>Sat, 15 Aug 2026 18:59:21 +0000</pubDate>
+  <pubDate>Sun, 16 Aug 2026 18:59:21 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -4630,10 +4630,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[A short outline you will actually follow beats a long one you will abandon by chapter three.]]></excerpt:encoded>
   <wp:post_id>1055</wp:post_id>
-  <wp:post_date>2026-08-15 11:59:21</wp:post_date>
-  <wp:post_date_gmt>2026-08-15 18:59:21</wp:post_date_gmt>
-  <wp:post_modified>2026-08-15 11:59:21</wp:post_modified>
-  <wp:post_modified_gmt>2026-08-15 18:59:21</wp:post_modified_gmt>
+  <wp:post_date>2026-08-16 11:59:21</wp:post_date>
+  <wp:post_date_gmt>2026-08-16 18:59:21</wp:post_date_gmt>
+  <wp:post_modified>2026-08-16 11:59:21</wp:post_modified>
+  <wp:post_modified_gmt>2026-08-16 18:59:21</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>outlining-for-people-who-hate-outlines</wp:post_name>
@@ -4670,17 +4670,17 @@
 <item>
   <title><![CDATA[A Post From The Classic Editor]]></title>
   <link>https://example.com</link>
-  <pubDate>Fri, 02 Jan 2026 19:59:20 +0000</pubDate>
+  <pubDate>Sat, 03 Jan 2026 19:59:20 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
   <content:encoded><![CDATA[<p>This post was written in the classic editor, long before block markup existed.</p><p>It references a footnote<sup class="modern-footnotes-footnote">1</sup> from that era.</p>]]></content:encoded>
   <excerpt:encoded><![CDATA[]]></excerpt:encoded>
   <wp:post_id>1056</wp:post_id>
-  <wp:post_date>2026-01-02 11:59:20</wp:post_date>
-  <wp:post_date_gmt>2026-01-02 19:59:20</wp:post_date_gmt>
-  <wp:post_modified>2026-01-02 11:59:20</wp:post_modified>
-  <wp:post_modified_gmt>2026-01-02 19:59:20</wp:post_modified_gmt>
+  <wp:post_date>2026-01-03 11:59:20</wp:post_date>
+  <wp:post_date_gmt>2026-01-03 19:59:20</wp:post_date_gmt>
+  <wp:post_modified>2026-01-03 11:59:20</wp:post_modified>
+  <wp:post_modified_gmt>2026-01-03 19:59:20</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>classic-post</wp:post_name>
@@ -4711,7 +4711,7 @@
 <item>
   <title><![CDATA[Hardening WordPress, part 1: what a scanner sees — and what it can’t]]></title>
   <link>https://example.com</link>
-  <pubDate>Fri, 09 Oct 2026 18:59:19 +0000</pubDate>
+  <pubDate>Sat, 10 Oct 2026 18:59:19 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -4778,10 +4778,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Most wp-config.php files are written once, at launch, and never audited again.]]></excerpt:encoded>
   <wp:post_id>1057</wp:post_id>
-  <wp:post_date>2026-10-09 11:59:19</wp:post_date>
-  <wp:post_date_gmt>2026-10-09 18:59:19</wp:post_date_gmt>
-  <wp:post_modified>2026-10-09 11:59:19</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-09 18:59:19</wp:post_modified_gmt>
+  <wp:post_date>2026-10-10 11:59:19</wp:post_date>
+  <wp:post_date_gmt>2026-10-10 18:59:19</wp:post_date_gmt>
+  <wp:post_modified>2026-10-10 11:59:19</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-10 18:59:19</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>hardening-part-1</wp:post_name>
@@ -4822,7 +4822,7 @@
 <item>
   <title><![CDATA[Hardening WordPress, part 2: salts, keys and the rotation you skipped]]></title>
   <link>https://example.com</link>
-  <pubDate>Mon, 19 Oct 2026 18:59:18 +0000</pubDate>
+  <pubDate>Tue, 20 Oct 2026 18:59:18 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -4899,10 +4899,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[The secret keys in wp-config.php were generated once, at launch, and rotated never.]]></excerpt:encoded>
   <wp:post_id>1058</wp:post_id>
-  <wp:post_date>2026-10-19 11:59:18</wp:post_date>
-  <wp:post_date_gmt>2026-10-19 18:59:18</wp:post_date_gmt>
-  <wp:post_modified>2026-10-19 11:59:18</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-19 18:59:18</wp:post_modified_gmt>
+  <wp:post_date>2026-10-20 11:59:18</wp:post_date>
+  <wp:post_date_gmt>2026-10-20 18:59:18</wp:post_date_gmt>
+  <wp:post_modified>2026-10-20 11:59:18</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-20 18:59:18</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>hardening-part-2-salts-and-keys</wp:post_name>
@@ -4944,7 +4944,7 @@
 <item>
   <title><![CDATA[Hardening WordPress, part 4: keys in the environment, rotated live]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 29 Oct 2026 18:59:17 +0000</pubDate>
+  <pubDate>Fri, 30 Oct 2026 18:59:17 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -5011,14 +5011,14 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Rotating a signing key without downtime means the old and new keys both have to verify for one deploy.]]></excerpt:encoded>
   <wp:post_id>1059</wp:post_id>
-  <wp:post_date>2026-10-29 11:59:17</wp:post_date>
-  <wp:post_date_gmt>2026-10-29 18:59:17</wp:post_date_gmt>
-  <wp:post_modified>2026-10-29 11:59:17</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-29 18:59:17</wp:post_modified_gmt>
+  <wp:post_date>2026-10-30 11:59:17</wp:post_date>
+  <wp:post_date_gmt>2026-10-30 18:59:17</wp:post_date_gmt>
+  <wp:post_modified>2026-10-30 11:59:17</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-30 18:59:17</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>hardening-part-4-keys-in-the-environment</wp:post_name>
-  <wp:status>publish</wp:status>
+  <wp:status>future</wp:status>
   <wp:post_parent>0</wp:post_parent>
   <wp:menu_order>0</wp:menu_order>
   <wp:post_type>post</wp:post_type>
@@ -5028,14 +5028,6 @@
   <category domain="series" nicename="hardening-wordpress"><![CDATA[Hardening WordPress]]></category>
   <category domain="category" nicename="security"><![CDATA[Security]]></category>
   <category domain="post_tag" nicename="wordpress"><![CDATA[wordpress]]></category>
-  <wp:postmeta>
-    <wp:meta_key>_pingme</wp:meta_key>
-    <wp:meta_value><![CDATA[1]]></wp:meta_value>
-  </wp:postmeta>
-  <wp:postmeta>
-    <wp:meta_key>_encloseme</wp:meta_key>
-    <wp:meta_value><![CDATA[1]]></wp:meta_value>
-  </wp:postmeta>
   <wp:postmeta>
     <wp:meta_key>ttm_form</wp:meta_key>
     <wp:meta_value><![CDATA[article]]></wp:meta_value>
@@ -5060,17 +5052,17 @@
 <item>
   <title><![CDATA[Two blank cut keys photographed in high-contrast black and white]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 29 Oct 2026 19:00:00 +0000</pubDate>
+  <pubDate>Fri, 30 Oct 2026 19:00:00 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-hardening-part-4-keys-in-the-environment.jpg</guid>
   <description/>
   <content:encoded><![CDATA[Photograph: Skeletonkey by Blenheimears (CC0), via Openverse: https://commons.wikimedia.org/w/index.php?curid=17390206]]></content:encoded>
   <excerpt:encoded><![CDATA[The keys that matter for this post aren't the ones under your fingers.]]></excerpt:encoded>
   <wp:post_id>1060</wp:post_id>
-  <wp:post_date>2026-10-29 12:00:00</wp:post_date>
-  <wp:post_date_gmt>2026-10-29 19:00:00</wp:post_date_gmt>
-  <wp:post_modified>2026-10-29 12:00:00</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-29 19:00:00</wp:post_modified_gmt>
+  <wp:post_date>2026-10-30 12:00:00</wp:post_date>
+  <wp:post_date_gmt>2026-10-30 19:00:00</wp:post_date_gmt>
+  <wp:post_modified>2026-10-30 12:00:00</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-30 19:00:00</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
   <wp:post_name>two-blank-cut-keys-photographed-in-high-contrast-black-and-white</wp:post_name>
@@ -5089,7 +5081,7 @@
 <item>
   <title><![CDATA[Hardening WordPress, part 5: the admin with the weak password]]></title>
   <link>https://example.com</link>
-  <pubDate>Tue, 03 Nov 2026 19:59:16 +0000</pubDate>
+  <pubDate>Wed, 04 Nov 2026 19:59:16 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -5156,10 +5148,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Every hardening checklist assumes the attacker has to work for it. Sometimes they do not.]]></excerpt:encoded>
   <wp:post_id>1061</wp:post_id>
-  <wp:post_date>2026-11-03 11:59:16</wp:post_date>
-  <wp:post_date_gmt>2026-11-03 19:59:16</wp:post_date_gmt>
-  <wp:post_modified>2026-11-03 11:59:16</wp:post_modified>
-  <wp:post_modified_gmt>2026-11-03 19:59:16</wp:post_modified_gmt>
+  <wp:post_date>2026-11-04 11:59:16</wp:post_date>
+  <wp:post_date_gmt>2026-11-04 19:59:16</wp:post_date_gmt>
+  <wp:post_modified>2026-11-04 11:59:16</wp:post_modified>
+  <wp:post_modified_gmt>2026-11-04 19:59:16</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>hardening-part-5-the-admin-with-the-weak-password</wp:post_name>
@@ -5192,7 +5184,7 @@
 <item>
   <title><![CDATA[Hardening WordPress, part 6: incident — what to do when the alarm fires]]></title>
   <link>https://example.com</link>
-  <pubDate>Tue, 10 Nov 2026 19:59:15 +0000</pubDate>
+  <pubDate>Wed, 11 Nov 2026 19:59:15 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -5259,10 +5251,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[The signature told you something changed. What you do in the next ten minutes is the part nobody rehearses.]]></excerpt:encoded>
   <wp:post_id>1062</wp:post_id>
-  <wp:post_date>2026-11-10 11:59:15</wp:post_date>
-  <wp:post_date_gmt>2026-11-10 19:59:15</wp:post_date_gmt>
-  <wp:post_modified>2026-11-10 11:59:15</wp:post_modified>
-  <wp:post_modified_gmt>2026-11-10 19:59:15</wp:post_modified_gmt>
+  <wp:post_date>2026-11-11 11:59:15</wp:post_date>
+  <wp:post_date_gmt>2026-11-11 19:59:15</wp:post_date_gmt>
+  <wp:post_modified>2026-11-11 11:59:15</wp:post_modified>
+  <wp:post_modified_gmt>2026-11-11 19:59:15</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>hardening-part-6-incident-when-the-alarm-fires</wp:post_name>
@@ -5294,7 +5286,7 @@
 <item>
   <title><![CDATA[Why I still recommend hardware keys to my parents]]></title>
   <link>https://example.com</link>
-  <pubDate>Sat, 24 Oct 2026 18:59:14 +0000</pubDate>
+  <pubDate>Sun, 25 Oct 2026 18:59:14 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -5361,10 +5353,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[A $25 dongle beats every password policy I have ever written.]]></excerpt:encoded>
   <wp:post_id>1063</wp:post_id>
-  <wp:post_date>2026-10-24 11:59:14</wp:post_date>
-  <wp:post_date_gmt>2026-10-24 18:59:14</wp:post_date_gmt>
-  <wp:post_modified>2026-10-24 11:59:14</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-24 18:59:14</wp:post_modified_gmt>
+  <wp:post_date>2026-10-25 11:59:14</wp:post_date>
+  <wp:post_date_gmt>2026-10-25 18:59:14</wp:post_date_gmt>
+  <wp:post_modified>2026-10-25 11:59:14</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-25 18:59:14</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>hardware-keys-for-my-parents</wp:post_name>
@@ -5401,7 +5393,7 @@
 <item>
   <title><![CDATA[Cookie theft still works and nobody wants to talk about it]]></title>
   <link>https://example.com</link>
-  <pubDate>Wed, 09 Sep 2026 18:59:13 +0000</pubDate>
+  <pubDate>Thu, 10 Sep 2026 18:59:13 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -5468,10 +5460,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Session hijacking predates the OWASP Top Ten and it is still how most WordPress sites actually get popped.]]></excerpt:encoded>
   <wp:post_id>1064</wp:post_id>
-  <wp:post_date>2026-09-09 11:59:13</wp:post_date>
-  <wp:post_date_gmt>2026-09-09 18:59:13</wp:post_date_gmt>
-  <wp:post_modified>2026-09-09 11:59:13</wp:post_modified>
-  <wp:post_modified_gmt>2026-09-09 18:59:13</wp:post_modified_gmt>
+  <wp:post_date>2026-09-10 11:59:13</wp:post_date>
+  <wp:post_date_gmt>2026-09-10 18:59:13</wp:post_date_gmt>
+  <wp:post_modified>2026-09-10 11:59:13</wp:post_modified>
+  <wp:post_modified_gmt>2026-09-10 18:59:13</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>cookie-theft-still-works</wp:post_name>
@@ -5504,7 +5496,7 @@
 <item>
   <title><![CDATA[What a coordinated disclosure actually costs]]></title>
   <link>https://example.com</link>
-  <pubDate>Fri, 02 Jan 2026 19:59:12 +0000</pubDate>
+  <pubDate>Sat, 03 Jan 2026 19:59:12 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -5571,10 +5563,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Ninety days sounds generous until you are the one holding the finding.]]></excerpt:encoded>
   <wp:post_id>1065</wp:post_id>
-  <wp:post_date>2026-01-02 11:59:12</wp:post_date>
-  <wp:post_date_gmt>2026-01-02 19:59:12</wp:post_date_gmt>
-  <wp:post_modified>2026-01-02 11:59:12</wp:post_modified>
-  <wp:post_modified_gmt>2026-01-02 19:59:12</wp:post_modified_gmt>
+  <wp:post_date>2026-01-03 11:59:12</wp:post_date>
+  <wp:post_date_gmt>2026-01-03 19:59:12</wp:post_date_gmt>
+  <wp:post_modified>2026-01-03 11:59:12</wp:post_modified>
+  <wp:post_modified_gmt>2026-01-03 19:59:12</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>what-coordinated-disclosure-costs</wp:post_name>
@@ -5607,7 +5599,7 @@
 <item>
   <title><![CDATA[Rotating secrets without an outage]]></title>
   <link>https://example.com</link>
-  <pubDate>Sat, 13 Dec 2025 19:59:11 +0000</pubDate>
+  <pubDate>Sun, 14 Dec 2025 19:59:11 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -5674,10 +5666,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[The rotation itself is easy. Keeping both keys valid for one deploy is the actual engineering.]]></excerpt:encoded>
   <wp:post_id>1066</wp:post_id>
-  <wp:post_date>2025-12-13 11:59:11</wp:post_date>
-  <wp:post_date_gmt>2025-12-13 19:59:11</wp:post_date_gmt>
-  <wp:post_modified>2025-12-13 11:59:11</wp:post_modified>
-  <wp:post_modified_gmt>2025-12-13 19:59:11</wp:post_modified_gmt>
+  <wp:post_date>2025-12-14 11:59:11</wp:post_date>
+  <wp:post_date_gmt>2025-12-14 19:59:11</wp:post_date_gmt>
+  <wp:post_modified>2025-12-14 11:59:11</wp:post_modified>
+  <wp:post_modified_gmt>2025-12-14 19:59:11</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>rotating-secrets-without-an-outage</wp:post_name>
@@ -5710,7 +5702,7 @@
 <item>
   <title><![CDATA[The plugin update nobody tested]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 13 Nov 2025 19:59:10 +0000</pubDate>
+  <pubDate>Fri, 14 Nov 2025 19:59:10 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -5777,10 +5769,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[A changelog that says "security fix" and nothing else is itself a finding.]]></excerpt:encoded>
   <wp:post_id>1067</wp:post_id>
-  <wp:post_date>2025-11-13 11:59:10</wp:post_date>
-  <wp:post_date_gmt>2025-11-13 19:59:10</wp:post_date_gmt>
-  <wp:post_modified>2025-11-13 11:59:10</wp:post_modified>
-  <wp:post_modified_gmt>2025-11-13 19:59:10</wp:post_modified_gmt>
+  <wp:post_date>2025-11-14 11:59:10</wp:post_date>
+  <wp:post_date_gmt>2025-11-14 19:59:10</wp:post_date_gmt>
+  <wp:post_modified>2025-11-14 11:59:10</wp:post_modified>
+  <wp:post_modified_gmt>2025-11-14 19:59:10</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>the-plugin-update-nobody-tested</wp:post_name>
@@ -5813,7 +5805,7 @@
 <item>
   <title><![CDATA[Password policies that make things worse]]></title>
   <link>https://example.com</link>
-  <pubDate>Tue, 14 Oct 2025 18:59:09 +0000</pubDate>
+  <pubDate>Wed, 15 Oct 2025 18:59:09 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -5880,10 +5872,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Forced rotation every ninety days trained a generation of users to increment a number.]]></excerpt:encoded>
   <wp:post_id>1068</wp:post_id>
-  <wp:post_date>2025-10-14 11:59:09</wp:post_date>
-  <wp:post_date_gmt>2025-10-14 18:59:09</wp:post_date_gmt>
-  <wp:post_modified>2025-10-14 11:59:09</wp:post_modified>
-  <wp:post_modified_gmt>2025-10-14 18:59:09</wp:post_modified_gmt>
+  <wp:post_date>2025-10-15 11:59:09</wp:post_date>
+  <wp:post_date_gmt>2025-10-15 18:59:09</wp:post_date_gmt>
+  <wp:post_modified>2025-10-15 11:59:09</wp:post_modified>
+  <wp:post_modified_gmt>2025-10-15 18:59:09</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>password-policies-that-make-things-worse</wp:post_name>
@@ -5916,7 +5908,7 @@
 <item>
   <title><![CDATA[The Quiet Ledger, Chapter 1]]></title>
   <link>https://example.com</link>
-  <pubDate>Tue, 02 Dec 2025 19:59:08 +0000</pubDate>
+  <pubDate>Wed, 03 Dec 2025 19:59:08 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -6323,10 +6315,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Marta opens an envelope that will end a working relationship she has not had yet.]]></excerpt:encoded>
   <wp:post_id>1069</wp:post_id>
-  <wp:post_date>2025-12-02 11:59:08</wp:post_date>
-  <wp:post_date_gmt>2025-12-02 19:59:08</wp:post_date_gmt>
-  <wp:post_modified>2025-12-02 11:59:08</wp:post_modified>
-  <wp:post_modified_gmt>2025-12-02 19:59:08</wp:post_modified_gmt>
+  <wp:post_date>2025-12-03 11:59:08</wp:post_date>
+  <wp:post_date_gmt>2025-12-03 19:59:08</wp:post_date_gmt>
+  <wp:post_modified>2025-12-03 11:59:08</wp:post_modified>
+  <wp:post_modified_gmt>2025-12-03 19:59:08</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>quiet-ledger-ch-1</wp:post_name>
@@ -6368,7 +6360,7 @@
 <item>
   <title><![CDATA[The Quiet Ledger, Chapter 2]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 01 Jan 2026 19:59:07 +0000</pubDate>
+  <pubDate>Fri, 02 Jan 2026 19:59:07 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -6775,10 +6767,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Harlan runs on one number, and everyone has agreed not to look at it.]]></excerpt:encoded>
   <wp:post_id>1070</wp:post_id>
-  <wp:post_date>2026-01-01 11:59:07</wp:post_date>
-  <wp:post_date_gmt>2026-01-01 19:59:07</wp:post_date_gmt>
-  <wp:post_modified>2026-01-01 11:59:07</wp:post_modified>
-  <wp:post_modified_gmt>2026-01-01 19:59:07</wp:post_modified_gmt>
+  <wp:post_date>2026-01-02 11:59:07</wp:post_date>
+  <wp:post_date_gmt>2026-01-02 19:59:07</wp:post_date_gmt>
+  <wp:post_modified>2026-01-02 11:59:07</wp:post_modified>
+  <wp:post_modified_gmt>2026-01-02 19:59:07</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>quiet-ledger-ch-2</wp:post_name>
@@ -6818,7 +6810,7 @@
 <item>
   <title><![CDATA[The Quiet Ledger, Chapter 3]]></title>
   <link>https://example.com</link>
-  <pubDate>Sat, 31 Jan 2026 19:59:06 +0000</pubDate>
+  <pubDate>Sun, 01 Feb 2026 19:59:06 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -7225,10 +7217,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[The books balance. That is the first thing that worries her.]]></excerpt:encoded>
   <wp:post_id>1071</wp:post_id>
-  <wp:post_date>2026-01-31 11:59:06</wp:post_date>
-  <wp:post_date_gmt>2026-01-31 19:59:06</wp:post_date_gmt>
-  <wp:post_modified>2026-01-31 11:59:06</wp:post_modified>
-  <wp:post_modified_gmt>2026-01-31 19:59:06</wp:post_modified_gmt>
+  <wp:post_date>2026-02-01 11:59:06</wp:post_date>
+  <wp:post_date_gmt>2026-02-01 19:59:06</wp:post_date_gmt>
+  <wp:post_modified>2026-02-01 11:59:06</wp:post_modified>
+  <wp:post_modified_gmt>2026-02-01 19:59:06</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>quiet-ledger-ch-3</wp:post_name>
@@ -7268,7 +7260,7 @@
 <item>
   <title><![CDATA[The Quiet Ledger, Chapter 4]]></title>
   <link>https://example.com</link>
-  <pubDate>Mon, 02 Mar 2026 19:59:05 +0000</pubDate>
+  <pubDate>Tue, 03 Mar 2026 19:59:05 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -7675,10 +7667,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[A number that appears once should never appear a second time, in a different column.]]></excerpt:encoded>
   <wp:post_id>1072</wp:post_id>
-  <wp:post_date>2026-03-02 11:59:05</wp:post_date>
-  <wp:post_date_gmt>2026-03-02 19:59:05</wp:post_date_gmt>
-  <wp:post_modified>2026-03-02 11:59:05</wp:post_modified>
-  <wp:post_modified_gmt>2026-03-02 19:59:05</wp:post_modified_gmt>
+  <wp:post_date>2026-03-03 11:59:05</wp:post_date>
+  <wp:post_date_gmt>2026-03-03 19:59:05</wp:post_date_gmt>
+  <wp:post_modified>2026-03-03 11:59:05</wp:post_modified>
+  <wp:post_modified_gmt>2026-03-03 19:59:05</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>quiet-ledger-ch-4</wp:post_name>
@@ -7718,7 +7710,7 @@
 <item>
   <title><![CDATA[The Quiet Ledger, Chapter 5]]></title>
   <link>https://example.com</link>
-  <pubDate>Wed, 01 Apr 2026 18:59:04 +0000</pubDate>
+  <pubDate>Thu, 02 Apr 2026 18:59:04 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -8125,10 +8117,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[He offers her coffee before he offers her an answer.]]></excerpt:encoded>
   <wp:post_id>1073</wp:post_id>
-  <wp:post_date>2026-04-01 11:59:04</wp:post_date>
-  <wp:post_date_gmt>2026-04-01 18:59:04</wp:post_date_gmt>
-  <wp:post_modified>2026-04-01 11:59:04</wp:post_modified>
-  <wp:post_modified_gmt>2026-04-01 18:59:04</wp:post_modified_gmt>
+  <wp:post_date>2026-04-02 11:59:04</wp:post_date>
+  <wp:post_date_gmt>2026-04-02 18:59:04</wp:post_date_gmt>
+  <wp:post_modified>2026-04-02 11:59:04</wp:post_modified>
+  <wp:post_modified_gmt>2026-04-02 18:59:04</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>quiet-ledger-ch-5</wp:post_name>
@@ -8168,7 +8160,7 @@
 <item>
   <title><![CDATA[The Quiet Ledger, Chapter 6]]></title>
   <link>https://example.com</link>
-  <pubDate>Fri, 01 May 2026 18:59:03 +0000</pubDate>
+  <pubDate>Sat, 02 May 2026 18:59:03 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -8575,10 +8567,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Depreciation is a story a company tells itself. This one is lying.]]></excerpt:encoded>
   <wp:post_id>1074</wp:post_id>
-  <wp:post_date>2026-05-01 11:59:03</wp:post_date>
-  <wp:post_date_gmt>2026-05-01 18:59:03</wp:post_date_gmt>
-  <wp:post_modified>2026-05-01 11:59:03</wp:post_modified>
-  <wp:post_modified_gmt>2026-05-01 18:59:03</wp:post_modified_gmt>
+  <wp:post_date>2026-05-02 11:59:03</wp:post_date>
+  <wp:post_date_gmt>2026-05-02 18:59:03</wp:post_date_gmt>
+  <wp:post_modified>2026-05-02 11:59:03</wp:post_modified>
+  <wp:post_modified_gmt>2026-05-02 18:59:03</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>quiet-ledger-ch-6</wp:post_name>
@@ -8618,7 +8610,7 @@
 <item>
   <title><![CDATA[The Quiet Ledger, Chapter 7: Going Concern]]></title>
   <link>https://example.com</link>
-  <pubDate>Sun, 31 May 2026 18:59:02 +0000</pubDate>
+  <pubDate>Mon, 01 Jun 2026 18:59:02 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -9025,10 +9017,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[The founder asks a question he already knows the answer to.]]></excerpt:encoded>
   <wp:post_id>1075</wp:post_id>
-  <wp:post_date>2026-05-31 11:59:02</wp:post_date>
-  <wp:post_date_gmt>2026-05-31 18:59:02</wp:post_date_gmt>
-  <wp:post_modified>2026-05-31 11:59:02</wp:post_modified>
-  <wp:post_modified_gmt>2026-05-31 18:59:02</wp:post_modified_gmt>
+  <wp:post_date>2026-06-01 11:59:02</wp:post_date>
+  <wp:post_date_gmt>2026-06-01 18:59:02</wp:post_date_gmt>
+  <wp:post_modified>2026-06-01 11:59:02</wp:post_modified>
+  <wp:post_modified_gmt>2026-06-01 18:59:02</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>quiet-ledger-ch-7</wp:post_name>
@@ -9068,7 +9060,7 @@
 <item>
   <title><![CDATA[The Quiet Ledger, Chapter 8: Material Weakness]]></title>
   <link>https://example.com</link>
-  <pubDate>Tue, 30 Jun 2026 18:59:01 +0000</pubDate>
+  <pubDate>Wed, 01 Jul 2026 18:59:01 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -9475,10 +9467,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Marta writes the sentence she cannot unwrite.]]></excerpt:encoded>
   <wp:post_id>1076</wp:post_id>
-  <wp:post_date>2026-06-30 11:59:01</wp:post_date>
-  <wp:post_date_gmt>2026-06-30 18:59:01</wp:post_date_gmt>
-  <wp:post_modified>2026-06-30 11:59:01</wp:post_modified>
-  <wp:post_modified_gmt>2026-06-30 18:59:01</wp:post_modified_gmt>
+  <wp:post_date>2026-07-01 11:59:01</wp:post_date>
+  <wp:post_date_gmt>2026-07-01 18:59:01</wp:post_date_gmt>
+  <wp:post_modified>2026-07-01 11:59:01</wp:post_modified>
+  <wp:post_modified_gmt>2026-07-01 18:59:01</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>quiet-ledger-ch-8</wp:post_name>
@@ -9518,7 +9510,7 @@
 <item>
   <title><![CDATA[The Quiet Ledger, Chapter 9: Depreciation]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 30 Jul 2026 18:59:00 +0000</pubDate>
+  <pubDate>Fri, 31 Jul 2026 18:59:00 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -9925,10 +9917,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[The mill, the town, and a number that only goes down.]]></excerpt:encoded>
   <wp:post_id>1077</wp:post_id>
-  <wp:post_date>2026-07-30 11:59:00</wp:post_date>
-  <wp:post_date_gmt>2026-07-30 18:59:00</wp:post_date_gmt>
-  <wp:post_modified>2026-07-30 11:59:00</wp:post_modified>
-  <wp:post_modified_gmt>2026-07-30 18:59:00</wp:post_modified_gmt>
+  <wp:post_date>2026-07-31 11:59:00</wp:post_date>
+  <wp:post_date_gmt>2026-07-31 18:59:00</wp:post_date_gmt>
+  <wp:post_modified>2026-07-31 11:59:00</wp:post_modified>
+  <wp:post_modified_gmt>2026-07-31 18:59:00</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>quiet-ledger-ch-9</wp:post_name>
@@ -9968,7 +9960,7 @@
 <item>
   <title><![CDATA[The Quiet Ledger, Chapter 10: The Auditor's Lunch]]></title>
   <link>https://example.com</link>
-  <pubDate>Sat, 29 Aug 2026 18:58:59 +0000</pubDate>
+  <pubDate>Sun, 30 Aug 2026 18:58:59 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -10375,10 +10367,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Nobody in Harlan eats alone by accident.]]></excerpt:encoded>
   <wp:post_id>1078</wp:post_id>
-  <wp:post_date>2026-08-29 11:58:59</wp:post_date>
-  <wp:post_date_gmt>2026-08-29 18:58:59</wp:post_date_gmt>
-  <wp:post_modified>2026-08-29 11:58:59</wp:post_modified>
-  <wp:post_modified_gmt>2026-08-29 18:58:59</wp:post_modified_gmt>
+  <wp:post_date>2026-08-30 11:58:59</wp:post_date>
+  <wp:post_date_gmt>2026-08-30 18:58:59</wp:post_date_gmt>
+  <wp:post_modified>2026-08-30 11:58:59</wp:post_modified>
+  <wp:post_modified_gmt>2026-08-30 18:58:59</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>quiet-ledger-ch-10</wp:post_name>
@@ -10418,7 +10410,7 @@
 <item>
   <title><![CDATA[The Quiet Ledger, Chapter 11: Accruals]]></title>
   <link>https://example.com</link>
-  <pubDate>Mon, 28 Sep 2026 18:58:58 +0000</pubDate>
+  <pubDate>Tue, 29 Sep 2026 18:58:58 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -10825,10 +10817,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[What gets counted before it happens.]]></excerpt:encoded>
   <wp:post_id>1079</wp:post_id>
-  <wp:post_date>2026-09-28 11:58:58</wp:post_date>
-  <wp:post_date_gmt>2026-09-28 18:58:58</wp:post_date_gmt>
-  <wp:post_modified>2026-09-28 11:58:58</wp:post_modified>
-  <wp:post_modified_gmt>2026-09-28 18:58:58</wp:post_modified_gmt>
+  <wp:post_date>2026-09-29 11:58:58</wp:post_date>
+  <wp:post_date_gmt>2026-09-29 18:58:58</wp:post_date_gmt>
+  <wp:post_modified>2026-09-29 11:58:58</wp:post_modified>
+  <wp:post_modified_gmt>2026-09-29 18:58:58</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>quiet-ledger-ch-11</wp:post_name>
@@ -10868,7 +10860,7 @@
 <item>
   <title><![CDATA[The Quiet Ledger, Chapter 12: Reconciliation]]></title>
   <link>https://example.com</link>
-  <pubDate>Wed, 28 Oct 2026 18:58:57 +0000</pubDate>
+  <pubDate>Thu, 29 Oct 2026 18:58:57 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -11275,10 +11267,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Marta finds the second set of books. The first set, it turns out, was the lie.]]></excerpt:encoded>
   <wp:post_id>1080</wp:post_id>
-  <wp:post_date>2026-10-28 11:58:57</wp:post_date>
-  <wp:post_date_gmt>2026-10-28 18:58:57</wp:post_date_gmt>
-  <wp:post_modified>2026-10-28 11:58:57</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-28 18:58:57</wp:post_modified_gmt>
+  <wp:post_date>2026-10-29 11:58:57</wp:post_date>
+  <wp:post_date_gmt>2026-10-29 18:58:57</wp:post_date_gmt>
+  <wp:post_modified>2026-10-29 11:58:57</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-29 18:58:57</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>quiet-ledger-ch-12</wp:post_name>
@@ -11318,7 +11310,7 @@
 <item>
   <title><![CDATA[The Quiet Ledger, Chapter 13]]></title>
   <link>https://example.com</link>
-  <pubDate>Wed, 04 Nov 2026 19:58:56 +0000</pubDate>
+  <pubDate>Thu, 05 Nov 2026 19:58:56 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -11355,10 +11347,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 13 of The Quiet Ledger.]]></excerpt:encoded>
   <wp:post_id>1081</wp:post_id>
-  <wp:post_date>2026-11-04 11:58:56</wp:post_date>
-  <wp:post_date_gmt>2026-11-04 19:58:56</wp:post_date_gmt>
-  <wp:post_modified>2026-11-04 11:58:56</wp:post_modified>
-  <wp:post_modified_gmt>2026-11-04 19:58:56</wp:post_modified_gmt>
+  <wp:post_date>2026-11-05 11:58:56</wp:post_date>
+  <wp:post_date_gmt>2026-11-05 19:58:56</wp:post_date_gmt>
+  <wp:post_modified>2026-11-05 11:58:56</wp:post_modified>
+  <wp:post_modified_gmt>2026-11-05 19:58:56</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>quiet-ledger-ch-13</wp:post_name>
@@ -11390,7 +11382,7 @@
 <item>
   <title><![CDATA[Failover, Chapter 1]]></title>
   <link>https://example.com</link>
-  <pubDate>Fri, 24 Oct 2025 18:58:55 +0000</pubDate>
+  <pubDate>Sat, 25 Oct 2025 18:58:55 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -11422,10 +11414,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 1 of Failover.]]></excerpt:encoded>
   <wp:post_id>1082</wp:post_id>
-  <wp:post_date>2025-10-24 11:58:55</wp:post_date>
-  <wp:post_date_gmt>2025-10-24 18:58:55</wp:post_date_gmt>
-  <wp:post_modified>2025-10-24 11:58:55</wp:post_modified>
-  <wp:post_modified_gmt>2025-10-24 18:58:55</wp:post_modified_gmt>
+  <wp:post_date>2025-10-25 11:58:55</wp:post_date>
+  <wp:post_date_gmt>2025-10-25 18:58:55</wp:post_date_gmt>
+  <wp:post_modified>2025-10-25 11:58:55</wp:post_modified>
+  <wp:post_modified_gmt>2025-10-25 18:58:55</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>failover-ch-1</wp:post_name>
@@ -11467,7 +11459,7 @@
 <item>
   <title><![CDATA[Failover, Chapter 2]]></title>
   <link>https://example.com</link>
-  <pubDate>Sat, 08 Nov 2025 19:58:54 +0000</pubDate>
+  <pubDate>Sun, 09 Nov 2025 19:58:54 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -11499,10 +11491,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 2 of Failover.]]></excerpt:encoded>
   <wp:post_id>1083</wp:post_id>
-  <wp:post_date>2025-11-08 11:58:54</wp:post_date>
-  <wp:post_date_gmt>2025-11-08 19:58:54</wp:post_date_gmt>
-  <wp:post_modified>2025-11-08 11:58:54</wp:post_modified>
-  <wp:post_modified_gmt>2025-11-08 19:58:54</wp:post_modified_gmt>
+  <wp:post_date>2025-11-09 11:58:54</wp:post_date>
+  <wp:post_date_gmt>2025-11-09 19:58:54</wp:post_date_gmt>
+  <wp:post_modified>2025-11-09 11:58:54</wp:post_modified>
+  <wp:post_modified_gmt>2025-11-09 19:58:54</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>failover-ch-2</wp:post_name>
@@ -11542,7 +11534,7 @@
 <item>
   <title><![CDATA[Failover, Chapter 3]]></title>
   <link>https://example.com</link>
-  <pubDate>Sun, 23 Nov 2025 19:58:53 +0000</pubDate>
+  <pubDate>Mon, 24 Nov 2025 19:58:53 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -11574,10 +11566,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 3 of Failover.]]></excerpt:encoded>
   <wp:post_id>1084</wp:post_id>
-  <wp:post_date>2025-11-23 11:58:53</wp:post_date>
-  <wp:post_date_gmt>2025-11-23 19:58:53</wp:post_date_gmt>
-  <wp:post_modified>2025-11-23 11:58:53</wp:post_modified>
-  <wp:post_modified_gmt>2025-11-23 19:58:53</wp:post_modified_gmt>
+  <wp:post_date>2025-11-24 11:58:53</wp:post_date>
+  <wp:post_date_gmt>2025-11-24 19:58:53</wp:post_date_gmt>
+  <wp:post_modified>2025-11-24 11:58:53</wp:post_modified>
+  <wp:post_modified_gmt>2025-11-24 19:58:53</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>failover-ch-3</wp:post_name>
@@ -11617,7 +11609,7 @@
 <item>
   <title><![CDATA[Failover, Chapter 4]]></title>
   <link>https://example.com</link>
-  <pubDate>Mon, 08 Dec 2025 19:58:52 +0000</pubDate>
+  <pubDate>Tue, 09 Dec 2025 19:58:52 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -11649,10 +11641,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 4 of Failover.]]></excerpt:encoded>
   <wp:post_id>1085</wp:post_id>
-  <wp:post_date>2025-12-08 11:58:52</wp:post_date>
-  <wp:post_date_gmt>2025-12-08 19:58:52</wp:post_date_gmt>
-  <wp:post_modified>2025-12-08 11:58:52</wp:post_modified>
-  <wp:post_modified_gmt>2025-12-08 19:58:52</wp:post_modified_gmt>
+  <wp:post_date>2025-12-09 11:58:52</wp:post_date>
+  <wp:post_date_gmt>2025-12-09 19:58:52</wp:post_date_gmt>
+  <wp:post_modified>2025-12-09 11:58:52</wp:post_modified>
+  <wp:post_modified_gmt>2025-12-09 19:58:52</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>failover-ch-4</wp:post_name>
@@ -11692,7 +11684,7 @@
 <item>
   <title><![CDATA[Failover, Chapter 5]]></title>
   <link>https://example.com</link>
-  <pubDate>Tue, 23 Dec 2025 19:58:51 +0000</pubDate>
+  <pubDate>Wed, 24 Dec 2025 19:58:51 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -11724,10 +11716,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 5 of Failover.]]></excerpt:encoded>
   <wp:post_id>1086</wp:post_id>
-  <wp:post_date>2025-12-23 11:58:51</wp:post_date>
-  <wp:post_date_gmt>2025-12-23 19:58:51</wp:post_date_gmt>
-  <wp:post_modified>2025-12-23 11:58:51</wp:post_modified>
-  <wp:post_modified_gmt>2025-12-23 19:58:51</wp:post_modified_gmt>
+  <wp:post_date>2025-12-24 11:58:51</wp:post_date>
+  <wp:post_date_gmt>2025-12-24 19:58:51</wp:post_date_gmt>
+  <wp:post_modified>2025-12-24 11:58:51</wp:post_modified>
+  <wp:post_modified_gmt>2025-12-24 19:58:51</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>failover-ch-5</wp:post_name>
@@ -11767,7 +11759,7 @@
 <item>
   <title><![CDATA[Failover, Chapter 6]]></title>
   <link>https://example.com</link>
-  <pubDate>Wed, 07 Jan 2026 19:58:50 +0000</pubDate>
+  <pubDate>Thu, 08 Jan 2026 19:58:50 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -11799,10 +11791,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 6 of Failover.]]></excerpt:encoded>
   <wp:post_id>1087</wp:post_id>
-  <wp:post_date>2026-01-07 11:58:50</wp:post_date>
-  <wp:post_date_gmt>2026-01-07 19:58:50</wp:post_date_gmt>
-  <wp:post_modified>2026-01-07 11:58:50</wp:post_modified>
-  <wp:post_modified_gmt>2026-01-07 19:58:50</wp:post_modified_gmt>
+  <wp:post_date>2026-01-08 11:58:50</wp:post_date>
+  <wp:post_date_gmt>2026-01-08 19:58:50</wp:post_date_gmt>
+  <wp:post_modified>2026-01-08 11:58:50</wp:post_modified>
+  <wp:post_modified_gmt>2026-01-08 19:58:50</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>failover-ch-6</wp:post_name>
@@ -11842,7 +11834,7 @@
 <item>
   <title><![CDATA[Failover, Chapter 7]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 22 Jan 2026 19:58:49 +0000</pubDate>
+  <pubDate>Fri, 23 Jan 2026 19:58:49 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -11874,10 +11866,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 7 of Failover.]]></excerpt:encoded>
   <wp:post_id>1088</wp:post_id>
-  <wp:post_date>2026-01-22 11:58:49</wp:post_date>
-  <wp:post_date_gmt>2026-01-22 19:58:49</wp:post_date_gmt>
-  <wp:post_modified>2026-01-22 11:58:49</wp:post_modified>
-  <wp:post_modified_gmt>2026-01-22 19:58:49</wp:post_modified_gmt>
+  <wp:post_date>2026-01-23 11:58:49</wp:post_date>
+  <wp:post_date_gmt>2026-01-23 19:58:49</wp:post_date_gmt>
+  <wp:post_modified>2026-01-23 11:58:49</wp:post_modified>
+  <wp:post_modified_gmt>2026-01-23 19:58:49</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>failover-ch-7</wp:post_name>
@@ -11917,7 +11909,7 @@
 <item>
   <title><![CDATA[Failover, Chapter 8]]></title>
   <link>https://example.com</link>
-  <pubDate>Fri, 06 Feb 2026 19:58:48 +0000</pubDate>
+  <pubDate>Sat, 07 Feb 2026 19:58:48 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -11949,10 +11941,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 8 of Failover.]]></excerpt:encoded>
   <wp:post_id>1089</wp:post_id>
-  <wp:post_date>2026-02-06 11:58:48</wp:post_date>
-  <wp:post_date_gmt>2026-02-06 19:58:48</wp:post_date_gmt>
-  <wp:post_modified>2026-02-06 11:58:48</wp:post_modified>
-  <wp:post_modified_gmt>2026-02-06 19:58:48</wp:post_modified_gmt>
+  <wp:post_date>2026-02-07 11:58:48</wp:post_date>
+  <wp:post_date_gmt>2026-02-07 19:58:48</wp:post_date_gmt>
+  <wp:post_modified>2026-02-07 11:58:48</wp:post_modified>
+  <wp:post_modified_gmt>2026-02-07 19:58:48</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>failover-ch-8</wp:post_name>
@@ -11992,7 +11984,7 @@
 <item>
   <title><![CDATA[Failover, Chapter 9]]></title>
   <link>https://example.com</link>
-  <pubDate>Sat, 21 Feb 2026 19:58:47 +0000</pubDate>
+  <pubDate>Sun, 22 Feb 2026 19:58:47 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -12024,10 +12016,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 9 of Failover.]]></excerpt:encoded>
   <wp:post_id>1090</wp:post_id>
-  <wp:post_date>2026-02-21 11:58:47</wp:post_date>
-  <wp:post_date_gmt>2026-02-21 19:58:47</wp:post_date_gmt>
-  <wp:post_modified>2026-02-21 11:58:47</wp:post_modified>
-  <wp:post_modified_gmt>2026-02-21 19:58:47</wp:post_modified_gmt>
+  <wp:post_date>2026-02-22 11:58:47</wp:post_date>
+  <wp:post_date_gmt>2026-02-22 19:58:47</wp:post_date_gmt>
+  <wp:post_modified>2026-02-22 11:58:47</wp:post_modified>
+  <wp:post_modified_gmt>2026-02-22 19:58:47</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>failover-ch-9</wp:post_name>
@@ -12067,7 +12059,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 1]]></title>
   <link>https://example.com</link>
-  <pubDate>Mon, 14 Oct 2024 18:58:46 +0000</pubDate>
+  <pubDate>Tue, 15 Oct 2024 18:58:46 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -12089,10 +12081,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 1 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1091</wp:post_id>
-  <wp:post_date>2024-10-14 11:58:46</wp:post_date>
-  <wp:post_date_gmt>2024-10-14 18:58:46</wp:post_date_gmt>
-  <wp:post_modified>2024-10-14 11:58:46</wp:post_modified>
-  <wp:post_modified_gmt>2024-10-14 18:58:46</wp:post_modified_gmt>
+  <wp:post_date>2024-10-15 11:58:46</wp:post_date>
+  <wp:post_date_gmt>2024-10-15 18:58:46</wp:post_date_gmt>
+  <wp:post_modified>2024-10-15 11:58:46</wp:post_modified>
+  <wp:post_modified_gmt>2024-10-15 18:58:46</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-1</wp:post_name>
@@ -12134,7 +12126,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 2]]></title>
   <link>https://example.com</link>
-  <pubDate>Tue, 29 Oct 2024 18:58:45 +0000</pubDate>
+  <pubDate>Wed, 30 Oct 2024 18:58:45 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -12156,10 +12148,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 2 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1092</wp:post_id>
-  <wp:post_date>2024-10-29 11:58:45</wp:post_date>
-  <wp:post_date_gmt>2024-10-29 18:58:45</wp:post_date_gmt>
-  <wp:post_modified>2024-10-29 11:58:45</wp:post_modified>
-  <wp:post_modified_gmt>2024-10-29 18:58:45</wp:post_modified_gmt>
+  <wp:post_date>2024-10-30 11:58:45</wp:post_date>
+  <wp:post_date_gmt>2024-10-30 18:58:45</wp:post_date_gmt>
+  <wp:post_modified>2024-10-30 11:58:45</wp:post_modified>
+  <wp:post_modified_gmt>2024-10-30 18:58:45</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-2</wp:post_name>
@@ -12199,7 +12191,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 3]]></title>
   <link>https://example.com</link>
-  <pubDate>Wed, 13 Nov 2024 19:58:44 +0000</pubDate>
+  <pubDate>Thu, 14 Nov 2024 19:58:44 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -12221,10 +12213,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 3 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1093</wp:post_id>
-  <wp:post_date>2024-11-13 11:58:44</wp:post_date>
-  <wp:post_date_gmt>2024-11-13 19:58:44</wp:post_date_gmt>
-  <wp:post_modified>2024-11-13 11:58:44</wp:post_modified>
-  <wp:post_modified_gmt>2024-11-13 19:58:44</wp:post_modified_gmt>
+  <wp:post_date>2024-11-14 11:58:44</wp:post_date>
+  <wp:post_date_gmt>2024-11-14 19:58:44</wp:post_date_gmt>
+  <wp:post_modified>2024-11-14 11:58:44</wp:post_modified>
+  <wp:post_modified_gmt>2024-11-14 19:58:44</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-3</wp:post_name>
@@ -12264,7 +12256,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 4]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 28 Nov 2024 19:58:43 +0000</pubDate>
+  <pubDate>Fri, 29 Nov 2024 19:58:43 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -12286,10 +12278,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 4 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1094</wp:post_id>
-  <wp:post_date>2024-11-28 11:58:43</wp:post_date>
-  <wp:post_date_gmt>2024-11-28 19:58:43</wp:post_date_gmt>
-  <wp:post_modified>2024-11-28 11:58:43</wp:post_modified>
-  <wp:post_modified_gmt>2024-11-28 19:58:43</wp:post_modified_gmt>
+  <wp:post_date>2024-11-29 11:58:43</wp:post_date>
+  <wp:post_date_gmt>2024-11-29 19:58:43</wp:post_date_gmt>
+  <wp:post_modified>2024-11-29 11:58:43</wp:post_modified>
+  <wp:post_modified_gmt>2024-11-29 19:58:43</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-4</wp:post_name>
@@ -12329,7 +12321,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 5]]></title>
   <link>https://example.com</link>
-  <pubDate>Fri, 13 Dec 2024 19:58:42 +0000</pubDate>
+  <pubDate>Sat, 14 Dec 2024 19:58:42 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -12351,10 +12343,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 5 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1095</wp:post_id>
-  <wp:post_date>2024-12-13 11:58:42</wp:post_date>
-  <wp:post_date_gmt>2024-12-13 19:58:42</wp:post_date_gmt>
-  <wp:post_modified>2024-12-13 11:58:42</wp:post_modified>
-  <wp:post_modified_gmt>2024-12-13 19:58:42</wp:post_modified_gmt>
+  <wp:post_date>2024-12-14 11:58:42</wp:post_date>
+  <wp:post_date_gmt>2024-12-14 19:58:42</wp:post_date_gmt>
+  <wp:post_modified>2024-12-14 11:58:42</wp:post_modified>
+  <wp:post_modified_gmt>2024-12-14 19:58:42</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-5</wp:post_name>
@@ -12394,7 +12386,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 6]]></title>
   <link>https://example.com</link>
-  <pubDate>Sat, 28 Dec 2024 19:58:41 +0000</pubDate>
+  <pubDate>Sun, 29 Dec 2024 19:58:41 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -12416,10 +12408,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 6 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1096</wp:post_id>
-  <wp:post_date>2024-12-28 11:58:41</wp:post_date>
-  <wp:post_date_gmt>2024-12-28 19:58:41</wp:post_date_gmt>
-  <wp:post_modified>2024-12-28 11:58:41</wp:post_modified>
-  <wp:post_modified_gmt>2024-12-28 19:58:41</wp:post_modified_gmt>
+  <wp:post_date>2024-12-29 11:58:41</wp:post_date>
+  <wp:post_date_gmt>2024-12-29 19:58:41</wp:post_date_gmt>
+  <wp:post_modified>2024-12-29 11:58:41</wp:post_modified>
+  <wp:post_modified_gmt>2024-12-29 19:58:41</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-6</wp:post_name>
@@ -12459,7 +12451,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 7]]></title>
   <link>https://example.com</link>
-  <pubDate>Sun, 12 Jan 2025 19:58:40 +0000</pubDate>
+  <pubDate>Mon, 13 Jan 2025 19:58:40 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -12481,10 +12473,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 7 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1097</wp:post_id>
-  <wp:post_date>2025-01-12 11:58:40</wp:post_date>
-  <wp:post_date_gmt>2025-01-12 19:58:40</wp:post_date_gmt>
-  <wp:post_modified>2025-01-12 11:58:40</wp:post_modified>
-  <wp:post_modified_gmt>2025-01-12 19:58:40</wp:post_modified_gmt>
+  <wp:post_date>2025-01-13 11:58:40</wp:post_date>
+  <wp:post_date_gmt>2025-01-13 19:58:40</wp:post_date_gmt>
+  <wp:post_modified>2025-01-13 11:58:40</wp:post_modified>
+  <wp:post_modified_gmt>2025-01-13 19:58:40</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-7</wp:post_name>
@@ -12524,7 +12516,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 8]]></title>
   <link>https://example.com</link>
-  <pubDate>Mon, 27 Jan 2025 19:58:39 +0000</pubDate>
+  <pubDate>Tue, 28 Jan 2025 19:58:39 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -12546,10 +12538,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 8 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1098</wp:post_id>
-  <wp:post_date>2025-01-27 11:58:39</wp:post_date>
-  <wp:post_date_gmt>2025-01-27 19:58:39</wp:post_date_gmt>
-  <wp:post_modified>2025-01-27 11:58:39</wp:post_modified>
-  <wp:post_modified_gmt>2025-01-27 19:58:39</wp:post_modified_gmt>
+  <wp:post_date>2025-01-28 11:58:39</wp:post_date>
+  <wp:post_date_gmt>2025-01-28 19:58:39</wp:post_date_gmt>
+  <wp:post_modified>2025-01-28 11:58:39</wp:post_modified>
+  <wp:post_modified_gmt>2025-01-28 19:58:39</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-8</wp:post_name>
@@ -12589,7 +12581,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 9]]></title>
   <link>https://example.com</link>
-  <pubDate>Tue, 11 Feb 2025 19:58:38 +0000</pubDate>
+  <pubDate>Wed, 12 Feb 2025 19:58:38 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -12611,10 +12603,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 9 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1099</wp:post_id>
-  <wp:post_date>2025-02-11 11:58:38</wp:post_date>
-  <wp:post_date_gmt>2025-02-11 19:58:38</wp:post_date_gmt>
-  <wp:post_modified>2025-02-11 11:58:38</wp:post_modified>
-  <wp:post_modified_gmt>2025-02-11 19:58:38</wp:post_modified_gmt>
+  <wp:post_date>2025-02-12 11:58:38</wp:post_date>
+  <wp:post_date_gmt>2025-02-12 19:58:38</wp:post_date_gmt>
+  <wp:post_modified>2025-02-12 11:58:38</wp:post_modified>
+  <wp:post_modified_gmt>2025-02-12 19:58:38</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-9</wp:post_name>
@@ -12654,7 +12646,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 10]]></title>
   <link>https://example.com</link>
-  <pubDate>Wed, 26 Feb 2025 19:58:37 +0000</pubDate>
+  <pubDate>Thu, 27 Feb 2025 19:58:37 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -12676,10 +12668,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 10 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1100</wp:post_id>
-  <wp:post_date>2025-02-26 11:58:37</wp:post_date>
-  <wp:post_date_gmt>2025-02-26 19:58:37</wp:post_date_gmt>
-  <wp:post_modified>2025-02-26 11:58:37</wp:post_modified>
-  <wp:post_modified_gmt>2025-02-26 19:58:37</wp:post_modified_gmt>
+  <wp:post_date>2025-02-27 11:58:37</wp:post_date>
+  <wp:post_date_gmt>2025-02-27 19:58:37</wp:post_date_gmt>
+  <wp:post_modified>2025-02-27 11:58:37</wp:post_modified>
+  <wp:post_modified_gmt>2025-02-27 19:58:37</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-10</wp:post_name>
@@ -12719,7 +12711,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 11]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 13 Mar 2025 18:58:36 +0000</pubDate>
+  <pubDate>Fri, 14 Mar 2025 18:58:36 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -12741,10 +12733,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 11 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1101</wp:post_id>
-  <wp:post_date>2025-03-13 11:58:36</wp:post_date>
-  <wp:post_date_gmt>2025-03-13 18:58:36</wp:post_date_gmt>
-  <wp:post_modified>2025-03-13 11:58:36</wp:post_modified>
-  <wp:post_modified_gmt>2025-03-13 18:58:36</wp:post_modified_gmt>
+  <wp:post_date>2025-03-14 11:58:36</wp:post_date>
+  <wp:post_date_gmt>2025-03-14 18:58:36</wp:post_date_gmt>
+  <wp:post_modified>2025-03-14 11:58:36</wp:post_modified>
+  <wp:post_modified_gmt>2025-03-14 18:58:36</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-11</wp:post_name>
@@ -12784,7 +12776,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 12]]></title>
   <link>https://example.com</link>
-  <pubDate>Fri, 28 Mar 2025 18:58:35 +0000</pubDate>
+  <pubDate>Sat, 29 Mar 2025 18:58:35 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -12806,10 +12798,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 12 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1102</wp:post_id>
-  <wp:post_date>2025-03-28 11:58:35</wp:post_date>
-  <wp:post_date_gmt>2025-03-28 18:58:35</wp:post_date_gmt>
-  <wp:post_modified>2025-03-28 11:58:35</wp:post_modified>
-  <wp:post_modified_gmt>2025-03-28 18:58:35</wp:post_modified_gmt>
+  <wp:post_date>2025-03-29 11:58:35</wp:post_date>
+  <wp:post_date_gmt>2025-03-29 18:58:35</wp:post_date_gmt>
+  <wp:post_modified>2025-03-29 11:58:35</wp:post_modified>
+  <wp:post_modified_gmt>2025-03-29 18:58:35</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-12</wp:post_name>
@@ -12849,7 +12841,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 13]]></title>
   <link>https://example.com</link>
-  <pubDate>Sat, 12 Apr 2025 18:58:34 +0000</pubDate>
+  <pubDate>Sun, 13 Apr 2025 18:58:34 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -12871,10 +12863,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 13 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1103</wp:post_id>
-  <wp:post_date>2025-04-12 11:58:34</wp:post_date>
-  <wp:post_date_gmt>2025-04-12 18:58:34</wp:post_date_gmt>
-  <wp:post_modified>2025-04-12 11:58:34</wp:post_modified>
-  <wp:post_modified_gmt>2025-04-12 18:58:34</wp:post_modified_gmt>
+  <wp:post_date>2025-04-13 11:58:34</wp:post_date>
+  <wp:post_date_gmt>2025-04-13 18:58:34</wp:post_date_gmt>
+  <wp:post_modified>2025-04-13 11:58:34</wp:post_modified>
+  <wp:post_modified_gmt>2025-04-13 18:58:34</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-13</wp:post_name>
@@ -12914,7 +12906,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 14]]></title>
   <link>https://example.com</link>
-  <pubDate>Sun, 27 Apr 2025 18:58:33 +0000</pubDate>
+  <pubDate>Mon, 28 Apr 2025 18:58:33 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -12936,10 +12928,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 14 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1104</wp:post_id>
-  <wp:post_date>2025-04-27 11:58:33</wp:post_date>
-  <wp:post_date_gmt>2025-04-27 18:58:33</wp:post_date_gmt>
-  <wp:post_modified>2025-04-27 11:58:33</wp:post_modified>
-  <wp:post_modified_gmt>2025-04-27 18:58:33</wp:post_modified_gmt>
+  <wp:post_date>2025-04-28 11:58:33</wp:post_date>
+  <wp:post_date_gmt>2025-04-28 18:58:33</wp:post_date_gmt>
+  <wp:post_modified>2025-04-28 11:58:33</wp:post_modified>
+  <wp:post_modified_gmt>2025-04-28 18:58:33</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-14</wp:post_name>
@@ -12979,7 +12971,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 15]]></title>
   <link>https://example.com</link>
-  <pubDate>Mon, 12 May 2025 18:58:32 +0000</pubDate>
+  <pubDate>Tue, 13 May 2025 18:58:32 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -13001,10 +12993,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 15 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1105</wp:post_id>
-  <wp:post_date>2025-05-12 11:58:32</wp:post_date>
-  <wp:post_date_gmt>2025-05-12 18:58:32</wp:post_date_gmt>
-  <wp:post_modified>2025-05-12 11:58:32</wp:post_modified>
-  <wp:post_modified_gmt>2025-05-12 18:58:32</wp:post_modified_gmt>
+  <wp:post_date>2025-05-13 11:58:32</wp:post_date>
+  <wp:post_date_gmt>2025-05-13 18:58:32</wp:post_date_gmt>
+  <wp:post_modified>2025-05-13 11:58:32</wp:post_modified>
+  <wp:post_modified_gmt>2025-05-13 18:58:32</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-15</wp:post_name>
@@ -13044,7 +13036,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 16]]></title>
   <link>https://example.com</link>
-  <pubDate>Tue, 27 May 2025 18:58:31 +0000</pubDate>
+  <pubDate>Wed, 28 May 2025 18:58:31 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -13066,10 +13058,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 16 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1106</wp:post_id>
-  <wp:post_date>2025-05-27 11:58:31</wp:post_date>
-  <wp:post_date_gmt>2025-05-27 18:58:31</wp:post_date_gmt>
-  <wp:post_modified>2025-05-27 11:58:31</wp:post_modified>
-  <wp:post_modified_gmt>2025-05-27 18:58:31</wp:post_modified_gmt>
+  <wp:post_date>2025-05-28 11:58:31</wp:post_date>
+  <wp:post_date_gmt>2025-05-28 18:58:31</wp:post_date_gmt>
+  <wp:post_modified>2025-05-28 11:58:31</wp:post_modified>
+  <wp:post_modified_gmt>2025-05-28 18:58:31</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-16</wp:post_name>
@@ -13109,7 +13101,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 17]]></title>
   <link>https://example.com</link>
-  <pubDate>Wed, 11 Jun 2025 18:58:30 +0000</pubDate>
+  <pubDate>Thu, 12 Jun 2025 18:58:30 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -13131,10 +13123,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 17 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1107</wp:post_id>
-  <wp:post_date>2025-06-11 11:58:30</wp:post_date>
-  <wp:post_date_gmt>2025-06-11 18:58:30</wp:post_date_gmt>
-  <wp:post_modified>2025-06-11 11:58:30</wp:post_modified>
-  <wp:post_modified_gmt>2025-06-11 18:58:30</wp:post_modified_gmt>
+  <wp:post_date>2025-06-12 11:58:30</wp:post_date>
+  <wp:post_date_gmt>2025-06-12 18:58:30</wp:post_date_gmt>
+  <wp:post_modified>2025-06-12 11:58:30</wp:post_modified>
+  <wp:post_modified_gmt>2025-06-12 18:58:30</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-17</wp:post_name>
@@ -13174,7 +13166,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 18]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 26 Jun 2025 18:58:29 +0000</pubDate>
+  <pubDate>Fri, 27 Jun 2025 18:58:29 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -13196,10 +13188,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 18 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1108</wp:post_id>
-  <wp:post_date>2025-06-26 11:58:29</wp:post_date>
-  <wp:post_date_gmt>2025-06-26 18:58:29</wp:post_date_gmt>
-  <wp:post_modified>2025-06-26 11:58:29</wp:post_modified>
-  <wp:post_modified_gmt>2025-06-26 18:58:29</wp:post_modified_gmt>
+  <wp:post_date>2025-06-27 11:58:29</wp:post_date>
+  <wp:post_date_gmt>2025-06-27 18:58:29</wp:post_date_gmt>
+  <wp:post_modified>2025-06-27 11:58:29</wp:post_modified>
+  <wp:post_modified_gmt>2025-06-27 18:58:29</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-18</wp:post_name>
@@ -13239,7 +13231,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 19]]></title>
   <link>https://example.com</link>
-  <pubDate>Fri, 11 Jul 2025 18:58:28 +0000</pubDate>
+  <pubDate>Sat, 12 Jul 2025 18:58:28 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -13261,10 +13253,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 19 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1109</wp:post_id>
-  <wp:post_date>2025-07-11 11:58:28</wp:post_date>
-  <wp:post_date_gmt>2025-07-11 18:58:28</wp:post_date_gmt>
-  <wp:post_modified>2025-07-11 11:58:28</wp:post_modified>
-  <wp:post_modified_gmt>2025-07-11 18:58:28</wp:post_modified_gmt>
+  <wp:post_date>2025-07-12 11:58:28</wp:post_date>
+  <wp:post_date_gmt>2025-07-12 18:58:28</wp:post_date_gmt>
+  <wp:post_modified>2025-07-12 11:58:28</wp:post_modified>
+  <wp:post_modified_gmt>2025-07-12 18:58:28</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-19</wp:post_name>
@@ -13304,7 +13296,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 20]]></title>
   <link>https://example.com</link>
-  <pubDate>Sat, 26 Jul 2025 18:58:27 +0000</pubDate>
+  <pubDate>Sun, 27 Jul 2025 18:58:27 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -13326,10 +13318,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 20 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1110</wp:post_id>
-  <wp:post_date>2025-07-26 11:58:27</wp:post_date>
-  <wp:post_date_gmt>2025-07-26 18:58:27</wp:post_date_gmt>
-  <wp:post_modified>2025-07-26 11:58:27</wp:post_modified>
-  <wp:post_modified_gmt>2025-07-26 18:58:27</wp:post_modified_gmt>
+  <wp:post_date>2025-07-27 11:58:27</wp:post_date>
+  <wp:post_date_gmt>2025-07-27 18:58:27</wp:post_date_gmt>
+  <wp:post_modified>2025-07-27 11:58:27</wp:post_modified>
+  <wp:post_modified_gmt>2025-07-27 18:58:27</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-20</wp:post_name>
@@ -13369,7 +13361,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 21]]></title>
   <link>https://example.com</link>
-  <pubDate>Sun, 10 Aug 2025 18:58:26 +0000</pubDate>
+  <pubDate>Mon, 11 Aug 2025 18:58:26 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -13391,10 +13383,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 21 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1111</wp:post_id>
-  <wp:post_date>2025-08-10 11:58:26</wp:post_date>
-  <wp:post_date_gmt>2025-08-10 18:58:26</wp:post_date_gmt>
-  <wp:post_modified>2025-08-10 11:58:26</wp:post_modified>
-  <wp:post_modified_gmt>2025-08-10 18:58:26</wp:post_modified_gmt>
+  <wp:post_date>2025-08-11 11:58:26</wp:post_date>
+  <wp:post_date_gmt>2025-08-11 18:58:26</wp:post_date_gmt>
+  <wp:post_modified>2025-08-11 11:58:26</wp:post_modified>
+  <wp:post_modified_gmt>2025-08-11 18:58:26</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-21</wp:post_name>
@@ -13434,7 +13426,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 22]]></title>
   <link>https://example.com</link>
-  <pubDate>Mon, 25 Aug 2025 18:58:25 +0000</pubDate>
+  <pubDate>Tue, 26 Aug 2025 18:58:25 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -13456,10 +13448,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 22 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1112</wp:post_id>
-  <wp:post_date>2025-08-25 11:58:25</wp:post_date>
-  <wp:post_date_gmt>2025-08-25 18:58:25</wp:post_date_gmt>
-  <wp:post_modified>2025-08-25 11:58:25</wp:post_modified>
-  <wp:post_modified_gmt>2025-08-25 18:58:25</wp:post_modified_gmt>
+  <wp:post_date>2025-08-26 11:58:25</wp:post_date>
+  <wp:post_date_gmt>2025-08-26 18:58:25</wp:post_date_gmt>
+  <wp:post_modified>2025-08-26 11:58:25</wp:post_modified>
+  <wp:post_modified_gmt>2025-08-26 18:58:25</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-22</wp:post_name>
@@ -13499,7 +13491,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 23]]></title>
   <link>https://example.com</link>
-  <pubDate>Tue, 09 Sep 2025 18:58:24 +0000</pubDate>
+  <pubDate>Wed, 10 Sep 2025 18:58:24 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -13521,10 +13513,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 23 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1113</wp:post_id>
-  <wp:post_date>2025-09-09 11:58:24</wp:post_date>
-  <wp:post_date_gmt>2025-09-09 18:58:24</wp:post_date_gmt>
-  <wp:post_modified>2025-09-09 11:58:24</wp:post_modified>
-  <wp:post_modified_gmt>2025-09-09 18:58:24</wp:post_modified_gmt>
+  <wp:post_date>2025-09-10 11:58:24</wp:post_date>
+  <wp:post_date_gmt>2025-09-10 18:58:24</wp:post_date_gmt>
+  <wp:post_modified>2025-09-10 11:58:24</wp:post_modified>
+  <wp:post_modified_gmt>2025-09-10 18:58:24</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-23</wp:post_name>
@@ -13564,7 +13556,7 @@
 <item>
   <title><![CDATA[Salt Water Wires, Chapter 24]]></title>
   <link>https://example.com</link>
-  <pubDate>Wed, 24 Sep 2025 18:58:23 +0000</pubDate>
+  <pubDate>Thu, 25 Sep 2025 18:58:23 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -13586,10 +13578,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Chapter 24 of Salt Water Wires.]]></excerpt:encoded>
   <wp:post_id>1114</wp:post_id>
-  <wp:post_date>2025-09-24 11:58:23</wp:post_date>
-  <wp:post_date_gmt>2025-09-24 18:58:23</wp:post_date_gmt>
-  <wp:post_modified>2025-09-24 11:58:23</wp:post_modified>
-  <wp:post_modified_gmt>2025-09-24 18:58:23</wp:post_modified_gmt>
+  <wp:post_date>2025-09-25 11:58:23</wp:post_date>
+  <wp:post_date_gmt>2025-09-25 18:58:23</wp:post_date_gmt>
+  <wp:post_modified>2025-09-25 11:58:23</wp:post_modified>
+  <wp:post_modified_gmt>2025-09-25 18:58:23</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>salt-water-wires-ch-24</wp:post_name>
@@ -13629,7 +13621,7 @@
 <item>
   <title><![CDATA[The Last Cron Job]]></title>
   <link>https://example.com</link>
-  <pubDate>Sat, 19 Sep 2026 18:58:22 +0000</pubDate>
+  <pubDate>Sun, 20 Sep 2026 18:58:22 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -14076,10 +14068,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[A short story: The Last Cron Job.]]></excerpt:encoded>
   <wp:post_id>1115</wp:post_id>
-  <wp:post_date>2026-09-19 11:58:22</wp:post_date>
-  <wp:post_date_gmt>2026-09-19 18:58:22</wp:post_date_gmt>
-  <wp:post_modified>2026-09-19 11:58:22</wp:post_modified>
-  <wp:post_modified_gmt>2026-09-19 18:58:22</wp:post_modified_gmt>
+  <wp:post_date>2026-09-20 11:58:22</wp:post_date>
+  <wp:post_date_gmt>2026-09-20 18:58:22</wp:post_date_gmt>
+  <wp:post_modified>2026-09-20 11:58:22</wp:post_modified>
+  <wp:post_modified_gmt>2026-09-20 18:58:22</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>story-the-last-cron-job</wp:post_name>
@@ -14111,7 +14103,7 @@
 <item>
   <title><![CDATA[A Field Guide to Empty Offices]]></title>
   <link>https://example.com</link>
-  <pubDate>Sun, 14 Sep 2025 18:58:21 +0000</pubDate>
+  <pubDate>Mon, 15 Sep 2025 18:58:21 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -14378,10 +14370,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[A short story: A Field Guide to Empty Offices.]]></excerpt:encoded>
   <wp:post_id>1116</wp:post_id>
-  <wp:post_date>2025-09-14 11:58:21</wp:post_date>
-  <wp:post_date_gmt>2025-09-14 18:58:21</wp:post_date_gmt>
-  <wp:post_modified>2025-09-14 11:58:21</wp:post_modified>
-  <wp:post_modified_gmt>2025-09-14 18:58:21</wp:post_modified_gmt>
+  <wp:post_date>2025-09-15 11:58:21</wp:post_date>
+  <wp:post_date_gmt>2025-09-15 18:58:21</wp:post_date_gmt>
+  <wp:post_modified>2025-09-15 11:58:21</wp:post_modified>
+  <wp:post_modified_gmt>2025-09-15 18:58:21</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>story-a-field-guide-to-empty-offices</wp:post_name>
@@ -14413,7 +14405,7 @@
 <item>
   <title><![CDATA[Uptime]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 28 Nov 2024 19:58:20 +0000</pubDate>
+  <pubDate>Fri, 29 Nov 2024 19:58:20 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -14495,10 +14487,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[A short story: Uptime.]]></excerpt:encoded>
   <wp:post_id>1117</wp:post_id>
-  <wp:post_date>2024-11-28 11:58:20</wp:post_date>
-  <wp:post_date_gmt>2024-11-28 19:58:20</wp:post_date_gmt>
-  <wp:post_modified>2024-11-28 11:58:20</wp:post_modified>
-  <wp:post_modified_gmt>2024-11-28 19:58:20</wp:post_modified_gmt>
+  <wp:post_date>2024-11-29 11:58:20</wp:post_date>
+  <wp:post_date_gmt>2024-11-29 19:58:20</wp:post_date_gmt>
+  <wp:post_modified>2024-11-29 11:58:20</wp:post_modified>
+  <wp:post_modified_gmt>2024-11-29 19:58:20</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>story-uptime</wp:post_name>
@@ -14534,17 +14526,17 @@
 <item>
   <title><![CDATA[Storm clouds gathering over a harbor full of sailboats]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 29 Oct 2026 19:00:00 +0000</pubDate>
+  <pubDate>Fri, 30 Oct 2026 19:00:00 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://raw.githubusercontent.com/ericmann/ttmm_theme/main/docs/fixtures/demo/images/demo-story-uptime.jpg</guid>
   <description/>
   <content:encoded><![CDATA[Photograph: Sydney Harbour Rain clouds - 2026 by Xyxyzyz (CC0), via Openverse: https://commons.wikimedia.org/w/index.php?curid=184062070]]></content:encoded>
   <excerpt:encoded><![CDATA[The server stayed up longer than the rain did, that week.]]></excerpt:encoded>
   <wp:post_id>1118</wp:post_id>
-  <wp:post_date>2026-10-29 12:00:00</wp:post_date>
-  <wp:post_date_gmt>2026-10-29 19:00:00</wp:post_date_gmt>
-  <wp:post_modified>2026-10-29 12:00:00</wp:post_modified>
-  <wp:post_modified_gmt>2026-10-29 19:00:00</wp:post_modified_gmt>
+  <wp:post_date>2026-10-30 12:00:00</wp:post_date>
+  <wp:post_date_gmt>2026-10-30 19:00:00</wp:post_date_gmt>
+  <wp:post_modified>2026-10-30 12:00:00</wp:post_modified>
+  <wp:post_modified_gmt>2026-10-30 19:00:00</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
   <wp:post_name>storm-clouds-gathering-over-a-harbor-full-of-sailboats</wp:post_name>
@@ -14563,7 +14555,7 @@
 <item>
   <title><![CDATA[What the River Audits]]></title>
   <link>https://example.com</link>
-  <pubDate>Sat, 04 Nov 2023 18:58:19 +0000</pubDate>
+  <pubDate>Sun, 05 Nov 2023 19:58:19 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -14670,10 +14662,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[A short story: what the river keeps, and what it gives back.]]></excerpt:encoded>
   <wp:post_id>1119</wp:post_id>
-  <wp:post_date>2023-11-04 11:58:19</wp:post_date>
-  <wp:post_date_gmt>2023-11-04 18:58:19</wp:post_date_gmt>
-  <wp:post_modified>2023-11-04 11:58:19</wp:post_modified>
-  <wp:post_modified_gmt>2023-11-04 18:58:19</wp:post_modified_gmt>
+  <wp:post_date>2023-11-05 11:58:19</wp:post_date>
+  <wp:post_date_gmt>2023-11-05 19:58:19</wp:post_date_gmt>
+  <wp:post_modified>2023-11-05 11:58:19</wp:post_modified>
+  <wp:post_modified_gmt>2023-11-05 19:58:19</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>story-what-the-river-audits</wp:post_name>
@@ -14705,7 +14697,7 @@
 <item>
   <title><![CDATA[Why I still read the WordPress changelog]]></title>
   <link>https://example.com</link>
-  <pubDate>Mon, 14 Sep 2026 18:58:18 +0000</pubDate>
+  <pubDate>Tue, 15 Sep 2026 18:58:18 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -14797,10 +14789,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Release notes are the cheapest signal you will ever get about what is about to break.]]></excerpt:encoded>
   <wp:post_id>1120</wp:post_id>
-  <wp:post_date>2026-09-14 11:58:18</wp:post_date>
-  <wp:post_date_gmt>2026-09-14 18:58:18</wp:post_date_gmt>
-  <wp:post_modified>2026-09-14 11:58:18</wp:post_modified>
-  <wp:post_modified_gmt>2026-09-14 18:58:18</wp:post_modified_gmt>
+  <wp:post_date>2026-09-15 11:58:18</wp:post_date>
+  <wp:post_date_gmt>2026-09-15 18:58:18</wp:post_date_gmt>
+  <wp:post_modified>2026-09-15 11:58:18</wp:post_modified>
+  <wp:post_modified_gmt>2026-09-15 18:58:18</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>why-i-still-read-the-wordpress-changelog</wp:post_name>
@@ -14833,7 +14825,7 @@
 <item>
   <title><![CDATA[Reading CVEs, part 1: what the advisory actually says]]></title>
   <link>https://example.com</link>
-  <pubDate>Mon, 27 Jan 2025 19:58:17 +0000</pubDate>
+  <pubDate>Tue, 28 Jan 2025 19:58:17 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -14900,10 +14892,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Most of an advisory is boilerplate. The paragraph that matters is usually the shortest one.]]></excerpt:encoded>
   <wp:post_id>1121</wp:post_id>
-  <wp:post_date>2025-01-27 11:58:17</wp:post_date>
-  <wp:post_date_gmt>2025-01-27 19:58:17</wp:post_date_gmt>
-  <wp:post_modified>2025-01-27 11:58:17</wp:post_modified>
-  <wp:post_modified_gmt>2025-01-27 19:58:17</wp:post_modified_gmt>
+  <wp:post_date>2025-01-28 11:58:17</wp:post_date>
+  <wp:post_date_gmt>2025-01-28 19:58:17</wp:post_date_gmt>
+  <wp:post_modified>2025-01-28 11:58:17</wp:post_modified>
+  <wp:post_modified_gmt>2025-01-28 19:58:17</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>reading-cves-part-1</wp:post_name>
@@ -14941,7 +14933,7 @@
 <item>
   <title><![CDATA[Reading CVEs, part 2: what the patch actually does]]></title>
   <link>https://example.com</link>
-  <pubDate>Thu, 17 Apr 2025 18:58:16 +0000</pubDate>
+  <pubDate>Fri, 18 Apr 2025 18:58:16 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -15008,10 +15000,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[The diff tells you more about the real vulnerability than the advisory ever will.]]></excerpt:encoded>
   <wp:post_id>1122</wp:post_id>
-  <wp:post_date>2025-04-17 11:58:16</wp:post_date>
-  <wp:post_date_gmt>2025-04-17 18:58:16</wp:post_date_gmt>
-  <wp:post_modified>2025-04-17 11:58:16</wp:post_modified>
-  <wp:post_modified_gmt>2025-04-17 18:58:16</wp:post_modified_gmt>
+  <wp:post_date>2025-04-18 11:58:16</wp:post_date>
+  <wp:post_date_gmt>2025-04-18 18:58:16</wp:post_date_gmt>
+  <wp:post_modified>2025-04-18 11:58:16</wp:post_modified>
+  <wp:post_modified_gmt>2025-04-18 18:58:16</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>reading-cves-part-2</wp:post_name>
@@ -15049,7 +15041,7 @@
 <item>
   <title><![CDATA[Reading CVEs, part 3: the exploit nobody published]]></title>
   <link>https://example.com</link>
-  <pubDate>Sun, 06 Jul 2025 18:58:15 +0000</pubDate>
+  <pubDate>Mon, 07 Jul 2025 18:58:15 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -15116,10 +15108,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[A working proof of concept is not required to know that a bug is exploitable.]]></excerpt:encoded>
   <wp:post_id>1123</wp:post_id>
-  <wp:post_date>2025-07-06 11:58:15</wp:post_date>
-  <wp:post_date_gmt>2025-07-06 18:58:15</wp:post_date_gmt>
-  <wp:post_modified>2025-07-06 11:58:15</wp:post_modified>
-  <wp:post_modified_gmt>2025-07-06 18:58:15</wp:post_modified_gmt>
+  <wp:post_date>2025-07-07 11:58:15</wp:post_date>
+  <wp:post_date_gmt>2025-07-07 18:58:15</wp:post_date_gmt>
+  <wp:post_modified>2025-07-07 11:58:15</wp:post_modified>
+  <wp:post_modified_gmt>2025-07-07 18:58:15</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>reading-cves-part-3</wp:post_name>
@@ -15157,7 +15149,7 @@
 <item>
   <title><![CDATA[Reading CVEs, part 4: what it would have taken to notice]]></title>
   <link>https://example.com</link>
-  <pubDate>Wed, 24 Sep 2025 18:58:14 +0000</pubDate>
+  <pubDate>Thu, 25 Sep 2025 18:58:14 +0000</pubDate>
   <dc:creator><![CDATA[demo]]></dc:creator>
   <guid isPermaLink="false">https://example.com</guid>
   <description/>
@@ -15224,10 +15216,10 @@
 ]]></content:encoded>
   <excerpt:encoded><![CDATA[Every one of these four bugs left a trace. None of the traces were read in time.]]></excerpt:encoded>
   <wp:post_id>1124</wp:post_id>
-  <wp:post_date>2025-09-24 11:58:14</wp:post_date>
-  <wp:post_date_gmt>2025-09-24 18:58:14</wp:post_date_gmt>
-  <wp:post_modified>2025-09-24 11:58:14</wp:post_modified>
-  <wp:post_modified_gmt>2025-09-24 18:58:14</wp:post_modified_gmt>
+  <wp:post_date>2025-09-25 11:58:14</wp:post_date>
+  <wp:post_date_gmt>2025-09-25 18:58:14</wp:post_date_gmt>
+  <wp:post_modified>2025-09-25 11:58:14</wp:post_modified>
+  <wp:post_modified_gmt>2025-09-25 18:58:14</wp:post_modified_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>open</wp:ping_status>
   <wp:post_name>reading-cves-part-4</wp:post_name>
