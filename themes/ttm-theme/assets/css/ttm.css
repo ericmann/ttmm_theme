@@ -2967,6 +2967,7 @@ main.is-style-grid-8-4 h1 {
 }
 
 .ttm-cover img {
+	display: block;
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
