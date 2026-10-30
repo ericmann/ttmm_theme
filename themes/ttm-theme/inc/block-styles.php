@@ -31,12 +31,12 @@ function block_styles(): array {
 		[
 			'block' => 'core/image',
 			'name'  => 'grayscale',
-			'label' => __( 'Grayscale', 'ttm-theme' ),
+			'label' => __( 'Washed', 'ttm-theme' ),
 		],
 		[
 			'block' => 'core/post-featured-image',
 			'name'  => 'grayscale',
-			'label' => __( 'Grayscale', 'ttm-theme' ),
+			'label' => __( 'Washed', 'ttm-theme' ),
 		],
 		[
 			'block' => 'core/image',

@@ -8,7 +8,8 @@
 # Other targets (the k3s beta, DEPLOYMENT.md §10, MIGRATION.md §3.2), all optional; with none set
 # the script behaves exactly as it always has against wp-env:
 #   TTM_WP              the WP-CLI command, word-split on whitespace
-#                       (e.g. "kubectl -n blog exec -i deploy/wordpress -- wp --allow-root").
+#                       (e.g. "kubectl -n blog exec -i deploy/wordpress -- runuser -u www-data -- wp";
+#                       the official image's WP-CLI refuses root without --allow-root).
 #   TTM_KUBECTL_TARGET  <namespace>/<pod> or <namespace>/deploy/<name>: move the conversion files
 #                       with `kubectl exec` instead of the wp-env mount, skip the import.xml
 #                       precondition and the wp-env-only screens.mjs step.
@@ -59,15 +60,25 @@ if [ -n "$K8S_TARGET" ]; then
 	fi
 	KEXEC+=(--)
 	POD_FIXTURES="${TTM_POD_WP_ROOT:-/var/www/html}/${REMOTE_FIXTURES}"
+	POD_WP_CONTENT="${TTM_POD_WP_ROOT:-/var/www/html}/wp-content"
 fi
+
+# Creates the fixture directory in the pod owned like wp-content: `kubectl exec` runs as root,
+# but WP-CLI may run as the web user (runuser above) and must be able to write into it.
+pod_fixture_dir() {
+	# The single quotes are deliberate: "$1"/"$2" expand inside the pod's shell, not this one.
+	# shellcheck disable=SC2016
+	"${KEXEC[@]}" sh -c 'mkdir -p "$1" && { chown -R "$(stat -c %u:%g "$2")" "$2/ttm-fixtures" 2>/dev/null || true; }' sh "$POD_FIXTURES" "$POD_WP_CONTENT" </dev/null
+}
 
 # Host file -> the directory WP-CLI reads. A no-op under wp-env (the mount already shares it).
 push_fixture() {
 	local name="$1"
 	if [ -n "$K8S_TARGET" ]; then
+		pod_fixture_dir
 		# The single quotes are deliberate: "$1" expands inside the pod's shell, not this one.
 		# shellcheck disable=SC2016
-		"${KEXEC[@]}" sh -c 'mkdir -p "$(dirname "$1")" && cat >"$1"' sh "${POD_FIXTURES}/${name}" <"${LOCAL_FIXTURES}/${name}"
+		"${KEXEC[@]}" sh -c 'cat >"$1"' sh "${POD_FIXTURES}/${name}" <"${LOCAL_FIXTURES}/${name}"
 	fi
 }
 
@@ -132,7 +143,7 @@ dry_then_run "migrate:excerpts --from=yoast" ttm migrate:excerpts --from=yoast
 dry_then_run "migrate:images" ttm migrate:images
 
 if [ -n "$K8S_TARGET" ]; then
-	"${KEXEC[@]}" mkdir -p "$POD_FIXTURES" </dev/null
+	pod_fixture_dir
 fi
 step "convert:export --all-classic" "${WP[@]}" ttm convert:export --all-classic --out=wp-content/ttm-fixtures/live/classic.ndjson
 pull_fixture classic.ndjson

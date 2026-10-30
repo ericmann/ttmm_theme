@@ -129,6 +129,28 @@ class Text {
 	}
 
 	/**
+	 * Drop a quotation's own outer double quotes, so a caller that wraps it in “…” doesn't
+	 * double them: a leading quote always, and a trailing one only when it closes that leading
+	 * quote (an odd number of quotes left), so `"A," he said, "B."` keeps its inner pair.
+	 *
+	 * @param string $s Quotation text.
+	 * @return string
+	 */
+	public static function strip_outer_quotes( string $s ): string {
+		$s = trim( $s );
+		if ( ! preg_match( '/^["“”]/u', $s ) ) {
+			return $s;
+		}
+
+		$s = (string) preg_replace( '/^["“”]\s*/u', '', $s );
+		if ( 1 === preg_match_all( '/["“”]/u', $s ) % 2 ) {
+			$s = (string) preg_replace( '/\s*["“”]$/u', '', $s );
+		}
+
+		return $s;
+	}
+
+	/**
 	 * Convert straight quotes to curly quotes, leaving markup untouched.
 	 *
 	 * @param string $s Input string.

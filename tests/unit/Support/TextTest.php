@@ -101,6 +101,20 @@ class TextTest extends TestCase {
 		$this->assertSame( 'She said “it’s <b>fine</b>” to us.', $result );
 	}
 
+	public function test_strip_outer_quotes_drops_an_unclosed_leading_quote(): void {
+		$this->assertSame( 'I hate, I despise your religious feasts; stream!', Text::strip_outer_quotes( '"I hate, I despise your religious feasts; stream!' ) );
+	}
+
+	public function test_strip_outer_quotes_drops_a_matching_pair(): void {
+		$this->assertSame( 'Be still.', Text::strip_outer_quotes( '"Be still."' ) );
+		$this->assertSame( 'Be still.', Text::strip_outer_quotes( ' “Be still.” ' ) );
+	}
+
+	public function test_strip_outer_quotes_keeps_inner_pairs(): void {
+		$this->assertSame( 'A," he said, "B.', Text::strip_outer_quotes( '"A," he said, "B."' ) );
+		$this->assertSame( 'He said: "I am the LORD."', Text::strip_outer_quotes( 'He said: "I am the LORD."' ) );
+	}
+
 	public function test_reading_minutes_rounds_up_and_floors_at_one(): void {
 		$this->assertSame( 1, Text::reading_minutes( 10, 230 ) );
 		$this->assertSame( 2, Text::reading_minutes( 231, 230 ) );

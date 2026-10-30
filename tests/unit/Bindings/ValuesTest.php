@@ -209,6 +209,16 @@ class ValuesTest extends TestCase {
 		$this->assertSame( '', Values::author_line( 'byline-link', '', 'https://example.test/about/', 'https://example.test' ) );
 	}
 
+	public function test_name_in_title_matches_case_insensitively(): void {
+		$this->assertTrue( Values::name_in_title( 'Eric Mann&#039;s Blog', 'Eric Mann' ) );
+		$this->assertTrue( Values::name_in_title( 'the eric mann blog', 'Eric Mann' ) );
+		$this->assertFalse( Values::name_in_title( 'These Things Matter', 'Eric Mann' ) );
+	}
+
+	public function test_name_in_title_empty_name_never_matches(): void {
+		$this->assertFalse( Values::name_in_title( 'These Things Matter', '' ) );
+	}
+
 	public function test_newsletter_title_by_context(): void {
 		$this->assertSame( 'Get the next part', Values::newsletter_title( true ) );
 		$this->assertSame( 'The weekly issue.', Values::newsletter_title( false ) );

@@ -45,6 +45,23 @@ class VerseOfTheDayTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'dailymedtoday.com', $html );
 	}
 
+	public function test_source_quotes_are_not_doubled_and_the_verse_links_out(): void {
+		update_option(
+			'ttm_verse',
+			[
+				'date'      => \TTM\Core\Support\Clock::today(),
+				'text'      => '"Away with the noise of your songs!',
+				'reference' => 'Amos 5:23',
+				'url'       => 'https://dailymedtoday.com/meditation/abc',
+			]
+		);
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( '<a class="ttm-verse__link" href="https://dailymedtoday.com/meditation/abc">“Away with the noise of your songs!”</a>', $html );
+		$this->assertStringNotContainsString( '““', $html );
+	}
+
 	/**
 	 * R1-05, SPEC §6.1.1: the attribution never carries a date, even for today's own verse --
 	 * "Meditation from dailymedtoday.com" only, linked.

@@ -188,7 +188,11 @@ test.describe( 'lead', () => {
 		await gotoFront( page, 1280 );
 		const media = page.locator( '.ttm-lead__media' );
 		expect( await computed( media, 'aspect-ratio' ) ).toBe( '16 / 9' );
-		expect( await computed( media, 'filter' ) ).toContain( 'grayscale(1)' );
+		// Washed, once: on the img, never also on the figure (filters would compound).
+		expect( await computed( media, 'filter' ) ).toBe( 'none' );
+		expect(
+			await computed( page.locator( '.ttm-lead__media img' ), 'filter' )
+		).toContain( 'saturate(0.35)' );
 	} );
 
 	test( 'lead-media-phone: .ttm-lead__media @390', async ( { page } ) => {
@@ -270,6 +274,13 @@ test.describe( 'verse', () => {
 		const verseText = page.locator( '.ttm-verse__text' );
 		expect( await computed( verseText, 'font-size' ) ).toBe( px( 19 ) );
 		expect( await computed( verseText, 'font-weight' ) ).toBe( '600' );
+		// At most four lines; the clamp's "…" sits inside the link to the meditation.
+		expect( await computed( verseText, '-webkit-line-clamp' ) ).toBe( '4' );
+		expect(
+			await verseText
+				.locator( 'a.ttm-verse__link' )
+				.getAttribute( 'href' )
+		).toMatch( /^https:\/\/dailymedtoday\.com\// );
 	} );
 
 	test( 'verse-ref: .ttm-verse__reference @1280', async ( { page } ) => {
@@ -601,7 +612,9 @@ test.describe( 'technology featured cell', () => {
 			'.ttm-cell.is-style-span-2 .wp-block-post:first-child .ttm-item-featured__media'
 		);
 		expect( await computed( media, 'aspect-ratio' ) ).toBe( '3 / 2' );
-		expect( await computed( media, 'filter' ) ).toContain( 'grayscale(1)' );
+		expect( await computed( media.locator( 'img' ), 'filter' ) ).toContain(
+			'saturate(0.35)'
+		);
 
 		// REVIEW.md F3: an empty figure (no <img>, or an <img> that never finished loading)
 		// passed this row before -- the lazy featured image below the fold hadn't loaded when
@@ -1451,7 +1464,7 @@ test.describe( 'article', () => {
 		const el = page.locator( '.ttm-article .wp-block-post-featured-image' );
 		expect( await computed( el, 'margin-top' ) ).toBe( px( 28 ) );
 		expect( await computed( el, 'aspect-ratio' ) ).toBe( '16 / 9' );
-		// Every grayscale rule in ttm.css targets `img`, not the figure; assert there.
+		// Every washed-photo rule in ttm.css targets `img`, not the figure; assert there.
 		const img = page.locator(
 			'.ttm-article .wp-block-post-featured-image img'
 		);
@@ -1616,7 +1629,8 @@ test.describe( 'aside', () => {
 		await gotoScreen( page, SCREENS.article, 1280 );
 		const el = page.locator( '.ttm-article aside' );
 		expect( await computed( el, 'position' ) ).toBe( 'sticky' );
-		expect( await computed( el, 'top' ) ).toBe( px( 24 ) );
+		// 24px below the pinned inner masthead (54px tall; no admin bar logged out).
+		expect( await computed( el, 'top' ) ).toBe( px( 78 ) );
 		expect( await computed( el, 'row-gap' ) ).toBe( px( 28 ) );
 	} );
 

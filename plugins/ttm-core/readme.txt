@@ -4,7 +4,7 @@ Tags: blocks, block-bindings, newspaper, series, block-theme
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.3.0
+Stable tag: 0.3.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -30,6 +30,14 @@ site owner's byline.
    publishing directly — every block and template degrades gracefully with no content.
 
 == Changelog ==
+
+= 0.3.1 =
+* `ttm/author-name` takes `{"unlessInTitle": true}`: empty when the site title already names
+  the author, so a masthead byline doesn't repeat it.
+* Verse of the day: a quotation's own outer quotes are dropped before the block adds its own
+  (no more doubled opening quote), and the verse links to its meditation.
+* `scripts/live/plan.sh` (kubectl target): the pod fixture directory is owned like wp-content,
+  so WP-CLI running as the web user can write the export.
 
 = 0.3.0 =
 * Tested on PHP 8.4 and WordPress 7.1.4.

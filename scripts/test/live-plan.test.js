@@ -194,9 +194,19 @@ describe( 'plan.sh', () => {
 		);
 
 		// The export is pulled from the pod, converted locally, and the result pushed back.
-		expect( lines ).toContain(
-			'KUBECTL -n blog exec -i deploy/wordpress -- mkdir -p /var/www/html/wp-content/ttm-fixtures/live'
+		// The pod's fixture dir is created as root, then handed to wp-content's owner so a
+		// WP-CLI running as the web user can write the export into it.
+		const mkdirLines = lines.filter(
+			( l ) =>
+				l.startsWith(
+					'KUBECTL -n blog exec -i deploy/wordpress -- sh -c mkdir -p'
+				) &&
+				l.includes( 'chown -R' ) &&
+				l.endsWith(
+					' sh /var/www/html/wp-content/ttm-fixtures/live /var/www/html/wp-content'
+				)
 		);
+		expect( mkdirLines.length ).toBeGreaterThan( 0 );
 		expect( lines ).toContain(
 			'KUBECTL -n blog exec -i deploy/wordpress -- cat /var/www/html/wp-content/ttm-fixtures/live/classic.ndjson'
 		);
