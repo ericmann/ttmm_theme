@@ -4,7 +4,7 @@ Tags: block-theme, newspaper, one-column, custom-colors, editor-style
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.3.3
+Stable tag: 0.3.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,6 +25,10 @@ Install and activate both together.
    publishing directly.
 
 == Changelog ==
+
+= 0.3.4 =
+* Editor's note and Update callouts for older posts: Group block styles "Note" and "Update",
+  plus insertable patterns with a label and a placeholder paragraph.
 
 = 0.3.3 =
 * No theme changes; version kept in step with the plugin.

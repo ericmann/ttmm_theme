@@ -136,7 +136,7 @@
       "step": "installPlugin",
       "pluginData": {
         "resource": "url",
-        "url": "https://github-proxy.com/proxy/?repo=ericmann/ttmm_theme&release=v0.3.3&asset=ttm-core.zip"
+        "url": "https://github-proxy.com/proxy/?repo=ericmann/ttmm_theme&release=v0.3.4&asset=ttm-core.zip"
       },
       "options": {
         "activate": true
@@ -146,7 +146,7 @@
       "step": "installTheme",
       "themeData": {
         "resource": "url",
-        "url": "https://github-proxy.com/proxy/?repo=ericmann/ttmm_theme&release=v0.3.3&asset=ttm-theme.zip"
+        "url": "https://github-proxy.com/proxy/?repo=ericmann/ttmm_theme&release=v0.3.4&asset=ttm-theme.zip"
       },
       "options": {
         "activate": true
