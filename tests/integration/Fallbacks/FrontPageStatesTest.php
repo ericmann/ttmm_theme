@@ -101,7 +101,7 @@ class FrontPageStatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'ttm-writing-cell is-plain', $html );
 	}
 
-	public function test_f9_stale_year_section_shows_two_rows_without_dek(): void {
+	public function test_f9_stale_year_section_shows_two_rows_with_the_lead_dek(): void {
 		$this->set_now( '2026-09-20 12:00:00' );
 		$this->seed( 'empty' );
 
@@ -114,23 +114,23 @@ class FrontPageStatesTest extends TTM_IntegrationTestCase {
 					'post_status'   => 'publish',
 					'post_category' => [ $security->term_id ],
 					'post_title'    => $title,
-					'post_excerpt'  => 'A real excerpt that must not appear.',
+					'post_excerpt'  => 'A real excerpt for ' . $title . '.',
 					'post_date'     => sprintf( '2024-01-0%d 09:00:00', $i + 1 ),
 				]
 			);
 			update_post_meta( $post_id, 'ttm_primary_category', $security->term_id );
 		}
 
-		// No do_action( 'init' ) re-fire needed: the pattern itself no longer varies by
-		// staleness (patterns.php never calls Query\Cells) -- the dek suppression and the
-		// posts_per_page drop both happen plugin-side, per request, in Query\Cells.
+		// No do_action( 'init' ) re-fire needed: the pattern itself doesn't vary by staleness
+		// (patterns.php never calls Query\Cells); the posts_per_page drop happens plugin-side.
 		$html = (string) do_blocks( '<!-- wp:pattern {"slug":"ttm/section-cell-security"} /-->' );
 
 		$this->assertSame( 2, substr_count( $html, 'wp-block-post ' ) );
 		$this->assertStringContainsString( 'Old Security One', $html );
 		$this->assertStringContainsString( 'Old Security Two', $html );
-		$this->assertStringNotContainsString( 'ttm-item__dek', $html );
-		$this->assertStringNotContainsString( 'A real excerpt', $html );
+		// Owner decision 2026-10-30: stale rows keep their deks (CSS shows only the first row's).
+		$this->assertStringContainsString( 'ttm-item__dek', $html );
+		$this->assertStringContainsString( 'A real excerpt for Old Security Two.', $html );
 	}
 
 	public function test_normal_state_zero_count_link_reads_all_arrow_for_new_category(): void {
