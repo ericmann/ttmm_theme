@@ -20,6 +20,8 @@ return [
 
 	'core/group:poster',
 	'core/group:surface-box',
+	'core/group:note',
+	'core/group:update',
 	'core/group:tile',
 	'core/group:zone',
 	'core/group:cell',

@@ -91,6 +91,7 @@ Body resets in `style.css`: `*{box-sizing:border-box}`, `img{display:block;max-w
 | `core/image`, `core/post-featured-image` | `cover-shadow` | as `cover` + `--shadow-lg` |
 | `core/group` | `poster` | accent bg, bg-colour text, padding 36 48 32 (24 20 phone); headings bg colour |
 | `core/group` | `surface-box` | surface bg, padding 18 20 |
+| `core/group` | `note`, `update` | callout at the top of an older post: surface bg, padding 18 20, 3px left rule (neutral-700 for a note, accent-700 for an update), 14px text; patterns `ttm/editors-note` and `ttm/update-note` add a kicker label |
 | `core/group` | `tile` | surface bg, aspect 4/3, padding 16, flex column space-between |
 | `core/group` | `zone` | padding 20 0 24, `border-top: 2px` |
 | `core/group` | `cell` | padding 20 32 24 0, `border-right: 1px`; `:last-child` no border |

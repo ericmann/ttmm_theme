@@ -7,7 +7,7 @@ Block theme `themes/ttm-theme` (presentation only) + companion plugin `plugins/t
 - [ ] Every page renders correctly as a cached static document: no per-visitor markup, no nonces on cacheable output, no front-end network requests. Photographs are same-origin.
 - [ ] Demo assets are licence-clean and provable (rule 53): every file in `docs/fixtures/demo/images/` has a `CREDITS.json` row (cc0/pdm), sizes within the script constants; no image reaches the repo except through `npm run demo:fetch-images`.
 - [ ] The demo is offline and deterministic (rule 54): `demo:build` makes no network request and two same-day builds are identical; the Openverse fetch is human-run and never in CI; `demo:check` fetches only from the tree, GitHub and the Playground CDN.
-- [ ] The repository is publishable as it stands (rule 55): GPL-2.0-or-later everywhere, `LICENSE`, both `readme.txt`, versions agree (`0.3.3`), the owner's name only behind `site.author_name`. Screenshots are generated, never hand-edited (rule 56). The Playground path is a test in CI (rule 57).
+- [ ] The repository is publishable as it stands (rule 55): GPL-2.0-or-later everywhere, `LICENSE`, both `readme.txt`, versions agree (`0.3.4`), the owner's name only behind `site.author_name`. Screenshots are generated, never hand-edited (rule 56). The Playground path is a test in CI (rule 57).
 - [ ] Private data never enters the repository (rule 47): the WXR export, dumps, uploads, backups and audit output stay gitignored; `docs/fixtures/demo/` is public; demo prose, alt text and captions are synthetic CC0.
 - [ ] A block's data comes from its context (rule 50); related lists are same-form, same-section first (rule 51). Live content is a state (rule 48); migration commands are idempotent and dry-run first (rule 49).
 - [ ] Fidelity is a test: every §6.9 row is a Playwright test in `tests/e2e/fidelity.spec.mjs`, asserting a count or position where presence is the point.
@@ -71,7 +71,7 @@ Each line that can be a single-line pattern is also a `constraints` entry in `do
 - `Serials::active()` only in `Fiction/Serials.php`, `serial-hero`, `writing-cell`, `story-tiles`, `book-grid`, `series-toc` chapters variant [serials-active-confined; variant split by reading].
 - `tests/e2e/fidelity.spec.mjs`/`editors.spec.mjs`: every `test.fixme(` carries a `// P<n>-<nn>` tag [untagged-fixme]; zero remain after P4-01.
 - `scripts/css-coverage-allow.txt` empty [pending-allow-list]; `tests/e2e/selectors-allow.txt` has no pending line [selectors-no-pending].
-- `ttm.css` ≤ 63488 bytes, plain CSS, presets via `var(--wp--preset--…)`, no hex [css-hex-literal]; no dark mode [no-dark-mode]; text under 18.66px never `accent`/`neutral-500`/`neutral-600`.
+- `ttm.css` ≤ 64512 bytes, plain CSS, presets via `var(--wp--preset--…)`, no hex [css-hex-literal]; no dark mode [no-dark-mode]; text under 18.66px never `accent`/`neutral-500`/`neutral-600`.
 - No `core/group` with `is-style-grid-*` uses `constrained`/`flow`/`flex` [grid-group-not-constrained].
 - Seeder never uses the accent red [seed-no-red]; no lorem in seed fixtures [seed-no-lorem]; footer nav eight items, no RSS [footer-no-rss]; verse-copyright stays removed [verse-copyright-removed].
 - Landmarks per 04 §8; axe serious/critical = 0 on every seeded screen at 1280 and 390; every `img[src*="demo-"]` has non-empty alt (`fidelity.spec.mjs`).

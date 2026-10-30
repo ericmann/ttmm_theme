@@ -43,8 +43,13 @@
 // P4-01: end-of-flight measurement (SPEC §8 Phase 4 tuning task): 63090
 // bytes before this task (no CSS changes) and 63090 after -- no shrink, so
 // kept at 63488 unchanged.
+// 2026-10-30 (owner fixes after the beta review): 63090 -> 63483 bytes for the pinned
+// masthead, phone-overflow fixes and verse clamp, made to fit by shortening comments. The
+// note/update callout block styles then needed 564 more (64052), with comments already
+// trimmed, so raised to 64512 (the next 1024 multiple). Owner intends a later pass to shrink
+// the file properly.
 import { statSync, existsSync } from 'node:fs';
-const cssBudgetBytes = 63488;
+const cssBudgetBytes = 64512;
 const file = 'themes/ttm-theme/assets/css/ttm.css';
 if ( ! existsSync( file ) ) {
 	console.error( `${ file } missing` );
