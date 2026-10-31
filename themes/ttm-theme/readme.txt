@@ -30,6 +30,7 @@ Install and activate both together.
 * "In print" book covers keep their own shape and stand on one baseline, so titles line up.
 * Newsletter copy matches per-post delivery: poster "Everything above, in your inbox."; box
   "Each post by email as it publishes, or as a daily or weekly digest."
+* Starter content stores page templates as slugs ("page-series", "default"), not file names.
 
 = 0.3.6 =
 * Syntax colours for code blocks, from the theme palette, when the site runs the

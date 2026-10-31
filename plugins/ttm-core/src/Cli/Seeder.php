@@ -338,7 +338,9 @@ class Seeder {
 			);
 
 			if ( $post_id && ! is_wp_error( $post_id ) ) {
-				update_post_meta( $post_id, '_wp_page_template', $row['template'] . '.html' );
+				// A block template slug, or "default" for the ordinary page template: a file name
+				// ("page.html") is not a registered template and makes later post saves fail.
+				update_post_meta( $post_id, '_wp_page_template', 'page' === $row['template'] ? 'default' : $row['template'] );
 				update_post_meta( $post_id, self::SEED_META, 1 );
 
 				if ( ! empty( $row['featured_image'] ) ) {

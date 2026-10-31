@@ -20,7 +20,7 @@ class StarterContentTest extends TTM_IntegrationTestCase {
 
 		$series = get_page_by_path( 'series', OBJECT, 'page' );
 		$this->assertNotNull( $series );
-		$this->assertSame( 'page-series.html', get_post_meta( $series->ID, '_wp_page_template', true ) );
+		$this->assertSame( 'page-series', get_post_meta( $series->ID, '_wp_page_template', true ) );
 
 		$nav = get_page_by_path( 'ttm-sections', OBJECT, 'wp_navigation' );
 		$this->assertNotNull( $nav );
@@ -54,6 +54,6 @@ class StarterContentTest extends TTM_IntegrationTestCase {
 		$page = get_page_by_path( 'about', OBJECT, 'page' );
 		$this->assertSame( $existing_id, $page->ID );
 		$this->assertSame( 'About Me', $page->post_title );
-		$this->assertSame( 'page.html', get_post_meta( $existing_id, '_wp_page_template', true ) );
+		$this->assertSame( 'default', get_post_meta( $existing_id, '_wp_page_template', true ) );
 	}
 }

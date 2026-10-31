@@ -28,17 +28,19 @@ function create_starter_content(): void {
 		}
 	}
 
+	// `_wp_page_template` holds a block template slug ("page-series"), or "default" for the
+	// ordinary page template; a file name ("page-series.html") is invalid and fails post saves.
 	$pages = [
 		'series'     => 'page-series',
 		'writing'    => 'page-writing',
-		'newsletter' => 'page',
-		'about'      => 'page',
+		'newsletter' => 'default',
+		'about'      => 'default',
 	];
 
 	foreach ( $pages as $slug => $template ) {
 		$existing = get_page_by_path( $slug, OBJECT, 'page' );
 		if ( $existing ) {
-			update_post_meta( $existing->ID, '_wp_page_template', $template . '.html' );
+			update_post_meta( $existing->ID, '_wp_page_template', $template );
 			continue;
 		}
 
@@ -52,7 +54,7 @@ function create_starter_content(): void {
 		);
 
 		if ( $post_id && ! is_wp_error( $post_id ) ) {
-			update_post_meta( $post_id, '_wp_page_template', $template . '.html' );
+			update_post_meta( $post_id, '_wp_page_template', $template );
 		}
 	}
 
