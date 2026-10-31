@@ -25,9 +25,11 @@ $ttm_sections = [
 
 $ttm_nav_links = '';
 foreach ( $ttm_sections as $ttm_slug => $ttm_fallback_name ) {
-	$ttm_term       = get_category_by_slug( $ttm_slug );
-	$ttm_name       = $ttm_term ? $ttm_term->name : $ttm_fallback_name;
-	$ttm_url        = $ttm_term ? get_category_link( $ttm_term ) : home_url( '/category/' . $ttm_slug . '/' );
+	$ttm_term = get_category_by_slug( $ttm_slug );
+	$ttm_name = $ttm_term ? $ttm_term->name : $ttm_fallback_name;
+	$ttm_url  = $ttm_term ? get_category_link( $ttm_term ) : home_url( '/category/' . $ttm_slug . '/' );
+	// Q10: Writing's canonical URL is its page (starter content always creates it).
+	$ttm_url        = 'writing' === $ttm_slug ? home_url( '/writing/' ) : $ttm_url;
 	$ttm_nav_links .= sprintf(
 		'<!-- wp:navigation-link {"label":"%s","url":"%s","kind":"custom"} /-->',
 		esc_attr( $ttm_name ),

@@ -25,6 +25,9 @@ class StarterContentTest extends TTM_IntegrationTestCase {
 		$nav = get_page_by_path( 'ttm-sections', OBJECT, 'wp_navigation' );
 		$this->assertNotNull( $nav );
 		$this->assertStringContainsString( 'Series', $nav->post_content );
+		// Q10: Writing links to its page, the canonical URL, not the category archive.
+		$this->assertStringContainsString( '"url":"' . esc_url( home_url( '/writing/' ) ) . '"', $nav->post_content );
+		$this->assertStringNotContainsString( 'category/writing', $nav->post_content );
 	}
 
 	public function test_activation_twice_creates_nothing_new(): void {

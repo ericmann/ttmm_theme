@@ -4,7 +4,7 @@ Tags: block-theme, newspaper, one-column, custom-colors, editor-style
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.3.7
+Stable tag: 0.3.8
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,6 +25,11 @@ Install and activate both together.
    publishing directly.
 
 == Changelog ==
+
+= 0.3.8 =
+* Static pages show the featured image (the About portrait) in the right-hand column, 3:4, beside the text.
+* The inner masthead links Newsletter, RSS and About like the front page; RSS is the category's feed on a category archive.
+* Writing links point at the Writing page, its canonical URL (mastheads, footer, starter Sections menu).
 
 = 0.3.7 =
 * "In print" book covers keep their own shape and stand on one baseline, so titles line up.

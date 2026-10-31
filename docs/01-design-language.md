@@ -141,7 +141,7 @@ Each component is named as the CSS class the theme should register (and the patt
 5. 2px rule.
 
 ### 4.2 Masthead — inner (`ttm-masthead-inner`, pattern `ttm/masthead-inner`)
-One row under a 2px rule: grid `auto 1fr auto`, align center, padding 14 0 12. Left: Site Title at 22px/800 −0.02em + “by Eric Mann” 12px neutral-700 (baseline-aligned, gap 10). Middle: nav as above at 13px, gap 22. Right: “Newsletter” 12px neutral-700.
+One row under a 2px rule: grid `auto 1fr auto`, align center, padding 14 0 12. Left: Site Title at 22px/800 −0.02em + “by Eric Mann” 12px neutral-700 (baseline-aligned, gap 10). Middle: nav as above at 13px, gap 22. Right: Newsletter · RSS · About, 12px neutral-700 (gap 18), as on the front page; RSS is the category’s feed on a category archive, the site feed everywhere else (owner, 2026-10-30).
 Phone: title 18px, right item becomes “Menu” (opens core Navigation overlay); nav hidden behind it.
 
 ### 4.3 Nav (`core/navigation` styled)

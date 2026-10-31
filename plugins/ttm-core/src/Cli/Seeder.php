@@ -376,14 +376,17 @@ class Seeder {
 			return 0;
 		}
 
-		$order = (array) Config::get( 'sections.order', [] );
-		$links = '';
+		$order        = (array) Config::get( 'sections.order', [] );
+		$writing_slug = (string) Config::get( 'sections.writing_slug', 'writing' );
+		$writing_page = get_page_by_path( $writing_slug, OBJECT, 'page' );
+		$links        = '';
 		foreach ( $order as $slug ) {
 			$term = get_term_by( 'slug', $slug, 'category' );
 			if ( ! $term || is_wp_error( $term ) ) {
 				continue;
 			}
-			$term_link = get_term_link( $term );
+			// Q10: the Writing page is the canonical Writing URL, so the menu links to it.
+			$term_link = $writing_page && $writing_slug === $slug ? (string) get_permalink( $writing_page ) : get_term_link( $term );
 			if ( is_wp_error( $term_link ) ) {
 				continue;
 			}

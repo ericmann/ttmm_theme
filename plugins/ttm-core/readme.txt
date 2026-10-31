@@ -4,7 +4,7 @@ Tags: blocks, block-bindings, newspaper, series, block-theme
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.3.7
+Stable tag: 0.3.8
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -30,6 +30,11 @@ site owner's byline.
    publishing directly — every block and template degrades gracefully with no content.
 
 == Changelog ==
+
+= 0.3.8 =
+* Navigation: a link to the Writing page (`/writing/`) counts as the Writing section link --
+  current on Writing posts and the Writing page, labelled with the category's name.
+* `wp ttm seed` links Writing in the Sections menu to the Writing page.
 
 = 0.3.7 =
 * Book grid: print covers are no longer cropped to 2:3; each keeps its own shape (uncropped

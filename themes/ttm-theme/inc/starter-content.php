@@ -65,7 +65,8 @@ function create_starter_content(): void {
 			if ( ! $category ) {
 				continue;
 			}
-			$link   = get_category_link( $category );
+			// A section with its own page above (Writing) links to the page, its canonical URL.
+			$link   = isset( $pages[ $slug ] ) ? home_url( '/' . $slug . '/' ) : get_category_link( $category );
 			$links .= sprintf(
 				'<!-- wp:navigation-link {"label":"%s","url":"%s","kind":"custom"} /-->',
 				esc_attr( $category->name ),

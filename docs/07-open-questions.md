@@ -16,7 +16,7 @@ Decisions the design leaves to the build/planning pass. Each has the design’s 
 | Q10 | Writing category archive URL (`/category/writing/`) vs page (`/writing/`) | **Both resolve to the Writing layout**; canonical `/writing/` | Redirect the category URL. |
 | Q11 | Series hub URL | `/series/` page + `/series/{slug}/` taxonomy archives | Reserve the slug on activation. |
 | Q12 | Newsletter archive on `/newsletter/` | **Not built**; page has poster + explainer only | Add when a provider archive is available. |
-| Q13 | About page portrait | **Optional**, colour, 3:2 above H1 | Owner supplies. |
+| Q13 | About page portrait | **Optional**, colour, 3:4 in the aside beside the text (owner, 2026-10-30; was 3:2 above the H1) | Owner supplies. |
 | Q14 | Italic font file | **Load 400 italic** (Archivo has true italics) | Skip 600/800 italic. |
 | Q15 | Analytics/consent UI | **None designed** | If required, a single 12px neutral-700 line above the footer, no banner. |
 | Q16 | Search results ranking | **Core** | Design covers layout only. |

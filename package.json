@@ -1,6 +1,6 @@
 {
   "name": "these-things-matter",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "private": true,
   "description": "These Things Matter — block theme (ttm-theme) and companion plugin (ttm-core) for eric.mann.blog",
   "license": "GPL-2.0-or-later",
