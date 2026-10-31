@@ -179,6 +179,32 @@ class ArticleTemplatesTest extends TTM_IntegrationTestCase {
 	}
 
 	/**
+	 * Credit captions keep their links (CC attribution) and lose anything else.
+	 */
+	public function test_hero_caption_keeps_credit_links_and_strips_other_markup(): void {
+		if ( ! function_exists( 'imagecreatetruecolor' ) ) {
+			$this->markTestSkipped( 'GD is not available.' );
+		}
+
+		$post          = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		$attachment_id = ( new \TTM\Core\Cli\Seeder() )->image( 'Credit test', 'ttm-lead' );
+		wp_update_post(
+			[
+				'ID'           => $attachment_id,
+				'post_excerpt' => '<a href="https://example.com/photo" rel="nofollow">Sky</a> by <em>Someone</em><script>alert(1)</script><span onclick="x()">!</span>',
+			]
+		);
+		set_post_thumbnail( $post, $attachment_id );
+
+		$html = $this->render_single( $post );
+
+		$this->assertStringContainsString( '<figcaption class="ttm-hero__caption"><a href="https://example.com/photo" rel="nofollow">Sky</a> by <em>Someone</em>alert(1)!</figcaption>', $html );
+		$this->assertStringNotContainsString( '&lt;a href', $html );
+		$this->assertStringNotContainsString( '<script>alert', $html );
+		$this->assertStringNotContainsString( 'onclick', $html );
+	}
+
+	/**
 	 * Decision "Kicker term order": the seeded article (Technology primary, Security second)
 	 * reads "Technology · Security", not the alphabetical "Security, Technology".
 	 */

@@ -90,7 +90,7 @@ Lead ID is excluded from all cells. Kicker shows the lead’s primary category a
 Free tags as today. Only surfaced in: article byline row (all tags), archive filter row (top 5 within the category), archive row meta (up to 2). Never on the front page.
 
 ## 12. Newsletter
-Weekly. Provider TBD (`07`). Two placements: poster (front page, newsletter page) and box (article aside, series pages). Copy is fixed in the patterns: poster “Everything above, once a week, in your inbox.”; box “Series land in the newsletter the week they publish.” (series contexts) / “The weekly issue, every Sunday.” (non-series contexts — verify day with owner).
+Per post: Jetpack emails each post as it publishes; subscribers can switch to a daily or weekly digest in their WordPress.com subscription settings (owner decision 2026-10-30; no hand-made issues). Two placements: poster (front page, newsletter page) and box (article aside, series pages). Copy is fixed in the patterns: poster “Everything above, in your inbox.”; box title “Get the next part” (series contexts) / “New posts by email.” (elsewhere), box copy “Each post by email as it publishes, or as a daily or weekly digest.”
 
 ## 13. Dates
 - Lists: `M j` (“Sept 19” — note the 4-letter “Sept”; WordPress `M` gives “Sep”. Plugin provides `ttm_short_month()` mapping Sep→Sept, and binding `ttm/short-date`).

@@ -1815,7 +1815,7 @@ test.describe( 'aside', () => {
 	} ) => {
 		await gotoScreen( page, SCREENS.articleNoSeries, 1280 );
 		const el = page.locator( '.ttm-newsletter-box__title' );
-		expect( await text( el ) ).toBe( 'The weekly issue.' );
+		expect( await text( el ) ).toBe( 'New posts by email.' );
 	} );
 } );
 

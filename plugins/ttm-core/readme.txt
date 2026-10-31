@@ -34,6 +34,7 @@ site owner's byline.
 = 0.3.7 =
 * Book grid: print covers are no longer cropped to 2:3; each keeps its own shape (uncropped
   medium_large rendition).
+* Newsletter box title outside series is "New posts by email." (was "The weekly issue.").
 
 = 0.3.6 =
 * No plugin changes; version kept in step with the theme.
