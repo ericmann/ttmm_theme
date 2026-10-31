@@ -1,0 +1,116 @@
+/* ttm/series-toc: loaded only where the block renders (inc/block-css.php). */
+
+/* 4.20 toc: rail, 28/1fr. */
+.ttm-series-toc__list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.ttm-series-toc__item {
+	display: grid;
+	grid-template-columns: 28px 1fr;
+	gap: 10px;
+	padding: 10px 0;
+	border-bottom: var(--ttm-rule-1);
+	font-size: 14px;
+	line-height: 1.35;
+}
+
+.ttm-series-toc__num {
+	font-weight: 800;
+	color: var(--wp--preset--color--neutral-700);
+}
+
+.ttm-series-toc__title {
+	color: var(--wp--preset--color--text);
+	text-decoration: none;
+}
+
+.ttm-series-toc__item.is-published .ttm-series-toc__title {
+	font-weight: 400;
+}
+
+.ttm-series-toc__item.is-current .ttm-series-toc__title {
+	font-weight: 800;
+	color: var(--wp--preset--color--accent-700);
+}
+
+.ttm-series-toc__item.is-scheduled,
+.ttm-series-toc__item.is-scheduled .ttm-series-toc__title {
+	color: var(--wp--preset--color--neutral-700);
+}
+
+.ttm-series-toc__series {
+	font-size: var(--wp--preset--font-size--micro);
+	color: var(--wp--preset--color--neutral-700);
+	text-decoration: none;
+}
+
+.ttm-series-toc__hub {
+	display: none;
+	font-size: var(--wp--preset--font-size--micro);
+	color: var(--wp--preset--color--accent-700);
+	text-decoration: none;
+}
+
+.ttm-series-toc__dek {
+	grid-column: 2;
+	font-size: 12px;
+	color: var(--wp--preset--color--neutral-700);
+}
+
+/* Chapters: .ttm-numbered. */
+.ttm-series-toc.is-chapters .ttm-numbered__row {
+	grid-template-columns: 44px 1fr auto;
+	gap: 0 16px;
+	padding: 12px 0;
+	align-items: baseline;
+}
+
+.ttm-series-toc.is-chapters .ttm-numbered__num {
+	font-size: 15px;
+}
+
+.ttm-series-toc.is-chapters .ttm-numbered__title,
+.ttm-series-toc.is-chapters .ttm-numbered__dek {
+	grid-column: 2;
+}
+
+.ttm-series-toc.is-chapters .ttm-numbered__title {
+	font-size: 17px;
+	font-weight: 800;
+	line-height: 1.2;
+}
+
+.ttm-series-toc.is-chapters .ttm-numbered__dek {
+	margin-top: 3px;
+	font-size: 13px;
+	font-weight: 400;
+	color: var(--wp--preset--color--neutral-800);
+}
+
+.ttm-series-toc.is-chapters .ttm-numbered__date {
+	grid-column: 3;
+	font-size: 12px;
+	font-weight: 400;
+	color: var(--wp--preset--color--neutral-700);
+	font-feature-settings: "tnum";
+}
+
+@media (max-width: 720px) {
+
+	/* 3b: TOC->"Hub →". */
+	.ttm-series-toc {
+		border-top: var(--ttm-rule-2);
+		padding: 18px 0 20px;
+	}
+
+	.ttm-series-toc__series {
+		display: none;
+	}
+
+	.ttm-series-toc__hub {
+		display: inline;
+	}
+}

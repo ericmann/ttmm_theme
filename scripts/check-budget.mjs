@@ -48,6 +48,9 @@
 // note/update callout block styles then needed 564 more (64052), with comments already
 // trimmed, so raised to 64512 (the next 1024 multiple). Owner intends a later pass to shrink
 // the file properly.
+// 0.3.9: the split. Rules owned by one ttm-core block moved to assets/css/blocks/<block>.css,
+// loaded only where that block renders (inc/block-css.php): 64497 -> 55708 bytes. The budget
+// stays at 64512 and still covers ttm.css alone, the stylesheet every page loads.
 import { statSync, existsSync } from 'node:fs';
 const cssBudgetBytes = 64512;
 const file = 'themes/ttm-theme/assets/css/ttm.css';

@@ -1,0 +1,63 @@
+/* ttm/series-prev-next: loaded only where the block renders (inc/block-css.php). */
+
+/* 4.21 prev/next */
+.ttm-prevnext {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	border-top: var(--ttm-rule-2);
+	margin-top: 40px;
+}
+
+/* Missing side: its rule */
+.ttm-prevnext__prev {
+	padding: 20px 24px 20px 0;
+	border-right: var(--ttm-rule-1);
+}
+
+.ttm-prevnext__next {
+	padding: 20px 0 20px 24px;
+}
+
+.ttm-prevnext__label {
+	display: block;
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--wp--preset--color--neutral-700);
+	margin-bottom: 8px;
+}
+
+.ttm-prevnext__title {
+	display: block;
+	font-size: 18px;
+	font-weight: 800;
+	line-height: 1.25;
+}
+
+/* stylelint-disable-next-line no-descending-specificity */
+.ttm-prevnext a {
+	color: inherit;
+	text-decoration: none;
+}
+
+@media (max-width: 720px) {
+
+	/* 3b: cells stack, flat. */
+	.ttm-prevnext {
+		grid-template-columns: 1fr;
+	}
+
+	.ttm-prevnext__prev {
+		padding: 20px 0;
+		border-right: 0;
+		border-bottom: var(--ttm-rule-1);
+	}
+
+	.ttm-prevnext__next {
+		padding: 20px 0;
+	}
+
+	.ttm-prevnext__title {
+		font-size: 16px;
+	}
+}

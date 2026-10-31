@@ -3,7 +3,7 @@
 // by markup has a selector in ttm.css/style.css, and every ttm-* selector in
 // those files matches emitted markup. Unresolved gaps must be listed, one
 // line per group of classes, in scripts/css-coverage-allow.txt (< 10 lines).
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import {
 	collectMarkupClasses,
@@ -13,6 +13,7 @@ import {
 	report,
 	UNSTYLED_WRAPPERS,
 } from './lib/css-coverage.mjs';
+import { blockCssNames, themeCssFiles } from './lib/theme-css.mjs';
 
 const MARKUP_ROOTS = [
 	'themes/ttm-theme/templates',
@@ -21,10 +22,13 @@ const MARKUP_ROOTS = [
 	'themes/ttm-theme/inc',
 ];
 
-const CSS_FILES = [
-	'themes/ttm-theme/assets/css/ttm.css',
-	'themes/ttm-theme/style.css',
-];
+const CSS_FILES = themeCssFiles();
+
+// A block stylesheet loads only where `ttm/<name>` renders, so a name with no block never loads.
+const orphanBlockCss = blockCssNames().filter(
+	( name ) =>
+		! existsSync( join( 'plugins/ttm-core/blocks', name, 'block.json' ) )
+);
 
 const ALLOW_PATH = 'scripts/css-coverage-allow.txt';
 
@@ -110,6 +114,13 @@ const { missing, dead, allowCount, pendingCount } = report( {
 	allow,
 } );
 
+if ( orphanBlockCss.length > 0 ) {
+	console.error(
+		'css-coverage: assets/css/blocks/ files with no ttm-core block of that name:'
+	);
+	orphanBlockCss.forEach( ( name ) => console.error( `  ${ name }.css` ) );
+}
+
 if ( missing.length > 0 ) {
 	console.error(
 		'css-coverage: markup classes with no ttm.css/style.css selector:'
@@ -131,6 +142,7 @@ if ( ! ALLOW_PENDING && allowCount > 0 ) {
 }
 
 if (
+	orphanBlockCss.length > 0 ||
 	missing.length > 0 ||
 	dead.length > 0 ||
 	( ! ALLOW_PENDING && allowCount > 0 )

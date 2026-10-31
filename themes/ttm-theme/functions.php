@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace TTM\Theme;
 
 require_once __DIR__ . '/inc/bindings-compat.php';
+require_once __DIR__ . '/inc/block-css.php';
 require_once __DIR__ . '/inc/block-styles.php';
 require_once __DIR__ . '/inc/code-highlighting.php';
 require_once __DIR__ . '/inc/patterns.php';
@@ -22,7 +23,8 @@ add_action(
 		add_theme_support( 'wp-block-styles' );
 		add_theme_support( 'editor-styles' );
 		load_theme_textdomain( 'ttm-theme', get_template_directory() . '/languages' );
-		add_editor_style( [ 'assets/css/ttm.css', 'assets/css/editor.css' ] );
+		$blocks = array_map( static fn( string $name ): string => 'assets/css/blocks/' . $name . '.css', block_css_names() );
+		add_editor_style( array_merge( [ 'assets/css/ttm.css' ], $blocks, [ 'assets/css/editor.css' ] ) );
 	}
 );
 

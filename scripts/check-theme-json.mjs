@@ -2,6 +2,7 @@
 // Fails when themes/ttm-theme/theme.json drifts from the token sheet (docs/_ds/.../styles.css) or from 04 §2 / P0-06.
 import { readFileSync } from 'node:fs';
 import { generatedVars, referencedVars } from './lib/theme-json-vars.mjs';
+import { themeCssFiles } from './lib/theme-css.mjs';
 
 const path = 'themes/ttm-theme/theme.json';
 const tokenPath =
@@ -193,14 +194,10 @@ if ( json.settings?.border?.radius !== false ) {
 // --- Preset variable references (rule 44) -----------------------------------
 const generated = generatedVars( json );
 const cssSources = [
-	[
-		'themes/ttm-theme/assets/css/ttm.css',
-		readFileSync( 'themes/ttm-theme/assets/css/ttm.css', 'utf8' ),
-	],
-	[
-		'themes/ttm-theme/style.css',
-		readFileSync( 'themes/ttm-theme/style.css', 'utf8' ),
-	],
+	...themeCssFiles().map( ( file ) => [
+		file,
+		readFileSync( file, 'utf8' ),
+	] ),
 	[ `${ path } (styles)`, JSON.stringify( json.styles ) ],
 ];
 for ( const [ source, text ] of cssSources ) {
