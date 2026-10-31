@@ -1,0 +1,31 @@
+/* ttm/series-progress: loaded only where the block renders (inc/block-css.php). */
+
+/* 4.19 series progress */
+.ttm-series-progress {
+	display: block;
+}
+
+.ttm-series-progress__segments {
+	display: flex;
+	gap: 4px;
+	margin-bottom: var(--wp--preset--spacing--20);
+}
+
+.ttm-series-progress__seg {
+	flex: 1;
+	height: 6px;
+}
+
+.ttm-series-progress__seg.is-done {
+	background: var(--wp--preset--color--neutral-900);
+}
+
+.ttm-series-progress__seg.is-todo {
+	background: var(--wp--preset--color--neutral-300);
+}
+
+.ttm-series-progress__meta {
+	margin: 0 0 18px;
+	font-size: var(--wp--preset--font-size--caption);
+	color: var(--wp--preset--color--neutral-700);
+}

@@ -1085,6 +1085,20 @@ test.describe( 'demo', () => {
 	} );
 
 	// prettier-ignore
+	test( 'block-css: block stylesheets follow ttm.css, only where the block renders @1280', async ( { page } ) => {
+		const order = () => page.evaluate( () => [ ...document.querySelectorAll( 'link[rel="stylesheet"], style' ) ].map( ( node ) => node.id ) );
+		await gotoScreen( page, SCREENS.front, 1280 );
+		const front = await order();
+		const theme = front.indexOf( 'ttm-theme-css' );
+		const cell = front.findIndex( ( id ) => id.startsWith( 'ttm-block-writing-cell' ) );
+		expect( theme ).toBeGreaterThan( -1 );
+		expect( cell ).toBeGreaterThan( theme );
+		expect( front.indexOf( 'global-styles-inline-css' ) ).toBeLessThan( theme );
+		await gotoScreen( page, SCREENS.about, 1280 );
+		expect( ( await order() ).filter( ( id ) => id.startsWith( 'ttm-block-' ) ) ).toEqual( [] );
+	} );
+
+	// prettier-ignore
 	test( 'demo-tile-cover: .ttm-tile.is-cover img @1280', async ( { page } ) => {
 		await gotoScreen( page, SCREENS.writing, 1280 );
 		const img = page.locator( '.ttm-tile.is-cover img' );

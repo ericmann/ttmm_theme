@@ -1,0 +1,65 @@
+/* ttm/verse-of-the-day: loaded only where the block renders (inc/block-css.php). */
+
+/* 4.9 verse */
+.ttm-verse {
+	background: var(--wp--preset--color--surface);
+	padding: 18px 20px;
+}
+
+.ttm-verse .is-style-kicker {
+	font-size: var(--wp--preset--font-size--micro);
+	margin: 0 0 var(--wp--preset--spacing--30);
+}
+
+.ttm-verse__text {
+	margin: 0 0 10px;
+	font-size: var(--wp--preset--font-size--synopsis);
+	font-weight: 600;
+	line-height: 1.35;
+	letter-spacing: -0.01em;
+	color: var(--wp--preset--color--text);
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 4;
+	overflow: hidden;
+}
+
+.ttm-verse__link {
+	color: inherit;
+	text-decoration: none;
+}
+
+.ttm-verse__link:hover {
+	text-decoration: underline;
+}
+
+.ttm-verse__reference {
+	margin: 0 0 14px;
+	font-size: var(--wp--preset--font-size--ui);
+	font-weight: 400;
+	color: var(--wp--preset--color--neutral-800);
+}
+
+.ttm-verse__attribution {
+	font-size: var(--wp--preset--font-size--caption);
+	color: var(--wp--preset--color--neutral-700);
+}
+
+/* WCAG 1.4.1: not colour. */
+/* stylelint-disable-next-line no-descending-specificity */
+.ttm-verse__attribution a {
+	color: var(--wp--preset--color--accent-700);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+@media (max-width: 720px) {
+
+	.ttm-verse {
+		padding: 16px 18px;
+	}
+
+	.ttm-verse__text {
+		font-size: var(--wp--preset--font-size--body);
+	}
+}

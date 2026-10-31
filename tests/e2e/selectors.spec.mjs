@@ -18,14 +18,12 @@ import {
 	parseSelectorAllow,
 } from '../../scripts/lib/css-selectors.mjs';
 import { SCREEN_URLS, securityFiltered } from './lib/urls.mjs';
+import { themeCssFiles } from '../../scripts/lib/theme-css.mjs';
 
 const __dirname = dirname( fileURLToPath( import.meta.url ) );
 const ROOT = join( __dirname, '..', '..' );
 
-const CSS_FILES = [
-	'themes/ttm-theme/assets/css/ttm.css',
-	'themes/ttm-theme/style.css',
-];
+const CSS_FILES = themeCssFiles( ROOT );
 
 const ALLOW_PATH = join( __dirname, 'selectors-allow.txt' );
 

@@ -27,6 +27,7 @@ import {
 	phpErrorMarkers,
 } from './lib/live.mjs';
 import { checksMergedParagraphs } from '../../scripts/live/lib/screens.mjs';
+import { themeCssFiles } from '../../scripts/lib/theme-css.mjs';
 
 const __dirname = dirname( fileURLToPath( import.meta.url ) );
 const ROOT = join( __dirname, '..', '..' );
@@ -40,10 +41,7 @@ const manifest = hasScreens
 	? JSON.parse( readFileSync( SCREENS_PATH, 'utf8' ) )
 	: { screens: [] };
 
-const CSS_FILES = [
-	'themes/ttm-theme/assets/css/ttm.css',
-	'themes/ttm-theme/style.css',
-];
+const CSS_FILES = themeCssFiles( ROOT );
 
 /**
  * Every `ttm-*` class any theme stylesheet defines a selector for.

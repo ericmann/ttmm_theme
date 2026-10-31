@@ -4,7 +4,7 @@ Tags: block-theme, newspaper, one-column, custom-colors, editor-style
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.3.8
+Stable tag: 0.3.9
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,6 +25,13 @@ Install and activate both together.
    publishing directly.
 
 == Changelog ==
+
+= 0.3.9 =
+* Styles that belong to one block (verse, Writing cell, series bar, progress, contents and
+  previous/next) move to assets/css/blocks/ and load only on pages that render that block.
+  No visual change; ttm.css drops from 64,497 to under 56,000 bytes.
+* Code blocks are keyboard-scrollable: the block's pre is the one scroll box and takes focus
+  (tabindex="0"), fixing an axe scrollable-region-focusable failure with highlighted code.
 
 = 0.3.8 =
 * Static pages show the featured image (the About portrait) in the right-hand column, 3:4, beside the text.

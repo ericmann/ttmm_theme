@@ -10,9 +10,9 @@
  * dark ground (the accent itself is under 4.5:1 there).
  */
 
+/* The plugin's wrapper span; the pre (ttm.css) stays the one keyboard-reachable scroller. */
 .wp-block-code > span {
 	display: block;
-	overflow: auto;
 }
 
 .wp-block-code code.hljs {
