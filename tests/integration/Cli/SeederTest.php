@@ -38,7 +38,13 @@ class SeederTest extends TTM_IntegrationTestCase {
 		$writing = get_page_by_path( 'writing', OBJECT, 'page' );
 		$this->assertSame( 'page-writing', get_post_meta( $writing->ID, '_wp_page_template', true ) );
 
-		foreach ( get_posts( [ 'post_type' => 'page', 'posts_per_page' => 10, 'fields' => 'ids' ] ) as $page_id ) {
+		foreach ( get_posts(
+			[
+				'post_type'      => 'page',
+				'posts_per_page' => 10,
+				'fields'         => 'ids',
+			] 
+		) as $page_id ) {
 			$template = (string) get_post_meta( $page_id, '_wp_page_template', true );
 			$this->assertStringEndsNotWith( '.html', $template, 'page templates are stored as slugs, never file names' );
 		}
