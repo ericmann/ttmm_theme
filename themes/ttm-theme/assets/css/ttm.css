@@ -2984,8 +2984,22 @@ main.is-style-grid-8-4 h1 {
 	padding-top: 16px;
 }
 
+/* Covers keep their own shape and stand on one baseline (subgrid rows), so titles align. */
 .ttm-book {
+	display: grid;
+	grid-row: span 4;
+	grid-template-rows: subgrid;
+	row-gap: 0;
 	min-width: 0;
+}
+
+.ttm-book .ttm-cover {
+	align-self: end;
+	aspect-ratio: auto;
+}
+
+.ttm-book .ttm-cover img {
+	height: auto;
 }
 
 .ttm-book__title {

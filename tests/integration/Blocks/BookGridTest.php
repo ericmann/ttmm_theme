@@ -56,6 +56,7 @@ class BookGridTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( 'Buy on Amazon', $html );
 		$this->assertStringContainsString( 'rel="noopener"', $html );
 		$this->assertStringContainsString( '<figure class="ttm-cover">', $html );
+		$this->assertStringNotContainsString( 'size-ttm-cover', $html, 'print covers use the uncropped rendition' );
 	}
 
 	public function test_book_without_cover_renders_caption_only(): void {
