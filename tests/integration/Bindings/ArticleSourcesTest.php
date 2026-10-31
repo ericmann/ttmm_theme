@@ -136,7 +136,7 @@ class ArticleSourcesTest extends TTM_IntegrationTestCase {
 
 		$this->go_to( (string) get_permalink( $plain ) );
 		$block = $this->make_block( 'core/paragraph', $plain );
-		$this->assertSame( 'The weekly issue.', $this->source_value( 'ttm/newsletter-copy', [], $block, 'content' ) );
+		$this->assertSame( 'New posts by email.', $this->source_value( 'ttm/newsletter-copy', [], $block, 'content' ) );
 
 		$link = get_term_link( $series_id, 'series' );
 		if ( is_wp_error( $link ) ) {

@@ -22,6 +22,18 @@ use TTM\Core\Support\Text;
 class Helpers {
 
 	/**
+	 * Inline markup a featured-image caption may keep (image credits).
+	 */
+	private const CAPTION_TAGS = [
+		'a'      => [
+			'href' => true,
+			'rel'  => true,
+		],
+		'em'     => [],
+		'strong' => [],
+	];
+
+	/**
 	 * Nesting depth inside `ttm/archive-by-year` (P5-02): incremented by
 	 * `track_archive_scope()` on `render_block_data` when that block is encountered (before
 	 * its inner `core/query`/`core/post-template` render), decremented by the block's own
@@ -234,7 +246,8 @@ class Helpers {
 	 * `render_block_core/post-featured-image`: on a singular view, append the attachment's
 	 * caption as `figcaption.ttm-hero__caption` before the closing `</figure>` (SPEC §6.2
 	 * "Hero", Decision "Featured-image caption"). No caption, not singular, or no figure ->
-	 * unchanged.
+	 * unchanged. Credit links survive (Creative Commons attribution links the source, author and
+	 * licence): links, emphasis and strong are kept, everything else is stripped.
 	 *
 	 * @param string               $block_content Rendered block HTML.
 	 * @param array<string, mixed> $block         Parsed block.
@@ -271,7 +284,7 @@ class Helpers {
 			return $block_content;
 		}
 
-		$figcaption = '<figcaption class="ttm-hero__caption">' . esc_html( $caption ) . '</figcaption>';
+		$figcaption = '<figcaption class="ttm-hero__caption">' . wp_kses( $caption, self::CAPTION_TAGS ) . '</figcaption>';
 
 		return substr( $block_content, 0, $closing ) . $figcaption . substr( $block_content, $closing );
 	}

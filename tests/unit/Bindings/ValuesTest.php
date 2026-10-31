@@ -221,7 +221,7 @@ class ValuesTest extends TestCase {
 
 	public function test_newsletter_title_by_context(): void {
 		$this->assertSame( 'Get the next part', Values::newsletter_title( true ) );
-		$this->assertSame( 'The weekly issue.', Values::newsletter_title( false ) );
+		$this->assertSame( 'New posts by email.', Values::newsletter_title( false ) );
 	}
 
 	public function test_section_label_more_in_and_empty(): void {

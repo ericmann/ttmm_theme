@@ -232,10 +232,10 @@ Grid `24px 1fr` (chapters `44px 1fr auto`), gap 8–16, padding 10–13 0, 1px r
 11px/600, padding 2 8, radius 0. `.tag-neutral` surface bg ink; `.tag-accent` accent-100 bg accent-700 text; `.tag-outline` 1px divider. Never on the front page; only on article byline rows and archive filter rows.
 
 ### 4.32 Newsletter box (`ttm-newsletter-box`)
-Surface bg, padding 16 18. Title 15/800 (“Get the next part” / “The weekly issue”), copy 13px neutral-800 (“Series land in the newsletter the week they publish.”), form: flex gap 6, `.input` (1px divider border, ground bg, 14px, padding 8 10, radius 0) + `.btn-primary` “Subscribe”. Phone: stacked, `.btn-block`.
+Surface bg, padding 16 18. Title 15/800 (“Get the next part” / “New posts by email.”), copy 13px neutral-800 (“Each post by email as it publishes, or as a daily or weekly digest.”), form: flex gap 6, `.input` (1px divider border, ground bg, 14px, padding 8 10, radius 0) + `.btn-primary` “Subscribe”. Phone: stacked, `.btn-block`.
 
 ### 4.33 Newsletter poster (`ttm-poster`, pattern `ttm/newsletter-poster`)
-Full-width accent field, padding 36 48 32. Grid `1fr auto` align end. H3 `poster` in ground colour, max 20ch (“Everything above, once a week, in your inbox.”). Right: `.input` 260px with ground bg and border + `.btn-ghost` (ground text, 1px ground border). Phone: padding 24 20, H3 28px, stacked full-width input and block ghost button. The poster is the **only** place the accent is a field.
+Full-width accent field, padding 36 48 32. Grid `1fr auto` align end. H3 `poster` in ground colour, max 20ch (“Everything above, in your inbox.”). Right: `.input` 260px with ground bg and border + `.btn-ghost` (ground text, 1px ground border). Phone: padding 24 20, H3 28px, stacked full-width input and block ghost button. The poster is the **only** place the accent is a field.
 
 ### 4.34 Footer (`ttm-footer`, template part `footer`)
 2px rule above (or the poster directly above on the front page, then 16px). Flex space-between, padding 14–16 48, 12px neutral-700. Left: “These Things Matter · © {year} Eric Mann · Built on WordPress”. Right: section names separated by “ · ” plus “Series” and “RSS”, each a link. Phone: stacked, 11px/1.6.

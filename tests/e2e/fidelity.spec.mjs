@@ -1815,7 +1815,7 @@ test.describe( 'aside', () => {
 	} ) => {
 		await gotoScreen( page, SCREENS.articleNoSeries, 1280 );
 		const el = page.locator( '.ttm-newsletter-box__title' );
-		expect( await text( el ) ).toBe( 'The weekly issue.' );
+		expect( await text( el ) ).toBe( 'New posts by email.' );
 	} );
 } );
 
@@ -2593,8 +2593,35 @@ test.describe( 'writing', () => {
 	} ) => {
 		await gotoScreen( page, SCREENS.writing, 1280 );
 		const el = page.locator( '.ttm-book .ttm-cover' ).first();
-		expect( await computed( el, 'aspect-ratio' ) ).toBe( '2 / 3' );
+		expect( await computed( el, 'aspect-ratio' ) ).toBe( 'auto' );
 		expect( await computed( el, 'box-shadow' ) ).toBe( 'none' );
+
+		// Print covers are never cropped: each image renders at its own aspect ratio.
+		const ratios = await page
+			.locator( '.ttm-book .ttm-cover img' )
+			.evaluateAll( ( imgs ) =>
+				imgs.map( ( img ) => {
+					const r = img.getBoundingClientRect();
+					return [
+						r.width / r.height,
+						img.naturalWidth / img.naturalHeight,
+					];
+				} )
+			);
+		expect( ratios.length ).toBeGreaterThan( 0 );
+		for ( const [ shown, natural ] of ratios ) {
+			expect( Math.abs( shown - natural ) ).toBeLessThan( 0.02 );
+		}
+
+		// Covers of different shapes stand on one baseline, so the titles line up.
+		const bottoms = await page
+			.locator( '.ttm-book .ttm-cover' )
+			.evaluateAll( ( figs ) =>
+				figs.map( ( f ) =>
+					Math.round( f.getBoundingClientRect().bottom )
+				)
+			);
+		expect( new Set( bottoms.slice( 0, 2 ) ).size ).toBe( 1 );
 	} );
 
 	test( 'wr-book-title: .ttm-book__title (first) @1280', async ( {

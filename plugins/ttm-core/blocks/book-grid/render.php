@@ -47,7 +47,11 @@ if ( empty( $ttm_books ) ) {
 		<div class="ttm-book">
 			<?php if ( ! empty( $ttm_book['cover_id'] ) ) : ?>
 			<figure class="ttm-cover">
-				<?php echo Helpers::image( (int) $ttm_book['cover_id'], 'ttm-cover' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Helpers::image() escapes via wp_get_attachment_image(). ?>
+				<?php
+				// Print covers come in every shape (trade 2:3, tech 3:4, 4:5): the uncropped
+				// medium_large rendition keeps the whole cover; ttm.css sizes it to the column.
+				echo Helpers::image( (int) $ttm_book['cover_id'], 'medium_large' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Helpers::image() escapes via wp_get_attachment_image().
+				?>
 			</figure>
 			<?php endif; ?>
 			<p class="ttm-book__title"><?php echo esc_html( $ttm_book['title'] ); ?></p>

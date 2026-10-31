@@ -250,7 +250,7 @@ class Sources {
 
 	/**
 	 * `ttm/newsletter-copy` (Decision S3): "Get the next part" on a single post that belongs to
-	 * a series or on a series term archive, else "The weekly issue."
+	 * a series or on a series term archive, else "New posts by email."
 	 *
 	 * @param array<string, mixed> $source_args    Unused: no args.
 	 * @param WP_Block             $block_instance Consuming block.

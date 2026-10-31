@@ -8,7 +8,7 @@ Decisions the design leaves to the build/planning pass. Each has the design’s 
 | Q2 | Journal template selection: primary-category filter vs post format `aside` | **Primary-category filter** (`single-journal.html`) | Post formats are legacy; a category is already how the owner files them. |
 | Q3 | Politics → child category of Opinion or a tag | **Child category** `opinion/politics` with redirects from `/category/politics/` | Keeps its archive; cells show “· Politics”. |
 | Q4 | Books: option repeater vs CPT | **Option repeater** (`ttm_books`) | Promote to CPT if > 10 books or if books need their own pages. |
-| Q5 | Newsletter provider | **Buttondown** adapter first; provider-agnostic interface | Owner to confirm; poster copy assumes weekly. Day of send unknown (“every Sunday” copy pending). |
+| Q5 | Newsletter provider | **Jetpack** (resolved 2026-10-30): per-post emails, subscribers may choose a daily or weekly digest; provider-agnostic interface stays | Copy says “as it publishes, or as a daily or weekly digest”; no hand-made issues. |
 | Q6 | “Most read” source | **Manual flag** `ttm_featured_in_section` (up to 3 per category) | No analytics dependency; can switch to a views counter later. |
 | Q7 | Include Journal in the main RSS feed | **Yes** | Setting exists to flip it. |
 | Q8 | Comments | **Off** by default; theme styles the core form minimally if enabled | Not designed. |

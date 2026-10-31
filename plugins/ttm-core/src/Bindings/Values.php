@@ -425,7 +425,8 @@ class Values {
 
 	/**
 	 * Newsletter box title (Decision S3): "Get the next part" in series contexts (a single
-	 * post that belongs to a series, or a series term archive), else "The weekly issue."
+	 * post that belongs to a series, or a series term archive), else "New posts by email." (Jetpack
+	 * sends each post as it publishes; subscribers can switch to a daily or weekly digest).
 	 *
 	 * @param bool $in_series Whether the request is a series context.
 	 * @return string
@@ -433,7 +434,7 @@ class Values {
 	public static function newsletter_title( bool $in_series ): string {
 		return $in_series
 			? __( 'Get the next part', 'ttm-core' )
-			: __( 'The weekly issue.', 'ttm-core' );
+			: __( 'New posts by email.', 'ttm-core' );
 	}
 
 	/**

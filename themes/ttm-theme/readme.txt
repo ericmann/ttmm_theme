@@ -4,7 +4,7 @@ Tags: block-theme, newspaper, one-column, custom-colors, editor-style
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.3.6
+Stable tag: 0.3.7
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,6 +25,12 @@ Install and activate both together.
    publishing directly.
 
 == Changelog ==
+
+= 0.3.7 =
+* "In print" book covers keep their own shape and stand on one baseline, so titles line up.
+* Newsletter copy matches per-post delivery: poster "Everything above, in your inbox."; box
+  "Each post by email as it publishes, or as a daily or weekly digest."
+* Starter content stores page templates as slugs ("page-series", "default"), not file names.
 
 = 0.3.6 =
 * Syntax colours for code blocks, from the theme palette, when the site runs the
