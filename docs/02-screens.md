@@ -159,6 +159,6 @@ Not a screen; the reference render for `06-fallbacks.md`. Each frame shows a rea
 - **Tag archive / date archive** (`archive.html`): the `1e` layout with kicker “Tag” / “Month”, no filter row, no aside series section (keep Most read).
 - **Search results** (`search.html`): `1e` layout; header H1 “Search” with the query as the description line; rows as archive rows with the matched section as kicker; core Search block (styled `.input` + `.btn-secondary`) under the header.
 - **404**: inner masthead; H1 “Not here.” `display-xl`; paragraph 17px; core Search block; then the front page’s **Series strip** and a 4-item “Latest” list. Footer.
-- **Static page** (`page.html`): inner masthead; H1 56px; body §4.24 in an 8-col column with an empty aside; footer.
-- **About page**: `page.html` + a colour portrait (`core/image`, 3:2, full column) above the H1 — optional, the owner supplies it.
+- **Static page** (`page.html`): inner masthead; H1 56px; body §4.24 in an 8-col column; the aside holds the featured image when there is one (the About portrait); footer.
+- **About page**: `page.html` + a colour portrait (the featured image, 3:4, at most 320px wide) in the right-hand aside beside the text; stacked below the text under 1025px — optional, the owner supplies it.
 - **Newsletter landing** (`/newsletter/`): `page.html` with the poster §4.33 immediately under the masthead, then body copy explaining cadence, then the last 6 issues if an archive exists (`07`).

@@ -44,7 +44,7 @@ class CurrentSection {
 		}
 
 		$raw_path = wp_parse_url( $url, PHP_URL_PATH );
-		$path     = trailingslashit( is_string( $raw_path ) ? $raw_path : '' );
+		$path     = self::section_path( trailingslashit( is_string( $raw_path ) ? $raw_path : '' ) );
 
 		if ( '/series/' === $path && empty( SeriesIndex::all() ) ) {
 			return '';
@@ -55,6 +55,27 @@ class CurrentSection {
 		}
 
 		return self::fill_label( $block_content, $path );
+	}
+
+	/**
+	 * The Writing page (`/writing/`) is the canonical Writing URL (Q10), so a nav link to it
+	 * counts as the Writing category's own link: same current state, same label.
+	 *
+	 * @param string $path Trailing-slashed URL path.
+	 * @return string The Writing category's path for the Writing page, otherwise `$path`.
+	 */
+	private static function section_path( string $path ): string {
+		$slug      = (string) Config::get( 'sections.writing_slug', 'writing' );
+		$page_path = wp_parse_url( home_url( '/' . $slug . '/' ), PHP_URL_PATH );
+		if ( $page_path !== $path ) {
+			return $path;
+		}
+
+		$category = get_category_by_slug( $slug );
+		$link     = $category ? wp_parse_url( get_category_link( $category ), PHP_URL_PATH ) : null;
+
+		// Plain permalinks (`?cat=N`) give no category path to alias.
+		return is_string( $link ) && '/' !== $link ? trailingslashit( $link ) : $path;
 	}
 
 	/**
@@ -130,6 +151,16 @@ class CurrentSection {
 				if ( $category_link && trailingslashit( $category_link ) === $path ) {
 					return true;
 				}
+			}
+		}
+
+		// The Writing page renders the Writing section (outside F28 it is a page, not a category).
+		$writing_slug = (string) Config::get( 'sections.writing_slug', 'writing' );
+		if ( is_page( $writing_slug ) ) {
+			$category      = get_category_by_slug( $writing_slug );
+			$category_link = $category ? wp_parse_url( get_category_link( $category ), PHP_URL_PATH ) : false;
+			if ( $category_link && trailingslashit( $category_link ) === $path ) {
+				return true;
 			}
 		}
 

@@ -190,4 +190,38 @@ class CurrentSectionTest extends TTM_IntegrationTestCase {
 
 		$this->assertStringContainsString( 'Technology Renamed', $html );
 	}
+
+	/**
+	 * Q10: `/writing/` is the canonical Writing URL; a nav link to it is current on a Writing
+	 * post, on the Writing page itself, and takes the Writing term's name as its label.
+	 */
+	public function test_writing_page_link_stands_in_for_the_writing_category(): void {
+		$this->set_permalink_structure( '/%postname%/' );
+		create_initial_taxonomies(); // Re-register the category permastruct under pretty permalinks.
+		$writing = $this->category_id( 'writing', 'Writing' );
+		wp_update_term( $writing, 'category', [ 'name' => 'Fiction & Books' ] );
+		$page_id = self::factory()->post->create(
+			[
+				'post_type'   => 'page',
+				'post_name'   => 'writing',
+				'post_status' => 'publish',
+			]
+		);
+		$post_id = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $writing ],
+			]
+		);
+		PrimaryCategory::on_save( $post_id, get_post( $post_id ) );
+
+		$this->go_to( (string) get_permalink( $post_id ) );
+		$html = $this->render_nav_link( home_url( '/writing/' ) );
+		$this->assertStringContainsString( 'current-section', $html );
+		$this->assertStringContainsString( 'Fiction &amp; Books', $html );
+
+		$this->go_to( (string) get_permalink( $page_id ) );
+		$this->assertStringContainsString( 'current-section', $this->render_nav_link( home_url( '/writing/' ) ) );
+		$this->assertStringNotContainsString( 'current-section', $this->render_nav_link( home_url( '/series/' ) ) );
+	}
 }

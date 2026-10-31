@@ -128,6 +128,49 @@ class ChromePartsTest extends TTM_IntegrationTestCase {
 		$this->assertStringNotContainsString( 'wp-block-navigation', $meta_html );
 	}
 
+	/**
+	 * Both mastheads carry Newsletter, RSS and About. RSS follows the page: a category archive
+	 * offers its own feed, every other page the site's. Patterns render per request, after the
+	 * main query, so the pattern file is executed directly here (see the rename test above).
+	 */
+	public function test_inner_masthead_links_newsletter_rss_and_about_with_a_contextual_feed(): void {
+		$this->set_permalink_structure( '/%postname%/' );
+		create_initial_taxonomies(); // Re-register the category permastruct under pretty permalinks.
+		$term     = term_exists( 'security', 'category' );
+		$security = $term ? (int) $term['term_id'] : (int) wp_insert_term( 'Security', 'category', [ 'slug' => 'security' ] )['term_id'];
+		$post_id  = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+
+		$aside = static function (): string {
+			ob_start();
+			require get_template_directory() . '/patterns/masthead-inner.php';
+			$html  = (string) do_blocks( (string) ob_get_clean() );
+			$start = (int) strpos( $html, 'ttm-masthead-inner__aside' );
+
+			return substr( $html, $start, (int) strpos( $html, '</p>', $start ) - $start );
+		};
+
+		$this->go_to( (string) get_category_link( $security ) );
+		$html = $aside();
+		$this->assertSame( 3, substr_count( $html, '<a ' ) );
+		$this->assertStringContainsString( 'href="' . esc_url( home_url( '/newsletter/' ) ) . '"', $html );
+		$this->assertStringContainsString( 'href="' . esc_url( get_category_feed_link( $security ) ) . '"', $html );
+		$this->assertStringContainsString( 'href="' . esc_url( home_url( '/about/' ) ) . '"', $html );
+
+		$this->go_to( (string) get_permalink( $post_id ) );
+		$this->assertStringContainsString( 'href="' . esc_url( get_feed_link() ) . '"', $aside() );
+	}
+
+	public function test_both_mastheads_link_writing_to_its_page(): void {
+		foreach ( [ 'masthead-front', 'masthead-inner' ] as $slug ) {
+			ob_start();
+			require get_template_directory() . "/patterns/{$slug}.php";
+			$raw = (string) ob_get_clean();
+
+			$this->assertStringContainsString( '"url":"' . esc_url( home_url( '/writing/' ) ) . '"', $raw, "{$slug} Writing link" );
+			$this->assertStringNotContainsString( 'category/writing', $raw, "{$slug} Writing link" );
+		}
+	}
+
 	public function test_both_mastheads_emit_ttm_nav_hub_class(): void {
 		// Checks the pattern's own source markup (pre-`do_blocks()`), not the fully server-side
 		// rendered nav -- core's Navigation block keeps request-scoped static caches that get

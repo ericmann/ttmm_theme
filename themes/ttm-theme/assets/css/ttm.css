@@ -706,7 +706,7 @@ blockquote.is-style-pull cite,
 }
 
 /* stylelint-disable-next-line no-descending-specificity */
-.ttm-masthead-front__links a {
+.ttm-masthead-front__links a, .ttm-masthead-inner__aside a {
 	margin-left: var(--wp--preset--spacing--40);
 }
 
@@ -2725,8 +2725,8 @@ ul.modern-footnotes-list,
 
 /* 4.24 static page */
 .ttm-page__portrait {
-	aspect-ratio: 3 / 2;
-	margin-bottom: 28px;
+	aspect-ratio: 3 / 4;
+	max-width: 320px;
 }
 
 main.is-style-grid-8-4 {

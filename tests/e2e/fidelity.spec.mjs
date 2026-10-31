@@ -1073,8 +1073,15 @@ test.describe( 'demo', () => {
 		);
 		expect( ratio ).toBeGreaterThanOrEqual( 1.35 );
 		expect( ratio ).toBeLessThanOrEqual( 1.65 );
-		const portrait = page.locator( '.ttm-page__portrait' );
-		expect( await computed( portrait, 'aspect-ratio' ) ).toBe( '3 / 2' );
+		const portrait = page.locator( 'main aside .ttm-page__portrait' );
+		expect( await computed( portrait, 'aspect-ratio' ) ).toBe( '3 / 4' );
+		// Beside the text, not above it: the portrait column starts right of the title.
+		const [ title, box ] = await Promise.all( [
+			page.locator( 'main h1' ).boundingBox(),
+			portrait.boundingBox(),
+		] );
+		expect( box.x ).toBeGreaterThan( title.x + title.width / 2 );
+		expect( box.width ).toBeLessThanOrEqual( 320 );
 	} );
 
 	// prettier-ignore

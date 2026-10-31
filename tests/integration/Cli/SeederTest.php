@@ -50,6 +50,31 @@ class SeederTest extends TTM_IntegrationTestCase {
 		}
 	}
 
+	/**
+	 * Q10: the Sections menu links Writing to its page, the canonical URL.
+	 */
+	public function test_sections_navigation_links_writing_to_its_page(): void {
+		$this->set_permalink_structure( '/%postname%/' );
+		create_initial_taxonomies(); // Re-register the category permastruct under pretty permalinks.
+		$seeder = new Seeder( false );
+		$seeder->seed_categories();
+		$seeder->seed_pages();
+		$seeder->seed_navigation();
+
+		$nav = get_posts(
+			[
+				'post_type'      => 'wp_navigation',
+				'title'          => 'Sections',
+				'posts_per_page' => 1,
+			]
+		);
+
+		$this->assertCount( 1, $nav );
+		$this->assertStringContainsString( '"url":"' . esc_url( home_url( '/writing/' ) ) . '"', $nav[0]->post_content );
+		$this->assertStringContainsString( '"url":"' . esc_url( home_url( '/category/technology/' ) ) . '"', $nav[0]->post_content );
+		$this->assertStringNotContainsString( 'category/writing', $nav[0]->post_content );
+	}
+
 	public function test_seed_is_idempotent(): void {
 		$seeder = new Seeder( false );
 		$seeder->seed_categories();

@@ -25,15 +25,22 @@ $ttm_sections = [
 
 $ttm_nav_links = '';
 foreach ( $ttm_sections as $ttm_slug => $ttm_fallback_name ) {
-	$ttm_term       = get_category_by_slug( $ttm_slug );
-	$ttm_name       = $ttm_term ? $ttm_term->name : $ttm_fallback_name;
-	$ttm_url        = $ttm_term ? get_category_link( $ttm_term ) : home_url( '/category/' . $ttm_slug . '/' );
+	$ttm_term = get_category_by_slug( $ttm_slug );
+	$ttm_name = $ttm_term ? $ttm_term->name : $ttm_fallback_name;
+	$ttm_url  = $ttm_term ? get_category_link( $ttm_term ) : home_url( '/category/' . $ttm_slug . '/' );
+	// Q10: Writing's canonical URL is its page (starter content always creates it).
+	$ttm_url        = 'writing' === $ttm_slug ? home_url( '/writing/' ) : $ttm_url;
 	$ttm_nav_links .= sprintf(
 		'<!-- wp:navigation-link {"label":"%s","url":"%s","kind":"custom"} /-->',
 		esc_attr( $ttm_name ),
 		esc_url( $ttm_url )
 	);
 }
+// RSS follows the page: a category archive offers its own feed, everything else the site's.
+// Patterns render with the main query in place, so this is per page, never per visitor.
+$ttm_queried  = get_queried_object();
+$ttm_feed_url = is_category() && $ttm_queried instanceof WP_Term ? get_category_feed_link( $ttm_queried->term_id ) : get_feed_link();
+
 $ttm_nav_links .= sprintf(
 	'<!-- wp:navigation-link {"label":"%s","url":"%s","kind":"custom","className":"ttm-nav__hub"} /-->',
 	esc_attr__( 'Series', 'ttm-theme' ),
@@ -57,7 +64,11 @@ $ttm_nav_links .= sprintf(
 	<!-- /wp:navigation -->
 
 	<!-- wp:paragraph {"className":"ttm-masthead-inner__aside"} -->
-	<p class="ttm-masthead-inner__aside"><a href="<?php echo esc_url( home_url( '/newsletter/' ) ); ?>"><?php esc_html_e( 'Newsletter', 'ttm-theme' ); ?></a></p>
+	<p class="ttm-masthead-inner__aside">
+		<a href="<?php echo esc_url( home_url( '/newsletter/' ) ); ?>"><?php esc_html_e( 'Newsletter', 'ttm-theme' ); ?></a>
+		<a href="<?php echo esc_url( $ttm_feed_url ); ?>"><?php esc_html_e( 'RSS', 'ttm-theme' ); ?></a>
+		<a href="<?php echo esc_url( home_url( '/about/' ) ); ?>"><?php esc_html_e( 'About', 'ttm-theme' ); ?></a>
+	</p>
 	<!-- /wp:paragraph -->
 
 </div>
