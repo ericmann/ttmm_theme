@@ -35,21 +35,24 @@ describe( 'theme-css', () => {
 		);
 	} );
 
-	it( 'names block stylesheets after ttm-core blocks, sorted', () => {
+	it( 'names block stylesheets after ttm-core blocks (or core-<name>), sorted', () => {
 		const names = blockCssNames( ROOT );
 		expect( names ).toContain( 'writing-cell' );
+		expect( names ).toContain( 'core-gallery' );
 		expect( [ ...names ].sort() ).toEqual( names );
-		names.forEach( ( name ) =>
-			expect(
-				fs.existsSync(
-					path.join(
-						ROOT,
-						'plugins/ttm-core/blocks',
-						name,
-						'block.json'
+		names
+			.filter( ( name ) => ! name.startsWith( 'core-' ) )
+			.forEach( ( name ) =>
+				expect(
+					fs.existsSync(
+						path.join(
+							ROOT,
+							'plugins/ttm-core/blocks',
+							name,
+							'block.json'
+						)
 					)
-				)
-			).toBe( true )
-		);
+				).toBe( true )
+			);
 	} );
 } );

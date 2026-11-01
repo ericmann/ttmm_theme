@@ -1,8 +1,9 @@
 <?php
 /**
- * Styles owned by a single ttm-core block. assets/css/blocks/<name>.css styles ttm/<name> and
- * loads only on pages that render that block, so ttm.css carries only the chrome, grids and
- * shared pieces every page needs. The editor loads every file, after ttm.css (functions.php).
+ * Styles owned by a single block. assets/css/blocks/<name>.css styles ttm/<name> (core-<name>.css
+ * styles core/<name>) and loads only on pages that render that block, so ttm.css carries only the
+ * chrome, grids and shared pieces every page needs. The editor loads every file, after ttm.css
+ * (functions.php).
  *
  * @package TTM\Theme
  */
@@ -25,6 +26,15 @@ function block_css_names(): array {
 }
 
 /**
+ * The block a stylesheet name styles: `core-gallery` is core/gallery, anything else is ttm/<name>.
+ *
+ * @param string $name A file name from block_css_names().
+ */
+function block_for_css( string $name ): string {
+	return str_starts_with( $name, 'core-' ) ? 'core/' . substr( $name, strlen( 'core-' ) ) : 'ttm/' . $name;
+}
+
+/**
  * Attach each file to the block its name names, on the front end only.
  */
 function register_block_css(): void {
@@ -36,7 +46,7 @@ function register_block_css(): void {
 	foreach ( block_css_names() as $name ) {
 		$path = get_template_directory() . '/assets/css/blocks/' . $name . '.css';
 		wp_enqueue_block_style(
-			'ttm/' . $name,
+			block_for_css( $name ),
 			[
 				'handle' => 'ttm-block-' . $name,
 				'src'    => get_template_directory_uri() . '/assets/css/blocks/' . $name . '.css',

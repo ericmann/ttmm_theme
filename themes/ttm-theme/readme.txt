@@ -4,7 +4,7 @@ Tags: block-theme, newspaper, one-column, custom-colors, editor-style
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.3.9
+Stable tag: 0.3.10
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,6 +25,15 @@ Install and activate both together.
    publishing directly.
 
 == Changelog ==
+
+= 0.3.10 =
+* Journal entries open on their featured photograph (Recede): full-bleed under the masthead,
+  fading into the page; the entry slides over it as the photo recedes to a grey wash. Long or
+  photo-heavy entries get a tall, pinned hero; short ones a shorter band. Reduced motion, or a
+  browser without scroll timelines, gets a still photograph. The photo credit sits at its foot.
+* Galleries lay out again: theme.json gave them a unitless gap, which broke core's column widths
+  and stacked every photo full width. In journal entries, galleries span all three columns in
+  justified rows (each frame at its photo's ratio; nothing cropped, order kept).
 
 = 0.3.9 =
 * Styles that belong to one block (verse, Writing cell, series bar, progress, contents and

@@ -153,7 +153,7 @@ export function isExempt( entry ) {
 }
 
 /**
- * Parse `tests/e2e/selectors-allow.txt`: `<selector> # <reason>` lines, blank/comment-only
+ * Parse `tests/e2e/selectors-allow.txt`: `<selector> # <reason>` lines (a spaced `#`), blank/comment-only
  * lines ignored. Mirrors `scripts/lib/css-coverage.mjs`'s `parseAllowList` shape (a literal
  * selector match, not a glob — rule 41 allow-list entries are exact selectors).
  *
@@ -169,12 +169,14 @@ export function parseSelectorAllow( text ) {
 			continue;
 		}
 
-		const hashIndex = line.indexOf( '#' );
+		// The reason follows a spaced ` # `, so an id inside a selector (`:not(#x)`) is kept.
+		const match = line.match( /\s#\s/ );
+		const hashIndex = match ? match.index : -1;
 		const selector = (
 			hashIndex === -1 ? line : line.slice( 0, hashIndex )
 		).trim();
 		const reason =
-			hashIndex === -1 ? '' : line.slice( hashIndex + 1 ).trim();
+			hashIndex === -1 ? '' : line.slice( hashIndex + 2 ).trim();
 
 		if ( selector === '' ) {
 			continue;

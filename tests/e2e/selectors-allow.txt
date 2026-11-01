@@ -46,3 +46,18 @@ blockquote.is-style-pull cite # editor block style (04 §3)
 .wp-block-group.is-style-update # editor block style (04 §3)
 .is-style-note > :last-child # editor block style (04 §3)
 .is-style-update > :last-child # editor block style (04 §3)
+body:has(.ttm-journal-hero) # state: journal hero; seeded journal entries have no featured image (ArticleTemplatesTest covers the hero)
+.wp-site-blocks:has(.ttm-journal-hero) > :has(.ttm-masthead-inner) # state: journal hero; seeded journal entries have no featured image
+.ttm-journal-recede .ttm-journal-hero # state: journal hero; seeded journal entries have no featured image
+.ttm-journal-long .ttm-journal-recede .ttm-journal-hero # state: long journal hero; seeded journal entries have no featured image
+.ttm-journal-hero img # state: journal hero; seeded journal entries have no featured image
+.ttm-journal-hero::after # state: journal hero; seeded journal entries have no featured image
+.ttm-journal-hero .ttm-hero__caption # state: journal hero; seeded journal entries have no featured image
+.ttm-journal-recede:has(.ttm-journal-hero) .ttm-journal-head # state: journal hero; seeded journal entries have no featured image
+.ttm-journal-head .wp-block-gallery.has-nested-images # state: journal gallery; no seeded journal entry has a gallery (GalleriesTest covers the frames)
+.ttm-journal-head .wp-block-gallery.has-nested-images figure.wp-block-image:not(#individual-image) # state: journal gallery; no seeded journal entry has a gallery
+.ttm-journal-head .wp-block-gallery.has-nested-images figure.wp-block-image:not(#individual-image) > a # state: journal gallery; no seeded journal entry has a gallery
+.ttm-journal-head .wp-block-gallery.has-nested-images figure.wp-block-image:not(#individual-image) img # state: journal gallery; no seeded journal entry has a gallery
+.ttm-journal-head .wp-block-gallery.has-nested-images figure.wp-block-image:has(figcaption)::before # state: journal gallery; no seeded journal entry has a gallery
+.ttm-journal-head .wp-block-gallery.has-nested-images figure.wp-block-image figcaption # state: journal gallery; no seeded journal entry has a gallery
+.ttm-journal-head .wp-block-gallery.has-nested-images .blocks-gallery-caption # state: journal gallery; no seeded journal entry has a gallery

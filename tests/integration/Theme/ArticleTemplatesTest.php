@@ -312,6 +312,48 @@ class ArticleTemplatesTest extends TTM_IntegrationTestCase {
 		$this->assertStringContainsString( '248 words', $html );
 	}
 
+	public function test_journal_featured_image_is_a_hero_the_entry_sheet_follows(): void {
+		if ( ! function_exists( 'imagecreatetruecolor' ) ) {
+			$this->markTestSkipped( 'GD is not available.' );
+		}
+
+		$journal = $this->category_id( 'journal', 'Journal' );
+		$post    = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $journal ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $journal );
+		set_post_thumbnail( $post, ( new \TTM\Core\Cli\Seeder() )->image( 'Journal hero', 'ttm-lead' ) );
+
+		$html  = $this->render_single( $post, 'single-journal' );
+		$hero  = strpos( $html, 'ttm-journal-hero' );
+		$sheet = strpos( $html, 'ttm-journal-sheet' );
+
+		$this->assertIsInt( $hero );
+		$this->assertIsInt( $sheet );
+		$this->assertLessThan( $sheet, $hero );
+		$this->assertLessThan( strpos( $html, 'ttm-journal-head' ), $sheet );
+		$this->assertLessThan( strpos( $html, 'ttm-journal-stream' ), $sheet );
+	}
+
+	public function test_journal_without_featured_image_has_no_hero(): void {
+		$journal = $this->category_id( 'journal', 'Journal' );
+		$post    = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $journal ],
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $journal );
+
+		$html = $this->render_single( $post, 'single-journal' );
+
+		$this->assertStringNotContainsString( 'ttm-journal-hero', $html );
+		$this->assertStringContainsString( 'ttm-journal-sheet', $html );
+	}
+
 	/**
 	 * SPEC §6.2 "More in {Category}": one label with the category name inline, not a second
 	 * label on the right; rows are `h4` post titles inside `.ttm-item`.

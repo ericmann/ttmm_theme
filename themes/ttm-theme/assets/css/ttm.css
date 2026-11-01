@@ -1948,6 +1948,116 @@ html:has(.ttm-masthead-inner) {
 	color: var(--wp--preset--color--neutral-700);
 }
 
+/* 4.12a journal hero (Recede): the featured photograph runs full-bleed under the masthead and
+   fades into the ground; the entry is an opaque sheet that slides over it as the photograph
+   recedes to a grey wash. A long or photo-heavy entry (ttm-journal-long) gets the tall, pinned
+   hero. Without scroll timelines, or with reduced motion, it is a still photograph. */
+body:has(.ttm-journal-hero) {
+	overflow-x: clip;
+}
+
+.wp-site-blocks:has(.ttm-journal-hero) > :has(.ttm-masthead-inner),
+.ttm-journal-sheet {
+	border-image: conic-gradient(var(--wp--preset--color--bg) 0 0) fill 0 / 0 / 0 100vmax;
+}
+
+.ttm-journal-sheet {
+	position: relative;
+	z-index: 1;
+	background: var(--wp--preset--color--bg);
+}
+
+.ttm-journal-recede .ttm-journal-hero {
+	position: relative;
+	width: 100vw;
+	max-width: none;
+	height: min(44svh, 420px);
+	margin: 0 calc(50% - 50vw);
+	overflow: hidden;
+}
+
+.ttm-journal-long .ttm-journal-recede .ttm-journal-hero {
+	height: min(72svh, 720px);
+}
+
+.ttm-journal-hero img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.ttm-journal-hero::after {
+	content: "";
+	position: absolute;
+	inset: auto 0 0;
+	height: 22%;
+	background: linear-gradient(transparent, var(--wp--preset--color--bg));
+	pointer-events: none;
+}
+
+/* The photo credit sits on ground at the hero's foot, over the date column. */
+.ttm-journal-hero .ttm-hero__caption {
+	position: absolute;
+	z-index: 1;
+	bottom: 0;
+	left: max(var(--wp--custom--gutter--desktop), 50vw - 640px + var(--wp--custom--gutter--desktop));
+	max-width: 40ch;
+	margin: 0;
+	padding: 4px 8px 0 0;
+	background: var(--wp--preset--color--bg);
+}
+
+.ttm-journal-recede:has(.ttm-journal-hero) .ttm-journal-head {
+	padding-top: 32px;
+}
+
+@supports (animation-timeline: scroll()) {
+
+	@media (prefers-reduced-motion: no-preference) {
+
+		.ttm-journal-long .ttm-journal-recede .ttm-journal-hero {
+			position: sticky;
+			top: var(--ttm-pin);
+		}
+
+		.ttm-journal-hero img {
+			animation: ttm-recede linear both;
+			animation-timeline: scroll(root);
+			animation-range: 0 min(44svh, 420px);
+		}
+
+		.ttm-journal-long .ttm-journal-hero img {
+			animation-range: 0 min(72svh, 720px);
+		}
+	}
+}
+
+@keyframes ttm-recede {
+
+	to {
+		opacity: 0.2;
+		filter: grayscale(1) contrast(1.08);
+		transform: scale(1.04);
+	}
+}
+
+@media (max-width: 720px) {
+
+	.ttm-journal-recede .ttm-journal-hero {
+		height: auto;
+		aspect-ratio: 3 / 2;
+	}
+
+	.ttm-journal-long .ttm-journal-recede .ttm-journal-hero {
+		height: auto;
+		aspect-ratio: 4 / 5;
+	}
+
+	.ttm-journal-hero .ttm-hero__caption {
+		left: var(--wp--custom--gutter--phone);
+	}
+}
+
 /* 4.13 syndication line */
 .ttm-syndication {
 	display: flex;

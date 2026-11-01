@@ -98,6 +98,7 @@ describe( 'parseSelectorAllow', () => {
 			'',
 			'.is-style-tile # editor block style (04 §3)',
 			'   ',
+			'.ttm-x figure:not(#individual-image) img # state: an id in the selector',
 		].join( '\n' );
 
 		const entries = parseSelectorAllow( text );
@@ -106,6 +107,10 @@ describe( 'parseSelectorAllow', () => {
 			{
 				selector: '.is-style-tile',
 				reason: 'editor block style (04 §3)',
+			},
+			{
+				selector: '.ttm-x figure:not(#individual-image) img',
+				reason: 'state: an id in the selector',
 			},
 		] );
 	} );

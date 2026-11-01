@@ -43,6 +43,8 @@ class ConfigTest extends TestCase {
 			'journal.stream_count',
 			'journal.archive_per_page',
 			'journal.relative_day_window',
+			'journal.long_words',
+			'journal.long_photos',
 			'series.strip_limit',
 			'series.index_batch',
 			'series.max_purchase_links',

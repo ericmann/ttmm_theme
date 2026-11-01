@@ -4,7 +4,7 @@ Tags: blocks, block-bindings, newspaper, series, block-theme
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.3.9
+Stable tag: 0.3.10
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -30,6 +30,10 @@ site owner's byline.
    publishing directly — every block and template degrades gracefully with no content.
 
 == Changelog ==
+
+= 0.3.10 =
+* A journal entry of `journal.long_words` (600) words or more, or with `journal.long_photos` (3)
+  or more image blocks, gets the `ttm-journal-long` body class (the theme's tall journal hero).
 
 = 0.3.9 =
 * No plugin changes; version kept in step with the theme.

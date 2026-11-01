@@ -25,8 +25,10 @@ const MARKUP_ROOTS = [
 const CSS_FILES = themeCssFiles();
 
 // A block stylesheet loads only where `ttm/<name>` renders, so a name with no block never loads.
+// `core-<name>.css` styles core/<name>, which always exists.
 const orphanBlockCss = blockCssNames().filter(
 	( name ) =>
+		! name.startsWith( 'core-' ) &&
 		! existsSync( join( 'plugins/ttm-core/blocks', name, 'block.json' ) )
 );
 
