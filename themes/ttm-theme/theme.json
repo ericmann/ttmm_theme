@@ -178,6 +178,10 @@
 			"core/image": {
 				"border": { "radius": "0" }
 			},
+			"core/gallery": {
+				"spacing": { "blockGap": "var(--wp--preset--spacing--20)" },
+				"css": "--wp--style--gallery-gap-default:var(--wp--preset--spacing--20)"
+			},
 			"core/navigation": {
 				"typography": { "fontWeight": "600", "fontSize": "var(--wp--preset--font-size--body-s)" }
 			},

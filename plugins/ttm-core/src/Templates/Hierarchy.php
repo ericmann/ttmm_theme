@@ -17,7 +17,7 @@ use TTM\Core\Query\Stats;
 use WP_Query;
 
 /**
- * Adds ttm-section-{slug}, ttm-in-series, ttm-form-{form} to body_class; prepends
+ * Adds ttm-section-{slug}, ttm-in-series, ttm-form-{form}, ttm-journal-long to body_class; prepends
  * single-journal/page-writing to the template hierarchy (rule 3: only prepends candidates,
  * missing template files fall through on their own).
  */
@@ -131,7 +131,8 @@ class Hierarchy {
 	}
 
 	/**
-	 * Adds ttm-section-{slug}, ttm-in-series, ttm-form-{form}.
+	 * Adds ttm-section-{slug}, ttm-in-series, ttm-form-{form}, and ttm-journal-long on a long
+	 * or photo-heavy journal entry (the theme gives those the tall pinned hero).
 	 *
 	 * @param string[] $classes Existing body classes.
 	 * @return string[]
@@ -150,13 +151,39 @@ class Hierarchy {
 			if ( $form ) {
 				$classes[] = 'ttm-form-' . $form;
 			}
+			if ( $slug && (string) Config::get( 'sections.journal_slug', 'journal' ) === $slug && self::is_long_post( (int) $post_id ) ) {
+				$classes[] = 'ttm-journal-long';
+			}
 		} elseif ( is_category() ) {
 			$queried = get_queried_object();
 			if ( $queried instanceof \WP_Term ) {
 				$classes[] = 'ttm-section-' . $queried->slug;
 			}
-		}
+		}//end if
 
 		return $classes;
+	}
+
+	/**
+	 * Whether a post is long or photo-heavy, from its stored word count and its image blocks.
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	private static function is_long_post( int $post_id ): bool {
+		return self::is_long_entry(
+			(int) get_post_meta( $post_id, 'ttm_word_count', true ),
+			substr_count( (string) get_post_field( 'post_content', $post_id ), '<!-- wp:image ' )
+		);
+	}
+
+	/**
+	 * Whether a journal entry is long enough, or has enough photographs, to open on the tall hero.
+	 *
+	 * @param int $words  The entry's word count.
+	 * @param int $photos Image blocks in the entry, gallery images included.
+	 */
+	public static function is_long_entry( int $words, int $photos ): bool {
+		return $words >= (int) Config::get( 'journal.long_words', 600 )
+			|| $photos >= (int) Config::get( 'journal.long_photos', 3 );
 	}
 }

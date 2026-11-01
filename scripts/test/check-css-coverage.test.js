@@ -38,10 +38,12 @@ describe( 'collectMarkupClasses', () => {
 			"<div class='ttm-baz'></div>",
 			'<!-- wp:group {"className":"ttm-lead-row is-style-grid-8-4"} -->',
 			"echo Helpers::wrapper( 'story-tiles', $classes );",
+			"$classes[] = 'ttm-journal-long';",
 		];
 
 		const classes = collectMarkupClasses( files );
 
+		expect( classes.has( 'ttm-journal-long' ) ).toBe( true );
 		expect( classes.has( 'ttm-foo' ) ).toBe( true );
 		expect( classes.has( 'ttm-bar' ) ).toBe( true );
 		expect( classes.has( 'ttm-baz' ) ).toBe( true );
@@ -53,6 +55,8 @@ describe( 'collectMarkupClasses', () => {
 		const files = [
 			'<div class="is-style-grid-8-4 is-after-poster"></div>',
 			"array_merge( [ 'ttm-' . $name ], $classes )",
+			"$classes[] = 'ttm-section-' . $slug;",
+			"$classes[] = 'ttm-in-series';",
 		];
 
 		const classes = collectMarkupClasses( files );

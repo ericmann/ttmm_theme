@@ -1,0 +1,83 @@
+/* core/gallery: loaded only where the block renders (inc/block-css.php). */
+
+/* Journal galleries (Recede): justified rows across all three journal columns. Each frame grows
+   with its photograph's ratio (--ttm-ar, inc/galleries.php), so a row shares one height, nothing
+   is cropped and the order is kept. */
+.ttm-journal-head {
+	container-type: inline-size;
+}
+
+.ttm-journal-head .wp-block-gallery.has-nested-images {
+	justify-content: flex-start;
+	width: 100cqi;
+	max-width: none;
+	margin: 40px 0 40px calc(-3 * (100cqi - 2 * var(--wp--preset--spacing--80)) / 12 - var(--wp--preset--spacing--80));
+}
+
+.ttm-journal-head .wp-block-gallery.has-nested-images figure.wp-block-image:not(#individual-image) {
+	flex: var(--ttm-ar, 1.5) 1 calc(var(--ttm-ar, 1.5) * 230px);
+	width: auto;
+	max-width: calc(var(--ttm-ar, 1.5) * 440px);
+	margin: 0;
+}
+
+.ttm-journal-head .wp-block-gallery.has-nested-images figure.wp-block-image:not(#individual-image) > a,
+.ttm-journal-head .wp-block-gallery.has-nested-images figure.wp-block-image:not(#individual-image) img {
+	flex: none;
+	width: 100%;
+	height: auto;
+	aspect-ratio: var(--ttm-ar, 1.5);
+	object-fit: cover;
+}
+
+/* A frame's caption is a label on ground at its corner, not white type on a darkened photo. */
+.ttm-journal-head .wp-block-gallery.has-nested-images figure.wp-block-image:has(figcaption)::before {
+	content: none;
+}
+
+.ttm-journal-head .wp-block-gallery.has-nested-images figure.wp-block-image figcaption {
+	inset: auto auto 0 0;
+	width: auto;
+	max-width: 100%;
+	max-height: none;
+	padding: 4px 8px;
+	background: var(--wp--preset--color--bg);
+	color: var(--wp--preset--color--neutral-800);
+	font-size: 12px;
+	line-height: 1.5;
+	text-align: left;
+	text-shadow: none;
+}
+
+.ttm-journal-head .wp-block-gallery.has-nested-images .blocks-gallery-caption {
+	padding-left: calc(3 * (100cqi - 2 * var(--wp--preset--spacing--80)) / 12 + var(--wp--preset--spacing--80));
+	text-align: left;
+}
+
+@media (max-width: 1024px) {
+
+	.ttm-journal-head .wp-block-gallery.has-nested-images {
+		width: auto;
+		margin-left: 0;
+	}
+
+	.ttm-journal-head .wp-block-gallery.has-nested-images .blocks-gallery-caption {
+		padding-left: 0;
+	}
+}
+
+@media (max-width: 720px) {
+
+	.ttm-journal-head .wp-block-gallery.has-nested-images {
+		gap: var(--wp--preset--spacing--10);
+		margin: 32px calc(-1 * var(--wp--custom--gutter--phone));
+	}
+
+	.ttm-journal-head .wp-block-gallery.has-nested-images figure.wp-block-image:not(#individual-image) {
+		flex-basis: calc(var(--ttm-ar, 1.5) * 130px);
+	}
+
+	.ttm-journal-head .wp-block-gallery.has-nested-images .blocks-gallery-caption {
+		padding: 0 var(--wp--custom--gutter--phone);
+	}
+}

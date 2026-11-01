@@ -201,6 +201,50 @@ class HierarchyTest extends TTM_IntegrationTestCase {
 		$this->assertSame( 'page-writing', $hierarchy[0] );
 	}
 
+	/**
+	 * A published post in `$slug` with `$words` stored words and `$photos` image blocks.
+	 */
+	private function entry( string $slug, int $words, int $photos ): int {
+		$category = $this->category_id( $slug, ucfirst( $slug ) );
+		$image    = "<!-- wp:image {\"id\":1} -->\n<figure class=\"wp-block-image\"><img src=\"x.jpg\" alt=\"\"/></figure>\n<!-- /wp:image -->\n";
+		$post     = self::factory()->post->create(
+			[
+				'post_status'   => 'publish',
+				'post_category' => [ $category ],
+				'post_content'  => "<!-- wp:paragraph -->\n<p>Entry.</p>\n<!-- /wp:paragraph -->\n" . str_repeat( $image, $photos ),
+			]
+		);
+		update_post_meta( $post, 'ttm_primary_category', $category );
+		update_post_meta( $post, 'ttm_word_count', $words );
+
+		return $post;
+	}
+
+	/**
+	 * @return string[] Body classes on the post's permalink.
+	 */
+	private function body_classes_for( int $post ): array {
+		$this->go_to( (string) get_permalink( $post ) );
+
+		return get_body_class();
+	}
+
+	public function test_long_journal_entry_gets_the_long_class(): void {
+		$this->assertContains( 'ttm-journal-long', $this->body_classes_for( $this->entry( 'journal', 600, 0 ) ) );
+	}
+
+	public function test_photo_heavy_journal_entry_gets_the_long_class(): void {
+		$this->assertContains( 'ttm-journal-long', $this->body_classes_for( $this->entry( 'journal', 120, 3 ) ) );
+	}
+
+	public function test_short_journal_entry_has_no_long_class(): void {
+		$this->assertNotContains( 'ttm-journal-long', $this->body_classes_for( $this->entry( 'journal', 599, 2 ) ) );
+	}
+
+	public function test_long_post_outside_the_journal_has_no_long_class(): void {
+		$this->assertNotContains( 'ttm-journal-long', $this->body_classes_for( $this->entry( 'technology', 2000, 9 ) ) );
+	}
+
 	public function test_hierarchy_unchanged_for_pages(): void {
 		$page = self::factory()->post->create( [ 'post_type' => 'page' ] );
 		$this->go_to( (string) get_permalink( $page ) );

@@ -83,6 +83,9 @@ class Config {
 			'journal.stream_count'             => 4,
 			'journal.archive_per_page'         => 20,
 			'journal.relative_day_window'      => 6,
+			// A journal entry this long, or with this many photographs, gets the tall pinned hero.
+			'journal.long_words'               => 600,
+			'journal.long_photos'              => 3,
 
 			'series.strip_limit'               => 3,
 			'series.index_batch'               => 500,

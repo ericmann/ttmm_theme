@@ -42,8 +42,8 @@ export function isIdentifierClass( cls ) {
 /**
  * Collect every `ttm-*` class referenced by markup sources: class="…" /
  * class='…' attributes, `"className":"…"` JSON (block comments and
- * block.json), and `Helpers::wrapper( 'name', … )` calls, which emit
- * `ttm-<name>`.
+ * block.json), `Helpers::wrapper( 'name', … )` calls, which emit
+ * `ttm-<name>`, and whole `$classes[] = 'ttm-…';` body classes.
  *
  * @param {string[]} files Raw file contents to scan.
  * @return {Set<string>} Class names referenced by markup.
@@ -76,6 +76,16 @@ export function collectMarkupClasses( files ) {
 			/Helpers::wrapper\(\s*'([a-z0-9_-]+)'/g
 		) ) {
 			found.add( `ttm-${ m[ 1 ] }` );
+		}
+
+		// Whole body classes: $classes[] = 'ttm-…' (Templates/Hierarchy.php), less the
+		// unstyled identifier ones.
+		for ( const m of content.matchAll(
+			/\$classes\[\]\s*=\s*'(ttm-[a-z0-9_-]+)'\s*;/g
+		) ) {
+			if ( ! isIdentifierClass( m[ 1 ] ) ) {
+				found.add( m[ 1 ] );
+			}
 		}
 	}
 

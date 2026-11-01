@@ -35,7 +35,7 @@ class BlockCssTest extends TestCase {
 		$this->assertContains( 'writing-cell', $names );
 		$this->assertContains( 'series-toc', $names );
 		$this->assertSame( $names, array_values( array_unique( $names ) ) );
-		foreach ( $names as $name ) {
+		foreach ( array_filter( $names, static fn ( string $name ): bool => ! str_starts_with( $name, 'core-' ) ) as $name ) {
 			$this->assertFileExists( dirname( TTM_THEME_DIR, 2 ) . '/plugins/ttm-core/blocks/' . $name . '/block.json', "assets/css/blocks/{$name}.css names no ttm-core block" );
 		}
 	}
@@ -53,11 +53,18 @@ class BlockCssTest extends TestCase {
 
 		\TTM\Theme\register_block_css();
 
+		$this->assertSame( 'ttm-block-core-gallery', $seen['core/gallery']['handle'] ?? null );
+
 		$args = $seen['ttm/writing-cell'] ?? [];
 		$this->assertSame( 'ttm-block-writing-cell', $args['handle'] ?? null );
 		$this->assertStringEndsWith( '/assets/css/blocks/writing-cell.css', $args['src'] ?? '' );
 		$this->assertFileExists( $args['path'] ?? '' );
 		$this->assertStringStartsWith( '9.9.9.', $args['ver'] ?? '' );
+	}
+
+	public function test_core_prefixed_files_style_core_blocks(): void {
+		$this->assertSame( 'core/gallery', \TTM\Theme\block_for_css( 'core-gallery' ) );
+		$this->assertSame( 'ttm/series-toc', \TTM\Theme\block_for_css( 'series-toc' ) );
 	}
 
 	public function test_the_editor_gets_the_files_as_editor_styles_instead(): void {

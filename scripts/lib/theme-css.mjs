@@ -1,7 +1,7 @@
 /**
  * The theme stylesheets that carry `ttm-*` rules (rules 34, 37, 44): ttm.css, style.css and the
  * per-block files in assets/css/blocks/, which inc/block-css.php loads only where `ttm/<name>`
- * renders. code.css colours hljs-* tokens only and has its own unit test.
+ * (or, for `core-<name>.css`, `core/<name>`) renders. code.css colours hljs-* tokens only and has its own unit test.
  */
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
