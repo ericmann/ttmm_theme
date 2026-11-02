@@ -78,4 +78,22 @@ class ArticleValuesTest extends TestCase {
 
 		$this->assertSame( 'The Quiet Ledger', Values::series_name( [ 'name' => 'The Quiet Ledger' ] ) );
 	}
+
+	public function test_comments_label_words_follow_the_kind(): void {
+		$this->assertSame( 'Discussion', Values::comments_label( 'discussion', 'title' ) );
+		$this->assertSame( 'Reflections', Values::comments_label( 'reflections', 'title' ) );
+		$this->assertSame( 'Reader notes', Values::comments_label( 'notes', 'title' ) );
+		$this->assertSame( 'Start the discussion', Values::comments_label( 'discussion', 'cta', 0 ) );
+		$this->assertSame( 'Join the discussion', Values::comments_label( 'discussion', 'cta', 4 ) );
+		$this->assertSame( 'Leave a note', Values::comments_label( 'notes', 'cta', 4 ) );
+		$this->assertSame( '', Values::comments_label( 'discussion', 'note' ) );
+		$this->assertNotSame( '', Values::comments_label( 'reflections', 'note' ) );
+	}
+
+	public function test_comments_label_count(): void {
+		$this->assertSame( '', Values::comments_label( 'discussion', 'count', 0 ) );
+		$this->assertSame( '1 comment', Values::comments_label( 'discussion', 'count', 1 ) );
+		$this->assertSame( '9 notes', Values::comments_label( 'notes', 'count', 9 ) );
+		$this->assertSame( '2 reflections', Values::comments_label( 'reflections', 'count', 2 ) );
+	}
 }

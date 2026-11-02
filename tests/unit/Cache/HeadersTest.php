@@ -185,7 +185,7 @@ class HeadersTest extends TestCase {
 	public function test_no_store_never_carries_stale_directives(): void {
 		$this->stub_config();
 
-		foreach ( [ [ 'admin' => true ], [ 'logged_in' => true ] ] as $flags ) {
+		foreach ( [ [ 'admin' => true ], [ 'logged_in' => true ], [ 'commenter' => true ] ] as $flags ) {
 			$value = Headers::for_request( array_merge( [ 'method' => 'GET' ], $flags ) );
 
 			$this->assertSame( 'no-store', $value );

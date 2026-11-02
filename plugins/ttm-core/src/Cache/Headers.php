@@ -45,6 +45,7 @@ class Headers {
 				'rest'      => false,
 				'feed'      => is_feed(),
 				'logged_in' => is_user_logged_in(),
+				'commenter' => self::is_commenter(),
 				'method'    => isset( $_SERVER['REQUEST_METHOD'] ) ? strtoupper( (string) $_SERVER['REQUEST_METHOD'] ) : 'GET', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- read-only method check, never persisted or output.
 			]
 		);
@@ -52,6 +53,18 @@ class Headers {
 		if ( null !== $value && ! headers_sent() ) {
 			header( 'Cache-Control: ' . $value );
 		}
+	}
+
+	/**
+	 * A commenter's page is theirs alone: core fills the form from their `comment_author_*`
+	 * cookie, and the `?unapproved=` page it sends them to after posting shows their held
+	 * comment.
+	 */
+	private static function is_commenter(): bool {
+		$commenter = wp_get_current_commenter();
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- presence check only, never output or stored.
+		return '' !== (string) $commenter['comment_author'] || isset( $_GET['unapproved'] );
 	}
 
 	/**
@@ -86,11 +99,11 @@ class Headers {
 	/**
 	 * Pure decision: the `Cache-Control` value for a request shape, or `null` for "send nothing".
 	 *
-	 * @param array{admin?:bool, rest?:bool, feed?:bool, logged_in?:bool, method?:string} $flags Request shape.
+	 * @param array{admin?:bool, rest?:bool, feed?:bool, logged_in?:bool, commenter?:bool, method?:string} $flags Request shape.
 	 * @return string|null
 	 */
 	public static function for_request( array $flags ): ?string {
-		if ( ! empty( $flags['admin'] ) || ! empty( $flags['logged_in'] ) ) {
+		if ( ! empty( $flags['admin'] ) || ! empty( $flags['logged_in'] ) || ! empty( $flags['commenter'] ) ) {
 			return 'no-store';
 		}
 

@@ -1,0 +1,406 @@
+/* core/comments (patterns/comments.php): loaded only where the block renders (inc/block-css.php).
+   Body class ttm-comments-{discussion|reflections|notes} picks the temperament; .is-enhanced,
+   .is-writing, .is-closed and .is-collapsed come from assets/js/comments.js. */
+
+.ttm-comments {
+	margin-top: 48px;
+	font-size: var(--wp--preset--font-size--body-s);
+}
+
+.ttm-comments__head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 6px 14px;
+	padding-top: 12px;
+	border-top: var(--ttm-rule-2);
+}
+
+.ttm-comments__head > * {
+	margin: 0;
+}
+
+.ttm-comments__title {
+	font-size: var(--wp--preset--font-size--caption);
+	font-weight: 600;
+	line-height: 1.2;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--neutral-800);
+}
+
+/* A discussion is the post's own continuation: the section red, like the article kicker. */
+.ttm-comments-discussion .ttm-comments__title {
+	color: var(--wp--preset--color--accent-700);
+}
+
+.ttm-comments__count {
+	font-size: var(--wp--preset--font-size--ui);
+	color: var(--wp--preset--color--neutral-800);
+	font-variant-numeric: tabular-nums;
+}
+
+.ttm-comments__cta {
+	margin-left: auto;
+}
+
+.ttm-comments__toggle,
+.ttm-comments__tool,
+.ttm-comments__more,
+.ttm-comment__collapse,
+.ttm-comment__fold {
+	font: inherit;
+	font-size: var(--wp--preset--font-size--ui);
+	color: var(--wp--preset--color--neutral-800);
+	background: none;
+	border: 0;
+	padding: 0;
+	cursor: pointer;
+}
+
+.ttm-comments__toggle,
+.ttm-comments__more {
+	color: var(--wp--preset--color--accent-700);
+	font-weight: 600;
+}
+
+.ttm-comments__tools {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 16px;
+	margin: 10px 0 0;
+}
+
+.ttm-comments__more {
+	margin-top: 14px;
+}
+
+/* The form, and the line under it, wait for the button or a Reply link. */
+.ttm-comments.is-enhanced:not(.is-writing) .comment-respond,
+.ttm-comments.is-enhanced:not(.is-writing) .ttm-comments__note,
+.ttm-comments.is-closed .ttm-comments__body,
+.ttm-comments.is-closed .ttm-comments__cta,
+.ttm-comments.is-closed .ttm-comments__tools {
+	display: none;
+}
+
+/* stylelint-disable-next-line no-descending-specificity -- different property, or a scope the earlier rule never reaches */
+.ttm-comments .comment-respond {
+	background: var(--wp--preset--color--surface);
+	padding: 16px 18px;
+	margin: 12px 0 16px;
+}
+
+.ttm-comments .comment-form {
+	display: grid;
+	gap: 12px;
+}
+
+.ttm-comments .comment-form > p {
+	margin: 0;
+}
+
+.ttm-comments .comment-form label {
+	display: block;
+	font-size: var(--wp--preset--font-size--ui);
+	font-weight: 600;
+	margin-bottom: 4px;
+}
+
+.ttm-comments .comment-form input[type="text"],
+.ttm-comments .comment-form input[type="email"],
+.ttm-comments .comment-form textarea {
+	box-sizing: border-box;
+	width: 100%;
+	font: inherit;
+	font-size: var(--wp--preset--font-size--dek);
+	padding: 8px 10px;
+	background: var(--wp--preset--color--bg);
+	color: var(--wp--preset--color--text);
+}
+
+.ttm-comments .comment-form .comment-form-cookies-consent {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+}
+
+.ttm-comments .comment-form .comment-form-cookies-consent label {
+	display: inline;
+	font-weight: 400;
+}
+
+.ttm-comments .comment-notes,
+/* stylelint-disable-next-line no-descending-specificity -- different property, or a scope the earlier rule never reaches */
+.ttm-comments__note {
+	font-size: var(--wp--preset--font-size--ui);
+	color: var(--wp--preset--color--neutral-800);
+}
+
+/* stylelint-disable-next-line no-descending-specificity -- different property, or a scope the earlier rule never reaches */
+.ttm-comments__note {
+	margin: 0 0 12px;
+}
+
+/* At the top the section's button names the form; under a comment it says who it answers. */
+.ttm-comments__body > .comment-respond .comment-reply-title {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+}
+
+/* stylelint-disable-next-line no-descending-specificity -- different property, or a scope the earlier rule never reaches */
+.ttm-comments .comment-reply-title {
+	margin: 0 0 4px;
+	font-size: var(--wp--preset--font-size--ui);
+	font-weight: 600;
+}
+
+.ttm-comments__cancel {
+	margin-left: 8px;
+	font-weight: 400;
+}
+
+/* The list. */
+.ttm-comments__list,
+.ttm-comments__list ol {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.ttm-comments__list {
+	margin-top: 12px;
+	border-bottom: var(--ttm-rule-1);
+}
+
+.ttm-comments__list > li {
+	border-top: var(--ttm-rule-1);
+}
+
+.ttm-comment {
+	padding: 16px 0 14px;
+}
+
+.ttm-comment__meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 4px 10px;
+	margin: 0 0 6px;
+}
+
+.ttm-comment__meta > * {
+	margin: 0;
+}
+
+.ttm-comment__name {
+	font-size: var(--wp--preset--font-size--dek);
+	font-weight: 800;
+}
+
+.ttm-comment__date,
+.ttm-comment__date a {
+	font-size: var(--wp--preset--font-size--ui);
+	color: var(--wp--preset--color--neutral-700);
+	text-decoration: none;
+	font-variant-numeric: tabular-nums;
+}
+
+.ttm-comment__tag,
+.ttm-comment__new {
+	display: inline-block;
+	font-size: var(--wp--preset--font-size--micro);
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	line-height: 1;
+	padding: 3px 5px;
+	background: var(--wp--preset--color--text);
+	color: var(--wp--preset--color--bg);
+}
+
+.ttm-comment__new {
+	background: var(--wp--preset--color--accent-100);
+	color: var(--wp--preset--color--accent-700);
+}
+
+.ttm-comment__body {
+	font-size: var(--wp--preset--font-size--headline-s);
+	line-height: 1.6;
+}
+
+/* stylelint-disable-next-line no-descending-specificity -- different property, or a scope the earlier rule never reaches */
+.ttm-comment__body p {
+	margin: 0 0 10px;
+}
+
+.ttm-comment__held {
+	background: var(--wp--preset--color--accent-100);
+	font-size: var(--wp--preset--font-size--ui);
+	padding: 6px 10px;
+	margin: 0 0 10px;
+}
+
+.ttm-comment__held strong {
+	color: var(--wp--preset--color--accent-700);
+}
+
+.ttm-comment__reply,
+.ttm-comment__collapse {
+	display: inline-block;
+	margin-right: 16px;
+	font-size: var(--wp--preset--font-size--ui);
+	font-weight: 600;
+}
+
+.ttm-comment__reply a {
+	color: var(--wp--preset--color--accent-700);
+	text-decoration: none;
+}
+
+.ttm-comments__list li > ol {
+	margin: 0 0 14px 18px;
+	padding-left: 18px;
+	border-left: var(--ttm-rule-1);
+}
+
+.ttm-comments__list li > ol .ttm-comment {
+	padding: 10px 0 8px;
+}
+
+.ttm-comments__list li > ol .ttm-comment__body {
+	font-size: var(--wp--preset--font-size--dek);
+}
+
+/* A collapsed thread folds to one line: who, what, how many replies. */
+.ttm-comment__fold {
+	display: none;
+	text-align: left;
+	line-height: 1.45;
+	padding: 14px 0;
+}
+
+.ttm-comment__fold b {
+	color: var(--wp--preset--color--text);
+}
+
+.ttm-comment__fold-go {
+	color: var(--wp--preset--color--accent-700);
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.is-collapsed > .ttm-comment__fold {
+	display: block;
+}
+
+/* stylelint-disable-next-line no-descending-specificity -- different property, or a scope the earlier rule never reaches */
+.is-collapsed > .ttm-comment,
+/* stylelint-disable-next-line no-descending-specificity -- different property, or a scope the earlier rule never reaches */
+.is-collapsed > ol {
+	display: none;
+}
+
+/* Reflections (journal): quieter, flat, a grey heading and a link for a button. */
+.ttm-comments-reflections .ttm-comments__head,
+.ttm-comments-notes .ttm-comments__head {
+	border-top: var(--ttm-rule-1);
+}
+
+.ttm-comments-reflections .ttm-comments__open .wp-block-button__link,
+.ttm-comments-notes .ttm-comments__open .wp-block-button__link {
+	background: none;
+	border: 0;
+	padding: 0;
+	font-size: var(--wp--preset--font-size--ui);
+	font-weight: 600;
+	color: var(--wp--preset--color--accent-700);
+}
+
+.ttm-comments-reflections .ttm-comments__list {
+	border-bottom: 0;
+}
+
+.ttm-comments-reflections .ttm-comments__list > li {
+	border-top: 0;
+	border-left: 2px solid var(--wp--preset--color--neutral-300);
+	margin-top: 12px;
+	padding-left: 16px;
+}
+
+/* stylelint-disable-next-line no-descending-specificity -- different property, or a scope the earlier rule never reaches */
+.ttm-comments-reflections .ttm-comment {
+	display: flex;
+	flex-direction: column-reverse;
+	padding: 4px 0;
+}
+
+.ttm-comments-reflections .ttm-comment__name {
+	font-size: var(--wp--preset--font-size--ui);
+	font-weight: 600;
+}
+
+/* stylelint-disable-next-line no-descending-specificity -- different property, or a scope the earlier rule never reaches */
+.ttm-comments-reflections .ttm-comment__body {
+	font-size: var(--wp--preset--font-size--dek);
+}
+
+/* Reader notes (fiction): a single grey line until opened, smaller type inside. */
+.ttm-comments-notes .ttm-comments {
+	margin-top: 28px;
+}
+
+.ttm-comments-notes .ttm-comments__head {
+	padding: 10px 0;
+	border-bottom: var(--ttm-rule-1);
+}
+
+.ttm-comments-notes .ttm-comments__toggle {
+	margin-left: auto;
+}
+
+/* stylelint-disable-next-line no-descending-specificity -- different property, or a scope the earlier rule never reaches */
+.ttm-comments-notes .ttm-comments__cta {
+	margin-left: 0;
+	width: 100%;
+}
+
+.ttm-comments-notes .ttm-comments__list > li {
+	border-top: 0;
+	border-bottom: var(--ttm-rule-1);
+}
+
+.ttm-comments-notes .ttm-comments__list {
+	border-bottom: 0;
+}
+
+/* stylelint-disable-next-line no-descending-specificity -- different property, or a scope the earlier rule never reaches */
+.ttm-comments-notes .ttm-comment {
+	padding: 12px 0 10px;
+}
+
+.ttm-comments-notes .ttm-comment__name {
+	font-size: var(--wp--preset--font-size--body-s);
+}
+
+/* stylelint-disable-next-line no-descending-specificity -- different property, or a scope the earlier rule never reaches */
+.ttm-comments-notes .ttm-comment__body {
+	font-size: var(--wp--preset--font-size--dek);
+	line-height: 1.55;
+}
+
+@media (max-width: 720px) {
+
+	.ttm-comments__cta {
+		margin-left: 0;
+		width: 100%;
+	}
+
+	.ttm-comments__list li > ol {
+		margin-left: 4px;
+		padding-left: 12px;
+	}
+}

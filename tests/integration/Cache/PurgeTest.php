@@ -100,4 +100,46 @@ class PurgeTest extends TTM_IntegrationTestCase {
 
 		$this->assertFalse( $fired );
 	}
+
+	public function test_approving_a_comment_purges_its_post(): void {
+		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		$comment = self::factory()->comment->create(
+			[
+				'comment_post_ID'  => $post_id,
+				'comment_approved' => 0,
+			]
+		);
+		$purged  = null;
+		add_action(
+			'ttm_purge_urls',
+			static function ( array $urls ) use ( &$purged ): void {
+				$purged = $urls;
+			}
+		);
+
+		wp_set_comment_status( $comment, 'approve' );
+
+		$this->assertSame( Purge::for_comments( $post_id ), $purged );
+		$this->assertContains( (string) get_permalink( $post_id ), $purged );
+	}
+
+	public function test_a_held_comment_purges_nothing(): void {
+		$post_id = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		$fired   = false;
+		add_action(
+			'ttm_purge_urls',
+			static function () use ( &$fired ): void {
+				$fired = true;
+			}
+		);
+
+		self::factory()->comment->create(
+			[
+				'comment_post_ID'  => $post_id,
+				'comment_approved' => 0,
+			]
+		);
+
+		$this->assertFalse( $fired );
+	}
 }

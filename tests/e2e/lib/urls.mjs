@@ -48,6 +48,16 @@ export const SCREENS = {
 export const SCREEN_URLS = Object.values( SCREENS );
 
 /**
+ * Seeded posts with comments open, one per kind (`tests/e2e/fixtures/comments.php`, run by
+ * `npm run test:e2e` after the seed). Kept out of `SCREENS` so no other screen changes.
+ */
+export const COMMENT_SCREENS = {
+	discussion: '/php-85-readonly-classes/',
+	reflections: '/journal-post-3/',
+	notes: '/quiet-ledger-ch-2/',
+};
+
+/**
  * The security archive filtered by the "wordpress" tag (`?tag=wordpress`), used only by
  * `fidelity.spec.mjs` and `selectors.spec.mjs` (rule 41: `.tag-accent` needs a filtered
  * archive to appear on).

@@ -4,7 +4,7 @@ Tags: blocks, block-bindings, newspaper, series, block-theme
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.3.10
+Stable tag: 0.3.11
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -30,6 +30,18 @@ site owner's byline.
    publishing directly — every block and template degrades gracefully with no content.
 
 == Changelog ==
+
+= 0.3.11 =
+* Comments follow the post's section: Journal entries collect flat reflections (newest first),
+  stories and chapters gather reader notes two levels deep (`comments.fiction_depth`), and
+  everything else holds a discussion three deep (`comments.depth`). The body class
+  `ttm-comments-{discussion|reflections|notes}` and the `ttm/comments-label` binding carry it.
+* Moderation runs after core and Akismet and only ever holds a comment they would approve: a
+  commenter's comments publish once they have `comments.trusted_after` (3) approved, never on
+  fiction. Akismet's form nonce is off, since the page is cached.
+* Approving, unapproving, editing or publishing a comment purges its post page and comment feed.
+* Any post can pick the journal template (`_wp_page_template` = `single-journal`); the tall hero
+  follows the template, comments follow the section.
 
 = 0.3.10 =
 * A journal entry of `journal.long_words` (600) words or more, or with `journal.long_photos` (3)

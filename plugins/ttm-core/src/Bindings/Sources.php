@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace TTM\Core\Bindings;
 
+use TTM\Core\Comments\Threading;
 use TTM\Core\Config;
 use TTM\Core\Meta\PrimaryCategory;
 use TTM\Core\Meta\SeriesPosition;
@@ -120,6 +121,15 @@ class Sources {
 			[
 				'label'              => __( 'TTM: Word count', 'ttm-core' ),
 				'get_value_callback' => [ self::class, 'word_count' ],
+				'uses_context'       => [ 'postId', 'postType' ],
+			]
+		);
+
+		register_block_bindings_source(
+			'ttm/comments-label',
+			[
+				'label'              => __( 'TTM: Comments wording', 'ttm-core' ),
+				'get_value_callback' => [ self::class, 'comments_label' ],
 				'uses_context'       => [ 'postId', 'postType' ],
 			]
 		);
@@ -545,6 +555,28 @@ class Sources {
 		$suppressed = ! empty( $source_args['whenUnsyndicated'] ) && self::is_syndicated( $post_id );
 
 		return self::finalize( Values::word_count( $words, $suppressed ), $block_instance, $attribute_name );
+	}
+
+	/**
+	 * `ttm/comments-label` (`{"part": "title"|"count"|"cta"|"note"}`): the comments section's
+	 * words for the post's section -- Discussion, Reflections or Reader notes (Comments\Threading).
+	 *
+	 * @param array<string, mixed> $source_args    `part`, default `title`.
+	 * @param WP_Block             $block_instance Consuming block.
+	 * @param string               $attribute_name Consuming attribute.
+	 * @return string
+	 */
+	public static function comments_label( array $source_args, $block_instance, string $attribute_name ): string {
+		$post_id = (int) ( $block_instance->context['postId'] ?? 0 );
+		if ( ! $post_id ) {
+			return '';
+		}
+
+		return self::finalize(
+			Values::comments_label( Threading::kind_of( $post_id ), (string) ( $source_args['part'] ?? 'title' ), (int) get_comments_number( $post_id ) ),
+			$block_instance,
+			$attribute_name
+		);
 	}
 
 	/**

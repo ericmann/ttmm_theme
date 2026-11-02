@@ -10,14 +10,16 @@ declare( strict_types=1 );
 
 namespace TTM\Core\Templates;
 
+use TTM\Core\Comments\Threading;
 use TTM\Core\Config;
+use TTM\Core\Meta\Layout;
 use TTM\Core\Meta\PrimaryCategory;
 use TTM\Core\Query\SeriesIndex;
 use TTM\Core\Query\Stats;
 use WP_Query;
 
 /**
- * Adds ttm-section-{slug}, ttm-in-series, ttm-form-{form}, ttm-journal-long to body_class; prepends
+ * Adds ttm-section-{slug}, ttm-in-series, ttm-form-{form}, ttm-journal-long, ttm-comments-{kind} to body_class; prepends
  * single-journal/page-writing to the template hierarchy (rule 3: only prepends candidates,
  * missing template files fall through on their own).
  */
@@ -84,10 +86,10 @@ class Hierarchy {
 		// per-request query shape, no page.php/wp-admin option write). Set it here instead;
 		// Writing is never Journal, so this is always the plain archive.per_page rate.
 		$query->set( 'posts_per_page', (int) Config::get( 'archive.per_page', 12 ) );
-		$query->is_page          = false;
-		$query->is_singular      = false;
-		$query->is_category      = true;
-		$query->is_archive       = true;
+		$query->is_page     = false;
+		$query->is_singular = false;
+		$query->is_category = true;
+		$query->is_archive  = true;
 		// parse_query() already cached the page as the queried object before pre_get_posts
 		// fires; clear it so get_queried_object() recomputes from the flags/vars just set.
 		$query->queried_object    = null;
@@ -95,7 +97,8 @@ class Hierarchy {
 	}
 
 	/**
-	 * Prepend `single-journal` when the post's primary category is Journal.
+	 * Prepend `single-journal` when Meta\Layout says so: picked in the editor, or a Journal
+	 * entry left on the default.
 	 *
 	 * @param string[] $templates Candidate template slugs, most specific first.
 	 * @return string[]
@@ -105,9 +108,7 @@ class Hierarchy {
 			return $templates;
 		}
 
-		$slug = PrimaryCategory::slug( (int) get_the_ID() );
-
-		if ( $slug && (string) Config::get( 'sections.journal_slug', 'journal' ) === $slug ) {
+		if ( 'single-journal' === Layout::of( (int) get_the_ID() ) ) {
 			array_unshift( $templates, 'single-journal' );
 		}
 
@@ -131,8 +132,9 @@ class Hierarchy {
 	}
 
 	/**
-	 * Adds ttm-section-{slug}, ttm-in-series, ttm-form-{form}, and ttm-journal-long on a long
-	 * or photo-heavy journal entry (the theme gives those the tall pinned hero).
+	 * Adds ttm-section-{slug}, ttm-in-series, ttm-form-{form}, ttm-journal-long on a long or
+	 * photo-heavy entry on the journal template (the theme gives those the tall pinned hero), and
+	 * ttm-comments-{discussion|reflections|notes} from the section.
 	 *
 	 * @param string[] $classes Existing body classes.
 	 * @return string[]
@@ -151,8 +153,16 @@ class Hierarchy {
 			if ( $form ) {
 				$classes[] = 'ttm-form-' . $form;
 			}
-			if ( $slug && (string) Config::get( 'sections.journal_slug', 'journal' ) === $slug && self::is_long_post( (int) $post_id ) ) {
+			if ( 'single-journal' === Layout::of( (int) $post_id ) && self::is_long_post( (int) $post_id ) ) {
 				$classes[] = 'ttm-journal-long';
+			}
+			$kind = Threading::kind_of( (int) $post_id );
+			if ( 'reflections' === $kind ) {
+				$classes[] = 'ttm-comments-reflections';
+			} elseif ( 'notes' === $kind ) {
+				$classes[] = 'ttm-comments-notes';
+			} else {
+				$classes[] = 'ttm-comments-discussion';
 			}
 		} elseif ( is_category() ) {
 			$queried = get_queried_object();

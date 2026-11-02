@@ -63,6 +63,8 @@ class Plugin {
 			Cache\Batcache::class,
 			Cache\Purge::class,
 			Cache\Cloudflare::class,
+			Comments\Threading::class,
+			Comments\Moderation::class,
 			Newsletter\Handler::class,
 			Newsletter\Settings::class,
 		];

@@ -322,6 +322,55 @@ class Values {
 	}
 
 	/**
+	 * The comments section's words. `title`: Discussion / Reflections / Reader notes; `count`:
+	 * "3 comments" ('' at 0); `cta`: the button that opens the form; `note`: the line under the
+	 * form ('' for a discussion).
+	 *
+	 * @param string $kind  `discussion`, `reflections` or `notes`.
+	 * @param string $part  `title`, `count`, `cta` or `note`.
+	 * @param int    $count Approved comments.
+	 * @return string
+	 */
+	public static function comments_label( string $kind, string $part, int $count = 0 ): string {
+		if ( 'count' === $part ) {
+			if ( $count < 1 ) {
+				return '';
+			}
+			switch ( $kind ) {
+				case 'reflections':
+					/* translators: %d: number of reflections left on a journal entry. */
+					return sprintf( _n( '%d reflection', '%d reflections', $count, 'ttm-core' ), $count );
+				case 'notes':
+					/* translators: %d: number of reader notes on a chapter or story. */
+					return sprintf( _n( '%d note', '%d notes', $count, 'ttm-core' ), $count );
+				default:
+					/* translators: %d: number of comments. */
+					return sprintf( _n( '%d comment', '%d comments', $count, 'ttm-core' ), $count );
+			}
+		}
+
+		$words = [
+			'discussion'  => [
+				'title' => __( 'Discussion', 'ttm-core' ),
+				'cta'   => $count > 0 ? __( 'Join the discussion', 'ttm-core' ) : __( 'Start the discussion', 'ttm-core' ),
+				'note'  => '',
+			],
+			'reflections' => [
+				'title' => __( 'Reflections', 'ttm-core' ),
+				'cta'   => __( 'Leave a reflection', 'ttm-core' ),
+				'note'  => __( 'I read every reflection. I don’t reply here.', 'ttm-core' ),
+			],
+			'notes'       => [
+				'title' => __( 'Reader notes', 'ttm-core' ),
+				'cta'   => __( 'Leave a note', 'ttm-core' ),
+				'note'  => __( 'Notes are read before they appear. Please don’t spoil later chapters.', 'ttm-core' ),
+			],
+		];
+
+		return $words[ $kind ][ $part ] ?? $words['discussion'][ $part ] ?? '';
+	}
+
+	/**
 	 * "Sunday · Portland"; location appended only when set.
 	 *
 	 * @param DateTimeImmutable $date     Post date.

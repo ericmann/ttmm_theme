@@ -192,5 +192,12 @@
 				"css": "& input,& textarea{border-radius:0;border:1px solid var(--wp--preset--color--divider)}"
 			}
 		}
-	}
+	},
+	"customTemplates": [
+		{
+			"name": "single-journal",
+			"title": "Journal entry",
+			"postTypes": [ "post" ]
+		}
+	]
 }
