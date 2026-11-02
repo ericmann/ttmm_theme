@@ -15,8 +15,9 @@ use TTM\Core\Query\SeriesIndex;
 use WP_Post;
 
 /**
- * `transition_post_status` -> `ttm_purge_urls` (DEPLOYMENT.md §1). The verse, settings, books
- * and series-index modules already fire the action themselves; this only covers post writes.
+ * `transition_post_status` -> `ttm_purge_urls` (DEPLOYMENT.md §1), and a published comment's
+ * post page. The verse, settings, books and series-index modules already fire the action
+ * themselves; this only covers post and comment writes.
  */
 class Purge {
 
@@ -25,6 +26,72 @@ class Purge {
 	 */
 	public static function register(): void {
 		add_action( 'transition_post_status', [ self::class, 'on_transition' ], 20, 3 );
+		add_action( 'transition_comment_status', [ self::class, 'on_comment_transition' ], 20, 3 );
+		add_action( 'comment_post', [ self::class, 'on_comment_post' ], 20, 2 );
+		add_action( 'edit_comment', [ self::class, 'on_comment_edit' ], 20 );
+	}
+
+	/**
+	 * A comment entering or leaving `approved` changes what its post page shows.
+	 *
+	 * @param string      $new_status New status.
+	 * @param string      $old_status Old status.
+	 * @param \WP_Comment $comment    Comment.
+	 */
+	public static function on_comment_transition( string $new_status, string $old_status, $comment ): void {
+		if ( 'approved' === $new_status || 'approved' === $old_status ) {
+			self::purge_comment_post( (int) $comment->comment_post_ID );
+		}
+	}
+
+	/**
+	 * A comment published straight away (a trusted commenter, or the author replying).
+	 *
+	 * @param int        $comment_id Comment id.
+	 * @param int|string $approved   1, 0, 'spam' or 'trash'.
+	 */
+	public static function on_comment_post( int $comment_id, $approved ): void {
+		if ( 1 === $approved || '1' === $approved ) {
+			$comment = get_comment( $comment_id );
+			if ( $comment ) {
+				self::purge_comment_post( (int) $comment->comment_post_ID );
+			}
+		}
+	}
+
+	/**
+	 * An approved comment edited from the dashboard.
+	 *
+	 * @param int $comment_id Comment id.
+	 */
+	public static function on_comment_edit( int $comment_id ): void {
+		$comment = get_comment( $comment_id );
+		if ( $comment && '1' === $comment->comment_approved ) {
+			self::purge_comment_post( (int) $comment->comment_post_ID );
+		}
+	}
+
+	/**
+	 * Purge a published post's page and its comment feed.
+	 *
+	 * @param int $post_id Post id.
+	 */
+	private static function purge_comment_post( int $post_id ): void {
+		if ( ! $post_id || 'publish' !== get_post_status( $post_id ) ) {
+			return;
+		}
+
+		do_action( 'ttm_purge_urls', self::for_comments( $post_id ) );
+	}
+
+	/**
+	 * The URLs a comment change touches: the post page and its comment feed.
+	 *
+	 * @param int $post_id Post id.
+	 * @return string[]
+	 */
+	public static function for_comments( int $post_id ): array {
+		return array_values( array_filter( [ (string) get_permalink( $post_id ), (string) get_post_comments_feed_link( $post_id ) ] ) );
 	}
 
 	/**

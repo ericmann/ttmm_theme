@@ -61,3 +61,10 @@ body:has(.ttm-journal-hero) # state: journal hero; seeded journal entries have n
 .ttm-journal-head .wp-block-gallery.has-nested-images figure.wp-block-image:has(figcaption)::before # state: journal gallery; no seeded journal entry has a gallery
 .ttm-journal-head .wp-block-gallery.has-nested-images figure.wp-block-image figcaption # state: journal gallery; no seeded journal entry has a gallery
 .ttm-journal-head .wp-block-gallery.has-nested-images .blocks-gallery-caption # state: journal gallery; no seeded journal entry has a gallery
+.ttm-comments.is-closed .ttm-comments__tools # state: reader notes busy enough (8+) for the collapse tools; the fixture chapter has three
+.ttm-comment__new # state: a returning reader's second visit after new comments (assets/js/comments.js, localStorage)
+.ttm-comment__held # state: a commenter's own ?unapproved= page after posting; tests/integration covers the markup
+.ttm-comment__held strong # state: a commenter's own ?unapproved= page after posting
+.is-collapsed > .ttm-comment__fold # state: a thread the reader collapsed (tests/e2e/specs/comments.spec.mjs)
+.is-collapsed > .ttm-comment # state: a thread the reader collapsed (tests/e2e/specs/comments.spec.mjs)
+.ttm-feature:has(.ttm-journal-hero) .ttm-journal-sheet # state: an article on the photo-hero template (single-feature.html); no seeded post picks it, HierarchyTest covers the routing

@@ -17,7 +17,7 @@ import {
 	isExempt,
 	parseSelectorAllow,
 } from '../../scripts/lib/css-selectors.mjs';
-import { SCREEN_URLS, securityFiltered } from './lib/urls.mjs';
+import { SCREEN_URLS, COMMENT_SCREENS, securityFiltered } from './lib/urls.mjs';
 import { themeCssFiles } from '../../scripts/lib/theme-css.mjs';
 
 const __dirname = dirname( fileURLToPath( import.meta.url ) );
@@ -51,7 +51,11 @@ function relevantSelectors() {
 	return candidates;
 }
 
-const SCREENS = [ ...SCREEN_URLS, securityFiltered ];
+const SCREENS = [
+	...SCREEN_URLS,
+	securityFiltered,
+	...Object.values( COMMENT_SCREENS ),
+];
 
 test( `selectors: every non-exempt .ttm-/.is-style- selector matches >= 1 element across ${ SCREENS.length } screens`, async ( {
 	page,

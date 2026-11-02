@@ -192,5 +192,22 @@
 				"css": "& input,& textarea{border-radius:0;border:1px solid var(--wp--preset--color--divider)}"
 			}
 		}
-	}
+	},
+	"customTemplates": [
+		{
+			"name": "single-article",
+			"title": "Article",
+			"postTypes": [ "post" ]
+		},
+		{
+			"name": "single-feature",
+			"title": "Article with photo hero",
+			"postTypes": [ "post" ]
+		},
+		{
+			"name": "single-journal",
+			"title": "Journal entry",
+			"postTypes": [ "post" ]
+		}
+	]
 }

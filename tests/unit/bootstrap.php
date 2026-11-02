@@ -18,3 +18,6 @@ if ( ! defined( 'TTM_CORE_DIR' ) ) {
 if ( ! defined( 'TTM_THEME_DIR' ) ) {
 	define( 'TTM_THEME_DIR', dirname( __DIR__, 2 ) . '/themes/ttm-theme/' );
 }
+if ( ! defined( 'DAY_IN_SECONDS' ) ) {
+	define( 'DAY_IN_SECONDS', 86400 );
+}

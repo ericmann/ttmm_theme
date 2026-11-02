@@ -7,6 +7,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import {
 	collectMarkupClasses,
+	collectScriptClasses,
 	collectCssClasses,
 	parseAllowList,
 	filterSrcFiles,
@@ -94,10 +95,17 @@ const srcFiles = filterSrcFiles(
 
 const allMarkupFiles = [ ...markupFiles, ...renderFiles, ...srcFiles ];
 
+// Front-end scripts add classes at runtime (comments.js's collapse controls, nav.js's
+// ttm-nav-open); the editor-only variations.js is not front-end markup.
+const scriptFiles = walk( 'themes/ttm-theme/assets/js' ).filter(
+	( p ) => p.endsWith( '.js' ) && ! p.endsWith( 'variations.js' )
+);
+
 const markup = new Set(
-	[ ...collectMarkupClasses( readAll( allMarkupFiles ) ) ].filter(
-		( cls ) => ! UNSTYLED_WRAPPERS.has( cls )
-	)
+	[
+		...collectMarkupClasses( readAll( allMarkupFiles ) ),
+		...collectScriptClasses( readAll( scriptFiles ) ),
+	].filter( ( cls ) => ! UNSTYLED_WRAPPERS.has( cls ) )
 );
 const css = collectCssClasses( readAll( CSS_FILES ).join( '\n' ) );
 let allow;

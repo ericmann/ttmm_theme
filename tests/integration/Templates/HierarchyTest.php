@@ -245,6 +245,60 @@ class HierarchyTest extends TTM_IntegrationTestCase {
 		$this->assertNotContains( 'ttm-journal-long', $this->body_classes_for( $this->entry( 'technology', 2000, 9 ) ) );
 	}
 
+	public function test_any_post_can_pick_the_journal_template(): void {
+		$post = $this->entry( 'technology', 2000, 9 );
+		update_post_meta( $post, '_wp_page_template', 'single-journal' );
+
+		$classes   = $this->body_classes_for( $post );
+		$hierarchy = apply_filters( 'single_template_hierarchy', [ 'single.php' ] );
+
+		$this->assertSame( 'single-journal', $hierarchy[0] );
+		$this->assertContains( 'ttm-journal-long', $classes );
+		// Comments follow the section, not the template.
+		$this->assertContains( 'ttm-comments-discussion', $classes );
+	}
+
+	public function test_a_journal_entry_can_opt_out_with_the_article_template(): void {
+		$post = $this->entry( 'journal', 2000, 9 );
+		update_post_meta( $post, '_wp_page_template', 'single-article' );
+
+		$classes   = $this->body_classes_for( $post );
+		$hierarchy = apply_filters( 'single_template_hierarchy', [ 'single.php' ] );
+
+		$this->assertSame( 'single-article', $hierarchy[0] );
+		$this->assertNotContains( 'ttm-journal-long', $classes );
+		$this->assertContains( 'ttm-comments-reflections', $classes );
+	}
+
+	public function test_photo_hero_template_gets_the_tall_hero_when_long(): void {
+		$post = $this->entry( 'technology', 2000, 0 );
+		update_post_meta( $post, '_wp_page_template', 'single-feature' );
+
+		$classes   = $this->body_classes_for( $post );
+		$hierarchy = apply_filters( 'single_template_hierarchy', [ 'single.php' ] );
+
+		$this->assertSame( 'single-feature', $hierarchy[0] );
+		$this->assertContains( 'ttm-journal-long', $classes );
+	}
+
+	public function test_article_template_matches_single(): void {
+		$dir = dirname( __DIR__, 3 ) . '/themes/ttm-theme/templates/';
+		if ( ! is_dir( $dir ) ) {
+			$dir = get_template_directory() . '/templates/';
+		}
+
+		$this->assertSame( file_get_contents( $dir . 'single.html' ), file_get_contents( $dir . 'single-article.html' ), 'single-article.html is single.html by choice; keep them identical.' );
+	}
+
+	public function test_comment_kind_body_class_follows_the_section(): void {
+		$this->assertContains( 'ttm-comments-reflections', $this->body_classes_for( $this->entry( 'journal', 100, 0 ) ) );
+		$this->assertContains( 'ttm-comments-discussion', $this->body_classes_for( $this->entry( 'business', 100, 0 ) ) );
+
+		$chapter = $this->entry( 'writing', 100, 0 );
+		update_post_meta( $chapter, 'ttm_form', 'chapter' );
+		$this->assertContains( 'ttm-comments-notes', $this->body_classes_for( $chapter ) );
+	}
+
 	public function test_hierarchy_unchanged_for_pages(): void {
 		$page = self::factory()->post->create( [ 'post_type' => 'page' ] );
 		$this->go_to( (string) get_permalink( $page ) );

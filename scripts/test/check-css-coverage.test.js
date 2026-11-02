@@ -7,6 +7,7 @@
 const path = require( 'path' );
 
 let collectMarkupClasses;
+let collectScriptClasses;
 let collectCssClasses;
 let globToRegExp;
 let parseAllowList;
@@ -21,6 +22,7 @@ beforeAll( async () => {
 	);
 	( {
 		collectMarkupClasses,
+		collectScriptClasses,
 		collectCssClasses,
 		globToRegExp,
 		parseAllowList,
@@ -233,5 +235,30 @@ describe( 'isIdentifierClass / UNSTYLED_WRAPPERS (P4-04)', () => {
 	it( 'does not exempt an unrelated ttm-* class', () => {
 		expect( isIdentifierClass( 'ttm-archive-row' ) ).toBe( false );
 		expect( isIdentifierClass( 'ttm-lead' ) ).toBe( false );
+	} );
+} );
+
+describe( 'collectScriptClasses', () => {
+	it( 'collects whole ttm-* class literals a script adds', () => {
+		const classes = collectScriptClasses( [
+			"button( say( 'collapse' ), 'ttm-comment__collapse' );",
+			'el.className = "ttm-comments__tool ttm-comments__more";',
+			"root.classList.toggle( 'ttm-nav-open', open );",
+		] );
+		expect( [ ...classes ].sort() ).toEqual( [
+			'ttm-comment__collapse',
+			'ttm-comments__more',
+			'ttm-comments__tool',
+			'ttm-nav-open',
+		] );
+	} );
+
+	it( 'skips storage keys, prefixes and other strings', () => {
+		const classes = collectScriptClasses( [
+			"const key = 'ttm-comments:' + postId;",
+			"body.contains( 'ttm-comments-' + kind );",
+			"say( 'collapse' );",
+		] );
+		expect( [ ...classes ] ).toEqual( [] );
 	} );
 } );

@@ -1951,7 +1951,7 @@ html:has(.ttm-masthead-inner) {
 /* 4.12a journal hero (Recede): the featured photograph runs full-bleed under the masthead and
    fades into the ground; the entry is an opaque sheet that slides over it as the photograph
    recedes to a grey wash. A long or photo-heavy entry (ttm-journal-long) gets the tall, pinned
-   hero. Without scroll timelines, or with reduced motion, it is a still photograph. */
+   hero. Articles can pick the same hero (single-feature.html). Without scroll timelines, or with reduced motion, it is a still photograph. */
 body:has(.ttm-journal-hero) {
 	overflow-x: clip;
 }
@@ -2009,6 +2009,11 @@ body:has(.ttm-journal-hero) {
 
 .ttm-journal-recede:has(.ttm-journal-hero) .ttm-journal-head {
 	padding-top: 32px;
+}
+
+/* The same hero over an article ("Article with photo hero", single-feature.html). */
+.ttm-feature:has(.ttm-journal-hero) .ttm-journal-sheet {
+	padding-top: 16px;
 }
 
 @supports (animation-timeline: scroll()) {

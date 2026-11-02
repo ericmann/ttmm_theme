@@ -32,6 +32,7 @@ const editorData = window.ttmEditorData || {
 export default function TtmPanel() {
 	const [ meta, setMeta ] = useEntityProp( 'postType', 'post', 'meta' );
 	const [ categories ] = useEntityProp( 'postType', 'post', 'categories' );
+	const [ template ] = useEntityProp( 'postType', 'post', 'template' );
 	const postId = useEntityId( 'postType', 'post' );
 
 	const { records: seriesTerms } = useEntityRecords( 'taxonomy', 'series', {
@@ -50,7 +51,10 @@ export default function TtmPanel() {
 
 	const primarySection = meta.ttm_primary_category || categories?.[ 0 ] || 0;
 	const inWriting = primarySection === editorData.writingId;
-	const inJournal = primarySection === editorData.journalId;
+	// The Location line shows on anything that opens on the journal template.
+	const inJournal =
+		template === 'single-journal' ||
+		( ! template && primarySection === editorData.journalId );
 
 	const selectedSeriesId = postSeriesIds?.[ 0 ] || 0;
 	const selectedSeries = ( seriesTerms || [] ).find(

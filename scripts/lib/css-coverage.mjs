@@ -16,8 +16,14 @@ const TTM_CLASS = /\bttm-[a-zA-Z0-9_-]+\b/g;
  * `.ttm-numbered__row`, …), so `ttm-archive`/`ttm-most-read` never need a CSS rule. A prior
  * `.ttm-archive, .ttm-most-read { display: block }` rule existed only to satisfy the coverage
  * scanner and was removed as a self-admitted no-op; this exemption is in its place.
+ * `ttm-nav-open` is the state hook nav.js toggles on <html> while the phone menu is open; nothing
+ * styles it today, and the scanner only sees it since theme scripts are scanned (0.3.11).
  */
-export const UNSTYLED_WRAPPERS = new Set( [ 'ttm-archive', 'ttm-most-read' ] );
+export const UNSTYLED_WRAPPERS = new Set( [
+	'ttm-archive',
+	'ttm-most-read',
+	'ttm-nav-open',
+] );
 
 /**
  * Dynamic `body_class()` identifier classes (`Templates/Hierarchy.php::body_classes()`, P4-04):
@@ -86,6 +92,29 @@ export function collectMarkupClasses( files ) {
 			if ( ! isIdentifierClass( m[ 1 ] ) ) {
 				found.add( m[ 1 ] );
 			}
+		}
+	}
+
+	return found;
+}
+
+/**
+ * Collect every `ttm-*` class a theme script adds at runtime: a quoted string literal made only
+ * of `ttm-*` class names (`'ttm-comments__tool'`, `classList.add( 'ttm-nav-open' )`). Keys and
+ * prefixes such as `'ttm-comments:'` or `'ttm-comments-'` are not whole class names and are
+ * left out by the closing quote.
+ *
+ * @param {string[]} files Raw script contents to scan.
+ * @return {Set<string>} Class names the scripts add.
+ */
+export function collectScriptClasses( files ) {
+	const found = new Set();
+
+	for ( const content of files ) {
+		for ( const m of content.matchAll(
+			/(['"])(ttm-[a-z0-9_]+(?:-[a-z0-9_]+)*(?:\s+ttm-[a-z0-9_]+(?:-[a-z0-9_]+)*)*)\1/g
+		) ) {
+			m[ 2 ].split( /\s+/ ).forEach( ( cls ) => found.add( cls ) );
 		}
 	}
 

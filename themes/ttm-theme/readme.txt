@@ -4,7 +4,7 @@ Tags: block-theme, newspaper, one-column, custom-colors, editor-style
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.3.10
+Stable tag: 0.3.11
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,6 +25,25 @@ Install and activate both together.
    publishing directly.
 
 == Changelog ==
+
+= 0.3.11 =
+* Comments, built from core blocks (patterns/comments.php). One section on every post, whose
+  words follow the post's section: a Discussion on articles (replies three deep, an Author tag
+  on the writer's own replies), Reflections on journal entries (flat, newest first, five shown,
+  no Reply), Reader notes on fiction (a single closed line after the chapter, two levels deep).
+* No "Leave a Reply" form and no "N replies on 'Title'" banner: the form waits behind the
+  section's button and opens under a comment when someone clicks Reply ("Replying to Dana ·
+  Cancel"). No website field. A held comment reads "Held for review" to the person who wrote it.
+* Busy threads collapse, and stay collapsed on the reader's next visit (this browser only);
+  comments posted since the last visit are marked new. Styles and script load only on pages
+  that render comments.
+* Comments close on their own: reader notes 30 days after a chapter or story publishes,
+  reflections after 14 days, a discussion after a year. Closed comments stay readable; the
+  section's button goes.
+* Layout is an editorial choice in the editor's Template panel: "Article" (the standard layout,
+  so a Journal entry can opt out), "Article with photo hero" (the journal's receding photograph
+  over the article layout, series bar and contents included) and "Journal entry". Journal
+  entries keep the journal layout by default.
 
 = 0.3.10 =
 * Journal entries open on their featured photograph (Recede): full-bleed under the masthead,
