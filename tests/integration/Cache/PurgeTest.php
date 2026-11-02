@@ -102,6 +102,7 @@ class PurgeTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_trashing_a_published_post_purges_the_url_it_was_served_at(): void {
+		$this->set_permalink_structure( '/%postname%/' );
 		$post_id   = self::factory()->post->create( [ 'post_status' => 'publish' ] );
 		$permalink = (string) get_permalink( $post_id );
 		$purged    = null;
@@ -121,6 +122,7 @@ class PurgeTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_unpublishing_to_draft_purges_the_url_it_was_served_at(): void {
+		$this->set_permalink_structure( '/%postname%/' );
 		$post_id   = self::factory()->post->create( [ 'post_status' => 'publish' ] );
 		$permalink = (string) get_permalink( $post_id );
 		$purged    = null;
@@ -142,6 +144,7 @@ class PurgeTest extends TTM_IntegrationTestCase {
 	}
 
 	public function test_deleting_a_published_post_outright_purges_it(): void {
+		$this->set_permalink_structure( '/%postname%/' );
 		$post_id   = self::factory()->post->create( [ 'post_status' => 'publish' ] );
 		$permalink = (string) get_permalink( $post_id );
 		$purged    = null;
