@@ -97,8 +97,9 @@ class Hierarchy {
 	}
 
 	/**
-	 * Prepend `single-journal` when Meta\Layout says so: picked in the editor, or a Journal
-	 * entry left on the default.
+	 * Prepend the Meta\Layout template unless it is plain `single`: one picked in the editor
+	 * (Article, Article with photo hero, Journal entry), or `single-journal` for a Journal entry
+	 * left on the default.
 	 *
 	 * @param string[] $templates Candidate template slugs, most specific first.
 	 * @return string[]
@@ -108,8 +109,9 @@ class Hierarchy {
 			return $templates;
 		}
 
-		if ( 'single-journal' === Layout::of( (int) get_the_ID() ) ) {
-			array_unshift( $templates, 'single-journal' );
+		$layout = Layout::of( (int) get_the_ID() );
+		if ( 'single' !== $layout ) {
+			array_unshift( $templates, $layout );
 		}
 
 		return $templates;
@@ -133,8 +135,9 @@ class Hierarchy {
 
 	/**
 	 * Adds ttm-section-{slug}, ttm-in-series, ttm-form-{form}, ttm-journal-long on a long or
-	 * photo-heavy entry on the journal template (the theme gives those the tall pinned hero), and
-	 * ttm-comments-{discussion|reflections|notes} from the section.
+	 * photo-heavy post on a photo-hero template (the theme gives those the tall pinned hero), and
+	 * ttm-comments-{discussion|reflections|notes} from the section (plus ttm-comments-closed once
+	 * comments have closed, so the theme drops the section's button).
 	 *
 	 * @param string[] $classes Existing body classes.
 	 * @return string[]
@@ -153,7 +156,7 @@ class Hierarchy {
 			if ( $form ) {
 				$classes[] = 'ttm-form-' . $form;
 			}
-			if ( 'single-journal' === Layout::of( (int) $post_id ) && self::is_long_post( (int) $post_id ) ) {
+			if ( Layout::has_hero( Layout::of( (int) $post_id ) ) && self::is_long_post( (int) $post_id ) ) {
 				$classes[] = 'ttm-journal-long';
 			}
 			$kind = Threading::kind_of( (int) $post_id );
@@ -163,6 +166,9 @@ class Hierarchy {
 				$classes[] = 'ttm-comments-notes';
 			} else {
 				$classes[] = 'ttm-comments-discussion';
+			}
+			if ( ! comments_open( (int) $post_id ) ) {
+				$classes[] = 'ttm-comments-closed';
 			}
 		} elseif ( is_category() ) {
 			$queried = get_queried_object();

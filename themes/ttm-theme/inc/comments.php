@@ -153,6 +153,7 @@ function enqueue_comments_js( string $content ): string {
 				/* translators: %d: number of reflections. */
 				'showAll'     => __( 'Show all %d', 'ttm-theme' ),
 				'readNotes'   => __( 'Read or leave a note', 'ttm-theme' ),
+				'readClosed'  => __( 'Read the notes', 'ttm-theme' ),
 				'close'       => __( 'Close', 'ttm-theme' ),
 				/* translators: %s: name of the person being replied to. */
 				'replyingTo'  => __( 'Replying to %s', 'ttm-theme' ),

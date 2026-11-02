@@ -92,7 +92,7 @@
 			if ( toggle ) {
 				toggle.setAttribute( 'aria-expanded', String( ! closed ) );
 				toggle.textContent = closed
-					? say( 'readNotes' )
+					? say( respond ? 'readNotes' : 'readClosed' )
 					: say( 'close' );
 			}
 		}

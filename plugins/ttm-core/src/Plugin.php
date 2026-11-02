@@ -65,6 +65,7 @@ class Plugin {
 			Cache\Cloudflare::class,
 			Comments\Threading::class,
 			Comments\Moderation::class,
+			Comments\Closing::class,
 			Newsletter\Handler::class,
 			Newsletter\Settings::class,
 		];

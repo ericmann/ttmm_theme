@@ -37,8 +37,13 @@ Install and activate both together.
 * Busy threads collapse, and stay collapsed on the reader's next visit (this browser only);
   comments posted since the last visit are marked new. Styles and script load only on pages
   that render comments.
-* The journal layout is a template you can pick for any post ("Journal entry" in the editor's
-  Template panel). Journal entries keep it by default.
+* Comments close on their own: reader notes 30 days after a chapter or story publishes,
+  reflections after 14 days, a discussion after a year. Closed comments stay readable; the
+  section's button goes.
+* Layout is an editorial choice in the editor's Template panel: "Article" (the standard layout,
+  so a Journal entry can opt out), "Article with photo hero" (the journal's receding photograph
+  over the article layout, series bar and contents included) and "Journal entry". Journal
+  entries keep the journal layout by default.
 
 = 0.3.10 =
 * Journal entries open on their featured photograph (Recede): full-bleed under the masthead,

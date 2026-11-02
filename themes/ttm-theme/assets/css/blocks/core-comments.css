@@ -44,6 +44,11 @@
 	margin-left: auto;
 }
 
+/* Closed: the comments stay, the button and its form go (core renders no form). */
+.ttm-comments-closed .ttm-comments__cta {
+	display: none;
+}
+
 .ttm-comments__toggle,
 .ttm-comments__tool,
 .ttm-comments__more,

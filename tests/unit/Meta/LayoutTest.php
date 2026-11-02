@@ -27,4 +27,19 @@ class LayoutTest extends TestCase {
 		$this->assertSame( 'single', Layout::resolve( '', '' ) );
 		$this->assertSame( 'single', Layout::resolve( 'some-unknown-template', 'business' ) );
 	}
+
+	public function test_a_journal_entry_can_opt_out_with_article(): void {
+		$this->assertSame( 'single-article', Layout::resolve( 'single-article', 'journal' ) );
+	}
+
+	public function test_any_post_can_pick_the_photo_hero(): void {
+		$this->assertSame( 'single-feature', Layout::resolve( 'single-feature', 'technology' ) );
+	}
+
+	public function test_hero_layouts(): void {
+		$this->assertTrue( Layout::has_hero( 'single-journal' ) );
+		$this->assertTrue( Layout::has_hero( 'single-feature' ) );
+		$this->assertFalse( Layout::has_hero( 'single-article' ) );
+		$this->assertFalse( Layout::has_hero( 'single' ) );
+	}
 }

@@ -195,6 +195,16 @@
 	},
 	"customTemplates": [
 		{
+			"name": "single-article",
+			"title": "Article",
+			"postTypes": [ "post" ]
+		},
+		{
+			"name": "single-feature",
+			"title": "Article with photo hero",
+			"postTypes": [ "post" ]
+		},
+		{
 			"name": "single-journal",
 			"title": "Journal entry",
 			"postTypes": [ "post" ]

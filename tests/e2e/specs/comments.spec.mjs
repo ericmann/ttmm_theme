@@ -118,6 +118,12 @@ test.describe( 'comments: reader notes', () => {
 			'Reader notes'
 		);
 		await expect( page.locator( '.ttm-comments__list' ) ).toBeHidden();
+		// The seeded chapter is older than comments.close_days_notes (30): notes read-only.
+		await expect( page.locator( '.ttm-comments__toggle' ) ).toHaveText(
+			'Read the notes'
+		);
+		await expect( page.locator( '#respond' ) ).toHaveCount( 0 );
+		await expect( page.locator( '.ttm-comments__cta' ) ).toBeHidden();
 		await page.click( '.ttm-comments__toggle' );
 		await expect( page.locator( '.ttm-comments__list' ) ).toBeVisible();
 		await expect(

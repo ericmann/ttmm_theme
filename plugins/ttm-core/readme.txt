@@ -40,8 +40,13 @@ site owner's byline.
   commenter's comments publish once they have `comments.trusted_after` (3) approved, never on
   fiction. Akismet's form nonce is off, since the page is cached.
 * Approving, unapproving, editing or publishing a comment purges its post page and comment feed.
-* Any post can pick the journal template (`_wp_page_template` = `single-journal`); the tall hero
-  follows the template, comments follow the section.
+* Comments close by kind (Comments\Closing): `comments.close_days_notes` (30) for fiction,
+  `comments.close_days_reflections` (14) for journal entries, `comments.close_days` (365)
+  otherwise. Core's "close comments on older posts" setting is held off so the two never stack.
+  Body class `ttm-comments-closed` once closed.
+* Meta\Layout: a post may pick `single-article`, `single-feature` (article on the photo hero)
+  or `single-journal`; Journal entries default to `single-journal`. The tall hero
+  (`ttm-journal-long`) follows the photo-hero templates, comments follow the section.
 
 = 0.3.10 =
 * A journal entry of `journal.long_words` (600) words or more, or with `journal.long_photos` (3)

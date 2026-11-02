@@ -13,15 +13,16 @@ use TTM\Core\Config;
 
 /**
  * A template picked in the editor (the post's `_wp_page_template`) wins; otherwise a Journal
- * entry opens on `single-journal` and anything else on `single`. Layout only: comments follow
- * the section (Comments\Threading), not the template.
+ * entry opens on `single-journal` and anything else on `single`. `single-article` is `single`
+ * by choice (a Journal entry opting out); `single-feature` is the article on the journal's
+ * receding photo hero. Layout only: comments follow the section (Comments\Threading).
  */
 class Layout {
 
 	/**
 	 * Templates the editor may pick for a post (theme.json `customTemplates`).
 	 */
-	public const CHOOSABLE = [ 'single-journal' ];
+	public const CHOOSABLE = [ 'single-article', 'single-feature', 'single-journal' ];
 
 	/**
 	 * Pure: the template slug for a post.
@@ -37,6 +38,15 @@ class Layout {
 		return '' !== $section_slug && (string) Config::get( 'sections.journal_slug', 'journal' ) === $section_slug
 			? 'single-journal'
 			: 'single';
+	}
+
+	/**
+	 * Pure: whether a layout opens on the receding photo hero (the tall version for a long post).
+	 *
+	 * @param string $layout A resolve() slug.
+	 */
+	public static function has_hero( string $layout ): bool {
+		return in_array( $layout, [ 'single-journal', 'single-feature' ], true );
 	}
 
 	/**

@@ -91,6 +91,10 @@ class Config {
 			'comments.depth'                   => 3,
 			'comments.fiction_depth'           => 2,
 			'comments.trusted_after'           => 3,
+			// Days a post takes comments, by kind (Comments\Closing; 0 = never closes).
+			'comments.close_days'              => 365,
+			'comments.close_days_reflections'  => 14,
+			'comments.close_days_notes'        => 30,
 
 			'series.strip_limit'               => 3,
 			'series.index_batch'               => 500,
