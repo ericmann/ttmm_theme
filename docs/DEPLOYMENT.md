@@ -34,7 +34,7 @@ Settings to verify in the dashboard:
 | Setting | Value | Why |
 |---|---|---|
 | Caching → Configuration → Browser Cache TTL | **Respect Existing Headers** | The origin computes the midnight boundary; a fixed TTL would show yesterday's masthead date and "Today" labels. |
-| Cache Rules | Cache everything for `eric.mann.blog/*`, Edge TTL "Use cache-control header from origin", bypass when cookie contains `wordpress_logged_in`, `wp-postpass`, `wordpress_sec` or when path starts with `/wp-admin`, `/wp-login.php`, `/wp-json/wp/`, `/wp-cron.php` | Same behaviour as APO, explicit. |
+| Cache Rules | Cache everything for `eric.mann.blog/*`, Edge TTL "Use cache-control header from origin", bypass when cookie contains `wordpress_logged_in`, `wp-postpass`, `wordpress_sec` or `comment_author`, or when path starts with `/wp-admin`, `/wp-login.php`, `/wp-json/wp/`, `/wp-cron.php` | Same behaviour as APO, explicit. The origin also answers `no-store` to a commenter (cookie or `?unapproved=`), so a page with their name pre-filled or their held comment is never stored; the bypass is belt and braces. Edge TTL must stay "from origin" for that `no-store` to count. |
 | Cache Rules | Also cache `/wp-json/ttm/v1/*` with origin TTL | These endpoints are public and carry the same computed headers. |
 | Tiered Cache | On | Fewer origin hits after a purge. |
 | Rules → Redirect Rules | `/category/politics/*` → `/category/opinion/politics/$1` (301) plus anything `wp ttm migrate:redirects` printed | Politics fold, `MIGRATION.md §2.2`. |
@@ -99,7 +99,7 @@ Avoid adding any of these without a plan for cache keys:
 
 - A plugin that prints a nonce or the current user on the front end (most "related posts" and social-share plugins do).
 - Cookie banners or A/B testing that vary the HTML.
-- Comments (a comment form carries a nonce and a per-post state). If comments come back after the content cleanup, they need a JavaScript-loaded form or a Cloudflare bypass on single posts.
+- Comments are fine as shipped in 0.3.11: the form carries no nonce for anonymous visitors (Akismet's is turned off, `Comments\Moderation::akismet_nonce()`), the cookie-consent box is unticked, and commenters get `no-store`. Keep core's `comment_moderation` 0 and `comment_previously_approved` 0: the plugin's `comments.trusted_after` is what holds a newcomer, and it only ever downgrades an approval core would have given.
 - Jetpack modules that inject per-visitor markup (Likes, Sharing with counts). Jetpack Stats' beacon is fine: it is a fixed script and an image request that vary nothing in the HTML.
 
 ## 9. Checklist for a release

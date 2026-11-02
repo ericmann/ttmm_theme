@@ -26,8 +26,8 @@ class PluginTest extends TestCase {
 
 	public function test_boot_registers_each_module_once(): void {
 		// Compat\Theme (API-version notice) and Admin\BuildNotice (P1-09, §6.7 editor-bundle
-		// notice) each hook admin_notices once.
-		Actions\expectAdded( 'admin_notices' )->twice();
+		// notice) and Cache\Cloudflare (last purge failure) each hook admin_notices once.
+		Actions\expectAdded( 'admin_notices' )->times( 3 );
 
 		Plugin::boot();
 		Plugin::boot();

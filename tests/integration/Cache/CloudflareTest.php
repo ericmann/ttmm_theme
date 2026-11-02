@@ -13,6 +13,7 @@ use TTM\Core\Config;
 class CloudflareTest extends TTM_IntegrationTestCase {
 
 	public function tear_down(): void {
+		delete_option( Cloudflare::LAST_ERROR_OPTION );
 		remove_all_filters( 'pre_http_request' );
 		remove_all_filters( 'ttm_config' );
 		Config::reset();
@@ -56,6 +57,110 @@ class CloudflareTest extends TTM_IntegrationTestCase {
 			},
 			10,
 			3
+		);
+	}
+
+	/**
+	 * @param int    $code HTTP status to answer.
+	 * @param string $body JSON body.
+	 */
+	private function mock_response( int $code, string $body ): void {
+		add_filter(
+			'pre_http_request',
+			static function () use ( $code, $body ) {
+				return [
+					'headers'  => [],
+					'body'     => $body,
+					'response' => [
+						'code'    => $code,
+						'message' => '',
+					],
+					'cookies'  => [],
+					'filename' => null,
+				];
+			}
+		);
+	}
+
+	public function test_a_rejected_purge_is_recorded_for_the_admin_notice(): void {
+		$this->configure( 'zone123', 'token456' );
+		$this->mock_response( 403, '{"success":false,"errors":[{"code":10000,"message":"Authentication error"}]}' );
+
+		Cloudflare::purge( [ home_url( '/' ) ] );
+
+		$last = get_option( Cloudflare::LAST_ERROR_OPTION );
+		$this->assertIsArray( $last );
+		$this->assertSame( 'HTTP 403: Authentication error', $last['message'] );
+		$this->assertNotEmpty( $last['at'] );
+	}
+
+	public function test_a_200_with_success_false_is_a_failure(): void {
+		$this->configure( 'zone123', 'token456' );
+		$this->mock_response( 200, '{"success":false,"errors":[{"message":"purge quota exceeded"}]}' );
+
+		Cloudflare::purge( [ home_url( '/' ) ] );
+
+		$this->assertSame( 'API answered success=false: purge quota exceeded', get_option( Cloudflare::LAST_ERROR_OPTION )['message'] );
+	}
+
+	public function test_a_transport_error_is_a_failure(): void {
+		$this->configure( 'zone123', 'token456' );
+		add_filter(
+			'pre_http_request',
+			static function () {
+				return new WP_Error( 'http_request_failed', 'cURL error 28: timed out' );
+			}
+		);
+
+		Cloudflare::purge( [ home_url( '/' ) ] );
+
+		$this->assertSame( 'cURL error 28: timed out', get_option( Cloudflare::LAST_ERROR_OPTION )['message'] );
+	}
+
+	public function test_a_successful_purge_clears_the_recorded_failure(): void {
+		$this->configure( 'zone123', 'token456' );
+		update_option(
+			Cloudflare::LAST_ERROR_OPTION,
+			[
+				'at'      => '2026-11-02T00:00:00+00:00',
+				'message' => 'HTTP 403',
+			],
+			false 
+		);
+		$requests = [];
+		$this->mock_success( $requests );
+
+		Cloudflare::purge( [ home_url( '/' ) ] );
+
+		$this->assertFalse( get_option( Cloudflare::LAST_ERROR_OPTION ) );
+	}
+
+	public function test_failure_reads_a_response(): void {
+		$this->assertNull(
+			Cloudflare::failure(
+				[
+					'response' => [ 'code' => 200 ],
+					'body'     => '{"success":true}',
+				] 
+			) 
+		);
+		$this->assertSame(
+			'HTTP 429',
+			Cloudflare::failure(
+				[
+					'response' => [ 'code' => 429 ],
+					'body'     => '',
+				] 
+			) 
+		);
+		$this->assertSame(
+			'API answered success=false',
+			Cloudflare::failure(
+				[
+					'response' => [ 'code' => 200 ],
+					'body'     => 'not json',
+				] 
+			) 
 		);
 	}
 

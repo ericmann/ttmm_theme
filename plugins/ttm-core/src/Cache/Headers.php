@@ -159,16 +159,21 @@ class Headers {
 	}
 
 	/**
-	 * `public, max-age=N, s-maxage=N`, plus `stale-while-revalidate` and `stale-if-error` when
+	 * `public, max-age=B, s-maxage=N`, plus `stale-while-revalidate` and `stale-if-error` when
 	 * their Config values are positive. Used for every cacheable response (pages, feeds and
 	 * `ttm/v1`), never for `no-store`: the stale directives let the edge keep serving the last
 	 * good copy while it refetches, or while the origin is unreachable.
 	 *
-	 * @param int $seconds Seconds.
+	 * The edge keeps a page until the day boundary because a publish purges it; a reader's
+	 * browser cannot be purged, so its share (`max-age`) is clamped to
+	 * `cache.browser_max_age_seconds` and a returning reader sees a new post within minutes.
+	 *
+	 * @param int $seconds Seconds the edge may keep the response.
 	 * @return string
 	 */
 	public static function header_value( int $seconds ): string {
-		$value = sprintf( 'public, max-age=%1$d, s-maxage=%1$d', $seconds );
+		$browser = min( $seconds, max( 0, (int) Config::get( 'cache.browser_max_age_seconds', 300 ) ) );
+		$value   = sprintf( 'public, max-age=%d, s-maxage=%d', $browser, $seconds );
 
 		$revalidate = (int) Config::get( 'cache.stale_revalidate_seconds', 60 );
 		if ( $revalidate > 0 ) {

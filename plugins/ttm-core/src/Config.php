@@ -145,6 +145,7 @@ class Config {
 			'cache.max_age_cap_seconds'        => 86400,
 			'cache.min_age_seconds'            => 60,
 			'cache.feed_seconds'               => 3600,
+			'cache.browser_max_age_seconds'    => 300,
 			// ⚠️ ASSUMPTION: `stale-while-revalidate`/`stale-if-error` seconds appended to every
 			// cacheable Cache-Control (0 omits the directive). A week of stale-if-error lets the
 			// edge keep serving pages through an origin outage; tune once real outages are seen.

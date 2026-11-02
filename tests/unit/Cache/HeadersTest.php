@@ -118,7 +118,7 @@ class HeadersTest extends TestCase {
 		$this->stub_config();
 
 		$this->assertSame(
-			'public, max-age=3600, s-maxage=3600, stale-while-revalidate=60, stale-if-error=604800',
+			'public, max-age=300, s-maxage=3600, stale-while-revalidate=60, stale-if-error=604800',
 			Headers::header_value( 3600 )
 		);
 	}
@@ -166,6 +166,19 @@ class HeadersTest extends TestCase {
 		$this->assertSame( 'public, max-age=120, s-maxage=120', Headers::header_value( 120 ) );
 	}
 
+	public function test_browser_share_is_clamped_while_the_edge_keeps_the_day(): void {
+		$this->stub_config();
+
+		$this->assertStringStartsWith( 'public, max-age=300, s-maxage=43200', Headers::header_value( 43200 ) );
+		$this->assertStringStartsWith( 'public, max-age=120, s-maxage=120', Headers::header_value( 120 ) );
+	}
+
+	public function test_browser_share_follows_its_config_key(): void {
+		$this->stub_config( [ 'cache.browser_max_age_seconds' => 0 ] );
+
+		$this->assertStringStartsWith( 'public, max-age=0, s-maxage=43200', Headers::header_value( 43200 ) );
+	}
+
 	public function test_feed_gets_stale_directives(): void {
 		$this->stub_config();
 
@@ -179,7 +192,7 @@ class HeadersTest extends TestCase {
 			]
 		);
 
-		$this->assertSame( 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=60, stale-if-error=604800', $value );
+		$this->assertSame( 'public, max-age=300, s-maxage=3600, stale-while-revalidate=60, stale-if-error=604800', $value );
 	}
 
 	public function test_no_store_never_carries_stale_directives(): void {

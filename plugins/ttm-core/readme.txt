@@ -4,7 +4,7 @@ Tags: blocks, block-bindings, newspaper, series, block-theme
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.3.11
+Stable tag: 0.3.12
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -30,6 +30,21 @@ site owner's byline.
    publishing directly — every block and template degrades gracefully with no content.
 
 == Changelog ==
+
+= 0.3.12 =
+* Purging follows the save, not the status change: the URL set is collected on
+  `wp_after_insert_post`, after the block editor has written the post's categories and meta,
+  so the right section archive and feed are purged on publish. A post that is trashed,
+  unpublished or deleted outright purges the pretty URL it was served at (`get_permalink()`
+  answers `?p=` once it is withdrawn), with the previous URL remembered on `pre_post_update`.
+* A Cloudflare purge that fails (transport error, non-200, `success: false`) is logged
+  regardless of `WP_DEBUG`, kept in the `ttm_cloudflare_last_error` option and shown to
+  administrators until a purge succeeds; before, every failure was silent.
+* A commenter whose comment published at once is redirected to `?c=<id>`, a URL the edge
+  has never cached, so their first view already shows it.
+* `cache.browser_max_age_seconds` (300): `max-age` for browsers is clamped while `s-maxage`
+  keeps the edge's day-boundary share. The edge is purged on publish; a reader's browser
+  cannot be, and it was holding the front page for up to a day.
 
 = 0.3.11 =
 * Comments follow the post's section: Journal entries collect flat reflections (newest first),
