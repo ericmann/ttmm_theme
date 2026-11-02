@@ -24,7 +24,8 @@ use WP_Post;
  * writes its terms and meta, so `transition_post_status` would collect yesterday's sections;
  * `wp_after_insert_post` runs after both, in the classic, REST and cron (`wp_publish_post()`)
  * paths. And once a post is trashed or unpublished `get_permalink()` answers `?p=N`, so the
- * pretty URL it was served at is remembered on `pre_post_update`, while it is still published.
+ * pretty URL it was served at is remembered on `wp_trash_post`/`pre_post_update`, while it is
+ * still published.
  */
 class Purge {
 
@@ -39,6 +40,7 @@ class Purge {
 	 * Hook registration.
 	 */
 	public static function register(): void {
+		add_action( 'wp_trash_post', [ self::class, 'remember_permalink' ] );
 		add_action( 'pre_post_update', [ self::class, 'remember_permalink' ] );
 		add_action( 'wp_after_insert_post', [ self::class, 'on_saved' ], 20, 4 );
 		add_action( 'before_delete_post', [ self::class, 'on_delete' ], 20, 2 );
@@ -130,12 +132,17 @@ class Purge {
 	}
 
 	/**
-	 * `pre_post_update`: keep the pretty URL of a published post before the update that may
-	 * trash, unpublish or rename it.
+	 * `wp_trash_post` and `pre_post_update`: keep the pretty URL of a published post before the
+	 * update that may trash, unpublish or rename it. Trashing fires both, and core has already
+	 * written the `__trashed` slug by the second, so the first value kept wins.
 	 *
 	 * @param int $post_id Post id.
 	 */
 	public static function remember_permalink( int $post_id ): void {
+		if ( isset( self::$before[ $post_id ] ) ) {
+			return;
+		}
+
 		if ( 'post' === get_post_type( $post_id ) && 'publish' === get_post_status( $post_id ) ) {
 			self::$before[ $post_id ] = (string) get_permalink( $post_id );
 		}
