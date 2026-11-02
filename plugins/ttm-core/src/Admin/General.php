@@ -50,7 +50,7 @@ class General {
 
 		echo '<tr><th><label for="ttm_comments_enabled">' . esc_html__( 'Comments', 'ttm-core' ) . '</label></th><td>';
 		printf( '<input type="checkbox" name="comments_enabled" id="ttm_comments_enabled" value="1"%s> ', checked( $comments, true, false ) );
-		echo '<p class="description">' . esc_html__( 'Comments are closed by design; this toggle is informational only.', 'ttm-core' ) . '</p></td></tr>';
+		echo '<p class="description">' . esc_html__( 'Recorded only. Whether a post takes comments follows its section and the closing windows (comments.close_days, comments.close_days_reflections, comments.close_days_notes), not this box.', 'ttm-core' ) . '</p></td></tr>';
 
 		echo '</tbody></table>';
 	}

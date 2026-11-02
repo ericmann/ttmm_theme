@@ -1,6 +1,7 @@
 <?php
 /**
- * Collects the affected URLs on a post publish/unpublish transition and fires `ttm_purge_urls`.
+ * Collects the affected URLs when a post enters, leaves or changes while in `publish`, and fires
+ * `ttm_purge_urls`.
  *
  * @package TTM\Core\Cache
  */
@@ -15,20 +16,36 @@ use TTM\Core\Query\SeriesIndex;
 use WP_Post;
 
 /**
- * `transition_post_status` -> `ttm_purge_urls` (DEPLOYMENT.md §1), and a published comment's
+ * `wp_after_insert_post` -> `ttm_purge_urls` (DEPLOYMENT.md §1), and a published comment's
  * post page. The verse, settings, books and series-index modules already fire the action
  * themselves; this only covers post and comment writes.
+ *
+ * Two things decide the hooks. The block editor saves the post (status included) and only then
+ * writes its terms and meta, so `transition_post_status` would collect yesterday's sections;
+ * `wp_after_insert_post` runs after both, in the classic, REST and cron (`wp_publish_post()`)
+ * paths. And once a post is trashed or unpublished `get_permalink()` answers `?p=N`, so the
+ * pretty URL it was served at is remembered on `pre_post_update`, while it is still published.
  */
 class Purge {
+
+	/**
+	 * Pretty permalinks of published posts about to be updated, by post id.
+	 *
+	 * @var array<int, string>
+	 */
+	private static array $before = [];
 
 	/**
 	 * Hook registration.
 	 */
 	public static function register(): void {
-		add_action( 'transition_post_status', [ self::class, 'on_transition' ], 20, 3 );
+		add_action( 'pre_post_update', [ self::class, 'remember_permalink' ] );
+		add_action( 'wp_after_insert_post', [ self::class, 'on_saved' ], 20, 4 );
+		add_action( 'before_delete_post', [ self::class, 'on_delete' ], 20, 2 );
 		add_action( 'transition_comment_status', [ self::class, 'on_comment_transition' ], 20, 3 );
 		add_action( 'comment_post', [ self::class, 'on_comment_post' ], 20, 2 );
 		add_action( 'edit_comment', [ self::class, 'on_comment_edit' ], 20 );
+		add_filter( 'comment_post_redirect', [ self::class, 'comment_redirect' ], 10, 2 );
 	}
 
 	/**
@@ -72,6 +89,24 @@ class Purge {
 	}
 
 	/**
+	 * `comment_post_redirect`: a commenter whose comment published at once is sent to a URL the
+	 * edge has never seen (`?c=<id>`), so their first view is rendered fresh rather than served
+	 * from the copy the purge is still replacing. A held comment already goes to `?unapproved=`,
+	 * which is never cached.
+	 *
+	 * @param string      $location Redirect target, usually `permalink#comment-N`.
+	 * @param \WP_Comment $comment  The comment just posted.
+	 * @return string
+	 */
+	public static function comment_redirect( string $location, $comment ): string {
+		if ( ! $comment || '1' !== (string) $comment->comment_approved ) {
+			return $location;
+		}
+
+		return add_query_arg( 'c', (int) $comment->comment_ID, $location );
+	}
+
+	/**
 	 * Purge a published post's page and its comment feed.
 	 *
 	 * @param int $post_id Post id.
@@ -95,22 +130,58 @@ class Purge {
 	}
 
 	/**
-	 * Fire `ttm_purge_urls` when a post enters or leaves `publish`.
+	 * `pre_post_update`: keep the pretty URL of a published post before the update that may
+	 * trash, unpublish or rename it.
 	 *
-	 * @param string  $new_status New status.
-	 * @param string  $old_status Old status.
-	 * @param WP_Post $post       Post object.
+	 * @param int $post_id Post id.
 	 */
-	public static function on_transition( string $new_status, string $old_status, WP_Post $post ): void {
+	public static function remember_permalink( int $post_id ): void {
+		if ( 'post' === get_post_type( $post_id ) && 'publish' === get_post_status( $post_id ) ) {
+			self::$before[ $post_id ] = (string) get_permalink( $post_id );
+		}
+	}
+
+	/**
+	 * `wp_after_insert_post`: fire `ttm_purge_urls` when a post is, or was, published.
+	 *
+	 * @param int          $post_id     Post id.
+	 * @param WP_Post      $post        Post as saved.
+	 * @param bool         $update      Whether this was an update (unused: `$post_before` says).
+	 * @param WP_Post|null $post_before The post before the update, null for a new one.
+	 */
+	public static function on_saved( int $post_id, WP_Post $post, bool $update, $post_before ): void {
+		unset( $update );
+
+		$previous = self::$before[ $post_id ] ?? '';
+		unset( self::$before[ $post_id ] );
+
 		if ( 'post' !== $post->post_type ) {
 			return;
 		}
 
-		if ( 'publish' !== $new_status && 'publish' !== $old_status ) {
+		$old = $post_before instanceof WP_Post ? $post_before->post_status : 'new';
+		if ( 'publish' !== $post->post_status && 'publish' !== $old ) {
 			return;
 		}
 
-		do_action( 'ttm_purge_urls', self::for_post( $post->ID ) );
+		$urls = self::for_post( $post_id );
+		if ( '' !== $previous ) {
+			$urls[] = $previous;
+		}
+
+		do_action( 'ttm_purge_urls', array_values( array_unique( $urls ) ) );
+	}
+
+	/**
+	 * `before_delete_post`: a published post deleted outright (no trash) leaves the same pages.
+	 *
+	 * @param int          $post_id Post id.
+	 * @param WP_Post|null $post    The post being deleted.
+	 */
+	public static function on_delete( int $post_id, $post ): void {
+		if ( $post instanceof WP_Post && 'post' === $post->post_type && 'publish' === $post->post_status ) {
+			do_action( 'ttm_purge_urls', self::for_post( $post_id ) );
+		}
 	}
 
 	/**
