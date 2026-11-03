@@ -593,4 +593,28 @@ class SeriesListTest extends TTM_IntegrationTestCase {
 
 		$this->assertStringContainsString( 'Current Series', $html );
 	}
+
+
+	public function test_series_with_no_published_part_is_not_listed(): void {
+		$tech = $this->category_id( 'technology', 'Technology' );
+		$this->make_series( 'live-series', 'Live Series', 'in-progress', 'nonfiction', $tech );
+
+		$term   = wp_insert_term( 'Staged Series', 'series', [ 'slug' => 'staged-series' ] );
+		$staged = (int) $term['term_id'];
+		update_term_meta( $staged, 'ttm_status', 'in-progress' );
+		$draft = self::factory()->post->create(
+			[
+				'post_status'   => 'draft',
+				'post_category' => [ $tech ],
+			]
+		);
+		update_post_meta( $draft, 'ttm_series_part', 1 );
+		wp_set_object_terms( $draft, [ $staged ], 'series' );
+		SeriesIndex::rebuild();
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'Live Series', $html );
+		$this->assertStringNotContainsString( 'Staged Series', $html );
+	}
 }

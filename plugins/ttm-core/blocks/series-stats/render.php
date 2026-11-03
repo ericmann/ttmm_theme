@@ -19,7 +19,7 @@ if ( 'empty' === Helpers::preview_state( $attributes ) ) {
 	return '';
 }
 
-$ttm_rows = SeriesIndex::all();
+$ttm_rows = SeriesIndex::published();
 
 if ( empty( $ttm_rows ) ) {
 	return '';

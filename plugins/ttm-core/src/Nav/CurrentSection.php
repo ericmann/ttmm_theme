@@ -46,7 +46,7 @@ class CurrentSection {
 		$raw_path = wp_parse_url( $url, PHP_URL_PATH );
 		$path     = self::section_path( trailingslashit( is_string( $raw_path ) ? $raw_path : '' ) );
 
-		if ( '/series/' === $path && empty( SeriesIndex::all() ) ) {
+		if ( '/series/' === $path && empty( SeriesIndex::published() ) ) {
 			return '';
 		}
 

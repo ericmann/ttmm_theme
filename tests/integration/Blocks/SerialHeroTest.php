@@ -271,4 +271,44 @@ class SerialHeroTest extends TTM_IntegrationTestCase {
 
 		$this->assertStringContainsString( 'The Quiet Ledger', $html );
 	}
+
+
+	/**
+	 * A serial staged as drafts ahead of its first chapter must not take the hero: with it the
+	 * hero would name the unpublished book and link "Read chapter 1" to nothing.
+	 */
+	public function test_draft_only_serial_does_not_take_the_hero(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$this->make_serial(
+			'done-novel',
+			'Done Novel',
+			2,
+			[
+				[ 'part' => 1 ],
+				[
+					'part' => 2,
+					'date' => '2026-03-01 09:00:00',
+				],
+			],
+			[ 'ttm_status' => 'complete' ]
+		);
+		$this->make_serial(
+			'staged-novel',
+			'Staged Novel',
+			4,
+			[
+				[
+					'part'   => 1,
+					'status' => 'draft',
+					'date'   => '2026-09-19 09:00:00',
+				],
+			]
+		);
+
+		$html = $this->render();
+
+		$this->assertStringContainsString( 'Done Novel', $html );
+		$this->assertStringNotContainsString( 'Staged Novel', $html );
+		$this->assertStringNotContainsString( 'href=""', $html );
+	}
 }

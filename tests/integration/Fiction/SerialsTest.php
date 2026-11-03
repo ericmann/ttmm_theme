@@ -117,4 +117,49 @@ class SerialsTest extends TTM_IntegrationTestCase {
 
 		$this->assertSame( [ $story_new, $story_old ], $stories );
 	}
+
+
+	/**
+	 * A serial staged ahead of its first chapter: in progress, every part still a draft.
+	 */
+	private function make_staged_serial( int $writing_id ): int {
+		$term      = wp_insert_term( 'Staged Novel', 'series', [ 'slug' => 'staged-novel' ] );
+		$series_id = (int) $term['term_id'];
+		update_term_meta( $series_id, 'ttm_form', 'novella' );
+		update_term_meta( $series_id, 'ttm_status', 'in-progress' );
+
+		$draft = self::factory()->post->create(
+			[
+				'post_status'   => 'draft',
+				'post_category' => [ $writing_id ],
+				'post_date'     => '2026-10-01 09:00:00',
+			]
+		);
+		update_post_meta( $draft, 'ttm_series_part', 1 );
+		wp_set_object_terms( $draft, [ $series_id ], 'series' );
+
+		SeriesIndex::rebuild();
+
+		return $series_id;
+	}
+
+	public function test_active_ignores_a_serial_with_no_published_part(): void {
+		$writing = $this->category_id( 'writing', 'Writing' );
+		$live    = $this->make_serial( 'live-novel', 'Live Novel', 'novel', 'in-progress', $writing, 2, '2026-09-01 00:00:00' );
+		$this->make_staged_serial( $writing );
+
+		$active = Serials::active();
+
+		$this->assertNotNull( $active );
+		$this->assertSame( $live, $active['id'] );
+	}
+
+	public function test_a_serial_with_no_published_part_is_not_fiction_yet(): void {
+		$writing = $this->category_id( 'writing', 'Writing' );
+		$this->make_staged_serial( $writing );
+
+		$this->assertNull( Serials::active() );
+		$this->assertSame( [], Serials::completed() );
+		$this->assertFalse( Serials::has_any_fiction() );
+	}
 }

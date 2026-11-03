@@ -75,7 +75,7 @@ class SeriesController {
 		$status = $request->get_param( 'status' );
 		$form   = $request->get_param( 'form' );
 
-		$rows = array_filter( SeriesIndex::all(), [ self::class, 'has_published_part' ] );
+		$rows = SeriesIndex::published();
 
 		if ( $status ) {
 			$rows = array_filter( $rows, static fn ( array $row ): bool => $row['status'] === $status );
@@ -101,28 +101,13 @@ class SeriesController {
 	public static function get_item( WP_REST_Request $request ) {
 		$row = SeriesIndex::by_slug( (string) $request->get_param( 'slug' ) );
 
-		if ( ! $row || ! self::has_published_part( $row ) ) {
+		if ( ! $row || (int) ( $row['published'] ?? 0 ) <= 0 ) {
 			return new WP_Error( 'ttm_not_found', __( 'Series not found.', 'ttm-core' ), [ 'status' => 404 ] );
 		}
 
 		return rest_ensure_response( self::public_row( $row ) );
 	}
 
-	/**
-	 * Whether a row has at least one published part.
-	 *
-	 * @param array<string, mixed> $row Series index row.
-	 * @return bool
-	 */
-	private static function has_published_part( array $row ): bool {
-		foreach ( $row['parts'] as $part ) {
-			if ( 'publish' === $part['status'] ) {
-				return true;
-			}
-		}
-
-		return false;
-	}
 
 	/**
 	 * Strip a row to public parts: only publish/future statuses, future parts hide post_id.

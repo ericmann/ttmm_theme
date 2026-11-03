@@ -52,7 +52,7 @@ if ( $ttm_series_id ) {
 	// taxonomy-series.html: feature the series being viewed, not an auto-pick.
 	$ttm_row = SeriesIndex::get( $ttm_queried->term_id );
 } else {
-	$ttm_rows = SeriesIndex::all();
+	$ttm_rows = SeriesIndex::published();
 
 	if ( empty( $ttm_rows ) ) {
 		return '';
@@ -81,7 +81,9 @@ if ( $ttm_series_id ) {
 	}
 }//end if
 
-if ( ! $ttm_row ) {
+// A series with no published part (a serial staged as drafts, viewed on its own archive or
+// named by attribute) has nothing a reader can start: feature nothing.
+if ( ! $ttm_row || (int) ( $ttm_row['published'] ?? 0 ) <= 0 ) {
 	return '';
 }
 

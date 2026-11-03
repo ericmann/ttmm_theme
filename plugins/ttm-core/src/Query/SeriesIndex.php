@@ -257,6 +257,23 @@ class SeriesIndex {
 	}
 
 	/**
+	 * Rows a reader may see: those with at least one published part. A series that so far
+	 * exists only as drafts or scheduled parts (a serial staged ahead of its first chapter)
+	 * stays out of every public list, pick and count until part 1 is live; `all()` keeps it
+	 * for the editor and the CLI.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public static function published(): array {
+		return array_values(
+			array_filter(
+				self::all(),
+				static fn ( array $row ): bool => (int) ( $row['published'] ?? 0 ) > 0
+			)
+		);
+	}
+
+	/**
 	 * A row by series term id.
 	 *
 	 * @param int $term_id Series term id.

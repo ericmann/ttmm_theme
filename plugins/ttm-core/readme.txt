@@ -4,7 +4,7 @@ Tags: blocks, block-bindings, newspaper, series, block-theme
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.3.12
+Stable tag: 0.3.13
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -30,6 +30,13 @@ site owner's byline.
    publishing directly — every block and template degrades gracefully with no content.
 
 == Changelog ==
+
+= 0.3.13 =
+* A series whose parts are all drafts or scheduled (a serial staged ahead of its first
+  chapter) no longer reaches a public page: it is not the active serial, is not listed,
+  counted or auto-featured, and its own archive features nothing until part 1 is published.
+  `SeriesIndex::published()` is the reader-facing row set; `all()` stays for the editor and
+  the CLI.
 
 = 0.3.12 =
 * Purging follows the save, not the status change: the URL set is collected on
