@@ -68,3 +68,5 @@ body:has(.ttm-journal-hero) # state: journal hero; seeded journal entries have n
 .is-collapsed > .ttm-comment__fold # state: a thread the reader collapsed (tests/e2e/specs/comments.spec.mjs)
 .is-collapsed > .ttm-comment # state: a thread the reader collapsed (tests/e2e/specs/comments.spec.mjs)
 .ttm-feature:has(.ttm-journal-hero) .ttm-journal-sheet # state: an article on the photo-hero template (single-feature.html); no seeded post picks it, HierarchyTest covers the routing
+.ttm-comments .comment-form .comment-subscription-form # state: Jetpack subscriptions adds the two Notify me rows; wp-env has no Jetpack
+.ttm-comments .comment-form .comment-subscription-form label # state: Jetpack subscriptions adds the two Notify me rows; wp-env has no Jetpack
