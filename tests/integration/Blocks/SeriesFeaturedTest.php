@@ -389,4 +389,27 @@ class SeriesFeaturedTest extends TTM_IntegrationTestCase {
 		$this->assertStringNotContainsString( 'Chapter 2', $html );
 		$this->assertNotEmpty( $series['post_ids'][2] );
 	}
+
+
+	public function test_series_with_no_published_part_is_neither_picked_nor_featured_on_its_archive(): void {
+		$this->set_now( '2026-09-20 12:00:00' );
+		$this->make_series(
+			'staged-series',
+			'Staged Series',
+			4,
+			[
+				[
+					'part'   => 1,
+					'status' => 'draft',
+				],
+			]
+		);
+
+		$this->assertSame( '', trim( $this->render() ) );
+
+		$term = get_term_by( 'slug', 'staged-series', 'series' );
+		$this->go_to( (string) get_term_link( $term ) );
+
+		$this->assertSame( '', trim( $this->render() ) );
+	}
 }

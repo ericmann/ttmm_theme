@@ -203,7 +203,7 @@ class Serials {
 	private static function fiction_rows(): array {
 		return array_values(
 			array_filter(
-				SeriesIndex::all(),
+				SeriesIndex::published(),
 				static fn ( array $row ): bool => 'nonfiction' !== $row['form']
 			)
 		);

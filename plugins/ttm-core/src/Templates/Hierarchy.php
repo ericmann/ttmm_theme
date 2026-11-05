@@ -44,7 +44,7 @@ class Hierarchy {
 	 * @return bool
 	 */
 	public static function is_f28(): bool {
-		foreach ( SeriesIndex::all() as $row ) {
+		foreach ( SeriesIndex::published() as $row ) {
 			if ( 'nonfiction' !== $row['form'] ) {
 				return false;
 			}

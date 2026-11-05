@@ -230,4 +230,22 @@ class SeriesIndexTest extends TTM_IntegrationTestCase {
 
 		$this->assertNull( SeriesIndex::get( $series ) );
 	}
+
+
+	public function test_published_lists_only_series_with_a_live_part(): void {
+		$staged = self::factory()->term->create( [ 'taxonomy' => 'series' ] );
+		$draft  = self::factory()->post->create( [ 'post_status' => 'draft' ] );
+		update_post_meta( $draft, 'ttm_series_part', 1 );
+		wp_set_object_terms( $draft, [ $staged ], 'series' );
+
+		$live = self::factory()->term->create( [ 'taxonomy' => 'series' ] );
+		$post = self::factory()->post->create( [ 'post_status' => 'publish' ] );
+		update_post_meta( $post, 'ttm_series_part', 1 );
+		wp_set_object_terms( $post, [ $live ], 'series' );
+
+		$this->flush();
+
+		$this->assertEqualsCanonicalizing( [ $staged, $live ], array_map( 'intval', array_column( SeriesIndex::all(), 'id' ) ) );
+		$this->assertSame( [ $live ], array_map( 'intval', array_column( SeriesIndex::published(), 'id' ) ) );
+	}
 }

@@ -21,7 +21,7 @@ if ( 'empty' === Helpers::preview_state( $attributes ) ) {
 	return '';
 }
 
-$ttm_all = SeriesIndex::all();
+$ttm_all = SeriesIndex::published();
 if ( empty( $ttm_all ) ) {
 	return '';
 }
