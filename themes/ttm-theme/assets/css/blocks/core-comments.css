@@ -124,13 +124,15 @@
 	color: var(--wp--preset--color--text);
 }
 
-.ttm-comments .comment-form .comment-form-cookies-consent {
+.ttm-comments .comment-form .comment-form-cookies-consent,
+.ttm-comments .comment-form .comment-subscription-form {
 	display: flex;
 	align-items: baseline;
 	gap: 8px;
 }
 
-.ttm-comments .comment-form .comment-form-cookies-consent label {
+.ttm-comments .comment-form .comment-form-cookies-consent label,
+.ttm-comments .comment-form .comment-subscription-form label {
 	display: inline;
 	font-weight: 400;
 }
