@@ -4,7 +4,7 @@ Tags: block-theme, newspaper, one-column, custom-colors, editor-style
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.3.14
+Stable tag: 0.3.15
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,6 +25,10 @@ Install and activate both together.
    publishing directly.
 
 == Changelog ==
+
+= 0.3.15 =
+* No visual change. Maintenance release with companion plugin 0.3.15: development
+  dependencies updated.
 
 = 0.3.14 =
 * Comment form: Jetpack's "Notify me" checkboxes sit on one line with their labels, like
