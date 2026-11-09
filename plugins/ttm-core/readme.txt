@@ -4,7 +4,7 @@ Tags: blocks, block-bindings, newspaper, series, block-theme
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.3.14
+Stable tag: 0.3.15
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -30,6 +30,11 @@ site owner's byline.
    publishing directly — every block and template degrades gracefully with no content.
 
 == Changelog ==
+
+= 0.3.15 =
+* No change in the plugin's code. Maintenance release: development dependencies updated
+  (wp-scripts and the @wordpress packages, Babel, Playwright, jsdom, Playground CLI); the
+  built editor scripts are rebuilt with them.
 
 = 0.3.14 =
 * No change. Theme 0.3.14 lays out Jetpack's comment-subscription checkboxes inline.
