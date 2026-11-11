@@ -4,7 +4,7 @@ Tags: blocks, block-bindings, newspaper, series, block-theme
 Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 8.3
-Stable tag: 0.3.15
+Stable tag: 0.3.16
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -30,6 +30,11 @@ site owner's byline.
    publishing directly — every block and template degrades gracefully with no content.
 
 == Changelog ==
+
+= 0.3.16 =
+* No change in the plugin's code. Maintenance release: the Playground CLI's isomorphic-git
+  (development only, used by the demo check) moves to a release fixed for two path-traversal
+  and symlink advisories; Playground CLI 3.1.64.
 
 = 0.3.15 =
 * No change in the plugin's code. Maintenance release: development dependencies updated
