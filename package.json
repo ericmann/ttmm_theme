@@ -1,6 +1,6 @@
 {
   "name": "these-things-matter",
-  "version": "0.3.15",
+  "version": "0.3.16",
   "private": true,
   "description": "These Things Matter — block theme (ttm-theme) and companion plugin (ttm-core) for eric.mann.blog",
   "license": "GPL-2.0-or-later",
@@ -65,7 +65,7 @@
     "@wordpress/plugins": "^8.0.0",
     "@wordpress/scripts": "*",
     "@wordpress/server-side-render": "^7.0.0",
-    "@wp-playground/cli": "^3.1.62",
+    "@wp-playground/cli": "^3.1.64",
     "babel-jest": "^30.5.2",
     "eslint-plugin-jest": "^29.17.0",
     "jest": "^30.5.2",
@@ -87,6 +87,7 @@
     "uuid": "^11.1.1",
     "postcss-selector-parser": "^7.1.6",
     "minimatch@^9": "^11.0.3",
-    "minimatch@^10": "^11.0.3"
+    "minimatch@^10": "^11.0.3",
+    "isomorphic-git": "^1.38.6"
   }
 }
